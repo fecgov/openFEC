@@ -24,7 +24,7 @@ elasticsearch-dsl==5.4.0
 git+https://github.com/18F/slate.git
 
 # Marshalling
-flask-apispec==0.6.0.post0
+flask-apispec==0.7.0
 prance==0.13.1
 marshmallow==2.6.0
 marshmallow-sqlalchemy==0.8.0
