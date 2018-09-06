@@ -53,6 +53,14 @@ def es_search(**kwargs):
         return {'hits': {'hits': [{'highlight': {'text': ['f']},
                                     '_source': {}, '_type': 'murs'}], 'total': 4}}
 
+    if _type == 'adrs':
+        return {'hits': {'hits': [{'highlight': {'text': ['f']},
+                                    '_source': {}, '_type': 'adrs'}], 'total': 2}}
+
+    if _type == 'admin_fines':
+        return {'hits': {'hits': [{'highlight': {'text': ['f']},
+                                    '_source': {}, '_type': 'admin_fines'}], 'total': 5}}
+
 
 class CanonicalPageTest(unittest.TestCase):
     @patch('webservices.rest.legal.es.search', es_advisory_opinion)
@@ -109,12 +117,20 @@ class SearchTest(unittest.TestCase):
                 {'highlights': ['f'], 'document_highlights': {}}
             ],
             'total_murs': 4,
+            'adrs': [
+                {'highlights': ['f'], 'document_highlights': {}}
+            ],
+            'total_adrs': 2,
+            'admin_fines': [
+                {'highlights': ['f'], 'document_highlights': {}}
+            ],
+            'total_admin_fines': 5,
             'advisory_opinions': [
                 {'highlights': ['a', 'b'], 'document_highlights': {}},
                 {'highlights': ['c', 'd'], 'document_highlights': {}}
             ],
             'total_advisory_opinions': 2,
-            'total_all': 10}
+            'total_all': 17}
 
     @patch('webservices.rest.legal.es.search', es_search)
     def test_type_search(self):
