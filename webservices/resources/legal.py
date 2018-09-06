@@ -101,13 +101,13 @@ class UniversalSearch(utils.Resource):
                 query = query_builders.get(type_)(q, type_, from_hit, hits_returned, **kwargs)
                 formatted_hits, count = execute_query(query)
             except TypeError as te:
-                logger.info(te.args)
+                logger.error(te.args)
                 raise ApiError("Not a valid search type", 400)
             except RequestError as e:
-                logger.info(e.args)
+                logger.error(e.args)
                 raise ApiError("Elasticsearch failed to execute query", 400)
-            except:
-                logger.info("Unexpected Server Error")
+            except Exception as e:
+                logger.error(e.args)
                 raise ApiError("Unexpected Server Error", 500)
             results[type_] = formatted_hits
             results['total_%s' % type_] = count
@@ -250,7 +250,7 @@ def apply_ao_specific_query_params(query, **kwargs):
 
     if kwargs.get('ao_statutory_citation'):
         for citation in kwargs.get('ao_statutory_citation'):
-            exact_match = re.match(r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<section>\d+).*\.?)", citation)
+            exact_match = re.match(r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<section>\d+).*\.?", citation)
             if(exact_match):
                 citation_queries.append(Q("nested", path="statutory_citations", query=Q("bool",
                     must=[Q("term", statutory_citations__title=int(exact_match.group('title'))),
