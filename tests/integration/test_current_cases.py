@@ -6,7 +6,7 @@ import pytest
 
 
 from webservices import rest
-from webservices.legal_docs.current_murs import get_cases
+from webservices.legal_docs.current_cases import get_cases
 
 from tests.common import TEST_CONN, BaseTestCase
 
@@ -25,7 +25,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         self.connection.close()
         rest.db.session.remove()
 
-    @patch('webservices.legal_docs.current_murs.get_bucket')
+    @patch('webservices.legal_docs.current_cases.get_bucket')
     def test_simple_mur(self, get_bucket):
         mur_subject = 'Fraudulent misrepresentation'
         expected_mur = {
@@ -52,7 +52,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         assert actual_mur == expected_mur
 
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
-    @patch('webservices.legal_docs.current_murs.get_bucket')
+    @patch('webservices.legal_docs.current_cases.get_bucket')
     def test_mur_with_participants_and_documents(self, get_bucket, get_credential):
         case_id = 1
         mur_subject = 'Fraudulent misrepresentation'
@@ -98,7 +98,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             (d['category'], d['text'], d['length']) for d in actual_mur['documents']]
 
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
-    @patch('webservices.legal_docs.current_murs.get_bucket')
+    @patch('webservices.legal_docs.current_cases.get_bucket')
     def test_mur_with_disposition(self, get_bucket, get_credential):
         case_id = 1
         case_no = '1'
@@ -185,7 +185,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         }
         assert actual_mur == expected_mur
 
-    @patch('webservices.legal_docs.current_murs.get_bucket')
+    @patch('webservices.legal_docs.current_cases.get_bucket')
     def test_mur_offsets(self, get_bucket):
         mur_subject = 'Fraudulent misrepresentation'
         expected_mur1 = {
