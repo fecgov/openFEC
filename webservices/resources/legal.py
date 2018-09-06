@@ -26,7 +26,14 @@ INNER_HITS = {
     }
 }
 
-ALL_DOCUMENT_TYPES = ['statutes', 'regulations', 'advisory_opinions', 'murs']
+ALL_DOCUMENT_TYPES = [
+    'statutes',
+    'regulations',
+    'advisory_opinions',
+    'murs',
+    'adrs',
+    'admin_fines',
+]
 
 class GetLegalCitation(utils.Resource):
     @property
@@ -78,7 +85,9 @@ class UniversalSearch(utils.Resource):
             "statutes": generic_query_builder,
             "regulations": generic_query_builder,
             "advisory_opinions": ao_query_builder,
-            "murs": mur_query_builder
+            "murs": case_query_builder,
+            "adrs": case_query_builder,
+            "admin_fines": case_query_builder,
         }
 
         if kwargs.get('type', 'all') == 'all':
@@ -101,13 +110,13 @@ class UniversalSearch(utils.Resource):
                 query = query_builders.get(type_)(q, type_, from_hit, hits_returned, **kwargs)
                 formatted_hits, count = execute_query(query)
             except TypeError as te:
-                logger.info(te.args)
+                logger.error(te.args)
                 raise ApiError("Not a valid search type", 400)
             except RequestError as e:
-                logger.info(e.args)
+                logger.error(e.args)
                 raise ApiError("Elasticsearch failed to execute query", 400)
-            except:
-                logger.info("Unexpected Server Error")
+            except Exception as e:
+                logger.error(e.args)
                 raise ApiError("Unexpected Server Error", 500)
             results[type_] = formatted_hits
             results['total_%s' % type_] = count
@@ -130,7 +139,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
     return query
 
-def mur_query_builder(q, type_, from_hit, hits_returned, **kwargs):
+def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q('term', _type=type_)]
 
     if q:
@@ -145,7 +154,12 @@ def mur_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .index('docs_search') \
         .sort("sort1", "sort2")
 
-    return apply_mur_specific_query_params(query, **kwargs)
+    if type_ == 'murs':
+        return apply_mur_specific_query_params(query, **kwargs)
+    elif type_ == 'adrs':
+        return apply_adr_specific_query_params(query, **kwargs)
+    elif type_ == 'admin_fines':
+        return apply_af_specific_query_params(query, **kwargs)
 
 def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q('term', _type=type_)]
@@ -194,6 +208,82 @@ def apply_mur_specific_query_params(query, **kwargs):
         date_range['gte'] = kwargs.get('mur_min_close_date')
     if kwargs.get('mur_max_close_date'):
         date_range['lte'] = kwargs.get('mur_max_close_date')
+    if date_range:
+        must_clauses.append(Q("range", close_date=date_range))
+
+    query = query.query('bool', must=must_clauses)
+
+    return query
+
+def apply_adr_specific_query_params(query, **kwargs):
+    must_clauses = []
+    if kwargs.get('adr_no'):
+        must_clauses.append(Q('terms', no=kwargs.get('adr_no')))
+    if kwargs.get('adr_respondents'):
+        must_clauses.append(Q('match', respondents=kwargs.get('adr_respondents')))
+    if kwargs.get('adr_dispositions'):
+        must_clauses.append(Q('term', disposition__data__disposition=kwargs.get('adr_dispositions')))
+    if kwargs.get('adr_election_cycles'):
+        must_clauses.append(Q('term', election_cycles=kwargs.get('adr_election_cycles')))
+
+    if kwargs.get('adr_document_category'):
+        must_clauses = [Q('terms', documents__category=kwargs.get('adr_document_category'))]
+
+    #if the query contains min or max open date, add as a range clause ("Q(range)")
+    #to the set of must_clauses
+
+    #gte = greater than or equal to and lte = less than or equal to (see elasticsearch docs)
+    date_range = {}
+    if kwargs.get('adr_min_open_date'):
+        date_range['gte'] = kwargs.get('adr_min_open_date')
+    if kwargs.get('adr_max_open_date'):
+        date_range['lte'] = kwargs.get('adr_max_open_date')
+    if date_range:
+        must_clauses.append(Q("range", open_date=date_range))
+
+    date_range = {}
+    if kwargs.get('adr_min_close_date'):
+        date_range['gte'] = kwargs.get('adr_min_close_date')
+    if kwargs.get('adr_max_close_date'):
+        date_range['lte'] = kwargs.get('adr_max_close_date')
+    if date_range:
+        must_clauses.append(Q("range", close_date=date_range))
+
+    query = query.query('bool', must=must_clauses)
+
+    return query
+
+def apply_af_specific_query_params(query, **kwargs):
+    must_clauses = []
+    if kwargs.get('af_no'):
+        must_clauses.append(Q('terms', no=kwargs.get('af_no')))
+    if kwargs.get('af_respondents'):
+        must_clauses.append(Q('match', respondents=kwargs.get('af_respondents')))
+    if kwargs.get('af_dispositions'):
+        must_clauses.append(Q('term', disposition__data__disposition=kwargs.get('af_dispositions')))
+    if kwargs.get('af_election_cycles'):
+        must_clauses.append(Q('term', election_cycles=kwargs.get('af_election_cycles')))
+
+    if kwargs.get('af_document_category'):
+        must_clauses = [Q('terms', documents__category=kwargs.get('af_document_category'))]
+
+    #if the query contains min or max open date, add as a range clause ("Q(range)")
+    #to the set of must_clauses
+
+    #gte = greater than or equal to and lte = less than or equal to (see elasticsearch docs)
+    date_range = {}
+    if kwargs.get('af_min_open_date'):
+        date_range['gte'] = kwargs.get('af_min_open_date')
+    if kwargs.get('af_max_open_date'):
+        date_range['lte'] = kwargs.get('af_max_open_date')
+    if date_range:
+        must_clauses.append(Q("range", open_date=date_range))
+
+    date_range = {}
+    if kwargs.get('af_min_close_date'):
+        date_range['gte'] = kwargs.get('af_min_close_date')
+    if kwargs.get('af_max_close_date'):
+        date_range['lte'] = kwargs.get('af_max_close_date')
     if date_range:
         must_clauses.append(Q("range", close_date=date_range))
 
@@ -250,7 +340,7 @@ def apply_ao_specific_query_params(query, **kwargs):
 
     if kwargs.get('ao_statutory_citation'):
         for citation in kwargs.get('ao_statutory_citation'):
-            exact_match = re.match(r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<section>\d+).*\.?)", citation)
+            exact_match = re.match(r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<section>\d+).*\.?", citation)
             if(exact_match):
                 citation_queries.append(Q("nested", path="statutory_citations", query=Q("bool",
                     must=[Q("term", statutory_citations__title=int(exact_match.group('title'))),

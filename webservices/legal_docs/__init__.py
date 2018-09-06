@@ -2,7 +2,7 @@ import logging
 import sys
 
 from .advisory_opinions import load_advisory_opinions
-from .current_murs import load_current_murs
+from .current_cases import load_current_murs, load_adrs, load_admin_fines
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger('elasticsearch')
