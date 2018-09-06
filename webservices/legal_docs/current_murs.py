@@ -126,6 +126,12 @@ CASE_NO_REGEX = re.compile(r'(?P<serial>\d+)')
 def load_current_murs(mur_no=None):
     load_cases(mur_no, 'MUR')
 
+def load_adrs(case_no=None):
+    load_cases(case_no, 'ADR')
+
+def load_admin_fines(case_no=None):
+    load_cases(case_no, 'AF')
+
 
 def get_es_type(case_type):
     if case_type == 'AF':
@@ -139,27 +145,28 @@ def get_es_type(case_type):
 
 def load_cases(case_no=None, case_type=None):
     """
-    Reads data for current MURs from a Postgres database, assembles a JSON document
-    corresponding to the MUR and indexes this document in Elasticsearch in the index
-    `docs_index` with a doc_type of `murs`. In addition, all documents attached to
-    the MUR are uploaded to an S3 bucket under the _directory_ `legal/murs/current/`.
+    Reads data for current MURs, AFs, and ADRs from a Postgres database,
+    assembles a JSON document corresponding to the case, and indexes this document
+    in Elasticsearch in the index `docs_index` with a doc_type of `murs`, `adrs`, or `admin_fines`.
+    In addition, all documents attached to the case are uploaded to an
+    S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
     """
     es = get_elasticsearch_connection()
-    logger.info("Loading current {0}(s)".format(case_type))
+    logger.info("Loading {0}(s)".format(case_type))
     case_count = 0
     for case in get_cases(case_no, case_type):
         if case is not None:
-            logger.info("Loading current {0}: {1}".format(case_type, case['no']))
+            logger.info("Loading {0}: {1}".format(case_type, case['no']))
             es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
             case_count += 1
-    logger.info("{0} current {1}(s) loaded".format(case_count, case_type))
+    logger.info("{0} {1}(s) loaded".format(case_count, case_type))
 
 
 def get_cases(case_no=None, case_type=None):
     """
-    Takes a specific MUR to load.
-    If none are specified, all MURs are reloaded
-    Unlike AOs, MURs are not published in sequential order.
+    Takes a specific case to load.
+    If none are specified, all cases are reloaded
+    Unlike AOs, cases are not published in sequential order.
     """
     if case_no is None:
         with db.engine.connect() as conn:
@@ -203,7 +210,7 @@ def get_single_case(case_no, case_type):
                 case['url'] = '/legal/{0}/{1}'.format(case_type.lower(), row['case_no'])
             return case
         else:
-            logger.info("Not a valid current {0} number.".format(case_type))
+            logger.info("Not a valid {0} number.".format(case_type))
             return None
 
 
