@@ -132,7 +132,6 @@ def load_adrs(case_no=None):
 def load_admin_fines(case_no=None):
     load_cases(case_no, 'AF')
 
-
 def get_es_type(case_type):
     if case_type == 'AF':
         return 'admin_fines'
