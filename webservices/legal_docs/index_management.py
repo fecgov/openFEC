@@ -158,6 +158,8 @@ MAPPINGS = {
         }
     },
     "murs": CASE_MAPPINGS,
+    "adrs": CASE_MAPPINGS,
+    "admin_fines": CASE_MAPPINGS,
     "statutes": {
         "properties": {
             "doc_id": {
