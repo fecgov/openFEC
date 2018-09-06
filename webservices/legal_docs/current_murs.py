@@ -126,6 +126,12 @@ MUR_NO_REGEX = re.compile(r'(?P<serial>\d+)')
 def load_current_murs(mur_no=None):
     load_current_cases(mur_no, 'MUR')
 
+def load_adrs(case_no=None):
+    load_current_cases(case_no, 'ADR')
+
+def load_admin_fines(case_no=None):
+    load_current_cases(case_no, 'AF')
+
 
 def get_es_type(case_type):
     if case_type == 'AF':
