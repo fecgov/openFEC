@@ -123,14 +123,14 @@ REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?')
 CASE_NO_REGEX = re.compile(r'(?P<serial>\d+)')
 
 
-def load_current_murs(mur_no=None):
-    load_cases(mur_no, 'MUR')
+def load_current_murs(specific_mur_no=None):
+    load_cases(specific_mur_no, 'MUR')
 
-def load_adrs(case_no=None):
-    load_cases(case_no, 'ADR')
+def load_adrs(specific_adr_no=None):
+    load_cases(specific_adr_no, 'ADR')
 
-def load_admin_fines(case_no=None):
-    load_cases(case_no, 'AF')
+def load_admin_fines(specific_af_no=None):
+    load_cases(specific_af_no, 'AF')
 
 def get_es_type(case_type):
     if case_type == 'AF':

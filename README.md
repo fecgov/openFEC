@@ -587,7 +587,7 @@ python manage.py load_advisory_opinions [-f FROM_AO_NO]
 
 #### Loading current MURs [only one MUR_NO]
 ```
-python manage.py load_current_murs [-m MUR_NO]
+python manage.py load_current_murs [-s MUR_NO]
 ```
 
 #### Loading archived MURs (This takes a very long time)
@@ -597,12 +597,12 @@ python manage.py load_archived_murs [-s MUR_NO] or [-f FROM_MUR_NO]
 
 #### Loading ADRs [only one ADR_NO]
 ```
-python manage.py load_adrs [-c ADR_NO]
+python manage.py load_adrs [-s ADR_NO]
 ```
 
 #### Loading Admin Fines [only one AF_NO]
 ```
-python manage.py load_admin_fines [-c AF_NO]
+python manage.py load_admin_fines [-s AF_NO]
 ```
 
 #### Reloading all current legal documents with no downtime (excludes archived MURs)
