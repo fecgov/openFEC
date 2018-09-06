@@ -6,6 +6,132 @@ from webservices import utils
 
 logger = logging.getLogger(__name__)
 
+CASE_MAPPINGS = {
+    "properties": {
+        "no": {
+            "type": "string",
+            "index": "not_analyzed"
+        },
+        "doc_id": {
+            "type": "string",
+            "index": "no"
+        },
+        "mur_type": {
+            "type": "string"
+        },
+        "name": {
+            "type": "string",
+            "analyzer": "english"
+        },
+        "election_cycles": {
+            "type": "long"
+        },
+        "open_date": {
+            "type": "date",
+            "format": "dateOptionalTime"
+        },
+        "close_date": {
+            "type": "date",
+            "format": "dateOptionalTime"
+        },
+        "url": {
+            "type": "string",
+            "index": "no"
+        },
+        "subjects": {
+            "type": "string"
+        },
+        "commission_votes": {
+            "properties": {
+                "text": {
+                    "type": "string"
+                },
+                "vote_date": {
+                    "type": "date",
+                    "format": "dateOptionalTime"
+                }
+            }
+        },
+        "dispositions": {
+            "properties": {
+                "citations": {
+                    "properties": {
+                        "text": {
+                            "type": "string"
+                        },
+                        "title": {
+                            "type": "string"
+                        },
+                        "type": {
+                            "type": "string"
+                        },
+                        "url": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "disposition": {
+                    "type": "string",
+                    "index": "not_analyzed"
+                },
+                "penalty": {
+                    "type": "double"
+                },
+                "respondent": {
+                    "type": "string"
+                }
+            }
+        },
+        "documents": {
+            "type": "nested",
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "index": "not_analyzed"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "document_date": {
+                    "type": "date",
+                    "format": "dateOptionalTime"
+                },
+                "document_id": {
+                    "type": "long",
+                    "index": "no"
+                },
+                "length": {
+                    "type": "long",
+                    "index": "no"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string",
+                    "index": "no"
+                }
+            }
+        },
+        "participants": {
+            "properties": {
+                "citations": {
+                    "type": "object"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "respondents": {
+            "type": "string"
+        }
+    }
+}
+
 MAPPINGS = {
     "_default_": {
         "properties": {
@@ -31,131 +157,7 @@ MAPPINGS = {
             }
         }
     },
-    "murs": {
-        "properties": {
-            "no": {
-                "type": "string",
-                "index": "not_analyzed"
-            },
-            "doc_id": {
-                "type": "string",
-                "index": "no"
-            },
-            "mur_type": {
-                "type": "string"
-            },
-            "name": {
-                "type": "string",
-                "analyzer": "english"
-            },
-            "election_cycles": {
-                "type": "long"
-            },
-            "open_date": {
-                "type": "date",
-                "format": "dateOptionalTime"
-            },
-            "close_date": {
-                "type": "date",
-                "format": "dateOptionalTime"
-            },
-            "url": {
-                "type": "string",
-                "index": "no"
-            },
-            "subjects": {
-                "type": "string"
-            },
-            "commission_votes": {
-                "properties": {
-                    "text": {
-                        "type": "string"
-                    },
-                    "vote_date": {
-                        "type": "date",
-                        "format": "dateOptionalTime"
-                    }
-                }
-            },
-            "dispositions": {
-                "properties": {
-                    "citations": {
-                        "properties": {
-                            "text": {
-                                "type": "string"
-                            },
-                            "title": {
-                                "type": "string"
-                            },
-                            "type": {
-                                "type": "string"
-                            },
-                            "url": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "disposition": {
-                        "type": "string",
-                        "index": "not_analyzed"
-                    },
-                    "penalty": {
-                        "type": "double"
-                    },
-                    "respondent": {
-                        "type": "string"
-                    }
-                }
-            },
-            "documents": {
-                "type": "nested",
-                "properties": {
-                    "category": {
-                        "type": "string",
-                        "index": "not_analyzed"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "document_date": {
-                        "type": "date",
-                        "format": "dateOptionalTime"
-                    },
-                    "document_id": {
-                        "type": "long",
-                        "index": "no"
-                    },
-                    "length": {
-                        "type": "long",
-                        "index": "no"
-                    },
-                    "text": {
-                        "type": "string"
-                    },
-                    "url": {
-                        "type": "string",
-                        "index": "no"
-                    }
-                }
-            },
-            "participants": {
-                "properties": {
-                    "citations": {
-                        "type": "object"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "role": {
-                        "type": "string"
-                    }
-                }
-            },
-            "respondents": {
-                "type": "string"
-            }
-        }
-    },
+    "murs": CASE_MAPPINGS,
     "statutes": {
         "properties": {
             "doc_id": {

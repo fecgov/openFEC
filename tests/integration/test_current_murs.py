@@ -6,11 +6,15 @@ import pytest
 
 
 from webservices import rest
-from webservices.legal_docs.current_murs import get_murs
+from webservices.legal_docs.current_murs import get_cases
+
 from tests.common import TEST_CONN, BaseTestCase
 
 @pytest.mark.usefixtures("migrate_db")
 class TestLoadCurrentMURs(BaseTestCase):
+
+    case_type = 'MUR'
+
     def setUp(self):
         self.connection = rest.db.engine.connect()
         subprocess.check_call(
@@ -43,7 +47,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'sort2': None
         }
         self.create_mur(1, expected_mur['no'], expected_mur['name'], mur_subject)
-        actual_mur = next(get_murs(None))
+        actual_mur = next(get_cases(None, case_type=self.case_type))
 
         assert actual_mur == expected_mur
 
@@ -82,7 +86,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             category, ocrtext, url = document
             self.create_document(case_id, document_id, category, ocrtext, filename)
 
-        actual_mur = next(get_murs(None))
+        actual_mur = next(get_cases(None, case_type=self.case_type))
 
         for key in expected_mur:
             assert actual_mur[key] == expected_mur[key]
@@ -150,7 +154,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         action = 'Conciliation Reached.'
         self.create_commission(commission_id, agenda_date, vote_date, action, case_id, pg_date)
 
-        actual_mur = next(get_murs(None))
+        actual_mur = next(get_cases(None, case_type=self.case_type))
 
         expected_mur = {
             'commission_votes': [{'action': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}],
@@ -242,12 +246,12 @@ class TestLoadCurrentMURs(BaseTestCase):
         self.create_mur(2, expected_mur2['no'], expected_mur2['name'], mur_subject)
         self.create_mur(3, expected_mur3['no'], expected_mur3['name'], mur_subject)
 
-        gen = get_murs(None)
+        gen = get_cases(None, case_type=self.case_type)
         assert(next(gen)) == expected_mur1
         assert(next(gen)) == expected_mur2
         assert(next(gen)) == expected_mur3
 
-        actual_murs = [mur for mur in get_murs('2')]
+        actual_murs = [mur for mur in get_cases('2', case_type=self.case_type)]
         assert actual_murs == [expected_mur2]
 
     def create_mur(self, case_id, case_no, name, subject_description):
