@@ -132,7 +132,6 @@ def load_adrs(case_no=None):
 def load_admin_fines(case_no=None):
     load_current_cases(case_no, 'AF')
 
-
 def get_es_type(case_type):
     if case_type == 'AF':
         return 'admin_fines'
@@ -145,10 +144,11 @@ def get_es_type(case_type):
 
 def load_current_cases(case_no=None, case_type=None):
     """
-    Reads data for current MURs from a Postgres database, assembles a JSON document
-    corresponding to the MUR and indexes this document in Elasticsearch in the index
-    `docs_index` with a doc_type of `murs`. In addition, all documents attached to
-    the MUR are uploaded to an S3 bucket under the _directory_ `legal/murs/current/`.
+    Reads data for current MURs, AFs, or ADR cases (depending on case_type)
+    from a Postgres database, assembles a JSON document
+    corresponding to the case and indexes this document in Elasticsearch
+    in the index `docs_index` with a doc_type corresponding to case_type.
+    In addition, all documents attached to the case are uploaded to an S3 bucket under the _directory_ `legal/<doc_type>/current/`.
     """
     es = get_elasticsearch_connection()
     logger.info("Loading current {0}(s)".format(case_type))
@@ -163,9 +163,9 @@ def load_current_cases(case_no=None, case_type=None):
 
 def get_cases(case_no=None, case_type=None):
     """
-    Takes a specific MUR to load.
-    If none are specified, all MURs are reloaded
-    Unlike AOs, MURs are not published in sequential order.
+    Takes a specific case to load.
+    If none are specified, all cases are reloaded
+    Unlike AOs, cases are not published in sequential order.
     """
     if case_no is None:
         with db.engine.connect() as conn:
