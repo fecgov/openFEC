@@ -18,7 +18,7 @@ ALL_CASES = """
         case_no,
         name,
         case_type
-    FROM fecmur.cases_with_parsed_case_serial_numbers
+    FROM fecmur.cases_with_parsed_case_serial_numbers_vw
     WHERE case_type = %s
     ORDER BY case_serial
 """
@@ -29,7 +29,7 @@ SINGLE_CASE = """
         case_no,
         name,
         case_type
-    FROM fecmur.cases_with_parsed_case_serial_numbers
+    FROM fecmur.cases_with_parsed_case_serial_numbers_vw
     WHERE case_no = %s
     AND case_type = %s
 """
@@ -43,7 +43,6 @@ CASE_SUBJECTS = """
     LEFT OUTER JOIN fecmur.relatedsubject USING (subject_id, relatedsubject_id)
     WHERE case_id = %s
 """
-
 
 CASE_ELECTION_CYCLES = """
     SELECT
@@ -77,7 +76,7 @@ CASE_DOCUMENTS = """
         doc.doc_order_id,
         doc.document_date
     FROM fecmur.document doc
-    INNER JOIN fecmur.cases_with_parsed_case_serial_numbers mur
+    INNER JOIN fecmur.cases_with_parsed_case_serial_numbers_vw mur
         ON mur.case_id = doc.case_id
     WHERE doc.case_id = %s
     ORDER BY doc.doc_order_id, doc.document_date desc, doc.document_id DESC;

@@ -34,7 +34,7 @@ RECENTLY_MODIFIED_STARTING_AO = """
 
 RECENTLY_MODIFIED_MURS = """
     SELECT case_no, pg_date
-    FROM fecmur.cases_with_parsed_case_serial_numbers
+    FROM fecmur.cases_with_parsed_case_serial_numbers_vw
     WHERE pg_date >= NOW() - '8 hour'::INTERVAL
     AND case_type = 'MUR'
     ORDER BY case_serial
