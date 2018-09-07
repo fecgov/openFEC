@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 
 from webservices.env import env
 from webservices.rest import db
-from webservices.utils import create_eregs_link, get_elasticsearch_connection
+from webservices.utils import extend, create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
 
 from .reclassify_statutory_citation import reclassify_statutory_citation_without_title
@@ -32,6 +32,32 @@ SINGLE_CASE = """
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
     WHERE case_no = %s
     AND case_type = %s
+"""
+
+AF_SPECIFIC_FIELDS = """
+    SELECT DISTINCT
+        committee_id,
+        report_year,
+        report_type,
+        rtb_action_date,
+        rtb_fine_amount,
+        chal_receipt_date,
+        CASE chal_outcome_code_desc
+            WHEN 'Upheld' THEN 'RTB Finding and Fine Upheld'
+            WHEN 'Corrected' THEN 'RTB Finding Upheld but Fine Reduced'
+            WHEN 'Waived' THEN 'No Fine Assessed at Final Determination'
+            WHEN 'TERMINATED' THEN 'No Fine Assessed at Final Determination'
+            ELSE chal_outcome_code_desc END
+        AS chal_outcome_code_desc,
+        fd_date,
+        fd_final_fine_amount,
+        check_amount,
+        treasury_date,
+        treasury_amount,
+        petition_court_filing_date,
+        petition_court_decision_date
+    FROM fecmur.af_case
+    WHERE case_id = %s
 """
 
 CASE_SUBJECTS = """
@@ -111,10 +137,16 @@ DISPOSITION_DATA = """
     ORDER BY fecmur.event.event_name ASC, fecmur.settlement.final_amount DESC NULLS LAST, event_date DESC;
 """
 
-COMMISSION_VOTES = """
+MUR_ADR_COMMISSION_VOTES = """
     SELECT vote_date, action from fecmur.commission
     WHERE case_id = %s
     ORDER BY vote_date desc;
+"""
+
+AF_COMMISSION_VOTES = """
+    SELECT action_date as vote_date, action from fecmur.af_case
+    WHERE case_id = %s
+    ORDER BY action_date desc;
 """
 
 STATUTE_REGEX = re.compile(r'(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)')
@@ -132,12 +164,20 @@ def load_admin_fines(specific_af_no=None):
     load_cases(specific_af_no, 'AF')
 
 def get_es_type(case_type):
-    if case_type == 'AF':
+    if case_type.upper() == 'AF':
         return 'admin_fines'
-    elif case_type == 'ADR':
+    elif case_type.upper() == 'ADR':
         return 'adrs'
     else:
         return 'murs'
+
+def get_full_name(case_type):
+    if case_type.upper() == 'AF':
+        return 'administrative-fine'
+    elif case_type.upper() == 'ADR':
+        return 'alternative-dispute-resolution'
+    else:
+        return 'matter-under-review'
 
 #TODO: How to handle if there's no case_type specified?
 
@@ -192,24 +232,49 @@ def get_single_case(case_no, case_type):
                 'sort1': sort1,
                 'sort2': sort2,
             }
+            case['commission_votes'] = get_commission_votes(case_id, case_type)
+            case['documents'] = get_documents(case_id, bucket, bucket_name)
+            case['url'] = '/legal/{0}/{1}/'.format(get_full_name(case_type), row['case_no'])
+            if case_type == 'AF':
+                case = extend(case, get_af_specific_fields(case_id))
+                return case
+            if case_type == 'MUR':
+                case['mur_type'] = 'current'
             case['subjects'] = get_subjects(case_id)
             case['election_cycles'] = get_election_cycles(case_id)
             participants = get_participants(case_id)
             case['participants'] = list(participants.values())
             case['respondents'] = get_sorted_respondents(case['participants'])
-            case['commission_votes'] = get_commission_votes(case_id)
+
             case['dispositions'] = get_dispositions(case_id)
-            case['documents'] = get_documents(case_id, bucket, bucket_name)
+
             case['open_date'], case['close_date'] = get_open_and_close_dates(case_id)
-            if case_type == 'MUR':
-                case['mur_type'] = 'current'
-                case['url'] = '/legal/matter-under-review/%s/' % row['case_no']
-            else:
-                case['url'] = '/legal/{0}/{1}'.format(case_type.lower(), row['case_no'])
             return case
         else:
             logger.info("Not a valid {0} number.".format(case_type))
             return None
+
+def get_af_specific_fields(case_id):
+    case = {}
+    with db.engine.connect() as conn:
+        rs = conn.execute(AF_SPECIFIC_FIELDS, case_id)
+        row = rs.first()
+        if row is not None:
+            case["committee_id"] = row["committee_id"]
+            case["report_year"] = row["report_year"]
+            case["report_type"] = row["report_type"]
+            case["reason_to_believe_action_date"] = row["rtb_action_date"]
+            case["reason_to_believe_fine_amount"] = row["rtb_fine_amount"]
+            case["challenge_receipt_date"] = row["chal_receipt_date"]
+            case["challenge_outcome"] = row["chal_outcome_code_desc"]
+            case["final_determination_date"] = row["fd_date"]
+            case["final_determination_amount"] = row["fd_final_fine_amount"]
+            case["check_amount"] = row["check_amount"]
+            case["treasury_referral_date"] = row["treasury_date"]
+            case["treasury_referral_amount"] = row["treasury_amount"]
+            case["petition_court_filing_date"] = row["petition_court_filing_date"]
+            case["petition_court_decision_date"] = row["petition_court_decision_date"]
+            return case
 
 
 def get_election_cycles(case_id):
@@ -241,9 +306,12 @@ def get_dispositions(case_id):
         return disposition_data
 
 
-def get_commission_votes(case_id):
+def get_commission_votes(case_id, case_type):
     with db.engine.connect() as conn:
-        rs = conn.execute(COMMISSION_VOTES, case_id)
+        if case_type == 'AF':
+            rs = conn.execute(AF_COMMISSION_VOTES, case_id)
+        else:
+            rs = conn.execute(MUR_ADR_COMMISSION_VOTES, case_id)
         commission_votes = []
         for row in rs:
             commission_votes.append({'vote_date': row['vote_date'], 'action': row['action']})
