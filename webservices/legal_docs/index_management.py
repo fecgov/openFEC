@@ -1,12 +1,45 @@
 import logging
 
 import elasticsearch
+import copy
 
 from webservices import utils
 
 logger = logging.getLogger(__name__)
 
-CASE_MAPPINGS = {
+CASE_DOCUMENT_MAPPINGS = {
+    "type": "nested",
+    "properties": {
+        "category": {
+            "type": "string",
+            "index": "not_analyzed"
+        },
+        "description": {
+            "type": "string"
+        },
+        "document_date": {
+            "type": "date",
+            "format": "dateOptionalTime"
+        },
+        "document_id": {
+            "type": "long",
+            "index": "no"
+        },
+        "length": {
+            "type": "long",
+            "index": "no"
+        },
+        "text": {
+            "type": "string"
+        },
+        "url": {
+            "type": "string",
+            "index": "no"
+        }
+    }
+}
+
+MUR_ADR_MAPPINGS = {
     "properties": {
         "no": {
             "type": "string",
@@ -15,9 +48,6 @@ CASE_MAPPINGS = {
         "doc_id": {
             "type": "string",
             "index": "no"
-        },
-        "mur_type": {
-            "type": "string"
         },
         "name": {
             "type": "string",
@@ -82,37 +112,7 @@ CASE_MAPPINGS = {
                 }
             }
         },
-        "documents": {
-            "type": "nested",
-            "properties": {
-                "category": {
-                    "type": "string",
-                    "index": "not_analyzed"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "document_date": {
-                    "type": "date",
-                    "format": "dateOptionalTime"
-                },
-                "document_id": {
-                    "type": "long",
-                    "index": "no"
-                },
-                "length": {
-                    "type": "long",
-                    "index": "no"
-                },
-                "text": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string",
-                    "index": "no"
-                }
-            }
-        },
+        "documents": CASE_DOCUMENT_MAPPINGS,
         "participants": {
             "properties": {
                 "citations": {
@@ -130,6 +130,12 @@ CASE_MAPPINGS = {
             "type": "string"
         }
     }
+}
+
+MUR_MAPPINGS = copy.deepcopy(MUR_ADR_MAPPINGS)
+
+MUR_MAPPINGS["properties"]["mur_type"] = {
+    "type": "string"
 }
 
 MAPPINGS = {
@@ -157,9 +163,96 @@ MAPPINGS = {
             }
         }
     },
-    "murs": CASE_MAPPINGS,
-    "adrs": CASE_MAPPINGS,
-    "admin_fines": CASE_MAPPINGS,
+    "murs": MUR_MAPPINGS,
+    "adrs": MUR_ADR_MAPPINGS,
+    "admin_fines": {
+        "properties": {
+            "no": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "doc_id": {
+                "type": "string",
+                "index": "no"
+            },
+            "name": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "url": {
+                "type": "string",
+                "index": "no"
+            },
+            "committee_id": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "report_year": {
+                "type": "string",
+                "index": "no"
+            },
+            "report_type": {
+                "type": "string",
+                "index": "no"
+            },
+            "reason_to_believe_action_date": {
+                "type": "date",
+                "format": "dateOptionalTime"
+            },
+            "reason_to_believe_fine_amount": {
+                "type": "long",
+                "index": "no"
+            },
+            "challenge_receipt_date": {
+                "type": "date",
+                "format": "dateOptionalTime"
+            },
+            "challenge_outcome": {
+                "type": "string",
+                "index": "no"
+            },
+            "final_determination_date": {
+                "type": "date",
+                "format": "dateOptionalTime"
+            },
+            "final_determination_amount": {
+                "type": "long",
+                "index": "no"
+            },
+            "check_amount": {
+                "type": "long",
+                "index": "no"
+            },
+            "treasury_referral_date": {
+                "type": "date",
+                "format": "dateOptionalTime"
+            },
+            "treasury_referral_amount": {
+                "type": "long",
+                "index": "no"
+            },
+            "petition_court_filing_date": {
+                "type": "date",
+                "format": "dateOptionalTime"
+            },
+            "petition_court_decision_date": {
+                "type": "date",
+                "format": "dateOptionalTime"
+            },
+            "commission_votes": {
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "vote_date": {
+                        "type": "date",
+                        "format": "dateOptionalTime"
+                    }
+                }
+            },
+            "documents": CASE_DOCUMENT_MAPPINGS
+        }
+    },
     "statutes": {
         "properties": {
             "doc_id": {
