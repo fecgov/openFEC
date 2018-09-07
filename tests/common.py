@@ -7,6 +7,8 @@ import unittest
 from webtest import TestApp
 from nplusone.ext.flask_sqlalchemy import NPlusOne
 
+import manage
+from jdbc_utils import to_jdbc_url
 from webservices import rest
 from webservices.common import models
 from webservices import __API_VERSION__
@@ -107,7 +109,48 @@ class ApiBaseTest(BaseTestCase):
         response = self._response(qry)
         return response['results']
 
+class MigratedDBTestCase(BaseTestCase):
+    """Base test case for tests that depend on the migrated DB
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super(MigratedDBTestCase, cls).setUpClass()
+        reset_schema()
+        run_migrations()
+        manage.refresh_materialized(concurrent=False)
 
 def assert_dicts_subset(first, second):
     expected = {key: first.get(key) for key in second}
     assert expected == second
+
+def run_migrations():
+    subprocess.check_call(
+        ['flyway', 'migrate', '-n', '-url=%s' % get_test_jdbc_url(), '-locations=filesystem:data/migrations'],)
+
+def reset_schema():
+    for schema in [
+        "aouser",
+        "auditsearch",
+        "disclosure",
+        "fecapp",
+        "fecmur",
+        "public",
+        "rad_pri_user",
+        "real_efile",
+        "real_pfile",
+        "rohan",
+        "staging",
+    ]:
+        rest.db.engine.execute('drop schema if exists %s cascade;' % schema)
+    rest.db.engine.execute('create schema public;')
+
+def get_test_jdbc_url():
+    """
+    Return the JDBC URL for TEST_CONN. If TEST_CONN cannot be successfully converted,
+    it is probably the default Postgres instance with trust authentication
+    """
+    jdbc_url = to_jdbc_url(TEST_CONN)
+    if jdbc_url is None:
+        jdbc_url = "jdbc:" + TEST_CONN
+    return jdbc_url
