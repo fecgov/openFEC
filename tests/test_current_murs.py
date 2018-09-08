@@ -6,20 +6,14 @@ from decimal import Decimal
 
 from webservices import rest
 from webservices.legal_docs.current_murs import get_murs
-from tests.common import TEST_CONN, BaseTestCase
+from tests.common import TEST_CONN, MigratedDBTestCase
 
-class TestLoadCurrentMURs(BaseTestCase):
+class TestLoadCurrentMURs(MigratedDBTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestLoadCurrentMURs, cls).setUpClass()
         subprocess.check_call(
-            ['psql', TEST_CONN, '-f', 'data/load_murs_schema.sql'])
-
-    @classmethod
-    def tearDownClass(cls):
-        subprocess.check_call(
-            ['psql', TEST_CONN, '-c', 'DROP SCHEMA fecmur CASCADE'])
-        super(TestLoadCurrentMURs, cls).tearDownClass()
+            ['psql', TEST_CONN, '-f', 'data/load_base_mur_data.sql'])
 
     def setUp(self):
         self.connection = rest.db.engine.connect()
