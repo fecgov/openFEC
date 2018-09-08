@@ -2,7 +2,7 @@ import datetime
 import subprocess
 from unittest.mock import patch
 
-from tests.common import TEST_CONN, BaseTestCase
+from tests.common import TEST_CONN, MigratedDBTestCase
 
 from webservices import rest
 from webservices.legal_docs.advisory_opinions import get_advisory_opinions
@@ -10,17 +10,15 @@ from webservices.legal_docs.advisory_opinions import get_advisory_opinions
 EMPTY_SET = set()
 
 
-class TestLoadAdvisoryOpinions(BaseTestCase):
+class TestLoadAdvisoryOpinions(MigratedDBTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestLoadAdvisoryOpinions, cls).setUpClass()
         subprocess.check_call(
-            ["psql", TEST_CONN, "-f", "data/load_advisory_opinions_schema.sql"])
+            ["psql", TEST_CONN, "-f", "data/load_base_advisory_opinion_data.sql"])
 
     @classmethod
     def tearDownClass(cls):
-        subprocess.check_call(
-            ["psql", TEST_CONN, "-c", "DROP SCHEMA aouser CASCADE"])
         super(TestLoadAdvisoryOpinions, cls).tearDownClass()
 
     def setUp(self):
