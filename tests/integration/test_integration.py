@@ -23,7 +23,8 @@ TOTALS_MODELS = [
 ]
 
 
-class IntegrationTestCase(common.MigratedDBTestCase):
+@pytest.mark.usefixtures("migrate_db")
+class IntegrationTestCase(common.BaseTestCase):
 
     def test_committee_year_filter(self):
         self._check_entity_model(models.Committee, 'committee_id')

@@ -2,7 +2,8 @@ import datetime
 import subprocess
 from unittest.mock import patch
 
-from tests.common import TEST_CONN, MigratedDBTestCase
+import pytest
+from tests.common import TEST_CONN, BaseTestCase
 
 from webservices import rest
 from webservices.legal_docs.advisory_opinions import get_advisory_opinions
@@ -10,19 +11,12 @@ from webservices.legal_docs.advisory_opinions import get_advisory_opinions
 EMPTY_SET = set()
 
 
-class TestLoadAdvisoryOpinions(MigratedDBTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(TestLoadAdvisoryOpinions, cls).setUpClass()
-        subprocess.check_call(
-            ["psql", TEST_CONN, "-f", "data/load_base_advisory_opinion_data.sql"])
-
-    @classmethod
-    def tearDownClass(cls):
-        super(TestLoadAdvisoryOpinions, cls).tearDownClass()
-
+@pytest.mark.usefixtures("migrate_db")
+class TestLoadAdvisoryOpinions(BaseTestCase):
     def setUp(self):
         self.connection = rest.db.engine.connect()
+        subprocess.check_call(
+            ["psql", TEST_CONN, "-f", "data/load_base_advisory_opinion_data.sql"])
 
     def tearDown(self):
         self.clear_test_data()
@@ -376,7 +370,9 @@ class TestLoadAdvisoryOpinions(MigratedDBTestCase):
             "ao",
             "document",
             "players",
-            "entity"
+            "entity",
+            "entity_type",
+            "role"
         ]
         for table in tables:
             self.connection.execute("DELETE FROM aouser.{}".format(table))
