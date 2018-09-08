@@ -2,21 +2,19 @@ import subprocess
 from unittest.mock import patch
 from datetime import datetime
 from decimal import Decimal
+import pytest
 
 
 from webservices import rest
 from webservices.legal_docs.current_murs import get_murs
-from tests.common import TEST_CONN, MigratedDBTestCase
+from tests.common import TEST_CONN, BaseTestCase
 
-class TestLoadCurrentMURs(MigratedDBTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(TestLoadCurrentMURs, cls).setUpClass()
-        subprocess.check_call(
-            ['psql', TEST_CONN, '-f', 'data/load_base_mur_data.sql'])
-
+@pytest.mark.usefixtures("migrate_db")
+class TestLoadCurrentMURs(BaseTestCase):
     def setUp(self):
         self.connection = rest.db.engine.connect()
+        subprocess.check_call(
+            ['psql', TEST_CONN, '-f', 'data/load_base_mur_data.sql'])
 
     def tearDown(self):
         self.clear_test_data()
@@ -340,7 +338,9 @@ class TestLoadCurrentMURs(MigratedDBTestCase):
             "calendar",
             "settlement",
             "event",
-            "commission"
+            "commission",
+            "subject",
+            "role"
         ]
         for table in tables:
             self.connection.execute("DELETE FROM fecmur.{}".format(table))

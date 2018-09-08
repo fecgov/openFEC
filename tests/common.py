@@ -7,7 +7,6 @@ import unittest
 from webtest import TestApp
 from nplusone.ext.flask_sqlalchemy import NPlusOne
 
-import manage
 from jdbc_utils import to_jdbc_url
 from webservices import rest
 from webservices.common import models
@@ -48,7 +47,6 @@ class BaseTestCase(unittest.TestCase):
         cls.app_context = rest.app.app_context()
         cls.app_context.push()
         _setup_extensions()
-        _reset_schema()
 
     def setUp(self):
         self.connection = rest.db.engine.connect()
@@ -61,7 +59,6 @@ class BaseTestCase(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        _reset_schema()
         cls.app_context.pop()
 
 
@@ -70,6 +67,7 @@ class ApiBaseTest(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(ApiBaseTest, cls).setUpClass()
+        _reset_schema()
         with open(os.devnull, 'w') as null:
             subprocess.check_call(
                 ['psql', '-f', 'data/migrations/V0039__states_and_zips_data.sql', TEST_CONN],
@@ -109,41 +107,9 @@ class ApiBaseTest(BaseTestCase):
         response = self._response(qry)
         return response['results']
 
-class MigratedDBTestCase(BaseTestCase):
-    """Base test case for tests that depend on the migrated DB
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        super(MigratedDBTestCase, cls).setUpClass()
-        reset_schema()
-        run_migrations()
-        manage.refresh_materialized(concurrent=False)
-
 def assert_dicts_subset(first, second):
     expected = {key: first.get(key) for key in second}
     assert expected == second
-
-def run_migrations():
-    subprocess.check_call(
-        ['flyway', 'migrate', '-n', '-url=%s' % get_test_jdbc_url(), '-locations=filesystem:data/migrations'],)
-
-def reset_schema():
-    for schema in [
-        "aouser",
-        "auditsearch",
-        "disclosure",
-        "fecapp",
-        "fecmur",
-        "public",
-        "rad_pri_user",
-        "real_efile",
-        "real_pfile",
-        "rohan",
-        "staging",
-    ]:
-        rest.db.engine.execute('drop schema if exists %s cascade;' % schema)
-    rest.db.engine.execute('create schema public;')
 
 def get_test_jdbc_url():
     """
