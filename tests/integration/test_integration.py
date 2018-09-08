@@ -119,7 +119,6 @@ class IntegrationTestCase(common.BaseTestCase):
 
         self.assertEqual(committee_history_count, committee_history_verified_count)
 
-    @pytest.mark.filterwarnings("ignore:Skipped unsupported reflection")
     def test_last_day_of_month(self):
         connection = db.engine.connect()
         fixtures = [
