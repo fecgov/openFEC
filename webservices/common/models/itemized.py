@@ -609,7 +609,6 @@ class ScheduleE(PdfMixin, BaseItemized):
     pdf_url = db.Column(db.String)
 
 
-
 class ScheduleEEfile(BaseRawItemized):
     __tablename__ = 'real_efile_se_f57_vw'
 

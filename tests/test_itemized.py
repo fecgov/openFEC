@@ -637,6 +637,7 @@ class TestItemized(ApiBaseTest):
             ('candidate_office_state', ScheduleE.candidate_office_state, ['AZ', 'AK']),
             ('candidate_office_district', ScheduleE.candidate_office_district, ['00', '01']),
             ('candidate_party', ScheduleE.candidate_party, ['DEM', 'REP']),
+            ('candidate_office', ScheduleE.candidate_office, ['H', 'S', 'P']),
         ]
         for label, column, values in filters:
             [
