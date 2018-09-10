@@ -7,6 +7,7 @@ import unittest
 from webtest import TestApp
 from nplusone.ext.flask_sqlalchemy import NPlusOne
 
+from jdbc_utils import to_jdbc_url
 from webservices import rest
 from webservices.common import models
 from webservices import __API_VERSION__
@@ -46,7 +47,6 @@ class BaseTestCase(unittest.TestCase):
         cls.app_context = rest.app.app_context()
         cls.app_context.push()
         _setup_extensions()
-        _reset_schema()
 
     def setUp(self):
         self.connection = rest.db.engine.connect()
@@ -59,7 +59,6 @@ class BaseTestCase(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        _reset_schema()
         cls.app_context.pop()
 
 
@@ -68,6 +67,7 @@ class ApiBaseTest(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(ApiBaseTest, cls).setUpClass()
+        _reset_schema()
         with open(os.devnull, 'w') as null:
             subprocess.check_call(
                 ['psql', '-f', 'data/migrations/V0039__states_and_zips_data.sql', TEST_CONN],
@@ -107,7 +107,16 @@ class ApiBaseTest(BaseTestCase):
         response = self._response(qry)
         return response['results']
 
-
 def assert_dicts_subset(first, second):
     expected = {key: first.get(key) for key in second}
     assert expected == second
+
+def get_test_jdbc_url():
+    """
+    Return the JDBC URL for TEST_CONN. If TEST_CONN cannot be successfully converted,
+    it is probably the default Postgres instance with trust authentication
+    """
+    jdbc_url = to_jdbc_url(TEST_CONN)
+    if jdbc_url is None:
+        jdbc_url = "jdbc:" + TEST_CONN
+    return jdbc_url
