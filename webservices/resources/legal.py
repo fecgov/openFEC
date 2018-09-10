@@ -154,12 +154,19 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .index('docs_search') \
         .sort("sort1", "sort2")
 
-    if type_ == 'murs':
-        return apply_mur_specific_query_params(query, **kwargs)
-    elif type_ == 'adrs':
-        return apply_adr_specific_query_params(query, **kwargs)
-    elif type_ == 'admin_fines':
+    must_clauses = []
+    if kwargs.get('case_no'):
+        must_clauses.append(Q('terms', no=kwargs.get('case_no')))
+    if kwargs.get('case_document_category'):
+        must_clauses = [Q('terms', documents__category=kwargs.get('case_document_category'))]
+
+    query = query.query('bool', must=must_clauses)
+
+    if type_ == 'admin_fines':
         return apply_af_specific_query_params(query, **kwargs)
+    else:
+        return apply_mur_adr_specific_query_params(query, **kwargs)
+
 
 def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q('term', _type=type_)]
@@ -177,7 +184,7 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
     return apply_ao_specific_query_params(query, **kwargs)
 
-def apply_mur_specific_query_params(query, **kwargs):
+def apply_mur_adr_specific_query_params(query, **kwargs):
     must_clauses = []
     if kwargs.get('mur_no'):
         must_clauses.append(Q('terms', no=kwargs.get('mur_no')))
@@ -211,85 +218,75 @@ def apply_mur_specific_query_params(query, **kwargs):
     if date_range:
         must_clauses.append(Q("range", close_date=date_range))
 
-    query = query.query('bool', must=must_clauses)
+    # Generic fields
 
-    return query
+    # Refactor MURs to use `case_` filters
+    # once we change the front end to use generic params (fec-cms issue #2351)
 
-def apply_adr_specific_query_params(query, **kwargs):
-    must_clauses = []
-    if kwargs.get('adr_no'):
-        must_clauses.append(Q('terms', no=kwargs.get('adr_no')))
-    if kwargs.get('adr_respondents'):
-        must_clauses.append(Q('match', respondents=kwargs.get('adr_respondents')))
-    if kwargs.get('adr_dispositions'):
-        must_clauses.append(Q('term', disposition__data__disposition=kwargs.get('adr_dispositions')))
-    if kwargs.get('adr_election_cycles'):
-        must_clauses.append(Q('term', election_cycles=kwargs.get('adr_election_cycles')))
+    if kwargs.get('case_respondents'):
+        must_clauses.append(Q('match', respondents=kwargs.get('case_respondents')))
+    if kwargs.get('case_dispositions'):
+        must_clauses.append(Q('term', disposition__data__disposition=kwargs.get('case_dispositions')))
 
-    if kwargs.get('adr_document_category'):
-        must_clauses = [Q('terms', documents__category=kwargs.get('adr_document_category'))]
+    if kwargs.get('case_election_cycles'):
+        must_clauses.append(Q('term', election_cycles=kwargs.get('case_election_cycles')))
 
-    #if the query contains min or max open date, add as a range clause ("Q(range)")
-    #to the set of must_clauses
-
-    #gte = greater than or equal to and lte = less than or equal to (see elasticsearch docs)
+    # gte/lte: greater than or equal to/less than or equal to
     date_range = {}
-    if kwargs.get('adr_min_open_date'):
-        date_range['gte'] = kwargs.get('adr_min_open_date')
-    if kwargs.get('adr_max_open_date'):
-        date_range['lte'] = kwargs.get('adr_max_open_date')
+    if kwargs.get('case_min_open_date'):
+        date_range['gte'] = kwargs.get('case_min_open_date')
+    if kwargs.get('case_max_open_date'):
+        date_range['lte'] = kwargs.get('case_max_open_date')
     if date_range:
         must_clauses.append(Q("range", open_date=date_range))
 
     date_range = {}
-    if kwargs.get('adr_min_close_date'):
-        date_range['gte'] = kwargs.get('adr_min_close_date')
-    if kwargs.get('adr_max_close_date'):
-        date_range['lte'] = kwargs.get('adr_max_close_date')
+    if kwargs.get('case_min_close_date'):
+        date_range['gte'] = kwargs.get('case_min_close_date')
+    if kwargs.get('case_max_close_date'):
+        date_range['lte'] = kwargs.get('case_max_close_date')
     if date_range:
         must_clauses.append(Q("range", close_date=date_range))
 
     query = query.query('bool', must=must_clauses)
 
     return query
+
 
 def apply_af_specific_query_params(query, **kwargs):
     must_clauses = []
-    if kwargs.get('af_no'):
-        must_clauses.append(Q('terms', no=kwargs.get('af_no')))
-    if kwargs.get('af_respondents'):
-        must_clauses.append(Q('match', respondents=kwargs.get('af_respondents')))
-    if kwargs.get('af_dispositions'):
-        must_clauses.append(Q('term', disposition__data__disposition=kwargs.get('af_dispositions')))
-    if kwargs.get('af_election_cycles'):
-        must_clauses.append(Q('term', election_cycles=kwargs.get('af_election_cycles')))
-
-    if kwargs.get('af_document_category'):
-        must_clauses = [Q('terms', documents__category=kwargs.get('af_document_category'))]
-
-    #if the query contains min or max open date, add as a range clause ("Q(range)")
-    #to the set of must_clauses
-
-    #gte = greater than or equal to and lte = less than or equal to (see elasticsearch docs)
-    date_range = {}
-    if kwargs.get('af_min_open_date'):
-        date_range['gte'] = kwargs.get('af_min_open_date')
-    if kwargs.get('af_max_open_date'):
-        date_range['lte'] = kwargs.get('af_max_open_date')
-    if date_range:
-        must_clauses.append(Q("range", open_date=date_range))
+    if kwargs.get('af_name'):
+        must_clauses.append(Q('match', name=' '.join(kwargs.get('af_name'))))
+    if kwargs.get('af_committee_id'):
+        must_clauses.append(Q('match', committee_id=kwargs.get('af_committee_id')))
+    if kwargs.get('af_report_year'):
+        must_clauses.append(Q('match', report_year=kwargs.get('af_report_year')))
 
     date_range = {}
-    if kwargs.get('af_min_close_date'):
-        date_range['gte'] = kwargs.get('af_min_close_date')
-    if kwargs.get('af_max_close_date'):
-        date_range['lte'] = kwargs.get('af_max_close_date')
+    if kwargs.get('af_min_rtb_date'):
+        date_range['gte'] = kwargs.get('af_min_rtb_date')
+    if kwargs.get('af_max_rtb_date'):
+        date_range['lte'] = kwargs.get('af_max_rtb_date')
     if date_range:
-        must_clauses.append(Q("range", close_date=date_range))
+        must_clauses.append(Q("range", reason_to_believe_action_date=date_range))
+
+    date_range = {}
+    if kwargs.get('af_min_fd_date'):
+        date_range['gte'] = kwargs.get('mur_min_fd_date')
+    if kwargs.get('af_max_fd_date'):
+        date_range['lte'] = kwargs.get('mur_max_fd_date')
+    if date_range:
+        must_clauses.append(Q("range", final_determination_date=date_range))
+
+    if kwargs.get('af_rtb_fine_amount'):
+        must_clauses.append(Q('term', reason_to_believe_fine_amount=kwargs.get('af_rtb_fine_amount')))
+    if kwargs.get('af_fd_fine_amount'):
+        must_clauses.append(Q('term', final_determination_amount=kwargs.get('af_fd_fine_amount')))
 
     query = query.query('bool', must=must_clauses)
 
     return query
+
 
 def get_ao_document_query(q, **kwargs):
     categories = {'F': 'Final Opinion',

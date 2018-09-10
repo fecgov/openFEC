@@ -188,8 +188,7 @@ MAPPINGS = {
                 "index": "not_analyzed"
             },
             "report_year": {
-                "type": "string",
-                "index": "no"
+                "type": "string"
             },
             "report_type": {
                 "type": "string",
@@ -200,8 +199,7 @@ MAPPINGS = {
                 "format": "dateOptionalTime"
             },
             "reason_to_believe_fine_amount": {
-                "type": "long",
-                "index": "no"
+                "type": "long"
             },
             "challenge_receipt_date": {
                 "type": "date",
@@ -216,8 +214,7 @@ MAPPINGS = {
                 "format": "dateOptionalTime"
             },
             "final_determination_amount": {
-                "type": "long",
-                "index": "no"
+                "type": "long"
             },
             "check_amount": {
                 "type": "long",
