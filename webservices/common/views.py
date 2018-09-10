@@ -1,6 +1,6 @@
 import sqlalchemy as sa
-from flask_apispec import Ref, marshal_with
 
+from flask_apispec import Ref, marshal_with
 from webservices import utils
 from webservices import filters
 from webservices import sorting
@@ -8,9 +8,6 @@ from webservices import exceptions
 from webservices.common import counts
 from webservices.common import models
 from webservices.utils import use_kwargs
-
-from sqlalchemy.dialects import postgresql
-
 
 class ApiResource(utils.Resource):
 
