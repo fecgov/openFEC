@@ -179,9 +179,12 @@ f24.rpt_yr + mod(f24.rpt_yr, 2::numeric) AS election_cycle,
 image_pdf_url(se.image_num) as pdf_url,
 coalesce(f24.rpt_tp, '') in ('24', '48') as is_notice,
 to_tsvector(se.pye_nm) as payee_name_text
-FROM disclosure.nml_sched_e se,
-    disclosure.nml_form_24 f24
-WHERE se.link_id = f24.sub_id AND f24.delete_ind IS NULL AND se.delete_ind IS NULL AND se.amndt_ind::text <> 'D'::text
+FROM disclosure.nml_sched_e se
+JOIN disclosure.nml_form_24 f24
+ON se.link_id = f24.sub_id 
+WHERE f24.delete_ind IS NULL 
+    AND se.delete_ind IS NULL 
+    AND se.amndt_ind::text <> 'D'::text
 -- -----------------
 UNION
 -- Add in records for the Form 5 filings
@@ -355,9 +358,13 @@ f5.rpt_yr + mod(f5.rpt_yr, 2::numeric) AS election_cycle,
 image_pdf_url(f57.image_num) as pdf_url,
 coalesce(f5.rpt_tp, '') in ('24', '48') AS is_notice, 
 to_tsvector(f57.pye_nm)
-FROM disclosure.nml_form_57 f57,
-    disclosure.nml_form_5 f5
-WHERE f57.link_id = f5.sub_id AND (f5.rpt_tp::text = ANY (ARRAY['24'::character varying::text, '48'::character varying::text])) AND f57.amndt_ind::text <> 'D'::text AND f57.delete_ind IS NULL AND f5.delete_ind IS NULL
+FROM disclosure.nml_form_57 f57
+JOIN disclosure.nml_form_5 f5
+ON f57.link_id = f5.sub_id 
+WHERE (f5.rpt_tp::text = ANY (ARRAY['24'::character varying::text, '48'::character varying::text])) 
+    AND f57.amndt_ind::text <> 'D'::text 
+    AND f57.delete_ind IS NULL 
+    AND f5.delete_ind IS NULL
 )
 SELECT 
 SE.cmte_id,
