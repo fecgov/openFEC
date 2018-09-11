@@ -634,6 +634,10 @@ class TestItemized(ApiBaseTest):
             ('committee_id', ScheduleE.committee_id, ['C01', 'C02']),
             ('support_oppose_indicator', ScheduleE.support_oppose_indicator, ['S', 'O']),
             ('is_notice', ScheduleE.is_notice, [True, False]),
+            ('candidate_office_state', ScheduleE.candidate_office_state, ['AZ', 'AK']),
+            ('candidate_office_district', ScheduleE.candidate_office_district, ['00', '01']),
+            ('candidate_party', ScheduleE.candidate_party, ['DEM', 'REP']),
+            ('candidate_office', ScheduleE.candidate_office, ['H', 'S', 'P']),
         ]
         for label, column, values in filters:
             [
