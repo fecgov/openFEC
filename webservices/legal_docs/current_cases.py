@@ -30,8 +30,8 @@ SINGLE_CASE = """
         name,
         case_type
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
-    WHERE case_no = %s
-    AND case_type = %s
+    WHERE case_type = %s
+    AND case_no = %s
 """
 
 AF_SPECIFIC_FIELDS = """
@@ -155,33 +155,34 @@ CASE_NO_REGEX = re.compile(r'(?P<serial>\d+)')
 
 
 def load_current_murs(specific_mur_no=None):
-    load_cases(specific_mur_no, 'MUR')
+    load_cases('MUR', specific_mur_no)
 
 def load_adrs(specific_adr_no=None):
-    load_cases(specific_adr_no, 'ADR')
+    load_cases('ADR', specific_adr_no)
 
 def load_admin_fines(specific_af_no=None):
-    load_cases(specific_af_no, 'AF')
+    load_cases('AF', specific_af_no)
 
 def get_es_type(case_type):
-    if case_type.upper() == 'AF':
+    case_type = case_type.upper()
+    if case_type == 'AF':
         return 'admin_fines'
-    elif case_type.upper() == 'ADR':
+    elif case_type == 'ADR':
         return 'adrs'
     else:
         return 'murs'
 
 def get_full_name(case_type):
-    if case_type.upper() == 'AF':
+    case_type = case_type.upper()
+    if case_type == 'AF':
         return 'administrative-fine'
-    elif case_type.upper() == 'ADR':
+    elif case_type == 'ADR':
         return 'alternative-dispute-resolution'
     else:
         return 'matter-under-review'
 
-#TODO: How to handle if there's no case_type specified?
 
-def load_cases(case_no=None, case_type=None):
+def load_cases(case_type, case_no=None):
     """
     Reads data for current MURs, AFs, and ADRs from a Postgres database,
     assembles a JSON document corresponding to the case, and indexes this document
@@ -189,18 +190,20 @@ def load_cases(case_no=None, case_type=None):
     In addition, all documents attached to the case are uploaded to an
     S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
     """
-    es = get_elasticsearch_connection()
-    logger.info("Loading {0}(s)".format(case_type))
-    case_count = 0
-    for case in get_cases(case_no, case_type):
-        if case is not None:
-            logger.info("Loading {0}: {1}".format(case_type, case['no']))
-            es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
-            case_count += 1
-    logger.info("{0} {1}(s) loaded".format(case_count, case_type))
+    if case_type in ('MUR', 'ADR', 'AF'):
+        es = get_elasticsearch_connection()
+        logger.info("Loading {0}(s)".format(case_type))
+        case_count = 0
+        for case in get_cases(case_type, case_no):
+            if case is not None:
+                logger.info("Loading {0}: {1}".format(case_type, case['no']))
+                es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
+                case_count += 1
+        logger.info("{0} {1}(s) loaded".format(case_count, case_type))
+    else:
+        logger.error("Invalid case_type: must be 'MUR', 'ADR', or 'AF'.")
 
-
-def get_cases(case_no=None, case_type=None):
+def get_cases(case_type, case_no=None):
     """
     Takes a specific case to load.
     If none are specified, all cases are reloaded
@@ -210,17 +213,17 @@ def get_cases(case_no=None, case_type=None):
         with db.engine.connect() as conn:
             rs = conn.execute(ALL_CASES, case_type)
             for row in rs:
-                yield get_single_case(row['case_no'], case_type)
+                yield get_single_case(case_type, row['case_no'])
     else:
-        yield get_single_case(case_no, case_type)
+        yield get_single_case(case_type, case_no)
 
 
-def get_single_case(case_no, case_type):
+def get_single_case(case_type, case_no):
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
 
     with db.engine.connect() as conn:
-        rs = conn.execute(SINGLE_CASE, case_no, case_type)
+        rs = conn.execute(SINGLE_CASE, case_type, case_no)
         row = rs.first()
         if row is not None:
             case_id = row['case_id']
@@ -232,7 +235,7 @@ def get_single_case(case_no, case_type):
                 'sort1': sort1,
                 'sort2': sort2,
             }
-            case['commission_votes'] = get_commission_votes(case_id, case_type)
+            case['commission_votes'] = get_commission_votes(case_type, case_id)
             case['documents'] = get_documents(case_id, bucket, bucket_name)
             case['url'] = '/legal/{0}/{1}/'.format(get_full_name(case_type), row['case_no'])
             if case_type == 'AF':
@@ -306,7 +309,7 @@ def get_dispositions(case_id):
         return disposition_data
 
 
-def get_commission_votes(case_id, case_type):
+def get_commission_votes(case_type, case_id):
     with db.engine.connect() as conn:
         if case_type == 'AF':
             rs = conn.execute(AF_COMMISSION_VOTES, case_id)
