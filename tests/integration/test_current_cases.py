@@ -11,9 +11,7 @@ from webservices.legal_docs.current_cases import get_cases
 from tests.common import TEST_CONN, BaseTestCase
 
 @pytest.mark.usefixtures("migrate_db")
-class TestLoadCurrentMURs(BaseTestCase):
-
-    case_type = 'MUR'
+class TestLoadCurrentCases(BaseTestCase):
 
     def setUp(self):
         self.connection = rest.db.engine.connect()
@@ -46,10 +44,82 @@ class TestLoadCurrentMURs(BaseTestCase):
             'sort1': -1,
             'sort2': None
         }
-        self.create_mur(1, expected_mur['no'], expected_mur['name'], mur_subject)
-        actual_mur = next(get_cases(self.case_type))
+        self.create_case(1, expected_mur['no'], expected_mur['name'], mur_subject)
+        actual_mur = next(get_cases('MUR'))
 
         assert actual_mur == expected_mur
+
+    @patch('webservices.legal_docs.current_cases.get_bucket')
+    def test_simple_adr(self, get_bucket):
+        adr_subject = 'Personal use'
+        expected_adr = {
+            'no': '1',
+            'name': 'Simple ADR',
+            'election_cycles': [2016],
+            'doc_id': 'adr_1',
+            'participants': [],
+            'subjects': [adr_subject],
+            'respondents': [],
+            'documents': [],
+            'commission_votes': [],
+            'dispositions': [],
+            'close_date': None,
+            'open_date': None,
+            'url': '/legal/alternative-dispute-resolution/1/',
+            'sort1': -1,
+            'sort2': None
+        }
+        self.create_case(1, expected_adr['no'], expected_adr['name'], adr_subject, 'ADR')
+        actual_adr = next(get_cases('ADR'))
+
+        assert actual_adr == expected_adr
+
+    @patch('webservices.legal_docs.current_cases.get_bucket')
+    def test_admin_fine(self, get_bucket):
+        dummy_subject = 'Personal use'
+        expected_admin_fine = {
+            'no': '1',
+            'name': 'Big Admin Fine',
+            'doc_id': 'af_1',
+            'documents': [],
+            'commission_votes': [{'action': None, 'vote_date': None}],
+            'committee_id': 'C001',
+            'report_year': '2016',
+            'report_type': '30G',
+            'reason_to_believe_action_date': None,
+            'reason_to_believe_fine_amount': 5000,
+            'challenge_receipt_date': None,
+            'challenge_outcome': '',
+            'final_determination_date': None,
+            'final_determination_amount': 5000,
+            'check_amount': 5000,
+            'treasury_referral_date': None,
+            'treasury_referral_amount': 0,
+            'petition_court_filing_date': None,
+            'petition_court_decision_date': None,
+            'url': '/legal/administrative-fine/1/',
+            'sort1': -1,
+            'sort2': None
+        }
+        self.create_case(1, expected_admin_fine['no'], expected_admin_fine['name'], dummy_subject, 'AF')
+        self.create_admin_fine(1,
+            expected_admin_fine['committee_id'],
+            expected_admin_fine['report_year'],
+            expected_admin_fine['report_type'],
+            expected_admin_fine['reason_to_believe_action_date'],
+            expected_admin_fine['reason_to_believe_fine_amount'],
+            expected_admin_fine['challenge_receipt_date'],
+            expected_admin_fine['challenge_outcome'],
+            expected_admin_fine['final_determination_date'],
+            expected_admin_fine['final_determination_amount'],
+            expected_admin_fine['check_amount'],
+            expected_admin_fine['treasury_referral_date'],
+            expected_admin_fine['treasury_referral_amount'],
+            expected_admin_fine['petition_court_filing_date'],
+            expected_admin_fine['petition_court_decision_date'])
+        actual_admin_fine = next(get_cases('AF'))
+
+        assert actual_admin_fine == expected_admin_fine
 
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
     @patch('webservices.legal_docs.current_cases.get_bucket')
@@ -78,7 +148,7 @@ class TestLoadCurrentMURs(BaseTestCase):
                     filename.replace(' ', '-'))),
         ]
 
-        self.create_mur(case_id, expected_mur['no'], expected_mur['name'], mur_subject)
+        self.create_case(case_id, expected_mur['no'], expected_mur['name'], mur_subject)
         for entity_id, participant in enumerate(participants):
             role, name = participant
             self.create_participant(case_id, entity_id, role, name)
@@ -86,7 +156,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             category, ocrtext, url = document
             self.create_document(case_id, document_id, category, ocrtext, filename)
 
-        actual_mur = next(get_cases(self.case_type))
+        actual_mur = next(get_cases('MUR'))
 
         for key in expected_mur:
             assert actual_mur[key] == expected_mur[key]
@@ -105,7 +175,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         name = 'Open Elections LLC'
         mur_subject = 'Fraudulent misrepresentation'
         pg_date = '2016-10-08'
-        self.create_mur(case_id, case_no, name, mur_subject)
+        self.create_case(case_id, case_no, name, mur_subject)
 
         entity_id = 1
         event_date = '2005-01-01'
@@ -154,7 +224,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         action = 'Conciliation Reached.'
         self.create_commission(commission_id, agenda_date, vote_date, action, case_id, pg_date)
 
-        actual_mur = next(get_cases(self.case_type))
+        actual_mur = next(get_cases('MUR'))
 
         expected_mur = {
             'commission_votes': [{'action': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}],
@@ -242,31 +312,44 @@ class TestLoadCurrentMURs(BaseTestCase):
             'sort1': -3,
             'sort2': None
         }
-        self.create_mur(1, expected_mur1['no'], expected_mur1['name'], mur_subject)
-        self.create_mur(2, expected_mur2['no'], expected_mur2['name'], mur_subject)
-        self.create_mur(3, expected_mur3['no'], expected_mur3['name'], mur_subject)
+        self.create_case(1, expected_mur1['no'], expected_mur1['name'], mur_subject)
+        self.create_case(2, expected_mur2['no'], expected_mur2['name'], mur_subject)
+        self.create_case(3, expected_mur3['no'], expected_mur3['name'], mur_subject)
 
-        gen = get_cases(self.case_type)
+        gen = get_cases('MUR')
         assert(next(gen)) == expected_mur1
         assert(next(gen)) == expected_mur2
         assert(next(gen)) == expected_mur3
 
-        actual_murs = [mur for mur in get_cases(self.case_type, '2')]
+        actual_murs = [mur for mur in get_cases('MUR', '2')]
         assert actual_murs == [expected_mur2]
 
-    def create_mur(self, case_id, case_no, name, subject_description):
+    def create_case(self, case_id, case_no, name, subject_description, case_type='MUR'):
         subject_id = self.connection.execute(
             "SELECT subject_id FROM fecmur.subject "
             " WHERE description = %s ", subject_description).scalar()
         self.connection.execute(
             "INSERT INTO fecmur.case (case_id, case_no, name, case_type) "
-            "VALUES (%s, %s, %s, 'MUR')", case_id, case_no, name)
+            "VALUES (%s, %s, %s, %s)", case_id, case_no, name, case_type)
+        if case_type != 'AF':
+            self.connection.execute(
+                "INSERT INTO fecmur.case_subject (case_id, subject_id, relatedsubject_id) "
+                "VALUES (%s, %s, -1)", case_id, subject_id)
+            self.connection.execute(
+                "INSERT INTO fecmur.electioncycle (case_id, election_cycle) "
+                "VALUES (%s, 2016)", case_id)
+
+    def create_admin_fine(
+            self, case_id, committee_id, report_year, report_type,
+            reason_to_believe_action_date, reason_to_believe_fine_amount,
+            challenge_receipt_date, challenge_outcome, final_determination_date,
+            final_determination_amount, check_amount, treasury_referral_date,
+            treasury_referral_amount, petition_court_filing_date,
+            petition_court_decision_date):
+
         self.connection.execute(
-            "INSERT INTO fecmur.case_subject (case_id, subject_id, relatedsubject_id) "
-            "VALUES (%s, %s, -1)", case_id, subject_id)
-        self.connection.execute(
-            "INSERT INTO fecmur.electioncycle (case_id, election_cycle) "
-            "VALUES (%s, 2016)", case_id)
+            "INSERT INTO fecmur.af_case (case_id, committee_id, report_year, report_type, rtb_action_date, rtb_fine_amount, chal_receipt_date, chal_outcome_code_desc, fd_date, fd_final_fine_amount, check_amount, treasury_date, treasury_amount, petition_court_filing_date, petition_court_decision_date) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", case_id, committee_id, report_year, report_type, reason_to_believe_action_date, reason_to_believe_fine_amount,  challenge_receipt_date, challenge_outcome, final_determination_date, final_determination_amount, check_amount, treasury_referral_date, treasury_referral_amount, petition_court_filing_date, petition_court_decision_date)
 
     def create_participant(self, case_id, entity_id, role, name,
             stage=None, statutory_citation=None, regulatory_citation=None):
