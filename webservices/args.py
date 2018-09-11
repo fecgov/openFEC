@@ -80,12 +80,12 @@ class IndexValidator(OptionValidator):
 
     :param Base model: SQLALchemy model.
     :param list exclude: Optional list of columns to exclude.
+    :param list extra: Optional list of extra columns to include.
     """
-    def __init__(self, model, extra=None, exclude=None, schema=None):
+    def __init__(self, model, extra=None, exclude=None):
         self.model = model
         self.extra = extra or []
         self.exclude = exclude or []
-        self.database_schema = schema
 
     @property
     def values(self):
@@ -96,7 +96,10 @@ class IndexValidator(OptionValidator):
         }
         return [
             column_map[column['column_names'][0]]
-            for column in inspector.get_indexes(self.model.__tablename__, self.database_schema)
+            for column in inspector.get_indexes(
+                self.model.__tablename__,
+                self.model.__table__.schema,
+            )
             if not self._is_excluded(column_map.get(column['column_names'][0]))
         ] + self.extra
 
@@ -249,8 +252,10 @@ committee_list = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'state': fields.List(IStr, description=docs.STATE_GENERIC),
     'party': fields.List(IStr, description=docs.PARTY),
-    'min_first_file_date': fields.Date(description='Selects all committees whose first filing was received by the FEC after this date'),
-    'max_first_file_date': fields.Date(description='Selects all committees whose first filing was received by the FEC before this date'),
+    'min_first_file_date': fields.Date(description='Filter for committees whose first filing was received on or after this date'),
+    'max_first_file_date': fields.Date(description='Filter for committees whose first filing was received on or before this date'),
+    'min_last_f1_date': fields.Date(description='Filter for committees whose latest Form 1 was received on or after this date'),
+    'max_last_f1_date': fields.Date(description='Filter for committees whose latest Form 1 was received on or before this date'),
     'treasurer_name': fields.List(fields.Str, description=docs.TREASURER_NAME),
 }
 
@@ -282,7 +287,7 @@ filings = {
     'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
     'primary_general_indicator': fields.List(IStr, description='Primary, general or special election indicator'),
     'amendment_indicator': fields.List(
-        IStr(validate=validate.OneOf(['', 'N', 'A', 'T', 'C' , 'M', 'S'])),
+        IStr(validate=validate.OneOf(['', 'N', 'A', 'T', 'C', 'M', 'S'])),
         description=docs.AMENDMENT_INDICATOR),
 }
 
@@ -735,6 +740,8 @@ rad_analyst = {
     'name': fields.List(fields.Str, description='Name of RAD analyst'),
     'email': fields.List(fields.Str, description='Email of RAD analyst'),
     'title': fields.List(fields.Str, description='Title of RAD analyst'),
+    'min_assignment_update_date': fields.Date(description='Filter results for assignment updates made after this date'),
+    'max_assignment_update_date': fields.Date(description='Filter results for assignment updates made before this date')
 }
 
 large_aggregates = {'cycle': fields.Int(required=True, description=docs.RECORD_CYCLE)}
