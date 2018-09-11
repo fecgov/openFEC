@@ -31,14 +31,16 @@ class RadAnalystView(ApiResource):
         ('committee_id', model.committee_id),
     ]
 
+    filter_range_fields = [
+        (('min_assignment_update_date', 'max_assignment_update_date'), model.assignment_update_date),
+    ]
+
     @property
     def args(self):
         return utils.extend(
             args.paging,
             args.rad_analyst,
-            args.make_sort_args(
-                validator=args.IndexValidator(models.RadAnalyst),
-            ),
+            args.make_sort_args(),
         )
 
     @property
