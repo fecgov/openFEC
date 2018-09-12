@@ -1,5 +1,3 @@
-
-
 import datetime
 
 import logging
@@ -8,7 +6,7 @@ from celery_once import QueueOnce
 
 from webservices import utils
 from webservices.legal_docs.advisory_opinions import load_advisory_opinions
-from webservices.legal_docs.current_cases import load_current_murs
+from webservices.legal_docs.current_cases import load_cases
 from webservices.rest import db
 from webservices.tasks import app
 from webservices.tasks.utils import get_app_name
@@ -32,11 +30,10 @@ RECENTLY_MODIFIED_STARTING_AO = """
     LIMIT 1;
 """
 
-RECENTLY_MODIFIED_MURS = """
-    SELECT case_no, pg_date
+RECENTLY_MODIFIED_CASES = """
+    SELECT case_no, case_type, pg_date
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
     WHERE pg_date >= NOW() - '8 hour'::INTERVAL
-    AND case_type = 'MUR'
     ORDER BY case_serial
 """
 
@@ -44,7 +41,7 @@ RECENTLY_MODIFIED_MURS = """
 def refresh():
     with db.engine.connect() as conn:
         refresh_aos(conn)
-        refresh_murs(conn)
+        refresh_cases(conn)
 
 @app.task(once={'graceful': True}, base=QueueOnce)
 def reload_all_aos_when_change():
@@ -77,20 +74,20 @@ def reload_all_aos():
 def refresh_aos(conn):
     row = conn.execute(RECENTLY_MODIFIED_STARTING_AO).first()
     if row:
-        logger.info("AO found %s modified at %s", row["ao_no"], row["pg_date"])
+        logger.info("AO %s found modified at %s", row["ao_no"], row["pg_date"])
         load_advisory_opinions(row["ao_no"])
     else:
         logger.info("No modified AOs found")
 
-def refresh_murs(conn):
-    logger.info('Checking for modified MURs')
-    rs = conn.execute(RECENTLY_MODIFIED_MURS)
+def refresh_cases(conn):
+    logger.info('Checking for modified cases')
+    rs = conn.execute(RECENTLY_MODIFIED_CASES)
     if rs.returns_rows:
         load_count = 0
         for row in rs:
-            logger.info("Current MUR %s found modified at %s", row["case_no"], row["pg_date"])
-            load_current_murs(row["case_no"])
+            logger.info("%s %s found modified at %s", row["case_type"], row["case_no"], row["pg_date"])
+            load_cases(row["case_type"], row["case_no"])
             load_count += 1
-        logger.info("Total of %d current MUR(s) loaded", load_count)
+        logger.info("Total of %d case(s) loaded", load_count)
     else:
-        logger.info("No modified current MURs found")
+        logger.info("No modified cases found")
