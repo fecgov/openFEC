@@ -277,7 +277,7 @@ def get_af_specific_fields(case_id):
             case["treasury_referral_amount"] = row["treasury_amount"]
             case["petition_court_filing_date"] = row["petition_court_filing_date"]
             case["petition_court_decision_date"] = row["petition_court_decision_date"]
-            return case
+    return case
 
 
 def get_election_cycles(case_id):
