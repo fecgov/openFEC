@@ -1,6 +1,6 @@
 import pytest
 
-from webservices.legal_docs.current_murs import (
+from webservices.legal_docs.current_cases import (
     parse_regulatory_citations,
     parse_statutory_citations,
 )

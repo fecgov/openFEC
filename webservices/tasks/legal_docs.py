@@ -8,7 +8,7 @@ from celery_once import QueueOnce
 
 from webservices import utils
 from webservices.legal_docs.advisory_opinions import load_advisory_opinions
-from webservices.legal_docs.current_murs import load_current_murs
+from webservices.legal_docs.current_cases import load_current_murs
 from webservices.rest import db
 from webservices.tasks import app
 from webservices.tasks.utils import get_app_name
@@ -34,8 +34,9 @@ RECENTLY_MODIFIED_STARTING_AO = """
 
 RECENTLY_MODIFIED_MURS = """
     SELECT case_no, pg_date
-    FROM fecmur.cases_with_parsed_case_serial_numbers
+    FROM fecmur.cases_with_parsed_case_serial_numbers_vw
     WHERE pg_date >= NOW() - '8 hour'::INTERVAL
+    AND case_type = 'MUR'
     ORDER BY case_serial
 """
 

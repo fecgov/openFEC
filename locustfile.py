@@ -194,14 +194,28 @@ class Tasks(locust.TaskSet):
         self.client.get('legal/search', name='legal_search', params=params)
 
     @locust.task
-    def get_mur(self, term=None):
+    def get_mur(self):
         params = {
             'api_key': API_KEY,
         }
         self.client.get('legal/docs/murs/7074', name='legal_get_mur', params=params)
 
     @locust.task
-    def get_ao(self, term=None):
+    def get_adr(self):
+        params = {
+            'api_key': API_KEY,
+        }
+        self.client.get('legal/docs/adrs/668', name='legal_get_adr', params=params)
+
+    @locust.task
+    def get_admin_fine(self):
+        params = {
+            'api_key': API_KEY,
+        }
+        self.client.get('legal/docs/admin_fines/2274', name='legal_get_admin_fine', params=params)
+
+    @locust.task
+    def get_ao(self):
         params = {
             'api_key': API_KEY,
         }

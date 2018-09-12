@@ -5,32 +5,62 @@ from urllib.parse import urlencode
 
 from webservices.env import env
 from webservices.rest import db
-from webservices.utils import create_eregs_link, get_elasticsearch_connection
+from webservices.utils import extend, create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
 
 from .reclassify_statutory_citation import reclassify_statutory_citation_without_title
 
 logger = logging.getLogger(__name__)
 
-ALL_MURS = """
+ALL_CASES = """
     SELECT
         case_id,
         case_no,
-        name
-    FROM fecmur.cases_with_parsed_case_serial_numbers
+        name,
+        case_type
+    FROM fecmur.cases_with_parsed_case_serial_numbers_vw
+    WHERE case_type = %s
     ORDER BY case_serial
 """
 
-SINGLE_MUR = """
+SINGLE_CASE = """
     SELECT DISTINCT
         case_id,
         case_no,
-        name
-    FROM fecmur.cases_with_parsed_case_serial_numbers
-    WHERE case_no = %s
+        name,
+        case_type
+    FROM fecmur.cases_with_parsed_case_serial_numbers_vw
+    WHERE case_type = %s
+    AND case_no = %s
 """
 
-MUR_SUBJECTS = """
+AF_SPECIFIC_FIELDS = """
+    SELECT DISTINCT
+        committee_id,
+        report_year,
+        report_type,
+        rtb_action_date,
+        rtb_fine_amount,
+        chal_receipt_date,
+        CASE chal_outcome_code_desc
+            WHEN 'Upheld' THEN 'RTB Finding and Fine Upheld'
+            WHEN 'Corrected' THEN 'RTB Finding Upheld but Fine Reduced'
+            WHEN 'Waived' THEN 'No Fine Assessed at Final Determination'
+            WHEN 'TERMINATED' THEN 'No Fine Assessed at Final Determination'
+            ELSE chal_outcome_code_desc END
+        AS chal_outcome_code_desc,
+        fd_date,
+        fd_final_fine_amount,
+        check_amount,
+        treasury_date,
+        treasury_amount,
+        petition_court_filing_date,
+        petition_court_decision_date
+    FROM fecmur.af_case
+    WHERE case_id = %s
+"""
+
+CASE_SUBJECTS = """
     SELECT
         subject.description AS subj,
         relatedsubject.description AS rel
@@ -40,14 +70,14 @@ MUR_SUBJECTS = """
     WHERE case_id = %s
 """
 
-MUR_ELECTION_CYCLES = """
+CASE_ELECTION_CYCLES = """
     SELECT
         election_cycle::INT
     FROM fecmur.electioncycle
     WHERE case_id = %s
 """
 
-MUR_PARTICIPANTS = """
+CASE_PARTICIPANTS = """
     SELECT
         entity_id,
         name,
@@ -58,10 +88,11 @@ MUR_PARTICIPANTS = """
     WHERE case_id = %s
 """
 
-MUR_DOCUMENTS = """
+CASE_DOCUMENTS = """
     SELECT
         doc.document_id,
         mur.case_no,
+        mur.case_type,
         doc.filename,
         doc.category,
         doc.description,
@@ -71,18 +102,16 @@ MUR_DOCUMENTS = """
         doc.doc_order_id,
         doc.document_date
     FROM fecmur.document doc
-    INNER JOIN fecmur.cases_with_parsed_case_serial_numbers mur
+    INNER JOIN fecmur.cases_with_parsed_case_serial_numbers_vw mur
         ON mur.case_id = doc.case_id
     WHERE doc.case_id = %s
     ORDER BY doc.doc_order_id, doc.document_date desc, doc.document_id DESC;
 """
-# TODO: Check if document order matters
 
-MUR_VIOLATIONS = """
+CASE_VIOLATIONS = """
     SELECT entity_id, stage, statutory_citation, regulatory_citation
     FROM fecmur.violations
-    WHERE case_id = %s
-    ;
+    WHERE case_id = %s;
 """
 
 OPEN_AND_CLOSE_DATES = """
@@ -108,89 +137,153 @@ DISPOSITION_DATA = """
     ORDER BY fecmur.event.event_name ASC, fecmur.settlement.final_amount DESC NULLS LAST, event_date DESC;
 """
 
-COMMISSION_VOTES = """
+MUR_ADR_COMMISSION_VOTES = """
     SELECT vote_date, action from fecmur.commission
     WHERE case_id = %s
     ORDER BY vote_date desc;
 """
 
+AF_COMMISSION_VOTES = """
+    SELECT action_date as vote_date, action from fecmur.af_case
+    WHERE case_id = %s
+    ORDER BY action_date desc;
+"""
+
 STATUTE_REGEX = re.compile(r'(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)')
 REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?')
-MUR_NO_REGEX = re.compile(r'(?P<serial>\d+)')
+CASE_NO_REGEX = re.compile(r'(?P<serial>\d+)')
 
 
-def load_current_murs(mur_no=None):
-    """
-    Reads data for current MURs from a Postgres database, assembles a JSON document
-    corresponding to the MUR and indexes this document in Elasticsearch in the index
-    `docs_index` with a doc_type of `murs`. In addition, all documents attached to
-    the MUR are uploaded to an S3 bucket under the _directory_ `legal/murs/current/`.
-    """
-    es = get_elasticsearch_connection()
-    logger.info("Loading current MUR(s)")
-    mur_count = 0
-    for mur in get_murs(mur_no):
-        if mur is not None:
-            logger.info("Loading current MUR: %s", mur['no'])
-            es.index('docs_index', 'murs', mur, id=mur['doc_id'])
-            mur_count += 1
-    logger.info("%d current MUR(s) loaded", mur_count)
+def load_current_murs(specific_mur_no=None):
+    load_cases('MUR', specific_mur_no)
 
+def load_adrs(specific_adr_no=None):
+    load_cases('ADR', specific_adr_no)
 
-def get_murs(mur_no=None):
-    """
-    Takes a specific MUR to load.
-    If none are specified, all MURs are reloaded
-    Unlike AOs, MURs are not published in sequential order.
-    """
-    if mur_no is None:
-        with db.engine.connect() as conn:
-            rs = conn.execute(ALL_MURS)
-            for row in rs:
-                yield get_single_mur(row['case_no'])
+def load_admin_fines(specific_af_no=None):
+    load_cases('AF', specific_af_no)
+
+def get_es_type(case_type):
+    case_type = case_type.upper()
+    if case_type == 'AF':
+        return 'admin_fines'
+    elif case_type == 'ADR':
+        return 'adrs'
     else:
-        yield get_single_mur(mur_no)
+        return 'murs'
+
+def get_full_name(case_type):
+    case_type = case_type.upper()
+    if case_type == 'AF':
+        return 'administrative-fine'
+    elif case_type == 'ADR':
+        return 'alternative-dispute-resolution'
+    else:
+        return 'matter-under-review'
 
 
-def get_single_mur(mur_no):
+def load_cases(case_type, case_no=None):
+    """
+    Reads data for current MURs, AFs, and ADRs from a Postgres database,
+    assembles a JSON document corresponding to the case, and indexes this document
+    in Elasticsearch in the index `docs_index` with a doc_type of `murs`, `adrs`, or `admin_fines`.
+    In addition, all documents attached to the case are uploaded to an
+    S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
+    """
+    if case_type in ('MUR', 'ADR', 'AF'):
+        es = get_elasticsearch_connection()
+        logger.info("Loading {0}(s)".format(case_type))
+        case_count = 0
+        for case in get_cases(case_type, case_no):
+            if case is not None:
+                logger.info("Loading {0}: {1}".format(case_type, case['no']))
+                es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
+                case_count += 1
+        logger.info("{0} {1}(s) loaded".format(case_count, case_type))
+    else:
+        logger.error("Invalid case_type: must be 'MUR', 'ADR', or 'AF'.")
+
+def get_cases(case_type, case_no=None):
+    """
+    Takes a specific case to load.
+    If none are specified, all cases are reloaded
+    Unlike AOs, cases are not published in sequential order.
+    """
+    if case_no is None:
+        with db.engine.connect() as conn:
+            rs = conn.execute(ALL_CASES, case_type)
+            for row in rs:
+                yield get_single_case(case_type, row['case_no'])
+    else:
+        yield get_single_case(case_type, case_no)
+
+
+def get_single_case(case_type, case_no):
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
 
     with db.engine.connect() as conn:
-        rs = conn.execute(SINGLE_MUR, mur_no)
+        rs = conn.execute(SINGLE_CASE, case_type, case_no)
         row = rs.first()
         if row is not None:
             case_id = row['case_id']
             sort1, sort2 = get_sort_fields(row['case_no'])
-            mur = {
-                'doc_id': 'mur_%s' % row['case_no'],
+            case = {
+                'doc_id': '{0}_{1}'.format(case_type.lower(), row['case_no']),
                 'no': row['case_no'],
                 'name': row['name'],
-                'mur_type': 'current',
                 'sort1': sort1,
                 'sort2': sort2,
             }
-            mur['subjects'] = get_subjects(case_id)
-            mur['election_cycles'] = get_election_cycles(case_id)
-
+            case['commission_votes'] = get_commission_votes(case_type, case_id)
+            case['documents'] = get_documents(case_id, bucket, bucket_name)
+            case['url'] = '/legal/{0}/{1}/'.format(get_full_name(case_type), row['case_no'])
+            if case_type == 'AF':
+                case = extend(case, get_af_specific_fields(case_id))
+                return case
+            if case_type == 'MUR':
+                case['mur_type'] = 'current'
+            case['subjects'] = get_subjects(case_id)
+            case['election_cycles'] = get_election_cycles(case_id)
             participants = get_participants(case_id)
-            mur['participants'] = list(participants.values())
-            mur['respondents'] = get_sorted_respondents(mur['participants'])
-            mur['commission_votes'] = get_commission_votes(case_id)
-            mur['dispositions'] = get_dispositions(case_id)
-            mur['documents'] = get_documents(case_id, bucket, bucket_name)
-            mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
-            mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
-            return mur
+            case['participants'] = list(participants.values())
+            case['respondents'] = get_sorted_respondents(case['participants'])
+
+            case['dispositions'] = get_dispositions(case_id)
+
+            case['open_date'], case['close_date'] = get_open_and_close_dates(case_id)
+            return case
         else:
-            logger.info("Not a valid current MUR number. This may be an archived MUR.")
+            logger.info("Not a valid {0} number.".format(case_type))
             return None
+
+def get_af_specific_fields(case_id):
+    case = {}
+    with db.engine.connect() as conn:
+        rs = conn.execute(AF_SPECIFIC_FIELDS, case_id)
+        row = rs.first()
+        if row is not None:
+            case["committee_id"] = row["committee_id"]
+            case["report_year"] = row["report_year"]
+            case["report_type"] = row["report_type"]
+            case["reason_to_believe_action_date"] = row["rtb_action_date"]
+            case["reason_to_believe_fine_amount"] = row["rtb_fine_amount"]
+            case["challenge_receipt_date"] = row["chal_receipt_date"]
+            case["challenge_outcome"] = row["chal_outcome_code_desc"]
+            case["final_determination_date"] = row["fd_date"]
+            case["final_determination_amount"] = row["fd_final_fine_amount"]
+            case["check_amount"] = row["check_amount"]
+            case["treasury_referral_date"] = row["treasury_date"]
+            case["treasury_referral_amount"] = row["treasury_amount"]
+            case["petition_court_filing_date"] = row["petition_court_filing_date"]
+            case["petition_court_decision_date"] = row["petition_court_decision_date"]
+            return case
 
 
 def get_election_cycles(case_id):
     election_cycles = []
     with db.engine.connect() as conn:
-        rs = conn.execute(MUR_ELECTION_CYCLES, case_id)
+        rs = conn.execute(CASE_ELECTION_CYCLES, case_id)
         for row in rs:
             election_cycles.append(row['election_cycle'])
     return election_cycles
@@ -216,9 +309,12 @@ def get_dispositions(case_id):
         return disposition_data
 
 
-def get_commission_votes(case_id):
+def get_commission_votes(case_type, case_id):
     with db.engine.connect() as conn:
-        rs = conn.execute(COMMISSION_VOTES, case_id)
+        if case_type == 'AF':
+            rs = conn.execute(AF_COMMISSION_VOTES, case_id)
+        else:
+            rs = conn.execute(MUR_ADR_COMMISSION_VOTES, case_id)
         commission_votes = []
         for row in rs:
             commission_votes.append({'vote_date': row['vote_date'], 'action': row['action']})
@@ -228,7 +324,7 @@ def get_commission_votes(case_id):
 def get_participants(case_id):
     participants = {}
     with db.engine.connect() as conn:
-        rs = conn.execute(MUR_PARTICIPANTS, case_id)
+        rs = conn.execute(CASE_PARTICIPANTS, case_id)
         for row in rs:
             participants[row['entity_id']] = {
                 'name': row['name'],
@@ -252,7 +348,7 @@ def get_sorted_respondents(participants):
 def get_subjects(case_id):
     subjects = []
     with db.engine.connect() as conn:
-        rs = conn.execute(MUR_SUBJECTS, case_id)
+        rs = conn.execute(CASE_SUBJECTS, case_id)
         for row in rs:
             if row['rel']:
                 subject_str = row['subj'] + "-" + row['rel']
@@ -264,7 +360,7 @@ def get_subjects(case_id):
 
 def assign_citations(participants, case_id):
     with db.engine.connect() as conn:
-        rs = conn.execute(MUR_VIOLATIONS, case_id)
+        rs = conn.execute(CASE_VIOLATIONS, case_id)
         for row in rs:
             entity_id = row['entity_id']
             if entity_id not in participants:
@@ -327,7 +423,7 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
 def get_documents(case_id, bucket, bucket_name):
     documents = []
     with db.engine.connect() as conn:
-        rs = conn.execute(MUR_DOCUMENTS, case_id)
+        rs = conn.execute(CASE_DOCUMENTS, case_id)
         for row in rs:
             document = {
                 'document_id': row['document_id'],
@@ -338,9 +434,11 @@ def get_documents(case_id, bucket, bucket_name):
                 'document_date': row['document_date'],
             }
             if not row['fileimage']:
-                logger.error('Error uploading document ID {0} for MUR Case {1}: No file image'.format(row['document_id'], row['case_no']))
+                logger.error(
+                    'Error uploading document ID {0} for {1} %{2}: No file image'.
+                    format(row['document_id'], row['case_type'], row['case_no']))
             else:
-                pdf_key = 'legal/murs/{0}/{1}'.format(row['case_no'],
+                pdf_key = 'legal/{0}/{1}/{2}'.format(get_es_type(row['case_type']), row['case_no'],
                     row['filename'].replace(' ', '-'))
                 document['url'] = '/files/' + pdf_key
                 logger.debug("S3: Uploading {}".format(pdf_key))
@@ -385,5 +483,5 @@ def remove_reclassification_notes(statutory_citation):
 
 
 def get_sort_fields(case_no):
-    match = MUR_NO_REGEX.match(case_no)
+    match = CASE_NO_REGEX.match(case_no)
     return -int(match.group("serial")), None
