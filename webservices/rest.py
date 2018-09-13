@@ -398,6 +398,7 @@ apidoc.register(audit.AuditCaseView, blueprint='v1')
 apidoc.register(audit.AuditCandidateNameSearch, blueprint='v1')
 apidoc.register(audit.AuditCommitteeNameSearch, blueprint='v1')
 apidoc.register(operations_log.OperationsLogView, blueprint='v1')
+apidoc.register(legal.UniversalSearch, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)
