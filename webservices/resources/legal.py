@@ -3,12 +3,15 @@ import re
 from elasticsearch_dsl import Search, Q
 from webargs import fields
 from flask import abort
+from flask_apispec import doc
 
+from webservices import docs
 from webservices import args
 from webservices import utils
 from webservices.utils import use_kwargs
 from elasticsearch import RequestError
 from webservices.exceptions import ApiError
+import webservices.legal_docs.responses as responses
 import logging
 
 
@@ -34,6 +37,7 @@ ALL_DOCUMENT_TYPES = [
     'adrs',
     'admin_fines',
 ]
+
 
 class GetLegalCitation(utils.Resource):
     @property
@@ -78,6 +82,11 @@ class GetLegalDocument(utils.Resource):
         else:
             return abort(404)
 
+@doc(
+    description=docs.LEGAL_SEARCH,
+    tags=['legal'],
+    responses=responses.LEGAL_SEARCH_RESPONSE
+)
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q='', from_hit=0, hits_returned=20, **kwargs):
