@@ -2,7 +2,7 @@ apispec==0.19.0
 cfenv==0.5.2
 invoke==0.15.0
 psycopg2==2.7.1
-Flask==0.12
+Flask==0.12.4
 Flask-Cors==3.0.2
 Flask-Script==2.0.5
 Flask-RESTful==0.3.5
