@@ -1,4 +1,5 @@
-apispec==1.0.0b2
+git+https://github.com/fecgov/apispec.git@dev
+prance[osv]>=0.11 # use apispec[validation] once we no longer fork apispec
 cfenv==0.5.2
 invoke==0.15.0
 psycopg2==2.7.1
@@ -25,7 +26,6 @@ git+https://github.com/18F/slate.git
 
 # Marshalling
 flask-apispec==0.7.0
-prance==0.13.1
 marshmallow==2.6.0
 marshmallow-sqlalchemy==0.8.0
 git+https://github.com/jmcarp/marshmallow-pagination@master
