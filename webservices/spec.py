@@ -11,8 +11,6 @@ def format_docstring(docstring):
 
     formatted = []
     lines = docstring.expandtabs().splitlines()
-    indent = min(len(line) - len(line.strip()) for line in lines if line.strip())
-    trimmed = [lines[0].lstrip()] + [line[indent:].rstrip() for line in lines[1:]]
 
     for line in lines:
         if line == '':
