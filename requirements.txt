@@ -1,4 +1,4 @@
-apispec==0.39.0
+apispec==1.0.0b2
 cfenv==0.5.2
 invoke==0.15.0
 psycopg2==2.7.1
