@@ -1226,3 +1226,9 @@ The Operations log contains details of each report loaded into the database. It 
 used as status check to determine when all of the data processes, from initial entry through
 review are complete.
 '''
+LEGAL = '''
+Explore relevant statutes, regulations and Commission actions.
+'''
+LEGAL_SEARCH = '''
+Search legal documents by type, or across all document types using keywords, parameter values and ranges.
+'''

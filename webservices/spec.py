@@ -105,6 +105,10 @@ spec = APISpec(
         {
             'name': 'audit',
             'description': format_docstring(docs.AUDIT),
+        },
+        {
+            'name': 'legal',
+            'description': format_docstring(docs.LEGAL),
         }
     ]
 )
