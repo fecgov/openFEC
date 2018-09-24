@@ -86,7 +86,6 @@ class TestAmendmentChain(BaseTestCase):
         # FilingsView view
         # /committee/<committee_id>/filings/ and /candidate/<candidate_id>/filings/
 
-        # TODO: Keep this test and then combine FilingsView and FilingsList
         results = self._results(rest.api.url_for(FilingsView, committee_id=expected_filing['committee_id']))
         assert len(results) == 1
         view_result = results[0]
@@ -197,16 +196,16 @@ class TestAmendmentChain(BaseTestCase):
         q2_results = self._results(rest.api.url_for(FilingsList, committee_id=form_3_q2_new['committee_id'], report_type='Q2'))
 
         for result in q2_results:
-            for form in (form_3_q2_new, form_3_q2_amend_1, form_3_q2_amend_2):
-                if result['file_number'] == form['file_number']:
-                    self.assert_filings_equal(result, form)
+            for filing in (form_3_q2_new, form_3_q2_amend_1, form_3_q2_amend_2):
+                if result['file_number'] == filing['file_number']:
+                    self.assert_filings_equal(result, filing)
 
         q3_results = self._results(rest.api.url_for(FilingsList, committee_id=form_3_q3_new['committee_id'], report_type='Q3'))
 
         for result in q3_results:
-            for form in (form_3_q3_new, form_3_q3_amend_1):
-                if result['file_number'] == form['file_number']:
-                    self.assert_filings_equal(result, form)
+            for filing in (form_3_q3_new, form_3_q3_amend_1):
+                if result['file_number'] == filing['file_number']:
+                    self.assert_filings_equal(result, filing)
 
     def test_multiple_form_1s(self):
         first_f1 = {
@@ -260,12 +259,12 @@ class TestAmendmentChain(BaseTestCase):
 
         results = self._results(rest.api.url_for(FilingsList, committee_id=first_f1['committee_id']))
 
-        for result in results:
-            if result['file_number'] == 1111:
-                assert result['most_recent'] is False
-            # TODO: Figure out how to run both of these
-            # if result['file_number'] == 3333:
-            #     assert result['amendment_chain'] == [1111, 2222, 3333]
+        for result in sorted(results, key=lambda x: x['file_number']):
+            for filing in (first_f1, unusual_entry_for_second_f1, third_f1):
+                if result['file_number'] == filing['file_number']:
+                    self.assert_filings_equal(result, filing)
+                    # Note: we're leaving data-entered previous_file_number alone
+                    assert result['previous_file_number'] == filing['previous_file_number']
 
     def create_filing(self, sub_id, expected_filing):
         self.connection.execute(
@@ -280,7 +279,6 @@ class TestAmendmentChain(BaseTestCase):
         assert api_result['receipt_date'][:10] == expected_filing['receipt_date']. isoformat()
         assert api_result['file_number'] == expected_filing['file_number']
         assert api_result['amendment_chain'] == expected_filing['amendment_chain']
-        assert api_result['previous_file_number'] == expected_filing['previous_file_number']
         assert api_result['most_recent_file_number'] == expected_filing['most_recent_file_number']
         assert api_result['most_recent'] == expected_filing['most_recent']
         assert api_result['report_type'] == expected_filing['report_type']
