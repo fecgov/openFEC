@@ -1,4 +1,4 @@
- CREATE OR REPLACE VIEW ofec_processed_filing_vw AS
+CREATE OR REPLACE VIEW ofec_processed_filing_vw AS
  WITH RECURSIVE oldest_filing AS (
          SELECT f_rpt_or_form_sub.cand_cmte_id,
             f_rpt_or_form_sub.rpt_yr,
@@ -53,6 +53,8 @@
 
 ALTER VIEW ofec_processed_filing_vw OWNER TO fec;
 
+GRANT SELECT ON ofec_processed_filing_vw TO fec_read;
+
 DROP MATERIALIZED VIEW ofec_amendments_mv CASCADE;
 
 CREATE MATERIALIZED VIEW ofec_amendments_mv AS
@@ -93,59 +95,64 @@ FROM (SELECT
                 ORDER BY file_num NULLS FIRST)
 ) combined;
 
-ALTER TABLE ofec_amendments_mv OWNER TO fec;
 
 CREATE UNIQUE INDEX ofec_amendments_mv_idx_idx ON ofec_amendments_mv USING btree(idx);
 
+ALTER TABLE ofec_amendments_mv OWNER TO fec;
+
+CREATE OR REPLACE VIEW ofec_amendments_vw AS SELECT * FROM ofec_amendments_mv;
+ALTER VIEW ofec_amendments_vw OWNER TO fec;
+GRANT SELECT ON ofec_amendments_vw TO fec_read;
+
 CREATE MATERIALIZED VIEW public.ofec_filings_amendments_all_mv AS
  WITH combined AS (
-         SELECT ofec_amendments_mv.idx,
-            ofec_amendments_mv.cand_cmte_id,
-            ofec_amendments_mv.rpt_yr,
-            ofec_amendments_mv.rpt_tp,
-            ofec_amendments_mv.amndt_ind,
-            ofec_amendments_mv.receipt_date,
-            ofec_amendments_mv.file_num,
-            ofec_amendments_mv.prev_file_num,
-            ofec_amendments_mv.mst_rct_file_num,
-            ofec_amendments_mv.amendment_chain
-           FROM public.ofec_amendments_mv
+         SELECT ofec_amendments_vw.idx,
+            ofec_amendments_vw.cand_cmte_id,
+            ofec_amendments_vw.rpt_yr,
+            ofec_amendments_vw.rpt_tp,
+            ofec_amendments_vw.amndt_ind,
+            ofec_amendments_vw.receipt_date,
+            ofec_amendments_vw.file_num,
+            ofec_amendments_vw.prev_file_num,
+            ofec_amendments_vw.mst_rct_file_num,
+            ofec_amendments_vw.amendment_chain
+           FROM public.ofec_amendments_vw
         UNION ALL
-         SELECT ofec_presidential_paper_amendments_mv.idx,
-            ofec_presidential_paper_amendments_mv.cmte_id,
-            ofec_presidential_paper_amendments_mv.rpt_yr,
-            ofec_presidential_paper_amendments_mv.rpt_tp,
-            ofec_presidential_paper_amendments_mv.amndt_ind,
-            ofec_presidential_paper_amendments_mv.receipt_dt,
-            ofec_presidential_paper_amendments_mv.file_num,
-            ofec_presidential_paper_amendments_mv.prev_file_num,
-            ofec_presidential_paper_amendments_mv.mst_rct_file_num,
-            ofec_presidential_paper_amendments_mv.amendment_chain
-           FROM public.ofec_presidential_paper_amendments_mv
+         SELECT ofec_presidential_paper_amendments_vw.idx,
+            ofec_presidential_paper_amendments_vw.cmte_id,
+            ofec_presidential_paper_amendments_vw.rpt_yr,
+            ofec_presidential_paper_amendments_vw.rpt_tp,
+            ofec_presidential_paper_amendments_vw.amndt_ind,
+            ofec_presidential_paper_amendments_vw.receipt_dt,
+            ofec_presidential_paper_amendments_vw.file_num,
+            ofec_presidential_paper_amendments_vw.prev_file_num,
+            ofec_presidential_paper_amendments_vw.mst_rct_file_num,
+            ofec_presidential_paper_amendments_vw.amendment_chain
+           FROM public.ofec_presidential_paper_amendments_vw
         UNION ALL
-         SELECT ofec_house_senate_paper_amendments_mv.idx,
-            ofec_house_senate_paper_amendments_mv.cmte_id,
-            ofec_house_senate_paper_amendments_mv.rpt_yr,
-            ofec_house_senate_paper_amendments_mv.rpt_tp,
-            ofec_house_senate_paper_amendments_mv.amndt_ind,
-            ofec_house_senate_paper_amendments_mv.receipt_dt,
-            ofec_house_senate_paper_amendments_mv.file_num,
-            ofec_house_senate_paper_amendments_mv.prev_file_num,
-            ofec_house_senate_paper_amendments_mv.mst_rct_file_num,
-            ofec_house_senate_paper_amendments_mv.amendment_chain
-           FROM public.ofec_house_senate_paper_amendments_mv
+         SELECT ofec_house_senate_paper_amendments_vw.idx,
+            ofec_house_senate_paper_amendments_vw.cmte_id,
+            ofec_house_senate_paper_amendments_vw.rpt_yr,
+            ofec_house_senate_paper_amendments_vw.rpt_tp,
+            ofec_house_senate_paper_amendments_vw.amndt_ind,
+            ofec_house_senate_paper_amendments_vw.receipt_dt,
+            ofec_house_senate_paper_amendments_vw.file_num,
+            ofec_house_senate_paper_amendments_vw.prev_file_num,
+            ofec_house_senate_paper_amendments_vw.mst_rct_file_num,
+            ofec_house_senate_paper_amendments_vw.amendment_chain
+           FROM public.ofec_house_senate_paper_amendments_vw
         UNION ALL
-         SELECT ofec_pac_party_paper_amendments_mv.idx,
-            ofec_pac_party_paper_amendments_mv.cmte_id,
-            ofec_pac_party_paper_amendments_mv.rpt_yr,
-            ofec_pac_party_paper_amendments_mv.rpt_tp,
-            ofec_pac_party_paper_amendments_mv.amndt_ind,
-            ofec_pac_party_paper_amendments_mv.receipt_dt,
-            ofec_pac_party_paper_amendments_mv.file_num,
-            ofec_pac_party_paper_amendments_mv.prev_file_num,
-            ofec_pac_party_paper_amendments_mv.mst_rct_file_num,
-            ofec_pac_party_paper_amendments_mv.amendment_chain
-           FROM public.ofec_pac_party_paper_amendments_mv
+         SELECT ofec_pac_party_paper_amendments_vw.idx,
+            ofec_pac_party_paper_amendments_vw.cmte_id,
+            ofec_pac_party_paper_amendments_vw.rpt_yr,
+            ofec_pac_party_paper_amendments_vw.rpt_tp,
+            ofec_pac_party_paper_amendments_vw.amndt_ind,
+            ofec_pac_party_paper_amendments_vw.receipt_dt,
+            ofec_pac_party_paper_amendments_vw.file_num,
+            ofec_pac_party_paper_amendments_vw.prev_file_num,
+            ofec_pac_party_paper_amendments_vw.mst_rct_file_num,
+            ofec_pac_party_paper_amendments_vw.amendment_chain
+           FROM public.ofec_pac_party_paper_amendments_vw
         )
  SELECT row_number() OVER () AS idx2,
     combined.idx,
@@ -162,6 +169,10 @@ CREATE MATERIALIZED VIEW public.ofec_filings_amendments_all_mv AS
   WITH DATA;
 
 ALTER TABLE public.ofec_filings_amendments_all_mv OWNER TO fec;
+
+CREATE OR REPLACE VIEW ofec_filings_amendments_all_vw AS SELECT * FROM ofec_filings_amendments_all_mv;
+ALTER VIEW ofec_filings_amendments_all_vw OWNER TO fec;
+GRANT SELECT ON ofec_filings_amendments_all_vw TO fec_read;
 
 CREATE MATERIALIZED VIEW public.ofec_filings_mv AS
  WITH filings AS (
@@ -222,10 +233,10 @@ CREATE MATERIALIZED VIEW public.ofec_filings_mv AS
             cand.district,
             cand.party
            FROM ((((disclosure.f_rpt_or_form_sub filing_history
-             LEFT JOIN public.ofec_committee_history_mv com ON ((((filing_history.cand_cmte_id)::text = (com.committee_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = com.cycle))))
-             LEFT JOIN public.ofec_candidate_history_mv cand ON ((((filing_history.cand_cmte_id)::text = (cand.candidate_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = cand.two_year_period))))
+             LEFT JOIN public.ofec_committee_history_vw com ON ((((filing_history.cand_cmte_id)::text = (com.committee_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = com.cycle))))
+             LEFT JOIN public.ofec_candidate_history_vw cand ON ((((filing_history.cand_cmte_id)::text = (cand.candidate_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = cand.two_year_period))))
              LEFT JOIN staging.ref_rpt_tp report ON (((filing_history.rpt_tp)::text = (report.rpt_tp_cd)::text)))
-             LEFT JOIN public.ofec_filings_amendments_all_mv amendments ON ((filing_history.file_num = amendments.file_num)))
+             LEFT JOIN public.ofec_filings_amendments_all_vw amendments ON ((filing_history.file_num = amendments.file_num)))
           WHERE ((filing_history.rpt_yr >= (1979)::numeric) AND ((filing_history.form_tp)::text <> 'SL'::text))
         ), rfai_filings AS (
          SELECT cand.candidate_id,
@@ -281,8 +292,8 @@ CREATE MATERIALIZED VIEW public.ofec_filings_mv AS
             cand.district,
             cand.party
            FROM (((disclosure.nml_form_rfai filing_history
-             LEFT JOIN public.ofec_committee_history_mv com ON ((((filing_history.id)::text = (com.committee_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = com.cycle))))
-             LEFT JOIN public.ofec_candidate_history_mv cand ON ((((filing_history.id)::text = (cand.candidate_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = cand.two_year_period))))
+             LEFT JOIN public.ofec_committee_history_vw com ON ((((filing_history.id)::text = (com.committee_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = com.cycle))))
+             LEFT JOIN public.ofec_candidate_history_vw cand ON ((((filing_history.id)::text = (cand.candidate_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = cand.two_year_period))))
              LEFT JOIN staging.ref_rpt_tp report ON (((filing_history.rpt_tp)::text = (report.rpt_tp_cd)::text)))
           WHERE ((filing_history.rpt_yr >= (1979)::numeric) AND (filing_history.delete_ind IS NULL))
         ), combined AS (
@@ -452,6 +463,10 @@ CREATE MATERIALIZED VIEW public.ofec_filings_mv AS
 
 ALTER TABLE public.ofec_filings_mv OWNER TO fec;
 
+CREATE OR REPLACE VIEW ofec_filings_vw AS SELECT * FROM ofec_filings_mv;
+ALTER VIEW ofec_filings_vw OWNER TO fec;
+GRANT SELECT ON ofec_filings_vw TO fec_read;
+
 CREATE MATERIALIZED VIEW public.ofec_totals_combined_mv AS
  WITH last_subset AS (
          SELECT DISTINCT ON (v_sum_and_det_sum_report.cmte_id, (public.get_cycle(v_sum_and_det_sum_report.rpt_yr))) v_sum_and_det_sum_report.orig_sub_id,
@@ -485,7 +500,7 @@ CREATE MATERIALIZED VIEW public.ofec_totals_combined_mv AS
             of.candidate_name,
             of.committee_name
            FROM (last_subset ls
-             LEFT JOIN public.ofec_filings_mv of ON ((ls.orig_sub_id = of.sub_id)))
+             LEFT JOIN public.ofec_filings_vw of ON ((ls.orig_sub_id = of.sub_id)))
         ), first AS (
          SELECT DISTINCT ON (v_sum_and_det_sum_report.cmte_id, (public.get_cycle(v_sum_and_det_sum_report.rpt_yr))) v_sum_and_det_sum_report.coh_bop AS cash_on_hand,
             v_sum_and_det_sum_report.cmte_id AS committee_id,
@@ -607,6 +622,10 @@ CREATE MATERIALIZED VIEW public.ofec_totals_combined_mv AS
 
 ALTER TABLE public.ofec_totals_combined_mv OWNER TO fec;
 
+CREATE OR REPLACE VIEW ofec_totals_combined_vw AS SELECT * FROM ofec_totals_combined_mv;
+ALTER VIEW ofec_totals_combined_vw OWNER TO fec;
+GRANT SELECT ON ofec_totals_combined_vw TO fec_read;
+
 CREATE MATERIALIZED VIEW public.ofec_totals_house_senate_mv AS
  WITH hs_cycle AS (
          SELECT DISTINCT ON (cand_cmte_linkage.cmte_id, cand_cmte_linkage.fec_election_yr) cand_cmte_linkage.cmte_id AS committee_id,
@@ -662,109 +681,117 @@ CREATE MATERIALIZED VIEW public.ofec_totals_house_senate_mv AS
     f3.committee_type_full,
     f3.committee_designation_full,
     f3.party_full
-   FROM (public.ofec_totals_combined_mv f3
+   FROM (public.ofec_totals_combined_vw f3
      LEFT JOIN hs_cycle USING (committee_id, cycle))
   WHERE ((f3.form_type)::text = 'F3'::text)
   WITH DATA;
 
 ALTER TABLE public.ofec_totals_house_senate_mv OWNER TO fec;
 
+CREATE OR REPLACE VIEW ofec_totals_house_senate_vw AS SELECT * FROM ofec_totals_house_senate_mv;
+ALTER VIEW ofec_totals_house_senate_vw OWNER TO fec;
+GRANT SELECT ON ofec_totals_house_senate_vw TO fec_read;
+
 CREATE MATERIALIZED VIEW public.ofec_totals_presidential_mv AS
- SELECT ofec_totals_combined_mv.sub_id AS idx,
-    ofec_totals_combined_mv.committee_id,
-    ofec_totals_combined_mv.cycle,
-    ofec_totals_combined_mv.coverage_start_date,
-    ofec_totals_combined_mv.coverage_end_date,
-    ofec_totals_combined_mv.candidate_contribution,
-    ofec_totals_combined_mv.contribution_refunds,
-    ofec_totals_combined_mv.contributions,
-    ofec_totals_combined_mv.disbursements,
-    ofec_totals_combined_mv.exempt_legal_accounting_disbursement,
-    ofec_totals_combined_mv.federal_funds,
-    ofec_totals_combined_mv.federal_funds_flag,
-    ofec_totals_combined_mv.fundraising_disbursements,
-    ofec_totals_combined_mv.individual_contributions,
-    ofec_totals_combined_mv.individual_unitemized_contributions,
-    ofec_totals_combined_mv.individual_itemized_contributions,
-    ofec_totals_combined_mv.loans_received,
-    ofec_totals_combined_mv.loans_received_from_candidate,
-    ofec_totals_combined_mv.loan_repayments_made,
-    ofec_totals_combined_mv.offsets_to_fundraising_expenditures,
-    ofec_totals_combined_mv.offsets_to_legal_accounting,
-    ofec_totals_combined_mv.offsets_to_operating_expenditures,
-    ofec_totals_combined_mv.total_offsets_to_operating_expenditures,
-    ofec_totals_combined_mv.operating_expenditures,
-    ofec_totals_combined_mv.other_disbursements,
-    ofec_totals_combined_mv.other_loans_received,
-    ofec_totals_combined_mv.other_political_committee_contributions,
-    ofec_totals_combined_mv.other_receipts,
-    ofec_totals_combined_mv.political_party_committee_contributions,
-    ofec_totals_combined_mv.receipts,
-    ofec_totals_combined_mv.refunded_individual_contributions,
-    ofec_totals_combined_mv.refunded_other_political_committee_contributions,
-    ofec_totals_combined_mv.refunded_political_party_committee_contributions,
-    ofec_totals_combined_mv.loan_repayments_made AS repayments_loans_made_by_candidate,
-    ofec_totals_combined_mv.loan_repayments_other_loans,
-    ofec_totals_combined_mv.repayments_other_loans,
-    ofec_totals_combined_mv.transfers_from_affiliated_committee,
-    ofec_totals_combined_mv.transfers_to_other_authorized_committee,
-    ofec_totals_combined_mv.cash_on_hand_beginning_period AS cash_on_hand_beginning_of_period,
-    ofec_totals_combined_mv.last_debts_owed_by_committee AS debts_owed_by_cmte,
-    ofec_totals_combined_mv.last_debts_owed_to_committee AS debts_owed_to_cmte,
-    ofec_totals_combined_mv.net_contributions,
-    ofec_totals_combined_mv.net_operating_expenditures,
-    ofec_totals_combined_mv.last_report_type_full,
-    ofec_totals_combined_mv.last_beginning_image_number,
-    ofec_totals_combined_mv.cash_on_hand_beginning_period,
-    ofec_totals_combined_mv.last_cash_on_hand_end_period,
-    ofec_totals_combined_mv.last_debts_owed_by_committee,
-    ofec_totals_combined_mv.last_debts_owed_to_committee,
-    ofec_totals_combined_mv.last_net_contributions,
-    ofec_totals_combined_mv.last_net_operating_expenditures,
-    ofec_totals_combined_mv.last_report_year,
-    ofec_totals_combined_mv.committee_name,
-    ofec_totals_combined_mv.committee_type,
-    ofec_totals_combined_mv.committee_designation,
-    ofec_totals_combined_mv.committee_type_full,
-    ofec_totals_combined_mv.committee_designation_full,
-    ofec_totals_combined_mv.party_full
-   FROM public.ofec_totals_combined_mv
-  WHERE ((ofec_totals_combined_mv.form_type)::text = 'F3P'::text)
+ SELECT ofec_totals_combined_vw.sub_id AS idx,
+    ofec_totals_combined_vw.committee_id,
+    ofec_totals_combined_vw.cycle,
+    ofec_totals_combined_vw.coverage_start_date,
+    ofec_totals_combined_vw.coverage_end_date,
+    ofec_totals_combined_vw.candidate_contribution,
+    ofec_totals_combined_vw.contribution_refunds,
+    ofec_totals_combined_vw.contributions,
+    ofec_totals_combined_vw.disbursements,
+    ofec_totals_combined_vw.exempt_legal_accounting_disbursement,
+    ofec_totals_combined_vw.federal_funds,
+    ofec_totals_combined_vw.federal_funds_flag,
+    ofec_totals_combined_vw.fundraising_disbursements,
+    ofec_totals_combined_vw.individual_contributions,
+    ofec_totals_combined_vw.individual_unitemized_contributions,
+    ofec_totals_combined_vw.individual_itemized_contributions,
+    ofec_totals_combined_vw.loans_received,
+    ofec_totals_combined_vw.loans_received_from_candidate,
+    ofec_totals_combined_vw.loan_repayments_made,
+    ofec_totals_combined_vw.offsets_to_fundraising_expenditures,
+    ofec_totals_combined_vw.offsets_to_legal_accounting,
+    ofec_totals_combined_vw.offsets_to_operating_expenditures,
+    ofec_totals_combined_vw.total_offsets_to_operating_expenditures,
+    ofec_totals_combined_vw.operating_expenditures,
+    ofec_totals_combined_vw.other_disbursements,
+    ofec_totals_combined_vw.other_loans_received,
+    ofec_totals_combined_vw.other_political_committee_contributions,
+    ofec_totals_combined_vw.other_receipts,
+    ofec_totals_combined_vw.political_party_committee_contributions,
+    ofec_totals_combined_vw.receipts,
+    ofec_totals_combined_vw.refunded_individual_contributions,
+    ofec_totals_combined_vw.refunded_other_political_committee_contributions,
+    ofec_totals_combined_vw.refunded_political_party_committee_contributions,
+    ofec_totals_combined_vw.loan_repayments_made AS repayments_loans_made_by_candidate,
+    ofec_totals_combined_vw.loan_repayments_other_loans,
+    ofec_totals_combined_vw.repayments_other_loans,
+    ofec_totals_combined_vw.transfers_from_affiliated_committee,
+    ofec_totals_combined_vw.transfers_to_other_authorized_committee,
+    ofec_totals_combined_vw.cash_on_hand_beginning_period AS cash_on_hand_beginning_of_period,
+    ofec_totals_combined_vw.last_debts_owed_by_committee AS debts_owed_by_cmte,
+    ofec_totals_combined_vw.last_debts_owed_to_committee AS debts_owed_to_cmte,
+    ofec_totals_combined_vw.net_contributions,
+    ofec_totals_combined_vw.net_operating_expenditures,
+    ofec_totals_combined_vw.last_report_type_full,
+    ofec_totals_combined_vw.last_beginning_image_number,
+    ofec_totals_combined_vw.cash_on_hand_beginning_period,
+    ofec_totals_combined_vw.last_cash_on_hand_end_period,
+    ofec_totals_combined_vw.last_debts_owed_by_committee,
+    ofec_totals_combined_vw.last_debts_owed_to_committee,
+    ofec_totals_combined_vw.last_net_contributions,
+    ofec_totals_combined_vw.last_net_operating_expenditures,
+    ofec_totals_combined_vw.last_report_year,
+    ofec_totals_combined_vw.committee_name,
+    ofec_totals_combined_vw.committee_type,
+    ofec_totals_combined_vw.committee_designation,
+    ofec_totals_combined_vw.committee_type_full,
+    ofec_totals_combined_vw.committee_designation_full,
+    ofec_totals_combined_vw.party_full
+   FROM public.ofec_totals_combined_vw
+  WHERE ((ofec_totals_combined_vw.form_type)::text = 'F3P'::text)
   WITH DATA;
 
 ALTER TABLE public.ofec_totals_presidential_mv OWNER TO fec;
 
+CREATE OR REPLACE VIEW ofec_totals_presidential_vw AS SELECT * FROM ofec_totals_presidential_mv;
+ALTER VIEW ofec_totals_presidential_vw OWNER TO fec;
+GRANT SELECT ON ofec_totals_presidential_vw TO fec_read;
+
 CREATE MATERIALIZED VIEW public.ofec_candidate_totals_mv AS
  WITH totals AS (
-         SELECT ofec_totals_house_senate_mv.committee_id,
-            ofec_totals_house_senate_mv.cycle,
-            ofec_totals_house_senate_mv.receipts,
-            ofec_totals_house_senate_mv.disbursements,
-            ofec_totals_house_senate_mv.last_cash_on_hand_end_period,
-            ofec_totals_house_senate_mv.last_debts_owed_by_committee,
-            ofec_totals_house_senate_mv.coverage_start_date,
-            ofec_totals_house_senate_mv.coverage_end_date,
+         SELECT ofec_totals_house_senate_vw.committee_id,
+            ofec_totals_house_senate_vw.cycle,
+            ofec_totals_house_senate_vw.receipts,
+            ofec_totals_house_senate_vw.disbursements,
+            ofec_totals_house_senate_vw.last_cash_on_hand_end_period,
+            ofec_totals_house_senate_vw.last_debts_owed_by_committee,
+            ofec_totals_house_senate_vw.coverage_start_date,
+            ofec_totals_house_senate_vw.coverage_end_date,
             false AS federal_funds_flag
-           FROM public.ofec_totals_house_senate_mv
+           FROM public.ofec_totals_house_senate_vw
         UNION ALL
-         SELECT ofec_totals_presidential_mv.committee_id,
-            ofec_totals_presidential_mv.cycle,
-            ofec_totals_presidential_mv.receipts,
-            ofec_totals_presidential_mv.disbursements,
-            ofec_totals_presidential_mv.last_cash_on_hand_end_period,
-            ofec_totals_presidential_mv.last_debts_owed_by_committee,
-            ofec_totals_presidential_mv.coverage_start_date,
-            ofec_totals_presidential_mv.coverage_end_date,
-            ofec_totals_presidential_mv.federal_funds_flag
-           FROM public.ofec_totals_presidential_mv
+         SELECT ofec_totals_presidential_vw.committee_id,
+            ofec_totals_presidential_vw.cycle,
+            ofec_totals_presidential_vw.receipts,
+            ofec_totals_presidential_vw.disbursements,
+            ofec_totals_presidential_vw.last_cash_on_hand_end_period,
+            ofec_totals_presidential_vw.last_debts_owed_by_committee,
+            ofec_totals_presidential_vw.coverage_start_date,
+            ofec_totals_presidential_vw.coverage_end_date,
+            ofec_totals_presidential_vw.federal_funds_flag
+           FROM public.ofec_totals_presidential_vw
         ), link AS (
-         SELECT DISTINCT ofec_cand_cmte_linkage_mv.cand_id,
-            (ofec_cand_cmte_linkage_mv.cand_election_yr + (ofec_cand_cmte_linkage_mv.cand_election_yr % (2)::numeric)) AS rounded_election_yr,
-            ofec_cand_cmte_linkage_mv.fec_election_yr,
-            ofec_cand_cmte_linkage_mv.cmte_id,
-            ofec_cand_cmte_linkage_mv.cmte_dsgn
-           FROM public.ofec_cand_cmte_linkage_mv
-          WHERE ((ofec_cand_cmte_linkage_mv.cmte_dsgn)::text = ANY ((ARRAY['P'::character varying, 'A'::character varying])::text[]))
+         SELECT DISTINCT ofec_cand_cmte_linkage_vw.cand_id,
+            (ofec_cand_cmte_linkage_vw.cand_election_yr + (ofec_cand_cmte_linkage_vw.cand_election_yr % (2)::numeric)) AS rounded_election_yr,
+            ofec_cand_cmte_linkage_vw.fec_election_yr,
+            ofec_cand_cmte_linkage_vw.cmte_id,
+            ofec_cand_cmte_linkage_vw.cmte_dsgn
+           FROM public.ofec_cand_cmte_linkage_vw
+          WHERE ((ofec_cand_cmte_linkage_vw.cmte_dsgn)::text = ANY ((ARRAY['P'::character varying, 'A'::character varying])::text[]))
         ), cycle_totals AS (
          SELECT DISTINCT ON (link.cand_id, totals_1.cycle) link.cand_id AS candidate_id,
             max(link.rounded_election_yr) AS election_year,
@@ -860,23 +887,31 @@ CREATE MATERIALIZED VIEW public.ofec_candidate_totals_mv AS
     totals.coverage_start_date,
     totals.coverage_end_date,
     COALESCE(totals.federal_funds_flag, false) AS federal_funds_flag
-   FROM (public.ofec_candidate_history_with_future_election_mv cand
+   FROM (public.ofec_candidate_history_with_future_election_vw cand
      LEFT JOIN combined_totals totals ON ((((cand.candidate_id)::text = (totals.candidate_id)::text) AND (cand.two_year_period = totals.cycle))))
   WITH DATA;
 
 ALTER TABLE public.ofec_candidate_totals_mv OWNER TO fec;
 
+CREATE OR REPLACE VIEW ofec_candidate_totals_vw AS SELECT * FROM ofec_candidate_totals_mv;
+ALTER VIEW ofec_candidate_totals_vw OWNER TO fec;
+GRANT SELECT ON ofec_candidate_totals_vw TO fec_read;
+
 CREATE MATERIALIZED VIEW public.ofec_candidate_flag_mv AS
  SELECT row_number() OVER () AS idx,
-    ofec_candidate_history_mv.candidate_id,
+    ofec_candidate_history_vw.candidate_id,
     (array_agg(oct.has_raised_funds) @> ARRAY[true]) AS has_raised_funds,
     (array_agg(oct.federal_funds_flag) @> ARRAY[true]) AS federal_funds_flag
-   FROM (public.ofec_candidate_history_mv
-     LEFT JOIN public.ofec_candidate_totals_mv oct USING (candidate_id))
-  GROUP BY ofec_candidate_history_mv.candidate_id
+   FROM (public.ofec_candidate_history_vw
+     LEFT JOIN public.ofec_candidate_totals_vw oct USING (candidate_id))
+  GROUP BY ofec_candidate_history_vw.candidate_id
   WITH DATA;
 
 ALTER TABLE public.ofec_candidate_flag_mv OWNER TO fec;
+
+CREATE OR REPLACE VIEW ofec_candidate_flag_vw AS SELECT * FROM ofec_candidate_flag_mv;
+ALTER VIEW ofec_candidate_flag_vw OWNER TO fec;
+GRANT SELECT ON ofec_candidate_flag_vw TO fec_read;
 
 CREATE MATERIALIZED VIEW public.ofec_candidate_fulltext_mv AS
  WITH nicknames AS (
@@ -889,27 +924,31 @@ CREATE MATERIALIZED VIEW public.ofec_candidate_fulltext_mv AS
             sum(totals_1.receipts) AS receipts,
             sum(totals_1.disbursements) AS disbursements
            FROM (disclosure.cand_cmte_linkage link
-             JOIN public.ofec_totals_combined_mv totals_1 ON ((((link.cmte_id)::text = (totals_1.committee_id)::text) AND (link.fec_election_yr = (totals_1.cycle)::numeric))))
+             JOIN public.ofec_totals_combined_vw totals_1 ON ((((link.cmte_id)::text = (totals_1.committee_id)::text) AND (link.fec_election_yr = (totals_1.cycle)::numeric))))
           WHERE (((link.cmte_dsgn)::text = ANY (ARRAY[('P'::character varying)::text, ('A'::character varying)::text])) AND ((substr((link.cand_id)::text, 1, 1) = (link.cmte_tp)::text) OR ((link.cmte_tp)::text <> ALL (ARRAY[('P'::character varying)::text, ('S'::character varying)::text, ('H'::character varying)::text]))))
           GROUP BY link.cand_id
         )
  SELECT DISTINCT ON (candidate_id) row_number() OVER () AS idx,
     candidate_id AS id,
-    ofec_candidate_detail_mv.name,
-    ofec_candidate_detail_mv.office AS office_sought,
+    ofec_candidate_detail_vw.name,
+    ofec_candidate_detail_vw.office AS office_sought,
         CASE
-            WHEN (ofec_candidate_detail_mv.name IS NOT NULL) THEN ((setweight(to_tsvector((ofec_candidate_detail_mv.name)::text), 'A'::"char") || setweight(to_tsvector(COALESCE(nicknames.nicknames, ''::text)), 'A'::"char")) || setweight(to_tsvector((candidate_id)::text), 'B'::"char"))
+            WHEN (ofec_candidate_detail_vw.name IS NOT NULL) THEN ((setweight(to_tsvector((ofec_candidate_detail_vw.name)::text), 'A'::"char") || setweight(to_tsvector(COALESCE(nicknames.nicknames, ''::text)), 'A'::"char")) || setweight(to_tsvector((candidate_id)::text), 'B'::"char"))
             ELSE NULL::tsvector
         END AS fulltxt,
     COALESCE(totals.receipts, (0)::numeric) AS receipts,
     COALESCE(totals.disbursements, (0)::numeric) AS disbursements,
     (COALESCE(totals.receipts, (0)::numeric) + COALESCE(totals.disbursements, (0)::numeric)) AS total_activity
-   FROM ((public.ofec_candidate_detail_mv
+   FROM ((public.ofec_candidate_detail_vw
      LEFT JOIN nicknames USING (candidate_id))
      LEFT JOIN totals USING (candidate_id))
   WITH DATA;
 
 ALTER TABLE public.ofec_candidate_fulltext_mv OWNER TO fec;
+
+CREATE OR REPLACE VIEW ofec_candidate_fulltext_vw AS SELECT * FROM ofec_candidate_fulltext_mv;
+ALTER VIEW ofec_candidate_fulltext_vw OWNER TO fec;
+GRANT SELECT ON ofec_candidate_fulltext_vw TO fec_read;
 
 CREATE MATERIALIZED VIEW public.ofec_committee_fulltext_mv AS
  WITH pacronyms AS (
@@ -918,12 +957,12 @@ CREATE MATERIALIZED VIEW public.ofec_committee_fulltext_mv AS
            FROM public.ofec_pacronyms
           GROUP BY ofec_pacronyms."ID NUMBER"
         ), totals AS (
-         SELECT ofec_totals_combined_mv.committee_id,
-            sum(ofec_totals_combined_mv.receipts) AS receipts,
-            sum(ofec_totals_combined_mv.disbursements) AS disbursements,
-            sum(ofec_totals_combined_mv.independent_expenditures) AS independent_expenditures
-           FROM public.ofec_totals_combined_mv
-          GROUP BY ofec_totals_combined_mv.committee_id
+         SELECT ofec_totals_combined_vw.committee_id,
+            sum(ofec_totals_combined_vw.receipts) AS receipts,
+            sum(ofec_totals_combined_vw.disbursements) AS disbursements,
+            sum(ofec_totals_combined_vw.independent_expenditures) AS independent_expenditures
+           FROM public.ofec_totals_combined_vw
+          GROUP BY ofec_totals_combined_vw.committee_id
         )
  SELECT DISTINCT ON (committee_id) row_number() OVER () AS idx,
     committee_id AS id,
@@ -936,12 +975,16 @@ CREATE MATERIALIZED VIEW public.ofec_committee_fulltext_mv AS
     COALESCE(totals.disbursements, (0)::numeric) AS disbursements,
     COALESCE(totals.independent_expenditures, (0)::numeric) AS independent_expenditures,
     ((COALESCE(totals.receipts, (0)::numeric) + COALESCE(totals.disbursements, (0)::numeric)) + COALESCE(totals.independent_expenditures, (0)::numeric)) AS total_activity
-   FROM ((public.ofec_committee_detail_mv cd
+   FROM ((public.ofec_committee_detail_vw cd
      LEFT JOIN pacronyms pac USING (committee_id))
      LEFT JOIN totals USING (committee_id))
   WITH DATA;
 
 ALTER TABLE public.ofec_committee_fulltext_mv OWNER TO fec;
+
+CREATE OR REPLACE VIEW ofec_committee_fulltext_vw AS SELECT * FROM ofec_committee_fulltext_mv;
+ALTER VIEW ofec_committee_fulltext_vw OWNER TO fec;
+GRANT SELECT ON ofec_committee_fulltext_vw TO fec_read;
 
 CREATE MATERIALIZED VIEW public.ofec_totals_pacs_parties_mv AS
  SELECT oft.sub_id AS idx,
@@ -1007,82 +1050,90 @@ CREATE MATERIALIZED VIEW public.ofec_totals_pacs_parties_mv AS
     oft.committee_designation_full,
     oft.party_full,
     comm_dets.designation
-   FROM (public.ofec_totals_combined_mv oft
-     JOIN public.ofec_committee_detail_mv comm_dets USING (committee_id))
+   FROM (public.ofec_totals_combined_vw oft
+     JOIN public.ofec_committee_detail_vw comm_dets USING (committee_id))
   WHERE ((oft.form_type)::text = 'F3X'::text)
   WITH DATA;
 
 ALTER TABLE public.ofec_totals_pacs_parties_mv OWNER TO fec;
 
+CREATE OR REPLACE VIEW ofec_totals_pacs_parties_vw AS SELECT * FROM ofec_totals_pacs_parties_mv;
+ALTER VIEW ofec_totals_pacs_parties_vw OWNER TO fec;
+GRANT SELECT ON ofec_totals_pacs_parties_vw TO fec_read;
+
 CREATE MATERIALIZED VIEW public.ofec_totals_pacs_mv AS
- SELECT ofec_totals_pacs_parties_mv.idx,
-    ofec_totals_pacs_parties_mv.committee_id,
-    ofec_totals_pacs_parties_mv.committee_name,
-    ofec_totals_pacs_parties_mv.cycle,
-    ofec_totals_pacs_parties_mv.coverage_start_date,
-    ofec_totals_pacs_parties_mv.coverage_end_date,
-    ofec_totals_pacs_parties_mv.all_loans_received,
-    ofec_totals_pacs_parties_mv.allocated_federal_election_levin_share,
-    ofec_totals_pacs_parties_mv.contribution_refunds,
-    ofec_totals_pacs_parties_mv.contributions,
-    ofec_totals_pacs_parties_mv.coordinated_expenditures_by_party_committee,
-    ofec_totals_pacs_parties_mv.disbursements,
-    ofec_totals_pacs_parties_mv.fed_candidate_committee_contributions,
-    ofec_totals_pacs_parties_mv.fed_candidate_contribution_refunds,
-    ofec_totals_pacs_parties_mv.fed_disbursements,
-    ofec_totals_pacs_parties_mv.fed_election_activity,
-    ofec_totals_pacs_parties_mv.fed_receipts,
-    ofec_totals_pacs_parties_mv.independent_expenditures,
-    ofec_totals_pacs_parties_mv.refunded_individual_contributions,
-    ofec_totals_pacs_parties_mv.individual_itemized_contributions,
-    ofec_totals_pacs_parties_mv.individual_unitemized_contributions,
-    ofec_totals_pacs_parties_mv.individual_contributions,
-    ofec_totals_pacs_parties_mv.loan_repayments_made,
-    ofec_totals_pacs_parties_mv.loan_repayments_other_loans,
-    ofec_totals_pacs_parties_mv.loan_repayments_received,
-    ofec_totals_pacs_parties_mv.loans_made,
-    ofec_totals_pacs_parties_mv.transfers_to_other_authorized_committee,
-    ofec_totals_pacs_parties_mv.net_operating_expenditures,
-    ofec_totals_pacs_parties_mv.non_allocated_fed_election_activity,
-    ofec_totals_pacs_parties_mv.total_transfers,
-    ofec_totals_pacs_parties_mv.offsets_to_operating_expenditures,
-    ofec_totals_pacs_parties_mv.operating_expenditures,
-    ofec_totals_pacs_parties_mv.fed_operating_expenditures,
-    ofec_totals_pacs_parties_mv.other_disbursements,
-    ofec_totals_pacs_parties_mv.other_fed_operating_expenditures,
-    ofec_totals_pacs_parties_mv.other_fed_receipts,
-    ofec_totals_pacs_parties_mv.other_political_committee_contributions,
-    ofec_totals_pacs_parties_mv.refunded_other_political_committee_contributions,
-    ofec_totals_pacs_parties_mv.political_party_committee_contributions,
-    ofec_totals_pacs_parties_mv.refunded_political_party_committee_contributions,
-    ofec_totals_pacs_parties_mv.receipts,
-    ofec_totals_pacs_parties_mv.shared_fed_activity,
-    ofec_totals_pacs_parties_mv.shared_fed_activity_nonfed,
-    ofec_totals_pacs_parties_mv.shared_fed_operating_expenditures,
-    ofec_totals_pacs_parties_mv.shared_nonfed_operating_expenditures,
-    ofec_totals_pacs_parties_mv.transfers_from_affiliated_party,
-    ofec_totals_pacs_parties_mv.transfers_from_nonfed_account,
-    ofec_totals_pacs_parties_mv.transfers_from_nonfed_levin,
-    ofec_totals_pacs_parties_mv.transfers_to_affiliated_committee,
-    ofec_totals_pacs_parties_mv.net_contributions,
-    ofec_totals_pacs_parties_mv.last_report_type_full,
-    ofec_totals_pacs_parties_mv.last_beginning_image_number,
-    ofec_totals_pacs_parties_mv.last_cash_on_hand_end_period,
-    ofec_totals_pacs_parties_mv.cash_on_hand_beginning_period,
-    ofec_totals_pacs_parties_mv.last_debts_owed_by_committee,
-    ofec_totals_pacs_parties_mv.last_debts_owed_to_committee,
-    ofec_totals_pacs_parties_mv.last_report_year,
-    ofec_totals_pacs_parties_mv.committee_type,
-    ofec_totals_pacs_parties_mv.committee_designation,
-    ofec_totals_pacs_parties_mv.committee_type_full,
-    ofec_totals_pacs_parties_mv.committee_designation_full,
-    ofec_totals_pacs_parties_mv.party_full,
-    ofec_totals_pacs_parties_mv.designation
-   FROM public.ofec_totals_pacs_parties_mv
-  WHERE ((ofec_totals_pacs_parties_mv.committee_type = 'N'::text) OR (ofec_totals_pacs_parties_mv.committee_type = 'Q'::text) OR (ofec_totals_pacs_parties_mv.committee_type = 'O'::text) OR (ofec_totals_pacs_parties_mv.committee_type = 'V'::text) OR (ofec_totals_pacs_parties_mv.committee_type = 'W'::text))
+ SELECT ofec_totals_pacs_parties_vw.idx,
+    ofec_totals_pacs_parties_vw.committee_id,
+    ofec_totals_pacs_parties_vw.committee_name,
+    ofec_totals_pacs_parties_vw.cycle,
+    ofec_totals_pacs_parties_vw.coverage_start_date,
+    ofec_totals_pacs_parties_vw.coverage_end_date,
+    ofec_totals_pacs_parties_vw.all_loans_received,
+    ofec_totals_pacs_parties_vw.allocated_federal_election_levin_share,
+    ofec_totals_pacs_parties_vw.contribution_refunds,
+    ofec_totals_pacs_parties_vw.contributions,
+    ofec_totals_pacs_parties_vw.coordinated_expenditures_by_party_committee,
+    ofec_totals_pacs_parties_vw.disbursements,
+    ofec_totals_pacs_parties_vw.fed_candidate_committee_contributions,
+    ofec_totals_pacs_parties_vw.fed_candidate_contribution_refunds,
+    ofec_totals_pacs_parties_vw.fed_disbursements,
+    ofec_totals_pacs_parties_vw.fed_election_activity,
+    ofec_totals_pacs_parties_vw.fed_receipts,
+    ofec_totals_pacs_parties_vw.independent_expenditures,
+    ofec_totals_pacs_parties_vw.refunded_individual_contributions,
+    ofec_totals_pacs_parties_vw.individual_itemized_contributions,
+    ofec_totals_pacs_parties_vw.individual_unitemized_contributions,
+    ofec_totals_pacs_parties_vw.individual_contributions,
+    ofec_totals_pacs_parties_vw.loan_repayments_made,
+    ofec_totals_pacs_parties_vw.loan_repayments_other_loans,
+    ofec_totals_pacs_parties_vw.loan_repayments_received,
+    ofec_totals_pacs_parties_vw.loans_made,
+    ofec_totals_pacs_parties_vw.transfers_to_other_authorized_committee,
+    ofec_totals_pacs_parties_vw.net_operating_expenditures,
+    ofec_totals_pacs_parties_vw.non_allocated_fed_election_activity,
+    ofec_totals_pacs_parties_vw.total_transfers,
+    ofec_totals_pacs_parties_vw.offsets_to_operating_expenditures,
+    ofec_totals_pacs_parties_vw.operating_expenditures,
+    ofec_totals_pacs_parties_vw.fed_operating_expenditures,
+    ofec_totals_pacs_parties_vw.other_disbursements,
+    ofec_totals_pacs_parties_vw.other_fed_operating_expenditures,
+    ofec_totals_pacs_parties_vw.other_fed_receipts,
+    ofec_totals_pacs_parties_vw.other_political_committee_contributions,
+    ofec_totals_pacs_parties_vw.refunded_other_political_committee_contributions,
+    ofec_totals_pacs_parties_vw.political_party_committee_contributions,
+    ofec_totals_pacs_parties_vw.refunded_political_party_committee_contributions,
+    ofec_totals_pacs_parties_vw.receipts,
+    ofec_totals_pacs_parties_vw.shared_fed_activity,
+    ofec_totals_pacs_parties_vw.shared_fed_activity_nonfed,
+    ofec_totals_pacs_parties_vw.shared_fed_operating_expenditures,
+    ofec_totals_pacs_parties_vw.shared_nonfed_operating_expenditures,
+    ofec_totals_pacs_parties_vw.transfers_from_affiliated_party,
+    ofec_totals_pacs_parties_vw.transfers_from_nonfed_account,
+    ofec_totals_pacs_parties_vw.transfers_from_nonfed_levin,
+    ofec_totals_pacs_parties_vw.transfers_to_affiliated_committee,
+    ofec_totals_pacs_parties_vw.net_contributions,
+    ofec_totals_pacs_parties_vw.last_report_type_full,
+    ofec_totals_pacs_parties_vw.last_beginning_image_number,
+    ofec_totals_pacs_parties_vw.last_cash_on_hand_end_period,
+    ofec_totals_pacs_parties_vw.cash_on_hand_beginning_period,
+    ofec_totals_pacs_parties_vw.last_debts_owed_by_committee,
+    ofec_totals_pacs_parties_vw.last_debts_owed_to_committee,
+    ofec_totals_pacs_parties_vw.last_report_year,
+    ofec_totals_pacs_parties_vw.committee_type,
+    ofec_totals_pacs_parties_vw.committee_designation,
+    ofec_totals_pacs_parties_vw.committee_type_full,
+    ofec_totals_pacs_parties_vw.committee_designation_full,
+    ofec_totals_pacs_parties_vw.party_full,
+    ofec_totals_pacs_parties_vw.designation
+   FROM public.ofec_totals_pacs_parties_vw
+  WHERE ((ofec_totals_pacs_parties_vw.committee_type = 'N'::text) OR (ofec_totals_pacs_parties_vw.committee_type = 'Q'::text) OR (ofec_totals_pacs_parties_vw.committee_type = 'O'::text) OR (ofec_totals_pacs_parties_vw.committee_type = 'V'::text) OR (ofec_totals_pacs_parties_vw.committee_type = 'W'::text))
   WITH DATA;
 
 ALTER TABLE public.ofec_totals_pacs_mv OWNER TO fec;
+
+CREATE OR REPLACE VIEW ofec_totals_pacs_vw AS SELECT * FROM ofec_totals_pacs_mv;
+ALTER VIEW ofec_totals_pacs_vw OWNER TO fec;
+GRANT SELECT ON ofec_totals_pacs_vw TO fec_read;
 
 CREATE MATERIALIZED VIEW public.ofec_totals_parties_mv AS
  SELECT pp.idx,
@@ -1148,40 +1199,44 @@ CREATE MATERIALIZED VIEW public.ofec_totals_parties_mv AS
     pp.committee_designation_full,
     pp.party_full,
     pp.designation
-   FROM public.ofec_totals_pacs_parties_mv pp
+   FROM public.ofec_totals_pacs_parties_vw pp
   WHERE ((pp.committee_type = 'X'::text) OR (pp.committee_type = 'Y'::text))
   WITH DATA;
 
 ALTER TABLE public.ofec_totals_parties_mv OWNER TO fec;
 
+CREATE OR REPLACE VIEW ofec_totals_parties_vw AS SELECT * FROM ofec_totals_parties_mv;
+ALTER VIEW ofec_totals_parties_vw OWNER TO fec;
+GRANT SELECT ON ofec_totals_parties_vw TO fec_read;
+
 CREATE MATERIALIZED VIEW public.ofec_entity_chart_mv AS
  WITH cand_totals AS (
          SELECT 'candidate'::text AS type,
-            date_part('month'::text, ofec_totals_house_senate_mv.coverage_end_date) AS month,
-            date_part('year'::text, ofec_totals_house_senate_mv.coverage_end_date) AS year,
-            sum((COALESCE(ofec_totals_house_senate_mv.receipts, (0)::numeric) - ((((COALESCE(ofec_totals_house_senate_mv.political_party_committee_contributions, (0)::numeric) + COALESCE(ofec_totals_house_senate_mv.other_political_committee_contributions, (0)::numeric)) + COALESCE(ofec_totals_house_senate_mv.offsets_to_operating_expenditures, (0)::numeric)) + COALESCE(ofec_totals_house_senate_mv.loan_repayments, (0)::numeric)) + COALESCE(ofec_totals_house_senate_mv.contribution_refunds, (0)::numeric)))) AS candidate_adjusted_total_receipts,
-            sum((COALESCE(ofec_totals_house_senate_mv.disbursements, (0)::numeric) - (((COALESCE(ofec_totals_house_senate_mv.transfers_to_other_authorized_committee, (0)::numeric) + COALESCE(ofec_totals_house_senate_mv.loan_repayments, (0)::numeric)) + COALESCE(ofec_totals_house_senate_mv.contribution_refunds, (0)::numeric)) + COALESCE(ofec_totals_house_senate_mv.other_disbursements, (0)::numeric)))) AS candidate_adjusted_total_disbursements
-           FROM public.ofec_totals_house_senate_mv
-          WHERE (ofec_totals_house_senate_mv.cycle >= 2008)
-          GROUP BY (date_part('month'::text, ofec_totals_house_senate_mv.coverage_end_date)), (date_part('year'::text, ofec_totals_house_senate_mv.coverage_end_date))
+            date_part('month'::text, ofec_totals_house_senate_vw.coverage_end_date) AS month,
+            date_part('year'::text, ofec_totals_house_senate_vw.coverage_end_date) AS year,
+            sum((COALESCE(ofec_totals_house_senate_vw.receipts, (0)::numeric) - ((((COALESCE(ofec_totals_house_senate_vw.political_party_committee_contributions, (0)::numeric) + COALESCE(ofec_totals_house_senate_vw.other_political_committee_contributions, (0)::numeric)) + COALESCE(ofec_totals_house_senate_vw.offsets_to_operating_expenditures, (0)::numeric)) + COALESCE(ofec_totals_house_senate_vw.loan_repayments, (0)::numeric)) + COALESCE(ofec_totals_house_senate_vw.contribution_refunds, (0)::numeric)))) AS candidate_adjusted_total_receipts,
+            sum((COALESCE(ofec_totals_house_senate_vw.disbursements, (0)::numeric) - (((COALESCE(ofec_totals_house_senate_vw.transfers_to_other_authorized_committee, (0)::numeric) + COALESCE(ofec_totals_house_senate_vw.loan_repayments, (0)::numeric)) + COALESCE(ofec_totals_house_senate_vw.contribution_refunds, (0)::numeric)) + COALESCE(ofec_totals_house_senate_vw.other_disbursements, (0)::numeric)))) AS candidate_adjusted_total_disbursements
+           FROM public.ofec_totals_house_senate_vw
+          WHERE (ofec_totals_house_senate_vw.cycle >= 2008)
+          GROUP BY (date_part('month'::text, ofec_totals_house_senate_vw.coverage_end_date)), (date_part('year'::text, ofec_totals_house_senate_vw.coverage_end_date))
         ), pac_totals AS (
          SELECT 'pac'::text AS type,
-            date_part('month'::text, ofec_totals_pacs_mv.coverage_end_date) AS month,
-            date_part('year'::text, ofec_totals_pacs_mv.coverage_end_date) AS year,
-            sum((COALESCE(ofec_totals_pacs_mv.receipts, (0)::numeric) - ((((((COALESCE(ofec_totals_pacs_mv.political_party_committee_contributions, (0)::numeric) + COALESCE(ofec_totals_pacs_mv.other_political_committee_contributions, (0)::numeric)) + COALESCE(ofec_totals_pacs_mv.offsets_to_operating_expenditures, (0)::numeric)) + COALESCE(ofec_totals_pacs_mv.fed_candidate_contribution_refunds, (0)::numeric)) + COALESCE(ofec_totals_pacs_mv.transfers_from_nonfed_account, (0)::numeric)) + COALESCE(ofec_totals_pacs_mv.loan_repayments_other_loans, (0)::numeric)) + COALESCE(ofec_totals_pacs_mv.contribution_refunds, (0)::numeric)))) AS pac_adjusted_total_receipts,
-            sum((COALESCE(ofec_totals_pacs_mv.disbursements, (0)::numeric) - (((((COALESCE(ofec_totals_pacs_mv.shared_nonfed_operating_expenditures, (0)::numeric) + COALESCE(ofec_totals_pacs_mv.transfers_to_affiliated_committee, (0)::numeric)) + COALESCE(ofec_totals_pacs_mv.fed_candidate_committee_contributions, (0)::numeric)) + COALESCE(ofec_totals_pacs_mv.loan_repayments_other_loans, (0)::numeric)) + COALESCE(ofec_totals_pacs_mv.contribution_refunds, (0)::numeric)) + COALESCE(ofec_totals_pacs_mv.other_disbursements, (0)::numeric)))) AS pac_adjusted_total_disbursements
-           FROM public.ofec_totals_pacs_mv
-          WHERE ((ofec_totals_pacs_mv.committee_type = ANY (ARRAY['N'::text, 'Q'::text, 'O'::text, 'V'::text, 'W'::text])) AND ((ofec_totals_pacs_mv.designation)::text <> 'J'::text) AND (ofec_totals_pacs_mv.cycle >= 2008))
-          GROUP BY (date_part('month'::text, ofec_totals_pacs_mv.coverage_end_date)), (date_part('year'::text, ofec_totals_pacs_mv.coverage_end_date))
+            date_part('month'::text, ofec_totals_pacs_vw.coverage_end_date) AS month,
+            date_part('year'::text, ofec_totals_pacs_vw.coverage_end_date) AS year,
+            sum((COALESCE(ofec_totals_pacs_vw.receipts, (0)::numeric) - ((((((COALESCE(ofec_totals_pacs_vw.political_party_committee_contributions, (0)::numeric) + COALESCE(ofec_totals_pacs_vw.other_political_committee_contributions, (0)::numeric)) + COALESCE(ofec_totals_pacs_vw.offsets_to_operating_expenditures, (0)::numeric)) + COALESCE(ofec_totals_pacs_vw.fed_candidate_contribution_refunds, (0)::numeric)) + COALESCE(ofec_totals_pacs_vw.transfers_from_nonfed_account, (0)::numeric)) + COALESCE(ofec_totals_pacs_vw.loan_repayments_other_loans, (0)::numeric)) + COALESCE(ofec_totals_pacs_vw.contribution_refunds, (0)::numeric)))) AS pac_adjusted_total_receipts,
+            sum((COALESCE(ofec_totals_pacs_vw.disbursements, (0)::numeric) - (((((COALESCE(ofec_totals_pacs_vw.shared_nonfed_operating_expenditures, (0)::numeric) + COALESCE(ofec_totals_pacs_vw.transfers_to_affiliated_committee, (0)::numeric)) + COALESCE(ofec_totals_pacs_vw.fed_candidate_committee_contributions, (0)::numeric)) + COALESCE(ofec_totals_pacs_vw.loan_repayments_other_loans, (0)::numeric)) + COALESCE(ofec_totals_pacs_vw.contribution_refunds, (0)::numeric)) + COALESCE(ofec_totals_pacs_vw.other_disbursements, (0)::numeric)))) AS pac_adjusted_total_disbursements
+           FROM public.ofec_totals_pacs_vw
+          WHERE ((ofec_totals_pacs_vw.committee_type = ANY (ARRAY['N'::text, 'Q'::text, 'O'::text, 'V'::text, 'W'::text])) AND ((ofec_totals_pacs_vw.designation)::text <> 'J'::text) AND (ofec_totals_pacs_vw.cycle >= 2008))
+          GROUP BY (date_part('month'::text, ofec_totals_pacs_vw.coverage_end_date)), (date_part('year'::text, ofec_totals_pacs_vw.coverage_end_date))
         ), party_totals AS (
          SELECT 'party'::text AS type,
-            date_part('month'::text, ofec_totals_parties_mv.coverage_end_date) AS month,
-            date_part('year'::text, ofec_totals_parties_mv.coverage_end_date) AS year,
-            sum((COALESCE(ofec_totals_parties_mv.receipts, (0)::numeric) - ((((((COALESCE(ofec_totals_parties_mv.political_party_committee_contributions, (0)::numeric) + COALESCE(ofec_totals_parties_mv.other_political_committee_contributions, (0)::numeric)) + COALESCE(ofec_totals_parties_mv.offsets_to_operating_expenditures, (0)::numeric)) + COALESCE(ofec_totals_parties_mv.fed_candidate_contribution_refunds, (0)::numeric)) + COALESCE(ofec_totals_parties_mv.transfers_from_nonfed_account, (0)::numeric)) + COALESCE(ofec_totals_parties_mv.loan_repayments_other_loans, (0)::numeric)) + COALESCE(ofec_totals_parties_mv.contribution_refunds, (0)::numeric)))) AS party_adjusted_total_receipts,
-            sum((COALESCE(ofec_totals_parties_mv.disbursements, (0)::numeric) - (((((COALESCE(ofec_totals_parties_mv.shared_nonfed_operating_expenditures, (0)::numeric) + COALESCE(ofec_totals_parties_mv.transfers_to_other_authorized_committee, (0)::numeric)) + COALESCE(ofec_totals_parties_mv.fed_candidate_committee_contributions, (0)::numeric)) + COALESCE(ofec_totals_parties_mv.loan_repayments_other_loans, (0)::numeric)) + COALESCE(ofec_totals_parties_mv.contribution_refunds, (0)::numeric)) + COALESCE(ofec_totals_parties_mv.other_disbursements, (0)::numeric)))) AS party_adjusted_total_disbursements
-           FROM public.ofec_totals_parties_mv
-          WHERE ((ofec_totals_parties_mv.committee_type = ANY (ARRAY['X'::text, 'Y'::text])) AND ((ofec_totals_parties_mv.designation)::text <> 'J'::text) AND ((ofec_totals_parties_mv.committee_id)::text <> ALL (ARRAY[('C00578419'::character varying)::text, ('C00485110'::character varying)::text, ('C00422048'::character varying)::text, ('C00567057'::character varying)::text, ('C00483586'::character varying)::text, ('C00431791'::character varying)::text, ('C00571133'::character varying)::text, ('C00500405'::character varying)::text, ('C00435560'::character varying)::text, ('C00572958'::character varying)::text, ('C00493254'::character varying)::text, ('C00496570'::character varying)::text, ('C00431593'::character varying)::text])) AND (ofec_totals_parties_mv.cycle >= 2008))
-          GROUP BY (date_part('month'::text, ofec_totals_parties_mv.coverage_end_date)), (date_part('year'::text, ofec_totals_parties_mv.coverage_end_date))
+            date_part('month'::text, ofec_totals_parties_vw.coverage_end_date) AS month,
+            date_part('year'::text, ofec_totals_parties_vw.coverage_end_date) AS year,
+            sum((COALESCE(ofec_totals_parties_vw.receipts, (0)::numeric) - ((((((COALESCE(ofec_totals_parties_vw.political_party_committee_contributions, (0)::numeric) + COALESCE(ofec_totals_parties_vw.other_political_committee_contributions, (0)::numeric)) + COALESCE(ofec_totals_parties_vw.offsets_to_operating_expenditures, (0)::numeric)) + COALESCE(ofec_totals_parties_vw.fed_candidate_contribution_refunds, (0)::numeric)) + COALESCE(ofec_totals_parties_vw.transfers_from_nonfed_account, (0)::numeric)) + COALESCE(ofec_totals_parties_vw.loan_repayments_other_loans, (0)::numeric)) + COALESCE(ofec_totals_parties_vw.contribution_refunds, (0)::numeric)))) AS party_adjusted_total_receipts,
+            sum((COALESCE(ofec_totals_parties_vw.disbursements, (0)::numeric) - (((((COALESCE(ofec_totals_parties_vw.shared_nonfed_operating_expenditures, (0)::numeric) + COALESCE(ofec_totals_parties_vw.transfers_to_other_authorized_committee, (0)::numeric)) + COALESCE(ofec_totals_parties_vw.fed_candidate_committee_contributions, (0)::numeric)) + COALESCE(ofec_totals_parties_vw.loan_repayments_other_loans, (0)::numeric)) + COALESCE(ofec_totals_parties_vw.contribution_refunds, (0)::numeric)) + COALESCE(ofec_totals_parties_vw.other_disbursements, (0)::numeric)))) AS party_adjusted_total_disbursements
+           FROM public.ofec_totals_parties_vw
+          WHERE ((ofec_totals_parties_vw.committee_type = ANY (ARRAY['X'::text, 'Y'::text])) AND ((ofec_totals_parties_vw.designation)::text <> 'J'::text) AND ((ofec_totals_parties_vw.committee_id)::text <> ALL (ARRAY[('C00578419'::character varying)::text, ('C00485110'::character varying)::text, ('C00422048'::character varying)::text, ('C00567057'::character varying)::text, ('C00483586'::character varying)::text, ('C00431791'::character varying)::text, ('C00571133'::character varying)::text, ('C00500405'::character varying)::text, ('C00435560'::character varying)::text, ('C00572958'::character varying)::text, ('C00493254'::character varying)::text, ('C00496570'::character varying)::text, ('C00431593'::character varying)::text])) AND (ofec_totals_parties_vw.cycle >= 2008))
+          GROUP BY (date_part('month'::text, ofec_totals_parties_vw.coverage_end_date)), (date_part('year'::text, ofec_totals_parties_vw.coverage_end_date))
         ), combined AS (
          SELECT month,
             year,
@@ -1238,6 +1293,10 @@ CREATE MATERIALIZED VIEW public.ofec_entity_chart_mv AS
   WITH DATA;
 
 ALTER TABLE public.ofec_entity_chart_mv OWNER TO fec;
+
+CREATE OR REPLACE VIEW ofec_entity_chart_vw AS SELECT * FROM ofec_entity_chart_mv;
+ALTER VIEW ofec_entity_chart_vw OWNER TO fec;
+GRANT SELECT ON ofec_entity_chart_vw TO fec_read;
 
 CREATE MATERIALIZED VIEW public.ofec_filings_all_mv AS
  WITH filings AS (
@@ -1301,10 +1360,10 @@ CREATE MATERIALIZED VIEW public.ofec_filings_all_mv AS
             public.get_office_cmte_tp(cand.office, cmte_valid_fec_yr.cmte_tp) AS office_cmte_tp
            FROM (((((disclosure.f_rpt_or_form_sub filing_history
              LEFT JOIN disclosure.cmte_valid_fec_yr cmte_valid_fec_yr ON ((((filing_history.cand_cmte_id)::text = (cmte_valid_fec_yr.cmte_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = cmte_valid_fec_yr.fec_election_yr))))
-             LEFT JOIN public.ofec_committee_history_mv com ON ((((filing_history.cand_cmte_id)::text = (com.committee_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = com.cycle))))
-             LEFT JOIN public.ofec_candidate_history_mv cand ON ((((filing_history.cand_cmte_id)::text = (cand.candidate_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = cand.two_year_period))))
+             LEFT JOIN public.ofec_committee_history_vw com ON ((((filing_history.cand_cmte_id)::text = (com.committee_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = com.cycle))))
+             LEFT JOIN public.ofec_candidate_history_vw cand ON ((((filing_history.cand_cmte_id)::text = (cand.candidate_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = cand.two_year_period))))
              LEFT JOIN staging.ref_rpt_tp report ON (((filing_history.rpt_tp)::text = (report.rpt_tp_cd)::text)))
-             LEFT JOIN public.ofec_filings_amendments_all_mv amendments ON ((filing_history.file_num = amendments.file_num)))
+             LEFT JOIN public.ofec_filings_amendments_all_vw amendments ON ((filing_history.file_num = amendments.file_num)))
           WHERE ((filing_history.rpt_yr >= (1979)::numeric) AND ((filing_history.form_tp)::text <> 'SL'::text))
         ), rfai_filings AS (
          SELECT cand.candidate_id,
@@ -1363,8 +1422,8 @@ CREATE MATERIALIZED VIEW public.ofec_filings_all_mv AS
             public.get_office_cmte_tp(cand.office, cmte_valid_fec_yr.cmte_tp) AS office_cmte_tp
            FROM ((((disclosure.nml_form_rfai filing_history
              LEFT JOIN disclosure.cmte_valid_fec_yr cmte_valid_fec_yr ON ((((filing_history.id)::text = (cmte_valid_fec_yr.cmte_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = cmte_valid_fec_yr.fec_election_yr))))
-             LEFT JOIN public.ofec_committee_history_mv com ON ((((filing_history.id)::text = (com.committee_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = com.cycle))))
-             LEFT JOIN public.ofec_candidate_history_mv cand ON ((((filing_history.id)::text = (cand.candidate_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = cand.two_year_period))))
+             LEFT JOIN public.ofec_committee_history_vw com ON ((((filing_history.id)::text = (com.committee_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = com.cycle))))
+             LEFT JOIN public.ofec_candidate_history_vw cand ON ((((filing_history.id)::text = (cand.candidate_id)::text) AND ((public.get_cycle(filing_history.rpt_yr))::numeric = cand.two_year_period))))
              LEFT JOIN staging.ref_rpt_tp report ON (((filing_history.rpt_tp)::text = (report.rpt_tp_cd)::text)))
           WHERE ((filing_history.rpt_yr >= (1979)::numeric) AND (filing_history.delete_ind IS NULL))
         ), combined AS (
@@ -1539,6 +1598,10 @@ CREATE MATERIALIZED VIEW public.ofec_filings_all_mv AS
   WITH DATA;
 
 ALTER TABLE public.ofec_filings_all_mv OWNER TO fec;
+
+CREATE OR REPLACE VIEW ofec_filings_all_vw AS SELECT * FROM ofec_filings_all_mv;
+ALTER VIEW ofec_filings_all_vw OWNER TO fec;
+GRANT SELECT ON ofec_filings_all_vw TO fec_read;
 
 CREATE MATERIALIZED VIEW public.ofec_report_pac_party_all_mv AS
  WITH f3_by_non_house_senate AS (
@@ -1923,10 +1986,14 @@ CREATE MATERIALIZED VIEW public.ofec_report_pac_party_all_mv AS
     amendments.mst_rct_file_num AS most_recent_file_number,
     public.is_most_recent((rpt.file_number)::integer, (amendments.mst_rct_file_num)::integer) AS most_recent
    FROM (pac_party_report rpt
-     LEFT JOIN public.ofec_filings_amendments_all_mv amendments ON ((rpt.file_number = amendments.file_num)))
+     LEFT JOIN public.ofec_filings_amendments_all_vw amendments ON ((rpt.file_number = amendments.file_num)))
   WITH DATA;
 
 ALTER TABLE public.ofec_report_pac_party_all_mv OWNER TO fec;
+
+CREATE OR REPLACE VIEW ofec_report_pac_party_all_vw AS SELECT * FROM ofec_report_pac_party_all_mv;
+ALTER VIEW ofec_report_pac_party_all_vw OWNER TO fec;
+GRANT SELECT ON ofec_report_pac_party_all_vw TO fec_read;
 
 CREATE MATERIALIZED VIEW public.ofec_reports_house_senate_mv AS
  SELECT row_number() OVER () AS idx,
@@ -2024,33 +2091,37 @@ CREATE MATERIALIZED VIEW public.ofec_reports_house_senate_mv AS
     amendments.mst_rct_file_num AS most_recent_file_number,
     public.is_most_recent((f3.file_num)::integer, (amendments.mst_rct_file_num)::integer) AS most_recent
    FROM (public.fec_vsum_f3_vw f3
-     LEFT JOIN ( SELECT ofec_amendments_mv.idx,
-            ofec_amendments_mv.cand_cmte_id,
-            ofec_amendments_mv.rpt_yr,
-            ofec_amendments_mv.rpt_tp,
-            ofec_amendments_mv.amndt_ind,
-            ofec_amendments_mv.receipt_date,
-            ofec_amendments_mv.file_num,
-            ofec_amendments_mv.prev_file_num,
-            ofec_amendments_mv.mst_rct_file_num,
-            ofec_amendments_mv.amendment_chain
-           FROM public.ofec_amendments_mv
+     LEFT JOIN ( SELECT ofec_amendments_vw.idx,
+            ofec_amendments_vw.cand_cmte_id,
+            ofec_amendments_vw.rpt_yr,
+            ofec_amendments_vw.rpt_tp,
+            ofec_amendments_vw.amndt_ind,
+            ofec_amendments_vw.receipt_date,
+            ofec_amendments_vw.file_num,
+            ofec_amendments_vw.prev_file_num,
+            ofec_amendments_vw.mst_rct_file_num,
+            ofec_amendments_vw.amendment_chain
+           FROM public.ofec_amendments_vw
         UNION ALL
-         SELECT ofec_house_senate_paper_amendments_mv.idx,
-            ofec_house_senate_paper_amendments_mv.cmte_id,
-            ofec_house_senate_paper_amendments_mv.rpt_yr,
-            ofec_house_senate_paper_amendments_mv.rpt_tp,
-            ofec_house_senate_paper_amendments_mv.amndt_ind,
-            ofec_house_senate_paper_amendments_mv.receipt_dt,
-            ofec_house_senate_paper_amendments_mv.file_num,
-            ofec_house_senate_paper_amendments_mv.prev_file_num,
-            ofec_house_senate_paper_amendments_mv.mst_rct_file_num,
-            ofec_house_senate_paper_amendments_mv.amendment_chain
-           FROM public.ofec_house_senate_paper_amendments_mv) amendments ON ((f3.file_num = amendments.file_num)))
+         SELECT ofec_house_senate_paper_amendments_vw.idx,
+            ofec_house_senate_paper_amendments_vw.cmte_id,
+            ofec_house_senate_paper_amendments_vw.rpt_yr,
+            ofec_house_senate_paper_amendments_vw.rpt_tp,
+            ofec_house_senate_paper_amendments_vw.amndt_ind,
+            ofec_house_senate_paper_amendments_vw.receipt_dt,
+            ofec_house_senate_paper_amendments_vw.file_num,
+            ofec_house_senate_paper_amendments_vw.prev_file_num,
+            ofec_house_senate_paper_amendments_vw.mst_rct_file_num,
+            ofec_house_senate_paper_amendments_vw.amendment_chain
+           FROM public.ofec_house_senate_paper_amendments_vw) amendments ON ((f3.file_num = amendments.file_num)))
   WHERE (f3.election_cycle >= (1979)::numeric)
   WITH DATA;
 
 ALTER TABLE public.ofec_reports_house_senate_mv OWNER TO fec;
+
+CREATE OR REPLACE VIEW ofec_reports_house_senate_vw AS SELECT * FROM ofec_reports_house_senate_mv;
+ALTER VIEW ofec_reports_house_senate_vw OWNER TO fec;
+GRANT SELECT ON ofec_reports_house_senate_vw TO fec_read;
 
 CREATE MATERIALIZED VIEW public.ofec_reports_pacs_parties_mv AS
  SELECT row_number() OVER () AS idx,
@@ -2168,33 +2239,37 @@ CREATE MATERIALIZED VIEW public.ofec_reports_pacs_parties_mv AS
     amendments.mst_rct_file_num AS most_recent_file_number,
     public.is_most_recent((f3x.file_num)::integer, (amendments.mst_rct_file_num)::integer) AS most_recent
    FROM (public.fec_vsum_f3x_vw f3x
-     LEFT JOIN ( SELECT ofec_amendments_mv.idx,
-            ofec_amendments_mv.cand_cmte_id,
-            ofec_amendments_mv.rpt_yr,
-            ofec_amendments_mv.rpt_tp,
-            ofec_amendments_mv.amndt_ind,
-            ofec_amendments_mv.receipt_date,
-            ofec_amendments_mv.file_num,
-            ofec_amendments_mv.prev_file_num,
-            ofec_amendments_mv.mst_rct_file_num,
-            ofec_amendments_mv.amendment_chain
-           FROM public.ofec_amendments_mv
+     LEFT JOIN ( SELECT ofec_amendments_vw.idx,
+            ofec_amendments_vw.cand_cmte_id,
+            ofec_amendments_vw.rpt_yr,
+            ofec_amendments_vw.rpt_tp,
+            ofec_amendments_vw.amndt_ind,
+            ofec_amendments_vw.receipt_date,
+            ofec_amendments_vw.file_num,
+            ofec_amendments_vw.prev_file_num,
+            ofec_amendments_vw.mst_rct_file_num,
+            ofec_amendments_vw.amendment_chain
+           FROM public.ofec_amendments_vw
         UNION ALL
-         SELECT ofec_pac_party_paper_amendments_mv.idx,
-            ofec_pac_party_paper_amendments_mv.cmte_id,
-            ofec_pac_party_paper_amendments_mv.rpt_yr,
-            ofec_pac_party_paper_amendments_mv.rpt_tp,
-            ofec_pac_party_paper_amendments_mv.amndt_ind,
-            ofec_pac_party_paper_amendments_mv.receipt_dt,
-            ofec_pac_party_paper_amendments_mv.file_num,
-            ofec_pac_party_paper_amendments_mv.prev_file_num,
-            ofec_pac_party_paper_amendments_mv.mst_rct_file_num,
-            ofec_pac_party_paper_amendments_mv.amendment_chain
-           FROM public.ofec_pac_party_paper_amendments_mv) amendments ON ((f3x.file_num = amendments.file_num)))
+         SELECT ofec_pac_party_paper_amendments_vw.idx,
+            ofec_pac_party_paper_amendments_vw.cmte_id,
+            ofec_pac_party_paper_amendments_vw.rpt_yr,
+            ofec_pac_party_paper_amendments_vw.rpt_tp,
+            ofec_pac_party_paper_amendments_vw.amndt_ind,
+            ofec_pac_party_paper_amendments_vw.receipt_dt,
+            ofec_pac_party_paper_amendments_vw.file_num,
+            ofec_pac_party_paper_amendments_vw.prev_file_num,
+            ofec_pac_party_paper_amendments_vw.mst_rct_file_num,
+            ofec_pac_party_paper_amendments_vw.amendment_chain
+           FROM public.ofec_pac_party_paper_amendments_vw) amendments ON ((f3x.file_num = amendments.file_num)))
   WHERE (f3x.election_cycle >= (1979)::numeric)
   WITH DATA;
 
 ALTER TABLE public.ofec_reports_pacs_parties_mv OWNER TO fec;
+
+CREATE OR REPLACE VIEW ofec_reports_pacs_parties_vw AS SELECT * FROM ofec_reports_pacs_parties_mv;
+ALTER VIEW ofec_reports_pacs_parties_vw OWNER TO fec;
+GRANT SELECT ON ofec_reports_pacs_parties_vw TO fec_read;
 
 CREATE MATERIALIZED VIEW public.ofec_reports_presidential_mv AS
  SELECT row_number() OVER () AS idx,
@@ -2294,43 +2369,47 @@ CREATE MATERIALIZED VIEW public.ofec_reports_presidential_mv AS
     amendments.mst_rct_file_num AS most_recent_file_number,
     public.is_most_recent((f3p.file_num)::integer, (amendments.mst_rct_file_num)::integer) AS most_recent
    FROM (public.fec_vsum_f3p_vw f3p
-     LEFT JOIN ( SELECT ofec_amendments_mv.idx,
-            ofec_amendments_mv.cand_cmte_id,
-            ofec_amendments_mv.rpt_yr,
-            ofec_amendments_mv.rpt_tp,
-            ofec_amendments_mv.amndt_ind,
-            ofec_amendments_mv.receipt_date,
-            ofec_amendments_mv.file_num,
-            ofec_amendments_mv.prev_file_num,
-            ofec_amendments_mv.mst_rct_file_num,
-            ofec_amendments_mv.amendment_chain
-           FROM public.ofec_amendments_mv
+     LEFT JOIN ( SELECT ofec_amendments_vw.idx,
+            ofec_amendments_vw.cand_cmte_id,
+            ofec_amendments_vw.rpt_yr,
+            ofec_amendments_vw.rpt_tp,
+            ofec_amendments_vw.amndt_ind,
+            ofec_amendments_vw.receipt_date,
+            ofec_amendments_vw.file_num,
+            ofec_amendments_vw.prev_file_num,
+            ofec_amendments_vw.mst_rct_file_num,
+            ofec_amendments_vw.amendment_chain
+           FROM public.ofec_amendments_vw
         UNION ALL
-         SELECT ofec_presidential_paper_amendments_mv.idx,
-            ofec_presidential_paper_amendments_mv.cmte_id,
-            ofec_presidential_paper_amendments_mv.rpt_yr,
-            ofec_presidential_paper_amendments_mv.rpt_tp,
-            ofec_presidential_paper_amendments_mv.amndt_ind,
-            ofec_presidential_paper_amendments_mv.receipt_dt,
-            ofec_presidential_paper_amendments_mv.file_num,
-            ofec_presidential_paper_amendments_mv.prev_file_num,
-            ofec_presidential_paper_amendments_mv.mst_rct_file_num,
-            ofec_presidential_paper_amendments_mv.amendment_chain
-           FROM public.ofec_presidential_paper_amendments_mv) amendments ON ((f3p.file_num = amendments.file_num)))
+         SELECT ofec_presidential_paper_amendments_vw.idx,
+            ofec_presidential_paper_amendments_vw.cmte_id,
+            ofec_presidential_paper_amendments_vw.rpt_yr,
+            ofec_presidential_paper_amendments_vw.rpt_tp,
+            ofec_presidential_paper_amendments_vw.amndt_ind,
+            ofec_presidential_paper_amendments_vw.receipt_dt,
+            ofec_presidential_paper_amendments_vw.file_num,
+            ofec_presidential_paper_amendments_vw.prev_file_num,
+            ofec_presidential_paper_amendments_vw.mst_rct_file_num,
+            ofec_presidential_paper_amendments_vw.amendment_chain
+           FROM public.ofec_presidential_paper_amendments_vw) amendments ON ((f3p.file_num = amendments.file_num)))
   WHERE (f3p.election_cycle >= (1979)::numeric)
   WITH DATA;
 
 ALTER TABLE public.ofec_reports_presidential_mv OWNER TO fec;
 
+CREATE OR REPLACE VIEW ofec_reports_presidential_vw AS SELECT * FROM ofec_reports_presidential_mv;
+ALTER VIEW ofec_reports_presidential_vw OWNER TO fec;
+GRANT SELECT ON ofec_reports_presidential_vw TO fec_read;
+
 CREATE MATERIALIZED VIEW public.ofec_sched_a_aggregate_size_merged_mv AS
  WITH grouped AS (
-         SELECT ofec_totals_combined_mv.committee_id AS cmte_id,
-            ofec_totals_combined_mv.cycle,
+         SELECT ofec_totals_combined_vw.committee_id AS cmte_id,
+            ofec_totals_combined_vw.cycle,
             0 AS size,
-            ofec_totals_combined_mv.individual_unitemized_contributions AS total,
+            ofec_totals_combined_vw.individual_unitemized_contributions AS total,
             0 AS count
-           FROM public.ofec_totals_combined_mv
-          WHERE (ofec_totals_combined_mv.cycle >= 2007)
+           FROM public.ofec_totals_combined_vw
+          WHERE (ofec_totals_combined_vw.cycle >= 2007)
         UNION ALL
          SELECT sched_a_aggregate_size.cmte_id,
             sched_a_aggregate_size.cycle,
@@ -2354,6 +2433,10 @@ CREATE MATERIALIZED VIEW public.ofec_sched_a_aggregate_size_merged_mv AS
 
 ALTER TABLE public.ofec_sched_a_aggregate_size_merged_mv OWNER TO fec;
 
+CREATE OR REPLACE VIEW ofec_sched_a_aggregate_size_merged_vw AS SELECT * FROM ofec_sched_a_aggregate_size_merged_mv;
+ALTER VIEW ofec_sched_a_aggregate_size_merged_vw OWNER TO fec;
+GRANT SELECT ON ofec_sched_a_aggregate_size_merged_vw TO fec_read;
+
 CREATE MATERIALIZED VIEW public.ofec_totals_candidate_committees_mv AS
  WITH last_cycle AS (
          SELECT DISTINCT ON (v_sum.cmte_id, link.fec_election_yr) v_sum.cmte_id,
@@ -2375,9 +2458,9 @@ CREATE MATERIALIZED VIEW public.ofec_totals_candidate_committees_mv AS
             link.fec_election_yr AS cycle,
             link.cand_election_yr AS election_year
            FROM (((disclosure.v_sum_and_det_sum_report v_sum
-             LEFT JOIN public.ofec_cand_cmte_linkage_mv link USING (cmte_id))
-             LEFT JOIN public.ofec_filings_mv of ON ((of.sub_id = v_sum.orig_sub_id)))
-             LEFT JOIN public.ofec_agg_coverage_date_mv trans_date ON ((((link.cmte_id)::text = (trans_date.committee_id)::text) AND (link.fec_election_yr = trans_date.fec_election_yr))))
+             LEFT JOIN public.ofec_cand_cmte_linkage_vw link USING (cmte_id))
+             LEFT JOIN public.ofec_filings_vw of ON ((of.sub_id = v_sum.orig_sub_id)))
+             LEFT JOIN public.ofec_agg_coverage_date_vw trans_date ON ((((link.cmte_id)::text = (trans_date.committee_id)::text) AND (link.fec_election_yr = trans_date.fec_election_yr))))
           WHERE ((((v_sum.form_tp_cd)::text = 'F3P'::text) OR ((v_sum.form_tp_cd)::text = 'F3'::text)) AND (((link.cmte_dsgn)::text = 'A'::text) OR ((link.cmte_dsgn)::text = 'P'::text)) AND (v_sum.cvg_end_dt <> (99999999)::numeric) AND (link.fec_election_yr = (public.get_cycle(((date_part('year'::text, ((v_sum.cvg_end_dt)::text)::timestamp without time zone))::integer)::numeric))::numeric) AND (link.fec_election_yr >= (1979)::numeric))
           ORDER BY v_sum.cmte_id, link.fec_election_yr, v_sum.cvg_end_dt DESC NULLS LAST
         ), ending_totals_per_cycle AS (
@@ -2436,7 +2519,7 @@ CREATE MATERIALIZED VIEW public.ofec_totals_candidate_committees_mv AS
             sum(p.net_op_exp) AS net_operating_expenditures,
             sum(p.net_contb) AS net_contributions,
             false AS full_election
-           FROM (public.ofec_cand_cmte_linkage_mv link
+           FROM (public.ofec_cand_cmte_linkage_vw link
              LEFT JOIN disclosure.v_sum_and_det_sum_report p ON ((((link.cmte_id)::text = (p.cmte_id)::text) AND (link.fec_election_yr = (public.get_cycle(p.rpt_yr))::numeric))))
           WHERE ((link.fec_election_yr >= (1979)::numeric) AND (p.cvg_start_dt <> (99999999)::numeric) AND (((p.form_tp_cd)::text = 'F3P'::text) OR ((p.form_tp_cd)::text = 'F3'::text)) AND (((link.cmte_dsgn)::text = 'A'::text) OR ((link.cmte_dsgn)::text = 'P'::text)))
           GROUP BY link.fec_election_yr, link.cand_election_yr, link.cand_id
@@ -2535,7 +2618,7 @@ CREATE MATERIALIZED VIEW public.ofec_totals_candidate_committees_mv AS
             max(totals.coverage_end_date) AS coverage_end_date,
             max(totals.transaction_coverage_date) AS transaction_coverage_date
            FROM (cycle_totals_with_ending_aggregates totals
-             LEFT JOIN public.ofec_candidate_election_mv election ON ((((totals.candidate_id)::text = (election.candidate_id)::text) AND (totals.cycle <= (election.cand_election_year)::numeric) AND (totals.cycle > (election.prev_election_year)::numeric))))
+             LEFT JOIN public.ofec_candidate_election_vw election ON ((((totals.candidate_id)::text = (election.candidate_id)::text) AND (totals.cycle <= (election.cand_election_year)::numeric) AND (totals.cycle > (election.prev_election_year)::numeric))))
           GROUP BY totals.candidate_id, election.cand_election_year
         ), election_totals_with_ending_aggregates AS (
          SELECT et.candidate_id,
@@ -2588,7 +2671,7 @@ CREATE MATERIALIZED VIEW public.ofec_totals_candidate_committees_mv AS
             totals.last_net_operating_expenditures,
             totals.last_net_contributions
            FROM ((ending_totals_per_cycle totals
-             LEFT JOIN public.ofec_candidate_election_mv election ON ((((totals.candidate_id)::text = (election.candidate_id)::text) AND (totals.cycle = (election.cand_election_year)::numeric))))
+             LEFT JOIN public.ofec_candidate_election_vw election ON ((((totals.candidate_id)::text = (election.candidate_id)::text) AND (totals.cycle = (election.cand_election_year)::numeric))))
              LEFT JOIN election_totals et ON ((((totals.candidate_id)::text = (et.candidate_id)::text) AND (totals.cycle = et.cycle))))
           WHERE (totals.cycle > (1979)::numeric)
         )
@@ -2697,26 +2780,34 @@ UNION ALL
 
 ALTER TABLE public.ofec_totals_candidate_committees_mv OWNER TO fec;
 
+CREATE OR REPLACE VIEW ofec_totals_candidate_committees_vw AS SELECT * FROM ofec_totals_candidate_committees_mv;
+ALTER VIEW ofec_totals_candidate_committees_vw OWNER TO fec;
+GRANT SELECT ON ofec_totals_candidate_committees_vw TO fec_read;
+
 CREATE MATERIALIZED VIEW public.ofec_totals_ie_only_mv AS
- SELECT ofec_totals_combined_mv.sub_id AS idx,
-    ofec_totals_combined_mv.committee_id,
-    ofec_totals_combined_mv.cycle,
-    ofec_totals_combined_mv.coverage_start_date,
-    ofec_totals_combined_mv.coverage_end_date,
-    ofec_totals_combined_mv.contributions AS total_independent_contributions,
-    ofec_totals_combined_mv.independent_expenditures AS total_independent_expenditures,
-    ofec_totals_combined_mv.last_beginning_image_number,
-    ofec_totals_combined_mv.committee_name,
-    ofec_totals_combined_mv.committee_type,
-    ofec_totals_combined_mv.committee_designation,
-    ofec_totals_combined_mv.committee_type_full,
-    ofec_totals_combined_mv.committee_designation_full,
-    ofec_totals_combined_mv.party_full
-   FROM public.ofec_totals_combined_mv
-  WHERE ((ofec_totals_combined_mv.form_type)::text = 'F5'::text)
+ SELECT ofec_totals_combined_vw.sub_id AS idx,
+    ofec_totals_combined_vw.committee_id,
+    ofec_totals_combined_vw.cycle,
+    ofec_totals_combined_vw.coverage_start_date,
+    ofec_totals_combined_vw.coverage_end_date,
+    ofec_totals_combined_vw.contributions AS total_independent_contributions,
+    ofec_totals_combined_vw.independent_expenditures AS total_independent_expenditures,
+    ofec_totals_combined_vw.last_beginning_image_number,
+    ofec_totals_combined_vw.committee_name,
+    ofec_totals_combined_vw.committee_type,
+    ofec_totals_combined_vw.committee_designation,
+    ofec_totals_combined_vw.committee_type_full,
+    ofec_totals_combined_vw.committee_designation_full,
+    ofec_totals_combined_vw.party_full
+   FROM public.ofec_totals_combined_vw
+  WHERE ((ofec_totals_combined_vw.form_type)::text = 'F5'::text)
   WITH DATA;
 
 ALTER TABLE public.ofec_totals_ie_only_mv OWNER TO fec;
+
+CREATE OR REPLACE VIEW ofec_totals_ie_only_vw AS SELECT * FROM ofec_totals_ie_only_mv;
+ALTER VIEW ofec_totals_ie_only_vw OWNER TO fec;
+GRANT SELECT ON ofec_totals_ie_only_vw TO fec_read;
 
 CREATE INDEX ofec_candidate_flag_mv_candidate_id_idx ON public.ofec_candidate_flag_mv USING btree (candidate_id);
 
