@@ -39,13 +39,16 @@
     oldest_filing.file_num,
     oldest_filing.prev_file_num,
     oldest_filing.form,
-    last_value(oldest_filing.file_num) OVER amendment_group::numeric(7,0) AS mst_rct_file_num,
-    last_value(oldest_filing.amendment_chain) OVER amendment_group::numeric(7,0)[] AS amendment_chain
+    last_value(oldest_filing.file_num) OVER amendment_group_entire::numeric(7,0) AS mst_rct_file_num,
+    array_agg(oldest_filing.file_num) OVER amendment_group_up_to_current AS amendment_chain
    FROM oldest_filing
-   WINDOW amendment_group AS
+   WINDOW amendment_group_entire AS
         (PARTITION BY oldest_filing.last
             ORDER BY oldest_filing.depth
-            RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+            RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING),
+   amendment_group_up_to_current AS
+        (PARTITION BY oldest_filing.last
+            ORDER BY oldest_filing.depth)
 ;
 
 ALTER VIEW ofec_processed_filing_vw OWNER TO fec;
@@ -53,39 +56,42 @@ ALTER VIEW ofec_processed_filing_vw OWNER TO fec;
 DROP MATERIALIZED VIEW ofec_amendments_mv CASCADE;
 
 CREATE MATERIALIZED VIEW ofec_amendments_mv AS
-SELECT
-    idx,
-    cand_cmte_id,
-    rpt_yr,
-    rpt_tp,
-    amndt_ind,
-    receipt_date,
-    file_num,
-    prev_file_num,
-    form,
-    mst_rct_file_num,
-    amendment_chain
-   FROM ofec_processed_filing_vw
-WHERE form NOT IN ('F1', 'F1M', 'F2')
-UNION ALL
-SELECT
-    idx,
-    cand_cmte_id,
-    rpt_yr,
-    rpt_tp,
-    amndt_ind,
-    receipt_date,
-    file_num,
-    prev_file_num,
-    form,
-    last_value(mst_rct_file_num) OVER candidate_committee_group AS mst_rct_file_num,
-    amendment_chain
-   FROM ofec_processed_filing_vw
-WHERE form IN ('F1', 'F1M', 'F2')
-   WINDOW candidate_committee_group AS
-        (PARTITION BY cand_cmte_id, form
-            ORDER BY file_num
-            RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING);
+SELECT row_number() OVER () AS idx, *
+FROM (SELECT
+        cand_cmte_id,
+        rpt_yr,
+        rpt_tp,
+        amndt_ind,
+        receipt_date,
+        file_num,
+        prev_file_num,
+        form,
+        mst_rct_file_num,
+        amendment_chain
+       FROM ofec_processed_filing_vw
+    WHERE form NOT IN ('F1', 'F1M', 'F2')
+    UNION ALL
+    SELECT
+        cand_cmte_id,
+        rpt_yr,
+        rpt_tp,
+        amndt_ind,
+        receipt_dt::text::date as receipt_date,
+        file_num,
+        prev_file_num,
+        form_tp as form,
+        last_value(file_num) OVER candidate_committee_group_entire AS mst_rct_file_num,
+        array_agg(file_num) OVER candidate_committee_group_up_to_current AS amendment_chain
+       FROM disclosure.f_rpt_or_form_sub
+    WHERE form_tp IN ('F1', 'F1M', 'F2')
+       WINDOW candidate_committee_group_entire AS
+            (PARTITION BY cand_cmte_id, form_tp
+                ORDER BY file_num NULLS FIRST
+                RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING),
+       candidate_committee_group_up_to_current AS
+            (PARTITION BY cand_cmte_id, form_tp
+                ORDER BY file_num NULLS FIRST)
+) combined;
 
 ALTER TABLE ofec_amendments_mv OWNER TO fec;
 
