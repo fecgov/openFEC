@@ -26,7 +26,14 @@ INNER_HITS = {
     }
 }
 
-ALL_DOCUMENT_TYPES = ['statutes', 'regulations', 'advisory_opinions', 'murs']
+ALL_DOCUMENT_TYPES = [
+    'statutes',
+    'regulations',
+    'advisory_opinions',
+    'murs',
+    'adrs',
+    'admin_fines',
+]
 
 class GetLegalCitation(utils.Resource):
     @property
@@ -78,7 +85,9 @@ class UniversalSearch(utils.Resource):
             "statutes": generic_query_builder,
             "regulations": generic_query_builder,
             "advisory_opinions": ao_query_builder,
-            "murs": mur_query_builder
+            "murs": case_query_builder,
+            "adrs": case_query_builder,
+            "admin_fines": case_query_builder,
         }
 
         if kwargs.get('type', 'all') == 'all':
@@ -130,7 +139,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
     return query
 
-def mur_query_builder(q, type_, from_hit, hits_returned, **kwargs):
+def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q('term', _type=type_)]
 
     if q:
@@ -145,7 +154,19 @@ def mur_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .index('docs_search') \
         .sort("sort1", "sort2")
 
-    return apply_mur_specific_query_params(query, **kwargs)
+    must_clauses = []
+    if kwargs.get('case_no'):
+        must_clauses.append(Q('terms', no=kwargs.get('case_no')))
+    if kwargs.get('case_document_category'):
+        must_clauses = [Q('terms', documents__category=kwargs.get('case_document_category'))]
+
+    query = query.query('bool', must=must_clauses)
+
+    if type_ == 'admin_fines':
+        return apply_af_specific_query_params(query, **kwargs)
+    else:
+        return apply_mur_adr_specific_query_params(query, **kwargs)
+
 
 def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q('term', _type=type_)]
@@ -163,7 +184,7 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
     return apply_ao_specific_query_params(query, **kwargs)
 
-def apply_mur_specific_query_params(query, **kwargs):
+def apply_mur_adr_specific_query_params(query, **kwargs):
     must_clauses = []
     if kwargs.get('mur_no'):
         must_clauses.append(Q('terms', no=kwargs.get('mur_no')))
@@ -197,9 +218,75 @@ def apply_mur_specific_query_params(query, **kwargs):
     if date_range:
         must_clauses.append(Q("range", close_date=date_range))
 
+    # Generic fields
+
+    # Refactor MURs to use `case_` filters
+    # once we change the front end to use generic params (fec-cms issue #2351)
+
+    if kwargs.get('case_respondents'):
+        must_clauses.append(Q('match', respondents=kwargs.get('case_respondents')))
+    if kwargs.get('case_dispositions'):
+        must_clauses.append(Q('term', disposition__data__disposition=kwargs.get('case_dispositions')))
+
+    if kwargs.get('case_election_cycles'):
+        must_clauses.append(Q('term', election_cycles=kwargs.get('case_election_cycles')))
+
+    # gte/lte: greater than or equal to/less than or equal to
+    date_range = {}
+    if kwargs.get('case_min_open_date'):
+        date_range['gte'] = kwargs.get('case_min_open_date')
+    if kwargs.get('case_max_open_date'):
+        date_range['lte'] = kwargs.get('case_max_open_date')
+    if date_range:
+        must_clauses.append(Q("range", open_date=date_range))
+
+    date_range = {}
+    if kwargs.get('case_min_close_date'):
+        date_range['gte'] = kwargs.get('case_min_close_date')
+    if kwargs.get('case_max_close_date'):
+        date_range['lte'] = kwargs.get('case_max_close_date')
+    if date_range:
+        must_clauses.append(Q("range", close_date=date_range))
+
     query = query.query('bool', must=must_clauses)
 
     return query
+
+
+def apply_af_specific_query_params(query, **kwargs):
+    must_clauses = []
+    if kwargs.get('af_name'):
+        must_clauses.append(Q('match', name=' '.join(kwargs.get('af_name'))))
+    if kwargs.get('af_committee_id'):
+        must_clauses.append(Q('match', committee_id=kwargs.get('af_committee_id')))
+    if kwargs.get('af_report_year'):
+        must_clauses.append(Q('match', report_year=kwargs.get('af_report_year')))
+
+    date_range = {}
+    if kwargs.get('af_min_rtb_date'):
+        date_range['gte'] = kwargs.get('af_min_rtb_date')
+    if kwargs.get('af_max_rtb_date'):
+        date_range['lte'] = kwargs.get('af_max_rtb_date')
+    if date_range:
+        must_clauses.append(Q("range", reason_to_believe_action_date=date_range))
+
+    date_range = {}
+    if kwargs.get('af_min_fd_date'):
+        date_range['gte'] = kwargs.get('mur_min_fd_date')
+    if kwargs.get('af_max_fd_date'):
+        date_range['lte'] = kwargs.get('mur_max_fd_date')
+    if date_range:
+        must_clauses.append(Q("range", final_determination_date=date_range))
+
+    if kwargs.get('af_rtb_fine_amount'):
+        must_clauses.append(Q('term', reason_to_believe_fine_amount=kwargs.get('af_rtb_fine_amount')))
+    if kwargs.get('af_fd_fine_amount'):
+        must_clauses.append(Q('term', final_determination_amount=kwargs.get('af_fd_fine_amount')))
+
+    query = query.query('bool', must=must_clauses)
+
+    return query
+
 
 def get_ao_document_query(q, **kwargs):
     categories = {'F': 'Final Opinion',

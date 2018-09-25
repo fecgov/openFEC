@@ -191,6 +191,29 @@ query = {
         description='Filter MURs by earliest date closed'),
     'mur_max_close_date': fields.Date(required=False,
         description='Filter MURs by latest date closed'),
+    'case_no': fields.List(IStr, required=False, description='Enforcement matter case number'),
+    'case_document_category': fields.List(IStr, required=False,
+        description='Filter cases by category of associated documents'),
+    'case_respondents': fields.Str(IStr, required=False, description='Filter cases by respondents'),
+    'case_dispositions': fields.List(IStr, required=False, description='Filter cases by dispositions'),
+    'case_election_cycles': fields.Int(IStr, required=False, description='Filter cases by election cycles'),
+    'case_min_open_date': fields.Date(required=False, description='Filter cases by earliest date opened'),
+    'case_max_open_date': fields.Date(required=False, description='Filter cases by latest date opened'),
+    'case_min_close_date': fields.Date(required=False,
+        description='Filter cases by earliest date closed'),
+    'case_max_close_date': fields.Date(required=False,
+        description='Filter cases by latest date closed'),
+    'af_name': fields.List(IStr, required=False, description='Admin fine committee name'),
+    'af_committee_id': fields.Str(IStr, required=False, description='Admin fine committee ID'),
+    'af_report_year': fields.Str(IStr, required=False, description='Admin fine report year'),
+    'af_min_rtb_date': fields.Date(required=False, description='Filter cases by earliest Reason to Believe date'),
+    'af_max_rtb_date': fields.Date(required=False, description='Filter cases by latest Reason to Believe date'),
+    'af_rtb_fine_amount': fields.Int(IStr, required=False, description='Filter cases by Reason to Believe fine amount'),
+    'af_min_fd_date': fields.Date(required=False,
+        description='Filter cases by earliest Final Determination date'),
+    'af_max_fd_date': fields.Date(required=False,
+        description='Filter cases by latest Final Determination date'),
+    'af_fd_fine_amount': fields.Int(IStr, required=False, description='Filter cases by Final Determination fine amount')
 }
 
 candidate_detail = {
@@ -698,13 +721,26 @@ entities = {
 }
 
 schedule_e = {
+    'candidate_office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description=docs.OFFICE),
+    'candidate_party': fields.List(IStr, description=docs.PARTY),
+    'candidate_office_state': fields.List(IStr, description=docs.STATE_GENERIC),
+    'candidate_office_district': fields.List(District, description=docs.DISTRICT),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'filing_form': fields.List(IStr, description='Filing form'),
-    'last_expenditure_date': fields.Date(missing=None, description='When sorting by `expenditure_date`, this is populated with the `expenditure_date` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
-    'last_expenditure_amount': fields.Float(missing=None, description='When sorting by `expenditure_amount`, this is populated with the `expenditure_amount` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
-    'last_office_total_ytd': fields.Float(missing=None, description='When sorting by `office_total_ytd`, this is populated with the `office_total_ytd` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
+    'last_expenditure_date': fields.Date(missing=None,
+        description='When sorting by `expenditure_date`,'
+        'this is populated with the `expenditure_date` of the last result.'
+        'However, you will need to pass the index of that last result to `last_index` to get the next page.'),
+    'last_expenditure_amount': fields.Float(missing=None,
+        description='When sorting by `expenditure_amount`,'
+        'this is populated with the `expenditure_amount` of the last result.'
+        'However, you will need to pass the index of that last result to `last_index` to get the next page.'),
+    'last_office_total_ytd': fields.Float(missing=None,
+        description='When sorting by `office_total_ytd`,'
+        'this is populated with the `office_total_ytd` of the last result.'
+        'However, you will need to pass the index of that last result to `last_index` to get the next page.'),
     'payee_name': fields.List(fields.Str, description='Name of the entity that received the payment'),
     'support_oppose_indicator': fields.List(
         IStr(validate=validate.OneOf(['S', 'O'])),
