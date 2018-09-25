@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW ofec_processed_filing_vw AS
+CREATE OR REPLACE VIEW ofec_processed_financial_amendment_chain_vw AS
  WITH RECURSIVE oldest_filing AS (
          SELECT f_rpt_or_form_sub.cand_cmte_id,
             f_rpt_or_form_sub.rpt_yr,
@@ -42,6 +42,7 @@ CREATE OR REPLACE VIEW ofec_processed_filing_vw AS
     last_value(oldest_filing.file_num) OVER amendment_group_entire::numeric(7,0) AS mst_rct_file_num,
     array_agg(oldest_filing.file_num) OVER amendment_group_up_to_current AS amendment_chain
    FROM oldest_filing
+   WHERE form NOT IN ('F1', 'F1M', 'F2')
    WINDOW amendment_group_entire AS
         (PARTITION BY oldest_filing.last
             ORDER BY oldest_filing.depth
@@ -51,28 +52,10 @@ CREATE OR REPLACE VIEW ofec_processed_filing_vw AS
             ORDER BY oldest_filing.depth)
 ;
 
-ALTER VIEW ofec_processed_filing_vw OWNER TO fec;
+ALTER VIEW ofec_processed_financial_amendment_chain_vw OWNER TO fec;
+GRANT SELECT ON ofec_processed_financial_amendment_chain_vw TO fec_read;
 
-GRANT SELECT ON ofec_processed_filing_vw TO fec_read;
-
-DROP MATERIALIZED VIEW ofec_amendments_mv CASCADE;
-
-CREATE MATERIALIZED VIEW ofec_amendments_mv AS
-SELECT row_number() OVER () AS idx, *
-FROM (SELECT
-        cand_cmte_id,
-        rpt_yr,
-        rpt_tp,
-        amndt_ind,
-        receipt_date,
-        file_num,
-        prev_file_num,
-        form,
-        mst_rct_file_num,
-        amendment_chain
-       FROM ofec_processed_filing_vw
-    WHERE form NOT IN ('F1', 'F1M', 'F2')
-    UNION ALL
+CREATE OR REPLACE VIEW ofec_processed_non_financial_amendment_chain_vw AS
     SELECT
         cand_cmte_id,
         rpt_yr,
@@ -92,7 +75,40 @@ FROM (SELECT
                 RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING),
        candidate_committee_group_up_to_current AS
             (PARTITION BY cand_cmte_id, form_tp
-                ORDER BY file_num NULLS FIRST)
+                ORDER BY file_num NULLS FIRST);
+
+ALTER VIEW ofec_processed_non_financial_amendment_chain_vw OWNER TO fec;
+GRANT SELECT ON ofec_processed_non_financial_amendment_chain_vw TO fec_read;
+
+DROP MATERIALIZED VIEW ofec_amendments_mv CASCADE;
+
+CREATE MATERIALIZED VIEW ofec_amendments_mv AS
+SELECT row_number() OVER () AS idx, *
+FROM (SELECT
+        cand_cmte_id,
+        rpt_yr,
+        rpt_tp,
+        amndt_ind,
+        receipt_date,
+        file_num,
+        prev_file_num,
+        form,
+        mst_rct_file_num,
+        amendment_chain
+      FROM ofec_processed_financial_amendment_chain_vw
+      UNION ALL
+      SELECT
+        cand_cmte_id,
+        rpt_yr,
+        rpt_tp,
+        amndt_ind,
+        receipt_date,
+        file_num,
+        prev_file_num,
+        form,
+        mst_rct_file_num,
+        amendment_chain
+     FROM ofec_processed_non_financial_amendment_chain_vw
 ) combined;
 
 
