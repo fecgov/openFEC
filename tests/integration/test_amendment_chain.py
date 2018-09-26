@@ -266,6 +266,36 @@ class TestAmendmentChain(BaseTestCase):
                     # Note: we're leaving data-entered previous_file_number alone
                     assert result['previous_file_number'] == filing['previous_file_number']
 
+    def test_negative_filing_chain(self):
+        # Make sure no negative numbers appear in amendment chain
+        negative_f1 = {
+            'committee_id': 'C006',
+            'report_year': 2018,
+            'amendment_indicator': 'N',
+            'receipt_date': datetime.date(2018, 1, 31),
+            'file_number': -1180841,
+            'amendment_chain': None,
+            'previous_file_number': -1180841,
+            'most_recent_file_number': None,
+            'most_recent': None,
+            'report_type': None,
+            'form_type': 'F1'
+        }
+
+        non_negative_f1 = copy.deepcopy(self.STOCK_FIRST_F1)
+
+        self.create_filing(1, negative_f1)
+        self.create_filing(2, non_negative_f1)
+
+        # Refresh downstream `ofec_amendments_mv` and `ofec_filings_all_mv`
+        manage.refresh_materialized(concurrent=False)
+
+        results = self._results(rest.api.url_for(FilingsList, committee_id=non_negative_f1['committee_id'], most_recent=True))
+        assert len(results) == 1
+
+        result = results[0]
+        self.assert_filings_equal(result, non_negative_f1)
+
     def create_filing(self, sub_id, expected_filing):
         self.connection.execute(
             "INSERT INTO disclosure.f_rpt_or_form_sub (sub_id, cand_cmte_id, form_tp, rpt_yr, rpt_tp, amndt_ind, receipt_dt, file_num, prev_file_num) "

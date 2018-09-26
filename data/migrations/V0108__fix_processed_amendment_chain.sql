@@ -69,6 +69,7 @@ CREATE OR REPLACE VIEW ofec_processed_non_financial_amendment_chain_vw AS
         array_agg(file_num) OVER candidate_committee_group_up_to_current AS amendment_chain
        FROM disclosure.f_rpt_or_form_sub
     WHERE form_tp IN ('F1', 'F1M', 'F2')
+       AND file_num > 0::numeric
        WINDOW candidate_committee_group_entire AS
             (PARTITION BY cand_cmte_id, form_tp
                 ORDER BY file_num NULLS FIRST
