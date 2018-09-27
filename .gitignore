@@ -66,3 +66,6 @@ celerybeat-schedule
 # Compiled swagger files
 static/swagger-ui/css
 static/swagger-ui/js
+
+# Pytest cache
+.pytest_cache/
