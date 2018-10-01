@@ -219,7 +219,6 @@ def refresh_materialized(concurrent=True):
         'filings': ['ofec_filings_amendments_all_mv',
                     'ofec_filings_mv',
                     'ofec_filings_all_mv'],
-        'large_aggregates': ['ofec_entity_chart_mv'],
         'ofec_agg_coverage_date': ['ofec_agg_coverage_date_mv'],
         'ofec_sched_e_mv': ['ofec_sched_e_mv'],
         'reports_house_senate': ['ofec_reports_house_senate_mv'],
