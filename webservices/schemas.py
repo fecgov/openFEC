@@ -505,10 +505,7 @@ totals_schemas = (
     schemas['CommitteeTotalsPresidentialSchema'],
     schemas['CommitteeTotalsHouseSenateSchema'],
     schemas['CommitteeTotalsPacPartySchema'],
-    schemas['CommitteeTotalsIEOnlySchema'],
-    schemas['CommitteeTotalsPartySchema'],
-    schemas['CommitteeTotalsPacSchema']
-
+    schemas['CommitteeTotalsIEOnlySchema']
 )
 CommitteeTotalsSchema = type('CommitteeTotalsSchema', totals_schemas, {})
 CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)
