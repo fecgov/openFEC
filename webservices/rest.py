@@ -192,6 +192,7 @@ def handle_exception(exception):
     )
     raise exceptions.ApiError('Could not process the request',
             status_code=http.client.NOT_FOUND)
+    return wrapped.wrappedException, wrapped.status
 
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')
