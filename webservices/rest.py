@@ -64,6 +64,7 @@ def initialize_newrelic():
 initialize_newrelic()
 
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 
 
 def sqla_conn_string():
