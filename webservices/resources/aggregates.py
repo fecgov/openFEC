@@ -129,7 +129,7 @@ class ScheduleAByEmployerView(AggregateResource):
 
     def get(self, committee_id=None, **kwargs):
         query = self.build_query(committee_id=committee_id, **kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=500000)
+        count = counts.count_estimate(query, models.db.session)
         return utils.fetch_page(query, kwargs, model=self.model, count=count, index_column=self.index_column)
 
 
@@ -153,7 +153,7 @@ class ScheduleAByOccupationView(AggregateResource):
 
     def get(self, committee_id=None, **kwargs):
         query = self.build_query(committee_id=committee_id, **kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=500000)
+        count = counts.count_estimate(query, models.db.session)
         return utils.fetch_page(query, kwargs, model=self.model, count=count, index_column=self.index_column)
 
 

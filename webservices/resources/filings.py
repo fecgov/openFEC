@@ -69,7 +69,7 @@ class BaseFilings(views.ApiResource):
             #Adds FRQ types if RFAI was requested
             kwargs.get('form_type').append('FRQ')
         query = self.build_query(**kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=500000)
+        count = counts.count_estimate(query, models.db.session)
         return utils.fetch_page(query, kwargs, model=models.Filings, count=count, multi=True)
 
 
@@ -127,7 +127,7 @@ class EFilingsView(views.ApiResource):
 
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=500000)
+        count = counts.count_estimate(query, models.db.session)
         return utils.fetch_page(query, kwargs, model=models.EFilings, count=count)
 
     @property
