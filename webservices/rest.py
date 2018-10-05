@@ -64,6 +64,7 @@ def initialize_newrelic():
 initialize_newrelic()
 
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 
 
 def sqla_conn_string():
@@ -191,7 +192,12 @@ def handle_exception(exception):
         )
     )
     raise exceptions.ApiError('Could not process the request',
-            status_code=http.client.NOT_FOUND)
+        status_code=http.client.NOT_FOUND)
+
+@app.errorhandler(404)
+def page_not_found(exception):
+    wrapped = ResponseException(str(exception), exception.code, type(exception))
+    return wrapped.wrappedException, wrapped.status
 
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')
