@@ -131,7 +131,7 @@ class ElectionView(ApiResource):
 
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=500000)
+        count = counts.count_estimate(query, models.db.session)
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True

@@ -30,7 +30,7 @@ class ApiResource(utils.Resource):
     @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=500000)
+        count = counts.count_estimate(query, models.db.session)
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
@@ -73,7 +73,7 @@ class ItemizedResource(ApiResource):
             query, count = self.join_committee_queries(kwargs)
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=500000)
+        count = counts.count_estimate(query, models.db.session)
         return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
 
     def join_committee_queries(self, kwargs):
@@ -100,5 +100,5 @@ class ItemizedResource(ApiResource):
         sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
         query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null)
         page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
-        count = counts.count_estimate(query, models.db.session, threshold=500000)
+        count = counts.count_estimate(query, models.db.session)
         return page_query, count
