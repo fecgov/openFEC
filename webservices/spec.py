@@ -1,4 +1,6 @@
 from apispec import APISpec
+from apispec.ext.marshmallow import MarshmallowPlugin
+
 
 from webservices import docs
 from webservices import __API_VERSION__
@@ -9,8 +11,6 @@ def format_docstring(docstring):
 
     formatted = []
     lines = docstring.expandtabs().splitlines()
-    indent = min(len(line) - len(line.strip()) for line in lines if line.strip())
-    trimmed = [lines[0].lstrip()] + [line[indent:].rstrip() for line in lines[1:]]
 
     for line in lines:
         if line == '':
@@ -20,13 +20,14 @@ def format_docstring(docstring):
 
     return ' '.join(formatted).strip()
 
+
 spec = APISpec(
     title='OpenFEC',
     version=__API_VERSION__,
     info={'description': format_docstring(docs.API_DESCRIPTION)},
     basePath='/v1',
     produces=['application/json'],
-    plugins=['apispec.ext.marshmallow'],
+    plugins=[MarshmallowPlugin()],
     securityDefinitions={
         'apiKey': {
             'type': 'apiKey',
@@ -105,6 +106,10 @@ spec = APISpec(
         {
             'name': 'audit',
             'description': format_docstring(docs.AUDIT),
+        },
+        {
+            'name': 'legal',
+            'description': format_docstring(docs.LEGAL),
         }
     ]
 )
