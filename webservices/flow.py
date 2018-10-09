@@ -30,7 +30,6 @@ def get_graph():
         'filing_amendments_pac_party',
         'filing_amendments_presidential',
         'filings',
-        'large_aggregates',
         'ofec_agg_coverage_date',
         'ofec_sched_e_mv',
         'reports_house_senate',
@@ -121,12 +120,6 @@ def get_graph():
     graph.add_edges_from([
         ('filings', 'totals_combined'),
         ('filings', 'report_pac_party_all'),
-    ])
-
-    graph.add_edges_from([
-        ('totals_pac_party', 'large_aggregates'),
-        ('totals_house_senate', 'large_aggregates'),
-        ('totals_combined', 'large_aggregates'),
     ])
 
     graph.add_edges_from([
