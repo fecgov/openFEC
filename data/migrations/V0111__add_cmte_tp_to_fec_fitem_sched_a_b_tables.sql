@@ -761,6 +761,3 @@ EXCEPTION
 END$$;
 -- ANALYZE disclosure.fec_fitem_sched_a_2017_2018;
 
--- -----------------------------------------------------
--- update functions that create indexes to new fec_fitem_sched_a/fec_fitem_sched_b partition tables
--- -----------------------------------------------------
