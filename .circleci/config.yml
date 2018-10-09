@@ -80,10 +80,24 @@ jobs:
           command: dockerize -wait tcp://localhost:5432 -timeout 1m
 
       - run:
+          name: Checking for PEP8 errors
+          # stop the build if there are Python syntax errors or undefined names
+          command: |
+            . venv/bin/activate
+            flake8 --count --select=E901,E999,F821,F822,F823 --show-source --statistics --exclude venv
+
+      - run:
           name: Run tests
           command: |
             . venv/bin/activate
             pytest
+
+      - run:
+          name: Checking for PEP8 warnings
+          # exit-zero treats all errors as warnings.  The GitHub editor is 127 chars wide
+          command: |
+            . venv/bin/activate
+            flake8 --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude venv
 
       - run:
           name: Perform post-test checks

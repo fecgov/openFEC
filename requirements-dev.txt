@@ -12,7 +12,7 @@ nplusone==0.8.0
 webtest==2.0.27
 pdbpp==0.9.1
 pygments==2.2.0
-
+flake8==3.5.0
 
 #efiling
 pandas==0.16.2
