@@ -4,8 +4,11 @@ Pls note that some endpoints need required parameters and some example data
 are given hereself.
 the endpoints list could be exapanded or improved in the future.
 """
+import os
 import click
 import requests
+
+API_KEY = os.environ['FEC_API_KEY']
 
 COMMITTEE_ID = 'C00496067'
 CANDIDATE_ID = 'P40002172'
@@ -14,9 +17,9 @@ COMMITTEE_TYPE = 'P'
 
 # a list of endpoints pulled from rest.py
 endpoints = [
-"/committees/?api_key=NICAR16",
-"/candidates/?api_key=NICAR16",
-"/candidates/search/?api_key=NICAR16" ,
+"/committees/?api_key={api_key}",
+"/candidates/?api_key={api_key}",
+"/candidates/search/?api_key={api_key}" ,
 "/candidate/{candidate_id}/",
 "/committee/{committee_id}/candidates/",
 '/candidate/{candidate_id}/history/',
@@ -29,54 +32,54 @@ endpoints = [
 '/committee/{committee_id}/history/2018/',
 '/candidate/{candidate_id}/committees/history/',
 '/candidate/{candidate_id}/committees/history/2018/',
-"/totals/{committee_type}/?api_key=NICAR16",
-"/committee/{committee_id}/totals/?api_key=NICAR16",
-"/candidate/{candidate_id}/totals/?api_key=NICAR16",
-"/reports/{committee_type}/?api_key=NICAR16",
-"/committee/{committee_id}/reports/?api_key=NICAR16",
-"/names/candidates/?q=clinton&api_key=NICAR16",
-"/names/committees/?q=clinton&api_key=NICAR16",
-"/schedules/schedule_a/{sub_id}/?api_key=NICAR16",
-"/schedules/schedule_a/efile/?api_key=NICAR16",
-"/schedules/schedule_b/{sub_id}/?api_key=NICAR16",
-"/schedules/schedule_b/efile/?api_key=NICAR16",
-"/schedules/schedule_c/?api_key=NICAR16",
-"/schedules/schedule_d/?api_key=NICAR16",
-"/schedules/schedule_e/?api_key=NICAR16",
-"/schedules/schedule_e/efile/?api_key=NICAR16",
-"/schedules/schedule_f/{sub_id}/?api_key=NICAR16",
-"/communication-costs/?api_key=NICAR16",
-"/electioneering/?api_key=NICAR16",
-"/elections/?cycle=2018&office=president&api_key=NICAR16",
-"/elections/search/?api_key=NICAR16",
-"/elections/summary/?cycle=2018&office=president&api_key=NICAR16",
-"/state-election-office/?state=MD&api_key=NICAR16",
-"/election-dates/?api_key=NICAR16",
-"/reporting-dates/?api_key=NICAR16",
-"/calendar-dates/?api_key=NICAR16",
-"/calendar-dates/export/?api_key=NICAR16",
-"/rad-analyst/?api_key=NICAR16",
-"/efile/filings/?api_key=NICAR16",
-"/totals/by_entity/?cycle=2018&api_key=NICAR16",
-"/audit-primary-category/?api_key=NICAR16",
-"/audit-category/?api_key=NICAR16",
-"/audit-case/?api_key=NICAR16",
-"/names/audit_candidates/?q=clinton&api_key=NICAR16",
-"/names/audit_committees/?q=&clinton&api_key=NICAR16",
-"/schedules/schedule_a/by_size/by_candidate/?candidate_id={candidate_id}&cycle=2018&api_key=NICAR16",
-"/schedules/schedule_a/by_state/by_candidate/?candidate_id={candidate_id}&cycle=2018&aapi_key=NICAR16",
-"/candidates/totals/?api_key=NICAR16",
-"/schedules/schedule_a/by_state/totals/?api_key=NICAR16",
-"/communication_costs/by_candidate/?api_key=NICAR16",
-"/committee/{committee_id}/communication_costs/by_candidate/?api_key=NICAR16",
-"/electioneering/by_candidate/?api_key=NICAR16",
-"/committee/{committee_id}/electioneering/by_candidate/?api_key=NICAR16",
-"/committee/{committee_id}/filings/?api_key=NICAR16",
-"/candidate/{candidate_id}/filings/?api_key=NICAR16",
-"/efile/reports/house-senate/?api_key=NICAR16",
-"/efile/reports/presidential/?api_key=NICAR16",
-"/efile/reports/pac-party/?api_key=NICAR16",
-"/filings/?api_key=NICAR16" # this one is also shooting for trailing slash issue
+"/totals/{committee_type}/?api_key={api_key}",
+"/committee/{committee_id}/totals/?api_key={api_key}",
+"/candidate/{candidate_id}/totals/?api_key={api_key}",
+"/reports/{committee_type}/?api_key={api_key}",
+"/committee/{committee_id}/reports/?api_key={api_key}",
+"/names/candidates/?q=clinton&api_key={api_key}",
+"/names/committees/?q=clinton&api_key={api_key}",
+"/schedules/schedule_a/{sub_id}/?api_key={api_key}",
+"/schedules/schedule_a/efile/?api_key={api_key}",
+"/schedules/schedule_b/{sub_id}/?api_key={api_key}",
+"/schedules/schedule_b/efile/?api_key={api_key}",
+"/schedules/schedule_c/?api_key={api_key}",
+"/schedules/schedule_d/?api_key={api_key}",
+"/schedules/schedule_e/?api_key={api_key}",
+"/schedules/schedule_e/efile/?api_key={api_key}",
+"/schedules/schedule_f/{sub_id}/?api_key={api_key}",
+"/communication-costs/?api_key={api_key}",
+"/electioneering/?api_key={api_key}",
+"/elections/?cycle=2018&office=president&api_key={api_key}",
+"/elections/search/?api_key={api_key}",
+"/elections/summary/?cycle=2018&office=president&api_key={api_key}",
+"/state-election-office/?state=MD&api_key={api_key}",
+"/election-dates/?api_key={api_key}",
+"/reporting-dates/?api_key={api_key}",
+"/calendar-dates/?api_key={api_key}",
+"/calendar-dates/export/?api_key={api_key}",
+"/rad-analyst/?api_key={api_key}",
+"/efile/filings/?api_key={api_key}",
+"/totals/by_entity/?cycle=2018&api_key={api_key}",
+"/audit-primary-category/?api_key={api_key}",
+"/audit-category/?api_key={api_key}",
+"/audit-case/?api_key={api_key}",
+"/names/audit_candidates/?q=clinton&api_key={api_key}",
+"/names/audit_committees/?q=&clinton&api_key={api_key}",
+"/schedules/schedule_a/by_size/by_candidate/?candidate_id={candidate_id}&cycle=2018&api_key={api_key}",
+"/schedules/schedule_a/by_state/by_candidate/?candidate_id={candidate_id}&cycle=2018&aapi_key={api_key}",
+"/candidates/totals/?api_key={api_key}",
+"/schedules/schedule_a/by_state/totals/?api_key={api_key}",
+"/communication_costs/by_candidate/?api_key={api_key}",
+"/committee/{committee_id}/communication_costs/by_candidate/?api_key={api_key}",
+"/electioneering/by_candidate/?api_key={api_key}",
+"/committee/{committee_id}/electioneering/by_candidate/?api_key={api_key}",
+"/committee/{committee_id}/filings/?api_key={api_key}",
+"/candidate/{candidate_id}/filings/?api_key={api_key}",
+"/efile/reports/house-senate/?api_key={api_key}",
+"/efile/reports/presidential/?api_key={api_key}",
+"/efile/reports/pac-party/?api_key={api_key}",
+"/filings/?api_key={api_key}" # this one is also shooting for trailing slash issue
 ]
 
 @click.command()
@@ -85,7 +88,8 @@ def check_endpoints(server):
     """Simple script to check all endpoints status quickly."""
 
     for endp in endpoints:
-        r = requests.get((server + endp).format(committee_id=COMMITTEE_ID,
+        r = requests.get((server + endp).format(api_key=API_KEY,
+                                                committee_id=COMMITTEE_ID,
                                                 candidate_id=CANDIDATE_ID,
                                                 committee_type=COMMITTEE_TYPE,
                                                 sub_id = SUB_ID))
