@@ -10,13 +10,11 @@ from . import utils
 logger = logging.getLogger('partitioner')
 logging.basicConfig(level=logging.INFO)
 
+
 def get_cycles():
-    return range(
-        SQL_CONFIG['START_YEAR'] - 1,
-        SQL_CONFIG['END_YEAR_ITEMIZED'] + 3,
-        2,
-    )
-    #return range(1978, 1980, 2)
+    return range(SQL_CONFIG['START_YEAR'] - 1, SQL_CONFIG['END_YEAR_ITEMIZED'] + 3, 2)
+    # return range(1978, 1980, 2)
+
 
 class TableGroup:
 
@@ -51,14 +49,13 @@ class TableGroup:
         """
 
         columns = [
-            column for column in parent.columns
+            column
+            for column in parent.columns
             if column.name not in cls.column_mappings.keys()
         ]
 
         for column_name, cast_type in cls.column_mappings.items():
-            columns.append(
-                sa.cast(parent.c[column_name], cast_type).label(column_name)
-            )
+            columns.append(sa.cast(parent.c[column_name], cast_type).label(column_name))
 
         return columns
 
@@ -80,49 +77,44 @@ class TableGroup:
             )
             connection.execute(delete)
 
-            insert_select = sa.select(
-                cls.recast_columns(queue_new) + cls.column_factory(queue_new)
-            ).select_from(
-                queue_new.join(
-                    queue_old,
-                    sa.and_(
-                        queue_new.c.get(cls.primary) == queue_old.c.get(cls.primary),
-                        queue_old.c.timestamp > queue_new.c.timestamp,
-                    ),
-                    isouter=True,
+            insert_select = (
+                sa.select(cls.recast_columns(queue_new) + cls.column_factory(queue_new))
+                .select_from(
+                    queue_new.join(
+                        queue_old,
+                        sa.and_(
+                            queue_new.c.get(cls.primary)
+                            == queue_old.c.get(cls.primary),
+                            queue_old.c.timestamp > queue_new.c.timestamp,
+                        ),
+                        isouter=True,
+                    )
                 )
-            ).where(
-                queue_old.c.get(cls.primary) == None  # noqa
-            ).distinct(
-                queue_new.c.get(cls.primary)
+                .where(queue_old.c.get(cls.primary) == None)  # noqa
+                .distinct(queue_new.c.get(cls.primary))
             )
             insert = sa.insert(master_table).from_select(
-                insert_select.columns,
-                insert_select
+                insert_select.columns, insert_select
             )
             connection.execute(insert)
 
             # Clear the processed records out of the queues.
             cls.clear_queue(queue_old, delete_select, connection)
-            cls.clear_queue(queue_new, insert_select.with_only_columns(
-                [queue_new.c.get(cls.primary)]
-            ), connection)
+            cls.clear_queue(
+                queue_new,
+                insert_select.with_only_columns([queue_new.c.get(cls.primary)]),
+                connection,
+            )
 
             transaction.commit()
-            output_message = (
-                0,
-                'Successfully refreshed {name}.'.format(name=name),
-            )
+            output_message = (0, 'Successfully refreshed {name}.'.format(name=name))
             logger.info(output_message[1])
         except Exception as e:
             transaction.rollback()
 
             output_message = (
                 1,
-                'Refreshing {name} failed: {error}'.format(
-                    name=name,
-                    error=e
-                ),
+                'Refreshing {name} failed: {error}'.format(name=name, error=e),
             )
             logger.error(output_message[1])
 
@@ -131,7 +123,5 @@ class TableGroup:
 
     @classmethod
     def clear_queue(cls, queue, record_ids, connection):
-        delete = sa.delete(queue).where(
-            queue.c.get(cls.primary).in_(record_ids)
-        )
+        delete = sa.delete(queue).where(queue.c.get(cls.primary).in_(record_ids))
         connection.execute(delete)

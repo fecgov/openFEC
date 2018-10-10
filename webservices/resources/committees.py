@@ -14,23 +14,22 @@ from webservices.common.views import ApiResource
 
 def filter_year(model, query, years):
     return query.filter(
-        sa.or_(*[
-            sa.and_(
-                sa.or_(
-                    sa.extract('year', model.last_file_date) >= year,
-                    model.last_file_date == None,
-                ),
-                sa.extract('year', model.first_file_date) <= year,
-            )
-            for year in years
-        ])
+        sa.or_(
+            *[
+                sa.and_(
+                    sa.or_(
+                        sa.extract('year', model.last_file_date) >= year,
+                        model.last_file_date == None,
+                    ),
+                    sa.extract('year', model.first_file_date) <= year,
+                )
+                for year in years
+            ]
+        )
     )  # noqa
 
 
-@doc(
-    tags=['committee'],
-    description=docs.COMMITTEE_LIST,
-)
+@doc(tags=['committee'], description=docs.COMMITTEE_LIST)
 class CommitteeList(ApiResource):
 
     model = models.Committee
@@ -48,7 +47,10 @@ class CommitteeList(ApiResource):
         ('committee_type', models.Committee.committee_type),
     ]
     filter_range_fields = [
-        (('min_first_file_date', 'max_first_file_date'), models.Committee.first_file_date),
+        (
+            ('min_first_file_date', 'max_first_file_date'),
+            models.Committee.first_file_date,
+        ),
         (('min_last_f1_date', 'max_last_f1_date'), models.Committee.last_f1_date),
     ]
     filter_fulltext_fields = [
@@ -65,8 +67,7 @@ class CommitteeList(ApiResource):
             args.make_sort_args(
                 default='name',
                 validator=args.IndexValidator(
-                    models.Committee,
-                    extra=list(self.aliases.keys()),
+                    models.Committee, extra=list(self.aliases.keys())
                 ),
             ),
         )
@@ -74,10 +75,11 @@ class CommitteeList(ApiResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
 
-        if {'receipts', '-receipts'}.intersection(kwargs.get('sort', [])) and 'q' not in kwargs:
+        if {'receipts', '-receipts'}.intersection(
+            kwargs.get('sort', [])
+        ) and 'q' not in kwargs:
             raise exceptions.ApiError(
-                'Cannot sort on receipts when parameter "q" is not set',
-                status_code=422,
+                'Cannot sort on receipts when parameter "q" is not set', status_code=422
             )
 
         if kwargs.get('candidate_id'):
@@ -126,8 +128,7 @@ class CommitteeView(ApiResource):
             args.paging,
             args.committee,
             args.make_sort_args(
-                default='name',
-                validator=args.IndexValidator(self.model),
+                default='name', validator=args.IndexValidator(self.model)
             ),
         )
 
@@ -138,11 +139,11 @@ class CommitteeView(ApiResource):
             query = query.filter_by(committee_id=committee_id)
 
         if candidate_id is not None:
-            query = query.join(
-                models.CandidateCommitteeLink
-            ).filter(
-                models.CandidateCommitteeLink.candidate_id == candidate_id
-            ).distinct()
+            query = (
+                query.join(models.CandidateCommitteeLink)
+                .filter(models.CandidateCommitteeLink.candidate_id == candidate_id)
+                .distinct()
+            )
 
         if kwargs.get('year'):
             query = filter_year(models.CommitteeDetail, query, kwargs['year'])
@@ -174,8 +175,7 @@ class CommitteeHistoryView(ApiResource):
             args.paging,
             args.committee_history,
             args.make_sort_args(
-                default='-cycle',
-                validator=args.IndexValidator(self.model),
+                default='-cycle', validator=args.IndexValidator(self.model)
             ),
         )
 
@@ -186,15 +186,19 @@ class CommitteeHistoryView(ApiResource):
             query = query.filter(models.CommitteeHistory.committee_id == committee_id)
 
         if candidate_id:
-            query = query.join(
-                models.CandidateCommitteeLink,
-                sa.and_(
-                    models.CandidateCommitteeLink.committee_id == models.CommitteeHistory.committee_id,
-                    models.CandidateCommitteeLink.fec_election_year == models.CommitteeHistory.cycle,
-                ),
-            ).filter(
-                models.CandidateCommitteeLink.candidate_id == candidate_id,
-            ).distinct()
+            query = (
+                query.join(
+                    models.CandidateCommitteeLink,
+                    sa.and_(
+                        models.CandidateCommitteeLink.committee_id
+                        == models.CommitteeHistory.committee_id,
+                        models.CandidateCommitteeLink.fec_election_year
+                        == models.CommitteeHistory.cycle,
+                    ),
+                )
+                .filter(models.CandidateCommitteeLink.candidate_id == candidate_id)
+                .distinct()
+            )
 
         if cycle:
             query = (
@@ -207,23 +211,30 @@ class CommitteeHistoryView(ApiResource):
 
     def _filter_elections(self, query, candidate_id, cycle):
         """Round up to the next election including `cycle`."""
-        return query.join(
-            models.CandidateElection,
-            sa.and_(
-                models.CandidateCommitteeLink.candidate_id == models.CandidateElection.candidate_id,
-                models.CandidateCommitteeLink.fec_election_year <= models.CandidateElection.cand_election_year,
-                models.CandidateCommitteeLink.fec_election_year > models.CandidateElection.prev_election_year,
-            ),
-        ).filter(
-            models.CandidateElection.candidate_id == candidate_id,
-            cycle <= models.CandidateElection.cand_election_year,
-            cycle > models.CandidateElection.prev_election_year,
-        ).order_by(
-            models.CommitteeHistory.committee_id,
-            sa.desc(models.CommitteeHistory.cycle),
-        ).distinct(
-            models.CommitteeHistory.committee_id,
+        return (
+            query.join(
+                models.CandidateElection,
+                sa.and_(
+                    models.CandidateCommitteeLink.candidate_id
+                    == models.CandidateElection.candidate_id,
+                    models.CandidateCommitteeLink.fec_election_year
+                    <= models.CandidateElection.cand_election_year,
+                    models.CandidateCommitteeLink.fec_election_year
+                    > models.CandidateElection.prev_election_year,
+                ),
+            )
+            .filter(
+                models.CandidateElection.candidate_id == candidate_id,
+                cycle <= models.CandidateElection.cand_election_year,
+                cycle > models.CandidateElection.prev_election_year,
+            )
+            .order_by(
+                models.CommitteeHistory.committee_id,
+                sa.desc(models.CommitteeHistory.cycle),
+            )
+            .distinct(models.CommitteeHistory.committee_id)
         )
+
 
 class TotalsCommitteeHistoryView(ApiResource):
 
@@ -246,25 +257,28 @@ class TotalsCommitteeHistoryView(ApiResource):
     @property
     def args(self):
         return utils.extend(
-            args.paging,
-            args.make_sort_args(),
-            args.totals_committee_aggregate,
+            args.paging, args.make_sort_args(), args.totals_committee_aggregate
         )
 
     def build_query(self, cycle, **kwargs):
-        totals = sa.Table('ofec_totals_combined_mv', db.metadata, autoload_with=db.engine)
-        query = models.CommitteeHistory.query.with_entities(
-            models.CommitteeHistory.__table__,
-            totals,
-        ).outerjoin(
-            totals,
-            sa.and_(
-                models.CommitteeHistory.committee_id == totals.c.committee_id,
-                models.CommitteeHistory.cycle == totals.c.cycle,
-            )
-        ).filter(
-            models.CommitteeHistory.cycle == cycle,
+        totals = sa.Table(
+            'ofec_totals_combined_mv', db.metadata, autoload_with=db.engine
         )
-        query = filters.filter_multi(query, kwargs, self.filter_multi_fields(models.CommitteeHistory))
+        query = (
+            models.CommitteeHistory.query.with_entities(
+                models.CommitteeHistory.__table__, totals
+            )
+            .outerjoin(
+                totals,
+                sa.and_(
+                    models.CommitteeHistory.committee_id == totals.c.committee_id,
+                    models.CommitteeHistory.cycle == totals.c.cycle,
+                ),
+            )
+            .filter(models.CommitteeHistory.cycle == cycle)
+        )
+        query = filters.filter_multi(
+            query, kwargs, self.filter_multi_fields(models.CommitteeHistory)
+        )
         query = filters.filter_range(query, kwargs, self.filter_range_fields(totals.c))
         return query

@@ -10,10 +10,7 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
-@doc(
-    tags=['loans'],
-    description=docs.SCHEDULE_C,
-)
+@doc(tags=['loans'], description=docs.SCHEDULE_C)
 class ScheduleCView(ApiResource):
 
     model = models.ScheduleC
@@ -38,7 +35,10 @@ class ScheduleCView(ApiResource):
         (('min_date', 'max_date'), models.ScheduleC.incurred_date),
         (('min_amount', 'max_amount'), models.ScheduleC.original_loan_amount),
         (('min_image_number', 'max_image_number'), models.ScheduleC.image_number),
-        (('min_payment_to_date', 'max_payment_to_date'), models.ScheduleC.payment_to_date),
+        (
+            ('min_payment_to_date', 'max_payment_to_date'),
+            models.ScheduleC.payment_to_date,
+        ),
     ]
 
     @property
@@ -47,22 +47,17 @@ class ScheduleCView(ApiResource):
             args.itemized,
             args.schedule_c,
             args.paging,
-            args.make_sort_args(
-                default='incurred_date',
-            ),
+            args.make_sort_args(default='incurred_date'),
         )
 
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
         if kwargs.get('sub_id'):
-            query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
+            query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         return query
 
 
-@doc(
-    tags=['loans'],
-    description=docs.SCHEDULE_C,
-)
+@doc(tags=['loans'], description=docs.SCHEDULE_C)
 class ScheduleCViewBySubId(ApiResource):
     model = models.ScheduleC
     schema = schemas.ScheduleCSchema
@@ -80,6 +75,6 @@ class ScheduleCViewBySubId(ApiResource):
     @property
     def args(self):
         return utils.extend(
-            #needed to attach a page, trivial since length is one, but can't build this view without a pageschema
-            args.paging,
+            # needed to attach a page, trivial since length is one, but can't build this view without a pageschema
+            args.paging
         )

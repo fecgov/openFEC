@@ -8,7 +8,6 @@ from webservices.resources.filings import FilingsView, FilingsList, EFilingsView
 
 
 class TestFilings(ApiBaseTest):
-
     def test_committee_filings(self):
         """ Check filing returns with a specified committee id"""
         committee_id = 'C8675309'
@@ -41,14 +40,27 @@ class TestFilings(ApiBaseTest):
         ]
         min_date = datetime.date(2013, 1, 1)
         results = self._results(api.url_for(FilingsList, min_receipt_date=min_date))
-        self.assertTrue(all(each for each in results if each['receipt_date'] >= min_date.isoformat()))
-        max_date = datetime.date(2014, 1, 1)
-        results = self._results(api.url_for(FilingsList, max_receipt_date=max_date))
-        self.assertTrue(all(each for each in results if each['receipt_date'] <= max_date.isoformat()))
-        results = self._results(api.url_for(FilingsList, min_receipt_date=min_date, max_receipt_date=max_date))
         self.assertTrue(
             all(
-                each for each in results
+                each for each in results if each['receipt_date'] >= min_date.isoformat()
+            )
+        )
+        max_date = datetime.date(2014, 1, 1)
+        results = self._results(api.url_for(FilingsList, max_receipt_date=max_date))
+        self.assertTrue(
+            all(
+                each for each in results if each['receipt_date'] <= max_date.isoformat()
+            )
+        )
+        results = self._results(
+            api.url_for(
+                FilingsList, min_receipt_date=min_date, max_receipt_date=max_date
+            )
+        )
+        self.assertTrue(
+            all(
+                each
+                for each in results
                 if min_date.isoformat() <= each['receipt_date'] <= max_date.isoformat()
             )
         )
@@ -99,10 +111,7 @@ class TestFilings(ApiBaseTest):
             factories.FilingsFactory(beginning_image_number=1),
         ]
         results = self._results(api.url_for(FilingsList, sort='beginning_image_number'))
-        self.assertTrue(
-            [each['beginning_image_number'] for each in results],
-            [1, 2]
-        )
+        self.assertTrue([each['beginning_image_number'] for each in results], [1, 2])
 
     def test_sort_bad_column(self):
         response = self.app.get(api.url_for(FilingsList, sort='request_type'))
@@ -110,32 +119,61 @@ class TestFilings(ApiBaseTest):
 
     def test_secondary_sort_ascending(self):
         [
-            factories.FilingsFactory(beginning_image_number=2, coverage_end_date='2017-01-01'),
-            factories.FilingsFactory(beginning_image_number=1, coverage_end_date='2017-01-01'),
-            factories.FilingsFactory(beginning_image_number=0, coverage_end_date='2017-01-02'),
+            factories.FilingsFactory(
+                beginning_image_number=2, coverage_end_date='2017-01-01'
+            ),
+            factories.FilingsFactory(
+                beginning_image_number=1, coverage_end_date='2017-01-01'
+            ),
+            factories.FilingsFactory(
+                beginning_image_number=0, coverage_end_date='2017-01-02'
+            ),
         ]
-        results = self._results(api.url_for(FilingsList, sort=['coverage_end_date', 'beginning_image_number']))
+        results = self._results(
+            api.url_for(
+                FilingsList, sort=['coverage_end_date', 'beginning_image_number']
+            )
+        )
         self.assertEqual(results[0]['beginning_image_number'], '1')
         self.assertEqual(results[2]['beginning_image_number'], '0')
 
     def test_secondary_sort_descending(self):
         [
-            factories.FilingsFactory(beginning_image_number=2, coverage_end_date='2017-01-01'),
-            factories.FilingsFactory(beginning_image_number=1, coverage_end_date='2017-01-01'),
-            factories.FilingsFactory(beginning_image_number=0, coverage_end_date='2017-01-02'),
+            factories.FilingsFactory(
+                beginning_image_number=2, coverage_end_date='2017-01-01'
+            ),
+            factories.FilingsFactory(
+                beginning_image_number=1, coverage_end_date='2017-01-01'
+            ),
+            factories.FilingsFactory(
+                beginning_image_number=0, coverage_end_date='2017-01-02'
+            ),
         ]
-        results = self._results(api.url_for(FilingsList, sort=['coverage_end_date', '-beginning_image_number']))
+        results = self._results(
+            api.url_for(
+                FilingsList, sort=['coverage_end_date', '-beginning_image_number']
+            )
+        )
         self.assertEqual(results[0]['beginning_image_number'], '2')
 
     def test_primary_sort_takes_overrides_secondary_sort(self):
         [
-            factories.FilingsFactory(beginning_image_number=2, coverage_end_date='2017-01-01'),
-            factories.FilingsFactory(beginning_image_number=1, coverage_end_date='2017-01-01'),
-            factories.FilingsFactory(beginning_image_number=0, coverage_end_date='2017-01-02'),
+            factories.FilingsFactory(
+                beginning_image_number=2, coverage_end_date='2017-01-01'
+            ),
+            factories.FilingsFactory(
+                beginning_image_number=1, coverage_end_date='2017-01-01'
+            ),
+            factories.FilingsFactory(
+                beginning_image_number=0, coverage_end_date='2017-01-02'
+            ),
         ]
-        results = self._results(api.url_for(FilingsList, sort=['-coverage_end_date', '-beginning_image_number']))
+        results = self._results(
+            api.url_for(
+                FilingsList, sort=['-coverage_end_date', '-beginning_image_number']
+            )
+        )
         self.assertEqual(results[0]['beginning_image_number'], '0')
-
 
     def test_regex(self):
         """ Getting rid of extra text that comes in the tables."""
@@ -152,26 +190,54 @@ class TestFilings(ApiBaseTest):
 
 
 class TestEfileFiles(ApiBaseTest):
-
     def test_filter_date_efile(self):
         [
-            factories.EFilingsFactory(committee_id='C010', beginning_image_number=2, receipt_date=datetime.date(2012, 1, 1)),
-            factories.EFilingsFactory(committee_id='C011', beginning_image_number=3, receipt_date=datetime.date(2013, 1, 1)),
-            factories.EFilingsFactory(committee_id='C012', beginning_image_number=4, receipt_date=datetime.date(2014, 1, 1)),
-            factories.EFilingsFactory(committee_id='C013', beginning_image_number=5, receipt_date=datetime.date(2015, 1, 1)),
+            factories.EFilingsFactory(
+                committee_id='C010',
+                beginning_image_number=2,
+                receipt_date=datetime.date(2012, 1, 1),
+            ),
+            factories.EFilingsFactory(
+                committee_id='C011',
+                beginning_image_number=3,
+                receipt_date=datetime.date(2013, 1, 1),
+            ),
+            factories.EFilingsFactory(
+                committee_id='C012',
+                beginning_image_number=4,
+                receipt_date=datetime.date(2014, 1, 1),
+            ),
+            factories.EFilingsFactory(
+                committee_id='C013',
+                beginning_image_number=5,
+                receipt_date=datetime.date(2015, 1, 1),
+            ),
         ]
 
         min_date = datetime.date(2013, 1, 1)
         r = self._results(api.url_for(EFilingsView))
         results = self._results(api.url_for(EFilingsView, min_receipt_date=min_date))
-        self.assertTrue(all(each for each in results if each['receipt_date'] >= min_date.isoformat()))
-        max_date = datetime.date(2014, 1, 1)
-        results = self._results(api.url_for(EFilingsView, max_receipt_date=max_date))
-        self.assertTrue(all(each for each in results if each['receipt_date'] <= max_date.isoformat()))
-        results = self._results(api.url_for(EFilingsView, min_receipt_date=min_date, max_receipt_date=max_date))
         self.assertTrue(
             all(
-                each for each in results
+                each for each in results if each['receipt_date'] >= min_date.isoformat()
+            )
+        )
+        max_date = datetime.date(2014, 1, 1)
+        results = self._results(api.url_for(EFilingsView, max_receipt_date=max_date))
+        self.assertTrue(
+            all(
+                each for each in results if each['receipt_date'] <= max_date.isoformat()
+            )
+        )
+        results = self._results(
+            api.url_for(
+                EFilingsView, min_receipt_date=min_date, max_receipt_date=max_date
+            )
+        )
+        self.assertTrue(
+            all(
+                each
+                for each in results
                 if min_date.isoformat() <= each['receipt_date'] <= max_date.isoformat()
             )
         )

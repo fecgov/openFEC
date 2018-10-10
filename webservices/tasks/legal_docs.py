@@ -37,11 +37,13 @@ RECENTLY_MODIFIED_CASES = """
     ORDER BY case_serial
 """
 
+
 @app.task(once={'graceful': True}, base=QueueOnce)
 def refresh():
     with db.engine.connect() as conn:
         refresh_aos(conn)
         refresh_cases(conn)
+
 
 @app.task(once={'graceful': True}, base=QueueOnce)
 def reload_all_aos_when_change():
@@ -52,24 +54,43 @@ def reload_all_aos_when_change():
         row = conn.execute(DAILY_MODIFIED_STARTING_AO).first()
         if row:
             logger.info("AO found %s modified at %s", row["ao_no"], row["pg_date"])
-            logger.info("Daily (%s) reload of all AOs starting", datetime.date.today().strftime("%A"))
+            logger.info(
+                "Daily (%s) reload of all AOs starting",
+                datetime.date.today().strftime("%A"),
+            )
             load_advisory_opinions()
-            logger.info("Daily (%s) reload of all AOs completed", datetime.date.today().strftime("%A"))
-            slack_message = 'Daily reload of all AOs completed in {0} space'.format(get_app_name())
+            logger.info(
+                "Daily (%s) reload of all AOs completed",
+                datetime.date.today().strftime("%A"),
+            )
+            slack_message = 'Daily reload of all AOs completed in {0} space'.format(
+                get_app_name()
+            )
             utils.post_to_slack(slack_message, '#bots')
         else:
-            logger.info("No daily (%s) modified AOs found", datetime.date.today().strftime("%A"))
-            slack_message = \
-                'No modified AOs found for the day - Reload of all AOs skipped in {0} space'.format(get_app_name())
+            logger.info(
+                "No daily (%s) modified AOs found", datetime.date.today().strftime("%A")
+            )
+            slack_message = 'No modified AOs found for the day - Reload of all AOs skipped in {0} space'.format(
+                get_app_name()
+            )
             utils.post_to_slack(slack_message, '#bots')
+
 
 @app.task(once={'graceful': True}, base=QueueOnce)
 def reload_all_aos():
-    logger.info("Weekly (%s) reload of all AOs starting", datetime.date.today().strftime("%A"))
+    logger.info(
+        "Weekly (%s) reload of all AOs starting", datetime.date.today().strftime("%A")
+    )
     load_advisory_opinions()
-    logger.info("Weekly (%s) reload of all AOs completed", datetime.date.today().strftime("%A"))
-    slack_message = 'Weekly reload of all AOs completed in {0} space'.format(get_app_name())
+    logger.info(
+        "Weekly (%s) reload of all AOs completed", datetime.date.today().strftime("%A")
+    )
+    slack_message = 'Weekly reload of all AOs completed in {0} space'.format(
+        get_app_name()
+    )
     utils.post_to_slack(slack_message, '#bots')
+
 
 def refresh_aos(conn):
     row = conn.execute(RECENTLY_MODIFIED_STARTING_AO).first()
@@ -79,13 +100,19 @@ def refresh_aos(conn):
     else:
         logger.info("No modified AOs found")
 
+
 def refresh_cases(conn):
     logger.info('Checking for modified cases')
     rs = conn.execute(RECENTLY_MODIFIED_CASES)
     if rs.returns_rows:
         load_count = 0
         for row in rs:
-            logger.info("%s %s found modified at %s", row["case_type"], row["case_no"], row["pg_date"])
+            logger.info(
+                "%s %s found modified at %s",
+                row["case_type"],
+                row["case_no"],
+                row["pg_date"],
+            )
             load_cases(row["case_type"], row["case_no"])
             load_count += 1
         logger.info("Total of %d case(s) loaded", load_count)

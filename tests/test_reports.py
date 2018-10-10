@@ -9,28 +9,34 @@ from tests.common import ApiBaseTest
 from webservices import schemas
 from webservices.rest import db
 from webservices.rest import api
-from webservices.resources.reports import ReportsView, CommitteeReportsView, EFilingHouseSenateSummaryView, EFilingPresidentialSummaryView, EFilingPacPartySummaryView
+from webservices.resources.reports import (
+    ReportsView,
+    CommitteeReportsView,
+    EFilingHouseSenateSummaryView,
+    EFilingPresidentialSummaryView,
+    EFilingPacPartySummaryView,
+)
 
 
 class TestReports(ApiBaseTest):
-
     def _check_committee_ids(self, results, positives=None, negatives=None):
         ids = [each['committee_id'] for each in results]
-        for positive in (positives or []):
+        for positive in positives or []:
             self.assertIn(positive.committee_id, ids)
-        for negative in (negatives or []):
+        for negative in negatives or []:
             self.assertNotIn(negative.committee_id, ids)
 
     def test_reports_by_committee_id(self):
         committee = factories.CommitteeFactory(committee_type='P')
         committee_id = committee.committee_id
-        factories.CommitteeHistoryFactory(
-            committee_id=committee_id,
-            committee_type='P',
+        factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='P')
+        committee_report = factories.ReportsPresidentialFactory(
+            committee_id=committee_id
         )
-        committee_report = factories.ReportsPresidentialFactory(committee_id=committee_id)
         other_report = factories.ReportsPresidentialFactory()
-        results = self._results(api.url_for(CommitteeReportsView, committee_id=committee_id))
+        results = self._results(
+            api.url_for(CommitteeReportsView, committee_id=committee_id)
+        )
         self._check_committee_ids(results, [committee_report], [other_report])
 
     def test_reports_by_committee_type(self):
@@ -44,11 +50,7 @@ class TestReports(ApiBaseTest):
         presidential_report_2016 = factories.ReportsPresidentialFactory(cycle=2016)
         house_report_2016 = factories.ReportsHouseSenateFactory(cycle=2016)
         results = self._results(
-            api.url_for(
-                ReportsView,
-                committee_type='presidential',
-                cycle=2016,
-            )
+            api.url_for(ReportsView, committee_type='presidential', cycle=2016)
         )
         self._check_committee_ids(
             results,
@@ -57,11 +59,7 @@ class TestReports(ApiBaseTest):
         )
         # Test repeated cycle parameter
         results = self._results(
-            api.url_for(
-                ReportsView,
-                committee_type='presidential',
-                cycle=[2016, 2018],
-            )
+            api.url_for(ReportsView, committee_type='presidential', cycle=[2016, 2018])
         )
         self._check_committee_ids(
             results,
@@ -78,32 +76,33 @@ class TestReports(ApiBaseTest):
         ]
 
         for category, factory in params:
-            reports = [
-                factory(is_amended=False),
-                factory(is_amended=True),
-            ]
+            reports = [factory(is_amended=False), factory(is_amended=True)]
 
             results = self._results(api.url_for(ReportsView, committee_type=category))
             self.assertEqual(len(results), 2)
 
-            results = self._results(api.url_for(ReportsView, committee_type=category, is_amended='false'))
+            results = self._results(
+                api.url_for(ReportsView, committee_type=category, is_amended='false')
+            )
             self.assertEqual(len(results), 1)
             self.assertEqual(results[0]['committee_id'], reports[0].committee_id)
 
-            results = self._results(api.url_for(ReportsView, committee_type=category, is_amended='true'))
+            results = self._results(
+                api.url_for(ReportsView, committee_type=category, is_amended='true')
+            )
             self.assertEqual(len(results), 1)
             self.assertEqual(results[0]['committee_id'], reports[1].committee_id)
 
     def test_reports_by_committee_type_and_year(self):
-        presidential_report_2012 = factories.ReportsPresidentialFactory(report_year=2012)
-        presidential_report_2016 = factories.ReportsPresidentialFactory(report_year=2016)
+        presidential_report_2012 = factories.ReportsPresidentialFactory(
+            report_year=2012
+        )
+        presidential_report_2016 = factories.ReportsPresidentialFactory(
+            report_year=2016
+        )
         house_report_2016 = factories.ReportsHouseSenateFactory(report_year=2016)
         results = self._results(
-            api.url_for(
-                ReportsView,
-                committee_type='presidential',
-                year=2016,
-            )
+            api.url_for(ReportsView, committee_type='presidential', year=2016)
         )
         self._check_committee_ids(
             results,
@@ -112,11 +111,7 @@ class TestReports(ApiBaseTest):
         )
         # Test repeated cycle parameter
         results = self._results(
-            api.url_for(
-                ReportsView,
-                committee_type='presidential',
-                year=[2016, 2018],
-            )
+            api.url_for(ReportsView, committee_type='presidential', year=[2016, 2018])
         )
         self._check_committee_ids(
             results,
@@ -127,32 +122,43 @@ class TestReports(ApiBaseTest):
     def test_reports_sort(self):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
-        factories.CommitteeHistoryFactory(
-            committee_id=committee_id,
-            committee_type='H',
-        )
+        factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='H')
         contributions = [0, 100]
-        factories.ReportsHouseSenateFactory(committee_id=committee_id, net_contributions_period=contributions[0])
-        factories.ReportsHouseSenateFactory(committee_id=committee_id, net_contributions_period=contributions[1])
-        results = self._results(api.url_for(CommitteeReportsView, committee_id=committee_id, sort=['-net_contributions_period']))
-        self.assertEqual([each['net_contributions_period'] for each in results], contributions[::-1])
+        factories.ReportsHouseSenateFactory(
+            committee_id=committee_id, net_contributions_period=contributions[0]
+        )
+        factories.ReportsHouseSenateFactory(
+            committee_id=committee_id, net_contributions_period=contributions[1]
+        )
+        results = self._results(
+            api.url_for(
+                CommitteeReportsView,
+                committee_id=committee_id,
+                sort=['-net_contributions_period'],
+            )
+        )
+        self.assertEqual(
+            [each['net_contributions_period'] for each in results], contributions[::-1]
+        )
 
     def test_reports_sort_default(self):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
-        factories.CommitteeHistoryFactory(
-            committee_id=committee_id,
-            committee_type='H',
-        )
-        dates = [
-            datetime.datetime(2015, 7, 4),
-            datetime.datetime(2015, 7, 5),
-        ]
+        factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='H')
+        dates = [datetime.datetime(2015, 7, 4), datetime.datetime(2015, 7, 5)]
         dates_formatted = [isoformat(each) for each in dates]
-        factories.ReportsHouseSenateFactory(committee_id=committee_id, coverage_end_date=dates[0])
-        factories.ReportsHouseSenateFactory(committee_id=committee_id, coverage_end_date=dates[1])
-        results = self._results(api.url_for(CommitteeReportsView, committee_id=committee_id))
-        self.assertEqual([each['coverage_end_date'] for each in results], dates_formatted[::-1])
+        factories.ReportsHouseSenateFactory(
+            committee_id=committee_id, coverage_end_date=dates[0]
+        )
+        factories.ReportsHouseSenateFactory(
+            committee_id=committee_id, coverage_end_date=dates[1]
+        )
+        results = self._results(
+            api.url_for(CommitteeReportsView, committee_id=committee_id)
+        )
+        self.assertEqual(
+            [each['coverage_end_date'] for each in results], dates_formatted[::-1]
+        )
 
     def test_reports_for_pdf_link(self):
         committee = factories.CommitteeFactory(committee_type='P')
@@ -160,9 +166,7 @@ class TestReports(ApiBaseTest):
         db.session.flush()
         number = 12345678901
         factories.ReportsPresidentialFactory(
-            report_year=2016,
-            beginning_image_number=number,
-            committee_id=committee_id,
+            report_year=2016, beginning_image_number=number, committee_id=committee_id
         )
 
         results = self._results(
@@ -186,9 +190,7 @@ class TestReports(ApiBaseTest):
         db.session.flush()
         number = 56789012345
         factories.ReportsPresidentialFactory(
-            report_year=1990,
-            beginning_image_number=number,
-            committee_id=committee_id,
+            report_year=1990, beginning_image_number=number, committee_id=committee_id
         )
 
         results = self._results(
@@ -209,9 +211,7 @@ class TestReports(ApiBaseTest):
         db.session.flush()
         number = 56789012346
         factories.ReportsHouseSenateFactory(
-            report_year=1999,
-            beginning_image_number=number,
-            committee_id=committee_id,
+            report_year=1999, beginning_image_number=number, committee_id=committee_id
         )
 
         results = self._results(
@@ -226,27 +226,35 @@ class TestReports(ApiBaseTest):
     def test_report_type_include(self):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
-        factories.CommitteeHistoryFactory(
-            committee_id=committee_id,
-            committee_type='H',
-        )
+        factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='H')
         factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='Q2')
         factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='M3')
-        factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='TER')
-        results = self._results(api.url_for(CommitteeReportsView, committee_id=committee_id, report_type=['Q2', 'M3']))
+        factories.ReportsHouseSenateFactory(
+            committee_id=committee_id, report_type='TER'
+        )
+        results = self._results(
+            api.url_for(
+                CommitteeReportsView,
+                committee_id=committee_id,
+                report_type=['Q2', 'M3'],
+            )
+        )
         self.assertTrue(all(each['report_type'] in ['Q2', 'M3'] for each in results))
 
     def test_report_type_exclude(self):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
-        factories.CommitteeHistoryFactory(
-            committee_id=committee_id,
-            committee_type='H',
-        )
+        factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='H')
         factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='Q2')
         factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='M3')
-        factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='TER')
-        results = self._results(api.url_for(CommitteeReportsView, committee_id=committee_id, report_type=['-M3']))
+        factories.ReportsHouseSenateFactory(
+            committee_id=committee_id, report_type='TER'
+        )
+        results = self._results(
+            api.url_for(
+                CommitteeReportsView, committee_id=committee_id, report_type=['-M3']
+            )
+        )
         self.assertTrue(all(each['report_type'] in ['Q2', 'TER'] for each in results))
 
     def test_ie_only(self):
@@ -258,35 +266,35 @@ class TestReports(ApiBaseTest):
         )
         results = self._results(
             api.url_for(
-                ReportsView,
-                committee_type='ie-only',
-                beginning_image_number=number,
+                ReportsView, committee_type='ie-only', beginning_image_number=number
             )
         )
         result = results[0]
-        for key in ['report_form', 'independent_contributions_period', 'independent_expenditures_period']:
+        for key in [
+            'report_form',
+            'independent_contributions_period',
+            'independent_expenditures_period',
+        ]:
             self.assertEqual(result[key], getattr(report, key))
 
     def test_ie_committee(self):
         committee = factories.CommitteeFactory(committee_type='I')
         committee_id = committee.committee_id
-        factories.CommitteeHistoryFactory(
-            committee_id=committee_id,
-            committee_type='I',
-        )
+        factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='I')
         report = factories.ReportsIEOnlyFactory(
             committee_id=committee_id,
             independent_contributions_period=200,
             independent_expenditures_period=100,
         )
         results = self._results(
-            api.url_for(
-                CommitteeReportsView,
-                committee_id=committee_id,
-            )
+            api.url_for(CommitteeReportsView, committee_id=committee_id)
         )
         result = results[0]
-        for key in ['report_form', 'independent_contributions_period', 'independent_expenditures_period']:
+        for key in [
+            'report_form',
+            'independent_contributions_period',
+            'independent_expenditures_period',
+        ]:
             self.assertEqual(result[key], getattr(report, key))
 
     def _check_reports(self, committee_type, factory, schema):
@@ -301,13 +309,13 @@ class TestReports(ApiBaseTest):
         db.session.flush()
         [
             factory(
-                committee_id=committee_id,
-                coverage_end_date=end_date,
-                report_year=2011,
+                committee_id=committee_id, coverage_end_date=end_date, report_year=2011
             )
             for end_date in end_dates
         ]
-        response = self._results(api.url_for(CommitteeReportsView, committee_id=committee_id))
+        response = self._results(
+            api.url_for(CommitteeReportsView, committee_id=committee_id)
+        )
         self.assertEqual(len(response), 2)
         self.assertEqual(response[0]['coverage_end_date'], isoformat(end_dates[0]))
         self.assertEqual(response[1]['coverage_end_date'], isoformat(end_dates[1]))
@@ -315,10 +323,26 @@ class TestReports(ApiBaseTest):
 
     # TODO(jmcarp) Refactor as parameterized tests
     def test_reports(self):
-        self._check_reports('H', factories.ReportsHouseSenateFactory, schemas.CommitteeReportsHouseSenateSchema)
-        self._check_reports('S', factories.ReportsHouseSenateFactory, schemas.CommitteeReportsHouseSenateSchema)
-        self._check_reports('P', factories.ReportsPresidentialFactory, schemas.CommitteeReportsPresidentialSchema)
-        self._check_reports('X', factories.ReportsPacPartyFactory, schemas.CommitteeReportsPacPartySchema)
+        self._check_reports(
+            'H',
+            factories.ReportsHouseSenateFactory,
+            schemas.CommitteeReportsHouseSenateSchema,
+        )
+        self._check_reports(
+            'S',
+            factories.ReportsHouseSenateFactory,
+            schemas.CommitteeReportsHouseSenateSchema,
+        )
+        self._check_reports(
+            'P',
+            factories.ReportsPresidentialFactory,
+            schemas.CommitteeReportsPresidentialSchema,
+        )
+        self._check_reports(
+            'X',
+            factories.ReportsPacPartyFactory,
+            schemas.CommitteeReportsPacPartySchema,
+        )
 
     def test_reports_committee_not_found(self):
         resp = self.app.get(api.url_for(CommitteeReportsView, committee_id='fake'))
@@ -329,26 +353,29 @@ class TestReports(ApiBaseTest):
 
 
 class TestEFileReports(ApiBaseTest):
-
     def _check_committee_ids(self, results, positives=None, negatives=None):
         ids = [each['committee_id'] for each in results]
-        for positive in (positives or []):
+        for positive in positives or []:
             self.assertIn(positive.committee_id, ids)
-        for negative in (negatives or []):
+        for negative in negatives or []:
             self.assertNotIn(negative.committee_id, ids)
 
     def test_efile_presidential_reports(self):
         committee_id = 'C86753090'
         other_id = 'C2222222'
 
-        committee_efile = factories.EfileReportsPresidentialFactory(committee_id=committee_id, cash_on_hand_end_period=20)
-        other_efile = factories.EfileReportsPresidentialFactory(committee_id=other_id, cash_on_hand_end_period=40)
+        committee_efile = factories.EfileReportsPresidentialFactory(
+            committee_id=committee_id, cash_on_hand_end_period=20
+        )
+        other_efile = factories.EfileReportsPresidentialFactory(
+            committee_id=other_id, cash_on_hand_end_period=40
+        )
 
         results = self._results(
             api.url_for(
                 EFilingPresidentialSummaryView,
                 committee_type='presidential',
-                committee_id=committee_id
+                committee_id=committee_id,
             )
         )
 
@@ -361,14 +388,13 @@ class TestEFileReports(ApiBaseTest):
         committee_id = 'C8675310'
         other_id = 'C3333333'
 
-        committee_efile = factories.EfileReportsPacPartyFactory(committee_id=committee_id)
+        committee_efile = factories.EfileReportsPacPartyFactory(
+            committee_id=committee_id
+        )
         other_efile = factories.EfileReportsPacPartyFactory(committee_id=other_id)
 
         results = self._results(
-            api.url_for(
-                EFilingPacPartySummaryView,
-                committee_id=committee_id
-            )
+            api.url_for(EFilingPacPartySummaryView, committee_id=committee_id)
         )
 
         self.assertEqual(results[0]['committee_id'], committee_id)
@@ -378,14 +404,16 @@ class TestEFileReports(ApiBaseTest):
         committee_id = 'C8675311'
         other_id = 'C1111111'
 
-        committee_efile = factories.EfileReportsHouseSenateFactory(committee_id=committee_id)
+        committee_efile = factories.EfileReportsHouseSenateFactory(
+            committee_id=committee_id
+        )
         other_efile = factories.EfileReportsHouseSenateFactory(committee_id=other_id)
 
         results = self._results(
             api.url_for(
                 EFilingHouseSenateSummaryView,
                 committee_type='house-senate',
-                committee_id=committee_id
+                committee_id=committee_id,
             )
         )
 
@@ -395,22 +423,49 @@ class TestEFileReports(ApiBaseTest):
 
     def test_filter_date_efile_reports(self):
         [
-            factories.EfileReportsPacPartyFactory(receipt_date=datetime.date(2012, 1, 1)),
-            factories.EfileReportsPacPartyFactory(receipt_date=datetime.date(2013, 1, 1)),
-            factories.EfileReportsPacPartyFactory(receipt_date=datetime.date(2014, 1, 1)),
-            factories.EfileReportsPacPartyFactory(receipt_date=datetime.date(2015, 1, 1)),
+            factories.EfileReportsPacPartyFactory(
+                receipt_date=datetime.date(2012, 1, 1)
+            ),
+            factories.EfileReportsPacPartyFactory(
+                receipt_date=datetime.date(2013, 1, 1)
+            ),
+            factories.EfileReportsPacPartyFactory(
+                receipt_date=datetime.date(2014, 1, 1)
+            ),
+            factories.EfileReportsPacPartyFactory(
+                receipt_date=datetime.date(2015, 1, 1)
+            ),
         ]
 
         min_date = datetime.date(2013, 1, 1)
-        results = self._results(api.url_for(EFilingPacPartySummaryView, min_receipt_date=min_date))
-        self.assertTrue(all(each for each in results if each['receipt_date'] >= min_date.isoformat()))
-        max_date = datetime.date(2014, 1, 1)
-        results = self._results(api.url_for(EFilingPacPartySummaryView, max_receipt_date=max_date))
-        self.assertTrue(all(each for each in results if each['receipt_date'] <= max_date.isoformat()))
-        results = self._results(api.url_for(EFilingPacPartySummaryView, min_receipt_date=min_date, max_receipt_date=max_date))
+        results = self._results(
+            api.url_for(EFilingPacPartySummaryView, min_receipt_date=min_date)
+        )
         self.assertTrue(
             all(
-                each for each in results
+                each for each in results if each['receipt_date'] >= min_date.isoformat()
+            )
+        )
+        max_date = datetime.date(2014, 1, 1)
+        results = self._results(
+            api.url_for(EFilingPacPartySummaryView, max_receipt_date=max_date)
+        )
+        self.assertTrue(
+            all(
+                each for each in results if each['receipt_date'] <= max_date.isoformat()
+            )
+        )
+        results = self._results(
+            api.url_for(
+                EFilingPacPartySummaryView,
+                min_receipt_date=min_date,
+                max_receipt_date=max_date,
+            )
+        )
+        self.assertTrue(
+            all(
+                each
+                for each in results
                 if min_date.isoformat() <= each['receipt_date'] <= max_date.isoformat()
             )
         )

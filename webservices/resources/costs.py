@@ -9,10 +9,7 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
-@doc(
-    tags=['communication cost'],
-    description=docs.COMMUNICATION_COST,
-)
+@doc(tags=['communication cost'], description=docs.COMMUNICATION_COST)
 class CommunicationCostView(ApiResource):
 
     model = models.CommunicationCost
@@ -26,7 +23,7 @@ class CommunicationCostView(ApiResource):
             args.itemized,
             args.communication_cost,
             args.make_sort_args(
-                validator=args.IndexValidator(models.CommunicationCost),
+                validator=args.IndexValidator(models.CommunicationCost)
             ),
         )
 
@@ -43,14 +40,14 @@ class CommunicationCostView(ApiResource):
     filter_range_fields = [
         (('min_date', 'max_date'), models.CommunicationCost.transaction_date),
         (('min_amount', 'max_amount'), models.CommunicationCost.transaction_amount),
-        (('min_image_number', 'max_image_number'), models.CommunicationCost.image_number),
+        (
+            ('min_image_number', 'max_image_number'),
+            models.CommunicationCost.image_number,
+        ),
     ]
 
 
-@doc(
-    tags=['electioneering'],
-    description=docs.ELECTIONEERING,
-)
+@doc(tags=['electioneering'], description=docs.ELECTIONEERING)
 class ElectioneeringView(ApiResource):
 
     model = models.Electioneering
@@ -58,7 +55,7 @@ class ElectioneeringView(ApiResource):
     page_schema = schemas.ElectioneeringPageSchema
 
     filter_fulltext_fields = [
-        ('description', models.Electioneering.purpose_description_text),
+        ('description', models.Electioneering.purpose_description_text)
     ]
 
     @property
@@ -67,9 +64,7 @@ class ElectioneeringView(ApiResource):
             args.paging,
             args.electioneering,
             args.make_seek_args(),
-            args.make_sort_args(
-                validator=args.IndexValidator(models.Electioneering),
-            ),
+            args.make_sort_args(validator=args.IndexValidator(models.Electioneering)),
         )
 
     @property

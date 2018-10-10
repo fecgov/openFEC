@@ -20,17 +20,11 @@ class AggregateResource(ApiResource):
 
     @property
     def args(self):
-        return utils.extend(
-            args.paging,
-            self.query_args,
-            self.sort_args,
-        )
+        return utils.extend(args.paging, self.query_args, self.sort_args)
 
     @property
     def sort_args(self):
-        return args.make_sort_args(
-            validator=args.IndexValidator(self.model)
-        )
+        return args.make_sort_args(validator=args.IndexValidator(self.model))
 
     @property
     def index_column(self):
@@ -43,10 +37,7 @@ class AggregateResource(ApiResource):
         return query
 
 
-@doc(
-    tags=['receipts'],
-    description=docs.SIZE_DESCRIPTION,
-)
+@doc(tags=['receipts'], description=docs.SIZE_DESCRIPTION)
 class ScheduleABySizeView(AggregateResource):
 
     model = models.ScheduleABySize
@@ -59,10 +50,7 @@ class ScheduleABySizeView(AggregateResource):
     ]
 
 
-@doc(
-    tags=['receipts'],
-    description=(docs.STATE_AGGREGATE)
-)
+@doc(tags=['receipts'], description=(docs.STATE_AGGREGATE))
 class ScheduleAByStateView(AggregateResource):
 
     model = models.ScheduleAByState
@@ -77,11 +65,7 @@ class ScheduleAByStateView(AggregateResource):
     @property
     def args(self):
         return utils.extend(
-            args.paging,
-            args.schedule_a_by_state,
-            args.make_sort_args(
-                default='-total',
-            ),
+            args.paging, args.schedule_a_by_state, args.make_sort_args(default='-total')
         )
 
     def build_query(self, committee_id=None, **kwargs):
@@ -90,12 +74,13 @@ class ScheduleAByStateView(AggregateResource):
             query = query.filter(self.model.state_full != None)  # noqa
         return query
 
+
 @doc(
     tags=['receipts'],
     description=(
         'Schedule A receipts aggregated by contributor zip code. To avoid double '
         'counting, memoed items are not included.'
-    )
+    ),
 )
 class ScheduleAByZipView(AggregateResource):
 
@@ -114,7 +99,7 @@ class ScheduleAByZipView(AggregateResource):
     description=(
         'Schedule A receipts aggregated by contributor employer name. To avoid double '
         'counting, memoed items are not included.'
-    )
+    ),
 )
 class ScheduleAByEmployerView(AggregateResource):
 
@@ -130,7 +115,9 @@ class ScheduleAByEmployerView(AggregateResource):
     def get(self, committee_id=None, **kwargs):
         query = self.build_query(committee_id=committee_id, **kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_page(query, kwargs, model=self.model, count=count, index_column=self.index_column)
+        return utils.fetch_page(
+            query, kwargs, model=self.model, count=count, index_column=self.index_column
+        )
 
 
 @doc(
@@ -138,7 +125,7 @@ class ScheduleAByEmployerView(AggregateResource):
     description=(
         'Schedule A receipts aggregated by contributor occupation. To avoid double '
         'counting, memoed items are not included.'
-    )
+    ),
 )
 class ScheduleAByOccupationView(AggregateResource):
 
@@ -154,7 +141,9 @@ class ScheduleAByOccupationView(AggregateResource):
     def get(self, committee_id=None, **kwargs):
         query = self.build_query(committee_id=committee_id, **kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_page(query, kwargs, model=self.model, count=count, index_column=self.index_column)
+        return utils.fetch_page(
+            query, kwargs, model=self.model, count=count, index_column=self.index_column
+        )
 
 
 @doc(
@@ -162,7 +151,7 @@ class ScheduleAByOccupationView(AggregateResource):
     description=(
         'Schedule B receipts aggregated by recipient name. To avoid '
         'double counting, memoed items are not included.'
-    )
+    ),
 )
 class ScheduleBByRecipientView(AggregateResource):
 
@@ -181,7 +170,7 @@ class ScheduleBByRecipientView(AggregateResource):
     description=(
         'Schedule B receipts aggregated by recipient committee ID, if applicable. To avoid '
         'double counting, memoed items are not included.'
-    )
+    ),
 )
 class ScheduleBByRecipientIDView(AggregateResource):
 
@@ -199,12 +188,7 @@ class ScheduleBByRecipientIDView(AggregateResource):
     ]
 
 
-@doc(
-    tags=['disbursements'],
-    description=(
-        docs.SCHEDULE_B_BY_PURPOSE
-    )
-)
+@doc(tags=['disbursements'], description=(docs.SCHEDULE_B_BY_PURPOSE))
 class ScheduleBByPurposeView(AggregateResource):
 
     model = models.ScheduleBByPurpose
@@ -227,10 +211,7 @@ class CandidateAggregateResource(AggregateResource):
     @property
     def sort_args(self):
         return args.make_sort_args(
-            validator=args.IndexValidator(
-                self.model,
-                extra=['candidate', 'committee'],
-            ),
+            validator=args.IndexValidator(self.model, extra=['candidate', 'committee'])
         )
 
     label_columns = []
@@ -241,32 +222,34 @@ class CandidateAggregateResource(AggregateResource):
         election_full = kwargs.get('election_full')
         if election_full and not (kwargs.get('candidate_id') or kwargs.get('office')):
             raise exceptions.ApiError(
-                'Must include "candidate_id" or "office" argument(s)',
-                status_code=422,
+                'Must include "candidate_id" or "office" argument(s)', status_code=422
             )
         cycle_column = (
             models.CandidateElection.cand_election_year
             if election_full
             else self.model.cycle
         )
-        query = filters.filter_election(query, kwargs, self.model.candidate_id, cycle_column)
+        query = filters.filter_election(
+            query, kwargs, self.model.candidate_id, cycle_column
+        )
         query = query.filter(
-            cycle_column.in_(kwargs['cycle'])
-            if kwargs.get('cycle')
-            else True
+            cycle_column.in_(kwargs['cycle']) if kwargs.get('cycle') else True
         )
         if election_full:
             query = self.aggregate_cycles(query, cycle_column)
         return self.join_entity_names(query)
 
     def aggregate_cycles(self, query, cycle_column):
-        election_duration = utils.get_election_duration(sa.func.left(self.model.candidate_id, 1))
+        election_duration = utils.get_election_duration(
+            sa.func.left(self.model.candidate_id, 1)
+        )
         query = query.join(
             models.CandidateElection,
             sa.and_(
                 self.model.candidate_id == models.CandidateElection.candidate_id,
                 self.model.cycle <= models.CandidateElection.cand_election_year,
-                self.model.cycle > (models.CandidateElection.cand_election_year - election_duration),
+                self.model.cycle
+                > (models.CandidateElection.cand_election_year - election_duration),
             ),
         )
         return query.with_entities(
@@ -285,32 +268,37 @@ class CandidateAggregateResource(AggregateResource):
 
     def join_entity_names(self, query):
         query = query.subquery()
-        return models.db.session.query(
-            query,
-            models.CandidateHistory.candidate_id.label('candidate_id'),
-            models.CommitteeHistory.committee_id.label('committee_id'),
-            models.CandidateHistory.name.label('candidate_name'),
-            models.CommitteeHistory.name.label('committee_name'),
-        ).outerjoin(
-            models.CandidateHistory,
-            sa.and_(
-                query.c.cand_id == models.CandidateHistory.candidate_id,
-                query.c.cycle == models.CandidateHistory.two_year_period,
-            ),
-        ).outerjoin(
-            models.CommitteeHistory,
-            sa.and_(
-                query.c.cmte_id == models.CommitteeHistory.committee_id,
-                query.c.cycle == models.CommitteeHistory.cycle,
-            ),
+        return (
+            models.db.session.query(
+                query,
+                models.CandidateHistory.candidate_id.label('candidate_id'),
+                models.CommitteeHistory.committee_id.label('committee_id'),
+                models.CandidateHistory.name.label('candidate_name'),
+                models.CommitteeHistory.name.label('committee_name'),
+            )
+            .outerjoin(
+                models.CandidateHistory,
+                sa.and_(
+                    query.c.cand_id == models.CandidateHistory.candidate_id,
+                    query.c.cycle == models.CandidateHistory.two_year_period,
+                ),
+            )
+            .outerjoin(
+                models.CommitteeHistory,
+                sa.and_(
+                    query.c.cmte_id == models.CommitteeHistory.committee_id,
+                    query.c.cycle == models.CommitteeHistory.cycle,
+                ),
+            )
         )
+
 
 @doc(
     tags=['independent expenditures'],
     description=(
         'Schedule E receipts aggregated by recipient candidate. To avoid double '
         'counting, memoed items are not included.'
-    )
+    ),
 )
 class ScheduleEByCandidateView(CandidateAggregateResource):
 
@@ -318,15 +306,14 @@ class ScheduleEByCandidateView(CandidateAggregateResource):
     schema = schemas.ScheduleEByCandidateSchema
     page_schema = schemas.ScheduleEByCandidatePageSchema
     query_args = utils.extend(args.elections, args.schedule_e_by_candidate)
-    filter_multi_fields = [
-        ('candidate_id', models.ScheduleEByCandidate.candidate_id),
-    ]
+    filter_multi_fields = [('candidate_id', models.ScheduleEByCandidate.candidate_id)]
     filter_match_fields = [
-        ('support_oppose', models.ScheduleEByCandidate.support_oppose_indicator),
+        ('support_oppose', models.ScheduleEByCandidate.support_oppose_indicator)
     ]
 
     label_columns = [models.ScheduleEByCandidate.support_oppose_indicator]
     group_columns = [models.ScheduleEByCandidate.support_oppose_indicator]
+
 
 @doc(
     tags=['communication cost'],
@@ -339,18 +326,18 @@ class CommunicationCostByCandidateView(CandidateAggregateResource):
     page_schema = schemas.CommunicationCostByCandidatePageSchema
     query_args = utils.extend(args.elections, args.communication_cost_by_candidate)
     filter_multi_fields = [
-        ('candidate_id', models.CommunicationCostByCandidate.candidate_id),
+        ('candidate_id', models.CommunicationCostByCandidate.candidate_id)
     ]
     filter_match_fields = [
-        ('support_oppose', models.CommunicationCostByCandidate.support_oppose_indicator),
+        ('support_oppose', models.CommunicationCostByCandidate.support_oppose_indicator)
     ]
 
     label_columns = [models.CommunicationCostByCandidate.support_oppose_indicator]
     group_columns = [models.CommunicationCostByCandidate.support_oppose_indicator]
 
+
 @doc(
-    tags=['electioneering'],
-    description='Electioneering costs aggregated by candidate.',
+    tags=['electioneering'], description='Electioneering costs aggregated by candidate.'
 )
 class ElectioneeringByCandidateView(CandidateAggregateResource):
 
@@ -359,5 +346,5 @@ class ElectioneeringByCandidateView(CandidateAggregateResource):
     page_schema = schemas.ElectioneeringByCandidatePageSchema
     query_args = utils.extend(args.elections, args.electioneering_by_candidate)
     filter_multi_fields = [
-        ('candidate_id', models.ElectioneeringByCandidate.candidate_id),
+        ('candidate_id', models.ElectioneeringByCandidate.candidate_id)
     ]

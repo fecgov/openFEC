@@ -8,10 +8,7 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
-@doc(
-    tags=['debts'],
-    description=docs.SCHEDULE_D,
-)
+@doc(tags=['debts'], description=docs.SCHEDULE_D)
 class ScheduleDView(ApiResource):
 
     model = models.ScheduleD
@@ -31,16 +28,17 @@ class ScheduleDView(ApiResource):
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleD.load_date),
         (('min_payment_period', 'max_payment_period'), models.ScheduleD.payment_period),
-        (('min_amount_incurred_period', 'max_amount_incurred_period'), models.ScheduleD.amount_incurred_period),
+        (
+            ('min_amount_incurred_period', 'max_amount_incurred_period'),
+            models.ScheduleD.amount_incurred_period,
+        ),
         (('min_image_number', 'max_image_number'), models.ScheduleD.image_number),
     ]
 
-    filter_match_fields = [
-        ('nature_of_debt', models.ScheduleD.nature_of_debt)
-    ]
+    filter_match_fields = [('nature_of_debt', models.ScheduleD.nature_of_debt)]
 
     filter_fulltext_fields = [
-        ('creditor_debtor_name', models.ScheduleD.creditor_debtor_name_text),
+        ('creditor_debtor_name', models.ScheduleD.creditor_debtor_name_text)
     ]
 
     @property
@@ -49,22 +47,17 @@ class ScheduleDView(ApiResource):
             args.itemized,
             args.schedule_d,
             args.paging,
-            args.make_sort_args(
-                default='load_date',
-            )
+            args.make_sort_args(default='load_date'),
         )
 
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
         if kwargs.get('sub_id'):
-            query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
+            query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         return query
 
 
-@doc(
-    tags=['debts'],
-    description=docs.SCHEDULE_D,
-)
+@doc(tags=['debts'], description=docs.SCHEDULE_D)
 class ScheduleDViewBySubId(ApiResource):
     model = models.ScheduleD
     schema = schemas.ScheduleDSchema
@@ -81,6 +74,4 @@ class ScheduleDViewBySubId(ApiResource):
 
     @property
     def args(self):
-        return utils.extend(
-            args.paging,
-        )
+        return utils.extend(args.paging)

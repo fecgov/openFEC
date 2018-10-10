@@ -41,7 +41,7 @@ class BaseFilings(views.ApiResource):
     ]
 
     filter_range_fields = [
-        (('min_receipt_date', 'max_receipt_date'), models.Filings.receipt_date),
+        (('min_receipt_date', 'max_receipt_date'), models.Filings.receipt_date)
     ]
 
     filter_match_fields = [
@@ -52,29 +52,29 @@ class BaseFilings(views.ApiResource):
 
     @property
     def args(self):
-        #Place the sort argument in a list, as the api will return a 422 status code if it's not in a list
-        #list is needed because multisort is used
+        # Place the sort argument in a list, as the api will return a 422 status code if it's not in a list
+        # list is needed because multisort is used
         default_sort = ['-receipt_date']
         return utils.extend(
             args.paging,
             args.filings,
             args.make_multi_sort_args(
-                default=default_sort,
-                validator=args.IndicesValidator(self.model)
+                default=default_sort, validator=args.IndicesValidator(self.model)
             ),
         )
 
     def get(self, **kwargs):
         if kwargs.get('form_type') and 'RFAI' in kwargs.get('form_type'):
-            #Adds FRQ types if RFAI was requested
+            # Adds FRQ types if RFAI was requested
             kwargs.get('form_type').append('FRQ')
         query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_page(query, kwargs, model=models.Filings, count=count, multi=True)
+        return utils.fetch_page(
+            query, kwargs, model=models.Filings, count=count, multi=True
+        )
 
 
 class FilingsView(BaseFilings):
-
     def build_query(self, committee_id=None, candidate_id=None, **kwargs):
         query = super().build_query(**kwargs)
         if committee_id:
@@ -96,10 +96,7 @@ class FilingsList(BaseFilings):
         return utils.extend(super().args, args.entities)
 
 
-@doc(
-    tags=['efiling'],
-    description=docs.EFILE_FILES,
-)
+@doc(tags=['efiling'], description=docs.EFILE_FILES)
 class EFilingsView(views.ApiResource):
 
     model = models.EFilings
@@ -111,7 +108,7 @@ class EFilingsView(views.ApiResource):
         ('committee_id', models.EFilings.committee_id),
     ]
     filter_range_fields = [
-        (('min_receipt_date', 'max_receipt_date'), models.EFilings.receipt_date),
+        (('min_receipt_date', 'max_receipt_date'), models.EFilings.receipt_date)
     ]
 
     @property
@@ -120,8 +117,7 @@ class EFilingsView(views.ApiResource):
             args.paging,
             args.efilings,
             args.make_sort_args(
-                default='-receipt_date',
-                validator=args.IndexValidator(self.model)
+                default='-receipt_date', validator=args.IndexValidator(self.model)
             ),
         )
 

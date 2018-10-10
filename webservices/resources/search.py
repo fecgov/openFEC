@@ -11,41 +11,31 @@ from webservices.common import models
 from webservices.utils import use_kwargs
 
 
-@doc(
-    tags=['search'],
-    description=docs.NAME_SEARCH,
-)
+@doc(tags=['search'], description=docs.NAME_SEARCH)
 class CandidateNameSearch(utils.Resource):
 
-    filter_fulltext_fields = [
-        ('q', models.CandidateSearch.fulltxt),
-    ]
+    filter_fulltext_fields = [('q', models.CandidateSearch.fulltxt)]
 
     @use_kwargs(args.names)
     @marshal_with(schemas.CandidateSearchListSchema())
     def get(self, **kwargs):
-        query = filters.filter_fulltext(models.CandidateSearch.query, kwargs, self.filter_fulltext_fields)
-        query = query.order_by(
-            sa.desc(models.CandidateSearch.total_activity)
-        ).limit(20)
+        query = filters.filter_fulltext(
+            models.CandidateSearch.query, kwargs, self.filter_fulltext_fields
+        )
+        query = query.order_by(sa.desc(models.CandidateSearch.total_activity)).limit(20)
         return {'results': query.all()}
 
 
-@doc(
-    tags=['search'],
-    description=docs.NAME_SEARCH,
-)
+@doc(tags=['search'], description=docs.NAME_SEARCH)
 class CommitteeNameSearch(utils.Resource):
 
-    filter_fulltext_fields = [
-        ('q', models.CommitteeSearch.fulltxt),
-    ]
+    filter_fulltext_fields = [('q', models.CommitteeSearch.fulltxt)]
 
     @use_kwargs(args.names)
     @marshal_with(schemas.CommitteeSearchListSchema())
     def get(self, **kwargs):
-        query = filters.filter_fulltext(models.CommitteeSearch.query, kwargs, self.filter_fulltext_fields)
-        query = query.order_by(
-            sa.desc(models.CommitteeSearch.total_activity)
-        ).limit(20)
+        query = filters.filter_fulltext(
+            models.CommitteeSearch.query, kwargs, self.filter_fulltext_fields
+        )
+        query = query.order_by(sa.desc(models.CommitteeSearch.total_activity)).limit(20)
         return {'results': query.all()}

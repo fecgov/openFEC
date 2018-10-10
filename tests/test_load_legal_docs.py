@@ -6,7 +6,7 @@ from webservices.legal_docs import (
     index_regulations,
     index_statutes,
     load_archived_murs,
-    create_docs_index
+    create_docs_index,
 )
 
 from webservices.legal_docs.load_legal_docs import (
@@ -20,12 +20,14 @@ from zipfile import ZipFile
 from tempfile import NamedTemporaryFile
 import json
 
+
 def test_get_subject_tree():
     assert get_subject_tree("foo") == [{"text": "Foo"}]
     assert get_subject_tree("<li>foo</li>") == [{"text": "Foo"}]
     assert get_subject_tree(
-        "foo<ul class='no-top-margin'><li>bar</li><li>baz</li></ul>") == [
-            {"text": "Foo", "children": [{"text": "Bar"}, {"text": "Baz"}]}]
+        "foo<ul class='no-top-margin'><li>bar</li><li>baz</li></ul>"
+    ) == [{"text": "Foo", "children": [{"text": "Bar"}, {"text": "Baz"}]}]
+
 
 class ElasticSearchMock:
     class ElasticSearchIndicesMock:
@@ -53,7 +55,9 @@ class ElasticSearchMock:
 def get_es_with_doc(doc):
     def get_es():
         return ElasticSearchMock(doc)
+
     return get_es
+
 
 def mock_xml(xml):
     def request_zip(url, stream=False):
@@ -67,16 +71,20 @@ def mock_xml(xml):
 
     return request_zip
 
+
 def mock_archived_murs_get_request(html):
     def request_murs_data(url, stream=False):
         if stream:
             return [b'ABC', b'def']
         else:
             return RequestResult(html)
+
     return request_murs_data
+
 
 def get_credential_mock(var, default):
     return 'https://eregs.api.com/'
+
 
 class RequestResult:
     def __init__(self, result):
@@ -86,16 +94,32 @@ class RequestResult:
     def json(self):
         return self.result
 
+
 def mock_get_regulations(url):
     if url.endswith('regulation'):
-        return RequestResult({'versions': [{'version': 'versionA',
-                             'regulation': 'reg104'}]})
+        return RequestResult(
+            {'versions': [{'version': 'versionA', 'regulation': 'reg104'}]}
+        )
     if url.endswith('reg104/versionA'):
-        return RequestResult({'children': [{'children': [{'label': ['104', '1'],
-                               'title': 'Section 104.1 Title',
-                               'text': 'sectionContentA',
-                               'children': [{'text': 'sectionContentB',
-                               'children': []}]}]}]})
+        return RequestResult(
+            {
+                'children': [
+                    {
+                        'children': [
+                            {
+                                'label': ['104', '1'],
+                                'title': 'Section 104.1 Title',
+                                'text': 'sectionContentA',
+                                'children': [
+                                    {'text': 'sectionContentB', 'children': []}
+                                ],
+                            }
+                        ]
+                    }
+                ]
+            }
+        )
+
 
 class S3Objects:
     def __init__(self):
@@ -103,6 +127,7 @@ class S3Objects:
 
     def filter(self, Prefix):
         return [o for o in self.objects if o.key.startswith(Prefix)]
+
 
 class BucketMock:
     def __init__(self, keys):
@@ -112,26 +137,43 @@ class BucketMock:
     def put_object(self, Key, Body, ContentType, ACL):
         assert Key in self.keys
 
+
 def get_bucket_mock(keys):
     def get_bucket():
         return BucketMock(keys)
+
     return get_bucket
 
+
 class IndexStatutesTest(unittest.TestCase):
-    @patch('webservices.legal_docs.load_legal_docs.requests.get', mock_xml('<test></test>'))
+    @patch(
+        'webservices.legal_docs.load_legal_docs.requests.get', mock_xml('<test></test>')
+    )
     def test_get_xml_tree_from_url(self):
         etree = get_xml_tree_from_url('anything.com')
         assert etree.getroot().tag == 'test'
 
-    @patch('webservices.utils.get_elasticsearch_connection',
-            get_es_with_doc({'name': 'title',
-            'chapter': '1', 'title': '26', 'no': '123',
-            'text': '   title  content ', 'doc_id': '/us/usc/t26/s123',
-            'url': 'http://api.fdsys.gov/link?collection=uscode&title=26&' +
-                    'year=mostrecent&section=123',
-            'sort1': 26, 'sort2': 123}))
-    @patch('webservices.legal_docs.load_legal_docs.requests.get', mock_xml(
-        """<?xml version="1.0" encoding="UTF-8"?>
+    @patch(
+        'webservices.utils.get_elasticsearch_connection',
+        get_es_with_doc(
+            {
+                'name': 'title',
+                'chapter': '1',
+                'title': '26',
+                'no': '123',
+                'text': '   title  content ',
+                'doc_id': '/us/usc/t26/s123',
+                'url': 'http://api.fdsys.gov/link?collection=uscode&title=26&'
+                + 'year=mostrecent&section=123',
+                'sort1': 26,
+                'sort2': 123,
+            }
+        ),
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.requests.get',
+        mock_xml(
+            """<?xml version="1.0" encoding="UTF-8"?>
             <uscDoc xmlns="http://xml.house.gov/schemas/uslm/1.0">
             <subtitle identifier="/us/usc/t26/stH">
             <chapter identifier="/us/usc/t26/stH/ch1">
@@ -139,20 +181,34 @@ class IndexStatutesTest(unittest.TestCase):
             <heading>title</heading>
             <subsection>content</subsection>
             </section></chapter></subtitle></uscDoc>
-            """))
+            """
+        ),
+    )
     def test_title_26(self):
         get_title_26_statutes()
 
-    @patch('webservices.utils.get_elasticsearch_connection',
-            get_es_with_doc({'subchapter': 'I',
-            'doc_id': '/us/usc/t52/s123', 'chapter': '1',
-            'text': '   title  content ',
-            'url': 'http://api.fdsys.gov/link?collection=uscode&title=52&' +
-                   'year=mostrecent&section=123',
-            'title': '52', 'name': 'title', 'no': '123',
-            'sort1': 52, 'sort2': 123}))
-    @patch('webservices.legal_docs.load_legal_docs.requests.get', mock_xml(
-        """<?xml version="1.0" encoding="UTF-8"?>
+    @patch(
+        'webservices.utils.get_elasticsearch_connection',
+        get_es_with_doc(
+            {
+                'subchapter': 'I',
+                'doc_id': '/us/usc/t52/s123',
+                'chapter': '1',
+                'text': '   title  content ',
+                'url': 'http://api.fdsys.gov/link?collection=uscode&title=52&'
+                + 'year=mostrecent&section=123',
+                'title': '52',
+                'name': 'title',
+                'no': '123',
+                'sort1': 52,
+                'sort2': 123,
+            }
+        ),
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.requests.get',
+        mock_xml(
+            """<?xml version="1.0" encoding="UTF-8"?>
             <uscDoc xmlns="http://xml.house.gov/schemas/uslm/1.0">
             <subtitle identifier="/us/usc/t52/stIII">
             <subchapter identifier="/us/usc/t52/stIII/ch1/schI">
@@ -160,7 +216,9 @@ class IndexStatutesTest(unittest.TestCase):
             <heading>title</heading>
             <subsection>content</subsection>
             </section></subchapter></subtitle></uscDoc>
-            """))
+            """
+        ),
+    )
     def test_title_52(self):
         get_title_52_statutes()
 
@@ -169,15 +227,26 @@ class IndexStatutesTest(unittest.TestCase):
     def test_index_statutes(self):
         index_statutes()
 
+
 class IndexRegulationsTest(unittest.TestCase):
-    @patch('webservices.legal_docs.load_legal_docs.env.get_credential', get_credential_mock)
+    @patch(
+        'webservices.legal_docs.load_legal_docs.env.get_credential', get_credential_mock
+    )
     @patch('webservices.legal_docs.load_legal_docs.requests.get', mock_get_regulations)
-    @patch('webservices.utils.get_elasticsearch_connection',
-            get_es_with_doc({'text': 'sectionContentA sectionContentB',
-            'no': '104.1', 'name': 'Title',
-            'url': '/regulations/104-1/versionA#104-1',
-            'doc_id': '104_1',
-            'sort1': 104, 'sort2': 1}))
+    @patch(
+        'webservices.utils.get_elasticsearch_connection',
+        get_es_with_doc(
+            {
+                'text': 'sectionContentA sectionContentB',
+                'no': '104.1',
+                'name': 'Title',
+                'url': '/regulations/104-1/versionA#104-1',
+                'doc_id': '104_1',
+                'sort1': 104,
+                'sort2': 1,
+            }
+        ),
+    )
     def test_index_regulations(self):
         index_regulations()
 
@@ -185,88 +254,170 @@ class IndexRegulationsTest(unittest.TestCase):
     def test_no_env_variable(self):
         index_regulations()
 
+
 class InitializeLegalDocsTest(unittest.TestCase):
-    @patch('webservices.utils.get_elasticsearch_connection',
-    get_es_with_doc({}))
+    @patch('webservices.utils.get_elasticsearch_connection', get_es_with_doc({}))
     def test_create_docs_index(self):
         create_docs_index()
+
 
 def raise_pdf_exception(PDF):
     raise Exception('Could not parse PDF')
 
+
 class LoadArchivedMursTest(unittest.TestCase):
-    @patch('webservices.utils.get_elasticsearch_connection',
-        get_es_with_doc(json.load(open('tests/data/archived_mur_doc.json'))))
-    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
-        get_bucket_mock('legal/murs/1.pdf'))
-    @patch('webservices.legal_docs.load_legal_docs.slate.PDF', lambda t: ['page1', 'page2'])
-    @patch('webservices.legal_docs.load_legal_docs.env.get_credential', lambda e: 'bucket123')
-    @patch('webservices.legal_docs.load_legal_docs.requests.get',
-        mock_archived_murs_get_request(open('tests/data/archived_mur_data.html').read()))
+    @patch(
+        'webservices.utils.get_elasticsearch_connection',
+        get_es_with_doc(json.load(open('tests/data/archived_mur_doc.json'))),
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.get_bucket',
+        get_bucket_mock('legal/murs/1.pdf'),
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.slate.PDF', lambda t: ['page1', 'page2']
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.env.get_credential',
+        lambda e: 'bucket123',
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.requests.get',
+        mock_archived_murs_get_request(
+            open('tests/data/archived_mur_data.html').read()
+        ),
+    )
     def test_base_case(self):
         # Management command brings this in as a string
         load_archived_murs(specific_mur_no='1')
 
-    @patch('webservices.utils.get_elasticsearch_connection',
-        get_es_with_doc(json.load(open('tests/data/archived_mur_multi_part_doc.json'))))
-    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
-        get_bucket_mock(['legal/murs/3_A.pdf', 'legal/murs/3_B.pdf', 'legal/murs/3_C.pdf']))
-    @patch('webservices.legal_docs.load_legal_docs.slate.PDF', lambda t: ['page1', 'page2'])
-    @patch('webservices.legal_docs.load_legal_docs.env.get_credential', lambda e: 'bucket123')
-    @patch('webservices.legal_docs.load_legal_docs.requests.get',
-        mock_archived_murs_get_request(open('tests/data/archived_mur_multi_part_data.html').read()))
+    @patch(
+        'webservices.utils.get_elasticsearch_connection',
+        get_es_with_doc(json.load(open('tests/data/archived_mur_multi_part_doc.json'))),
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.get_bucket',
+        get_bucket_mock(
+            ['legal/murs/3_A.pdf', 'legal/murs/3_B.pdf', 'legal/murs/3_C.pdf']
+        ),
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.slate.PDF', lambda t: ['page1', 'page2']
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.env.get_credential',
+        lambda e: 'bucket123',
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.requests.get',
+        mock_archived_murs_get_request(
+            open('tests/data/archived_mur_multi_part_data.html').read()
+        ),
+    )
     def test_multi_file(self):
         # Management command brings this in as a string
         load_archived_murs(specific_mur_no='3')
 
-    @patch('webservices.utils.get_elasticsearch_connection',
-        get_es_with_doc(json.load(open('tests/data/archived_mur_empty_doc.json'))))
-    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
-        get_bucket_mock('legal/murs/1.pdf'))
-    @patch('webservices.legal_docs.load_legal_docs.slate.PDF', lambda t: ['page1', 'page2'])
-    @patch('webservices.legal_docs.load_legal_docs.env.get_credential', lambda e: 'bucket123')
-    @patch('webservices.legal_docs.load_legal_docs.requests.get',
-        mock_archived_murs_get_request(open('tests/data/archived_mur_empty_data.html').read()))
+    @patch(
+        'webservices.utils.get_elasticsearch_connection',
+        get_es_with_doc(json.load(open('tests/data/archived_mur_empty_doc.json'))),
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.get_bucket',
+        get_bucket_mock('legal/murs/1.pdf'),
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.slate.PDF', lambda t: ['page1', 'page2']
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.env.get_credential',
+        lambda e: 'bucket123',
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.requests.get',
+        mock_archived_murs_get_request(
+            open('tests/data/archived_mur_empty_data.html').read()
+        ),
+    )
     def test_with_empty_data(self):
         load_archived_murs()
 
-    @patch('webservices.utils.get_elasticsearch_connection',
-        get_es_with_doc(json.load(open('tests/data/archived_mur_empty_doc.json'))))
-    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
-        get_bucket_mock('legal/murs/1.pdf'))
-    @patch('webservices.legal_docs.load_legal_docs.slate.PDF', lambda t: ['page1', 'page2'])
-    @patch('webservices.legal_docs.load_legal_docs.env.get_credential', lambda e: 'bucket123')
-    @patch('webservices.legal_docs.load_legal_docs.requests.get',
-        mock_archived_murs_get_request(open('tests/data/archived_mur_bad_subject.html').read()))
+    @patch(
+        'webservices.utils.get_elasticsearch_connection',
+        get_es_with_doc(json.load(open('tests/data/archived_mur_empty_doc.json'))),
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.get_bucket',
+        get_bucket_mock('legal/murs/1.pdf'),
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.slate.PDF', lambda t: ['page1', 'page2']
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.env.get_credential',
+        lambda e: 'bucket123',
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.requests.get',
+        mock_archived_murs_get_request(
+            open('tests/data/archived_mur_bad_subject.html').read()
+        ),
+    )
     def test_bad_parse(self):
         with self.assertRaises(Exception):
             load_archived_murs()
 
-    @patch('webservices.utils.get_elasticsearch_connection',
-        get_es_with_doc(json.load(open('tests/data/archived_mur_empty_doc.json'))))
-    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
-        get_bucket_mock('legal/murs/1.pdf'))
-    @patch('webservices.legal_docs.load_legal_docs.slate.PDF', lambda t: ['page1', 'page2'])
-    @patch('webservices.legal_docs.load_legal_docs.env.get_credential', lambda e: 'bucket123')
-    @patch('webservices.legal_docs.load_legal_docs.requests.get',
-        mock_archived_murs_get_request(open('tests/data/archived_mur_bad_citation.html').read()))
+    @patch(
+        'webservices.utils.get_elasticsearch_connection',
+        get_es_with_doc(json.load(open('tests/data/archived_mur_empty_doc.json'))),
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.get_bucket',
+        get_bucket_mock('legal/murs/1.pdf'),
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.slate.PDF', lambda t: ['page1', 'page2']
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.env.get_credential',
+        lambda e: 'bucket123',
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.requests.get',
+        mock_archived_murs_get_request(
+            open('tests/data/archived_mur_bad_citation.html').read()
+        ),
+    )
     def test_bad_citation(self):
         with self.assertRaises(Exception):
             load_archived_murs()
 
-    @patch('webservices.utils.get_elasticsearch_connection',
-        get_es_with_doc(json.load(open('tests/data/archived_mur_bad_pdf_doc.json'))))
-    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
-        get_bucket_mock('legal/murs/1.pdf'))
-    @patch('webservices.legal_docs.load_legal_docs.env.get_credential', lambda e: 'bucket123')
-    @patch('webservices.legal_docs.load_legal_docs.requests.get',
-        mock_archived_murs_get_request(open('tests/data/archived_mur_data.html').read()))
+    @patch(
+        'webservices.utils.get_elasticsearch_connection',
+        get_es_with_doc(json.load(open('tests/data/archived_mur_bad_pdf_doc.json'))),
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.get_bucket',
+        get_bucket_mock('legal/murs/1.pdf'),
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.env.get_credential',
+        lambda e: 'bucket123',
+    )
+    @patch(
+        'webservices.legal_docs.load_legal_docs.requests.get',
+        mock_archived_murs_get_request(
+            open('tests/data/archived_mur_data.html').read()
+        ),
+    )
     @patch('webservices.legal_docs.load_legal_docs.slate.PDF', raise_pdf_exception)
     def test_with_bad_pdf(self):
         load_archived_murs(specific_mur_no='1')
 
-    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
-        get_bucket_mock('legal/murs/1.pdf'))
+    @patch(
+        'webservices.legal_docs.load_legal_docs.get_bucket',
+        get_bucket_mock('legal/murs/1.pdf'),
+    )
     def test_delete_murs_from_s3(self):
         delete_murs_from_s3()
 

@@ -3,14 +3,22 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from webservices import docs, utils
 from webservices.common.models.dates import ReportType
 from webservices.common.models.dates import clean_report_type
-from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin, FecFileNumberMixin
+from webservices.common.models.reports import (
+    CsvMixin,
+    FecMixin,
+    AmendmentChainMixin,
+    FecFileNumberMixin,
+)
 from .base import db
+
 
 class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     __tablename__ = 'ofec_filings_all_mv'
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
-    committee = utils.related_committee_history('committee_id', cycle_label='report_year')
+    committee = utils.related_committee_history(
+        'committee_id', cycle_label='report_year'
+    )
     committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
     candidate_id = db.Column(db.String, index=True, doc=docs.CANDIDATE_ID)
     candidate_name = db.Column(db.String, doc=docs.CANDIDATE_NAME)
@@ -26,7 +34,9 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     document_type = db.Column(db.String, index=True, doc=docs.DOC_TYPE)
     document_type_full = db.Column(db.String, doc=docs.DOC_TYPE)
     report_type_full = db.Column(db.String, doc=docs.REPORT_TYPE)
-    beginning_image_number = db.Column(db.BigInteger, index=True, doc=docs.BEGINNING_IMAGE_NUMBER)
+    beginning_image_number = db.Column(
+        db.BigInteger, index=True, doc=docs.BEGINNING_IMAGE_NUMBER
+    )
     ending_image_number = db.Column(db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
     pages = db.Column(db.Integer, doc='Number of pages in the document')
     total_receipts = db.Column(db.Numeric(30, 2))
@@ -35,10 +45,18 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     total_disbursements = db.Column(db.Numeric(30, 2))
     total_independent_expenditures = db.Column(db.Numeric(30, 2))
     total_communication_cost = db.Column(db.Numeric(30, 2))
-    cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2), doc=docs.CASH_ON_HAND_BEGIN_PERIOD)
-    cash_on_hand_end_period = db.Column(db.Numeric(30, 2), doc=docs.CASH_ON_HAND_END_PERIOD)
-    debts_owed_by_committee = db.Column(db.Numeric(30, 2), doc=docs.DEBTS_OWED_BY_COMMITTEE)
-    debts_owed_to_committee = db.Column(db.Numeric(30, 2), doc=docs.DEBTS_OWED_TO_COMMITTEE)
+    cash_on_hand_beginning_period = db.Column(
+        db.Numeric(30, 2), doc=docs.CASH_ON_HAND_BEGIN_PERIOD
+    )
+    cash_on_hand_end_period = db.Column(
+        db.Numeric(30, 2), doc=docs.CASH_ON_HAND_END_PERIOD
+    )
+    debts_owed_by_committee = db.Column(
+        db.Numeric(30, 2), doc=docs.DEBTS_OWED_BY_COMMITTEE
+    )
+    debts_owed_to_committee = db.Column(
+        db.Numeric(30, 2), doc=docs.DEBTS_OWED_TO_COMMITTEE
+    )
     house_personal_funds = db.Column(db.Numeric(30, 2))
     senate_personal_funds = db.Column(db.Numeric(30, 2))
     opposition_personal_funds = db.Column(db.Numeric(30, 2))
@@ -55,10 +73,10 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     is_amended = db.Column('is_amended', db.Boolean)
     most_recent = db.Column('most_recent', db.Boolean)
     html_url = db.Column(db.String, doc='HTML link to the filing.')
-    #If f2 filing, the state of the candidate, else the state of the committee
+    # If f2 filing, the state of the candidate, else the state of the committee
     state = db.Column(db.String, doc=docs.STATE)
     office = db.Column(db.String, doc=docs.OFFICE)
-    # Filter filings based off candidate office or committee type H, S and P only. all other 
+    # Filter filings based off candidate office or committee type H, S and P only. all other
     # committee types are ignored. Because from the fron-end we only filter
     # filings by candidate office only.
     # mapped office_cmte_tp db column with office
@@ -79,9 +97,12 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
             self.form_type,
         )
 
+
 class EfilingsAmendments(db.Model):
     __tablename__ = 'efiling_amendment_chain_vw'
-    file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
+    file_number = db.Column(
+        'repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER
+    )
     amendment_chain = db.Column(ARRAY(db.Numeric))
     longest_chain = db.Column(ARRAY(db.Numeric))
     most_recent_filing = db.Column(db.Numeric)
@@ -96,11 +117,14 @@ class EfilingsAmendments(db.Model):
         else:
             return 0
 
+
 class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.Model):
-    __table_args__ = {'schema' : 'real_efile'}
+    __table_args__ = {'schema': 'real_efile'}
     __tablename__ = 'reps'
 
-    file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
+    file_number = db.Column(
+        'repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER
+    )
     form_type = db.Column('form', db.String, doc=docs.FORM_TYPE)
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
     committee_name = db.Column('com_name', db.String, doc=docs.COMMITTEE_NAME)
@@ -108,9 +132,18 @@ class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.M
     load_timestamp = db.Column('create_dt', db.DateTime, doc=docs.LOAD_DATE)
     coverage_start_date = db.Column('from_date', db.Date, doc=docs.COVERAGE_START_DATE)
     coverage_end_date = db.Column('through_date', db.Date, doc=docs.COVERAGE_END_DATE)
-    beginning_image_number = db.Column('starting', db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER)
-    ending_image_number = db.Column('ending', db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
-    report_type = db.Column('rptcode', db.String, db.ForeignKey(ReportType.report_type), doc=docs.REPORT_TYPE)
+    beginning_image_number = db.Column(
+        'starting', db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER
+    )
+    ending_image_number = db.Column(
+        'ending', db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER
+    )
+    report_type = db.Column(
+        'rptcode',
+        db.String,
+        db.ForeignKey(ReportType.report_type),
+        doc=docs.REPORT_TYPE,
+    )
     superceded = db.Column(db.BigInteger, doc=docs.AMENDED_BY)
     amends_file = db.Column('previd', db.BigInteger, doc=docs.AMENDS_FILE)
     amendment_number = db.Column('rptnum', db.Integer, doc=docs.AMENDMENT_NUMBER)
@@ -146,16 +179,19 @@ class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.M
     def is_amended(self):
         return self.superceded or not self.most_recent
 
-
     @property
     def pdf_url(self):
         image_number = str(self.beginning_image_number)
-        return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(image_number[-3:], image_number)
+        return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
+            image_number[-3:], image_number
+        )
 
     @property
     def html_url(self):
-        return 'http://docquery.fec.gov/cgi-bin/forms/{0}/{1}/'.format(self.committee_id, self.file_number)
+        return 'http://docquery.fec.gov/cgi-bin/forms/{0}/{1}/'.format(
+            self.committee_id, self.file_number
+        )
 
 
 # TODO: add index on committee id and filed_date
-    #  version -- this is the efiling version and I don't think we need this - let's document in API for now, see if there are objections
+#  version -- this is the efiling version and I don't think we need this - let's document in API for now, see if there are objections

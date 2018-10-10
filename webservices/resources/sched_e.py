@@ -12,16 +12,10 @@ from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
 
-from webservices.common.models import (
-    EFilings,
-    db
-)
+from webservices.common.models import EFilings, db
 
 
-@doc(
-    tags=['independent expenditures'],
-    description=docs.SCHEDULE_E,
-)
+@doc(tags=['independent expenditures'], description=docs.SCHEDULE_E)
 class ScheduleEView(ItemizedResource):
 
     model = models.ScheduleE
@@ -31,9 +25,11 @@ class ScheduleEView(ItemizedResource):
     @property
     def year_column(self):
         return self.model.report_year
+
     @property
     def index_column(self):
         return self.model.sub_id
+
     @property
     def amount_column(self):
         return self.model.expenditure_amount
@@ -51,9 +47,7 @@ class ScheduleEView(ItemizedResource):
         ('candidate_office_district', models.ScheduleE.candidate_office_district),
         ('candidate_party', models.ScheduleE.candidate_party),
     ]
-    filter_fulltext_fields = [
-        ('payee_name', models.ScheduleE.payee_name_text),
-    ]
+    filter_fulltext_fields = [('payee_name', models.ScheduleE.payee_name_text)]
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleE.expenditure_date),
         (('min_amount', 'max_amount'), models.ScheduleE.expenditure_amount),
@@ -72,11 +66,9 @@ class ScheduleEView(ItemizedResource):
             args.make_seek_args(),
             args.make_sort_args(
                 default='-expenditure_date',
-                validator=args.OptionValidator([
-                    'expenditure_date',
-                    'expenditure_amount',
-                    'office_total_ytd',
-                ]),
+                validator=args.OptionValidator(
+                    ['expenditure_date', 'expenditure_amount', 'office_total_ytd']
+                ),
             ),
         )
 
@@ -99,10 +91,7 @@ class ScheduleEView(ItemizedResource):
         return query
 
 
-@doc(
-    tags=['independent expenditures'],
-    description=docs.EFILING_TAG,
-)
+@doc(tags=['independent expenditures'], description=docs.EFILING_TAG)
 class ScheduleEEfileView(views.ApiResource):
     model = models.ScheduleEEfile
     schema = schemas.ItemizedScheduleEfilingsSchema
@@ -113,16 +102,17 @@ class ScheduleEEfileView(views.ApiResource):
         ('committee_id', models.ScheduleEEfile.committee_id),
         ('candidate_id', models.ScheduleEEfile.candidate_id),
         ('support_oppose_indicator', models.ScheduleEEfile.support_oppose_indicator),
-        #('candidate_name', models.ScheduleEEfile.candidate_name),
+        # ('candidate_name', models.ScheduleEEfile.candidate_name),
     ]
 
     filter_range_fields = [
-        (('min_expenditure_date', 'max_expenditure_date'), models.ScheduleEEfile.expenditure_date),
+        (
+            ('min_expenditure_date', 'max_expenditure_date'),
+            models.ScheduleEEfile.expenditure_date,
+        )
     ]
 
-    filter_fulltext_fields = [
-        ('candidate_name', models.ScheduleEEfile.candidate_name),
-    ]
+    filter_fulltext_fields = [('candidate_name', models.ScheduleEEfile.candidate_name)]
 
     @property
     def args(self):
@@ -131,10 +121,8 @@ class ScheduleEEfileView(views.ApiResource):
             args.schedule_e_efile,
             args.make_sort_args(
                 default='-expenditure_date',
-                validator=args.OptionValidator([
-                    'expenditure_date',
-                    'expenditure_amount',
-                    'office_total_ytd',
-                ]),
+                validator=args.OptionValidator(
+                    ['expenditure_date', 'expenditure_amount', 'office_total_ytd']
+                ),
             ),
         )

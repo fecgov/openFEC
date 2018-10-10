@@ -45,17 +45,10 @@ spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
 
 class Relationship(namedtuple('Relationship', 'field column label position')):
     def __new__(cls, field, column, label, position=-1):
-        return super(Relationship, cls).__new__(
-            cls,
-            field,
-            column,
-            label,
-            position
-        )
+        return super(Relationship, cls).__new__(cls, field, column, label, position)
 
 
 class BaseSchema(ModelSchema):
-
     def get_attribute(self, attr, obj, default):
         if '.' in attr:
             return super().get_attribute(attr, obj, default)
@@ -81,7 +74,7 @@ class BaseEfileSchema(BaseSchema):
     def extract_summary_rows(self, obj):
         if obj.get('summary_lines'):
             for key, value in obj.get('summary_lines').items():
-                #may be a way to pull these out using pandas?
+                # may be a way to pull these out using pandas?
                 if key == 'nan':
                     continue
                 obj[key] = value
@@ -98,10 +91,16 @@ def extract_columns(obj, column_a, column_b, descriptions):
     ytd = re.compile('(.+?(?=ytd))')
     if obj.summary_lines:
         for row in obj.summary_lines:
-            replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_',
-                               str(keys[int(row.line_number - 1)][0])).replace(' ', '_')
-            replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
-                               str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
+            replace_a = re.sub(
+                per,
+                descriptions[int(row.line_number - 1)] + '_',
+                str(keys[int(row.line_number - 1)][0]),
+            ).replace(' ', '_')
+            replace_b = re.sub(
+                ytd,
+                descriptions[int(row.line_number - 1)] + '_',
+                str(keys[int(row.line_number - 1)][1]),
+            ).replace(' ', '_')
             replace_a = make_period_string(replace_a)
             line_list[replace_a] = row.column_a
             line_list[replace_b] = row.column_b
@@ -134,10 +133,16 @@ class EFilingF3PSchema(BaseEfileSchema):
                     state_map[keys[int(row.line_number - 1)][0]] = row.column_a
                     state_map[keys[int(row.line_number - 1)][1]] = row.column_b
                 else:
-                    replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_',
-                        keys[int(row.line_number - 1)][0]).replace(' ', '_')
-                    replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
-                                       str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
+                    replace_a = re.sub(
+                        per,
+                        descriptions[int(row.line_number - 1)] + '_',
+                        keys[int(row.line_number - 1)][0],
+                    ).replace(' ', '_')
+                    replace_b = re.sub(
+                        ytd,
+                        descriptions[int(row.line_number - 1)] + '_',
+                        str(keys[int(row.line_number - 1)][1]),
+                    ).replace(' ', '_')
                     replace_a = make_period_string(replace_a)
                     line_list[replace_a] = row.column_a
                     line_list[replace_b] = row.column_b
@@ -145,7 +150,9 @@ class EFilingF3PSchema(BaseEfileSchema):
             if not line_list.get('total_disbursements_per'):
                 line_list['total_disbursements_per'] = float("-inf")
 
-            cash = max(line_list.get('total_disbursements_per'), obj.total_disbursements)
+            cash = max(
+                line_list.get('total_disbursements_per'), obj.total_disbursements
+            )
             line_list['total_disbursements_per'] = cash
             if not line_list.get('total_receipts_per'):
                 line_list['total_receipts_per'] = float("-inf")
@@ -160,8 +167,10 @@ class EFilingF3Schema(BaseEfileSchema):
 
     def parse_summary_rows(self, obj):
         descriptions = decoders.f3_description
-        line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b, descriptions)
-        #final bit of data cleaning before json marshalling
+        line_list = extract_columns(
+            obj, decoders.f3_col_a, decoders.f3_col_b, descriptions
+        )
+        # final bit of data cleaning before json marshalling
         cash = max(line_list.get('coh_cop_i'), line_list.get('coh_cop_ii'))
         line_list["cash_on_hand_end_period"] = cash
         line_list.pop('coh_cop_ii')  # maybe  a api exception if i and ii are different?
@@ -170,11 +179,16 @@ class EFilingF3Schema(BaseEfileSchema):
         obj.cash_on_hand_beginning_period = None
         line_list.pop('coh_bop')
         line_list["cash_on_hand_beginning_period"] = cash
-        cash = max(line_list.get('total_disbursements_per_i'), line_list.get('total_disbursements_per_ii'))
+        cash = max(
+            line_list.get('total_disbursements_per_i'),
+            line_list.get('total_disbursements_per_ii'),
+        )
         line_list["total_disbursements_period"] = cash
         line_list.pop('total_disbursements_per_i')
         line_list.pop('total_disbursements_per_ii')
-        cash = max(line_list.get('total_receipts_per_i'), line_list.get('ttl_receipts_ii'))
+        cash = max(
+            line_list.get('total_receipts_per_i'), line_list.get('ttl_receipts_ii')
+        )
         line_list["total_receipts_period"] = cash
         line_list.pop('total_receipts_per_i')
         line_list.pop('ttl_receipts_ii')
@@ -184,10 +198,15 @@ class EFilingF3Schema(BaseEfileSchema):
 class EFilingF3XSchema(BaseEfileSchema):
     def parse_summary_rows(self, obj):
         descriptions = decoders.f3x_description
-        line_list = extract_columns(obj, decoders.f3x_col_a, decoders.f3x_col_b, descriptions)
-        line_list['cash_on_hand_beginning_calendar_ytd'] = line_list.pop('coh_begin_calendar_yr')
+        line_list = extract_columns(
+            obj, decoders.f3x_col_a, decoders.f3x_col_b, descriptions
+        )
+        line_list['cash_on_hand_beginning_calendar_ytd'] = line_list.pop(
+            'coh_begin_calendar_yr'
+        )
         line_list['cash_on_hand_beginning_period'] = line_list.pop('coh_bop')
         return line_list
+
 
 schema_map = {}
 schema_map["BaseF3XFiling"] = EFilingF3XSchema
@@ -204,41 +223,36 @@ def make_schema(model, class_name=None, fields=None, options=None):
     class_name = class_name or '{0}Schema'.format(model.__name__)
     Meta = type(
         'Meta',
-        (object, ),
+        (object,),
         utils.extend(
-            {
-                'model': model,
-                'sqla_session': models.db.session,
-                'exclude': ('idx', ),
-            },
+            {'model': model, 'sqla_session': models.db.session, 'exclude': ('idx',)},
             options or {},
-        )
+        ),
     )
     mapped_schema = (
         BaseSchema
         if not schema_map.get(model.__name__)
         else schema_map.get(model.__name__)
-
     )
     return type(
-        class_name,
-        (mapped_schema, ),
-        utils.extend({'Meta': Meta}, fields or {}),
+        class_name, (mapped_schema,), utils.extend({'Meta': Meta}, fields or {})
     )
 
 
-def make_page_schema(schema, page_type=paging_schemas.OffsetPageSchema, class_name=None,
-                     definition_name=None):
-    class_name = class_name or '{0}PageSchema'.format(re.sub(r'Schema$', '', schema.__name__))
+def make_page_schema(
+    schema,
+    page_type=paging_schemas.OffsetPageSchema,
+    class_name=None,
+    definition_name=None,
+):
+    class_name = class_name or '{0}PageSchema'.format(
+        re.sub(r'Schema$', '', schema.__name__)
+    )
 
     class Meta:
         results_schema_class = schema
 
-    return type(
-        class_name,
-        (page_type, ApiSchema),
-        {'Meta': Meta},
-    )
+    return type(class_name, (page_type, ApiSchema), {'Meta': Meta})
 
 
 schemas = {}
@@ -249,10 +263,7 @@ def augment_schemas(*schemas, namespace=schemas):
         page_schema = make_page_schema(schema)
         register_schema(schema)
         register_schema(page_schema)
-        namespace.update({
-            schema.__name__: schema,
-            page_schema.__name__: page_schema,
-        })
+        namespace.update({schema.__name__: schema, page_schema.__name__: page_schema})
 
 
 def augment_models(factory, *models, namespace=schemas):
@@ -261,7 +272,9 @@ def augment_models(factory, *models, namespace=schemas):
         augment_schemas(schema, namespace=namespace)
 
 
-def augment_itemized_aggregate_models(factory, committee_model, *models, namespace=schemas):
+def augment_itemized_aggregate_models(
+    factory, committee_model, *models, namespace=schemas
+):
     for model in models:
         schema = factory(
             model,
@@ -269,13 +282,10 @@ def augment_itemized_aggregate_models(factory, committee_model, *models, namespa
                 'exclude': ('committee',),
                 'relationships': [
                     Relationship(
-                        model.committee,
-                        committee_model.name,
-                        'committee_name',
-                        1
-                    ),
+                        model.committee, committee_model.name, 'committee_name', 1
+                    )
                 ],
-            }
+            },
         )
         augment_schemas(schema, namespace=namespace)
 
@@ -302,18 +312,15 @@ class CommitteeSearchSchema(BaseSearchSchema):
 
 class CandidateSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
-        CandidateSearchSchema,
-        ref='#/definitions/CandidateSearch',
-        many=True,
+        CandidateSearchSchema, ref='#/definitions/CandidateSearch', many=True
     )
 
 
 class CommitteeSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
-        CandidateSearchSchema,
-        ref='#/definitions/CommitteeSearch',
-        many=True,
+        CandidateSearchSchema, ref='#/definitions/CommitteeSearch', many=True
     )
+
 
 register_schema(CandidateSearchSchema)
 register_schema(CandidateSearchListSchema)
@@ -331,18 +338,15 @@ class AuditCommitteeSearchSchema(BaseSearchSchema):
 
 class AuditCandidateSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
-        AuditCandidateSearchSchema,
-        ref='#/definitions/AuditCandidateSearch',
-        many=True,
+        AuditCandidateSearchSchema, ref='#/definitions/AuditCandidateSearch', many=True
     )
 
 
 class AuditCommitteeSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
-        AuditCommitteeSearchSchema,
-        ref='#/definitions/AuditCommitteeSearch',
-        many=True,
+        AuditCommitteeSearchSchema, ref='#/definitions/AuditCommitteeSearch', many=True
     )
+
 
 register_schema(AuditCandidateSearchSchema)
 register_schema(AuditCandidateSearchListSchema)
@@ -353,23 +357,16 @@ register_schema(AuditCommitteeSearchListSchema)
 make_efiling_schema = functools.partial(
     make_schema,
     options={'exclude': ('idx', 'total_disbursements', 'total_receipts')},
-    fields={
-        'pdf_url': ma.fields.Str(),
-        'report_year': ma.fields.Int(),
-    }
+    fields={'pdf_url': ma.fields.Str(), 'report_year': ma.fields.Int()},
 )
 
 
 make_committee_schema = functools.partial(
-    make_schema,
-    options={'exclude': ('idx', 'treasurer_text')},
+    make_schema, options={'exclude': ('idx', 'treasurer_text')}
 )
 
 augment_models(
-    make_efiling_schema,
-    models.BaseF3PFiling,
-    models.BaseF3XFiling,
-    models.BaseF3Filing,
+    make_efiling_schema, models.BaseF3PFiling, models.BaseF3XFiling, models.BaseF3Filing
 )
 
 augment_models(
@@ -386,28 +383,23 @@ make_candidate_schema = functools.partial(
     fields={
         'federal_funds_flag': ma.fields.Boolean(attribute='flags.federal_funds_flag'),
         'has_raised_funds': ma.fields.Boolean(attribute='flags.has_raised_funds'),
-    }
+    },
 )
 
-augment_models(
-    make_candidate_schema,
-    models.Candidate,
-    models.CandidateDetail,
-
-)
+augment_models(make_candidate_schema, models.Candidate, models.CandidateDetail)
 # built these schemas without make_candidate_schema, as it was filtering out the flags
 augment_models(
-    make_schema,
-    models.CandidateHistory,
-    models.CandidateTotal,
-    models.CandidateFlags
-
+    make_schema, models.CandidateHistory, models.CandidateTotal, models.CandidateFlags
 )
 
 
-class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'],
-        schemas['CandidateTotalSchema'], schemas['CandidateFlagsSchema']):
+class CandidateHistoryTotalSchema(
+    schemas['CandidateHistorySchema'],
+    schemas['CandidateTotalSchema'],
+    schemas['CandidateFlagsSchema'],
+):
     pass
+
 
 augment_schemas(CandidateHistoryTotalSchema)
 
@@ -468,12 +460,10 @@ make_totals_schema = functools.partial(
         'last_cash_on_hand_end_period': ma.fields.Decimal(places=2),
         'last_beginning_image_number': ma.fields.Str(),
         'transaction_coverage_date': ma.fields.Date(
-            attribute='transaction_coverage.transaction_coverage_date',
-            default=None),
+            attribute='transaction_coverage.transaction_coverage_date', default=None
+        ),
     },
-    options={
-        'exclude': ('transaction_coverage', 'idx')
-    },
+    options={'exclude': ('transaction_coverage', 'idx')},
 )
 augment_models(
     make_totals_schema,
@@ -482,7 +472,7 @@ augment_models(
     models.CommitteeTotalsPacParty,
     models.CommitteeTotalsIEOnly,
     models.CommitteeTotalsParty,
-    models.CommitteeTotalsPac
+    models.CommitteeTotalsPac,
 )
 
 make_candidate_totals_schema = functools.partial(
@@ -507,8 +497,7 @@ totals_schemas = (
     schemas['CommitteeTotalsPacPartySchema'],
     schemas['CommitteeTotalsIEOnlySchema'],
     schemas['CommitteeTotalsPartySchema'],
-    schemas['CommitteeTotalsPacSchema']
-
+    schemas['CommitteeTotalsPacSchema'],
 )
 CommitteeTotalsSchema = type('CommitteeTotalsSchema', totals_schemas, {})
 CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)
@@ -542,14 +531,15 @@ ScheduleASchema = make_schema(
                 models.ScheduleA.committee,
                 models.CommitteeHistory.name,
                 'committee_name',
-                1
-            ),
+                1,
+            )
         ],
-
-    }
+    },
 )
 
-ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging_schemas.SeekPageSchema)
+ScheduleAPageSchema = make_page_schema(
+    ScheduleASchema, page_type=paging_schemas.SeekPageSchema
+)
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)
 
@@ -559,28 +549,15 @@ ScheduleCSchema = make_schema(
         'sub_id': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
-
     },
-    options={
-        'exclude': (
-            'loan_source_name_text',
-            'candidate_name_text',
-        )
-    },
+    options={'exclude': ('loan_source_name_text', 'candidate_name_text')},
 )
-ScheduleCPageSchema = make_page_schema(
-    ScheduleCSchema,
-)
+ScheduleCPageSchema = make_page_schema(ScheduleCSchema)
 # excluding street address to comply with FEC policy
 ScheduleBByRecipientIDSchema = make_schema(
     models.ScheduleBByRecipientID,
-    fields={
-        'committee_name': ma.fields.Str(),
-        'recipient_name': ma.fields.Str(),
-    },
-    options={
-        'exclude': ('committee', 'recipient')
-    },
+    fields={'committee_name': ma.fields.Str(), 'recipient_name': ma.fields.Str()},
+    options={'exclude': ('committee', 'recipient')},
 )
 
 augment_schemas(ScheduleBByRecipientIDSchema)
@@ -618,13 +595,9 @@ ScheduleDSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
-    options={
-        'exclude': ('creditor_debtor_name_text',)
-    },
+    options={'exclude': ('creditor_debtor_name_text',)},
 )
-ScheduleDPageSchema = make_page_schema(
-    ScheduleDSchema
-)
+ScheduleDPageSchema = make_page_schema(ScheduleDSchema)
 
 ScheduleFSchema = make_schema(
     models.ScheduleF,
@@ -634,18 +607,18 @@ ScheduleFSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
-    options={'exclude': ('payee_name_text',)
-             },
-
+    options={'exclude': ('payee_name_text',)},
 )
-ScheduleFPageSchema = make_page_schema(
-    ScheduleFSchema
-)
+ScheduleFPageSchema = make_page_schema(ScheduleFSchema)
 
-CommunicationCostByCandidateSchema = make_aggregate_schema(models.CommunicationCostByCandidate)
+CommunicationCostByCandidateSchema = make_aggregate_schema(
+    models.CommunicationCostByCandidate
+)
 augment_schemas(CommunicationCostByCandidateSchema)
 
-ElectioneeringByCandidateSchema = make_aggregate_schema(models.ElectioneeringByCandidate)
+ElectioneeringByCandidateSchema = make_aggregate_schema(
+    models.ElectioneeringByCandidate
+)
 augment_schemas(ElectioneeringByCandidateSchema)
 
 ScheduleBSchema = make_schema(
@@ -671,12 +644,14 @@ ScheduleBSchema = make_schema(
                 models.ScheduleB.committee,
                 models.CommitteeHistory.name,
                 'committee_name',
-                1
-            ),
+                1,
+            )
         ],
-    }
+    },
 )
-ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging_schemas.SeekPageSchema)
+ScheduleBPageSchema = make_page_schema(
+    ScheduleBSchema, page_type=paging_schemas.SeekPageSchema
+)
 register_schema(ScheduleBSchema)
 register_schema(ScheduleBPageSchema)
 
@@ -692,27 +667,27 @@ ScheduleESchema = make_schema(
         'sub_id': ma.fields.Str(),
     },
     options={
-        'exclude': (
-            'payee_name_text',
-        ),
+        'exclude': ('payee_name_text',),
         'relationships': [
             Relationship(
                 models.ScheduleE.committee,
                 models.CommitteeHistory.name,
                 'committee_name',
-                1
-            ),
+                1,
+            )
         ],
-    }
+    },
 )
-ScheduleEPageSchema = make_page_schema(ScheduleESchema, page_type=paging_schemas.SeekPageSchema)
+ScheduleEPageSchema = make_page_schema(
+    ScheduleESchema, page_type=paging_schemas.SeekPageSchema
+)
 register_schema(ScheduleESchema)
 register_schema(ScheduleEPageSchema)
 
-CommunicationCostSchema = make_schema(
-    models.CommunicationCost,
+CommunicationCostSchema = make_schema(models.CommunicationCost)
+CommunicationCostPageSchema = make_page_schema(
+    CommunicationCostSchema, page_type=paging_schemas.SeekPageSchema
 )
-CommunicationCostPageSchema = make_page_schema(CommunicationCostSchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(CommunicationCostSchema)
 register_schema(CommunicationCostPageSchema)
 
@@ -721,7 +696,9 @@ ElectioneeringSchema = make_schema(
     fields={'election_type': ma.fields.Str()},
     options={'exclude': ('idx', 'purpose_description_text', 'election_type_raw')},
 )
-ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=paging_schemas.SeekPageSchema)
+ElectioneeringPageSchema = make_page_schema(
+    ElectioneeringSchema, page_type=paging_schemas.SeekPageSchema
+)
 register_schema(ElectioneeringSchema)
 register_schema(ElectioneeringPageSchema)
 
@@ -736,7 +713,7 @@ BaseFilingsSchema = make_schema(
         'sub_id': ma.fields.Str(),
         'fec_file_id': ma.fields.Str(),
     },
-    options={'exclude': ('committee', )},
+    options={'exclude': ('committee',)},
 )
 
 
@@ -746,11 +723,10 @@ class FilingsSchema(BaseFilingsSchema):
         if not obj.get('fec_url'):
             obj.pop('fec_url')
 
+
 augment_schemas(FilingsSchema)
 
-EfilingsAmendmentsSchema = make_schema(
-    models.EfilingsAmendments,
-)
+EfilingsAmendmentsSchema = make_schema(models.EfilingsAmendments)
 
 augment_schemas(EfilingsAmendmentsSchema)
 
@@ -794,10 +770,10 @@ ItemizedScheduleBfilingsSchema = make_schema(
                 models.ScheduleEEfile.committee,
                 models.CommitteeHistory.name,
                 'committee_name',
-                1
-            ),
-        ],
-    }
+                1,
+            )
+        ]
+    },
 )
 augment_schemas(ItemizedScheduleBfilingsSchema)
 
@@ -820,10 +796,10 @@ ItemizedScheduleEfilingsSchema = make_schema(
                 models.ScheduleEEfile.committee,
                 models.CommitteeHistory.name,
                 'committee_name',
-                1
-            ),
-        ],
-    }
+                1,
+            )
+        ]
+    },
 )
 
 augment_schemas(ItemizedScheduleEfilingsSchema)
@@ -853,10 +829,10 @@ ItemizedScheduleAfilingsSchema = make_schema(
                 models.ScheduleAEfile.committee,
                 models.CommitteeHistory.name,
                 'committee_name',
-                1
-            ),
+                1,
+            )
         ],
-    }
+    },
 )
 
 augment_schemas(ItemizedScheduleAfilingsSchema)
@@ -866,10 +842,7 @@ register_schema(ReportTypeSchema)
 
 ReportingDatesSchema = make_schema(
     models.ReportDate,
-    fields={
-        'report_type': ma.fields.Str(),
-        'report_type_full': ma.fields.Str(),
-    },
+    fields={'report_type': ma.fields.Str(), 'report_type_full': ma.fields.Str()},
     options={'exclude': ('trc_report_due_date_id', 'report')},
 )
 ReportingDatesPageSchema = make_page_schema(ReportingDatesSchema)
@@ -881,9 +854,7 @@ ElectionDatesSchema = make_schema(
         'election_type_full': ma.fields.Str(),
         'active_election': ma.fields.Boolean(),
     },
-    options={
-        'exclude': ('trc_election_id', 'election_status_id'),
-    },
+    options={'exclude': ('trc_election_id', 'election_status_id')},
 )
 ElectionDatesPageSchema = make_page_schema(ElectionDatesSchema)
 augment_schemas(ElectionDatesSchema)
@@ -896,11 +867,7 @@ CalendarDateSchema = make_schema(
         'start_date': ma.fields.Function(format_start_date),
         'end_date': ma.fields.Function(format_end_date),
     },
-    options={
-        'exclude': (
-            'summary_text', 'description_text'
-        )
-    },
+    options={'exclude': ('summary_text', 'description_text')},
 )
 CalendarDatePageSchema = make_page_schema(CalendarDateSchema)
 augment_schemas(CalendarDateSchema)
@@ -914,6 +881,8 @@ class ElectionSearchSchema(ma.Schema):
     cycle = ma.fields.Int(attribute='two_year_period')
     incumbent_id = ma.fields.Str(attribute='cand_id')
     incumbent_name = ma.fields.Str(attribute='cand_name')
+
+
 augment_schemas(ElectionSearchSchema)
 
 
@@ -922,6 +891,8 @@ class ElectionSummarySchema(ApiSchema):
     receipts = ma.fields.Decimal(places=2)
     disbursements = ma.fields.Decimal(places=2)
     independent_expenditures = ma.fields.Decimal(places=2)
+
+
 register_schema(ElectionSummarySchema)
 
 
@@ -931,17 +902,24 @@ class ElectionSchema(ma.Schema):
     incumbent_challenge_full = ma.fields.Str()
     party_full = ma.fields.Str()
     committee_ids = ma.fields.List(ma.fields.Str)
-    candidate_pcc_id = ma.fields.Str(doc="The candidate's primary campaign committee ID")
-    candidate_pcc_name = ma.fields.Str(doc="The candidate's primary campaign committee name")
+    candidate_pcc_id = ma.fields.Str(
+        doc="The candidate's primary campaign committee ID"
+    )
+    candidate_pcc_name = ma.fields.Str(
+        doc="The candidate's primary campaign committee name"
+    )
     total_receipts = ma.fields.Decimal(places=2)
     total_disbursements = ma.fields.Decimal(places=2)
     cash_on_hand_end_period = ma.fields.Decimal(places=2)
     candidate_election_year = ma.fields.Int()
     coverage_end_date = ma.fields.Date()
+
+
 augment_schemas(ElectionSchema)
 
 ElectionPageSchema = make_page_schema(ElectionSchema)
 register_schema(ElectionPageSchema)
+
 
 class ScheduleABySizeCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
@@ -972,6 +950,7 @@ class TotalsCommitteeSchema(schemas['CommitteeHistorySchema']):
     debts_owed_by_committee = ma.fields.Decimal(places=2)
     independent_expenditures = ma.fields.Decimal(places=2)
 
+
 augment_schemas(
     ScheduleABySizeCandidateSchema,
     ScheduleAByStateCandidateSchema,
@@ -979,8 +958,7 @@ augment_schemas(
 )
 
 RadAnalystSchema = make_schema(
-    models.RadAnalyst,
-    options={'exclude': ('idx', 'name_txt')},
+    models.RadAnalyst, options={'exclude': ('idx', 'name_txt')}
 )
 RadAnalystPageSchema = make_page_schema(RadAnalystSchema)
 register_schema(RadAnalystSchema)
@@ -991,13 +969,14 @@ EntityReceiptDisbursementTotalsSchema = make_schema(
     options={'exclude': ('idx', 'month', 'year')},
     fields={'end_date': ma.fields.Date(doc='The cumulative total for this month.')},
 )
-EntityReceiptDisbursementTotalsPageSchema = make_page_schema(EntityReceiptDisbursementTotalsSchema)
+EntityReceiptDisbursementTotalsPageSchema = make_page_schema(
+    EntityReceiptDisbursementTotalsSchema
+)
 register_schema(EntityReceiptDisbursementTotalsSchema)
 register_schema(EntityReceiptDisbursementTotalsPageSchema)
 
 ScheduleAByStateRecipientTotalsSchema = make_schema(
-    models.ScheduleAByStateRecipientTotals,
-    options={'exclude': ('idx',)}
+    models.ScheduleAByStateRecipientTotals, options={'exclude': ('idx',)}
 )
 ScheduleAByStateRecipientTotalsPageSchema = make_page_schema(
     ScheduleAByStateRecipientTotalsSchema
@@ -1014,9 +993,7 @@ AuditPrimaryCategorySchema = make_schema(
         'primary_category_name': ma.fields.Str(),
         'tier': ma.fields.Int(),
     },
-    options={
-        'exclude': ('tier',)
-    }
+    options={'exclude': ('tier',)},
 )
 
 AuditPrimaryCategoryPageSchema = make_page_schema(AuditPrimaryCategorySchema)
@@ -1032,9 +1009,7 @@ AuditCategoryRelationSchema = make_schema(
         'sub_category_name': ma.fields.Str(),
         'primary_category_name': ma.fields.Str(),
     },
-    options={
-        'exclude': ('primary_category_id', 'primary_category_name')
-    }
+    options={'exclude': ('primary_category_id', 'primary_category_name')},
 )
 
 AuditCategoryRelationPageSchema = make_page_schema(AuditCategoryRelationSchema)
@@ -1060,7 +1035,7 @@ AuditCategorySchema = make_schema(
         #         1
         #     ),
         # ],
-    }
+    },
 )
 
 AuditCategoryPageSchema = make_page_schema(AuditCategorySchema)
@@ -1078,12 +1053,8 @@ AuditCaseSubCategorySchema = make_schema(
         'sub_category_name': ma.fields.Str(),
     },
     options={
-        'exclude': (
-            'primary_category_id',
-            'audit_case_id',
-            'primary_category_name',
-        )
-    }
+        'exclude': ('primary_category_id', 'audit_case_id', 'primary_category_name')
+    },
 )
 
 AuditCaseSubCategoryPageSchema = make_page_schema(AuditCaseSubCategorySchema)
@@ -1100,10 +1071,7 @@ AuditCaseCategoryRelationSchema = make_schema(
         'primary_category_name': ma.fields.Str(),
         'sub_category_list': ma.fields.Nested(AuditCaseSubCategorySchema, many=True),
     },
-    options={
-        'exclude': (
-            'audit_case_id',
-        )}
+    options={'exclude': ('audit_case_id',)},
 )
 
 AuditCaseCategoryRelationPageSchema = make_page_schema(AuditCaseCategoryRelationSchema)
@@ -1126,14 +1094,11 @@ AuditCaseSchema = make_schema(
         'audit_id': ma.fields.Integer(),
         'candidate_id': ma.fields.Str(),
         'candidate_name': ma.fields.Str(),
-        'primary_category_list': ma.fields.Nested(AuditCaseCategoryRelationSchema, many=True),
+        'primary_category_list': ma.fields.Nested(
+            AuditCaseCategoryRelationSchema, many=True
+        ),
     },
-    options={
-        'exclude': (
-            'primary_category_id',
-            'sub_category_id',
-            'idx',
-        )}
+    options={'exclude': ('primary_category_id', 'sub_category_id', 'idx')},
 )
 AuditCasePageSchema = make_page_schema(AuditCaseSchema)
 register_schema(AuditCaseSchema)
@@ -1141,31 +1106,20 @@ register_schema(AuditCasePageSchema)
 
 ElectionsListSchema = make_schema(
     models.ElectionsList,
-    options={
-        'exclude': (
-            'idx',
-            'sort_order',
-            'incumbent_id',
-            'incumbent_name',
-        )
-    }
+    options={'exclude': ('idx', 'sort_order', 'incumbent_id', 'incumbent_name')},
 )
 
 ElectionsListPageSchema = make_page_schema(ElectionsListSchema)
 register_schema(ElectionsListSchema)
 register_schema(ElectionsListPageSchema)
 
-StateElectionOfficeInfoSchema = make_schema(
-    models.StateElectionOfficeInfo,
-)
+StateElectionOfficeInfoSchema = make_schema(models.StateElectionOfficeInfo)
 
 StateElectionOfficeInfoPageSchema = make_page_schema(StateElectionOfficeInfoSchema)
 register_schema(StateElectionOfficeInfoSchema)
 register_schema(StateElectionOfficeInfoPageSchema)
 
-OperationsLogSchema = make_schema(
-    models.OperationsLog,
-)
+OperationsLogSchema = make_schema(models.OperationsLog)
 
 OperationsLogPageSchema = make_page_schema(OperationsLogSchema)
 register_schema(OperationsLogSchema)

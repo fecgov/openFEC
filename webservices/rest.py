@@ -57,9 +57,11 @@ def initialize_newrelic():
     license_key = env.get_credential('NEW_RELIC_LICENSE_KEY')
     if license_key:
         import newrelic.agent
+
         settings = newrelic.agent.global_settings()
         settings.license_key = license_key
         newrelic.agent.initialize()
+
 
 initialize_newrelic()
 
@@ -70,9 +72,13 @@ app.url_map.strict_slashes = False
 def sqla_conn_string():
     sqla_conn_string = env.get_credential('SQLA_CONN')
     if not sqla_conn_string:
-        print("Environment variable SQLA_CONN is empty; running against " + "local `cfdm_test`")
+        print(
+            "Environment variable SQLA_CONN is empty; running against "
+            + "local `cfdm_test`"
+        )
         sqla_conn_string = 'postgresql://:@/cfdm_test'
     return sqla_conn_string
+
 
 # app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
@@ -84,9 +90,7 @@ app.config['SQLALCHEMY_POOL_TIMEOUT'] = 120
 app.config['SQLALCHEMY_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS'] = bool(
     env.get_credential('SQLA_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS', '')
 )
-app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
-    'webservices.tasks.download.export_query',
-]
+app.config['SQLALCHEMY_FOLLOWER_TASKS'] = ['webservices.tasks.download.export_query']
 app.config['SQLALCHEMY_FOLLOWERS'] = [
     sa.create_engine(follower.strip())
     for follower in env.get_credential('SQLA_FOLLOWERS', '').split(',')
@@ -106,11 +110,11 @@ cors.CORS(app)
 
 
 class FlaskRestParser(FlaskParser):
-
     def handle_error(self, error):
         message = error.messages
         status_code = getattr(error, 'status_code', 422)
         raise exceptions.ApiError(message, status_code)
+
 
 parser = FlaskRestParser()
 app.config['APISPEC_WEBARGS_PARSER'] = parser
@@ -174,30 +178,30 @@ def get_cache_duration(url):
 def add_caching_headers(response):
 
     cache_duration = get_cache_duration(request.path)
-    response.headers.add(
-        'Cache-Control',
-        'public, max-age={}'.format(cache_duration)
-    )
+    response.headers.add('Cache-Control', 'public, max-age={}'.format(cache_duration))
     return response
 
 
 @app.errorhandler(Exception)
 def handle_exception(exception):
-    wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
+    wrapped = ResponseException(
+        str(exception), ErrorCode.INTERNAL_ERROR, type(exception)
+    )
     app.logger.error(
-        'An API error occurred with the status code of {status} ({exception}).'
-        .format(
-            status=wrapped.status,
-            exception=wrapped.wrappedException
+        'An API error occurred with the status code of {status} ({exception}).'.format(
+            status=wrapped.status, exception=wrapped.wrappedException
         )
     )
-    raise exceptions.ApiError('Could not process the request',
-        status_code=http.client.NOT_FOUND)
+    raise exceptions.ApiError(
+        'Could not process the request', status_code=http.client.NOT_FOUND
+    )
+
 
 @app.errorhandler(404)
 def page_not_found(exception):
     wrapped = ResponseException(str(exception), exception.code, type(exception))
     return wrapped.wrappedException, wrapped.status
+
 
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')
@@ -230,12 +234,22 @@ api.add_resource(totals.TotalsView, '/totals/<string:committee_type>/')
 api.add_resource(totals.TotalsCommitteeView, '/committee/<string:committee_id>/totals/')
 api.add_resource(totals.CandidateTotalsView, '/candidate/<string:candidate_id>/totals/')
 api.add_resource(reports.ReportsView, '/reports/<string:committee_type>/')
-api.add_resource(reports.CommitteeReportsView, '/committee/<string:committee_id>/reports/')
+api.add_resource(
+    reports.CommitteeReportsView, '/committee/<string:committee_id>/reports/'
+)
 api.add_resource(search.CandidateNameSearch, '/names/candidates/')
 api.add_resource(search.CommitteeNameSearch, '/names/committees/')
-api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/', '/schedules/schedule_a/<string:sub_id>/')
+api.add_resource(
+    sched_a.ScheduleAView,
+    '/schedules/schedule_a/',
+    '/schedules/schedule_a/<string:sub_id>/',
+)
 api.add_resource(sched_a.ScheduleAEfileView, '/schedules/schedule_a/efile/')
-api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/', '/schedules/schedule_b/<string:sub_id>/')
+api.add_resource(
+    sched_b.ScheduleBView,
+    '/schedules/schedule_b/',
+    '/schedules/schedule_b/<string:sub_id>/',
+)
 api.add_resource(sched_b.ScheduleBEfileView, '/schedules/schedule_b/efile/')
 api.add_resource(sched_c.ScheduleCView, '/schedules/schedule_c/')
 api.add_resource(sched_c.ScheduleCViewBySubId, '/schedules/schedule_c/<string:sub_id>/')
@@ -243,7 +257,11 @@ api.add_resource(sched_d.ScheduleDView, '/schedules/schedule_d/')
 api.add_resource(sched_d.ScheduleDViewBySubId, '/schedules/schedule_d/<string:sub_id>/')
 api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
 api.add_resource(sched_e.ScheduleEEfileView, '/schedules/schedule_e/efile/')
-api.add_resource(sched_f.ScheduleFView, '/schedules/schedule_f/', '/schedules/schedule_f/<string:sub_id>/')
+api.add_resource(
+    sched_f.ScheduleFView,
+    '/schedules/schedule_f/',
+    '/schedules/schedule_f/<string:sub_id>/',
+)
 api.add_resource(sched_f.ScheduleFViewBySubId, '/schedules/schedule_f/<string:sub_id>/')
 api.add_resource(costs.CommunicationCostView, '/communication-costs/')
 api.add_resource(costs.ElectioneeringView, '/electioneering/')
@@ -257,7 +275,9 @@ api.add_resource(dates.CalendarDatesView, '/calendar-dates/')
 api.add_resource(dates.CalendarDatesExport, '/calendar-dates/export/')
 api.add_resource(rad_analyst.RadAnalystView, '/rad-analyst/')
 api.add_resource(filings.EFilingsView, '/efile/filings/')
-api.add_resource(large_aggregates.EntityReceiptDisbursementTotalsView, '/totals/by_entity/')
+api.add_resource(
+    large_aggregates.EntityReceiptDisbursementTotalsView, '/totals/by_entity/'
+)
 api.add_resource(audit.AuditPrimaryCategoryView, '/audit-primary-category/')
 api.add_resource(audit.AuditCategoryView, '/audit-category/')
 api.add_resource(audit.AuditCaseView, '/audit-case/')
@@ -269,8 +289,11 @@ def add_aggregate_resource(api, view, schedule, label):
     api.add_resource(
         view,
         '/schedules/schedule_{schedule}/by_{label}/'.format(**locals()),
-        '/committee/<committee_id>/schedules/schedule_{schedule}/by_{label}/'.format(**locals()),
+        '/committee/<committee_id>/schedules/schedule_{schedule}/by_{label}/'.format(
+            **locals()
+        ),
     )
+
 
 add_aggregate_resource(api, aggregates.ScheduleABySizeView, 'a', 'size')
 add_aggregate_resource(api, aggregates.ScheduleAByStateView, 'a', 'state')
@@ -284,12 +307,20 @@ add_aggregate_resource(api, aggregates.ScheduleBByPurposeView, 'b', 'purpose')
 
 add_aggregate_resource(api, aggregates.ScheduleEByCandidateView, 'e', 'candidate')
 
-api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate/')
-api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate/')
+api.add_resource(
+    candidate_aggregates.ScheduleABySizeCandidateView,
+    '/schedules/schedule_a/by_size/by_candidate/',
+)
+api.add_resource(
+    candidate_aggregates.ScheduleAByStateCandidateView,
+    '/schedules/schedule_a/by_state/by_candidate/',
+)
 
 api.add_resource(candidate_aggregates.TotalsCandidateView, '/candidates/totals/')
 api.add_resource(committees.TotalsCommitteeHistoryView, '/committees/totals/')
-api.add_resource(totals.ScheduleAByStateRecipientTotalsView, '/schedules/schedule_a/by_state/totals/')
+api.add_resource(
+    totals.ScheduleAByStateRecipientTotalsView, '/schedules/schedule_a/by_state/totals/'
+)
 
 api.add_resource(
     aggregates.CommunicationCostByCandidateView,
@@ -308,20 +339,11 @@ api.add_resource(
     '/candidate/<candidate_id>/filings/',
 )
 
-api.add_resource(
-    reports.EFilingHouseSenateSummaryView,
-    '/efile/reports/house-senate/',
-)
+api.add_resource(reports.EFilingHouseSenateSummaryView, '/efile/reports/house-senate/')
 
-api.add_resource(
-    reports.EFilingPresidentialSummaryView,
-    '/efile/reports/presidential/',
-)
+api.add_resource(reports.EFilingPresidentialSummaryView, '/efile/reports/presidential/')
 
-api.add_resource(
-    reports.EFilingPacPartySummaryView,
-    '/efile/reports/pac-party/',
-)
+api.add_resource(reports.EFilingPacPartySummaryView, '/efile/reports/pac-party/')
 
 api.add_resource(filings.FilingsList, '/filings/')
 
@@ -332,11 +354,13 @@ api.add_resource(legal.GetLegalCitation, '/legal/citation/<citation_type>/<citat
 api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
 api.add_resource(operations_log.OperationsLogView, '/operations-log/')
 
-app.config.update({
-    'APISPEC_SWAGGER_URL': None,
-    'APISPEC_SWAGGER_UI_URL': None,
-    'APISPEC_SPEC': spec.spec,
-})
+app.config.update(
+    {
+        'APISPEC_SWAGGER_URL': None,
+        'APISPEC_SWAGGER_UI_URL': None,
+        'APISPEC_SPEC': spec.spec,
+    }
+)
 apidoc = FlaskApiSpec(app)
 
 apidoc.register(search.CandidateNameSearch, blueprint='v1')

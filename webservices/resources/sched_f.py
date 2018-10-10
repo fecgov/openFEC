@@ -8,10 +8,7 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
-@doc(
-    tags=['party-coordinated expenditures'],
-    description=docs.SCHEDULE_F,
-)
+@doc(tags=['party-coordinated expenditures'], description=docs.SCHEDULE_F)
 class ScheduleFView(ApiResource):
 
     model = models.ScheduleF
@@ -35,9 +32,7 @@ class ScheduleFView(ApiResource):
         (('min_image_number', 'max_image_number'), models.ScheduleF.image_number),
     ]
 
-    filter_fulltext_fields = [
-        ('payee_name', models.ScheduleF.payee_name_text)
-    ]
+    filter_fulltext_fields = [('payee_name', models.ScheduleF.payee_name_text)]
 
     @property
     def args(self):
@@ -45,22 +40,17 @@ class ScheduleFView(ApiResource):
             args.itemized,
             args.schedule_f,
             args.paging,
-            args.make_sort_args(
-                default='expenditure_date',
-            )
+            args.make_sort_args(default='expenditure_date'),
         )
 
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
         if kwargs.get('sub_id'):
-            query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
+            query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         return query
 
 
-@doc(
-    tags=['party-coordinated expenditures'],
-    description=docs.SCHEDULE_F,
-)
+@doc(tags=['party-coordinated expenditures'], description=docs.SCHEDULE_F)
 class ScheduleFViewBySubId(ApiResource):
     model = models.ScheduleF
     schema = schemas.ScheduleFSchema
@@ -77,6 +67,4 @@ class ScheduleFViewBySubId(ApiResource):
 
     @property
     def args(self):
-        return utils.extend(
-            args.paging,
-        )
+        return utils.extend(args.paging)

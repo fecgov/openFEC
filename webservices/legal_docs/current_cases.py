@@ -157,11 +157,14 @@ CASE_NO_REGEX = re.compile(r'(?P<serial>\d+)')
 def load_current_murs(specific_mur_no=None):
     load_cases('MUR', specific_mur_no)
 
+
 def load_adrs(specific_adr_no=None):
     load_cases('ADR', specific_adr_no)
 
+
 def load_admin_fines(specific_af_no=None):
     load_cases('AF', specific_af_no)
+
 
 def get_es_type(case_type):
     case_type = case_type.upper()
@@ -171,6 +174,7 @@ def get_es_type(case_type):
         return 'adrs'
     else:
         return 'murs'
+
 
 def get_full_name(case_type):
     case_type = case_type.upper()
@@ -202,6 +206,7 @@ def load_cases(case_type, case_no=None):
         logger.info("{0} {1}(s) loaded".format(case_count, case_type))
     else:
         logger.error("Invalid case_type: must be 'MUR', 'ADR', or 'AF'.")
+
 
 def get_cases(case_type, case_no=None):
     """
@@ -237,7 +242,9 @@ def get_single_case(case_type, case_no):
             }
             case['commission_votes'] = get_commission_votes(case_type, case_id)
             case['documents'] = get_documents(case_id, bucket, bucket_name)
-            case['url'] = '/legal/{0}/{1}/'.format(get_full_name(case_type), row['case_no'])
+            case['url'] = '/legal/{0}/{1}/'.format(
+                get_full_name(case_type), row['case_no']
+            )
             if case_type == 'AF':
                 case = extend(case, get_af_specific_fields(case_id))
                 return case
@@ -256,6 +263,7 @@ def get_single_case(case_type, case_no):
         else:
             logger.info("Not a valid {0} number.".format(case_type))
             return None
+
 
 def get_af_specific_fields(case_id):
     case = {}
@@ -301,10 +309,22 @@ def get_dispositions(case_id):
         rs = conn.execute(DISPOSITION_DATA.format(case_id))
         disposition_data = []
         for row in rs:
-            citations = parse_statutory_citations(row['statutory_citation'], case_id, row['name'])
-            citations.extend(parse_regulatory_citations(row['regulatory_citation'], case_id, row['name']))
-            disposition_data.append({'disposition': row['event_name'], 'penalty': row['final_amount'],
-                'respondent': row['name'], 'citations': citations})
+            citations = parse_statutory_citations(
+                row['statutory_citation'], case_id, row['name']
+            )
+            citations.extend(
+                parse_regulatory_citations(
+                    row['regulatory_citation'], case_id, row['name']
+                )
+            )
+            disposition_data.append(
+                {
+                    'disposition': row['event_name'],
+                    'penalty': row['final_amount'],
+                    'respondent': row['name'],
+                    'citations': citations,
+                }
+            )
 
         return disposition_data
 
@@ -317,7 +337,9 @@ def get_commission_votes(case_type, case_id):
             rs = conn.execute(MUR_ADR_COMMISSION_VOTES, case_id)
         commission_votes = []
         for row in rs:
-            commission_votes.append({'vote_date': row['vote_date'], 'action': row['action']})
+            commission_votes.append(
+                {'vote_date': row['vote_date'], 'action': row['action']}
+            )
         return commission_votes
 
 
@@ -329,7 +351,7 @@ def get_participants(case_id):
             participants[row['entity_id']] = {
                 'name': row['name'],
                 'role': row['role'],
-                'citations': defaultdict(list)
+                'citations': defaultdict(list),
             }
     return participants
 
@@ -338,10 +360,16 @@ def get_sorted_respondents(participants):
     """
     Returns the respondents in a MUR sorted in the order of most important to least important
     """
-    SORTED_RESPONDENT_ROLES = ['Primary Respondent', 'Respondent', 'Previous Respondent']
+    SORTED_RESPONDENT_ROLES = [
+        'Primary Respondent',
+        'Respondent',
+        'Previous Respondent',
+    ]
     respondents = []
     for role in SORTED_RESPONDENT_ROLES:
-        respondents.extend(sorted([p['name'] for p in participants if p['role'] == role]))
+        respondents.extend(
+            sorted([p['name'] for p in participants if p['role'] == role])
+        )
     return respondents
 
 
@@ -364,12 +392,20 @@ def assign_citations(participants, case_id):
         for row in rs:
             entity_id = row['entity_id']
             if entity_id not in participants:
-                logger.warn("Entity %s from violations not found in participants for case %s", entity_id, case_id)
+                logger.warn(
+                    "Entity %s from violations not found in participants for case %s",
+                    entity_id,
+                    case_id,
+                )
                 continue
             participants[entity_id]['citations'][row['stage']].extend(
-                parse_statutory_citations(row['statutory_citation'], case_id, entity_id))
+                parse_statutory_citations(row['statutory_citation'], case_id, entity_id)
+            )
             participants[entity_id]['citations'][row['stage']].extend(
-                parse_regulatory_citations(row['regulatory_citation'], case_id, entity_id))
+                parse_regulatory_citations(
+                    row['regulatory_citation'], case_id, entity_id
+                )
+            )
 
 
 def parse_statutory_citations(statutory_citation, case_id, entity_id):
@@ -379,24 +415,35 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
         matches = list(STATUTE_REGEX.finditer(statutory_citation))
         for index, match in enumerate(matches):
             section = match.group('section')
-            orig_title, new_title, new_section = reclassify_statutory_citation_without_title(section)
-            url = 'https://api.fdsys.gov/link?' +\
-                urlencode([
+            orig_title, new_title, new_section = reclassify_statutory_citation_without_title(
+                section
+            )
+            url = 'https://api.fdsys.gov/link?' + urlencode(
+                [
                     ('collection', 'uscode'),
                     ('year', 'mostrecent'),
                     ('link-type', 'html'),
                     ('title', new_title),
-                    ('section', new_section)
-                ])
+                    ('section', new_section),
+                ]
+            )
             if index == len(matches) - 1:
-                match_text = statutory_citation[match.start():]
+                match_text = statutory_citation[match.start() :]
             else:
-                match_text = statutory_citation[match.start():matches[index + 1].start()]
+                match_text = statutory_citation[
+                    match.start() : matches[index + 1].start()
+                ]
             text = match_text.rstrip(' ,;')
-            citations.append({'text': text, 'type': 'statute', 'title': orig_title, 'url': url})
+            citations.append(
+                {'text': text, 'type': 'statute', 'title': orig_title, 'url': url}
+            )
         if not citations:
-            logger.warn("Cannot parse statutory citation %s for Entity %s in case %s",
-                    statutory_citation, entity_id, case_id)
+            logger.warn(
+                "Cannot parse statutory citation %s for Entity %s in case %s",
+                statutory_citation,
+                entity_id,
+                case_id,
+            )
     return citations
 
 
@@ -409,14 +456,22 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
             section = match.group('section')
             url = create_eregs_link(part, section)
             if index == len(matches) - 1:
-                match_text = regulatory_citation[match.start():]
+                match_text = regulatory_citation[match.start() :]
             else:
-                match_text = regulatory_citation[match.start():matches[index + 1].start()]
+                match_text = regulatory_citation[
+                    match.start() : matches[index + 1].start()
+                ]
             text = match_text.rstrip(' ,;')
-            citations.append({'text': text, 'type': 'regulation', 'title': '11', 'url': url})
+            citations.append(
+                {'text': text, 'type': 'regulation', 'title': '11', 'url': url}
+            )
         if not citations:
-            logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
-                    regulatory_citation, entity_id, case_id)
+            logger.warn(
+                "Cannot parse regulatory citation %s for Entity %s in case %s",
+                regulatory_citation,
+                entity_id,
+                case_id,
+            )
     return citations
 
 
@@ -435,15 +490,24 @@ def get_documents(case_id, bucket, bucket_name):
             }
             if not row['fileimage']:
                 logger.error(
-                    'Error uploading document ID {0} for {1} %{2}: No file image'.
-                    format(row['document_id'], row['case_type'], row['case_no']))
+                    'Error uploading document ID {0} for {1} %{2}: No file image'.format(
+                        row['document_id'], row['case_type'], row['case_no']
+                    )
+                )
             else:
-                pdf_key = 'legal/{0}/{1}/{2}'.format(get_es_type(row['case_type']), row['case_no'],
-                    row['filename'].replace(' ', '-'))
+                pdf_key = 'legal/{0}/{1}/{2}'.format(
+                    get_es_type(row['case_type']),
+                    row['case_no'],
+                    row['filename'].replace(' ', '-'),
+                )
                 document['url'] = '/files/' + pdf_key
                 logger.debug("S3: Uploading {}".format(pdf_key))
-                bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
-                        ContentType='application/pdf', ACL='public-read')
+                bucket.put_object(
+                    Key=pdf_key,
+                    Body=bytes(row['fileimage']),
+                    ContentType='application/pdf',
+                    ACL='public-read',
+                )
                 documents.append(document)
 
     return documents
@@ -468,13 +532,13 @@ def remove_reclassification_notes(statutory_citation):
         while pos < len(citation):
             if citation[pos] == ')':
                 if paren_count == 0:
-                    return citation[:match.start()] + citation[pos + 1:]
+                    return citation[: match.start()] + citation[pos + 1 :]
                 else:
                     paren_count -= 1
             elif citation[pos] == '(':
                 paren_count += 1
             pos += 1
-        return citation[:match.start()]  # Degenerate case - no matching ')'
+        return citation[: match.start()]  # Degenerate case - no matching ')'
 
     cleaned_citation = UNPARENTHESIZED_FORMERLY_REGEX.sub(' ', statutory_citation)
     while PARENTHESIZED_FORMERLY_REGEX.search(cleaned_citation):

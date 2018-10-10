@@ -342,7 +342,9 @@ Of those transactions,[under $200, and having "earmark" in the memo text OR tran
 
 '''
 
-SCHEDULE_A = SCHEDULE_A_TAG + '''
+SCHEDULE_A = (
+    SCHEDULE_A_TAG
+    + '''
 All receipt data is divided in two-year periods, called `two_year_transaction_period`, which
 is derived from the `report_year` submitted of the corresponding form. If no value is supplied, the results
 will default to the most recent two-year period that is named after the ending,
@@ -375,6 +377,7 @@ are required to properly page through this large dataset.
 Note: because the Schedule A data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
 '''
+)
 
 SUB_ID = '''
 A unique database identifier for itemized receipts or disbursements.
@@ -386,7 +389,9 @@ explains how committees and other filers spend their money. These figures are
 reported as part of forms F3, F3X and F3P.
 '''
 
-SCHEDULE_B = SCHEDULE_B_TAG + '''
+SCHEDULE_B = (
+    SCHEDULE_B_TAG
+    + '''
 The data is divided in two-year periods, called `two_year_transaction_period`, which
 is derived from the `report_year` submitted of the corresponding form. If no value is supplied, the results will
 default to the most recent two-year period that is named after the ending,
@@ -419,6 +424,7 @@ and these indices are required to properly page through this large dataset.
 Note: because the Schedule B data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
 '''
+)
 
 SCHEDULE_B_BY_PURPOSE = '''
 Schedule B disbursements aggregated by disbursement purpose category. To avoid double counting, memoed items are not included.
@@ -430,18 +436,24 @@ Schedule C shows all loans, endorsements and loan guarantees a committee
 receives or makes.
 '''
 
-SCHEDULE_C = SCHEDULE_C_TAG + '''
+SCHEDULE_C = (
+    SCHEDULE_C_TAG
+    + '''
 The committee continues to report the loan until it is repaid.
 '''
+)
 
 SCHEDULE_D_TAG = '''
 Schedule D, it shows debts and obligations owed to or by the committee that are
 required to be disclosed.
 '''
 
-SCHEDULE_D = SCHEDULE_D_TAG + '''
+SCHEDULE_D = (
+    SCHEDULE_D_TAG
+    + '''
 
 '''
+)
 
 SCHEDULE_E_TAG = '''
 Schedule E covers the line item expenditures for independent expenditures. For example, if a super PAC
@@ -458,7 +470,9 @@ and the totals are more accurate. You can still find the information from 24 and
 `/schedule/schedule_e/`.
 '''
 
-SCHEDULE_E = SCHEDULE_E_TAG + '''
+SCHEDULE_E = (
+    SCHEDULE_E_TAG
+    + '''
 Due to the large quantity of Schedule E filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
 the `last_indexes` object from `pagination` to the URL of your last request. For
@@ -487,16 +501,20 @@ and these indices are required to properly page through this large dataset.
 Note: because the Schedule E data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
 '''
+)
 
 SCHEDULE_F_TAG = '''
 Schedule F, it shows all special expenditures a national or state party committee
 makes in connection with the general election campaigns of federal candidates.
 '''
 
-SCHEDULE_F = SCHEDULE_F_TAG + '''
+SCHEDULE_F = (
+    SCHEDULE_F_TAG
+    + '''
 These coordinated party expenditures do not count against the contribution limits but are subject to other limits,
 these limits are detailed in Chapter 7 of the FEC Campaign Guide for Political Party Committees.
 '''
+)
 
 SIZE_DESCRIPTION = '''
 This endpoint aggregates Schedule A donations based on size:
@@ -534,10 +552,13 @@ itemized, if those contributions are not itemized, they will not be included in 
 state totals.
 '''
 
-STATE_AGGREGATE_RECIPIENT_TOTALS = STATE_AGGREGATE + '''
+STATE_AGGREGATE_RECIPIENT_TOTALS = (
+    STATE_AGGREGATE
+    + '''
 These receipts are then added together by committee type for the total amount
 of each type, grouped by state and cycle.
 '''
+)
 
 API_KEY_DESCRIPTION = '''
 API key for https://api.data.gov. Get one at https://api.data.gov/signup.
@@ -744,13 +765,13 @@ REQUEST_TYPE = 'Requests for additional information (RFAIs) sent to filers. The 
     - 9 From Multi Candidate Status\n\
 '
 
-REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. '+REPORT_TYPE
+REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. ' + REPORT_TYPE
 
 RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
 STATE_GENERIC = 'US state or territory'
 ZIP_CODE = 'Zip code'
 
-#candidates
+# candidates
 CANDIDATE_NAME = 'Name of candidate running for office'
 OFFICE_FULL = 'Federal office candidate runs for: House, Senate or presidential'
 OFFICE = 'Federal office candidate runs for: H, S or P'
@@ -768,9 +789,13 @@ CANDIDATE_STATUS = 'One-letter code explaining if the candidate is:\n\
 LAST_F2_DATE = 'The day the FEC received the candidate\'s most recent Form 2'
 FIRST_CANDIDATE_FILE_DATE = 'The day the FEC received the candidate\'s first filing. \
 This is a F2 candidate registration.'
-LAST_CANDIDATE_FILE_DATE = 'The day the FEC received the candidate\'s most recent filing'
+LAST_CANDIDATE_FILE_DATE = (
+    'The day the FEC received the candidate\'s most recent filing'
+)
 INCUMBENT_CHALLENGE = "One-letter code ('I', 'C', 'O') explaining if the candidate is an incumbent, a challenger, or if the seat is open."
-INCUMBENT_CHALLENGE_FULL = 'Explains if the candidate is an incumbent, a challenger, or if the seat is open.'
+INCUMBENT_CHALLENGE_FULL = (
+    'Explains if the candidate is an incumbent, a challenger, or if the seat is open.'
+)
 ACTIVE_THROUGH = 'Last year a candidate was active. This field is specific to the candidate_id so if the same person runs for another office, there may be a different record for them.'
 HAS_RAISED_FUNDS = 'A boolean that describes if a candidate\'s committee has ever received any receipts for their campaign for this particular office. (Candidates have separate candidate IDs for each office.)'
 FEDERAL_FUNDS_FLAG = 'A boolean the describes if a presidential candidate has accepted federal funds. The flag will be false for House and Senate candidates.'
@@ -824,11 +849,14 @@ COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
         - Y party, qualified\n\
         - Z national party non-federal account\n\
 '
-COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS = COMMITTEE_TYPE + '\
+COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS = (
+    COMMITTEE_TYPE
+    + '\
         - all All Committee Types\n\
         - all_candidates All Candidate Committee Types (H, S, P)\n\
         - all_pacs All PAC Committee Types (N, O, Q, V, W)\n\
 '
+)
 PAC_PARTY_TYPE = 'The one-letter type code of a PAC/Party organization:\n\
         - N PAC - nonqualified\n\
         - O independent expenditure-only (super PACs)\n\
@@ -848,7 +876,9 @@ LAST_F1_DATE = 'The day the FEC received the committee\'s most recent Form 1'
 MEANS_FILED = 'The method used to file with the FEC, either electronic or on paper.'
 
 # schedules
-MEMO_CODE = "'X' indicates that the amount is NOT to be included in the itemization total."
+MEMO_CODE = (
+    "'X' indicates that the amount is NOT to be included in the itemization total."
+)
 
 # schedule A
 CONTRIBUTOR_ID = 'The FEC identifier should be represented here if the contributor is registered with the FEC.'
@@ -857,7 +887,9 @@ OCCUPATION = 'Occupation of contributor as reported on the committee\'s filing'
 CONTRIBUTOR_NAME = 'Name of contributor'
 CONTRIBUTOR_CITY = 'City of contributor'
 CONTRIBUTOR_STATE = 'State of contributor'
-CONTRIBUTOR_EMPLOYER = 'Employer of contributor, filers need to make an effort to gather this information'
+CONTRIBUTOR_EMPLOYER = (
+    'Employer of contributor, filers need to make an effort to gather this information'
+)
 CONTRIBUTOR_OCCUPATION = 'Occupation of contributor, filers need to make an effort to gather this information'
 CONTRIBUTOR_ZIP = 'Zip code of contributor'
 IS_INDIVIDUAL = 'Restrict to non-earmarked individual contributions where memo code is true. \
@@ -878,8 +910,12 @@ PURPOSE = 'Purpose of the expenditure'
 # schedule E
 EXPENDITURE_MAX_DATE = 'Selects all items expended by this committee before this date'
 EXPENDITURE_MIN_DATE = 'Selects all items expended by this committee after this date'
-EXPENDITURE_MIN_AMOUNT = 'Selects all items expended by this committee greater than this amount'
-EXPENDITURE_MAX_AMOUNT = 'Selects all items expended by this committee less than this amount'
+EXPENDITURE_MIN_AMOUNT = (
+    'Selects all items expended by this committee greater than this amount'
+)
+EXPENDITURE_MAX_AMOUNT = (
+    'Selects all items expended by this committee less than this amount'
+)
 
 
 # dates
@@ -888,7 +924,7 @@ CREATE_DATE = 'Date the record was created'
 UPDATE_DATE = 'Date the record was updated'
 ELECTION_DATE = 'Date of election'
 ELECTION_YEAR = 'Year of election'
-#? TODO: add more categories
+# ? TODO: add more categories
 ELECTION_TYPE = 'Election type \n\
 Convention, Primary,\n\
 General, Special,\n\
@@ -913,6 +949,7 @@ report.'
 
 # Reports and Totals
 
+
 def add_period(var):
     return var + ' total for the reporting period'
 
@@ -920,8 +957,11 @@ def add_period(var):
 def add_ytd(var):
     return var + ' total for the year to date'
 
+
 # shared
-CASH_ON_HAND_BEGIN_PERIOD = 'Balance for the committee at the start of the two-year period'
+CASH_ON_HAND_BEGIN_PERIOD = (
+    'Balance for the committee at the start of the two-year period'
+)
 CASH_ON_HAND_END_PERIOD = 'Ending cash balance on the most recent filing'
 COVERAGE_START_DATE = 'Beginning date of the reporting period'
 COVERAGE_END_DATE = 'Ending date of the reporting period'
@@ -960,9 +1000,11 @@ REFUNDED_POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS = 'Political party refunds'
 CONTRIBUTION_REFUNDS = 'Total contribution refunds'
 REFUNDED_OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS = 'Other committee refunds'
 
-#loans
-LOAN_SOURCE = "Source of the loan (i.e., bank loan, brokerage account, credit card, home equity line of credit," \
-              "other line of credit, or personal funds of the candidate"
+# loans
+LOAN_SOURCE = (
+    "Source of the loan (i.e., bank loan, brokerage account, credit card, home equity line of credit,"
+    "other line of credit, or personal funds of the candidate"
+)
 
 
 # presidential
@@ -1020,7 +1062,9 @@ COORDINATED_EXPENDITURES_BY_PARTY_COMMITTEE = 'Coordinated party expenditures'
 LOANS_MADE = 'Loans made'
 LOAN_REPAYMENTS_MADE = 'Loan repayments made'
 SHARED_FED_ACTIVITY = 'Allocated federal election activity - federal share'
-ALLOCATED_FEDERAL_ELECTION_LEVIN_SHARE = 'Allocated federal election activity - Levin share'
+ALLOCATED_FEDERAL_ELECTION_LEVIN_SHARE = (
+    'Allocated federal election activity - Levin share'
+)
 NON_ALLOCATED_FED_ELECTION_ACTIVITY = 'Federal election activity - federal only'
 FED_ELECTION_ACTIVITY = 'Total federal election activity'
 FED_DISBURSEMENTS = 'Total federal disbursements'
@@ -1119,7 +1163,7 @@ requirements.
 These endpoints contain Final Audit Reports approved by the Commission since inception.
 '''
 
-#endpoint: audit-case
+# endpoint: audit-case
 AUDIT_CASE = '''
 This endpoint contains Final Audit Reports approved by the Commission since inception.
 The search can be based on information about the audited committee (Name, FEC ID Number, Type, \n\
@@ -1127,12 +1171,12 @@ Election Cycle) or the issues covered in the report.
 '''
 
 
-#endpoint: audit-primary-category
+# endpoint: audit-primary-category
 AUDIT_PRIMARY_CATEGORY = '''
 This lists the options for the primary categories available in the /audit-search/ endpoint.
 '''
 
-#endpoint: audit-category
+# endpoint: audit-category
 AUDIT_CATEGORY = '''
 This lists the options for the categories and subcategories available in the /audit-search/ endpoint.
 '''

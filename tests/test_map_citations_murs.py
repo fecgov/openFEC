@@ -6,16 +6,22 @@ from webservices.legal_docs import load_legal_docs, reclassify_statutory_citatio
 
 
 class TestGetCitations(unittest.TestCase):
-
     def test_reclassify_statutory_citation(self):
         # spot check a few cases from the csv
-        assert reclassify_statutory_citation.reclassify_statutory_citation('2', '431') == ('52', '30101')
-        assert reclassify_statutory_citation.reclassify_statutory_citation('2', '437g') == ('52', '30109')
-        assert reclassify_statutory_citation.reclassify_statutory_citation('2', '441a-1') == ('52', '30117')
+        assert reclassify_statutory_citation.reclassify_statutory_citation(
+            '2', '431'
+        ) == ('52', '30101')
+        assert reclassify_statutory_citation.reclassify_statutory_citation(
+            '2', '437g'
+        ) == ('52', '30109')
+        assert reclassify_statutory_citation.reclassify_statutory_citation(
+            '2', '441a-1'
+        ) == ('52', '30117')
 
         # and a fallback
-        assert reclassify_statutory_citation.reclassify_statutory_citation('99', '12345') == ('99', '12345')
-
+        assert reclassify_statutory_citation.reclassify_statutory_citation(
+            '99', '12345'
+        ) == ('99', '12345')
 
     @mock.patch.object(reclassify_statutory_citation, 'reclassify_statutory_citation')
     def test_get_citations_statute(self, reclassify_statutory_citation):
@@ -51,18 +57,18 @@ class TestGetCitations(unittest.TestCase):
         parsed_url = urllib.parse.urlparse(us_code[0]['url'])
         query = urllib.parse.parse_qs(parsed_url.query)
 
-        assert query == dict([
-            ('collection', ['uscode']),
-            ('link-type', ['html']),
-            ('year', ['mostrecent']),
-            ('title', ['99']),
-            ('section', ['31999']),
-        ])
+        assert query == dict(
+            [
+                ('collection', ['uscode']),
+                ('link-type', ['html']),
+                ('year', ['mostrecent']),
+                ('title', ['99']),
+                ('section', ['31999']),
+            ]
+        )
 
     def test_get_citations_regulation(self):
-        citation_text = [
-            '11 C.F.R. 23.421',
-        ]
+        citation_text = ['11 C.F.R. 23.421']
 
         citations = load_legal_docs.get_citations(citation_text)
         regulations = citations['regulations']
@@ -70,11 +76,8 @@ class TestGetCitations(unittest.TestCase):
 
         assert regulations[0]['url'] == '/regulations/23-421/CURRENT'
 
-
     def test_get_citations_regulation_no_section(self):
-        citation_text = [
-            '11 C.F.R. 19',
-        ]
+        citation_text = ['11 C.F.R. 19']
 
         citations = load_legal_docs.get_citations(citation_text)
         regulations = citations['regulations']

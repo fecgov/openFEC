@@ -8,9 +8,7 @@ from jdbc_utils import to_jdbc_url
 
 
 DEFAULT_FRACTION = 0.5
-FULL_TABLES = [
-    'cand_inactive',
-]
+FULL_TABLES = ['cand_inactive']
 EXCLUDE_TABLES = [
     '*_mv',
     '*_tmp',
@@ -27,7 +25,7 @@ EXCLUDE_TABLES = [
 @task
 def fetch_schemas(ctx, source, dest):
     cmd = 'pg_dump {0} --format c --schema-only --no-acl --no-owner'.format(source)
-    for table in (FULL_TABLES + EXCLUDE_TABLES):
+    for table in FULL_TABLES + EXCLUDE_TABLES:
         cmd += ' --exclude-table {0}'.format(table)
     cmd += ' | pg_restore --dbname {0} --no-acl --no-owner'.format(dest)
     ctx.run(cmd, echo=True)
@@ -47,7 +45,7 @@ def fetch_subset(ctx, source, dest, fraction=DEFAULT_FRACTION, log=True):
     cmd = 'rdbms-subsetter {source} {dest} {fraction}'.format(**locals())
     if log:
         cmd += ' --logarithmic'
-    for table in (FULL_TABLES + EXCLUDE_TABLES):
+    for table in FULL_TABLES + EXCLUDE_TABLES:
         cmd += ' --exclude-table {0}'.format(table)
     cmd += ' --config data/subset-config.json'
     cmd += ' --yes'
@@ -165,7 +163,9 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, skip_migrations=
 
     # Log in if necessary
     if login == 'True':
-        login_command = 'cf auth "$FEC_CF_USERNAME_{0}" "$FEC_CF_PASSWORD_{0}"'.format(space.upper())
+        login_command = 'cf auth "$FEC_CF_USERNAME_{0}" "$FEC_CF_PASSWORD_{0}"'.format(
+            space.upper()
+        )
         ctx.run(login_command, echo=True)
 
     # Target space
@@ -178,7 +178,11 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, skip_migrations=
         migration_credential = os.getenv(migration_env_var)
 
         if migration_credential is None:
-            print("\nUnable to retrieve {0}. Make sure the environmental variable is set.\n".format(migration_env_var))
+            print(
+                "\nUnable to retrieve {0}. Make sure the environmental variable is set.\n".format(
+                    migration_env_var
+                )
+            )
             return
 
         print("\nMigrating database...")
@@ -194,12 +198,13 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, skip_migrations=
     for app in ('api', 'celery-worker', 'celery-beat'):
         deployed = ctx.run('cf app {0}'.format(app), echo=True, warn=True)
         cmd = 'zero-downtime-push' if deployed.ok else 'push'
-        ctx.run('cf {cmd} {app} -f manifests/manifest_{file}_{space}.yml'.format(
-            cmd=cmd,
-            app=app,
-            file=app.replace('-','_'),
-            space=space
-        ), echo=True)
+        ctx.run(
+            'cf {cmd} {app} -f manifests/manifest_{file}_{space}.yml'.format(
+                cmd=cmd, app=app, file=app.replace('-', '_'), space=space
+            ),
+            echo=True,
+        )
+
 
 @task
 def create_sample_db(ctx):
@@ -215,18 +220,21 @@ def create_sample_db(ctx):
 
     print("Loading sample data...")
     subprocess.check_call(
-        ['psql', '-v', 'ON_ERROR_STOP=1', '-f', 'data/sample_db.sql', db_conn],
+        ['psql', '-v', 'ON_ERROR_STOP=1', '-f', 'data/sample_db.sql', db_conn]
     )
     print("Sample data loaded")
 
     print("Refreshing materialized views...")
     # SQLA_CONN is used by manage.py tasks
     os.environ["SQLA_CONN"] = db_conn
-    subprocess.check_call(
-        ['python', 'manage.py', 'refresh_materialized'],
-    )
+    subprocess.check_call(['python', 'manage.py', 'refresh_materialized'])
     print("Materialized views refreshed")
+
 
 @task
 def run_migrations(ctx, jdbc_url):
-    ctx.run('flyway migrate -q -url="{0}" -locations=filesystem:data/migrations'.format(jdbc_url))
+    ctx.run(
+        'flyway migrate -q -url="{0}" -locations=filesystem:data/migrations'.format(
+            jdbc_url
+        )
+    )

@@ -21,7 +21,9 @@ class BaseCommittee(BaseModel):
     __abstract__ = True
 
     name = db.Column(db.String(100), index=True, doc=docs.COMMITTEE_NAME)
-    committee_id = db.Column(db.String, primary_key=True, index=True, doc=docs.COMMITTEE_ID)
+    committee_id = db.Column(
+        db.String, primary_key=True, index=True, doc=docs.COMMITTEE_ID
+    )
     cycles = db.Column(ARRAY(db.Integer), index=True, doc=docs.COMMITTEE_CYCLE)
     treasurer_name = db.Column(db.String(100), index=True, doc=docs.TREASURER_NAME)
     treasurer_text = db.Column(TSVECTOR)
@@ -31,7 +33,9 @@ class BaseCommittee(BaseModel):
     designation = db.Column(db.String(1), index=True, doc=docs.DESIGNATION)
     designation_full = db.Column(db.String(25), index=True, doc=docs.DESIGNATION)
     organization_type = db.Column(db.String(1), index=True, doc=docs.ORGANIZATION_TYPE)
-    organization_type_full = db.Column(db.String(100), index=True, doc=docs.ORGANIZATION_TYPE)
+    organization_type_full = db.Column(
+        db.String(100), index=True, doc=docs.ORGANIZATION_TYPE
+    )
     party = db.Column(db.String(3), index=True, doc=docs.PARTY)
     party_full = db.Column(db.String(50), doc=docs.PARTY)
     state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
@@ -40,7 +44,9 @@ class BaseCommittee(BaseModel):
 class BaseConcreteCommittee(BaseCommittee):
     __tablename__ = 'ofec_committee_detail_mv'
 
-    committee_id = db.Column(db.String, primary_key=True, unique=True, index=True, doc=docs.COMMITTEE_ID)
+    committee_id = db.Column(
+        db.String, primary_key=True, unique=True, index=True, doc=docs.COMMITTEE_ID
+    )
     candidate_ids = db.Column(ARRAY(db.Text), doc=docs.CANDIDATE_ID)
 
 
@@ -56,13 +62,22 @@ class Committee(BaseConcreteCommittee):
 class CommitteeHistory(BaseCommittee):
     __tablename__ = 'ofec_committee_history_mv'
 
-    street_1 = db.Column(db.String(50), doc='Street address of committee as reported on the Form 1')
-    street_2 = db.Column(db.String(50), doc='Second line of street address of committee as reported on the Form 1')
+    street_1 = db.Column(
+        db.String(50), doc='Street address of committee as reported on the Form 1'
+    )
+    street_2 = db.Column(
+        db.String(50),
+        doc='Second line of street address of committee as reported on the Form 1',
+    )
     city = db.Column(db.String(50), doc='City of committee as reported on the Form 1')
-    state_full = db.Column(db.String(50), doc='State of committee as reported on the Form 1')
+    state_full = db.Column(
+        db.String(50), doc='State of committee as reported on the Form 1'
+    )
     zip = db.Column(db.String(9), doc='Zip code of committee as reported on the Form 1')
     candidate_ids = db.Column(ARRAY(db.Text), doc=docs.CANDIDATE_ID)
-    cycle = db.Column(db.Integer, primary_key=True, index=True, doc=docs.COMMITTEE_CYCLE)
+    cycle = db.Column(
+        db.Integer, primary_key=True, index=True, doc=docs.COMMITTEE_CYCLE
+    )
 
 
 class CommitteeDetail(BaseConcreteCommittee):
@@ -75,39 +90,89 @@ class CommitteeDetail(BaseConcreteCommittee):
     fax = db.Column(db.String(10), doc='Fax as reported on the Form 1')
     website = db.Column(db.String(50), doc='Website url as reported on the Form 1')
     form_type = db.Column(db.String(3), doc='Form where the information was reported')
-    leadership_pac = db.Column(db.String(50), doc='Indicates if the committee is a leadership PAC')
-    lobbyist_registrant_pac = db.Column(db.String(1), doc='Indicates if the committee is a lobbyist registrant PAC')
-    party_type = db.Column(db.String(3), doc='Code for the type of party the committee is, only if applicable')
-    party_type_full = db.Column(db.String(15), doc='Description of the type of party the committee is, only if applicable')
-    #? explain this more
-    qualifying_date = db.Column(db.Date(), doc='Date the committee became a qualified committee.')
-    street_1 = db.Column(db.String(50), doc='Street address of committee as reported on the Form 1')
-    street_2 = db.Column(db.String(50), doc='Second line of street address of committee as reported on the Form 1')
+    leadership_pac = db.Column(
+        db.String(50), doc='Indicates if the committee is a leadership PAC'
+    )
+    lobbyist_registrant_pac = db.Column(
+        db.String(1), doc='Indicates if the committee is a lobbyist registrant PAC'
+    )
+    party_type = db.Column(
+        db.String(3),
+        doc='Code for the type of party the committee is, only if applicable',
+    )
+    party_type_full = db.Column(
+        db.String(15),
+        doc='Description of the type of party the committee is, only if applicable',
+    )
+    # ? explain this more
+    qualifying_date = db.Column(
+        db.Date(), doc='Date the committee became a qualified committee.'
+    )
+    street_1 = db.Column(
+        db.String(50), doc='Street address of committee as reported on the Form 1'
+    )
+    street_2 = db.Column(
+        db.String(50),
+        doc='Second line of street address of committee as reported on the Form 1',
+    )
     city = db.Column(db.String(50), doc='City of committee as reported on the Form 1')
-    state_full = db.Column(db.String(50), doc='State of committee as reported on the Form 1')
+    state_full = db.Column(
+        db.String(50), doc='State of committee as reported on the Form 1'
+    )
     zip = db.Column(db.String(9), doc='Zip code of committee as reported on the Form 1')
-    treasurer_city = db.Column(db.String(50), doc='City of committee treasurer as reported on the Form 1')
+    treasurer_city = db.Column(
+        db.String(50), doc='City of committee treasurer as reported on the Form 1'
+    )
     treasurer_name_1 = db.Column(db.String(50))
     treasurer_name_2 = db.Column(db.String(50))
     treasurer_name_middle = db.Column(db.String(50))
     treasurer_name_prefix = db.Column(db.String(50))
-    treasurer_phone = db.Column(db.String(15), doc='Phone number of the committee treasurer as reported on the Form 1')
-    treasurer_state = db.Column(db.String(50), doc='State of the committee treasurer as reported on the Form 1')
-    treasurer_street_1 = db.Column(db.String(50), doc='Street of the committee treasurer as reported on the Form 1')
-    treasurer_street_2 = db.Column(db.String(50), doc='Second line of the street address of the committee treasurer as reported on the Form 1')
+    treasurer_phone = db.Column(
+        db.String(15),
+        doc='Phone number of the committee treasurer as reported on the Form 1',
+    )
+    treasurer_state = db.Column(
+        db.String(50), doc='State of the committee treasurer as reported on the Form 1'
+    )
+    treasurer_street_1 = db.Column(
+        db.String(50), doc='Street of the committee treasurer as reported on the Form 1'
+    )
+    treasurer_street_2 = db.Column(
+        db.String(50),
+        doc='Second line of the street address of the committee treasurer as reported on the Form 1',
+    )
     treasurer_name_suffix = db.Column(db.String(50))
     treasurer_name_title = db.Column(db.String(50))
-    treasurer_zip = db.Column(db.String(9), doc='Zip code of the committee treasurer as reported on the Form 1')
-    custodian_city = db.Column(db.String(50), doc='City of committee custodian as reported on the Form 1')
+    treasurer_zip = db.Column(
+        db.String(9),
+        doc='Zip code of the committee treasurer as reported on the Form 1',
+    )
+    custodian_city = db.Column(
+        db.String(50), doc='City of committee custodian as reported on the Form 1'
+    )
     custodian_name_1 = db.Column(db.String(50))
     custodian_name_2 = db.Column(db.String(50))
     custodian_name_middle = db.Column(db.String(50))
     custodian_name_full = db.Column(db.String(100), doc='Name of custodian')
-    custodian_phone = db.Column(db.String(15), doc='Phone number of the committee custodian as reported on the Form 1')
+    custodian_phone = db.Column(
+        db.String(15),
+        doc='Phone number of the committee custodian as reported on the Form 1',
+    )
     custodian_name_prefix = db.Column(db.String(50))
-    custodian_state = db.Column(db.String(2), doc='State of the committee custodian as reported on the Form 1')
-    custodian_street_1 = db.Column(db.String(50), doc='Street address of the committee custodian as reported on the Form 1')
-    custodian_street_2 = db.Column(db.String(50), doc='Second line of the street address of the committee custodian as reported on the Form 1')
+    custodian_state = db.Column(
+        db.String(2), doc='State of the committee custodian as reported on the Form 1'
+    )
+    custodian_street_1 = db.Column(
+        db.String(50),
+        doc='Street address of the committee custodian as reported on the Form 1',
+    )
+    custodian_street_2 = db.Column(
+        db.String(50),
+        doc='Second line of the street address of the committee custodian as reported on the Form 1',
+    )
     custodian_name_suffix = db.Column(db.String(50))
     custodian_name_title = db.Column(db.String(50))
-    custodian_zip = db.Column(db.String(9), doc='Zip code of the committee custodian as reported on the Form 1')
+    custodian_zip = db.Column(
+        db.String(9),
+        doc='Zip code of the committee custodian as reported on the Form 1',
+    )

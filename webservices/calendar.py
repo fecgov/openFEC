@@ -9,19 +9,14 @@ from marshmallow import Schema, fields
 
 timezone = pytz.timezone('US/Eastern')
 
+
 def render_date(value, fmt=True):
-    return (
-        value.isoformat()
-        if value and fmt
-        else value
-    )
+    return value.isoformat() if value and fmt else value
+
 
 def localize(value):
-    return (
-        timezone.localize(value)
-        if isinstance(value, datetime.datetime)
-        else value
-    )
+    return timezone.localize(value) if isinstance(value, datetime.datetime) else value
+
 
 def format_start_date(row, context=None, fmt=True):
     """Cast start date to appropriate type. If no end date is present, the start
@@ -31,12 +26,11 @@ def format_start_date(row, context=None, fmt=True):
     """
     return render_date(
         localize(
-            row.start_date.date()
-            if row.start_date and row.all_day
-            else row.start_date
+            row.start_date.date() if row.start_date and row.all_day else row.start_date
         ),
         fmt=fmt,
     )
+
 
 def format_end_date(row, context=None, fmt=True):
     """Round end date to start of next day for all-day events.
@@ -50,6 +44,7 @@ def format_end_date(row, context=None, fmt=True):
         fmt=fmt,
     )
 
+
 def render_ical(rows, schema):
     calendar = Calendar()
     for row in rows:
@@ -60,6 +55,7 @@ def render_ical(rows, schema):
         calendar.add_component(event)
     return calendar.to_ical()
 
+
 def render_csv(rows, schema):
     sio = io.StringIO()
     writer = csv.DictWriter(sio, fieldnames=schema.fields.keys())
@@ -68,15 +64,18 @@ def render_csv(rows, schema):
         writer.writerow(row)
     return sio.getvalue()
 
+
 class BaseEventSchema(Schema):
     summary = fields.String()
     description = fields.String()
     location = fields.String()
 
+
 class ICalEventSchema(BaseEventSchema):
     dtstart = fields.Function(functools.partial(format_start_date, fmt=False))
     dtend = fields.Function(functools.partial(format_end_date, fmt=False))
     categories = fields.String(attribute='category')
+
 
 class EventSchema(BaseEventSchema):
     start_date = fields.Function(format_start_date)

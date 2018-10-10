@@ -8,10 +8,7 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
-@doc(
-    tags=['filer resources'],
-    description=docs.RAD_ANALYST,
-)
+@doc(tags=['filer resources'], description=docs.RAD_ANALYST)
 class RadAnalystView(ApiResource):
 
     model = models.RadAnalyst
@@ -32,16 +29,15 @@ class RadAnalystView(ApiResource):
     ]
 
     filter_range_fields = [
-        (('min_assignment_update_date', 'max_assignment_update_date'), model.assignment_update_date),
+        (
+            ('min_assignment_update_date', 'max_assignment_update_date'),
+            model.assignment_update_date,
+        )
     ]
 
     @property
     def args(self):
-        return utils.extend(
-            args.paging,
-            args.rad_analyst,
-            args.make_sort_args(),
-        )
+        return utils.extend(args.paging, args.rad_analyst, args.make_sort_args())
 
     @property
     def index_column(self):

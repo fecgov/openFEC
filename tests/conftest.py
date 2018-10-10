@@ -12,9 +12,18 @@ def migrate_db(request):
     run_migrations()
     manage.refresh_materialized(concurrent=False)
 
+
 def run_migrations():
     subprocess.check_call(
-        ['flyway', 'migrate', '-n', '-url=%s' % get_test_jdbc_url(), '-locations=filesystem:data/migrations'],)
+        [
+            'flyway',
+            'migrate',
+            '-n',
+            '-url=%s' % get_test_jdbc_url(),
+            '-locations=filesystem:data/migrations',
+        ]
+    )
+
 
 def reset_schema():
     for schema in [

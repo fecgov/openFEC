@@ -5,7 +5,11 @@ from tests.common import ApiBaseTest
 
 from webservices import utils
 from webservices.rest import api
-from webservices.resources.totals import TotalsView, TotalsCommitteeView, ScheduleAByStateRecipientTotalsView
+from webservices.resources.totals import (
+    TotalsView,
+    TotalsCommitteeView,
+    ScheduleAByStateRecipientTotalsView,
+)
 
 
 shared_fields = {
@@ -40,21 +44,20 @@ shared_fields = {
     'committee_designation': "",
     'committee_type_full': "",
     'committee_designation_full': "",
-    'party_full': ""
+    'party_full': "",
 }
 
 transaction_coverage_fields = {'transaction_coverage_date': None}
 
-class TestTotals(ApiBaseTest):
 
+class TestTotals(ApiBaseTest):
     def test_Presidential_totals(self):
         committee_id = 'C8675309'
         transaction_coverage = factories.TransactionCoverageFactory(
-            committee_id=committee_id,
-            fec_election_year=2016)
+            committee_id=committee_id, fec_election_year=2016
+        )
         history = factories.CommitteeHistoryFactory(
-            committee_id=committee_id,
-            committee_type='P',
+            committee_id=committee_id, committee_type='P'
         )
         presidential_fields = {
             'committee_id': 'C8675309',
@@ -75,7 +78,6 @@ class TestTotals(ApiBaseTest):
             'repayments_other_loans': 13,
             'transfers_from_affiliated_committee': 14,
             'transfers_to_other_authorized_committee': 15,
-
         }
 
         fields = utils.extend(shared_fields, presidential_fields)
@@ -83,17 +85,18 @@ class TestTotals(ApiBaseTest):
 
         fields = utils.extend(fields, transaction_coverage_fields)
 
-        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
+        results = self._results(
+            api.url_for(TotalsCommitteeView, committee_id=committee_id)
+        )
         self.assertEqual(results[0], fields)
 
     def test_House_Senate_totals(self):
         committee_id = 'C8675310'
         transaction_coverage = factories.TransactionCoverageFactory(
-            committee_id=committee_id,
-            fec_election_year=2016)
+            committee_id=committee_id, fec_election_year=2016
+        )
         history = factories.CommitteeHistoryFactory(
-            committee_id=committee_id,
-            committee_type='S',
+            committee_id=committee_id, committee_type='S'
         )
 
         house_senate_fields = {
@@ -117,17 +120,18 @@ class TestTotals(ApiBaseTest):
 
         fields = utils.extend(fields, transaction_coverage_fields)
 
-        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
+        results = self._results(
+            api.url_for(TotalsCommitteeView, committee_id=committee_id)
+        )
         self.assertEqual(results[0], fields)
 
     def test_Pac_Party_totals(self):
         committee_id = 'C8675311'
         transaction_coverage = factories.TransactionCoverageFactory(
-            committee_id=committee_id,
-            fec_election_year=2016)
+            committee_id=committee_id, fec_election_year=2016
+        )
         history = factories.CommitteeHistoryFactory(
-            committee_id=committee_id,
-            committee_type='Q',
+            committee_id=committee_id, committee_type='Q'
         )
         pac_party_fields = {
             'committee_id': committee_id,
@@ -165,14 +169,15 @@ class TestTotals(ApiBaseTest):
 
         fields = utils.extend(fields, transaction_coverage_fields)
 
-        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
+        results = self._results(
+            api.url_for(TotalsCommitteeView, committee_id=committee_id)
+        )
         self.assertEqual(results[0], fields)
 
     def test_ie_totals(self):
         committee_id = 'C8675312'
         history = factories.CommitteeHistoryFactory(
-            committee_id=committee_id,
-            committee_type='I',
+            committee_id=committee_id, committee_type='I'
         )
         ie_fields = {
             'committee_id': committee_id,
@@ -186,7 +191,9 @@ class TestTotals(ApiBaseTest):
 
         fields = utils.extend(ie_fields, transaction_coverage_fields)
 
-        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
+        results = self._results(
+            api.url_for(TotalsCommitteeView, committee_id=committee_id)
+        )
         self.assertEqual(results[0], fields)
 
     def test_totals_house_senate(self):
@@ -194,18 +201,20 @@ class TestTotals(ApiBaseTest):
         committee_id = committee.committee_id
         [
             factories.TransactionCoverageFactory(
-                committee_id=committee_id,
-                fec_election_year=2008),
+                committee_id=committee_id, fec_election_year=2008
+            ),
             factories.TransactionCoverageFactory(
-                committee_id=committee_id,
-                fec_election_year=2012),
+                committee_id=committee_id, fec_election_year=2012
+            ),
         ]
         factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='H')
         [
             factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2008),
             factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2012),
         ]
-        response = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
+        response = self._results(
+            api.url_for(TotalsCommitteeView, committee_id=committee_id)
+        )
         self.assertEqual(len(response), 2)
         self.assertEqual(response[0]['cycle'], 2012)
         self.assertEqual(response[1]['cycle'], 2008)
@@ -226,7 +235,7 @@ class TestTotals(ApiBaseTest):
                 state='CA',
                 state_full='California',
                 committee_type='P',
-                committee_type_full='Presidential'
+                committee_type_full='Presidential',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=10000,
@@ -235,7 +244,7 @@ class TestTotals(ApiBaseTest):
                 state='ND',
                 state_full='North Dakota',
                 committee_type='H',
-                committee_type_full='House'
+                committee_type_full='House',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=20000,
@@ -244,7 +253,7 @@ class TestTotals(ApiBaseTest):
                 state='NC',
                 state_full='North Carolina',
                 committee_type='S',
-                committee_type_full='Senate'
+                committee_type_full='Senate',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=90000,
@@ -253,7 +262,7 @@ class TestTotals(ApiBaseTest):
                 state='NY',
                 state_full='New York',
                 committee_type='U',
-                committee_type_full='single candidate independent expenditure'
+                committee_type_full='single candidate independent expenditure',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=150000,
@@ -262,13 +271,11 @@ class TestTotals(ApiBaseTest):
                 state='TX',
                 state_full='Texas',
                 committee_type='',
-                committee_type_full='All'
+                committee_type_full='All',
             ),
         ]
 
-        response = self._results(
-            api.url_for(ScheduleAByStateRecipientTotalsView)
-        )
+        response = self._results(api.url_for(ScheduleAByStateRecipientTotalsView))
 
         self.assertEqual(len(response), 5)
         self.assertEqual(response[0]['total'], 50000)
@@ -289,7 +296,7 @@ class TestTotals(ApiBaseTest):
                 state='CA',
                 state_full='California',
                 committee_type='P',
-                committee_type_full='Presidential'
+                committee_type_full='Presidential',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=10000,
@@ -298,7 +305,7 @@ class TestTotals(ApiBaseTest):
                 state='ND',
                 state_full='North Dakota',
                 committee_type='H',
-                committee_type_full='House'
+                committee_type_full='House',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=20000,
@@ -307,7 +314,7 @@ class TestTotals(ApiBaseTest):
                 state='NC',
                 state_full='North Carolina',
                 committee_type='S',
-                committee_type_full='Senate'
+                committee_type_full='Senate',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=90000,
@@ -316,7 +323,7 @@ class TestTotals(ApiBaseTest):
                 state='NY',
                 state_full='New York',
                 committee_type='U',
-                committee_type_full='single candidate independent expenditure'
+                committee_type_full='single candidate independent expenditure',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=150000,
@@ -325,15 +332,12 @@ class TestTotals(ApiBaseTest):
                 state='TX',
                 state_full='Texas',
                 committee_type='',
-                committee_type_full='All'
+                committee_type_full='All',
             ),
         ]
 
         response = self._results(
-            api.url_for(
-                ScheduleAByStateRecipientTotalsView,
-                sort='-cycle'
-            )
+            api.url_for(ScheduleAByStateRecipientTotalsView, sort='-cycle')
         )
 
         self.assertEqual(len(response), 5)
@@ -355,7 +359,7 @@ class TestTotals(ApiBaseTest):
                 state='CA',
                 state_full='California',
                 committee_type='P',
-                committee_type_full='Presidential'
+                committee_type_full='Presidential',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=10000,
@@ -364,7 +368,7 @@ class TestTotals(ApiBaseTest):
                 state='ND',
                 state_full='North Dakota',
                 committee_type='H',
-                committee_type_full='House'
+                committee_type_full='House',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=20000,
@@ -373,7 +377,7 @@ class TestTotals(ApiBaseTest):
                 state='NC',
                 state_full='North Carolina',
                 committee_type='S',
-                committee_type_full='Senate'
+                committee_type_full='Senate',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=90000,
@@ -382,7 +386,7 @@ class TestTotals(ApiBaseTest):
                 state='NY',
                 state_full='New York',
                 committee_type='U',
-                committee_type_full='single candidate independent expenditure'
+                committee_type_full='single candidate independent expenditure',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=150000,
@@ -391,14 +395,13 @@ class TestTotals(ApiBaseTest):
                 state='TX',
                 state_full='Texas',
                 committee_type='',
-                committee_type_full='All'
+                committee_type_full='All',
             ),
         ]
 
         response = self._results(
             api.url_for(
-                ScheduleAByStateRecipientTotalsView,
-                committee_type=['P', 'H', 'S',]
+                ScheduleAByStateRecipientTotalsView, committee_type=['P', 'H', 'S']
             )
         )
 
@@ -427,7 +430,7 @@ class TestTotals(ApiBaseTest):
                 state='CA',
                 state_full='California',
                 committee_type='P',
-                committee_type_full='Presidential'
+                committee_type_full='Presidential',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=10000,
@@ -436,7 +439,7 @@ class TestTotals(ApiBaseTest):
                 state='ND',
                 state_full='North Dakota',
                 committee_type='H',
-                committee_type_full='House'
+                committee_type_full='House',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=20000,
@@ -445,7 +448,7 @@ class TestTotals(ApiBaseTest):
                 state='NC',
                 state_full='North Carolina',
                 committee_type='S',
-                committee_type_full='Senate'
+                committee_type_full='Senate',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=90000,
@@ -454,7 +457,7 @@ class TestTotals(ApiBaseTest):
                 state='NY',
                 state_full='New York',
                 committee_type='U',
-                committee_type_full='single candidate independent expenditure'
+                committee_type_full='single candidate independent expenditure',
             ),
             factories.ScheduleAByStateRecipientTotalsFactory(
                 total=150000,
@@ -463,15 +466,12 @@ class TestTotals(ApiBaseTest):
                 state='TX',
                 state_full='Texas',
                 committee_type='',
-                committee_type_full='All'
+                committee_type_full='All',
             ),
         ]
 
         response = self._results(
-            api.url_for(
-                ScheduleAByStateRecipientTotalsView,
-                state='NY'
-            )
+            api.url_for(ScheduleAByStateRecipientTotalsView, state='NY')
         )
 
         self.assertEqual(len(response), 1)

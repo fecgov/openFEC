@@ -18,7 +18,7 @@ from .load_legal_docs import (
     delete_murs_from_s3,
     index_regulations,
     index_statutes,
-    load_archived_murs
+    load_archived_murs,
 )
 
 from .index_management import (
@@ -27,8 +27,9 @@ from .index_management import (
     delete_docs_index,
     create_staging_index,
     restore_from_staging_index,
-    move_archived_murs
+    move_archived_murs,
 )
+
 
 def load_current_legal_docs():
     index_statutes()
@@ -38,6 +39,7 @@ def load_current_legal_docs():
     load_adrs()
     load_admin_fines()
 
+
 def initialize_current_legal_docs():
     """
     Creates the Elasticsearch index and loads all the different types of legal documents.
@@ -45,6 +47,7 @@ def initialize_current_legal_docs():
     """
     create_docs_index()
     load_current_legal_docs()
+
 
 def refresh_current_legal_docs_zero_downtime():
     """

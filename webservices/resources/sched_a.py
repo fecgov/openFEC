@@ -13,10 +13,7 @@ from webservices.common.views import ItemizedResource
 from webservices import exceptions
 
 
-@doc(
-    tags=['receipts'],
-    description=docs.SCHEDULE_A,
-)
+@doc(tags=['receipts'], description=docs.SCHEDULE_A)
 class ScheduleAView(ItemizedResource):
 
     model = models.ScheduleA
@@ -26,12 +23,15 @@ class ScheduleAView(ItemizedResource):
     @property
     def year_column(self):
         return self.model.two_year_transaction_period
+
     @property
     def index_column(self):
         return self.model.sub_id
+
     @property
     def amount_column(self):
         return self.model.contribution_receipt_amount
+
     filter_multi_fields = [
         ('image_number', models.ScheduleA.image_number),
         ('committee_id', models.ScheduleA.committee_id),
@@ -54,7 +54,7 @@ class ScheduleAView(ItemizedResource):
         ('contributor_occupation', models.ScheduleA.contributor_occupation_text),
     ]
     filter_multi_start_with_fields = [
-        ('contributor_zip', models.ScheduleA.contributor_zip),
+        ('contributor_zip', models.ScheduleA.contributor_zip)
     ]
     query_options = [
         sa.orm.joinedload(models.ScheduleA.committee),
@@ -69,12 +69,14 @@ class ScheduleAView(ItemizedResource):
             args.make_seek_args(),
             args.make_sort_args(
                 default='contribution_receipt_date',
-                validator=args.OptionValidator([
-                    'contribution_receipt_date',
-                    'contribution_receipt_amount',
-                    'contributor_aggregate_ytd',
-                ]),
-            )
+                validator=args.OptionValidator(
+                    [
+                        'contribution_receipt_date',
+                        'contribution_receipt_amount',
+                        'contributor_aggregate_ytd',
+                    ]
+                ),
+            ),
         )
 
     def build_query(self, **kwargs):
@@ -91,7 +93,9 @@ class ScheduleAView(ItemizedResource):
                 else:
                     zip_list.append(value[:5])
             contributor_zip_list = {'contributor_zip': zip_list}
-            query = filters.filter_multi_start_with(query, contributor_zip_list, self.filter_multi_start_with_fields)
+            query = filters.filter_multi_start_with(
+                query, contributor_zip_list, self.filter_multi_start_with_fields
+            )
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         if kwargs.get('line_number'):
@@ -101,10 +105,8 @@ class ScheduleAView(ItemizedResource):
                 query = query.filter_by(line_number=line_no)
         return query
 
-@doc(
-    tags=['receipts'],
-    description=docs.EFILING_TAG,
-)
+
+@doc(tags=['receipts'], description=docs.EFILING_TAG)
 class ScheduleAEfileView(views.ApiResource):
     model = models.ScheduleAEfile
     schema = schemas.ItemizedScheduleAfilingsSchema
@@ -115,12 +117,15 @@ class ScheduleAEfileView(views.ApiResource):
         ('committee_id', models.ScheduleAEfile.committee_id),
         ('contributor_city', models.ScheduleAEfile.contributor_city),
         ('contributor_state', models.ScheduleAEfile.contributor_state),
-        #('contributor_name', models.ScheduleAEfile.contr)
+        # ('contributor_name', models.ScheduleAEfile.contr)
     ]
 
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleAEfile.contribution_receipt_date),
-        (('min_amount', 'max_amount'), models.ScheduleAEfile.contribution_receipt_amount),
+        (
+            ('min_amount', 'max_amount'),
+            models.ScheduleAEfile.contribution_receipt_amount,
+        ),
         (('min_image_number', 'max_image_number'), models.ScheduleAEfile.image_number),
     ]
 
@@ -138,10 +143,12 @@ class ScheduleAEfileView(views.ApiResource):
             args.itemized,
             args.make_sort_args(
                 default='-contribution_receipt_date',
-                validator=args.OptionValidator([
-                    'contribution_receipt_date',
-                    'contribution_receipt_amount',
-                    'contributor_aggregate_ytd',
-                ]),
+                validator=args.OptionValidator(
+                    [
+                        'contribution_receipt_date',
+                        'contribution_receipt_amount',
+                        'contributor_aggregate_ytd',
+                    ]
+                ),
             ),
         )

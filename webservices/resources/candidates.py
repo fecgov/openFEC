@@ -23,15 +23,10 @@ def filter_multi_fields(model):
 
 
 def filter_range_fields(model):
-    return [
-        (('min_first_file_date', 'max_first_file_date'), model.first_file_date),
-    ]
+    return [(('min_first_file_date', 'max_first_file_date'), model.first_file_date)]
 
 
-@doc(
-    tags=['candidate'],
-    description=docs.CANDIDATE_LIST,
-)
+@doc(tags=['candidate'], description=docs.CANDIDATE_LIST)
 class CandidateList(ApiResource):
 
     model = models.Candidate
@@ -42,9 +37,7 @@ class CandidateList(ApiResource):
     filter_fulltext_fields = [('q', models.CandidateSearch.fulltxt)]
     aliases = {'receipts': models.CandidateSearch.receipts}
 
-    query_options = [
-        sa.orm.joinedload(models.Candidate.flags),
-    ]
+    query_options = [sa.orm.joinedload(models.Candidate.flags)]
 
     @property
     def args(self):
@@ -55,10 +48,9 @@ class CandidateList(ApiResource):
             args.make_sort_args(
                 default='name',
                 validator=args.IndexValidator(
-                    models.Candidate,
-                    extra=list(self.aliases.keys()),
+                    models.Candidate, extra=list(self.aliases.keys())
                 ),
-            )
+            ),
         )
 
     def build_query(self, **kwargs):
@@ -67,19 +59,25 @@ class CandidateList(ApiResource):
 
         query = super().build_query(**kwargs)
 
-        if {'receipts', '-receipts'}.intersection(kwargs.get('sort', [])) and 'q' not in kwargs:
+        if {'receipts', '-receipts'}.intersection(
+            kwargs.get('sort', [])
+        ) and 'q' not in kwargs:
             raise exceptions.ApiError(
-                'Cannot sort on receipts when parameter "q" is not set',
-                status_code=422,
+                'Cannot sort on receipts when parameter "q" is not set', status_code=422
             )
 
         if 'has_raised_funds' in kwargs:
             query = query.filter(
-                models.Candidate.flags.has(models.CandidateFlags.has_raised_funds == kwargs['has_raised_funds'])
+                models.Candidate.flags.has(
+                    models.CandidateFlags.has_raised_funds == kwargs['has_raised_funds']
+                )
             )
         if 'federal_funds_flag' in kwargs:
             query = query.filter(
-                models.Candidate.flags.has(models.CandidateFlags.federal_funds_flag == kwargs['federal_funds_flag'])
+                models.Candidate.flags.has(
+                    models.CandidateFlags.federal_funds_flag
+                    == kwargs['federal_funds_flag']
+                )
             )
 
         if kwargs.get('q'):
@@ -91,15 +89,14 @@ class CandidateList(ApiResource):
         if kwargs.get('cycle'):
             query = query.filter(models.Candidate.cycles.overlap(kwargs['cycle']))
         if kwargs.get('election_year'):
-            query = query.filter(models.Candidate.election_years.overlap(kwargs['election_year']))
+            query = query.filter(
+                models.Candidate.election_years.overlap(kwargs['election_year'])
+            )
 
         return query
 
 
-@doc(
-    tags=['candidate'],
-    description=docs.CANDIDATE_SEARCH,
-)
+@doc(tags=['candidate'], description=docs.CANDIDATE_SEARCH)
 class CandidateSearch(CandidateList):
 
     schema = schemas.CandidateSearchSchema
@@ -125,9 +122,7 @@ class CandidateView(ApiResource):
     page_schema = schemas.CandidateDetailPageSchema
     filter_multi_fields = filter_multi_fields(models.CandidateDetail)
 
-    query_options = [
-        sa.orm.joinedload(models.CandidateDetail.flags),
-    ]
+    query_options = [sa.orm.joinedload(models.CandidateDetail.flags)]
 
     @property
     def args(self):
@@ -135,8 +130,7 @@ class CandidateView(ApiResource):
             args.paging,
             args.candidate_detail,
             args.make_sort_args(
-                default='name',
-                validator=args.IndexValidator(self.model),
+                default='name', validator=args.IndexValidator(self.model)
             ),
         )
 
@@ -147,23 +141,30 @@ class CandidateView(ApiResource):
             query = query.filter_by(candidate_id=candidate_id)
 
         if committee_id is not None:
-            query = query.join(
-                models.CandidateCommitteeLink
-            ).filter(
-                models.CandidateCommitteeLink.committee_id == committee_id
-            ).distinct()
+            query = (
+                query.join(models.CandidateCommitteeLink)
+                .filter(models.CandidateCommitteeLink.committee_id == committee_id)
+                .distinct()
+            )
 
         if kwargs.get('cycle'):
             query = query.filter(models.CandidateDetail.cycles.overlap(kwargs['cycle']))
         if kwargs.get('election_year'):
-            query = query.filter(models.Candidate.election_years.overlap(kwargs['election_year']))
+            query = query.filter(
+                models.Candidate.election_years.overlap(kwargs['election_year'])
+            )
         if 'has_raised_funds' in kwargs:
             query = query.filter(
-                models.Candidate.flags.has(models.CandidateFlags.has_raised_funds == kwargs['has_raised_funds'])
+                models.Candidate.flags.has(
+                    models.CandidateFlags.has_raised_funds == kwargs['has_raised_funds']
+                )
             )
         if 'federal_funds_flag' in kwargs:
             query = query.filter(
-                models.Candidate.flags.has(models.CandidateFlags.federal_funds_flag == kwargs['federal_funds_flag'])
+                models.Candidate.flags.has(
+                    models.CandidateFlags.federal_funds_flag
+                    == kwargs['federal_funds_flag']
+                )
             )
 
         return query
@@ -184,9 +185,7 @@ class CandidateHistoryView(ApiResource):
     schema = schemas.CandidateHistorySchema
     page_schema = schemas.CandidateHistoryPageSchema
 
-    query_options = [
-        sa.orm.joinedload(models.CandidateHistory.flags),
-    ]
+    query_options = [sa.orm.joinedload(models.CandidateHistory.flags)]
 
     @property
     def args(self):
@@ -194,8 +193,7 @@ class CandidateHistoryView(ApiResource):
             args.paging,
             args.candidate_history,
             args.make_sort_args(
-                default='-two_year_period',
-                validator=args.IndexValidator(self.model),
+                default='-two_year_period', validator=args.IndexValidator(self.model)
             ),
         )
 
@@ -206,12 +204,15 @@ class CandidateHistoryView(ApiResource):
             query = query.filter(models.CandidateHistory.candidate_id == candidate_id)
 
         if committee_id:
-            query = query.join(
-                models.CandidateCommitteeLink,
-                models.CandidateCommitteeLink.candidate_id == models.CandidateHistory.candidate_id,
-            ).filter(
-                models.CandidateCommitteeLink.committee_id == committee_id
-            ).distinct()
+            query = (
+                query.join(
+                    models.CandidateCommitteeLink,
+                    models.CandidateCommitteeLink.candidate_id
+                    == models.CandidateHistory.candidate_id,
+                )
+                .filter(models.CandidateCommitteeLink.committee_id == committee_id)
+                .distinct()
+            )
 
         if cycle:
             query = (
@@ -224,19 +225,25 @@ class CandidateHistoryView(ApiResource):
 
     def _filter_elections(self, query, cycle):
         """Round up to the next election including `cycle`."""
-        return query.join(
-            models.CandidateElection,
-            sa.and_(
-                models.CandidateHistory.candidate_id == models.CandidateElection.candidate_id,
-                models.CandidateHistory.two_year_period <= models.CandidateElection.cand_election_year,
-                models.CandidateHistory.two_year_period > models.CandidateElection.prev_election_year,
-            ),
-        ).filter(
-            cycle <= models.CandidateElection.cand_election_year,
-            cycle > models.CandidateElection.prev_election_year,
-        ).order_by(
-            models.CandidateHistory.candidate_id,
-            sa.desc(models.CandidateHistory.two_year_period),
-        ).distinct(
-            models.CandidateHistory.candidate_id,
+        return (
+            query.join(
+                models.CandidateElection,
+                sa.and_(
+                    models.CandidateHistory.candidate_id
+                    == models.CandidateElection.candidate_id,
+                    models.CandidateHistory.two_year_period
+                    <= models.CandidateElection.cand_election_year,
+                    models.CandidateHistory.two_year_period
+                    > models.CandidateElection.prev_election_year,
+                ),
+            )
+            .filter(
+                cycle <= models.CandidateElection.cand_election_year,
+                cycle > models.CandidateElection.prev_election_year,
+            )
+            .order_by(
+                models.CandidateHistory.candidate_id,
+                sa.desc(models.CandidateHistory.two_year_period),
+            )
+            .distinct(models.CandidateHistory.candidate_id)
         )

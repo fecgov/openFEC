@@ -45,12 +45,14 @@ def call_resource(path, qs):
         'kwargs': kwargs,
     }
 
+
 def parse_kwargs(resource, qs):
     annotation = resolve_annotations(resource.get, 'args', parent=resource)
     fields = utils.extend(*[option['args'] for option in annotation.options])
     with task_utils.get_app().test_request_context(b'?' + qs):
         kwargs = flaskparser.parser.parse(fields)
     return fields, kwargs
+
 
 def query_with_labels(query, schema, sort_columns=False):
     """Create a new query that labels columns according to the SQLAlchemy
@@ -70,18 +72,14 @@ def query_with_labels(query, schema, sort_columns=False):
     exclude = getattr(schema.Meta, 'exclude', ())
     relationships = getattr(schema.Meta, 'relationships', [])
     joins = []
-    entities = [
-        entity for entity in query_entities(query)
-        if entity.key not in exclude
-    ]
+    entities = [entity for entity in query_entities(query) if entity.key not in exclude]
 
     for relationship in relationships:
         if relationship.position == -1:
             entities.append(relationship.column.label(relationship.label))
         else:
             entities.insert(
-                relationship.position,
-                relationship.column.label(relationship.label)
+                relationship.position, relationship.column.label(relationship.label)
             )
 
         if relationship.field not in joins:
@@ -97,9 +95,11 @@ def query_with_labels(query, schema, sort_columns=False):
 
     return query
 
+
 def unpack(values, size):
-    values = values if isinstance(values, tuple) else (values, )
-    return values + (None, ) * (size - len(values))
+    values = values if isinstance(values, tuple) else (values,)
+    return values + (None,) * (size - len(values))
+
 
 def get_s3_name(path, qs):
     """
@@ -118,17 +118,9 @@ def get_s3_name(path, qs):
 def make_bundle(resource):
     s3_key = task_utils.get_s3_key(resource['name'])
     with smart_open(s3_key, "wb") as fp:
-        query = query_with_labels(
-            resource['query'],
-            resource['schema']
-        )
-        copy_to(
-            query,
-            fp,
-            db.session.connection().engine,
-            format='csv',
-            header=True
-        )
+        query = query_with_labels(resource['query'], resource['schema'])
+        copy_to(query, fp, db.session.connection().engine, format='csv', header=True)
+
 
 @app.task(base=QueueOnce, once={'graceful': True})
 def export_query(path, qs):
@@ -142,6 +134,7 @@ def export_query(path, qs):
         logger.info('Bundled: {0}'.format(qs))
     except:
         logger.exception('Download failed: {0}'.format(qs))
+
 
 @app.task
 def clear_bucket():

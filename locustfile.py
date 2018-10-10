@@ -22,7 +22,7 @@ except KeyError:
 
 CYCLES = range(1980, 2018, 2)
 CANDIDATES = [
-    'bush'
+    'bush',
     'cheney',
     'gore',
     'lieberman',
@@ -33,19 +33,13 @@ CANDIDATES = [
     'mccain',
     'palin',
     'clinton',
-    'sanders'
+    'sanders',
     'omalley',
     'rubio',
     'graham',
     'kasich',
 ]
-TERMS = [
-    'embezzle',
-    'email',
-    'department',
-    'contribution',
-    'commission'
-]
+TERMS = ['embezzle', 'email', 'department', 'contribution', 'commission']
 
 # TODO: Add more small
 small_records_sched_a = [
@@ -64,76 +58,162 @@ medium_records_sched_a = [
 
 large_records_sched_a = [
     {'committee_id': 'C00401224'},
-    {'committee_id': ['C00401224', 'C00003418', 'C00010603', 'C00027466', 'C00005561', 'C00484642']},
+    {
+        'committee_id': [
+            'C00401224',
+            'C00003418',
+            'C00010603',
+            'C00027466',
+            'C00005561',
+            'C00484642',
+        ]
+    },
     {'contributor_state': 'NY'},
     {'contributor_state': 'TX'},
     # some common last names in the US
     {'contributor_name': 'Smith'},
     {'contributor_name': 'Johnson'},
     # seeing this problem in production
-    {'data_type': 'processed', 'sort_hide_null': 'true', 'committee_id': 'C00401224',
-        'two_year_transaction_period': 2016, 'min_date': '07/01/2016', 'max_date': '07/31/2016',
-        'sort': '-contribution_receipt_date', 'per_page': 30
-    }
+    {
+        'data_type': 'processed',
+        'sort_hide_null': 'true',
+        'committee_id': 'C00401224',
+        'two_year_transaction_period': 2016,
+        'min_date': '07/01/2016',
+        'max_date': '07/31/2016',
+        'sort': '-contribution_receipt_date',
+        'per_page': 30,
+    },
 ]
 
 
 # took the worst performing queries from the log https://logs.fr.cloud.gov/goto/be56820fc05ef241c62c5641f16dcd3e
 poor_performance_a = [
-    {'sort_nulls_large': True, 'contributor_name': 'paul+johnson', 'two_year_transaction_period': 2014, 'min_date': '01%2F01%2F2013', 'max_date': '12%2F31%2F2014','contributor_state': 'IN', 'sort': '-contribution_receipt_date', 'per_page': 30, 'is_individual': True},
-    {'sort_nulls_large': True, 'contributor_name': 'Robert+F+Pence', 'two_year_transaction_period': 2014, 'min_date': '01%2F01%2F2013', 'max_date': '12%2F31%2F2014', 'sort': '-contribution_receipt_date', 'per_page': 100, 'is_individual': True},
-    {'sort_nulls_large': True, 'contributor_name': 'tom+lewis', 'contributor_name': 'thomas+lewis', 'two_year_transaction_period': 2016, 'min_date': '01%2F01%2F2015', 'max_date': '12%2F31%2F2016', 'sort': '-contribution_receipt_amount', 'per_page': 30, 'is_individual': True},
-    {'sort_nulls_large': True, 'contributor_name': 'Becher%2C+S', 'two_year_transaction_period': 2016, 'min_date': '01%2F01%2F2015', 'max_date': '12%2F31%2F2016&', 'contributor_state': 'FL', 'sort': '-contribution_receipt_date', 'per_page': 30, 'is_individual': True},
-    {'sort_nulls_large': True, 'contributor_name': 'Becher', 'two_year_transaction_period': 2016, 'min_date': '01%2F01%2F2015', 'max_date': '12%2F31%2F2016', 'contributor_state':'FL', 'sort':'-contribution_receipt_date', 'per_page': 30, 'is_individual': True},
+    {
+        'sort_nulls_large': True,
+        'contributor_name': 'paul+johnson',
+        'two_year_transaction_period': 2014,
+        'min_date': '01%2F01%2F2013',
+        'max_date': '12%2F31%2F2014',
+        'contributor_state': 'IN',
+        'sort': '-contribution_receipt_date',
+        'per_page': 30,
+        'is_individual': True,
+    },
+    {
+        'sort_nulls_large': True,
+        'contributor_name': 'Robert+F+Pence',
+        'two_year_transaction_period': 2014,
+        'min_date': '01%2F01%2F2013',
+        'max_date': '12%2F31%2F2014',
+        'sort': '-contribution_receipt_date',
+        'per_page': 100,
+        'is_individual': True,
+    },
+    {
+        'sort_nulls_large': True,
+        'contributor_name': 'tom+lewis',
+        'contributor_name': 'thomas+lewis',
+        'two_year_transaction_period': 2016,
+        'min_date': '01%2F01%2F2015',
+        'max_date': '12%2F31%2F2016',
+        'sort': '-contribution_receipt_amount',
+        'per_page': 30,
+        'is_individual': True,
+    },
+    {
+        'sort_nulls_large': True,
+        'contributor_name': 'Becher%2C+S',
+        'two_year_transaction_period': 2016,
+        'min_date': '01%2F01%2F2015',
+        'max_date': '12%2F31%2F2016&',
+        'contributor_state': 'FL',
+        'sort': '-contribution_receipt_date',
+        'per_page': 30,
+        'is_individual': True,
+    },
+    {
+        'sort_nulls_large': True,
+        'contributor_name': 'Becher',
+        'two_year_transaction_period': 2016,
+        'min_date': '01%2F01%2F2015',
+        'max_date': '12%2F31%2F2016',
+        'contributor_state': 'FL',
+        'sort': '-contribution_receipt_date',
+        'per_page': 30,
+        'is_individual': True,
+    },
 ]
 
 poor_performance_b = [
-    {'sort_nulls_large': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4070720161305573871},
-    {'sort_nulls_large': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4062420161300286190},
-    {'sort_nulls_large': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4062120161299938749},
-    {'sort_nulls_large': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4061720161299122923},
-    {'sort_nulls_large': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4061720161299122723},
+    {
+        'sort_nulls_large': True,
+        'two_year_transaction_period': 2016,
+        'per_page': 100,
+        'sort': 'disbursement_date',
+        'last_disbursement_date': '2016-03-03',
+        'last_index': 4070720161305573871,
+    },
+    {
+        'sort_nulls_large': True,
+        'two_year_transaction_period': 2016,
+        'per_page': 100,
+        'sort': 'disbursement_date',
+        'last_disbursement_date': '2016-03-03',
+        'last_index': 4062420161300286190,
+    },
+    {
+        'sort_nulls_large': True,
+        'two_year_transaction_period': 2016,
+        'per_page': 100,
+        'sort': 'disbursement_date',
+        'last_disbursement_date': '2016-03-03',
+        'last_index': 4062120161299938749,
+    },
+    {
+        'sort_nulls_large': True,
+        'two_year_transaction_period': 2016,
+        'per_page': 100,
+        'sort': 'disbursement_date',
+        'last_disbursement_date': '2016-03-03',
+        'last_index': 4061720161299122923,
+    },
+    {
+        'sort_nulls_large': True,
+        'two_year_transaction_period': 2016,
+        'per_page': 100,
+        'sort': 'disbursement_date',
+        'last_disbursement_date': '2016-03-03',
+        'last_index': 4061720161299122723,
+    },
 ]
 
 
 class Tasks(locust.TaskSet):
-
     def on_start(self):
         self.candidates = self.fetch_ids('candidates', 'candidate_id')
         self.committees = self.fetch_ids('committees', 'committee_id')
 
     def fetch_ids(self, endpoint, key):
-        params = {
-            'api_key': API_KEY,
-        }
+        params = {'api_key': API_KEY}
         resp = self.client.get(endpoint, name='preload_ids', params=params)
         return [result[key] for result in resp.json()['results']]
 
     @locust.task
     def load_home(self):
-        params = {
-            'api_key': API_KEY,
-        }
+        params = {'api_key': API_KEY}
         self.client.get('', name='home', params=params)
 
     @locust.task
     def load_candidates_search(self, term=None):
         term = term or random.choice(CANDIDATES)
-        params = {
-            'api_key': API_KEY,
-            'sort': '-receipts',
-            'q': term,
-        }
+        params = {'api_key': API_KEY, 'sort': '-receipts', 'q': term}
         self.client.get('candidates/search', name='candidate_search', params=params)
 
     @locust.task
     def load_committees_search(self, term=None):
         term = term or random.choice(CANDIDATES)
-        params = {
-            'api_key': API_KEY,
-            'sort': '-receipts',
-            'q': term,
-        }
+        params = {'api_key': API_KEY, 'sort': '-receipts', 'q': term}
         self.client.get('committees', name='committee_search', params=params)
 
     @locust.task
@@ -154,72 +234,73 @@ class Tasks(locust.TaskSet):
 
     @locust.task
     def load_candidate_detail(self, candidate_id=None):
-        params = {
-            'api_key': API_KEY,
-        }
+        params = {'api_key': API_KEY}
         candidate_id = candidate_id or random.choice(self.candidates)
-        self.client.get(os.path.join('candidate', candidate_id), name='candidate_detail', params=params)
+        self.client.get(
+            os.path.join('candidate', candidate_id),
+            name='candidate_detail',
+            params=params,
+        )
 
     @locust.task
     def load_committee_detail(self, committee_id=None):
-        params = {
-            'api_key': API_KEY,
-        }
+        params = {'api_key': API_KEY}
         committee_id = committee_id or random.choice(self.committees)
-        self.client.get(os.path.join('committee', committee_id), name='committee_detail', params=params)
+        self.client.get(
+            os.path.join('committee', committee_id),
+            name='committee_detail',
+            params=params,
+        )
 
     @locust.task
     def load_candidate_totals(self, candidate_id=None):
-        params = {
-            'api_key': API_KEY,
-        }
+        params = {'api_key': API_KEY}
         candidate_id = candidate_id or random.choice(self.candidates)
-        self.client.get(os.path.join('candidate', candidate_id, 'totals'), name='candidate_totals', params=params)
+        self.client.get(
+            os.path.join('candidate', candidate_id, 'totals'),
+            name='candidate_totals',
+            params=params,
+        )
 
     @locust.task
     def load_committee_totals(self, committee_id=None):
-        params = {
-            'api_key': API_KEY,
-        }
+        params = {'api_key': API_KEY}
         committee_id = committee_id or random.choice(self.committees)
-        self.client.get(os.path.join('committee', committee_id, 'totals'), name='committee_totals', params=params)
+        self.client.get(
+            os.path.join('committee', committee_id, 'totals'),
+            name='committee_totals',
+            params=params,
+        )
 
     @locust.task
     def load_legal_documents_search(self, term=None):
         term = term or random.choice(CANDIDATES)
-        params = {
-            'q': term,
-            'api_key': API_KEY,
-        }
+        params = {'q': term, 'api_key': API_KEY}
         self.client.get('legal/search', name='legal_search', params=params)
 
     @locust.task
     def get_mur(self):
-        params = {
-            'api_key': API_KEY,
-        }
+        params = {'api_key': API_KEY}
         self.client.get('legal/docs/murs/7074', name='legal_get_mur', params=params)
 
     @locust.task
     def get_adr(self):
-        params = {
-            'api_key': API_KEY,
-        }
+        params = {'api_key': API_KEY}
         self.client.get('legal/docs/adrs/668', name='legal_get_adr', params=params)
 
     @locust.task
     def get_admin_fine(self):
-        params = {
-            'api_key': API_KEY,
-        }
-        self.client.get('legal/docs/admin_fines/2274', name='legal_get_admin_fine', params=params)
+        params = {'api_key': API_KEY}
+        self.client.get(
+            'legal/docs/admin_fines/2274', name='legal_get_admin_fine', params=params
+        )
 
     @locust.task
     def get_ao(self):
-        params = {
-            'api_key': API_KEY,
-        }
-        self.client.get('legal/docs/advisory_opinions/2018-07', name='legal_get_ao', params=params)
+        params = {'api_key': API_KEY}
+        self.client.get(
+            'legal/docs/advisory_opinions/2018-07', name='legal_get_ao', params=params
+        )
 
     @locust.task
     def load_schedule_a_small(self):
@@ -231,25 +312,33 @@ class Tasks(locust.TaskSet):
     def load_schedule_a_medium(self):
         params = random.choice(medium_records_sched_a)
         params['api_key'] = API_KEY
-        self.client.get('schedules/schedule_a/', name='schedule_a_medium', params=params)
+        self.client.get(
+            'schedules/schedule_a/', name='schedule_a_medium', params=params
+        )
 
     @locust.task
     def load_schedule_a_large(self):
         params = random.choice(large_records_sched_a)
         params['api_key'] = API_KEY
-        self.client.get('schedules/schedule_a/', name='load_schedule_a_large', params=params)
+        self.client.get(
+            'schedules/schedule_a/', name='load_schedule_a_large', params=params
+        )
 
     @locust.task
     def load_schedule_a_problematic(self):
         params = random.choice(poor_performance_a)
         params['api_key'] = API_KEY
-        self.client.get('schedules/schedule_a/', name='load_schedule_a_problematic', params=params)
+        self.client.get(
+            'schedules/schedule_a/', name='load_schedule_a_problematic', params=params
+        )
 
     @locust.task
     def load_schedule_b_problematic(self):
         params = random.choice(poor_performance_b)
         params['api_key'] = API_KEY
-        self.client.get('schedules/schedule_b/', name='load_schedule_b_problematic', params=params)
+        self.client.get(
+            'schedules/schedule_b/', name='load_schedule_b_problematic', params=params
+        )
 
 
 class Swarm(locust.HttpLocust):

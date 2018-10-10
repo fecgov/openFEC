@@ -12,11 +12,13 @@ def get_cycle_start(year):
     """
     return year if year % 2 == 1 else year - 1
 
+
 def get_cycle_end(year):
     """Round year up to the last year of the two-year election cycle. Used
     when querying partitioned itemized data for election cycle.
     """
     return year if year % 2 == 0 else year + 1
+
 
 CURRENT_YEAR = datetime.datetime.now().year
 
@@ -29,21 +31,16 @@ SQL_CONFIG = {
     'PARTITION_END_YEAR': 2018,
 }
 
-REQUIRED_CREDS = (
-    'SQLA_CONN',
-    'FEC_SLACK_TOKEN',
-)
+REQUIRED_CREDS = ('SQLA_CONN', 'FEC_SLACK_TOKEN')
 
 REQUIRED_SERVICES = ('redis32', 's3', 'elasticsearch24')
 
-REQUIRED_TABLES = (
-    tuple(db.Model.metadata.tables.keys()) +
-    (
-        'ofec_pacronyms',
-        'ofec_nicknames',
-        'ofec_zips_districts',
-    )
+REQUIRED_TABLES = tuple(db.Model.metadata.tables.keys()) + (
+    'ofec_pacronyms',
+    'ofec_nicknames',
+    'ofec_zips_districts',
 )
+
 
 def load_table(name):
     try:
@@ -51,17 +48,24 @@ def load_table(name):
     except sa.exc.NoSuchTableError:
         return None
 
+
 def check_keys(keys, getter, formatter):
     missing = [key for key in keys if getter(key) is None]
     if missing:
         print(formatter.format(', '.join(keys)))
     return missing
 
+
 CHECKS = [
     (REQUIRED_CREDS, env.get_credential, 'Missing creds {}'),
-    (REQUIRED_SERVICES, lambda service: env.get_service(label=service), 'Missing services {}'),
+    (
+        REQUIRED_SERVICES,
+        lambda service: env.get_service(label=service),
+        'Missing services {}',
+    ),
     (REQUIRED_TABLES, load_table, 'Missing tables {}'),
 ]
+
 
 def check_config():
     results = [check_keys(*check) for check in CHECKS]

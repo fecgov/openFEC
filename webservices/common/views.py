@@ -9,6 +9,7 @@ from webservices.common import counts
 from webservices.common import models
 from webservices.utils import use_kwargs
 
+
 class ApiResource(utils.Resource):
 
     args = {}
@@ -36,9 +37,15 @@ class ApiResource(utils.Resource):
             multi = True
 
         return utils.fetch_page(
-            query, kwargs,
-            count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
-            index_column=self.index_column, cap=self.cap, multi=multi,
+            query,
+            kwargs,
+            count=count,
+            model=self.model,
+            join_columns=self.join_columns,
+            aliases=self.aliases,
+            index_column=self.index_column,
+            cap=self.cap,
+            multi=multi,
         )
 
     def build_query(self, *args, _apply_options=True, **kwargs):
@@ -74,7 +81,9 @@ class ItemizedResource(ApiResource):
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
+        return utils.fetch_seek_page(
+            query, kwargs, self.index_column, count=count, cap=self.cap
+        )
 
     def join_committee_queries(self, kwargs):
         """Build and compose per-committee subqueries using `UNION ALL`.
@@ -85,9 +94,7 @@ class ItemizedResource(ApiResource):
             query, count = self.build_committee_query(kwargs, committee_id)
             queries.append(query.subquery().select())
             total += count
-        query = models.db.session.query(
-            self.model
-        ).select_entity_from(
+        query = models.db.session.query(self.model).select_entity_from(
             sa.union_all(*queries)
         )
         query = query.options(*self.query_options)
@@ -96,9 +103,14 @@ class ItemizedResource(ApiResource):
     def build_committee_query(self, kwargs, committee_id):
         """Build a subquery by committee.
         """
-        query = self.build_query(_apply_options=False, **utils.extend(kwargs, {'committee_id': [committee_id]}))
+        query = self.build_query(
+            _apply_options=False,
+            **utils.extend(kwargs, {'committee_id': [committee_id]})
+        )
         sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
         query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null)
-        page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
+        page_query = utils.fetch_seek_page(
+            query, kwargs, self.index_column, count=-1, eager=False
+        ).results
         count = counts.count_estimate(query, models.db.session, threshold=5000)
         return page_query, count

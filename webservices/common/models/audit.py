@@ -6,6 +6,7 @@ from webservices import docs
 
 from .base import db
 
+
 class AuditBase(object):
     __table_args__ = {"schema": "auditsearch"}
 
@@ -14,7 +15,9 @@ class AuditBase(object):
 class AuditPrimaryCategory(AuditBase, db.Model):
     __tablename__ = 'finding_vw'
 
-    primary_category_id = db.Column(db.String, index=True, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
+    primary_category_id = db.Column(
+        db.String, index=True, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID
+    )
     primary_category_name = db.Column(db.String, doc=docs.PRIMARY_CATEGORY_NAME)
     tier = db.Column(db.Integer, doc=docs.AUDIT_TIER)
 
@@ -23,9 +26,13 @@ class AuditPrimaryCategory(AuditBase, db.Model):
 class AuditCategoryRelation(AuditBase, db.Model):
     __tablename__ = 'finding_rel_vw'
 
-    primary_category_id = db.Column(db.String, index=True, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
+    primary_category_id = db.Column(
+        db.String, index=True, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID
+    )
     primary_category_name = db.Column(db.String, doc=docs.PRIMARY_CATEGORY_NAME)
-    sub_category_id = db.Column(db.String, index=True, primary_key=True, doc=docs.SUB_CATEGORY_ID)
+    sub_category_id = db.Column(
+        db.String, index=True, primary_key=True, doc=docs.SUB_CATEGORY_ID
+    )
     sub_category_name = db.Column(db.String, index=True, doc=docs.SUB_CATEGORY_NAME)
 
 
@@ -35,25 +42,33 @@ class AuditCategory(AuditPrimaryCategory):
     def sub_category_list(self):
         return sa.orm.relationship(
             AuditCategoryRelation,
-            primaryjoin=sa.orm.foreign(AuditCategoryRelation.primary_category_id) == self.primary_category_id,
+            primaryjoin=sa.orm.foreign(AuditCategoryRelation.primary_category_id)
+            == self.primary_category_id,
             uselist=True,
         )
+
 
 # endpoint audit-case
 class AuditCaseSubCategory(db.Model):
     __tablename__ = 'ofec_audit_case_sub_category_rel_mv'
     audit_case_id = db.Column(db.String, primary_key=True, doc=docs.AUDIT_CASE_ID)
-    primary_category_id = db.Column(db.String, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
+    primary_category_id = db.Column(
+        db.String, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID
+    )
     primary_category_name = db.Column(db.String, doc=docs.PRIMARY_CATEGORY_NAME)
     sub_category_id = db.Column(db.String, primary_key=True, doc=docs.SUB_CATEGORY_ID)
-    sub_category_name = db.Column(db.String, primary_key=True, doc=docs.SUB_CATEGORY_NAME)
+    sub_category_name = db.Column(
+        db.String, primary_key=True, doc=docs.SUB_CATEGORY_NAME
+    )
 
 
 # endpoint audit-case
 class AuditCaseCategoryRelation(db.Model):
     __tablename__ = 'ofec_audit_case_category_rel_mv'
     audit_case_id = db.Column(db.String, primary_key=True, doc=docs.AUDIT_CASE_ID)
-    primary_category_id = db.Column(db.String, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
+    primary_category_id = db.Column(
+        db.String, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID
+    )
     primary_category_name = db.Column(db.String, doc=docs.PRIMARY_CATEGORY_NAME)
     sub_category_list = db.relationship(
         'AuditCaseSubCategory',
@@ -62,7 +77,7 @@ class AuditCaseCategoryRelation(db.Model):
             foreign(AuditCaseCategoryRelation.primary_category_id) == AuditCaseSubCategory.primary_category_id
        )''',
         uselist=True,
-        lazy='joined'
+        lazy='joined',
     )
 
 
@@ -92,7 +107,7 @@ class AuditCase(db.Model):
             foreign(AuditCaseCategoryRelation.audit_case_id) == AuditCase.audit_case_id
         )''',
         uselist=True,
-        lazy='joined'
+        lazy='joined',
     )
 
 

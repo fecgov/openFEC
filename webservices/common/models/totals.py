@@ -3,6 +3,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 from webservices import docs
 
+
 class CommitteeTotals(BaseModel):
     __abstract__ = True
 
@@ -12,8 +13,12 @@ class CommitteeTotals(BaseModel):
     political_party_committee_contributions = db.Column(db.Numeric(30, 2))
     other_disbursements = db.Column(db.Numeric(30, 2))
     other_political_committee_contributions = db.Column(db.Numeric(30, 2))
-    individual_itemized_contributions = db.Column(db.Numeric(30, 2), doc=docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS)
-    individual_unitemized_contributions = db.Column(db.Numeric(30, 2), doc=docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS)
+    individual_itemized_contributions = db.Column(
+        db.Numeric(30, 2), doc=docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS
+    )
+    individual_unitemized_contributions = db.Column(
+        db.Numeric(30, 2), doc=docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS
+    )
     operating_expenditures = db.Column(db.Numeric(30, 2))
     disbursements = db.Column(db.Numeric(30, 2), doc=docs.DISBURSEMENTS)
     contributions = db.Column(db.Numeric(30, 2), doc=docs.CONTRIBUTIONS)
@@ -35,7 +40,7 @@ class CommitteeTotals(BaseModel):
     last_debts_owed_by_committee = db.Column(db.Numeric(30, 2))
     last_debts_owed_to_committee = db.Column(db.Numeric(30, 2))
 
-    #Add additional fields and filters to /totals/{committee-type} endpoint#2631
+    # Add additional fields and filters to /totals/{committee-type} endpoint#2631
     committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
     committee_type = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
     committee_designation = db.Column(db.String, doc=docs.DESIGNATION)
@@ -50,7 +55,9 @@ class CommitteeTotals(BaseModel):
             primaryjoin='''and_(
                 foreign({0}.committee_id) == TransactionCoverage.committee_id,
                 {0}.cycle  == TransactionCoverage.fec_election_year,
-            )'''.format(self.__name__),
+            )'''.format(
+                self.__name__
+            ),
             viewonly=True,
             lazy='joined',
         )
@@ -58,17 +65,21 @@ class CommitteeTotals(BaseModel):
 
 class CandidateCommitteeTotals(db.Model):
     __abstract__ = True
-    #making this it's own model hieararchy until can figure out
-    #how to maybe use existing classes while removing primary
-    #key stuff on cycle
+    # making this it's own model hieararchy until can figure out
+    # how to maybe use existing classes while removing primary
+    # key stuff on cycle
     candidate_id = db.Column(db.String, primary_key=True, doc=docs.CANDIDATE_ID)
     cycle = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CYCLE)
     offsets_to_operating_expenditures = db.Column(db.Numeric(30, 2))
     political_party_committee_contributions = db.Column(db.Numeric(30, 2))
     other_disbursements = db.Column(db.Numeric(30, 2))
     other_political_committee_contributions = db.Column(db.Numeric(30, 2))
-    individual_itemized_contributions = db.Column(db.Numeric(30, 2), doc=docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS)
-    individual_unitemized_contributions = db.Column(db.Numeric(30, 2), doc=docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS)
+    individual_itemized_contributions = db.Column(
+        db.Numeric(30, 2), doc=docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS
+    )
+    individual_unitemized_contributions = db.Column(
+        db.Numeric(30, 2), doc=docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS
+    )
     disbursements = db.Column(db.Numeric(30, 2), doc=docs.DISBURSEMENTS)
     contributions = db.Column(db.Numeric(30, 2), doc=docs.CONTRIBUTIONS)
     contribution_refunds = db.Column(db.Numeric(30, 2))
@@ -107,7 +118,7 @@ class CommitteeTotalsPacPartyBase(CommitteeTotals):
     loan_repayments_received = db.Column(db.Numeric(30, 2))
     loans_made = db.Column(db.Numeric(30, 2))
     non_allocated_fed_election_activity = db.Column(db.Numeric(30, 2))
-    total_transfers = db.Column(db.Numeric(30,2))
+    total_transfers = db.Column(db.Numeric(30, 2))
     other_fed_operating_expenditures = db.Column(db.Numeric(30, 2))
     other_fed_receipts = db.Column(db.Numeric(30, 2))
     shared_fed_activity = db.Column(db.Numeric(30, 2))
@@ -141,7 +152,9 @@ class CommitteeTotalsPresidential(CommitteeTotals):
     transfers_from_affiliated_committee = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
-    net_operating_expenditures = db.Column('last_net_operating_expenditures', db.Numeric(30, 2))
+    net_operating_expenditures = db.Column(
+        'last_net_operating_expenditures', db.Numeric(30, 2)
+    )
     net_contributions = db.Column('last_net_contributions', db.Numeric(30, 2))
 
 
@@ -165,9 +178,11 @@ class CandidateCommitteeTotalsPresidential(CandidateCommitteeTotals):
     repayments_other_loans = db.Column(db.Numeric(30, 2))
     transfers_from_affiliated_committee = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
-    #cash_on_hand_beginning_of_period = db.Column(db.Numeric(30, 2))
+    # cash_on_hand_beginning_of_period = db.Column(db.Numeric(30, 2))
     full_election = db.Column(db.Boolean, primary_key=True)
-    net_operating_expenditures = db.Column('last_net_operating_expenditures', db.Numeric(30, 2))
+    net_operating_expenditures = db.Column(
+        'last_net_operating_expenditures', db.Numeric(30, 2)
+    )
     net_contributions = db.Column('last_net_contributions', db.Numeric(30, 2))
     transaction_coverage_date = db.Column(db.DateTime())
 
@@ -179,14 +194,20 @@ class CandidateCommitteeTotalsHouseSenate(CandidateCommitteeTotals):
     all_other_loans = db.Column('other_loans_received', db.Numeric(30, 2))
     candidate_contribution = db.Column(db.Numeric(30, 2))
     loan_repayments = db.Column('loan_repayments_made', db.Numeric(30, 2))
-    loan_repayments_candidate_loans = db.Column('repayments_loans_made_by_candidate', db.Numeric(30, 2))
+    loan_repayments_candidate_loans = db.Column(
+        'repayments_loans_made_by_candidate', db.Numeric(30, 2)
+    )
     loan_repayments_other_loans = db.Column('repayments_other_loans', db.Numeric(30, 2))
-    loans = db.Column('loans_received', db.Numeric(30,2))
-    loans_made_by_candidate = db.Column('loans_received_from_candidate', db.Numeric(30, 2))
+    loans = db.Column('loans_received', db.Numeric(30, 2))
+    loans_made_by_candidate = db.Column(
+        'loans_received_from_candidate', db.Numeric(30, 2)
+    )
     other_receipts = db.Column(db.Numeric(30, 2))
-    transfers_from_other_authorized_committee = db.Column('transfers_from_affiliated_committee', db.Numeric(30, 2))
+    transfers_from_other_authorized_committee = db.Column(
+        'transfers_from_affiliated_committee', db.Numeric(30, 2)
+    )
     transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
-    #cash_on_hand_beginning_of_period = db.Column(db.Numeric(30, 2))
+    # cash_on_hand_beginning_of_period = db.Column(db.Numeric(30, 2))
     full_election = db.Column(db.Boolean, primary_key=True)
     net_operating_expenditures = db.Column(db.Numeric(30, 2))
     net_contributions = db.Column(db.Numeric(30, 2))
@@ -246,11 +267,14 @@ class CommitteeTotalsIEOnly(BaseModel):
         lazy='joined',
     )
 
+
 class ScheduleAByStateRecipientTotals(BaseModel):
     __tablename__ = 'ofec_sched_a_aggregate_state_recipient_totals_mv'
 
     total = db.Column(db.Numeric(30, 2), index=True, doc='The calculated total.')
-    count = db.Column(db.Integer, index=True, doc='Number of records making up the total.')
+    count = db.Column(
+        db.Integer, index=True, doc='Number of records making up the total.'
+    )
     cycle = db.Column(db.Integer, index=True, doc=docs.CYCLE)
     state = db.Column(db.String, index=True, doc=docs.STATE_GENERIC)
     state_full = db.Column(db.String, index=True, doc=docs.STATE_GENERIC)

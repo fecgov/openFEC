@@ -19,8 +19,8 @@ client = boto3.client('s3')
 MAX_RECORDS = 500000
 URL_EXPIRY = 7 * 24 * 60 * 60
 
-class DownloadView(utils.Resource):
 
+class DownloadView(utils.Resource):
     @use_kwargs_original({'filename': fields.Str(missing=None)})
     def post(self, path, filename=None, **kwargs):
         parts = request.path.split('/')
@@ -28,21 +28,20 @@ class DownloadView(utils.Resource):
         path = '/'.join(parts)
         cached_file = get_cached_file(path, request.query_string, filename=filename)
         if cached_file:
-            return {
-                'status': 'complete',
-                'url': cached_file,
-            }
+            return {'status': 'complete', 'url': cached_file}
         resource = download.call_resource(path, request.query_string)
         if resource['count'] > MAX_RECORDS:
             raise exceptions.ApiError(
-                'Cannot request downloads with more than {} records'.format(MAX_RECORDS),
+                'Cannot request downloads with more than {} records'.format(
+                    MAX_RECORDS
+                ),
                 status_code=http.client.FORBIDDEN,
             )
         download.export_query.delay(
-            path,
-            base64.b64encode(request.query_string).decode('UTF-8')
+            path, base64.b64encode(request.query_string).decode('UTF-8')
         )
         return {'status': 'queued'}
+
 
 def get_cached_file(path, qs, filename=None):
     key = download.get_s3_name(path, qs)
@@ -53,15 +52,11 @@ def get_cached_file(path, qs, filename=None):
     except ClientError:
         return None
 
+
 def get_download_url(obj, filename=None):
-    params = {
-        'Key': obj.key,
-        'Bucket': obj.bucket_name,
-    }
+    params = {'Key': obj.key, 'Bucket': obj.bucket_name}
     if filename:
         params['ResponseContentDisposition'] = 'filename={}'.format(filename)
     return obj.meta.client.generate_presigned_url(
-        'get_object',
-        Params=params,
-        ExpiresIn=URL_EXPIRY,
+        'get_object', Params=params, ExpiresIn=URL_EXPIRY
     )

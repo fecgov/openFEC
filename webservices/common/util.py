@@ -42,6 +42,10 @@ def get_class_by_tablename(tablename):
     :return: Class reference or None.
     """
     from webservices.common.models import db
+
     for c in db.Model._decl_class_registry.values():
-        if hasattr(c, '_sa_class_manager') and c._sa_class_manager.mapper.mapped_table == tablename:
+        if (
+            hasattr(c, '_sa_class_manager')
+            and c._sa_class_manager.mapper.mapped_table == tablename
+        ):
             return c

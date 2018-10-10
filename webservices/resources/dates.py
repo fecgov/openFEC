@@ -30,14 +30,13 @@ class ReportingDatesView(ApiResource):
             args.paging,
             args.reporting_dates,
             args.make_sort_args(
-                default='-due_date',
-                validator=args.IndexValidator(self.model),
+                default='-due_date', validator=args.IndexValidator(self.model)
             ),
         )
 
     filter_multi_fields = [
         ('report_year', models.ReportDate.report_year),
-        ('report_type', models.ReportDate.report_type)
+        ('report_type', models.ReportDate.report_type),
     ]
     filter_range_fields = [
         (('min_due_date', 'max_due_date'), models.ReportDate.due_date),
@@ -61,8 +60,7 @@ class ElectionDatesView(ApiResource):
             args.paging,
             args.election_dates,
             args.make_sort_args(
-                default='-election_date',
-                validator=args.IndexValidator(self.model),
+                default='-election_date', validator=args.IndexValidator(self.model)
             ),
         )
 
@@ -78,7 +76,10 @@ class ElectionDatesView(ApiResource):
         (('min_election_date', 'max_election_date'), models.ElectionDate.election_date),
         (('min_update_date', 'max_update_date'), models.ElectionDate.update_date),
         (('min_create_date', 'max_create_date'), models.ElectionDate.create_date),
-        (('min_primary_general_date', 'max_primary_general_date'), models.ElectionDate.primary_general_date),
+        (
+            ('min_primary_general_date', 'max_primary_general_date'),
+            models.ElectionDate.primary_general_date,
+        ),
     ]
 
     def build_query(self, *args, **kwargs):
@@ -86,10 +87,7 @@ class ElectionDatesView(ApiResource):
         return query.filter_by(election_status_id=1)
 
 
-@doc(
-    tags=['dates'],
-    description=docs.CALENDAR_DATES,
-)
+@doc(tags=['dates'], description=docs.CALENDAR_DATES)
 class CalendarDatesView(ApiResource):
 
     model = models.CalendarDate
@@ -97,11 +95,9 @@ class CalendarDatesView(ApiResource):
     page_schema = schemas.CalendarDatePageSchema
     cap = 500
 
-    filter_match_fields = [
-        ('event_id', models.CalendarDate.event_id),
-    ]
+    filter_match_fields = [('event_id', models.CalendarDate.event_id)]
     filter_multi_fields = [
-        ('calendar_category_id', models.CalendarDate.calendar_category_id),
+        ('calendar_category_id', models.CalendarDate.calendar_category_id)
     ]
     filter_fulltext_fields = [
         ('description', models.CalendarDate.description_text),
@@ -115,11 +111,7 @@ class CalendarDatesView(ApiResource):
     @property
     def args(self):
         return utils.extend(
-            args.paging,
-            args.calendar_dates,
-            args.make_sort_args(
-                default='-start_date',
-            ),
+            args.paging, args.calendar_dates, args.make_sort_args(default='-start_date')
         )
 
     def build_query(self, *args, **kwargs):
@@ -140,9 +132,9 @@ class CalendarDatesExport(CalendarDatesView):
     }
 
     @use_kwargs(args.calendar_dates)
-    @use_kwargs({
-        'renderer': fields.Str(missing='ics', validate=validate.OneOf(['ics', 'csv'])),
-    })
+    @use_kwargs(
+        {'renderer': fields.Str(missing='ics', validate=validate.OneOf(['ics', 'csv']))}
+    )
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
         today = datetime.date.today()
@@ -152,7 +144,4 @@ class CalendarDatesExport(CalendarDatesView):
         )
         schema_type, renderer, mimetype = self.renderers[kwargs['renderer']]
         schema = schema_type(many=True)
-        return Response(
-            renderer(schema.dump(query).data, schema),
-            mimetype=mimetype,
-        )
+        return Response(renderer(schema.dump(query).data, schema), mimetype=mimetype)

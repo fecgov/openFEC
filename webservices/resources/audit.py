@@ -13,10 +13,7 @@ from webservices.utils import use_kwargs
 
 
 # endpoint: audit-primary-category
-@doc(
-    tags=['audit'],
-    description=docs.AUDIT_PRIMARY_CATEGORY,
-)
+@doc(tags=['audit'], description=docs.AUDIT_PRIMARY_CATEGORY)
 class AuditPrimaryCategoryView(ApiResource):
     model = models.AuditPrimaryCategory
     schema = schemas.AuditPrimaryCategorySchema
@@ -26,18 +23,14 @@ class AuditPrimaryCategoryView(ApiResource):
         ('primary_category_id', model.primary_category_id),
         ('tier', model.tier),
     ]
-    filter_fulltext_fields = [
-        ('primary_category_name', model.primary_category_name),
-    ]
+    filter_fulltext_fields = [('primary_category_name', model.primary_category_name)]
 
     @property
     def args(self):
         return utils.extend(
             args.paging,
             args.auditPrimaryCategory,
-            args.make_sort_args(
-                default='primary_category_name',
-            ),
+            args.make_sort_args(default='primary_category_name'),
         )
 
     @property
@@ -46,10 +39,7 @@ class AuditPrimaryCategoryView(ApiResource):
 
 
 # endpoint: audit-category
-@doc(
-    tags=['audit'],
-    description=docs.AUDIT_CATEGORY,
-)
+@doc(tags=['audit'], description=docs.AUDIT_CATEGORY)
 class AuditCategoryView(ApiResource):
     model = models.AuditCategory
     schema = schemas.AuditCategorySchema
@@ -59,21 +49,15 @@ class AuditCategoryView(ApiResource):
         ('primary_category_id', model.primary_category_id),
         ('tier', model.tier),
     ]
-    filter_fulltext_fields = [
-        ('primary_category_name', model.primary_category_name),
-    ]
-    query_options = [
-        sa.orm.joinedload(models.AuditCategory.sub_category_list),
-    ]
+    filter_fulltext_fields = [('primary_category_name', model.primary_category_name)]
+    query_options = [sa.orm.joinedload(models.AuditCategory.sub_category_list)]
 
     @property
     def args(self):
         return utils.extend(
             args.paging,
             args.auditCategory,
-            args.make_sort_args(
-                default='primary_category_name',
-            ),
+            args.make_sort_args(default='primary_category_name'),
         )
 
     @property
@@ -82,10 +66,7 @@ class AuditCategoryView(ApiResource):
 
 
 # endpoint: audit-case
-@doc(
-    tags=['audit'],
-    description=docs.AUDIT_CASE,
-)
+@doc(tags=['audit'], description=docs.AUDIT_CASE)
 class AuditCaseView(ApiResource):
     model = models.AuditCase
     schema = schemas.AuditCaseSchema
@@ -109,12 +90,10 @@ class AuditCaseView(ApiResource):
         ('sub_category_id', model.sub_category_id),
     ]
 
-    filter_range_fields = [
-        (('min_election_cycle', 'max_election_cycle'), model.cycle),
-    ]
+    filter_range_fields = [(('min_election_cycle', 'max_election_cycle'), model.cycle)]
 
-# q---committee name typeahead
-# qq---candidate name typeadead
+    # q---committee name typeahead
+    # qq---candidate name typeadead
     filter_fulltext_fields = [
         ('q', models.AuditCommitteeSearch.fulltxt),
         ('qq', models.AuditCandidateSearch.fulltxt),
@@ -125,9 +104,7 @@ class AuditCaseView(ApiResource):
         return utils.extend(
             args.paging,
             args.auditCase,
-            args.make_multi_sort_args(
-                default=['-cycle', 'committee_name', ]
-            ),
+            args.make_multi_sort_args(default=['-cycle', 'committee_name']),
         )
 
     def build_query(self, **kwargs):
@@ -152,41 +129,32 @@ class AuditCaseView(ApiResource):
 
 
 # endpoint audit/search/name/candidates
-@doc(
-    tags=['audit'],
-    description=docs.NAME_SEARCH,
-)
+@doc(tags=['audit'], description=docs.NAME_SEARCH)
 class AuditCandidateNameSearch(utils.Resource):
 
-    filter_fulltext_fields = [
-        ('q', models.AuditCandidateSearch.fulltxt),
-    ]
+    filter_fulltext_fields = [('q', models.AuditCandidateSearch.fulltxt)]
 
     @use_kwargs(args.names)
     @marshal_with(schemas.AuditCandidateSearchListSchema())
     def get(self, **kwargs):
-        query = filters.filter_fulltext(models.AuditCandidateSearch.query, kwargs, self.filter_fulltext_fields)
-        query = query.order_by(
-            sa.desc(models.AuditCandidateSearch.id)
-        ).limit(20)
+        query = filters.filter_fulltext(
+            models.AuditCandidateSearch.query, kwargs, self.filter_fulltext_fields
+        )
+        query = query.order_by(sa.desc(models.AuditCandidateSearch.id)).limit(20)
         return {'results': query.all()}
 
+
 # endpoint audit/search/name/committees
-@doc(
-    tags=['audit'],
-    description=docs.NAME_SEARCH,
-)
+@doc(tags=['audit'], description=docs.NAME_SEARCH)
 class AuditCommitteeNameSearch(utils.Resource):
 
-    filter_fulltext_fields = [
-        ('q', models.AuditCommitteeSearch.fulltxt),
-    ]
+    filter_fulltext_fields = [('q', models.AuditCommitteeSearch.fulltxt)]
 
     @use_kwargs(args.names)
     @marshal_with(schemas.AuditCommitteeSearchListSchema())
     def get(self, **kwargs):
-        query = filters.filter_fulltext(models.AuditCommitteeSearch.query, kwargs, self.filter_fulltext_fields)
-        query = query.order_by(
-            sa.desc(models.AuditCommitteeSearch.id)
-        ).limit(20)
+        query = filters.filter_fulltext(
+            models.AuditCommitteeSearch.query, kwargs, self.filter_fulltext_fields
+        )
+        query = query.order_by(sa.desc(models.AuditCommitteeSearch.id)).limit(20)
         return {'results': query.all()}
