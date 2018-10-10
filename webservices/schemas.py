@@ -481,8 +481,6 @@ augment_models(
     models.CommitteeTotalsHouseSenate,
     models.CommitteeTotalsPacParty,
     models.CommitteeTotalsIEOnly,
-    models.CommitteeTotalsParty,
-    models.CommitteeTotalsPac
 )
 
 make_candidate_totals_schema = functools.partial(

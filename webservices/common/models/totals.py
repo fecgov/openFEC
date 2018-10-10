@@ -192,20 +192,6 @@ class CandidateCommitteeTotalsHouseSenate(CandidateCommitteeTotals):
     net_contributions = db.Column(db.Numeric(30, 2))
 
 
-class CommitteeTotalsParty(CommitteeTotalsPacPartyBase):
-    __tablename__ = 'ofec_totals_parties_vw'
-
-    committee_name = db.Column(db.String)
-    committee_type = db.Column(db.String)
-
-
-class CommitteeTotalsPac(CommitteeTotalsPacPartyBase):
-    __tablename__ = 'ofec_totals_pacs_vw'
-
-    committee_name = db.Column(db.String)
-    committee_type = db.Column(db.String)
-
-
 class CommitteeTotalsPacParty(CommitteeTotalsPacPartyBase):
     __tablename__ = 'ofec_totals_pacs_parties_vw'
 
