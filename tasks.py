@@ -4,7 +4,6 @@ import subprocess
 import git
 
 from invoke import task
-from webservices.env import env
 from jdbc_utils import to_jdbc_url
 
 
@@ -23,12 +22,6 @@ EXCLUDE_TABLES = [
     'dimcandproperties',
     'f_rpt_or_form_sub',
 ]
-# Include records used in integration tests
-# FORCE_INCLUDE = [
-#     ('dimcand', 10025229),  # Nancy Pelosi
-#     ('dimcand', 10012694),  # John Boehner
-#     ('dimcmte', 10031117),  # Raul Grijalva (committee)
-# ]
 
 
 @task
@@ -56,8 +49,6 @@ def fetch_subset(ctx, source, dest, fraction=DEFAULT_FRACTION, log=True):
         cmd += ' --logarithmic'
     for table in (FULL_TABLES + EXCLUDE_TABLES):
         cmd += ' --exclude-table {0}'.format(table)
-    for table, key in FORCE_INCLUDE:
-        cmd += ' --force {0}:{1}'.format(table, key)
     cmd += ' --config data/subset-config.json'
     cmd += ' --yes'
     ctx.run(cmd, echo=True)
@@ -229,7 +220,8 @@ def create_sample_db(ctx):
     print("Sample data loaded")
 
     print("Refreshing materialized views...")
-    os.environ["SQLA_CONN"] = db_conn # SQLA_CONN is used by manage.py tasks
+    # SQLA_CONN is used by manage.py tasks
+    os.environ["SQLA_CONN"] = db_conn
     subprocess.check_call(
         ['python', 'manage.py', 'refresh_materialized'],
     )
