@@ -31,7 +31,7 @@ def call_resource(path, qs):
     for field in IGNORE_FIELDS:
         kwargs.pop(field, None)
     query, model, schema = unpack(resource.build_query(**kwargs), 3)
-    count = counts.count_estimate(query, db.session, threshold=5000)
+    count = counts.count_estimate(query, db.session)
     return {
         'path': path,
         'qs': qs,
