@@ -7,7 +7,7 @@ from webservices import utils
 from webservices.rest import api
 from webservices.resources.totals import (
     TotalsCommitteeView,
-    ScheduleAByStateRecipientTotalsView
+    ScheduleAByStateRecipientTotalsView,
 )
 
 
@@ -55,9 +55,7 @@ class TestTotals(ApiBaseTest):
         factories.TransactionCoverageFactory(
             committee_id=committee_id, fec_election_year=2016
         )
-        factories.CommitteeHistoryFactory(
-            committee_id=committee_id, committee_type='P'
-        )
+        factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='P')
         presidential_fields = {
             'committee_id': 'C8675309',
             'cycle': 2016,
@@ -94,9 +92,7 @@ class TestTotals(ApiBaseTest):
         factories.TransactionCoverageFactory(
             committee_id=committee_id, fec_election_year=2016
         )
-        factories.CommitteeHistoryFactory(
-            committee_id=committee_id, committee_type='S'
-        )
+        factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='S')
 
         house_senate_fields = {
             'committee_id': committee_id,
@@ -129,9 +125,7 @@ class TestTotals(ApiBaseTest):
         factories.TransactionCoverageFactory(
             committee_id=committee_id, fec_election_year=2016
         )
-        factories.CommitteeHistoryFactory(
-            committee_id=committee_id, committee_type='Q'
-        )
+        factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='Q')
         pac_party_fields = {
             'committee_id': committee_id,
             'cycle': 2016,
@@ -175,9 +169,7 @@ class TestTotals(ApiBaseTest):
 
     def test_ie_totals(self):
         committee_id = 'C8675312'
-        factories.CommitteeHistoryFactory(
-            committee_id=committee_id, committee_type='I'
-        )
+        factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='I')
         ie_fields = {
             'committee_id': committee_id,
             'cycle': 2014,

@@ -190,10 +190,7 @@ class TestSort(ApiBaseTest):
             candidate_id='C1234', is_election=False, cycle=2016
         )
         factories.CandidateTotalFactory(
-            candidate_id='C5678',
-            disbursements='9999.99',
-            is_election=False,
-            cycle=2016,
+            candidate_id='C5678', disbursements='9999.99', is_election=False, cycle=2016
         )
         # Candidate Flags
         factories.CandidateFlagsFactory(candidate_id='C1234'),
@@ -259,15 +256,11 @@ class TestSort(ApiBaseTest):
             committee_designation='P',
         )
         # Cmte Totals
-        factories.CommitteeTotalsHouseSenateFactory(
-            committee_id='H1234', cycle=2016
-        )
+        factories.CommitteeTotalsHouseSenateFactory(committee_id='H1234', cycle=2016)
         factories.CommitteeTotalsHouseSenateFactory(
             committee_id='H1234', cycle=2016, disbursements='9999.99'
         )
-        factories.CommitteeTotalsHouseSenateFactory(
-            committee_id='H5678', cycle=2016
-        )
+        factories.CommitteeTotalsHouseSenateFactory(committee_id='H5678', cycle=2016)
         db.session.flush()
 
         electionView = elections.ElectionView()
