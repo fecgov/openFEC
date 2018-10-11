@@ -1,17 +1,10 @@
 import json
 import logging
-import re
-
 import boto
-
 from boto.s3.key import Key
-
 import boto3
 
-import requests
-
 from webservices.env import env
-
 
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
 logging.getLogger('smart_open').setLevel(logging.CRITICAL)

@@ -10,13 +10,8 @@ from webservices import args
 from webservices import rest
 from webservices import sorting
 from webservices.resources import candidate_aggregates
-from webservices.resources import audit
 from webservices.resources import elections
 from webservices.rest import db
-from webservices.tasks import utils
-
-from sqlalchemy.dialects import postgresql
-
 from webservices.common import models
 
 
@@ -175,37 +170,34 @@ class TestSort(ApiBaseTest):
             factories.CandidateFactory(candidate_id='C1234'),
             factories.CandidateFactory(candidate_id='C5678'),
         ]
-        candidateHistory = [
-            factories.CandidateHistoryFutureFactory(
-                candidate_id='C1234',
-                two_year_period=2016,
-                election_years=[2016],
-                cycles=[2016],
-                candidate_election_year=2016,
-            ),
-            factories.CandidateHistoryFutureFactory(
-                candidate_id='C5678',
-                two_year_period=2016,
-                election_years=[2016],
-                cycles=[2016],
-                candidate_election_year=2016,
-            ),
-        ]
-        candidateTotals = [
-            factories.CandidateTotalFactory(
-                candidate_id='C1234', is_election=False, cycle=2016
-            ),
-            factories.CandidateTotalFactory(
-                candidate_id='C5678',
-                disbursements='9999.99',
-                is_election=False,
-                cycle=2016,
-            ),
-        ]
-        candidateFlags = [
-            factories.CandidateFlagsFactory(candidate_id='C1234'),
-            factories.CandidateFlagsFactory(candidate_id='C5678'),
-        ]
+        # Candidate History
+        factories.CandidateHistoryFutureFactory(
+            candidate_id='C1234',
+            two_year_period=2016,
+            election_years=[2016],
+            cycles=[2016],
+            candidate_election_year=2016,
+        )
+        factories.CandidateHistoryFutureFactory(
+            candidate_id='C5678',
+            two_year_period=2016,
+            election_years=[2016],
+            cycles=[2016],
+            candidate_election_year=2016,
+        )
+        # Candidate Totals
+        factories.CandidateTotalFactory(
+            candidate_id='C1234', is_election=False, cycle=2016
+        )
+        factories.CandidateTotalFactory(
+            candidate_id='C5678',
+            disbursements='9999.99',
+            is_election=False,
+            cycle=2016,
+        )
+        # Candidate Flags
+        factories.CandidateFlagsFactory(candidate_id='C1234'),
+        factories.CandidateFlagsFactory(candidate_id='C5678'),
 
         tcv = candidate_aggregates.TotalsCandidateView()
         query, columns = sorting.sort(
@@ -226,60 +218,56 @@ class TestSort(ApiBaseTest):
             factories.CandidateFactory(candidate_id='C1234'),
             factories.CandidateFactory(candidate_id='C5678'),
         ]
-        cmteFacorty = [
-            factories.CommitteeDetailFactory(committee_id='H1234'),
-            factories.CommitteeDetailFactory(committee_id='H5678'),
-        ]
+        # Cmte Factory = [
+        factories.CommitteeDetailFactory(committee_id='H1234')
+        factories.CommitteeDetailFactory(committee_id='H5678')
         db.session.flush()
-        candidateHistory = [
-            factories.CandidateHistoryFactory(
-                candidate_id='C1234',
-                two_year_period=2016,
-                state='MO',
-                candidate_election_year=2016,
-                candidate_inactive=False,
-                district='01',
-                office='S',
-                election_years=[2016],
-                cycles=[2016],
-            ),
-            factories.CandidateHistoryFactory(
-                candidate_id='C5678',
-                candidate_election_year=2016,
-                two_year_period=2016,
-                state='MO',
-                election_years=[2016],
-                cycles=[2016],
-                candidate_inactive=False,
-                district='02',
-                office='S',
-            ),
-        ]
-        candidateCmteLinks = [
-            factories.CandidateCommitteeLinkFactory(
-                committee_id='H1234',
-                candidate_id='C1234',
-                fec_election_year=2016,
-                committee_designation='P',
-            ),
-            factories.CandidateCommitteeLinkFactory(
-                committee_id='H5678',
-                candidate_id='C5678',
-                fec_election_year=2016,
-                committee_designation='P',
-            ),
-        ]
-        cmteTotalsFactory = [
-            factories.CommitteeTotalsHouseSenateFactory(
-                committee_id='H1234', cycle=2016
-            ),
-            factories.CommitteeTotalsHouseSenateFactory(
-                committee_id='H1234', cycle=2016, disbursements='9999.99'
-            ),
-            factories.CommitteeTotalsHouseSenateFactory(
-                committee_id='H5678', cycle=2016
-            ),
-        ]
+        # Candidate History
+        factories.CandidateHistoryFactory(
+            candidate_id='C1234',
+            two_year_period=2016,
+            state='MO',
+            candidate_election_year=2016,
+            candidate_inactive=False,
+            district='01',
+            office='S',
+            election_years=[2016],
+            cycles=[2016],
+        )
+        factories.CandidateHistoryFactory(
+            candidate_id='C5678',
+            candidate_election_year=2016,
+            two_year_period=2016,
+            state='MO',
+            election_years=[2016],
+            cycles=[2016],
+            candidate_inactive=False,
+            district='02',
+            office='S',
+        )
+        # Candidate Cmte Links
+        factories.CandidateCommitteeLinkFactory(
+            committee_id='H1234',
+            candidate_id='C1234',
+            fec_election_year=2016,
+            committee_designation='P',
+        )
+        factories.CandidateCommitteeLinkFactory(
+            committee_id='H5678',
+            candidate_id='C5678',
+            fec_election_year=2016,
+            committee_designation='P',
+        )
+        # Cmte Totals
+        factories.CommitteeTotalsHouseSenateFactory(
+            committee_id='H1234', cycle=2016
+        )
+        factories.CommitteeTotalsHouseSenateFactory(
+            committee_id='H1234', cycle=2016, disbursements='9999.99'
+        )
+        factories.CommitteeTotalsHouseSenateFactory(
+            committee_id='H5678', cycle=2016
+        )
         db.session.flush()
 
         electionView = elections.ElectionView()
@@ -289,7 +277,6 @@ class TestSort(ApiBaseTest):
             model=None,
         )
 
-        # print(str(query.statement.compile(dialect=postgresql.dialect())))
         self.assertEqual(len(query.all()), len(candidates))
         query, columns = sorting.sort(
             electionView.build_query(office='senate', cycle=2016, state='MO'),

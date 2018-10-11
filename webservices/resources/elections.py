@@ -20,7 +20,6 @@ from webservices.common.models import (
     ElectionsList,
     ZipsDistricts,
     ScheduleEByCandidate,
-    StateElectionOfficeInfo,
     BaseConcreteCommittee,
 )
 

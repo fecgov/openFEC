@@ -1,18 +1,14 @@
 import sqlalchemy as sa
-from sqlalchemy import func
 from flask_apispec import doc
 
 from webservices import args
 from webservices import docs
-from webservices import filters
 from webservices import utils
 from webservices import schemas
 
 from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
-
-from webservices.common.models import EFilings, db
 
 
 @doc(tags=['independent expenditures'], description=docs.SCHEDULE_E)

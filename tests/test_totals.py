@@ -6,9 +6,8 @@ from tests.common import ApiBaseTest
 from webservices import utils
 from webservices.rest import api
 from webservices.resources.totals import (
-    TotalsView,
     TotalsCommitteeView,
-    ScheduleAByStateRecipientTotalsView,
+    ScheduleAByStateRecipientTotalsView
 )
 
 
@@ -53,10 +52,10 @@ transaction_coverage_fields = {'transaction_coverage_date': None}
 class TestTotals(ApiBaseTest):
     def test_Presidential_totals(self):
         committee_id = 'C8675309'
-        transaction_coverage = factories.TransactionCoverageFactory(
+        factories.TransactionCoverageFactory(
             committee_id=committee_id, fec_election_year=2016
         )
-        history = factories.CommitteeHistoryFactory(
+        factories.CommitteeHistoryFactory(
             committee_id=committee_id, committee_type='P'
         )
         presidential_fields = {
@@ -81,7 +80,7 @@ class TestTotals(ApiBaseTest):
         }
 
         fields = utils.extend(shared_fields, presidential_fields)
-        committee_total = factories.TotalsPresidentialFactory(**fields)
+        factories.TotalsPresidentialFactory(**fields)
 
         fields = utils.extend(fields, transaction_coverage_fields)
 
@@ -92,10 +91,10 @@ class TestTotals(ApiBaseTest):
 
     def test_House_Senate_totals(self):
         committee_id = 'C8675310'
-        transaction_coverage = factories.TransactionCoverageFactory(
+        factories.TransactionCoverageFactory(
             committee_id=committee_id, fec_election_year=2016
         )
-        history = factories.CommitteeHistoryFactory(
+        factories.CommitteeHistoryFactory(
             committee_id=committee_id, committee_type='S'
         )
 
@@ -116,7 +115,7 @@ class TestTotals(ApiBaseTest):
             'net_operating_expenditures': 128,
         }
         fields = utils.extend(house_senate_fields, shared_fields)
-        committee_total = factories.TotalsHouseSenateFactory(**fields)
+        factories.TotalsHouseSenateFactory(**fields)
 
         fields = utils.extend(fields, transaction_coverage_fields)
 
@@ -127,10 +126,10 @@ class TestTotals(ApiBaseTest):
 
     def test_Pac_Party_totals(self):
         committee_id = 'C8675311'
-        transaction_coverage = factories.TransactionCoverageFactory(
+        factories.TransactionCoverageFactory(
             committee_id=committee_id, fec_election_year=2016
         )
-        history = factories.CommitteeHistoryFactory(
+        factories.CommitteeHistoryFactory(
             committee_id=committee_id, committee_type='Q'
         )
         pac_party_fields = {
@@ -165,7 +164,7 @@ class TestTotals(ApiBaseTest):
             'net_operating_expenditures': 128,
         }
         fields = utils.extend(pac_party_fields, shared_fields)
-        committee_total = factories.TotalsPacPartyFactory(**fields)
+        factories.TotalsPacPartyFactory(**fields)
 
         fields = utils.extend(fields, transaction_coverage_fields)
 
@@ -176,7 +175,7 @@ class TestTotals(ApiBaseTest):
 
     def test_ie_totals(self):
         committee_id = 'C8675312'
-        history = factories.CommitteeHistoryFactory(
+        factories.CommitteeHistoryFactory(
             committee_id=committee_id, committee_type='I'
         )
         ie_fields = {
@@ -187,7 +186,7 @@ class TestTotals(ApiBaseTest):
             'total_independent_contributions': 1,
             'total_independent_expenditures': 2,
         }
-        committee_total = factories.TotalsIEOnlyFactory(**ie_fields)
+        factories.TotalsIEOnlyFactory(**ie_fields)
 
         fields = utils.extend(ie_fields, transaction_coverage_fields)
 
@@ -227,53 +226,51 @@ class TestTotals(ApiBaseTest):
         self.assertIn('not found', data['message'].lower())
 
     def test_sched_a_by_state_recipient_totals(self):
-        rows = [
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=50000,
-                count=10,
-                cycle=2008,
-                state='CA',
-                state_full='California',
-                committee_type='P',
-                committee_type_full='Presidential',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=10000,
-                count=5,
-                cycle=2010,
-                state='ND',
-                state_full='North Dakota',
-                committee_type='H',
-                committee_type_full='House',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=20000,
-                count=15,
-                cycle=2012,
-                state='NC',
-                state_full='North Carolina',
-                committee_type='S',
-                committee_type_full='Senate',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=90000,
-                count=4,
-                cycle=2014,
-                state='NY',
-                state_full='New York',
-                committee_type='U',
-                committee_type_full='single candidate independent expenditure',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=150000,
-                count=15,
-                cycle=2016,
-                state='TX',
-                state_full='Texas',
-                committee_type='',
-                committee_type_full='All',
-            ),
-        ]
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=50000,
+            count=10,
+            cycle=2008,
+            state='CA',
+            state_full='California',
+            committee_type='P',
+            committee_type_full='Presidential',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=10000,
+            count=5,
+            cycle=2010,
+            state='ND',
+            state_full='North Dakota',
+            committee_type='H',
+            committee_type_full='House',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=20000,
+            count=15,
+            cycle=2012,
+            state='NC',
+            state_full='North Carolina',
+            committee_type='S',
+            committee_type_full='Senate',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=90000,
+            count=4,
+            cycle=2014,
+            state='NY',
+            state_full='New York',
+            committee_type='U',
+            committee_type_full='single candidate independent expenditure',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=150000,
+            count=15,
+            cycle=2016,
+            state='TX',
+            state_full='Texas',
+            committee_type='',
+            committee_type_full='All',
+        )
 
         response = self._results(api.url_for(ScheduleAByStateRecipientTotalsView))
 
@@ -288,53 +285,51 @@ class TestTotals(ApiBaseTest):
         self.assertEqual(response[4]['committee_type'], '')
 
     def test_sched_a_by_state_recipient_totals_sort_by_cycle(self):
-        rows = [
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=50000,
-                count=10,
-                cycle=2008,
-                state='CA',
-                state_full='California',
-                committee_type='P',
-                committee_type_full='Presidential',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=10000,
-                count=5,
-                cycle=2010,
-                state='ND',
-                state_full='North Dakota',
-                committee_type='H',
-                committee_type_full='House',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=20000,
-                count=15,
-                cycle=2012,
-                state='NC',
-                state_full='North Carolina',
-                committee_type='S',
-                committee_type_full='Senate',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=90000,
-                count=4,
-                cycle=2014,
-                state='NY',
-                state_full='New York',
-                committee_type='U',
-                committee_type_full='single candidate independent expenditure',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=150000,
-                count=15,
-                cycle=2016,
-                state='TX',
-                state_full='Texas',
-                committee_type='',
-                committee_type_full='All',
-            ),
-        ]
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=50000,
+            count=10,
+            cycle=2008,
+            state='CA',
+            state_full='California',
+            committee_type='P',
+            committee_type_full='Presidential',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=10000,
+            count=5,
+            cycle=2010,
+            state='ND',
+            state_full='North Dakota',
+            committee_type='H',
+            committee_type_full='House',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=20000,
+            count=15,
+            cycle=2012,
+            state='NC',
+            state_full='North Carolina',
+            committee_type='S',
+            committee_type_full='Senate',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=90000,
+            count=4,
+            cycle=2014,
+            state='NY',
+            state_full='New York',
+            committee_type='U',
+            committee_type_full='single candidate independent expenditure',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=150000,
+            count=15,
+            cycle=2016,
+            state='TX',
+            state_full='Texas',
+            committee_type='',
+            committee_type_full='All',
+        )
 
         response = self._results(
             api.url_for(ScheduleAByStateRecipientTotalsView, sort='-cycle')
@@ -351,53 +346,51 @@ class TestTotals(ApiBaseTest):
         self.assertEqual(response[4]['committee_type'], 'P')
 
     def test_sched_a_by_state_recipient_totals_filter_by_committee_types(self):
-        rows = [
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=50000,
-                count=10,
-                cycle=2008,
-                state='CA',
-                state_full='California',
-                committee_type='P',
-                committee_type_full='Presidential',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=10000,
-                count=5,
-                cycle=2010,
-                state='ND',
-                state_full='North Dakota',
-                committee_type='H',
-                committee_type_full='House',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=20000,
-                count=15,
-                cycle=2012,
-                state='NC',
-                state_full='North Carolina',
-                committee_type='S',
-                committee_type_full='Senate',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=90000,
-                count=4,
-                cycle=2014,
-                state='NY',
-                state_full='New York',
-                committee_type='U',
-                committee_type_full='single candidate independent expenditure',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=150000,
-                count=15,
-                cycle=2016,
-                state='TX',
-                state_full='Texas',
-                committee_type='',
-                committee_type_full='All',
-            ),
-        ]
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=50000,
+            count=10,
+            cycle=2008,
+            state='CA',
+            state_full='California',
+            committee_type='P',
+            committee_type_full='Presidential',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=10000,
+            count=5,
+            cycle=2010,
+            state='ND',
+            state_full='North Dakota',
+            committee_type='H',
+            committee_type_full='House',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=20000,
+            count=15,
+            cycle=2012,
+            state='NC',
+            state_full='North Carolina',
+            committee_type='S',
+            committee_type_full='Senate',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=90000,
+            count=4,
+            cycle=2014,
+            state='NY',
+            state_full='New York',
+            committee_type='U',
+            committee_type_full='single candidate independent expenditure',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=150000,
+            count=15,
+            cycle=2016,
+            state='TX',
+            state_full='Texas',
+            committee_type='',
+            committee_type_full='All',
+        )
 
         response = self._results(
             api.url_for(
@@ -422,53 +415,51 @@ class TestTotals(ApiBaseTest):
         self.assertEqual(response[2]['committee_type'], 'S')
 
     def test_sched_a_by_state_recipient_totals_filter_by_state(self):
-        rows = [
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=50000,
-                count=10,
-                cycle=2008,
-                state='CA',
-                state_full='California',
-                committee_type='P',
-                committee_type_full='Presidential',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=10000,
-                count=5,
-                cycle=2010,
-                state='ND',
-                state_full='North Dakota',
-                committee_type='H',
-                committee_type_full='House',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=20000,
-                count=15,
-                cycle=2012,
-                state='NC',
-                state_full='North Carolina',
-                committee_type='S',
-                committee_type_full='Senate',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=90000,
-                count=4,
-                cycle=2014,
-                state='NY',
-                state_full='New York',
-                committee_type='U',
-                committee_type_full='single candidate independent expenditure',
-            ),
-            factories.ScheduleAByStateRecipientTotalsFactory(
-                total=150000,
-                count=15,
-                cycle=2016,
-                state='TX',
-                state_full='Texas',
-                committee_type='',
-                committee_type_full='All',
-            ),
-        ]
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=50000,
+            count=10,
+            cycle=2008,
+            state='CA',
+            state_full='California',
+            committee_type='P',
+            committee_type_full='Presidential',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=10000,
+            count=5,
+            cycle=2010,
+            state='ND',
+            state_full='North Dakota',
+            committee_type='H',
+            committee_type_full='House',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=20000,
+            count=15,
+            cycle=2012,
+            state='NC',
+            state_full='North Carolina',
+            committee_type='S',
+            committee_type_full='Senate',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=90000,
+            count=4,
+            cycle=2014,
+            state='NY',
+            state_full='New York',
+            committee_type='U',
+            committee_type_full='single candidate independent expenditure',
+        )
+        factories.ScheduleAByStateRecipientTotalsFactory(
+            total=150000,
+            count=15,
+            cycle=2016,
+            state='TX',
+            state_full='Texas',
+            committee_type='',
+            committee_type_full='All',
+        )
 
         response = self._results(
             api.url_for(ScheduleAByStateRecipientTotalsView, state='NY')

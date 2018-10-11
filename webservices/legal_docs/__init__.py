@@ -4,15 +4,7 @@ import sys
 from .advisory_opinions import load_advisory_opinions
 from .current_cases import load_current_murs, load_adrs, load_admin_fines
 
-logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-logger = logging.getLogger('elasticsearch')
-logger.setLevel('WARN')
-logger = logging.getLogger('pdfminer')
-logger.setLevel('ERROR')
-logger = logging.getLogger('botocore')
-logger.setLevel('WARN')
-
-from .load_legal_docs import (
+from .load_legal_docs import (  # noqa: needed for management task
     delete_advisory_opinions_from_es,
     delete_current_murs_from_es,
     delete_murs_from_s3,
@@ -21,7 +13,7 @@ from .load_legal_docs import (
     load_archived_murs,
 )
 
-from .index_management import (
+from .index_management import (  # noqa: needed for management task
     create_docs_index,
     create_archived_murs_index,
     delete_docs_index,
@@ -29,6 +21,14 @@ from .index_management import (
     restore_from_staging_index,
     move_archived_murs,
 )
+
+logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+logger = logging.getLogger('elasticsearch')
+logger.setLevel('WARN')
+logger = logging.getLogger('pdfminer')
+logger.setLevel('ERROR')
+logger = logging.getLogger('botocore')
+logger.setLevel('WARN')
 
 
 def load_current_legal_docs():

@@ -215,7 +215,6 @@ class TestEfileFiles(ApiBaseTest):
         ]
 
         min_date = datetime.date(2013, 1, 1)
-        r = self._results(api.url_for(EFilingsView))
         results = self._results(api.url_for(EFilingsView, min_receipt_date=min_date))
         self.assertTrue(
             all(

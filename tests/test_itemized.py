@@ -1,19 +1,14 @@
 import datetime
 
-import sqlalchemy as sa
-
 from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices.rest import api
 from webservices.common.models import (
-    ScheduleA,
-    ScheduleB,
     ScheduleE,
     ScheduleAEfile,
     ScheduleBEfile,
     ScheduleEEfile,
-    EFilings,
 )
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
@@ -69,35 +64,31 @@ class TestItemized(ApiBaseTest):
     # This is the only test that the years will have to be bumped when in a new cycle
     # maybe refactor to use some logic based on current year?
     def test_two_year_transaction_period_default_supplied_automatically(self):
-        receipts = [
-            factories.ScheduleAFactory(
-                report_year=2016,
-                contribution_receipt_date=datetime.date(2016, 1, 1),
-                two_year_transaction_period=2016,
-            ),
-            factories.ScheduleAFactory(
-                report_year=2018,
-                contribution_receipt_date=datetime.date(2018, 1, 1),
-                two_year_transaction_period=2018,
-            ),
-        ]
+        factories.ScheduleAFactory(
+            report_year=2016,
+            contribution_receipt_date=datetime.date(2016, 1, 1),
+            two_year_transaction_period=2016,
+        )
+        factories.ScheduleAFactory(
+            report_year=2018,
+            contribution_receipt_date=datetime.date(2018, 1, 1),
+            two_year_transaction_period=2018,
+        )
 
         response = self._response(api.url_for(ScheduleAView))
         self.assertEqual(len(response['results']), 1)
 
     def test_two_year_transaction_period_limits_results_per_cycle(self):
-        receipts = [
-            factories.ScheduleAFactory(
-                report_year=2014,
-                contribution_receipt_date=datetime.date(2014, 1, 1),
-                two_year_transaction_period=2014,
-            ),
-            factories.ScheduleAFactory(
-                report_year=2012,
-                contribution_receipt_date=datetime.date(2012, 1, 1),
-                two_year_transaction_period=2012,
-            ),
-        ]
+        factories.ScheduleAFactory(
+            report_year=2014,
+            contribution_receipt_date=datetime.date(2014, 1, 1),
+            two_year_transaction_period=2014,
+        )
+        factories.ScheduleAFactory(
+            report_year=2012,
+            contribution_receipt_date=datetime.date(2012, 1, 1),
+            two_year_transaction_period=2012,
+        )
 
         response = self._response(
             api.url_for(ScheduleAView, two_year_transaction_period=2014)
@@ -173,7 +164,7 @@ class TestItemized(ApiBaseTest):
         If this is removed, please add a test to test_filters.py
         """
         names = ['David Koch', 'George Soros']
-        filings = [factories.ScheduleAFactory(contributor_name=name) for name in names]
+        [factories.ScheduleAFactory(contributor_name=name) for name in names]
         results = self._results(
             api.url_for(ScheduleAView, contributor_name='soros', **self.kwargs)
         )
@@ -202,7 +193,7 @@ class TestItemized(ApiBaseTest):
 
     def test_filter_fulltext_employer(self):
         employers = ['Acme Corporation', 'Vandelay Industries']
-        filings = [
+        [
             factories.ScheduleAFactory(contributor_employer=employer)
             for employer in employers
         ]
@@ -214,7 +205,7 @@ class TestItemized(ApiBaseTest):
 
     def test_filter_fulltext_occupation(self):
         occupations = ['Attorney at Law', 'Doctor of Philosophy']
-        filings = [
+        [
             factories.ScheduleAFactory(contributor_occupation=occupation)
             for occupation in occupations
         ]

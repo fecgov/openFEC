@@ -1,5 +1,4 @@
 from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.ext.hybrid import hybrid_property
 from webservices import docs, utils
 from webservices.common.models.dates import ReportType
 from webservices.common.models.dates import clean_report_type

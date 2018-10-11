@@ -1,19 +1,14 @@
 import datetime
-import functools
-from webservices import filters
 from tests import factories
 from tests.common import ApiBaseTest, assert_dicts_subset
 
 from webservices.rest import db, api
-from webservices.common import models
 from webservices.resources.elections import (
     ElectionsListView,
     ElectionView,
     ElectionSummary,
     StateElectionOfficeInfoView,
 )
-from webservices.common.models.elections import StateElectionOfficeInfo
-from webservices.schemas import StateElectionOfficeInfoSchema
 
 
 class TestElectionSearch(ApiBaseTest):

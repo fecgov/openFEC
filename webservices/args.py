@@ -687,7 +687,7 @@ schedule_a = {
 
 schedule_a_e_file = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    #'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
+    # 'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
     'contributor_name': fields.List(fields.Str, description=docs.CONTRIBUTOR_NAME),
     'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
     'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
@@ -778,8 +778,8 @@ schedule_b = {
 
 schedule_b_efile = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    #'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here if the contributor is registered with the FEC.'),
-    #'recipient_name': fields.List(fields.Str, description='Name of recipient'),
+    # 'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here if the contributor is registered with the FEC.'),
+    # 'recipient_name': fields.List(fields.Str, description='Name of recipient'),
     'disbursement_description': fields.List(
         fields.Str, description='Description of disbursement'
     ),

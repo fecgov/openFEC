@@ -69,11 +69,11 @@ class TestDownloadTask(ApiBaseTest):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
         factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='H')
-        filing = factories.FilingsFactory(committee_id=committee_id)
-        efiling = factories.EFilingsFactory(
+        factories.FilingsFactory(committee_id=committee_id)
+        factories.EFilingsFactory(
             committee_id=committee_id, receipt_date=datetime.datetime(2012, 1, 1)
         )
-        basef3pfiling = factories.BaseF3PFilingFactory(
+        factories.BaseF3PFilingFactory(
             committee_id=committee_id, receipt_date=datetime.date(2012, 1, 1)
         )
 

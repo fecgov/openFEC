@@ -428,10 +428,10 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
                 ]
             )
             if index == len(matches) - 1:
-                match_text = statutory_citation[match.start() :]
+                match_text = statutory_citation[match.start():]
             else:
                 match_text = statutory_citation[
-                    match.start() : matches[index + 1].start()
+                    match.start(): matches[index + 1].start()
                 ]
             text = match_text.rstrip(' ,;')
             citations.append(
@@ -456,10 +456,10 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
             section = match.group('section')
             url = create_eregs_link(part, section)
             if index == len(matches) - 1:
-                match_text = regulatory_citation[match.start() :]
+                match_text = regulatory_citation[match.start():]
             else:
                 match_text = regulatory_citation[
-                    match.start() : matches[index + 1].start()
+                    match.start(): matches[index + 1].start()
                 ]
             text = match_text.rstrip(' ,;')
             citations.append(
@@ -532,7 +532,7 @@ def remove_reclassification_notes(statutory_citation):
         while pos < len(citation):
             if citation[pos] == ')':
                 if paren_count == 0:
-                    return citation[: match.start()] + citation[pos + 1 :]
+                    return citation[: match.start()] + citation[pos + 1:]
                 else:
                     paren_count -= 1
             elif citation[pos] == '(':

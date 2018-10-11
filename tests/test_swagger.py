@@ -2,7 +2,7 @@ import unittest
 from apispec import utils, exceptions
 
 import webservices.rest
-import webservices.schemas  # needed to generate full spec
+import webservices.schemas  # noqa: needed to generate full spec
 from webservices.spec import spec, format_docstring
 
 

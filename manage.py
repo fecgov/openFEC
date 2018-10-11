@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from flask_script import Server
 from flask_script import Manager
 
-from webservices import flow, partition
+from webservices import flow
 from webservices.common import models
 from webservices.env import env
 from webservices.rest import app, db

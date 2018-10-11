@@ -7,7 +7,7 @@ import copy
 import manage
 from tests.common import BaseTestCase
 from webservices import rest, __API_VERSION__
-from webservices.resources.filings import FilingsView, FilingsList, EFilingsView
+from webservices.resources.filings import FilingsView, FilingsList
 
 
 @pytest.mark.usefixtures("migrate_db")

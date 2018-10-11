@@ -6,7 +6,6 @@ from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
-from webservices.common.models import db, TransactionCoverage
 from webservices.common.views import ApiResource
 from webservices.utils import use_kwargs
 from webservices.resources.reports import reports_type_map

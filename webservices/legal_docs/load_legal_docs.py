@@ -24,11 +24,11 @@ from . import reclassify_statutory_citation
 import importlib
 
 importlib.invalidate_caches()
-import sys
-from distutils.sysconfig import get_python_lib
+import sys  # noqa
+from distutils.sysconfig import get_python_lib  # noqa
 
 sys.path = [get_python_lib() + '/slate'] + sys.path
-import slate
+import slate  # noqa
 
 sys.path = sys.path[1:]
 

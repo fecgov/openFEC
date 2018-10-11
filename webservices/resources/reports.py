@@ -6,7 +6,6 @@ from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices import filters
-from webservices.common import counts
 from webservices.common import models
 from webservices.common import views
 from webservices.utils import use_kwargs
@@ -137,7 +136,6 @@ class ReportsView(utils.Resource):
     @use_kwargs(args.make_multi_sort_args(default=['-coverage_end_date']))
     @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
     def get(self, committee_type=None, **kwargs):
-        committee_id = kwargs.get('committee_id')
         query, reports_class, reports_schema = self.build_query(
             committee_type=committee_type, **kwargs
         )

@@ -76,7 +76,7 @@ def fetch_page(
     multi=False,
 ):
     check_cap(kwargs, cap)
-    sort, hide_null, reverse_nulls = (
+    sort, hide_null, _ = (
         kwargs.get('sort'),
         kwargs.get('sort_hide_null'),
         kwargs.get('sort_reverse_nulls'),
@@ -233,7 +233,7 @@ def fetch_seek_page(
         ):
             print('In fetch_seek_page method')
             sort_index = None
-            query = query.filter(null_sort_by == None)
+            query = query.filter(null_sort_by == None)  # noqa: sqlalchemy quirk
             paginator.cursor = query
     else:
         sort_index = None

@@ -1,6 +1,5 @@
 import re
 import functools
-import json
 
 from collections import namedtuple
 
@@ -11,13 +10,9 @@ from marshmallow_pagination import schemas as paging_schemas
 from webservices import utils, decoders
 from webservices.spec import spec
 from webservices.common import models
-from webservices.common.models import db
 from webservices import __API_VERSION__
 from webservices.calendar import format_start_date, format_end_date
-from marshmallow import pre_dump, post_dump
-from sqlalchemy import func
-import sqlalchemy as sa
-
+from marshmallow import post_dump
 
 spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
 spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
@@ -456,7 +451,7 @@ make_totals_schema = functools.partial(
     fields={
         'pdf_url': ma.fields.Str(),
         'report_form': ma.fields.Str(),
-        #'committee_type': ma.fields.Str(attribute='committee.committee_type'),
+        # 'committee_type': ma.fields.Str(attribute='committee.committee_type'),
         'last_cash_on_hand_end_period': ma.fields.Decimal(places=2),
         'last_beginning_image_number': ma.fields.Str(),
         'transaction_coverage_date': ma.fields.Date(

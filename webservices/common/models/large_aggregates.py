@@ -1,6 +1,3 @@
-import calendar
-from datetime import date, datetime, timedelta
-
 from .base import db
 
 from webservices import docs
