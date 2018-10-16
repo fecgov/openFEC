@@ -3,6 +3,14 @@ this is a simple scipt to test the status of all endpoints after deployment
 Pls note that some endpoints need required parameters and some example data
 are given hereself.
 the endpoints list could be exapanded or improved in the future.
+
+Note: on the production tier, api_key is required.
+
+quick server list for reference:
+
+prod: https://api.open.fec.gov/v1/
+stage: https://api-stage.open.fec.gov/v1/
+dev: https://fec-dev-api.app.cloud.gov/v1/
 """
 import os
 import click
@@ -19,19 +27,19 @@ COMMITTEE_TYPE = 'P'
 endpoints = [
 "/committees/?api_key={api_key}",
 "/candidates/?api_key={api_key}",
-"/candidates/search/?api_key={api_key}" ,
-"/candidate/{candidate_id}/",
-"/committee/{committee_id}/candidates/",
-'/candidate/{candidate_id}/history/',
-'/candidate/{candidate_id}/history/2018/',
-'/committee/{committee_id}/candidates/history/',
-'/committee/{committee_id}/candidates/history/2018/',
-'/committee/{committee_id}/',
-'/candidate/{candidate_id}/committees/',
-'/committee/{committee_id}/history/',
-'/committee/{committee_id}/history/2018/',
-'/candidate/{candidate_id}/committees/history/',
-'/candidate/{candidate_id}/committees/history/2018/',
+"/candidates/search/?api_key={api_key}",
+"/candidate/{candidate_id}/?api_key={api_key}",
+"/committee/{committee_id}/candidates/?api_key={api_key}",
+'/candidate/{candidate_id}/history/?api_key={api_key}',
+'/candidate/{candidate_id}/history/2018/?api_key={api_key}',
+'/committee/{committee_id}/candidates/history/?api_key={api_key}',
+'/committee/{committee_id}/candidates/history/2018/?api_key={api_key}',
+'/committee/{committee_id}/?api_key={api_key}',
+'/candidate/{candidate_id}/committees/?api_key={api_key}',
+'/committee/{committee_id}/history/?api_key={api_key}',
+'/committee/{committee_id}/history/2018/?api_key={api_key}',
+'/candidate/{candidate_id}/committees/history/?api_key={api_key}',
+'/candidate/{candidate_id}/committees/history/2018/?api_key={api_key}',
 "/totals/{committee_type}/?api_key={api_key}",
 "/committee/{committee_id}/totals/?api_key={api_key}",
 "/candidate/{candidate_id}/totals/?api_key={api_key}",
