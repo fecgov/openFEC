@@ -177,6 +177,8 @@ class ElectionView(ApiResource):
             sa.case(
                 [(CandidateCommitteeLink.committee_designation == 'P', CandidateCommitteeLink.committee_id)]  # noqa
             ).label('candidate_pcc_id')
+        ).filter(
+            CandidateCommitteeLink.committee_designation.in_(['P', 'A'])
         )
         pairs = join_candidate_totals(pairs, kwargs, totals_model)
         pairs = filter_candidate_totals(pairs, kwargs, totals_model)
