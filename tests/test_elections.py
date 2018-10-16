@@ -212,10 +212,13 @@ class TestElections(ApiBaseTest):
         }
         assert len(results) == 1
         assert_dicts_subset(results[0], expected)
-        assert set(results[0]['committee_ids']) == set(each.committee_id for each in self.committees)
+        assert set(results[0]['committee_ids']) == set(
+            each.committee_id for each in self.committees
+            if each.designation != 'J')
 
     def test_electionview_excludes_jfc(self):
         self.candidate_committee_links[0].committee_designation = 'J'
+        self.committees[0].designation = 'J'
 
         results = self._results(
             api.url_for(
@@ -223,13 +226,13 @@ class TestElections(ApiBaseTest):
                 office='senate', cycle=2012, state='NY', election_full='true',
             )
         )
-# Joint Fundraising Committees raise money for multiple
-# candidate committees and transfer that money to those committees.
-# By limiting the committee designations to A and P
-# you eliminate J (joint) and thus do not inflate
-# the candidate's money by including it twice and
-# by including money that was raised and transferred
-# to the other committees in the joint fundraiser.
+        # Joint Fundraising Committees raise money for multiple
+        # candidate committees and transfer that money to those committees.
+        # By limiting the committee designations to A and P
+        # you eliminate J (joint) and thus do not inflate
+        # the candidate's money by including it twice and
+        # by including money that was raised and transferred
+        # to the other committees in the joint fundraiser.
         totals_without_jfc = self.totals[1:]
         cash_on_hand_without_jfc = self.totals[1:2]
         expected = {
@@ -243,7 +246,7 @@ class TestElections(ApiBaseTest):
         }
         assert len(results) == 1
         assert_dicts_subset(results[0], expected)
-        assert set(results[0]['committee_ids']) == set(each.committee_id for each in self.committees)
+        assert set(results[0]['committee_ids']) == set(each.committee_id for each in self.committees if each.designation != 'J')
 
     def test_election_summary(self):
         results = self._response(api.url_for(ElectionSummary, office='senate', cycle=2012, state='NY'))
