@@ -94,7 +94,6 @@ endpoints = [
 @click.option('--server', default="https://fec-dev-api.app.cloud.gov/v1", help='server to check with.')
 def check_endpoints(server):
     """Simple script to check all endpoints status quickly."""
-
     for endp in endpoints:
         r = requests.get((server + endp).format(api_key=API_KEY,
                                                 committee_id=COMMITTEE_ID,
