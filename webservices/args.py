@@ -546,6 +546,7 @@ schedule_b = {
         required=True,
         missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
     ),
+    'spender_committee_type': fields.List(IStr, description=docs.COMMITTEE_TYPE),
 }
 
 schedule_b_efile = {
