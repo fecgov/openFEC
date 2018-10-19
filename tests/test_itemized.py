@@ -1,14 +1,12 @@
 import datetime
 
-import sqlalchemy as sa
-
 from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices.rest import api
-from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile, EFilings
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
+from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile, EFilings
 from webservices.resources.sched_a import ScheduleAView, ScheduleAEfileView
 from webservices.resources.sched_b import ScheduleBView, ScheduleBEfileView
 from webservices.resources.sched_e import ScheduleEView, ScheduleEEfileView
@@ -173,6 +171,15 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleBView, line_number='f3X-21', **self.kwargs))
         self.assertEqual(len(results), 1)
 
+    def test_sched_b_spender_committee_type_filter(self):
+        [
+            factories.ScheduleBFactory(spender_committee_type='S'),
+            factories.ScheduleBFactory(spender_committee_type='S'),
+            factories.ScheduleBFactory(spender_committee_type='P'),
+        ]
+        results = self._results(api.url_for(ScheduleBView, spender_committee_type='S', **self.kwargs))
+        self.assertEqual(len(results), 2)
+
     def test_filter_fulltext_employer(self):
         employers = ['Acme Corporation', 'Vandelay Industries']
         filings = [
@@ -234,7 +241,8 @@ class TestItemized(ApiBaseTest):
         )
         self.assertEqual(
             [each['contribution_receipt_date'] for each in page1],
-            [each.contribution_receipt_date.strftime('%Y-%m-%d') if each.contribution_receipt_date else None for each in filings[5:25]]
+            [each.contribution_receipt_date.strftime('%Y-%m-%d')
+            if each.contribution_receipt_date else None for each in filings[5:25]]
         )
         page2 = self._results(
             api.url_for(
@@ -242,7 +250,8 @@ class TestItemized(ApiBaseTest):
                 last_index=page1[-1]['sub_id'],
                 sort='contribution_receipt_date',
                 **self.kwargs
-        ))
+            )
+        )
         self.assertEqual(len(page2), 5)
         self.assertEqual(
             [int(each['sub_id']) for each in page2],
@@ -250,7 +259,8 @@ class TestItemized(ApiBaseTest):
         )
         self.assertEqual(
             [each['contribution_receipt_date'] for each in page2],
-            [each.contribution_receipt_date.strftime('%Y-%m-%d') if each.contribution_receipt_date else None for each in filings[25:]]
+            [each.contribution_receipt_date.strftime('%Y-%m-%d')
+            if each.contribution_receipt_date else None for each in filings[25:]]
         )
 
     def test_null_pagination_with_null_sort_column_values_descending(self):
@@ -284,7 +294,8 @@ class TestItemized(ApiBaseTest):
         )
         self.assertEqual(
             [each['contribution_receipt_date'] for each in page1],
-            [each.contribution_receipt_date.strftime('%Y-%m-%d') if each.contribution_receipt_date else None for each in top_reversed_from_middle]
+            [each.contribution_receipt_date.strftime('%Y-%m-%d')
+            if each.contribution_receipt_date else None for each in top_reversed_from_middle]
         )
         page2 = self._results(api.url_for(
             ScheduleAView,
@@ -300,7 +311,8 @@ class TestItemized(ApiBaseTest):
         )
         self.assertEqual(
             [each['contribution_receipt_date'] for each in page2],
-            [each.contribution_receipt_date.strftime('%Y-%m-%d') if each.contribution_receipt_date else None for each in filings[14:9:-1]]
+            [each.contribution_receipt_date.strftime('%Y-%m-%d')
+            if each.contribution_receipt_date else None for each in filings[14:9:-1]]
         )
 
     def test_null_pagination_with_null_sort_column_values_ascending(self):
@@ -308,13 +320,13 @@ class TestItemized(ApiBaseTest):
             factories.ScheduleAFactory(contribution_receipt_date=None)
             # this range should ensure the page has a null transition
             for _ in range(10)
-            ]
+        ]
         filings = filings + [
             factories.ScheduleAFactory(
                 contribution_receipt_date=datetime.date(2016, 1, 1)
             )
             for _ in range(15)
-            ]
+        ]
 
         page1 = self._results(api.url_for(
             ScheduleAView,
@@ -422,7 +434,8 @@ class TestItemized(ApiBaseTest):
                 last_index=page1[-1]['sub_id'],
                 sort='disbursement_date',
                 **self.kwargs
-        ))
+            )
+        )
         self.assertEqual(len(page2), 5)
         self.assertEqual(
             [int(each['sub_id']) for each in page2],
@@ -468,7 +481,8 @@ class TestItemized(ApiBaseTest):
         )
         self.assertEqual(
             [each['disbursement_date'] for each in page1],
-            [each.disbursement_date.strftime('%Y-%m-%d') if each.disbursement_date else None for each in top_reversed_from_middle]
+            [each.disbursement_date.strftime('%Y-%m-%d')
+            if each.disbursement_date else None for each in top_reversed_from_middle]
         )
         page2 = self._results(api.url_for(
             ScheduleBView,
@@ -484,7 +498,8 @@ class TestItemized(ApiBaseTest):
         )
         self.assertEqual(
             [each['disbursement_date'] for each in page2],
-            [each.disbursement_date.strftime('%Y-%m-%d') if each.disbursement_date else None for each in filings[14:9:-1]]
+            [each.disbursement_date.strftime('%Y-%m-%d')
+            if each.disbursement_date else None for each in filings[14:9:-1]]
         )
 
     def test_null_pagination_with_null_sort_column_values_ascending_with_sort_expression(self):
@@ -496,13 +511,13 @@ class TestItemized(ApiBaseTest):
             factories.ScheduleBFactory(disbursement_date=None)
             # this range should ensure the page has a null transition
             for _ in range(10)
-            ]
+        ]
         filings = filings + [
             factories.ScheduleBFactory(
                 disbursement_date=datetime.date(2016, 1, 1)
             )
             for _ in range(15)
-            ]
+        ]
 
         page1 = self._results(api.url_for(
             ScheduleBView,
@@ -584,7 +599,6 @@ class TestItemized(ApiBaseTest):
         self.assertTrue(all(each['image_number'] <= '3' for each in results))
         results = self._results(api.url_for(ScheduleAView, min_image_number='2', max_image_number='3'))
         self.assertTrue(all('2' <= each['image_number'] <= '3' for each in results))
-
 
     def test_amount_sched_a(self):
         [
