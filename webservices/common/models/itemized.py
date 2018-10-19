@@ -540,6 +540,8 @@ class ScheduleE(PdfMixin, BaseItemized):
     payee_zip = db.Column('pye_zip', db.String)
 
     # Primary transaction info
+    previous_file_number = db.Column('prev_file_num', db.Integer)
+    amendment_indicator = db.Column('amndt_ind', db.String)
     is_notice = db.Column(db.Boolean, index=True)
     expenditure_description = db.Column('exp_desc', db.String)
     expenditure_date = db.Column('exp_dt', db.Date)
