@@ -175,6 +175,7 @@ class TestItemized(ApiBaseTest):
         [
             factories.ScheduleBFactory(spender_committee_type='S'),
             factories.ScheduleBFactory(spender_committee_type='S'),
+            factories.ScheduleBFactory(spender_committee_type='P'),
         ]
         results = self._results(api.url_for(ScheduleBView, spender_committee_type='S', **self.kwargs))
         self.assertEqual(len(results), 2)
