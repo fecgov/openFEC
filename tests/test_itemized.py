@@ -1,7 +1,5 @@
 import datetime
 
-# import sqlalchemy as sa
-
 from tests import factories
 from tests.common import ApiBaseTest
 
