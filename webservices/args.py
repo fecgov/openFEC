@@ -264,7 +264,9 @@ committee = {
         description=docs.ORGANIZATION_TYPE,
     ),
     'committee_type': fields.List(
-        IStr(validate=validate.OneOf(['', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q', 'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
+        IStr(validate=validate.OneOf([
+            '', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q',
+            'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
         description=docs.COMMITTEE_TYPE,
     ),
 }
@@ -352,7 +354,7 @@ reports = {
     'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
     'committee_id': fields.List(fields.Str, description=docs.COMMITTEE_ID),
     'amendment_indicator': fields.List(
-        IStr(validate=validate.OneOf(['', 'N', 'A', 'T', 'C' , 'M', 'S'])),
+        IStr(validate=validate.OneOf(['', 'N', 'A', 'T', 'C', 'M', 'S'])),
         description=docs.AMENDMENT_INDICATOR),
 }
 
@@ -545,6 +547,12 @@ schedule_b = {
         description=docs.TWO_YEAR_TRANSACTION_PERIOD,
         required=True,
         missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
+    ),
+    'spender_committee_type': fields.List(
+        IStr(validate=validate.OneOf([
+            '', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q',
+            'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
+        description=docs.COMMITTEE_TYPE,
     ),
 }
 
