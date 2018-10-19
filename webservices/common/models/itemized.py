@@ -145,7 +145,6 @@ class ScheduleA(BaseItemized):
 
     # Transaction meta info
     election_type = db.Column('election_tp', db.String)
-    # ? election_type looks like it's included in BaseItemized already
     election_type_full = db.Column('election_tp_desc', db.String)
     fec_election_type_desc = db.Column('fec_election_tp_desc', db.String)
     fec_election_year = db.Column('fec_election_yr', db.String)
@@ -293,7 +292,6 @@ class ScheduleB(BaseItemized):
 
     # Transaction meta info
     election_type = db.Column('election_tp', db.String)
-    # ?election_type looks like it's included in BaseItemized already
     election_type_full = db.Column('election_tp_desc', db.String)
     fec_election_type_desc = db.Column('fec_election_tp_desc', db.String)
     fec_election_year = db.Column('fec_election_tp_year', db.String)
@@ -339,7 +337,7 @@ class ScheduleB(BaseItemized):
     ref_disp_excess_flg = db.Column('ref_disp_excess_flg', db.String)
     comm_dt = db.Column('comm_dt', db.Date)
 
-    spender_committee_type = db.Column('cmte_tp', db.String)
+    spender_committee_type = db.Column('cmte_tp', db.String(1), index=True)
 
     @hybrid_property
     def sort_expressions(self):
