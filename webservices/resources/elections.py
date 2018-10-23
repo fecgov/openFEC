@@ -131,7 +131,7 @@ class ElectionView(ApiResource):
 
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=500000)
+        count = counts.count_estimate(query, models.db.session)
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
@@ -177,6 +177,8 @@ class ElectionView(ApiResource):
             sa.case(
                 [(CandidateCommitteeLink.committee_designation == 'P', CandidateCommitteeLink.committee_id)]  # noqa
             ).label('candidate_pcc_id')
+        ).filter(
+            CandidateCommitteeLink.committee_designation.in_(['P', 'A'])
         )
         pairs = join_candidate_totals(pairs, kwargs, totals_model)
         pairs = filter_candidate_totals(pairs, kwargs, totals_model)

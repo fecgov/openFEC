@@ -124,12 +124,14 @@ class ScheduleAByEmployerView(AggregateResource):
     query_args = args.schedule_a_by_employer
     filter_multi_fields = [
         ('cycle', models.ScheduleAByEmployer.cycle),
+    ]
+    filter_fulltext_fields = [
         ('employer', models.ScheduleAByEmployer.employer),
     ]
 
     def get(self, committee_id=None, **kwargs):
         query = self.build_query(committee_id=committee_id, **kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        count = counts.count_estimate(query, models.db.session)
         return utils.fetch_page(query, kwargs, model=self.model, count=count, index_column=self.index_column)
 
 
@@ -148,12 +150,14 @@ class ScheduleAByOccupationView(AggregateResource):
     query_args = args.schedule_a_by_occupation
     filter_multi_fields = [
         ('cycle', models.ScheduleAByOccupation.cycle),
+    ]
+    filter_fulltext_fields = [
         ('occupation', models.ScheduleAByOccupation.occupation),
     ]
 
     def get(self, committee_id=None, **kwargs):
         query = self.build_query(committee_id=committee_id, **kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        count = counts.count_estimate(query, models.db.session)
         return utils.fetch_page(query, kwargs, model=self.model, count=count, index_column=self.index_column)
 
 
@@ -172,6 +176,8 @@ class ScheduleBByRecipientView(AggregateResource):
     query_args = args.schedule_b_by_recipient
     filter_multi_fields = [
         ('cycle', models.ScheduleBByRecipient.cycle),
+    ]
+    filter_fulltext_fields = [
         ('recipient_name', models.ScheduleBByRecipient.recipient_name),
     ]
 
@@ -213,6 +219,8 @@ class ScheduleBByPurposeView(AggregateResource):
     query_args = args.schedule_b_by_purpose
     filter_multi_fields = [
         ('cycle', models.ScheduleBByPurpose.cycle),
+    ]
+    filter_fulltext_fields = [
         ('purpose', models.ScheduleBByPurpose.purpose),
     ]
 
