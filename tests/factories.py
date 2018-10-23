@@ -290,7 +290,10 @@ class ScheduleAByEmployerFactory(BaseAggregateFactory):
 class ScheduleBByPurposeFactory(BaseAggregateFactory):
     class Meta:
         model = models.ScheduleBByPurpose
-    purpose = 'ADMINISTRATIVE'
+
+class ScheduleBByRecipientFactory(BaseAggregateFactory):
+    class Meta:
+        model = models.ScheduleBByRecipient
 
 
 class ScheduleEByCandidateFactory(BaseAggregateFactory):

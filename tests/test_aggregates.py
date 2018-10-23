@@ -10,6 +10,8 @@ from webservices.resources.aggregates import (
     ElectioneeringByCandidateView,
     ScheduleAByEmployerView,
     ScheduleAByStateView,
+    ScheduleBByPurposeView,
+    ScheduleBByRecipientView,
     ScheduleEByCandidateView,
 )
 from webservices.resources.candidate_aggregates import (
@@ -85,6 +87,59 @@ class TestCommitteeAggregates(ApiBaseTest):
             )
         )
         assert len(results) == 1
+
+    def test_disbursement_purpose(self):
+        committee = factories.CommitteeHistoryFactory(cycle=2012)
+
+        aggregate = factories.ScheduleBByPurposeFactory(
+            committee_id=committee.committee_id,
+            cycle=committee.cycle,
+            purpose='ADMINISTRATIVE EXPENSES'
+        )
+        results = self._results(
+            api.url_for(
+                ScheduleBByPurposeView,
+                committee_id=committee.committee_id,
+                cycle=2012,
+                purpose='Administrative'
+            )
+        )
+        self.assertEqual(len(results), 1)
+        expected = {
+            'committee_id': committee.committee_id,
+            'purpose': 'ADMINISTRATIVE EXPENSES',
+            'cycle': 2012,
+            'total': aggregate.total,
+            'count': aggregate.count,
+        }
+        self.assertEqual(results[0], expected)
+
+    def test_disbursement_recipient(self):
+        committee = factories.CommitteeHistoryFactory(cycle=2012)
+
+        aggregate = factories.ScheduleBByRecipientFactory(
+            committee_id=committee.committee_id,
+            cycle=committee.cycle,
+            recipient_name='STARBOARD STRATEGIES, INC.'
+        )
+        results = self._results(
+            api.url_for(
+                ScheduleBByRecipientView,
+                committee_id=committee.committee_id,
+                cycle=2012,
+                recipient_name='Starboard Strategies'
+            )
+        )
+        self.assertEqual(len(results), 1)
+        expected = {
+            'committee_id': committee.committee_id,
+            'recipient_name': 'STARBOARD STRATEGIES, INC.',
+            'cycle': 2012,
+            'total': aggregate.total,
+            'count': aggregate.count,
+        }
+        self.assertEqual(results[0], expected)
+
 
 class TestAggregates(ApiBaseTest):
     cases = [
