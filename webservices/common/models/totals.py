@@ -102,8 +102,10 @@ class CommitteeTotalsPacPartyBase(CommitteeTotals):
     fed_election_activity = db.Column(db.Numeric(30, 2))
     fed_operating_expenditures = db.Column(db.Numeric(30, 2))
     fed_receipts = db.Column(db.Numeric(30, 2))
+    federal_funds = db.Column(db.Numeric(30, 2))  # For Form 4
     independent_expenditures = db.Column(db.Numeric(30, 2))
     loan_repayments_made = db.Column(db.Numeric(30, 2))
+    loans_and_loan_repayments = db.Column(db.Numeric(30, 2))
     loan_repayments_received = db.Column(db.Numeric(30, 2))
     loans_made = db.Column(db.Numeric(30, 2))
     non_allocated_fed_election_activity = db.Column(db.Numeric(30, 2))
