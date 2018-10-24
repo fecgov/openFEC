@@ -168,6 +168,58 @@ class TestTotals(ApiBaseTest):
         results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
         self.assertEqual(results[0], fields)
 
+    def test_party_totals(self):
+
+        committee_id = 'C00540005'
+        transaction_coverage = factories.TransactionCoverageFactory(
+            committee_id=committee_id,
+            fec_election_year=2014)
+        history = factories.CommitteeHistoryFactory(
+            committee_id=committee_id,
+            committee_type='X',
+        )
+        party_fields = {
+            'committee_id': committee_id,
+            'cycle': 2014,
+            'committee_name': 'PRESIDENTIAL INAUGURAL COMMITTEE',
+            'coverage_start_date': '2012-12-10 00:00:00',
+            'coverage_end_date': '2013-08-07 00:00:00',
+            'all_loans_received': 1,
+            'allocated_federal_election_levin_share': 2,
+            'coordinated_expenditures_by_party_committee': 3,
+            'fed_candidate_committee_contributions': 4,
+            'fed_candidate_contribution_refunds': 5,
+            'fed_disbursements': 6,
+            'fed_election_activity': 7,
+            'fed_operating_expenditures': 8,
+            'fed_receipts': 9,
+            'independent_expenditures': 10,
+            'loan_repayments_made': 11,
+            'loan_repayments_received': 12,
+            'loans_made': 13,
+            'non_allocated_fed_election_activity': 14,
+            'total_transfers': 15,
+            'other_fed_operating_expenditures': 16,
+            'other_fed_receipts': 17,
+            'shared_fed_activity': 18,
+            'shared_fed_activity_nonfed': 19,
+            'shared_fed_operating_expenditures': 20,
+            'shared_nonfed_operating_expenditures': 21,
+            'transfers_from_affiliated_party': 22,
+            'transfers_from_nonfed_account': 23,
+            'transfers_from_nonfed_levin': 24,
+            'transfers_to_affiliated_committee': 25,
+            'net_contributions': 127,
+            'net_operating_expenditures': 128,
+        }
+        fields = utils.extend(party_fields, shared_fields)
+        committee_total = factories.TotalsPartyFactory(**fields)
+
+        fields = utils.extend(fields, transaction_coverage_fields)
+
+        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
+        self.assertEqual(results[0], fields)
+
     def test_ie_totals(self):
         committee_id = 'C8675312'
         history = factories.CommitteeHistoryFactory(
