@@ -121,7 +121,8 @@ class CommitteeTotalsPacPartyBase(CommitteeTotals):
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
     # For Form 4
     federal_funds = db.Column(db.Numeric(30, 2))
-    loans_and_loan_repayments = db.Column(db.Numeric(30, 2))
+    loans_and_loan_repayments_received = db.Column(db.Numeric(30, 2))
+    loans_and_loan_repayments_made = db.Column(db.Numeric(30, 2))
     exp_subject_limits = db.Column(db.Numeric(30, 2))
     exp_prior_years_subject_limits = db.Column(db.Numeric(30, 2))
     total_exp_subject_limits = db.Column(db.Numeric(30, 2))
