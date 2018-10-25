@@ -464,7 +464,8 @@ CREATE OR REPLACE VIEW public.ofec_totals_pacs_parties_vw AS
     oft.party_full,
     comm_dets.designation,
     --needed for Form 4
-    oft.loans AS loans_and_loan_repayments,
+    oft.loans AS loans_and_loan_repayments_received,
+    oft.loan_repayments AS loans_and_loan_repayments_made,
     oft.federal_funds,
     oft.exp_subject_limits,
     oft.exp_prior_years_subject_limits,
