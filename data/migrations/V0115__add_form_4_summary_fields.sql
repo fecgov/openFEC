@@ -9,6 +9,11 @@ Add missing fields for Form 4 totals
 
 - 2) Bring missing fields into ofec_totals_pac_party_vw
 
+    a) `create or replace ofec_totals_pac_party_vw` to use new `MV` logic
+    b) drop old `MV`
+    c) recreate `MV` with new logic
+    d) `create or replace ofec_totals_pac_party_vw` -> `select all` from new `MV`
+
     - Add new fields from ofec_totals_combined_vw
     - Add ofec_totals_combined_vw.loans to ofec_totals_pacs_parties_vw
     Name it `loans_and_loan_repayments`
@@ -397,7 +402,9 @@ CREATE OR REPLACE VIEW ofec_totals_combined_vw AS SELECT * FROM ofec_totals_comb
 ALTER VIEW ofec_totals_combined_vw OWNER TO fec;
 GRANT SELECT ON ofec_totals_combined_vw TO fec_read;
 
---Add missing fields to ofec_totals_pacs_parties_vw
+--2) Add missing fields to ofec_totals_pacs_parties_vw
+
+-- a) `create or replace ofec_totals_pac_party_vw` to use new `MV` logic
 
 CREATE OR REPLACE VIEW public.ofec_totals_pacs_parties_vw AS
  SELECT oft.sub_id AS idx,
@@ -489,5 +496,164 @@ CREATE OR REPLACE VIEW public.ofec_totals_pacs_parties_vw AS
 
 ALTER VIEW ofec_totals_pacs_parties_vw OWNER TO fec;
 GRANT SELECT ON ofec_totals_pacs_parties_vw TO fec_read;
+
+-- b) drop old `MV`
+
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_totals_pacs_parties_mv;
+
+-- c) recreate `MV` with new logic
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS public.ofec_totals_pacs_parties_mv AS
+ SELECT oft.sub_id AS idx,
+    oft.committee_id,
+    oft.committee_name,
+    oft.cycle,
+    oft.coverage_start_date,
+    oft.coverage_end_date,
+    oft.all_loans_received,
+    oft.allocated_federal_election_levin_share,
+    oft.contribution_refunds,
+    oft.contributions,
+    oft.coordinated_expenditures_by_party_committee,
+    oft.disbursements,
+    oft.fed_candidate_committee_contributions,
+    oft.fed_candidate_contribution_refunds,
+    oft.fed_disbursements,
+    oft.fed_election_activity,
+    oft.fed_receipts,
+    oft.independent_expenditures,
+    oft.refunded_individual_contributions,
+    oft.individual_itemized_contributions,
+    oft.individual_unitemized_contributions,
+    oft.individual_contributions,
+    oft.loan_repayments_other_loans AS loan_repayments_made,
+    oft.loan_repayments_other_loans,
+    oft.loan_repayments_received,
+    oft.loans_made,
+    oft.transfers_to_other_authorized_committee,
+    oft.net_operating_expenditures,
+    oft.non_allocated_fed_election_activity,
+    oft.total_transfers,
+    oft.offsets_to_operating_expenditures,
+    oft.operating_expenditures,
+    oft.operating_expenditures AS fed_operating_expenditures,
+    oft.other_disbursements,
+    oft.other_fed_operating_expenditures,
+    oft.other_fed_receipts,
+    oft.other_political_committee_contributions,
+    oft.refunded_other_political_committee_contributions,
+    oft.political_party_committee_contributions,
+    oft.refunded_political_party_committee_contributions,
+    oft.receipts,
+    oft.shared_fed_activity,
+    oft.shared_fed_activity_nonfed,
+    oft.shared_fed_operating_expenditures,
+    oft.shared_nonfed_operating_expenditures,
+    oft.transfers_from_affiliated_party,
+    oft.transfers_from_nonfed_account,
+    oft.transfers_from_nonfed_levin,
+    oft.transfers_to_affiliated_committee,
+    oft.net_contributions,
+    oft.last_report_type_full,
+    oft.last_beginning_image_number,
+    oft.last_cash_on_hand_end_period,
+    oft.cash_on_hand_beginning_period,
+    oft.last_debts_owed_by_committee,
+    oft.last_debts_owed_to_committee,
+    oft.last_report_year,
+    oft.committee_type,
+    oft.committee_designation,
+    oft.committee_type_full,
+    oft.committee_designation_full,
+    oft.party_full,
+    comm_dets.designation,
+    --needed for Form 4
+    oft.loans AS loans_and_loan_repayments_received,
+    oft.loan_repayments AS loans_and_loan_repayments_made,
+    oft.federal_funds,
+    oft.exp_subject_limits,
+    oft.exp_prior_years_subject_limits,
+    oft.total_exp_subject_limits,
+    oft.refunds_relating_convention_exp,
+    oft.itemized_refunds_relating_convention_exp,
+    oft.unitemized_refunds_relating_convention_exp,
+    oft.other_refunds,
+    oft.itemized_other_refunds,
+    oft.unitemized_other_refunds,
+    oft.itemized_other_income,
+    oft.unitemized_other_income,
+    oft.convention_exp,
+    oft.itemized_convention_exp,
+    oft.unitemized_convention_exp,
+    oft.itemized_other_disb,
+    oft.unitemized_other_disb
+   FROM ofec_totals_combined_vw oft
+     JOIN ofec_committee_detail_vw comm_dets USING (committee_id)
+  WHERE oft.form_type IN ('F3X', 'F13', 'F4');
+
+-- Permissions
+
+ALTER TABLE public.ofec_totals_pacs_parties_mv
+  OWNER TO fec;
+GRANT ALL ON TABLE public.ofec_totals_pacs_parties_mv TO fec;
+GRANT SELECT ON TABLE public.ofec_totals_pacs_parties_mv TO fec_read;
+
+-- Indices
+
+CREATE UNIQUE INDEX idx_ofec_totals_pacs_parties_mv_idx
+  ON public.ofec_totals_pacs_parties_mv
+  USING btree
+  (idx);
+
+CREATE INDEX idx_ofec_totals_pacs_parties_mv_cmte_id_idx
+  ON public.ofec_totals_pacs_parties_mv
+  USING btree
+  (committee_id COLLATE pg_catalog."default", idx);
+
+CREATE INDEX idx_ofec_totals_pacs_parties_mv_cmte_tp_full_idx
+  ON public.ofec_totals_pacs_parties_mv
+  USING btree
+  (committee_type_full COLLATE pg_catalog."default", idx);
+
+CREATE INDEX idx_ofec_totals_pacs_parties_mv_cmte_tp_idx
+  ON public.ofec_totals_pacs_parties_mv
+  USING btree
+  (committee_type COLLATE pg_catalog."default", idx);
+
+CREATE INDEX idx_ofec_totals_pacs_parties_mv_cycle_idx
+  ON public.ofec_totals_pacs_parties_mv
+  USING btree
+  (cycle, idx);
+
+CREATE INDEX idx_ofec_totals_pacs_parties_mv_dsgn_idx
+  ON public.ofec_totals_pacs_parties_mv
+  USING btree
+  (designation COLLATE pg_catalog."default", idx);
+
+CREATE INDEX idx_ofec_totals_pacs_parties_mv_disbursements
+  ON public.ofec_totals_pacs_parties_mv
+  USING btree
+  (disbursements);
+
+CREATE INDEX idx_ofec_totals_pacs_parties_mv_receipts
+  ON public.ofec_totals_pacs_parties_mv
+  USING btree
+  (receipts);
+
+CREATE INDEX idx_ofec_totals_pacs_parties_mv_cmte_dsgn_full_idx
+  ON public.ofec_totals_pacs_parties_mv
+  USING btree
+  (committee_designation_full COLLATE pg_catalog."default", idx);
+
+-- d) `create or replace ofec_totals_pac_party_vw` -> `select all` from new `MV`
+
+CREATE OR REPLACE VIEW ofec_totals_pacs_parties_vw AS
+SELECT * FROM ofec_totals_pacs_parties_mv;
+
+ALTER TABLE public.ofec_totals_pacs_parties_vw
+  OWNER TO fec;
+GRANT ALL ON TABLE public.ofec_totals_pacs_parties_vw TO fec;
+GRANT SELECT ON TABLE public.ofec_totals_pacs_parties_vw TO fec_read;
+
 
 
