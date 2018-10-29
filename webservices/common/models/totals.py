@@ -119,7 +119,26 @@ class CommitteeTotalsPacPartyBase(CommitteeTotals):
     transfers_from_nonfed_levin = db.Column(db.Numeric(30, 2))
     transfers_to_affiliated_committee = db.Column(db.Numeric(30, 2))
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
-
+    # For Form 4
+    federal_funds = db.Column(db.Numeric(30, 2))
+    loans_and_loan_repayments_received = db.Column(db.Numeric(30, 2))
+    loans_and_loan_repayments_made = db.Column(db.Numeric(30, 2))
+    exp_subject_limits = db.Column(db.Numeric(30, 2))
+    exp_prior_years_subject_limits = db.Column(db.Numeric(30, 2))
+    total_exp_subject_limits = db.Column(db.Numeric(30, 2))
+    refunds_relating_convention_exp = db.Column(db.Numeric(30, 2))
+    itemized_refunds_relating_convention_exp = db.Column(db.Numeric(30, 2))
+    unitemized_refunds_relating_convention_exp = db.Column(db.Numeric(30, 2))
+    other_refunds = db.Column(db.Numeric(30, 2))
+    itemized_other_refunds = db.Column(db.Numeric(30, 2))
+    unitemized_other_refunds = db.Column(db.Numeric(30, 2))
+    itemized_other_income = db.Column(db.Numeric(30, 2))
+    unitemized_other_income = db.Column(db.Numeric(30, 2))
+    convention_exp = db.Column(db.Numeric(30, 2))
+    itemized_convention_exp = db.Column(db.Numeric(30, 2))
+    unitemized_convention_exp = db.Column(db.Numeric(30, 2))
+    itemized_other_disb = db.Column(db.Numeric(30, 2))
+    unitemized_other_disb = db.Column(db.Numeric(30, 2))
 
 class CommitteeTotalsPresidential(CommitteeTotals):
     __tablename__ = 'ofec_totals_presidential_mv'
