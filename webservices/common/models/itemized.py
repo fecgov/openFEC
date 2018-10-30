@@ -541,7 +541,8 @@ class ScheduleE(PdfMixin, BaseItemized):
 
     # Primary transaction info
     previous_file_number = db.Column('prev_file_num', db.Integer)
-    amendment_indicator = db.Column('amndt_ind', db.String)
+    amendment_indicator = db.Column('amndt_ind', db.String, doc=docs.AMENDMENT_INDICATOR)
+    amendment_number = db.Column('amndt_number', db.Integer, doc=docs.AMENDMENT_NUMBER)
     is_notice = db.Column(db.Boolean, index=True)
     expenditure_description = db.Column('exp_desc', db.String)
     expenditure_date = db.Column('exp_dt', db.Date)
