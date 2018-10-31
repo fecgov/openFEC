@@ -238,6 +238,34 @@ def get_ao_names():
     return ao_names
 
 
+def remove_false_ao_citations(ao_no, ao_citations):
+    """
+    Lookup false positives caused by parsing errors, exclude them.
+    'AO number': [List of citations to exclude]
+    """
+
+    AO_CITATION_EXCLUDE = {
+        '2017-03': ['2011-12']
+    }
+    if AO_CITATION_EXCLUDE.get(ao_no):
+        for false_citation in AO_CITATION_EXCLUDE.get(ao_no):
+            ao_citations.discard(false_citation)
+    return ao_citations
+
+def add_missed_ao_citations(ao_no, ao_citations):
+    """
+    Lookup missed citations caused by parsing errors, add them.
+    'AO number': [List of citations to include]
+    """
+
+    AO_CITATION_INCLUDE = {
+        # Placeholder: '2017-03': ['2011-12']
+    }
+    if AO_CITATION_INCLUDE.get(ao_no):
+        for missed_citation in AO_CITATION_INCLUDE.get(ao_no):
+            ao_citations.add(missed_citation)
+    return ao_citations
+
 def get_citations(ao_names):
     ao_component_to_name_map = {tuple(map(int, a.split('-'))): a for a in ao_names}
 
@@ -255,10 +283,12 @@ def get_citations(ao_names):
 
         if not row["ocrtext"]:
             logger.error("Missing OCR text for AO no {0}: unable to get citations".format(row['ao_no']))
-
         ao_citations_in_doc = parse_ao_citations(row["ocrtext"], ao_component_to_name_map)
-        ao_citations_in_doc.discard(row["ao_no"])  # Remove self
-
+        # Remove self
+        ao_citations_in_doc.discard(row["ao_no"])
+        # Remove false positives and add missed citations
+        ao_citations_in_doc = remove_false_ao_citations(row["ao_no"], ao_citations_in_doc)
+        ao_citations_in_doc = add_missed_ao_citations(row["ao_no"], ao_citations_in_doc)
         raw_citations[row["ao_no"]]["ao"].update(ao_citations_in_doc)
 
         for citation in ao_citations_in_doc:

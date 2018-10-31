@@ -117,3 +117,5 @@ def test_validate_regulation_citation(title, part, expected):
 ])
 def test_parse_regulatory_citations(text, expected):
     assert parse_regulatory_citations(text) == expected
+
+# Test exclude/include
