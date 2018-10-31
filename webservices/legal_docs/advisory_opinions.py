@@ -238,33 +238,41 @@ def get_ao_names():
     return ao_names
 
 
-def remove_false_ao_citations(ao_no, ao_citations):
+def fix_citations(ao_no, citation_type, citations):
     """
-    Lookup false positives caused by parsing errors, exclude them.
-    'AO number': [List of citations to exclude]
-    """
+    Exclude false positives and include missed citations due to
+    parsing errors. Citation types are 'ao', 'statute', and 'regulation'
 
-    AO_CITATION_EXCLUDE = {
-        '2017-03': ['2011-12']
+    Example lookup:
+    {'2017-03':
+        {'ao': ['2011-12', '2018-11']},
+        {'statute': [(52, '30101'), (52, '30116')]},
+        {'regulation': [(11, 110, 3), (11, 100, 5)]},
     }
-    if AO_CITATION_EXCLUDE.get(ao_no):
-        for false_citation in AO_CITATION_EXCLUDE.get(ao_no):
-            ao_citations.discard(false_citation)
-    return ao_citations
 
-def add_missed_ao_citations(ao_no, ao_citations):
-    """
-    Lookup missed citations caused by parsing errors, add them.
-    'AO number': [List of citations to include]
     """
 
-    AO_CITATION_INCLUDE = {
-        # Placeholder: '2017-03': ['2011-12']
+    CITATION_EXCLUDE_LOOKUP = {
+        '2017-03': {'ao': ['2010-11', '2011-12', '2015-16']},
     }
-    if AO_CITATION_INCLUDE.get(ao_no):
-        for missed_citation in AO_CITATION_INCLUDE.get(ao_no):
-            ao_citations.add(missed_citation)
-    return ao_citations
+
+    CITATION_INCLUDE_LOOKUP = {
+        '1999-40': {'regulation': [(11, 110, 3)]},
+    }
+
+    exclude_list = CITATION_EXCLUDE_LOOKUP.get(ao_no, {}).get(citation_type)
+    if exclude_list:
+        for false_citation in exclude_list:
+            logger.debug("Removing citation {}".format(false_citation))
+            citations.discard(false_citation)
+
+    include_list = CITATION_INCLUDE_LOOKUP.get(ao_no, {}).get(citation_type)
+    if include_list:
+        for missed_citation in include_list:
+            logger.debug("Adding citation {}".format(missed_citation))
+            citations.add(missed_citation)
+
+    return citations
 
 def get_citations(ao_names):
     ao_component_to_name_map = {tuple(map(int, a.split('-'))): a for a in ao_names}
@@ -286,19 +294,23 @@ def get_citations(ao_names):
         ao_citations_in_doc = parse_ao_citations(row["ocrtext"], ao_component_to_name_map)
         # Remove self
         ao_citations_in_doc.discard(row["ao_no"])
-        # Remove false positives and add missed citations
-        ao_citations_in_doc = remove_false_ao_citations(row["ao_no"], ao_citations_in_doc)
-        ao_citations_in_doc = add_missed_ao_citations(row["ao_no"], ao_citations_in_doc)
-        raw_citations[row["ao_no"]]["ao"].update(ao_citations_in_doc)
+        statutory_citations = parse_statutory_citations(row["ocrtext"])
+        regulatory_citations = parse_regulatory_citations(row["ocrtext"])
+        # Manually fix parsing mistakes
+        ao_citations_in_doc = fix_citations(row["ao_no"], 'ao', ao_citations_in_doc)
+        statutory_citations = fix_citations(row["ao_no"], 'statute', statutory_citations)
+        regulatory_citations = fix_citations(row["ao_no"], 'regulation', regulatory_citations)
 
         for citation in ao_citations_in_doc:
             raw_citations[citation]["aos_cited_by"].add(row["ao_no"])
 
-        statutory_citations = parse_statutory_citations(row["ocrtext"])
-        regulatory_citations = parse_regulatory_citations(row["ocrtext"])
-
+        logger.debug("AO citations: {}".format(ao_citations_in_doc))
+        raw_citations[row["ao_no"]]["ao"].update(ao_citations_in_doc)
+        logger.debug("Statutory citations: {}".format(statutory_citations))
         all_statutory_citations.update(statutory_citations)
+        logger.debug("Regulatory citations: {}".format(regulatory_citations))
         all_regulatory_citations.update(regulatory_citations)
+
         raw_citations[row["ao_no"]]["statutes"].update(statutory_citations)
         raw_citations[row["ao_no"]]["regulations"].update(regulatory_citations)
 
