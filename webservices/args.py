@@ -117,7 +117,7 @@ class IndicesValidator(IndexValidator):
                     status_code=422
                 )
 
-def make_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True,
+def make_sort_args(default=None, validator=None, default_hide_null=False,
         default_nulls_only=False, default_sort_nulls_last=False, sort_nulls_last=False):
     return {
         'sort': fields.Str(
@@ -140,9 +140,9 @@ def make_sort_args(default=None, validator=None, default_hide_null=False, defaul
     }
 
 
-def make_multi_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True,
+def make_multi_sort_args(default=None, validator=None, default_hide_null=False,
         default_nulls_only=False, default_sort_nulls_last=False, sort_nulls_last=False):
-    args = make_sort_args(default, validator, default_hide_null, default_reverse_nulls, default_nulls_only, default_sort_nulls_last, sort_nulls_last)
+    args = make_sort_args(default, validator, default_hide_null, default_nulls_only, default_sort_nulls_last, sort_nulls_last)
     args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True,
         description='Provide a field to sort by. Use - for descending order.',)
     return args
