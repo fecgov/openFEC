@@ -164,7 +164,6 @@ class CandidateFormatTest(ApiBaseTest):
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
 
-
     def test_candidate_sort(self):
         candidates = [
             factories.CandidateFactory(candidate_status='P'),
@@ -179,6 +178,22 @@ class CandidateFormatTest(ApiBaseTest):
         self.assertEqual([each['candidate_id'] for each in results], candidate_ids)
         results = self._results(api.url_for(CandidateSearch, sort='-candidate_status'))
         self.assertEqual([each['candidate_id'] for each in results], candidate_ids)
+
+    def test_candidate_sort_nulls_last(self):
+        """
+        Nulls will sort last by default when sorting ascending -
+        sort_nulls_last forces nulls to the bottom for descending sort
+        """
+        candidates = [
+            factories.CandidateFactory(candidate_id='1'),
+            factories.CandidateFactory(candidate_id='2', candidate_status='P'),
+            factories.CandidateFactory(candidate_id='3', candidate_status='C'),
+        ]
+        candidate_ids = [each.candidate_id for each in candidates]
+        results = self._results(api.url_for(CandidateList, sort='candidate_status', sort_nulls_last=True))
+        self.assertEqual([each['candidate_id'] for each in results], candidate_ids[::-1])
+        results = self._results(api.url_for(CandidateList, sort='-candidate_status', sort_nulls_last=True))
+        self.assertEqual([each['candidate_id'] for each in results], ['2', '3', '1'])
 
 class TestCandidateHistory(ApiBaseTest):
 
