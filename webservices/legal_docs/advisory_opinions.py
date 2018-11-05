@@ -294,14 +294,17 @@ def fix_citations(ao_no, citation_type, citations):
 
     return citations
 
+
 def get_citations(ao_names):
     ao_component_to_name_map = {tuple(map(int, a.split('-'))): a for a in ao_names}
 
     logger.info("Getting citations...")
 
-    rs = db.engine.execute("""SELECT ao_no, ocrtext FROM aouser.document
+    rs = db.engine.execute(
+        """SELECT ao_no, ocrtext FROM aouser.document
                                 INNER JOIN aouser.ao USING (ao_id)
-                              WHERE category = 'Final Opinion'""")
+                              WHERE category = 'Final Opinion'"""
+    )
 
     all_regulatory_citations = set()
     all_statutory_citations = set()
@@ -310,16 +313,26 @@ def get_citations(ao_names):
         logger.debug("Getting citations for AO %s" % row["ao_no"])
 
         if not row["ocrtext"]:
-            logger.error("Missing OCR text for AO no {0}: unable to get citations".format(row['ao_no']))
-        ao_citations_in_doc = parse_ao_citations(row["ocrtext"], ao_component_to_name_map)
+            logger.error(
+                "Missing OCR text for AO no {0}: unable to get citations".format(
+                    row['ao_no']
+                )
+            )
+        ao_citations_in_doc = parse_ao_citations(
+            row["ocrtext"], ao_component_to_name_map
+        )
         # Remove self
         ao_citations_in_doc.discard(row["ao_no"])
         statutory_citations = parse_statutory_citations(row["ocrtext"])
         regulatory_citations = parse_regulatory_citations(row["ocrtext"])
         # Manually fix parsing mistakes
         ao_citations_in_doc = fix_citations(row["ao_no"], 'ao', ao_citations_in_doc)
-        statutory_citations = fix_citations(row["ao_no"], 'statute', statutory_citations)
-        regulatory_citations = fix_citations(row["ao_no"], 'regulation', regulatory_citations)
+        statutory_citations = fix_citations(
+            row["ao_no"], 'statute', statutory_citations
+        )
+        regulatory_citations = fix_citations(
+            row["ao_no"], 'regulation', regulatory_citations
+        )
 
         for citation in ao_citations_in_doc:
             raw_citations[citation]["aos_cited_by"].add(row["ao_no"])
@@ -336,29 +349,40 @@ def get_citations(ao_names):
 
     citations = defaultdict(lambda: defaultdict(list))
     for ao in raw_citations:
-        citations[ao]["ao"] = sorted([
-            {"no": c, "name": ao_names[c]}
-            for c in raw_citations[ao]["ao"]], key=lambda d: d["no"])
-        citations[ao]["aos_cited_by"] = sorted([
-            {"no": c, "name": ao_names[c]}
-            for c in raw_citations[ao]["aos_cited_by"]], key=lambda d: d["no"])
-        citations[ao]["statutes"] = sorted([
-            {"title": c[0], "section": c[1]}
-            for c in raw_citations[ao]["statutes"]], key=lambda d: (d["title"], d["section"]))
-        citations[ao]["regulations"] = sorted([
-            {"title": c[0], "part": c[1], "section": c[2]}
-            for c in raw_citations[ao]["regulations"]], key=lambda d: (d["title"], d["part"], d["section"]))
+        citations[ao]["ao"] = sorted(
+            [{"no": c, "name": ao_names[c]} for c in raw_citations[ao]["ao"]],
+            key=lambda d: d["no"],
+        )
+        citations[ao]["aos_cited_by"] = sorted(
+            [{"no": c, "name": ao_names[c]} for c in raw_citations[ao]["aos_cited_by"]],
+            key=lambda d: d["no"],
+        )
+        citations[ao]["statutes"] = sorted(
+            [{"title": c[0], "section": c[1]} for c in raw_citations[ao]["statutes"]],
+            key=lambda d: (d["title"], d["section"]),
+        )
+        citations[ao]["regulations"] = sorted(
+            [
+                {"title": c[0], "part": c[1], "section": c[2]}
+                for c in raw_citations[ao]["regulations"]
+            ],
+            key=lambda d: (d["title"], d["part"], d["section"]),
+        )
 
     es = get_elasticsearch_connection()
 
     for citation in all_regulatory_citations:
-        entry = {'citation_text': '%d CFR §%d.%d'
-                 % (citation[0], citation[1], citation[2]), 'citation_type': 'regulation'}
+        entry = {
+            'citation_text': '%d CFR §%d.%d' % (citation[0], citation[1], citation[2]),
+            'citation_type': 'regulation',
+        }
         es.index('docs_index', 'citations', entry, id=entry['citation_text'])
 
     for citation in all_statutory_citations:
-        entry = {'citation_text': '%d U.S.C. §%s'
-                 % (citation[0], citation[1]), 'citation_type': 'statute'}
+        entry = {
+            'citation_text': '%d U.S.C. §%s' % (citation[0], citation[1]),
+            'citation_type': 'statute',
+        }
         es.index('docs_index', 'citations', entry, id=entry['citation_text'])
 
     logger.info("Citations loaded.")
@@ -371,7 +395,10 @@ def parse_ao_citations(text, ao_component_to_name_map):
 
     if text:
         for citation in AO_CITATION_REGEX.finditer(text):
-            year, serial_no = int(citation.group('year')), int(citation.group('serial_no'))
+            year, serial_no = (
+                int(citation.group('year')),
+                int(citation.group('serial_no')),
+            )
             if (year, serial_no) in ao_component_to_name_map:
                 matches.add(ao_component_to_name_map[(year, serial_no)])
     return matches
@@ -397,11 +424,9 @@ def validate_statute_citation(title, section):
     if title == '2':
         return 431 <= section_lookup <= 457
     elif title == '18':
-        return (590 <= section_lookup <= 619 or
-               section_lookup == 100)
+        return 590 <= section_lookup <= 619 or section_lookup == 100
     elif title == '26':
-        return (900 <= section_lookup <= 904 or
-               section_lookup in (501, 527))
+        return 900 <= section_lookup <= 904 or section_lookup in (501, 527)
     elif title == '52':
         return section_lookup == 301
 
@@ -413,26 +438,28 @@ def parse_statutory_citations(text):
     if text:
         for citation in SINGLE_STATUTE_CITATION_REGEX.finditer(text):
             new_title, new_section = reclassify_statutory_citation(
-                citation.group('title'), citation.group('section'))
-            matches.add((
-                int(new_title),
-                str(new_section)
-            ))
-        for possible_multiple_citation in MULTIPLE_STATUTE_CITATION_REGEX.finditer(text):
+                citation.group('title'), citation.group('section')
+            )
+            matches.add((int(new_title), str(new_section)))
+        for possible_multiple_citation in MULTIPLE_STATUTE_CITATION_REGEX.finditer(
+            text
+        ):
             citations_title = possible_multiple_citation.group('title')
             possible_sections = possible_multiple_citation.group('possible_sections')
 
             for section in STATUTE_SECTION_ONLY_REGEX.finditer(possible_sections):
                 new_title, new_section = reclassify_statutory_citation(
-                    citations_title, section.group('section'))
+                    citations_title, section.group('section')
+                )
 
                 if validate_statute_citation(new_title, new_section):
-                    matches.add((
-                        int(new_title),
-                        str(new_section)
-                    ))
+                    matches.add((int(new_title), str(new_section)))
                 else:
-                    logger.debug("Citation out of range - excluding {} USC {} from multiples.".format(new_title, new_section))
+                    logger.debug(
+                        "Citation out of range - excluding {} USC {} from multiples.".format(
+                            new_title, new_section
+                        )
+                    )
     return matches
 
 
@@ -454,12 +481,14 @@ def validate_regulation_citation(title, part):
         return False
 
     if title == '11':
-        return (1 <= part <= 8 or
-        100 <= part <= 120 or
-        200 <= part <= 205 or
-        300 <= part <= 305 or
-        part == 400 or
-        9001 <= part <= 9099)
+        return (
+            1 <= part <= 8
+            or 100 <= part <= 120
+            or 200 <= part <= 205
+            or 300 <= part <= 305
+            or part == 400
+            or 9001 <= part <= 9099
+        )
 
     return True
 
@@ -468,27 +497,42 @@ def parse_regulatory_citations(text):
     matches = set()
     if text:
         for citation in SINGLE_REGULATION_CITATION_REGEX.finditer(text):
-            matches.add((
-                int(citation.group('title')),
-                int(citation.group('part')),
-                int(citation.group('section'))
-            ))
+            matches.add(
+                (
+                    int(citation.group('title')),
+                    int(citation.group('part')),
+                    int(citation.group('section')),
+                )
+            )
 
-        for possible_multiple_citation in MULTIPLE_REGULATION_CITATION_REGEX.finditer(text):
+        for possible_multiple_citation in MULTIPLE_REGULATION_CITATION_REGEX.finditer(
+            text
+        ):
             citations_title = possible_multiple_citation.group('title')
-            possible_parts_and_sections = possible_multiple_citation.group('possible_parts_and_sections')
+            possible_parts_and_sections = possible_multiple_citation.group(
+                'possible_parts_and_sections'
+            )
 
-            for part_and_section in REGULATION_SECTION_ONLY_REGEX.finditer(possible_parts_and_sections):
+            for part_and_section in REGULATION_SECTION_ONLY_REGEX.finditer(
+                possible_parts_and_sections
+            ):
 
-                if validate_regulation_citation(citations_title, part_and_section.group('part')):
-                    matches.add((
-                        int(citations_title),
-                        int(part_and_section.group('part')),
-                        int(part_and_section.group('section'))
-                    ))
+                if validate_regulation_citation(
+                    citations_title, part_and_section.group('part')
+                ):
+                    matches.add(
+                        (
+                            int(citations_title),
+                            int(part_and_section.group('part')),
+                            int(part_and_section.group('section')),
+                        )
+                    )
                 else:
-                    logger.debug("Citation out of range - excluding {} CFR {}.{} from multiples.".
-                        format(citations_title,
+                    logger.debug(
+                        "Citation out of range - excluding {} CFR {}.{} from multiples.".format(
+                            citations_title,
                             part_and_section.group('part'),
-                            int(part_and_section.group('section'))))
+                            int(part_and_section.group('section')),
+                        )
+                    )
     return matches
