@@ -62,19 +62,18 @@ def check_cap(kwargs, cap):
             )
 
 
-def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear=False,
-               count=None, cap=100, index_column=None, multi=False):
+def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear=False, count=None, cap=100, index_column=None, multi=False):
     check_cap(kwargs, cap)
-    sort, hide_null, reverse_nulls = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_reverse_nulls')
+    sort, hide_null, reverse_nulls, nulls_last = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_reverse_nulls'), kwargs.get('sort_nulls_last')
     if sort and multi:
         query, _ = sorting.multi_sort(
             query, sort, model=model, aliases=aliases, join_columns=join_columns,
-            clear=clear, hide_null=hide_null, index_column=index_column
+            clear=clear, hide_null=hide_null, index_column=index_column, nulls_last=nulls_last
         )
     elif sort:
         query, _ = sorting.sort(
             query, sort, model=model, aliases=aliases, join_columns=join_columns,
-            clear=clear, hide_null=hide_null, index_column=index_column
+            clear=clear, hide_null=hide_null, index_column=index_column, nulls_last=nulls_last
         )
     paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
