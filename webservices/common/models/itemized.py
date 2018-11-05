@@ -87,6 +87,7 @@ class ScheduleA(BaseItemized):
     )
 
     contributor_name = db.Column('contbr_nm', db.String, doc=docs.CONTRIBUTOR_NAME)
+    contributor_committee_type = db.Column('cmte_tp', db.String(1), index=True)
 
     contributor_name_text = db.Column(TSVECTOR)
     contributor_first_name = db.Column('contbr_nm_first', db.String)
