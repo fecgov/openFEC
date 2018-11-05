@@ -72,11 +72,9 @@ TO_END_OF_SENTENCE = r"(?P<possible_sections>\d+[a-z]?(-1)?[^.;]*)[.;]"
 STATUTE_TITLE = r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*"
 STATUTE_SECTION = r"(?P<section>\d+[a-z]?(-1)?)(?:\S*)"
 
-SINGLE_STATUTE_CITATION_REGEX = re.compile(
-    STATUTE_TITLE + STATUTE_SECTION + r".*\.?")
+SINGLE_STATUTE_CITATION_REGEX = re.compile(STATUTE_TITLE + STATUTE_SECTION + r".*\.?")
 
-MULTIPLE_STATUTE_CITATION_REGEX = re.compile(
-    STATUTE_TITLE + TO_END_OF_SENTENCE)
+MULTIPLE_STATUTE_CITATION_REGEX = re.compile(STATUTE_TITLE + TO_END_OF_SENTENCE)
 
 STATUTE_SECTION_ONLY_REGEX = re.compile(STATUTE_SECTION)
 
@@ -87,18 +85,17 @@ MAX_MULTIPLE_REGULATION_CITATION_LENGTH = r"(?P<possible_parts_and_sections>.{,7
 REGULATION_TITLE = r"(?P<title>\d+)\s+C\.?F\.?R\.?\s+§*\s*"
 REGULATION_SECTION = r"(?P<part>\d+)\.(?P<section>\d+)+"
 
-SINGLE_REGULATION_CITATION_REGEX = re.compile(
-    REGULATION_TITLE + REGULATION_SECTION)
+SINGLE_REGULATION_CITATION_REGEX = re.compile(REGULATION_TITLE + REGULATION_SECTION)
 
 MULTIPLE_REGULATION_CITATION_REGEX = re.compile(
-    REGULATION_TITLE + MAX_MULTIPLE_REGULATION_CITATION_LENGTH)
+    REGULATION_TITLE + MAX_MULTIPLE_REGULATION_CITATION_LENGTH
+)
 
 REGULATION_SECTION_ONLY_REGEX = re.compile(REGULATION_SECTION)
 
 # AO REGEX
 
-AO_CITATION_REGEX = re.compile(
-    r"\b(?P<year>\d{4,4})-(?P<serial_no>\d+)\b")
+AO_CITATION_REGEX = re.compile(r"\b(?P<year>\d{4,4})-(?P<serial_no>\d+)\b")
 
 AOS_WITH_CORRECTED_STAGE = {"2009-05": "Withdrawn"}
 
@@ -174,8 +171,13 @@ def get_advisory_opinions(from_ao_no):
                 "sort2": -serial,
             }
             ao["documents"] = get_documents(ao_id, bucket)
-            (ao["requestor_names"], ao["requestor_types"], ao["commenter_names"],
-                    ao["representative_names"], ao["entities"]) = get_entities(ao_id)
+            (
+                ao["requestor_names"],
+                ao["requestor_types"],
+                ao["commenter_names"],
+                ao["representative_names"],
+                ao["entities"],
+            ) = get_entities(ao_id)
 
             yield ao
 
@@ -196,11 +198,20 @@ def get_entities(ao_id):
                 commenter_names.append(row["name"])
             elif row["role_description"] == "Counsel/Representative":
                 representative_names.append(row["name"])
-            entities.append({"role": row["role_description"],
-                "name": row["name"],
-                "type": row["entity_type_description"]})
-    return requestor_names, list(requestor_types),\
-            commenter_names, representative_names, entities
+            entities.append(
+                {
+                    "role": row["role_description"],
+                    "name": row["name"],
+                    "type": row["entity_type_description"],
+                }
+            )
+    return (
+        requestor_names,
+        list(requestor_types),
+        commenter_names,
+        representative_names,
+        entities,
+    )
 
 
 def get_documents(ao_id, bucket):
@@ -216,14 +227,23 @@ def get_documents(ao_id, bucket):
                 "date": row["document_date"],
             }
             if not row['fileimage']:
-                logger.error('Error uploading document ID {0} for AO no {1}: No file image'.format(row['document_id'], row['ao_no']))
+                logger.error(
+                    'Error uploading document ID {0} for AO no {1}: No file image'.format(
+                        row['document_id'], row['ao_no']
+                    )
+                )
             else:
-                pdf_key = "legal/aos/{0}/{1}".format(row['ao_no'],
-                    row["filename"].replace(' ', '-'))
+                pdf_key = "legal/aos/{0}/{1}".format(
+                    row['ao_no'], row["filename"].replace(' ', '-')
+                )
                 document["url"] = '/files/' + pdf_key
                 logger.debug("S3: Uploading {}".format(pdf_key))
-                bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
-                        ContentType="application/pdf", ACL="public-read")
+                bucket.put_object(
+                    Key=pdf_key,
+                    Body=bytes(row["fileimage"]),
+                    ContentType="application/pdf",
+                    ACL="public-read",
+                )
                 documents.append(document)
 
     return documents

@@ -123,13 +123,12 @@ def test_parse_regulatory_citations(text, expected):
 class TestManualCitations(unittest.TestCase):
     def test_exclude_citations(self):
         original_ao_citations = set(['2011-12', '2017-03', '2014-18', '2010-11', '2004-41', '2007-13', '1996-26', '2005-17', '2017-01', '2016-02', '2012-21', '2012-23', '2014-11', '2002-15', '2006-12', '2015-16', '2014-21'])
-        expected_citations = set(['2017-03', '2014-18', '2004-41', '2007-13', '1996-26', '2005-17', '2017-01', '2016-02', '2012-21', '2012-23', '2014-11', '2002-15', '2006-12', '2014-21'])
-
         fixed_citations = fix_citations('2017-03', 'ao', original_ao_citations)
-        assert fixed_citations == expected_citations
+        assert '2010-11' not in fixed_citations
+        assert '2011-12' not in fixed_citations
+        assert '2015-16' not in fixed_citations
 
     def test_include_citations(self):
         original_reg_citations = set([(11, 110, 4), (11, 110, 1), (11, 102, 9), (11, 102, 6), (11, 114, 5), (11, 100, 8), (11, 114, 1), (11, 100, 5), (11, 103, 3), (11, 104, 14), (11, 100, 6), (11, 102, 8), (11, 114, 7)])
-        expected_citations = set([(11, 110, 4), (11, 110, 1), (11, 102, 9), (11, 102, 6), (11, 114, 5), (11, 100, 8), (11, 114, 1), (11, 100, 5), (11, 103, 3), (11, 104, 14), (11, 100, 6), (11, 102, 8), (11, 114, 7), (11, 110, 3)])
         fixed_citations = fix_citations('1999-40', 'regulation', original_reg_citations)
-        assert fixed_citations == expected_citations
+        assert (11, 110, 3) in fixed_citations
