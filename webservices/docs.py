@@ -75,7 +75,7 @@ making wrappers and exploring the data.
 
 A few restrictions limit the way you can use FEC data. For example, you can’t use contributor
 lists for commercial purposes or to solicit donations.
-[Learn more here](https://transition.fec.gov/pages/brochures/saleuse.shtml).
+[Learn more here](https://www.fec.gov/updates/sale-or-use-contributor-information/).
 
 [View our source code](https://github.com/fecgov/openFEC). We welcome issues and pull requests!
 '''
