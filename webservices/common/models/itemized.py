@@ -68,7 +68,7 @@ class BaseRawItemized(db.Model):
 
 
 class ScheduleA(BaseItemized):
-    __table_args__ = {'schema' : 'disclosure'}
+    __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'fec_fitem_sched_a'
 
     committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_NAME)
@@ -85,7 +85,6 @@ class ScheduleA(BaseItemized):
             ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
         )'''
     )
-
 
     contributor_name = db.Column('contbr_nm', db.String, doc=docs.CONTRIBUTOR_NAME)
 
@@ -145,7 +144,7 @@ class ScheduleA(BaseItemized):
     national_committee_nonfederal_account = db.Column('national_cmte_nonfed_acct', db.String)
 
     # Transaction meta info
-    election_type = db.Column('election_tp', db.String) # ? election_type looks like it's included in BaseItemized already
+    election_type = db.Column('election_tp', db.String)
     election_type_full = db.Column('election_tp_desc', db.String)
     fec_election_type_desc = db.Column('fec_election_tp_desc', db.String)
     fec_election_year = db.Column('fec_election_yr', db.String)
@@ -240,7 +239,7 @@ class ScheduleAEfile(BaseRawItemized):
 
 
 class ScheduleB(BaseItemized):
-    __table_args__ = {'schema' : 'disclosure'}
+    __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'fec_fitem_sched_b'
 
     # Recipient info
@@ -292,7 +291,7 @@ class ScheduleB(BaseItemized):
     candidate_office_state_full = db.Column('cand_office_st_desc', db.String)
 
     # Transaction meta info
-    election_type = db.Column('election_tp', db.String) # ? election_type looks like it's included in BaseItemized already
+    election_type = db.Column('election_tp', db.String)
     election_type_full = db.Column('election_tp_desc', db.String)
     fec_election_type_desc = db.Column('fec_election_tp_desc', db.String)
     fec_election_year = db.Column('fec_election_tp_year', db.String)
@@ -337,6 +336,8 @@ class ScheduleB(BaseItemized):
 
     ref_disp_excess_flg = db.Column('ref_disp_excess_flg', db.String)
     comm_dt = db.Column('comm_dt', db.Date)
+
+    spender_committee_type = db.Column('cmte_tp', db.String(1), index=True)
 
     @hybrid_property
     def sort_expressions(self):
@@ -404,8 +405,7 @@ class ScheduleBEfile(BaseRawItemized):
     )
 
 
-
-class ScheduleC(PdfMixin,BaseItemized):
+class ScheduleC(PdfMixin, BaseItemized):
     __tablename__ = 'ofec_sched_c_mv'
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
@@ -467,7 +467,7 @@ class ScheduleC(PdfMixin,BaseItemized):
         return None
 
 
-class ScheduleD(PdfMixin,BaseItemized):
+class ScheduleD(PdfMixin, BaseItemized):
     __tablename__ = 'fec_fitem_sched_d_vw'
 
     sub_id = db.Column(db.Integer, primary_key=True)
@@ -541,7 +541,8 @@ class ScheduleE(PdfMixin, BaseItemized):
 
     # Primary transaction info
     previous_file_number = db.Column('prev_file_num', db.Integer)
-    amendment_indicator = db.Column('amndt_ind', db.String)
+    amendment_indicator = db.Column('amndt_ind', db.String, doc=docs.AMENDMENT_INDICATOR)
+    amendment_number = db.Column('amndt_number', db.Integer, doc=docs.AMENDMENT_NUMBER)
     is_notice = db.Column(db.Boolean, index=True)
     expenditure_description = db.Column('exp_desc', db.String)
     expenditure_date = db.Column('exp_dt', db.Date)
@@ -671,7 +672,6 @@ class ScheduleEEfile(BaseRawItemized):
         innerjoin='True',
     )
 
-
     committee = db.relationship(
         'CommitteeHistory',
         primaryjoin='''and_(
@@ -700,7 +700,7 @@ class ScheduleEEfile(BaseRawItemized):
         return name
 
 
-class ScheduleF(PdfMixin,BaseItemized):
+class ScheduleF(PdfMixin, BaseItemized):
     __tablename__ = 'ofec_sched_f_mv'
 
     sub_id = db.Column(db.Integer, primary_key=True)
@@ -776,7 +776,6 @@ class ScheduleF(PdfMixin,BaseItemized):
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     load_date = db.Column('pg_date', db.DateTime)
     election_cycle = db.Column(db.Integer)
-
 
     @property
     def pdf_url(self):

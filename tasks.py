@@ -23,6 +23,7 @@ EXCLUDE_TABLES = [
     'dimcandproperties',
     'f_rpt_or_form_sub',
 ]
+
 # Include records used in integration tests
 # FORCE_INCLUDE = [
 #     ('dimcand', 10025229),  # Nancy Pelosi
