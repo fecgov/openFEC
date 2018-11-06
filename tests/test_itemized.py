@@ -642,6 +642,17 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleEView, min_amount=100, max_amount=150))
         self.assertTrue(all(100 <= each['expenditure_amount'] <= 150 for each in results))
 
+    def test_sort_sched_e(self):
+        expenditures = [
+            factories.ScheduleEFactory(expenditure_amount=50),
+            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1)),
+            factories.ScheduleEFactory(expenditure_amount=150, expenditure_date=datetime.date(2016, 2, 1)),
+            factories.ScheduleEFactory(expenditure_amount=200, expenditure_date=datetime.date(2016, 3, 1)),
+        ]
+        sub_ids = [str(each.sub_id) for each in expenditures]
+        results = self._results(api.url_for(ScheduleEView, sort='-expenditure_date', sort_nulls_last=True))
+        self.assertEqual([each['sub_id'] for each in results], sub_ids[::-1])
+
     def test_filters_sched_e(self):
         filters = [
             ('image_number', ScheduleE.image_number, ['123', '456']),
