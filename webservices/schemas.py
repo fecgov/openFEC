@@ -953,7 +953,7 @@ class ScheduleABySizeCandidateSchema(ma.Schema):
     cycle = ma.fields.Int()
     total = ma.fields.Decimal(places=2)
     size = ma.fields.Int()
-
+    count = ma.fields.Int()
 
 class ScheduleAByStateCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
@@ -961,6 +961,7 @@ class ScheduleAByStateCandidateSchema(ma.Schema):
     total = ma.fields.Decimal(places=2)
     state = ma.fields.Str()
     state_full = ma.fields.Str()
+    count = ma.fields.Int()
 
 
 class ScheduleAByContributorTypeCandidateSchema(ma.Schema):
