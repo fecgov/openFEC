@@ -215,11 +215,11 @@ def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=10
 def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
     model = index_column.parent.class_
-    sort, hide_null = kwargs.get('sort'), kwargs.get('sort_hide_null')
+    sort, hide_null, nulls_last = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_nulls_last')
     if sort:
         query, sort_column = sorting.sort(
             query, sort,
-            model=model, clear=clear, hide_null=hide_null
+            model=model, clear=clear, hide_null=hide_null, nulls_last=nulls_last
         )
     else:
         sort_column = None
