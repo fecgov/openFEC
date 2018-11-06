@@ -162,11 +162,21 @@ class EFilingF3Schema(BaseEfileSchema):
         descriptions = decoders.f3_description
         line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b, descriptions)
         #final bit of data cleaning before json marshalling
-        cash = max(line_list.get('coh_cop_i'), line_list.get('coh_cop_ii'))
+        # If values are None, fall back to 0 to prevent errors
+        coh_cop_i = line_list.get('coh_cop_i') if line_list.get('coh_cop_i') else 0
+        coh_cop_ii = line_list.get('coh_cop_ii') if line_list.get('coh_cop_ii') else 0
+        cash = max(coh_cop_i, coh_cop_ii)
         line_list["cash_on_hand_end_period"] = cash
-        line_list.pop('coh_cop_ii')  # maybe  a api exception if i and ii are different?
+        # i and ii should always be the same but data can be wrong
+        line_list.pop('coh_cop_ii')
         line_list.pop('coh_cop_i')
-        cash = max(obj.cash_on_hand_beginning_period, line_list.get('coh_bop'))
+        coh_bop = line_list.get('coh_bop') if line_list.get('coh_bop') else 0
+        cash_on_hand_beginning_period = (
+            obj.cash_on_hand_beginning_period
+            if obj.cash_on_hand_beginning_period
+            else 0
+        )
+        cash = max(cash_on_hand_beginning_period, coh_bop)
         obj.cash_on_hand_beginning_period = None
         line_list.pop('coh_bop')
         line_list["cash_on_hand_beginning_period"] = cash
