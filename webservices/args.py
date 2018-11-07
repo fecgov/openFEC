@@ -117,8 +117,8 @@ class IndicesValidator(IndexValidator):
                     status_code=422
                 )
 
-def make_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True,
-        default_nulls_only=False):
+def make_sort_args(default=None, validator=None, default_hide_null=False,
+        default_nulls_only=False, default_sort_nulls_last=False):
     return {
         'sort': fields.Str(
             missing=default,
@@ -132,13 +132,17 @@ def make_sort_args(default=None, validator=None, default_hide_null=False, defaul
         'sort_null_only': fields.Bool(
             missing=default_nulls_only,
             description='Toggle that filters out all rows having sort column that is non-null'
+        ),
+        'sort_nulls_last': fields.Bool(
+            missing=default_sort_nulls_last,
+            description='Toggle that sorts null values last'
         )
     }
 
 
-def make_multi_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True,
-        default_nulls_only=False):
-    args = make_sort_args(default, validator, default_hide_null, default_reverse_nulls, default_nulls_only)
+def make_multi_sort_args(default=None, validator=None, default_hide_null=False,
+        default_nulls_only=False, default_sort_nulls_last=False):
+    args = make_sort_args(default, validator, default_hide_null, default_nulls_only, default_sort_nulls_last)
     args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True,
         description='Provide a field to sort by. Use - for descending order.',)
     return args
