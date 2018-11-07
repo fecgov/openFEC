@@ -13,6 +13,7 @@ from webservices.resources.aggregates import (
     ScheduleBByPurposeView,
     ScheduleBByRecipientView,
     ScheduleEByCandidateView,
+    ScheduleBByRecipientIDView,
 )
 from webservices.resources.candidate_aggregates import (
     ScheduleABySizeCandidateView,
@@ -111,6 +112,8 @@ class TestCommitteeAggregates(ApiBaseTest):
             'cycle': 2012,
             'total': aggregate.total,
             'count': aggregate.count,
+            'memo_total': aggregate.memo_total,
+            'memo_count': aggregate.memo_count,
         }
         self.assertEqual(results[0], expected)
 
@@ -137,9 +140,42 @@ class TestCommitteeAggregates(ApiBaseTest):
             'cycle': 2012,
             'total': aggregate.total,
             'count': aggregate.count,
+            'memo_total': aggregate.memo_total,
+            'memo_count': aggregate.memo_count,
         }
         self.assertEqual(results[0], expected)
 
+    def test_disbursement_recipient_id_total(self):
+        committee = factories.CommitteeHistoryFactory(cycle=2012)
+
+        aggregate = factories.ScheduleBByRecipientIDFactory(
+            committee_id=committee.committee_id,
+            cycle=committee.cycle,
+            recipient_id='C00507368',
+            total=4000,
+            count=2,
+            memo_total=0,
+            memo_count=0
+        )
+        results = self._results(
+            api.url_for(
+                ScheduleBByRecipientIDView,
+                committee_id=committee.committee_id,
+                cycle=2012,
+                recipient_id='C00507368'
+            )
+        )
+        self.assertEqual(len(results), 1)
+        expected = {
+            'committee_id': committee.committee_id,
+            'recipient_id': 'C00507368',
+            'cycle': 2012,
+            'total': aggregate.total,
+            'count': aggregate.count,
+            'memo_total': aggregate.memo_total,
+            'memo_count': aggregate.memo_count,
+        }
+        self.assertEqual(results[0], expected)
 
 class TestAggregates(ApiBaseTest):
     cases = [
