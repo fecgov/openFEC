@@ -87,6 +87,7 @@ class ScheduleA(BaseItemized):
     )
 
     contributor_name = db.Column('contbr_nm', db.String, doc=docs.CONTRIBUTOR_NAME)
+    contributor_committee_type = db.Column('cmte_tp', db.String(1), index=True)
 
     contributor_name_text = db.Column(TSVECTOR)
     contributor_first_name = db.Column('contbr_nm_first', db.String)
@@ -541,7 +542,8 @@ class ScheduleE(PdfMixin, BaseItemized):
 
     # Primary transaction info
     previous_file_number = db.Column('prev_file_num', db.Integer)
-    amendment_indicator = db.Column('amndt_ind', db.String)
+    amendment_indicator = db.Column('amndt_ind', db.String, doc=docs.AMENDMENT_INDICATOR)
+    amendment_number = db.Column('amndt_number', db.Integer, doc=docs.AMENDMENT_NUMBER)
     is_notice = db.Column(db.Boolean, index=True)
     expenditure_description = db.Column('exp_desc', db.String)
     expenditure_date = db.Column('exp_dt', db.Date)

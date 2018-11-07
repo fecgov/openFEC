@@ -162,11 +162,21 @@ class EFilingF3Schema(BaseEfileSchema):
         descriptions = decoders.f3_description
         line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b, descriptions)
         #final bit of data cleaning before json marshalling
-        cash = max(line_list.get('coh_cop_i'), line_list.get('coh_cop_ii'))
+        # If values are None, fall back to 0 to prevent errors
+        coh_cop_i = line_list.get('coh_cop_i') if line_list.get('coh_cop_i') else 0
+        coh_cop_ii = line_list.get('coh_cop_ii') if line_list.get('coh_cop_ii') else 0
+        cash = max(coh_cop_i, coh_cop_ii)
         line_list["cash_on_hand_end_period"] = cash
-        line_list.pop('coh_cop_ii')  # maybe  a api exception if i and ii are different?
+        # i and ii should always be the same but data can be wrong
+        line_list.pop('coh_cop_ii')
         line_list.pop('coh_cop_i')
-        cash = max(obj.cash_on_hand_beginning_period, line_list.get('coh_bop'))
+        coh_bop = line_list.get('coh_bop') if line_list.get('coh_bop') else 0
+        cash_on_hand_beginning_period = (
+            obj.cash_on_hand_beginning_period
+            if obj.cash_on_hand_beginning_period
+            else 0
+        )
+        cash = max(cash_on_hand_beginning_period, coh_bop)
         obj.cash_on_hand_beginning_period = None
         line_list.pop('coh_bop')
         line_list["cash_on_hand_beginning_period"] = cash
@@ -481,8 +491,6 @@ augment_models(
     models.CommitteeTotalsHouseSenate,
     models.CommitteeTotalsPacParty,
     models.CommitteeTotalsIEOnly,
-    models.CommitteeTotalsParty,
-    models.CommitteeTotalsPac
 )
 
 make_candidate_totals_schema = functools.partial(
@@ -505,10 +513,7 @@ totals_schemas = (
     schemas['CommitteeTotalsPresidentialSchema'],
     schemas['CommitteeTotalsHouseSenateSchema'],
     schemas['CommitteeTotalsPacPartySchema'],
-    schemas['CommitteeTotalsIEOnlySchema'],
-    schemas['CommitteeTotalsPartySchema'],
-    schemas['CommitteeTotalsPacSchema']
-
+    schemas['CommitteeTotalsIEOnlySchema']
 )
 CommitteeTotalsSchema = type('CommitteeTotalsSchema', totals_schemas, {})
 CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)
@@ -948,7 +953,7 @@ class ScheduleABySizeCandidateSchema(ma.Schema):
     cycle = ma.fields.Int()
     total = ma.fields.Decimal(places=2)
     size = ma.fields.Int()
-
+    count = ma.fields.Int()
 
 class ScheduleAByStateCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
@@ -956,6 +961,7 @@ class ScheduleAByStateCandidateSchema(ma.Schema):
     total = ma.fields.Decimal(places=2)
     state = ma.fields.Str()
     state_full = ma.fields.Str()
+    count = ma.fields.Int()
 
 
 class ScheduleAByContributorTypeCandidateSchema(ma.Schema):

@@ -125,6 +125,15 @@ class TestItemized(ApiBaseTest):
         response = self.app.get(api.url_for(ScheduleAView, contributor_zip='96%', cycle=2018))
         self.assertEqual(response.status_code, 400)
 
+    def test_sched_a_contributor_committee_type_filter(self):
+        [
+            factories.ScheduleAFactory(contributor_committee_type='S'),
+            factories.ScheduleAFactory(contributor_committee_type='S'),
+            factories.ScheduleAFactory(contributor_committee_type='P'),
+        ]
+        results = self._results(api.url_for(ScheduleAView, contributor_committee_type='S', **self.kwargs))
+        self.assertEqual(len(results), 2)
+
     def test_filter_multi_start_with(self):
         [
             factories.ScheduleAFactory(contributor_zip=1296789)
