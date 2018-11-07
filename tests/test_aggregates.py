@@ -541,12 +541,14 @@ class TestCandidateAggregates(ApiBaseTest):
                 cycle=2012,
                 total=50,
                 size=200,
+                count=20,
             ),
             factories.ScheduleABySizeFactory(
                 committee_id=self.committees[1].committee_id,
                 cycle=2012,
                 total=150,
                 size=200,
+                count=20,
             ),
         ]
         results = self._results(
@@ -562,6 +564,7 @@ class TestCandidateAggregates(ApiBaseTest):
             'cycle': 2012,
             'total': 200,
             'size': 200,
+            'count': 20,
         }
         assert results[0] == expected
 
@@ -573,6 +576,7 @@ class TestCandidateAggregates(ApiBaseTest):
                 total=50,
                 state='NY',
                 state_full='New York',
+                count=30,
             ),
             factories.ScheduleAByStateFactory(
                 committee_id=self.committees[1].committee_id,
@@ -580,6 +584,7 @@ class TestCandidateAggregates(ApiBaseTest):
                 total=150,
                 state='NY',
                 state_full='New York',
+                count=30,
             ),
         ]
         results = self._results(
@@ -596,6 +601,7 @@ class TestCandidateAggregates(ApiBaseTest):
             'total': 200,
             'state': 'NY',
             'state_full': 'New York',
+            'count': 30,
         }
         assert results[0] == expected
 

@@ -11,7 +11,7 @@ class BaseAggregate(BaseModel):
     cycle = db.Column(db.Integer, primary_key=True, doc=docs.RECORD_CYCLE)
     #? not sure how to document this
     total = db.Column(db.Numeric(30, 2), index=True,)
-    count = db.Column(db.Integer, index=True, doc='Number of records making up the total')
+    count = db.Column(db.Integer, index=True, doc=docs.COUNT)
 
 
 class ScheduleABySize(BaseAggregate):
