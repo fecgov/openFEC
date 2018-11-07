@@ -41,14 +41,14 @@ def parse_option(option, model=None, aliases=None, join_columns=None, query=None
 
 
 def multi_sort(query, keys, model, aliases=None, join_columns=None, clear=False,
-         hide_null=False, index_column=None):
+         hide_null=False, index_column=None, nulls_last=False):
     for key in keys:
-        query,_ = sort(query, key, model, aliases, join_columns, clear, hide_null, index_column)
+        query,_ = sort(query, key, model, aliases, join_columns, clear, hide_null, index_column, nulls_last)
     return query,_
 
 
 def sort(query, key, model, aliases=None, join_columns=None, clear=False,
-         hide_null=False, index_column=None):
+         hide_null=False, index_column=None, nulls_last=False):
     """Sort query using string-formatted columns.
 
     :param query: Original query
@@ -59,7 +59,7 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
     :param clear: Clear existing sort conditions
     :param hide_null: Exclude null values on sorted column(s)
     :param index_column:
-    :param reverse_nulls: Swap order of null values on sorted column(s) in results;
+    :param nulls_last: Sort null values on sorted column(s) last in results;
         Ignored if hide_null is True
     """
 
@@ -111,7 +111,10 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
             is_expression = True
 
     sort_column = order(column)
-    query = query.order_by(sort_column)
+    if nulls_last and not hide_null:
+        query = query.order_by(sa.nullslast(sort_column))
+    else:
+        query = query.order_by(sort_column)
 
     if relationship:
         query = query.join(relationship)
