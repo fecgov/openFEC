@@ -233,6 +233,42 @@ class TestCandidateHistory(ApiBaseTest):
         assert results[0]['two_year_period'] == history_2012.two_year_period
         assert results[1]['two_year_period'] == history_2008.two_year_period
 
+    def test_house_cand_history_between_cycles(self):
+        # Committee
+        factories.CommitteeDetailFactory()
+        candidate = factories.CandidateDetailFactory(candidate_id='H001')
+        history = factories.CandidateHistoryFactory(
+            candidate_id=candidate.candidate_id,
+            two_year_period=2018,
+            candidate_election_year=2020,
+        )
+        db.session.flush()
+        # Link
+        factories.CandidateCommitteeLinkFactory(
+            candidate_id=candidate.candidate_id,
+            fec_election_year=2018,
+            committee_type='H',
+        )
+        factories.CandidateElectionFactory(
+            candidate_id=candidate.candidate_id,
+            cand_election_year=2020,
+            prev_election_year=2018,
+        )
+        # Make sure future house candidate returns results
+        results = self._results(
+            api.url_for(
+                CandidateHistoryView,
+                candidate_id=candidate.candidate_id,
+                cycle=2020,
+                # election_full='false' is strictly 2-year period
+                election_full='true',
+            )
+        )
+        assert len(results) == 1
+        assert results[0]['candidate_id'] == history.candidate_id
+        assert results[0]['two_year_period'] == history.two_year_period
+        assert results[0]['candidate_election_year'] == history.candidate_election_year
+
     def test_committee_cycle(self):
         results = self._results(
             api.url_for(
