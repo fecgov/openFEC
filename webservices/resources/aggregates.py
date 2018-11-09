@@ -163,10 +163,7 @@ class ScheduleAByOccupationView(AggregateResource):
 
 @doc(
     tags=['disbursements'],
-    description=(
-        'Schedule B receipts aggregated by recipient name. To avoid '
-        'double counting, memoed items are not included.'
-    )
+    description=(docs.SCHEDULE_B_BY_RECIPIENT_TAG)
 )
 class ScheduleBByRecipientView(AggregateResource):
 
@@ -184,10 +181,7 @@ class ScheduleBByRecipientView(AggregateResource):
 
 @doc(
     tags=['disbursements'],
-    description=(
-        'Schedule B receipts aggregated by recipient committee ID, if applicable. To avoid '
-        'double counting, memoed items are not included.'
-    )
+    description=(docs.SCHEDULE_B_BY_RECIPIENT_ID_TAG)
 )
 class ScheduleBByRecipientIDView(AggregateResource):
 

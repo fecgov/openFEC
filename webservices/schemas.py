@@ -584,7 +584,7 @@ ScheduleBByRecipientIDSchema = make_schema(
         'recipient_name': ma.fields.Str(),
     },
     options={
-        'exclude': ('committee', 'recipient')
+        'exclude': ('idx', 'committee', 'recipient')
     },
 )
 
