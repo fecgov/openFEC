@@ -35,7 +35,7 @@ jobs:
 
  
       - add_ssh_keys # this command will add the keys configured in the UI
-      - run: |
+      - run: 
           # the above step handled our private key, but we still need to trust the *public* key of the bastion host by adding them to known_hosts 
           # you can also use `ssh keyscan IP` to do this dynamically
           # echo "18.191.19.150 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEQonlo27Q6jHMBHm7FczYsVbSDMMejUCZmSTcloE2DrDNfL/fzbzNlP5Xk8MxqRfjrPEsrlvRlyNYSxDLVA+0g=" >> ~/.ssh/known_hosts
@@ -45,6 +45,8 @@ jobs:
       # with private and public keys configured, we can open a LocalForwarding ssh tunnel.
            # ssh -L <local-port>:<target-host>:<target-port> -Nf <user>@<bastion-host>
       - run: ssh -L 5555:fec-govcloud-dev.cfojp1ao5rbz.us-gov-west-1.rds.amazonaws.com:5432 -Nf ec2-user@54.70.114.36 || true
+
+
 
       # and simply confirm that accessing local port resolves the target (in this case an HTTP server)
       # - run: curl localhost:9001
