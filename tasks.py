@@ -185,7 +185,8 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, skip_migrations=
     if skip_migrations:
         print("\nSkipping migrations. Database not migrated.\n")
     else:
-        migration_env_var = 'FEC_MIGRATOR_SQLA_CONN_{0}'.format(space.upper())
+        # migration_env_var = 'FEC_MIGRATOR_SQLA_CONN_{0}'.format(space.upper())
+        migration_env_var = 'FEC_MIGRATOR_SQLA_CONN_{0}_TEST'.format(space.upper())
         migration_credential = os.getenv(migration_env_var)
 
         if migration_credential is None:
