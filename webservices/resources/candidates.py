@@ -229,7 +229,13 @@ class CandidateHistoryView(ApiResource):
             sa.and_(
                 models.CandidateHistory.candidate_id == models.CandidateElection.candidate_id,
                 models.CandidateHistory.two_year_period <= models.CandidateElection.cand_election_year,
-                models.CandidateHistory.two_year_period > models.CandidateElection.prev_election_year,
+                # For new house candidates that file for a future election,
+                #   the 2-year period will equal `prev_election_yr`
+                #   until we reach the 2-year period for that future election.
+                # This `>=` (rather than `>`)
+                #   guarantees results for candidate pages.
+                # A `SELECT DISTINCT` on `candidate_id` prevents duplicate rows.
+                models.CandidateHistory.two_year_period >= models.CandidateElection.prev_election_year,
             ),
         ).filter(
             cycle <= models.CandidateElection.cand_election_year,
