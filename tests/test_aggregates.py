@@ -154,8 +154,8 @@ class TestCommitteeAggregates(ApiBaseTest):
             recipient_id='C00507368',
             total=4000,
             count=2,
-            memo_total=0,
-            memo_count=0
+            memo_total=10,
+            memo_count=1
         )
         results = self._results(
             api.url_for(
