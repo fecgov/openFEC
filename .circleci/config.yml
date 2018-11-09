@@ -44,7 +44,7 @@ jobs:
           echo "54.70.114.36 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJMfe1/BJV5HTuQCakodJkiyjJMkicpv+eL5XcPTgcmYjarDQqalbhd7QqWJ+JGVJ5CFcfA0N/EZtjfL+KN9FDE=" >> ~/.ssh/known_hosts
       # with private and public keys configured, we can open a LocalForwarding ssh tunnel.
            # ssh -L <local-port>:<target-host>:<target-port> -Nf <user>@<bastion-host>
-      - run: ssh -L 5555:fec-govcloud-dev.cfojp1ao5rbz.us-gov-west-1.rds.amazonaws.com:5432 -Nf ec2-user@54.70.114.36 || true
+      - run: ssh -L 5555:fec-govcloud-dev.cfojp1ao5rbz.us-gov-west-1.rds.amazonaws.com:5432 ec2-user@54.70.114.36
 
 
 
