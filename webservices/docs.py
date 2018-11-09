@@ -420,9 +420,29 @@ Note: because the Schedule B data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
 '''
 
+MEMO_TOTAL = '''
+Schedule B disbursements aggregated by memoed items only
+'''
+
+NON_MEMO_TOTAL = '''
+Schedule B disbursements aggregated by non-memoed items only
+'''
+
 SCHEDULE_B_BY_PURPOSE = '''
-Schedule B disbursements aggregated by disbursement purpose category. To avoid double counting, memoed items are not included.
-Purpose is a combination of transaction codes, category codes and disbursement description. See the `disbursement_purpose` sql function within the migrations for more details.
+Schedule B disbursements aggregated by disbursement purpose category. To avoid double counting,
+memoed items are not included.
+Purpose is a combination of transaction codes, category codes and disbursement description.
+See the `disbursement_purpose` sql function within the migrations for more details.
+'''
+
+SCHEDULE_B_BY_RECIPIENT_TAG = '''
+Schedule B disbursements aggregated by recipient name. To avoid double counting,
+memoed items are not included.
+'''
+
+SCHEDULE_B_BY_RECIPIENT_ID_TAG = '''
+Schedule B disbursements aggregated by recipient committee ID, if applicable.
+To avoid double counting, memoed items are not included.
 '''
 
 SCHEDULE_C_TAG = '''
