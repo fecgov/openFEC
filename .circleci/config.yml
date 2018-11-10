@@ -112,8 +112,7 @@ jobs:
       - run: 
           # the above step handled our private key, but we still need to trust the *public* key of the bastion host by adding them to known_hosts 
           # you can also use `ssh keyscan IP` to do this dynamically 
-          echo "54.70.114.36 ecdsa-s-ha2nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJMfe1/BJV5HTuQCakodJkiyjJMkicpv+eL5XcPTgcmYjarDQqalbhd7QqWJ+JGVJ5CFcfA0N/EZtjfL+KN9FDE=" >> ~/.ssh/known_hosts      
-
+          echo "54.70.114.36 ecdsa-s-ha2nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJMfe1/BJV5HTuQCakodJkiyjJMkicpv+eL5XcPTgcmYjarDQqalbhd7QqWJ+JGVJ5CFcfA0N/EZtjfL+KN9FDE=" >> ~/.ssh/known_hosts
       - run: 
           # with private and public keys configured, we can open a LocalForwarding ssh tunnel.
           # ssh -L <local-port>:<target-host>:<target-port> -Nf <user>@<bastion-host> 
