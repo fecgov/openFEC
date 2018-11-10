@@ -34,9 +34,6 @@ jobs:
             echo 'export PATH=/usr/lib/postgresql/9.6/bin/:$PATH' >> $BASH_ENV
 
 
-      - add_ssh_keys # this command will add the keys configured in the UI
-
-
       # and simply confirm that accessing local port resolves the target (in this case an HTTP server)
       # - run: curl localhost:9001
 
@@ -110,14 +107,18 @@ jobs:
             curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.32.0" | tar xzv -C $HOME/bin
             cf install-plugin autopilot -f -r CF-Community
 
+
+      - add_ssh_keys # this command will add the keys configured in the UI
       - run: 
-          name: Establish bastion host tunnel
+          name: Setup public for bastion host
           # the above step handled our private key, but we still need to trust the *public* key of the bastion host by adding them to known_hosts 
           # you can also use `ssh keyscan IP` to do this dynamically 
+          echo "54.70.114.36 ecdsa-s-ha2nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJMfe1/BJV5HTuQCakodJkiyjJMkicpv+eL5XcPTgcmYjarDQqalbhd7QqWJ+JGVJ5CFcfA0N/EZtjfL+KN9FDE=" >> ~/.ssh/known_hosts      
+
+      - run: 
+          name: Establish bastion host tunnel
           # with private and public keys configured, we can open a LocalForwarding ssh tunnel.
           # ssh -L <local-port>:<target-host>:<target-port> -Nf <user>@<bastion-host> 
-          command: |
-          echo "54.70.114.36 ecdsa-s-ha2nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJMfe1/BJV5HTuQCakodJkiyjJMkicpv+eL5XcPTgcmYjarDQqalbhd7QqWJ+JGVJ5CFcfA0N/EZtjfL+KN9FDE=" >> ~/.ssh/known_hosts        
           ssh -L 5555:fec-govcloud-dev.cfojp1ao5rbz.us-gov-west-1.rds.amazonaws.com:5432 -Nf ec2-user@54.70.114.36 || true
 
       - deploy:
