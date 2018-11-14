@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 """Load testing for the API and web app. Run from the root directory using the
-`locust --host=https://api-stage.open.fec.gov/v1/` command, then open localhost:8089 to run tests.
+
+`locust --host=https://api-stage.open.fec.gov/v1/` (stage)
+`locust --host=https://api.open.fec.gov/v1/` (prod)
+`locust --host=https://fec-dev-api.app.cloud.gov/v1/` (dev)
+
+command, then open localhost:8089 to run tests.
 """
 
 import os
@@ -15,6 +20,7 @@ resource.setrlimit(resource.RLIMIT_NOFILE, (9999, 999999))
 
 API_KEY = os.environ['FEC_API_KEY']
 
+# it seems like AUTH is NOT used for current tests
 try:
     AUTH = (os.environ['FEC_USERNAME'], os.environ['FEC_PASSWORD'])
 except KeyError:
@@ -107,6 +113,7 @@ class Tasks(locust.TaskSet):
             'api_key': API_KEY,
         }
         resp = self.client.get(endpoint, name='preload_ids', params=params)
+        print('*********fetch_ids response:{}'.format(resp))
         return [result[key] for result in resp.json()['results']]
 
     @locust.task
@@ -250,9 +257,36 @@ class Tasks(locust.TaskSet):
         params = random.choice(poor_performance_b)
         params['api_key'] = API_KEY
         self.client.get('schedules/schedule_b/', name='load_schedule_b_problematic', params=params)
-
+    
+    @locust.task
+    def load_audit_category(self):
+        params = {
+            'api_key': API_KEY,
+        }
+        self.client.get('audit-category/', name='load_audit_category', params=params)
+    
+    @locust.task
+    def load_filings(self):
+        params = {
+            'api_key': API_KEY,
+        }
+        self.client.get('filings/', name='load_filings', params=params)
+    
+    @locust.task
+    def load_totals(self):
+        params = {
+            'api_key': API_KEY,
+        }
+        self.client.get('totals/P/', name='load_totals', params=params)
+    
+    @locust.task
+    def load_reports(self):
+        params = {
+            'api_key': API_KEY,
+        }
+        self.client.get('reports/P/', name='load_reports', params=params)
 
 class Swarm(locust.HttpLocust):
     task_set = Tasks
     min_wait = 5000
-    max_wait = 10000
+    max_wait = 50000
