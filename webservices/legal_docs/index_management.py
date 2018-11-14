@@ -1,7 +1,7 @@
 import logging
-
 import elasticsearch
 import copy
+import datetime
 
 from webservices import utils
 
@@ -591,3 +591,24 @@ def move_archived_murs():
 
     logger.info("Copy archived MURs from 'docs' index to 'archived_murs' index")
     es.reindex(body=body, wait_for_completion=True, request_timeout=1500)
+
+def create_elasticsearch_backup():
+    '''
+    Create elasticsearch backup in the `legal_s3_repository`.
+    '''
+    logger.info("Creating backup")
+    es = utils.get_elasticsearch_connection()
+    logger.info("Verifying repository setup")
+    try:
+        es.snapshot.verify_repository(repository="legal_s3_repository")
+    except elasticsearch.exceptions.NotFoundError:
+        # TODO: Set up repository if it's not set up
+        logger.error("Unable to verify repository. Please check that it has been set up.")
+        return
+
+    snapshot_name = "{0}_auto_backup".format(datetime.datetime.today().strftime('%Y%m%d'))
+    logger.info("Creating backup {0}".format(snapshot_name))
+    result = es.snapshot.create(repository="legal_s3_repository", snapshot=snapshot_name)
+    logger.info(result)
+
+# TODO: Restore from backup task, take date as argument
