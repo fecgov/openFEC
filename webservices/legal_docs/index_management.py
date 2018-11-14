@@ -4,6 +4,8 @@ import copy
 import datetime
 
 from webservices import utils
+from webservices.env import env
+
 
 logger = logging.getLogger(__name__)
 
@@ -592,23 +594,49 @@ def move_archived_murs():
     logger.info("Copy archived MURs from 'docs' index to 'archived_murs' index")
     es.reindex(body=body, wait_for_completion=True, request_timeout=1500)
 
+
+def create_backup_repository(repository_name):
+    '''
+    Create repository `legal_s3_repository` if it doesn't exist
+    '''
+    es = utils.get_elasticsearch_connection()
+    body = {
+        'type': 's3',
+        'settings': {
+            'bucket': env.get_credential("bucket"),
+            'region': env.get_credential("region"),
+            'access_key': env.get_credential("access_key_id"),
+            'secret_key': env.get_credential("secret_access_key"),
+        },
+    }
+    es.snapshot.create_repository(repository=repository_name, body=body)
+
+
 def create_elasticsearch_backup():
     '''
     Create elasticsearch backup in the `legal_s3_repository`.
     '''
-    logger.info("Creating backup")
     es = utils.get_elasticsearch_connection()
+    repository_name = "legal_s3_repository"
+
     logger.info("Verifying repository setup")
     try:
-        es.snapshot.verify_repository(repository="legal_s3_repository")
+        es.snapshot.verify_repository(repository=repository_name)
     except elasticsearch.exceptions.NotFoundError:
-        # TODO: Set up repository if it's not set up
-        logger.error("Unable to verify repository. Please check that it has been set up.")
-        return
+        logger.error(
+            "Unable to verify repository. Creating {0} repository.".format(
+                repository_name
+            )
+        )
+        create_backup_repository(repository_name)
+        pass
 
-    snapshot_name = "{0}_auto_backup".format(datetime.datetime.today().strftime('%Y%m%d'))
+    snapshot_name = "{0}_auto_backup".format(
+        datetime.datetime.today().strftime('%Y%m%d')
+    )
     logger.info("Creating backup {0}".format(snapshot_name))
-    result = es.snapshot.create(repository="legal_s3_repository", snapshot=snapshot_name)
+    result = es.snapshot.create(repository=repository_name, snapshot=snapshot_name)
     logger.info(result)
+
 
 # TODO: Restore from backup task, take date as argument
