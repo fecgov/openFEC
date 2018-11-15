@@ -30,6 +30,11 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
             'schedule': crontab(minute='*/5', hour='10-23'),
         },
 
+        'backup_elasticsearch_every_sunday': {
+            'task': 'webservices.tasks.legal_docs.create_es_backup',
+            'schedule': crontab(minute=0, hour=4, day_of_week='sun'),
+        },
+
     }
 
 def redis_url():
