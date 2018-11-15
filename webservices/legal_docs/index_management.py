@@ -644,4 +644,25 @@ def create_elasticsearch_backup(snapshot_name="auto_backup"):
         logger.error("Unable to create snapshot: {0}".format(snapshot_name))
 
 
-# TODO: Restore from backup task, take date as argument
+def restore_elasticsearch_backup(snapshot_name=None):
+    '''
+    Restore from elasticsearch snapshot
+    Default to most recent, optionally specify `snapshot_name`
+    '''
+    es = utils.get_elasticsearch_connection()
+    logger.info("Retreiving most recent snapshot")
+    snapshot_list = es.snapshot.get(repository=BACKUP_REPOSITORY_NAME, snapshot="*").get('snapshots')
+    # Most recent snapshot is at the end
+    most_recent_snapshot_name = snapshot_list.pop().get('snapshot')
+    if not snapshot_name:
+        snapshot_name = most_recent_snapshot_name
+    logger.info("Deleting docs index")
+    delete_docs_index()
+    logger.info("Retrieving snapshot: {0}".format(snapshot_name))
+    body = {"indices": "docs"}
+    result = es.snapshot.restore(repository=BACKUP_REPOSITORY_NAME, snapshot=snapshot_name, body=body)
+    if result.get('accepted'):
+        logger.info("Successfully restored snapshot: {0}".format(snapshot_name))
+    else:
+        logger.error("Unable to restore snapshot: {0}".format(snapshot_name))
+        logger.info("You may want to try the most recent snapshot: {0}".format(most_recent_snapshot_name))
