@@ -597,7 +597,7 @@ def move_archived_murs():
     es.reindex(body=body, wait_for_completion=True, request_timeout=1500)
 
 
-def create_backup_repository():
+def create_backup_repository(repository=BACKUP_REPOSITORY_NAME):
     '''
     Create repository `legal_s3_repository` if it doesn't exist
     '''
@@ -611,7 +611,7 @@ def create_backup_repository():
             'secret_key': env.get_credential("secret_access_key"),
         },
     }
-    es.snapshot.create_repository(repository=BACKUP_REPOSITORY_NAME, body=body)
+    es.snapshot.create_repository(repository=repository, body=body)
 
 
 def create_elasticsearch_backup(snapshot_name="auto_backup"):
@@ -625,19 +625,19 @@ def create_elasticsearch_backup(snapshot_name="auto_backup"):
         es.snapshot.verify_repository(repository=BACKUP_REPOSITORY_NAME)
     except elasticsearch.exceptions.NotFoundError:
         logger.error(
-            "Unable to verify repository. Creating repository: {0}".format(
+            "Unable to verify repository {0}. Configure repository with create_backup_repository command.".format(
                 BACKUP_REPOSITORY_NAME
             )
         )
-        create_backup_repository()
-        pass
+        return
 
     snapshot_name = "{0}_{1}".format(
-        datetime.datetime.today().strftime('%Y%m%d'),
-        snapshot_name
+        datetime.datetime.today().strftime('%Y%m%d'), snapshot_name
     )
     logger.info("Creating snapshot {0}".format(snapshot_name))
-    result = es.snapshot.create(repository=BACKUP_REPOSITORY_NAME, snapshot=snapshot_name)
+    result = es.snapshot.create(
+        repository=BACKUP_REPOSITORY_NAME, snapshot=snapshot_name
+    )
     if result.get('accepted'):
         logger.info("Successfully created snapshot: {0}".format(snapshot_name))
     else:
@@ -646,23 +646,44 @@ def create_elasticsearch_backup(snapshot_name="auto_backup"):
 
 def restore_elasticsearch_backup(snapshot_name=None):
     '''
+    Delete docs index
     Restore from elasticsearch snapshot
-    Default to most recent, optionally specify `snapshot_name`
+    Default to most recent snapshot, optionally specify `snapshot_name`
     '''
     es = utils.get_elasticsearch_connection()
-    logger.info("Retreiving most recent snapshot")
-    snapshot_list = es.snapshot.get(repository=BACKUP_REPOSITORY_NAME, snapshot="*").get('snapshots')
-    # Most recent snapshot is at the end
-    most_recent_snapshot_name = snapshot_list.pop().get('snapshot')
+
+    most_recent_snapshot_name = get_most_recent_snapshot()
     if not snapshot_name:
         snapshot_name = most_recent_snapshot_name
+
     logger.info("Deleting docs index")
     delete_docs_index()
+
     logger.info("Retrieving snapshot: {0}".format(snapshot_name))
     body = {"indices": "docs"}
-    result = es.snapshot.restore(repository=BACKUP_REPOSITORY_NAME, snapshot=snapshot_name, body=body)
+    result = es.snapshot.restore(
+        repository=BACKUP_REPOSITORY_NAME, snapshot=snapshot_name, body=body
+    )
     if result.get('accepted'):
         logger.info("Successfully restored snapshot: {0}".format(snapshot_name))
     else:
         logger.error("Unable to restore snapshot: {0}".format(snapshot_name))
-        logger.info("You may want to try the most recent snapshot: {0}".format(most_recent_snapshot_name))
+        logger.info(
+            "You may want to try the most recent snapshot: {0}".format(
+                most_recent_snapshot_name
+            )
+        )
+
+def get_most_recent_snapshot():
+    '''
+    Get the list of snapshots (sorted by date, ascending) and
+    return most recent snapshot name
+    '''
+    es = utils.get_elasticsearch_connection()
+
+    logger.info("Retreiving most recent snapshot")
+    snapshot_list = es.snapshot.get(
+        repository=BACKUP_REPOSITORY_NAME, snapshot="*"
+    ).get('snapshots')
+
+    return snapshot_list.pop().get('snapshot')
