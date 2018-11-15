@@ -29,6 +29,7 @@ from .index_management import (
     restore_from_staging_index,
     move_archived_murs,
     create_elasticsearch_backup,
+    restore_elasticsearch_backup,
 )
 
 def load_current_legal_docs():
