@@ -74,7 +74,7 @@ endpoints = [
     "/names/audit_candidates/?q=clinton&api_key={api_key}",
     "/names/audit_committees/?q=&clinton&api_key={api_key}",
     "/schedules/schedule_a/by_size/by_candidate/?candidate_id={candidate_id}&cycle=2018&api_key={api_key}",
-    "/schedules/schedule_a/by_state/by_candidate/?candidate_id={candidate_id}&cycle=2018&aapi_key={api_key}",
+    "/schedules/schedule_a/by_state/by_candidate/?candidate_id={candidate_id}&cycle=2018&api_key={api_key}",
     "/candidates/totals/?api_key={api_key}",
     "/schedules/schedule_a/by_state/totals/?api_key={api_key}",
     "/communication_costs/by_candidate/?api_key={api_key}",
