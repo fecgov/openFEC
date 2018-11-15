@@ -599,9 +599,11 @@ def move_archived_murs():
 
 def create_backup_repository(repository=BACKUP_REPOSITORY_NAME):
     '''
-    Create repository `legal_s3_repository` if it doesn't exist
+    Create s3 backup repository using api credentials.
+    This should only need to get run once.
     '''
     es = utils.get_elasticsearch_connection()
+    logger.info("Creating backup repository: {0}".format(repository))
     body = {
         'type': 's3',
         'settings': {
