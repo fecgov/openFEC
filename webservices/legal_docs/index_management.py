@@ -420,6 +420,8 @@ ANALYZER_SETTINGS = {
     "analysis": {"analyzer": {"default": {"type": "english"}}}
 }
 
+BACKUP_REPOSITORY_NAME = "legal_s3_repository"
+
 
 def create_docs_index():
     """
@@ -595,7 +597,7 @@ def move_archived_murs():
     es.reindex(body=body, wait_for_completion=True, request_timeout=1500)
 
 
-def create_backup_repository(repository_name):
+def create_backup_repository():
     '''
     Create repository `legal_s3_repository` if it doesn't exist
     '''
@@ -609,34 +611,37 @@ def create_backup_repository(repository_name):
             'secret_key': env.get_credential("secret_access_key"),
         },
     }
-    es.snapshot.create_repository(repository=repository_name, body=body)
+    es.snapshot.create_repository(repository=BACKUP_REPOSITORY_NAME, body=body)
 
 
-def create_elasticsearch_backup():
+def create_elasticsearch_backup(snapshot_name="auto_backup"):
     '''
-    Create elasticsearch backup in the `legal_s3_repository`.
+    Create elasticsearch shapshot in the `legal_s3_repository`.
     '''
     es = utils.get_elasticsearch_connection()
-    repository_name = "legal_s3_repository"
 
     logger.info("Verifying repository setup")
     try:
-        es.snapshot.verify_repository(repository=repository_name)
+        es.snapshot.verify_repository(repository=BACKUP_REPOSITORY_NAME)
     except elasticsearch.exceptions.NotFoundError:
         logger.error(
-            "Unable to verify repository. Creating {0} repository.".format(
-                repository_name
+            "Unable to verify repository. Creating repository: {0}".format(
+                BACKUP_REPOSITORY_NAME
             )
         )
-        create_backup_repository(repository_name)
+        create_backup_repository()
         pass
 
-    snapshot_name = "{0}_auto_backup".format(
-        datetime.datetime.today().strftime('%Y%m%d')
+    snapshot_name = "{0}_{1}".format(
+        datetime.datetime.today().strftime('%Y%m%d'),
+        snapshot_name
     )
-    logger.info("Creating backup {0}".format(snapshot_name))
-    result = es.snapshot.create(repository=repository_name, snapshot=snapshot_name)
-    logger.info(result)
+    logger.info("Creating snapshot {0}".format(snapshot_name))
+    result = es.snapshot.create(repository=BACKUP_REPOSITORY_NAME, snapshot=snapshot_name)
+    if result.get('accepted'):
+        logger.info("Successfully created snapshot: {0}".format(snapshot_name))
+    else:
+        logger.error("Unable to create snapshot: {0}".format(snapshot_name))
 
 
 # TODO: Restore from backup task, take date as argument
