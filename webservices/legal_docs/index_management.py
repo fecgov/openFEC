@@ -655,8 +655,7 @@ def restore_elasticsearch_backup(snapshot_name=None):
     es = utils.get_elasticsearch_connection()
 
     most_recent_snapshot_name = get_most_recent_snapshot()
-    if not snapshot_name:
-        snapshot_name = most_recent_snapshot_name
+    snapshot_name = snapshot_name or most_recent_snapshot_name
 
     logger.info("Deleting docs index")
     delete_docs_index()
