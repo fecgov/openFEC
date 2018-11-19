@@ -851,4 +851,10 @@ operations_log = {
     'form_type': fields.List(IStr, description=docs.FORM_TYPE),
     'amendment_indicator': fields.List(IStr, description=docs.AMENDMENT_INDICATOR),
     'status_num': fields.List(fields.Str(validate=validate.OneOf(['0', '1'])), description=docs.STATUS_NUM),
+    'min_receipt_date': fields.DateTime(description=docs.RECEIPT_DATE),
+    'max_receipt_date': fields.DateTime(description=docs.RECEIPT_DATE),
+    'min_coverage_end_date': fields.DateTime(description=docs.COVERAGE_END_DATE),
+    'max_coverage_end_date': fields.DateTime(description=docs.COVERAGE_END_DATE),
+    'min_transaction_data_complete_date': fields.Date(description='Date when the report is processed completely'),
+    'max_transaction_data_complete_date': fields.Date(description='Date when the report is processed completely'),
 }
