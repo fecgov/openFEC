@@ -616,19 +616,20 @@ def create_backup_repository(repository=BACKUP_REPOSITORY_NAME):
     es.snapshot.create_repository(repository=repository, body=body)
 
 
-def create_elasticsearch_backup(snapshot_name="auto_backup"):
+def create_elasticsearch_backup(repository_name=None, snapshot_name="auto_backup"):
     '''
     Create elasticsearch shapshot in the `legal_s3_repository`.
     '''
     es = utils.get_elasticsearch_connection()
 
+    repository_name = repository_name or BACKUP_REPOSITORY_NAME
     logger.info("Verifying repository setup")
     try:
-        es.snapshot.verify_repository(repository=BACKUP_REPOSITORY_NAME)
+        es.snapshot.verify_repository(repository=repository_name)
     except elasticsearch.exceptions.NotFoundError:
         logger.error(
             "Unable to verify repository {0}. Configure repository with create_backup_repository command.".format(
-                BACKUP_REPOSITORY_NAME
+                repository_name
             )
         )
         return
@@ -638,7 +639,7 @@ def create_elasticsearch_backup(snapshot_name="auto_backup"):
     )
     logger.info("Creating snapshot {0}".format(snapshot_name))
     result = es.snapshot.create(
-        repository=BACKUP_REPOSITORY_NAME, snapshot=snapshot_name
+        repository=repository_name, snapshot=snapshot_name
     )
     if result.get('accepted'):
         logger.info("Successfully created snapshot: {0}".format(snapshot_name))
