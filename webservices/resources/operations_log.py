@@ -23,6 +23,12 @@ class OperationsLogView(ApiResource):
         ('status_num', models.OperationsLog.status_num),
     ]
 
+    filter_range_fields = [
+        (('min_receipt_date', 'max_receipt_date'), models.OperationsLog.receipt_date),
+        (('min_coverage_end_date', 'max_coverage_end_date'), models.OperationsLog.coverage_end_date),
+        (('min_transaction_data_complete_date', 'max_transaction_data_complete_date'), models.OperationsLog.transaction_data_complete_date),
+    ]
+
     @property
     def args(self):
         default_sort = ['-report_year']
