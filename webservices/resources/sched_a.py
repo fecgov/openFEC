@@ -75,6 +75,7 @@ class ScheduleAView(ItemizedResource):
                     'contribution_receipt_amount',
                     'contributor_aggregate_ytd',
                 ]),
+                show_nulls_last_arg=False,
             )
         )
 
