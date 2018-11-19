@@ -647,7 +647,7 @@ def create_elasticsearch_backup(repository_name=None, snapshot_name="auto_backup
         logger.error("Unable to create snapshot: {0}".format(snapshot_name))
 
 
-def restore_elasticsearch_backup(snapshot_name=None):
+def restore_elasticsearch_backup(repository_name=None, snapshot_name=None):
     '''
     Delete docs index
     Restore from elasticsearch snapshot
@@ -655,7 +655,8 @@ def restore_elasticsearch_backup(snapshot_name=None):
     '''
     es = utils.get_elasticsearch_connection()
 
-    most_recent_snapshot_name = get_most_recent_snapshot()
+    repository_name = repository_name or BACKUP_REPOSITORY_NAME
+    most_recent_snapshot_name = get_most_recent_snapshot(repository_name)
     snapshot_name = snapshot_name or most_recent_snapshot_name
 
     logger.info("Deleting docs index")
@@ -676,16 +677,17 @@ def restore_elasticsearch_backup(snapshot_name=None):
             )
         )
 
-def get_most_recent_snapshot():
+def get_most_recent_snapshot(repository_name=None):
     '''
     Get the list of snapshots (sorted by date, ascending) and
     return most recent snapshot name
     '''
     es = utils.get_elasticsearch_connection()
 
+    repository_name = repository_name or BACKUP_REPOSITORY_NAME
     logger.info("Retreiving most recent snapshot")
     snapshot_list = es.snapshot.get(
-        repository=BACKUP_REPOSITORY_NAME, snapshot="*"
+        repository=repository_name, snapshot="*"
     ).get('snapshots')
 
     return snapshot_list.pop().get('snapshot')
