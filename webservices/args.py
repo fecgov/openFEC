@@ -118,8 +118,8 @@ class IndicesValidator(IndexValidator):
                 )
 
 def make_sort_args(default=None, validator=None, default_hide_null=False,
-        default_nulls_only=False, default_sort_nulls_last=False):
-    return {
+        default_nulls_only=False, default_sort_nulls_last=False, show_nulls_last_arg=True):
+    args = {
         'sort': fields.Str(
             missing=default,
             validate=validator,
@@ -133,11 +133,14 @@ def make_sort_args(default=None, validator=None, default_hide_null=False,
             missing=default_nulls_only,
             description='Toggle that filters out all rows having sort column that is non-null'
         ),
-        'sort_nulls_last': fields.Bool(
+
+    }
+    if show_nulls_last_arg:
+        args['sort_nulls_last'] = fields.Bool(
             missing=default_sort_nulls_last,
             description='Toggle that sorts null values last'
         )
-    }
+    return args
 
 
 def make_multi_sort_args(default=None, validator=None, default_hide_null=False,
