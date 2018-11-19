@@ -1,9 +1,11 @@
 import logging
-
 import elasticsearch
 import copy
+import datetime
 
 from webservices import utils
+from webservices.env import env
+
 
 logger = logging.getLogger(__name__)
 
@@ -418,6 +420,8 @@ ANALYZER_SETTINGS = {
     "analysis": {"analyzer": {"default": {"type": "english"}}}
 }
 
+BACKUP_REPOSITORY_NAME = "legal_s3_repository"
+
 
 def create_docs_index():
     """
@@ -591,3 +595,99 @@ def move_archived_murs():
 
     logger.info("Copy archived MURs from 'docs' index to 'archived_murs' index")
     es.reindex(body=body, wait_for_completion=True, request_timeout=1500)
+
+
+def create_backup_repository(repository=BACKUP_REPOSITORY_NAME):
+    '''
+    Create s3 backup repository using api credentials.
+    This should only need to get run once.
+    '''
+    es = utils.get_elasticsearch_connection()
+    logger.info("Creating backup repository: {0}".format(repository))
+    body = {
+        'type': 's3',
+        'settings': {
+            'bucket': env.get_credential("bucket"),
+            'region': env.get_credential("region"),
+            'access_key': env.get_credential("access_key_id"),
+            'secret_key': env.get_credential("secret_access_key"),
+        },
+    }
+    es.snapshot.create_repository(repository=repository, body=body)
+
+
+def create_elasticsearch_backup(repository_name=None, snapshot_name="auto_backup"):
+    '''
+    Create elasticsearch shapshot in the `legal_s3_repository`.
+    '''
+    es = utils.get_elasticsearch_connection()
+
+    repository_name = repository_name or BACKUP_REPOSITORY_NAME
+    logger.info("Verifying repository setup")
+    try:
+        es.snapshot.verify_repository(repository=repository_name)
+    except elasticsearch.exceptions.NotFoundError:
+        logger.error(
+            "Unable to verify repository {0}. Configure repository with create_backup_repository command.".format(
+                repository_name
+            )
+        )
+        return
+
+    snapshot_name = "{0}_{1}".format(
+        datetime.datetime.today().strftime('%Y%m%d'), snapshot_name
+    )
+    logger.info("Creating snapshot {0}".format(snapshot_name))
+    result = es.snapshot.create(
+        repository=repository_name, snapshot=snapshot_name
+    )
+    if result.get('accepted'):
+        logger.info("Successfully created snapshot: {0}".format(snapshot_name))
+    else:
+        logger.error("Unable to create snapshot: {0}".format(snapshot_name))
+
+
+def restore_elasticsearch_backup(repository_name=None, snapshot_name=None):
+    '''
+    Delete docs index
+    Restore from elasticsearch snapshot
+    Default to most recent snapshot, optionally specify `snapshot_name`
+    '''
+    es = utils.get_elasticsearch_connection()
+
+    repository_name = repository_name or BACKUP_REPOSITORY_NAME
+    most_recent_snapshot_name = get_most_recent_snapshot(repository_name)
+    snapshot_name = snapshot_name or most_recent_snapshot_name
+
+    logger.info("Deleting docs index")
+    delete_docs_index()
+
+    logger.info("Retrieving snapshot: {0}".format(snapshot_name))
+    body = {"indices": "docs"}
+    result = es.snapshot.restore(
+        repository=BACKUP_REPOSITORY_NAME, snapshot=snapshot_name, body=body
+    )
+    if result.get('accepted'):
+        logger.info("Successfully restored snapshot: {0}".format(snapshot_name))
+    else:
+        logger.error("Unable to restore snapshot: {0}".format(snapshot_name))
+        logger.info(
+            "You may want to try the most recent snapshot: {0}".format(
+                most_recent_snapshot_name
+            )
+        )
+
+def get_most_recent_snapshot(repository_name=None):
+    '''
+    Get the list of snapshots (sorted by date, ascending) and
+    return most recent snapshot name
+    '''
+    es = utils.get_elasticsearch_connection()
+
+    repository_name = repository_name or BACKUP_REPOSITORY_NAME
+    logger.info("Retreiving most recent snapshot")
+    snapshot_list = es.snapshot.get(
+        repository=repository_name, snapshot="*"
+    ).get('snapshots')
+
+    return snapshot_list.pop().get('snapshot')
