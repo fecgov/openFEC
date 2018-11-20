@@ -35,7 +35,7 @@ class ScheduleBView(ItemizedResource):
         ('recipient_committee_id', models.ScheduleB.recipient_committee_id),
         ('disbursement_purpose_category', models.ScheduleB.disbursement_purpose_category),
         ('spender_committee_type', models.ScheduleB.spender_committee_type),
-        
+
     ]
     filter_match_fields = [
         ('two_year_transaction_period', models.ScheduleB.two_year_transaction_period),
@@ -59,6 +59,7 @@ class ScheduleBView(ItemizedResource):
             args.make_sort_args(
                 default='-disbursement_date',
                 validator=args.OptionValidator(['disbursement_date', 'disbursement_amount']),
+                show_nulls_last_arg=False,
             )
         )
 
