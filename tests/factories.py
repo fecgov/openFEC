@@ -298,6 +298,9 @@ class ScheduleBByRecipientFactory(BaseAggregateFactory):
     class Meta:
         model = models.ScheduleBByRecipient
 
+class ScheduleBByRecipientIDFactory(BaseAggregateFactory):
+    class Meta:
+        model = models.ScheduleBByRecipientID
 
 class ScheduleEByCandidateFactory(BaseAggregateFactory):
     class Meta:

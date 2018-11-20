@@ -11,7 +11,7 @@ class BaseAggregate(BaseModel):
     cycle = db.Column(db.Integer, primary_key=True, doc=docs.RECORD_CYCLE)
     #? not sure how to document this
     total = db.Column(db.Numeric(30, 2), index=True,)
-    count = db.Column(db.Integer, index=True, doc='Number of records making up the total')
+    count = db.Column(db.Integer, index=True, doc=docs.COUNT)
 
 
 class ScheduleABySize(BaseAggregate):
@@ -45,15 +45,24 @@ class ScheduleAByOccupation(BaseAggregate):
     occupation = db.Column(db.String, primary_key=True, doc=docs.OCCUPATION)
 
 
-class ScheduleBByRecipient(BaseAggregate):
+class BaseDisbursementAggregate(BaseAggregate):
+    __abstract__ = True
+
+    total = db.Column('non_memo_total', db.Numeric(30, 2), index=True, doc=docs.NON_MEMO_TOTAL)
+    count = db.Column('non_memo_count', db.Integer, index=True, doc=docs.COUNT)
+    memo_total = db.Column('memo_total', db.Numeric(30, 2), index=True, doc=docs.MEMO_TOTAL)
+    memo_count = db.Column('memo_count', db.Integer, index=True, doc=docs.COUNT)
+
+
+class ScheduleBByRecipient(BaseDisbursementAggregate):
     __table_args__ = {'schema': 'disclosure'}
-    __tablename__ = 'dsc_sched_b_aggregate_recipient'
+    __tablename__ = 'dsc_sched_b_aggregate_recipient_new'
     recipient_name = db.Column('recipient_nm', db.String, primary_key=True, doc=docs.RECIPIENT_NAME)
 
 
-class ScheduleBByRecipientID(BaseAggregate):
+class ScheduleBByRecipientID(BaseDisbursementAggregate):
     __table_args__ = {'schema': 'disclosure'}
-    __tablename__ = 'dsc_sched_b_aggregate_recipient_id'
+    __tablename__ = 'dsc_sched_b_aggregate_recipient_id_new'
     recipient_id = db.Column('recipient_cmte_id', db.String, primary_key=True, doc=docs.RECIPIENT_ID)
     committee = utils.related_committee('committee_id')
     recipient = utils.related('CommitteeHistory', 'recipient_id', 'committee_id', cycle_label='cycle')
@@ -67,9 +76,9 @@ class ScheduleBByRecipientID(BaseAggregate):
         return self.recipient.name
 
 
-class ScheduleBByPurpose(BaseAggregate):
+class ScheduleBByPurpose(BaseDisbursementAggregate):
     __table_args__ = {'schema': 'disclosure'}
-    __tablename__ = 'dsc_sched_b_aggregate_purpose'
+    __tablename__ = 'dsc_sched_b_aggregate_purpose_new'
     purpose = db.Column(db.String, primary_key=True, doc=docs.PURPOSE)
 
 
