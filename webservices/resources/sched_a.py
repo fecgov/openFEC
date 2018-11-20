@@ -38,6 +38,7 @@ class ScheduleAView(ItemizedResource):
         ('contributor_id', models.ScheduleA.contributor_id),
         ('contributor_city', models.ScheduleA.contributor_city),
         ('contributor_state', models.ScheduleA.contributor_state),
+        ('contributor_committee_type', models.ScheduleA.contributor_committee_type),
     ]
     filter_match_fields = [
         ('is_individual', models.ScheduleA.is_individual),
@@ -74,6 +75,7 @@ class ScheduleAView(ItemizedResource):
                     'contribution_receipt_amount',
                     'contributor_aggregate_ytd',
                 ]),
+                show_nulls_last_arg=False,
             )
         )
 

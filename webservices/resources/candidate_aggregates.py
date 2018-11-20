@@ -4,14 +4,17 @@ from flask_apispec import doc, marshal_with
 
 from webservices import args
 from webservices import utils
+from webservices import docs
 from webservices import filters
 from webservices import schemas
 from webservices.utils import use_kwargs
 from webservices.common.views import ApiResource
 from webservices.common import models
 from webservices.common.models import (
-    CandidateElection, CandidateCommitteeLink,
-    ScheduleABySize, ScheduleAByState,
+    CandidateCommitteeLink,
+    CandidateElection,
+    ScheduleABySize,
+    ScheduleAByState,
     db
 )
 
@@ -76,7 +79,7 @@ def join_elections(query, kwargs):
 
 @doc(
     tags=['receipts'],
-    description='Schedule A receipts aggregated by contribution size.',
+    description=docs.SCHEDULE_A_SIZE_CANDIDATE_TAG,
 )
 class ScheduleABySizeCandidateView(utils.Resource):
 
@@ -88,15 +91,16 @@ class ScheduleABySizeCandidateView(utils.Resource):
         label_columns = [
             ScheduleABySize.size,
             sa.func.sum(ScheduleABySize.total).label('total'),
+            ScheduleABySize.count,
         ]
-        group_columns = [ScheduleABySize.size]
+        group_columns = [ScheduleABySize.size, ScheduleABySize.count]
         _, query = candidate_aggregate(ScheduleABySize, label_columns, group_columns, kwargs)
         return utils.fetch_page(query, kwargs, cap=None)
 
 
 @doc(
     tags=['receipts'],
-    description='Schedule A receipts aggregated by contributor state.',
+    description=docs.SCHEDULE_A_STATE_CANDIDATE_TAG,
 )
 class ScheduleAByStateCandidateView(utils.Resource):
 
@@ -111,15 +115,17 @@ class ScheduleAByStateCandidateView(utils.Resource):
                 ScheduleAByState.state,
                 sa.func.sum(ScheduleAByState.total).label('total'),
                 sa.func.max(ScheduleAByState.state_full).label('state_full'),
+                ScheduleAByState.count,
             ],
-            [ScheduleAByState.state],
+            [ScheduleAByState.state, ScheduleAByState.count],
             kwargs,
         )
         return utils.fetch_page(query, kwargs, cap=0)
 
+
 @doc(
     tags=['candidate'],
-    description='Aggregated candidate receipts and disbursements grouped by cycle.',
+    description=docs.TOTAL_CANDIDATE_TAG,
 )
 class TotalsCandidateView(ApiResource):
 

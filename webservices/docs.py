@@ -75,7 +75,7 @@ making wrappers and exploring the data.
 
 A few restrictions limit the way you can use FEC data. For example, you can’t use contributor
 lists for commercial purposes or to solicit donations.
-[Learn more here](https://transition.fec.gov/pages/brochures/saleuse.shtml).
+[Learn more here](https://www.fec.gov/updates/sale-or-use-contributor-information/).
 
 [View our source code](https://github.com/fecgov/openFEC). We welcome issues and pull requests!
 '''
@@ -420,9 +420,29 @@ Note: because the Schedule B data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
 '''
 
+MEMO_TOTAL = '''
+Schedule B disbursements aggregated by memoed items only
+'''
+
+NON_MEMO_TOTAL = '''
+Schedule B disbursements aggregated by non-memoed items only
+'''
+
 SCHEDULE_B_BY_PURPOSE = '''
-Schedule B disbursements aggregated by disbursement purpose category. To avoid double counting, memoed items are not included.
-Purpose is a combination of transaction codes, category codes and disbursement description. See the `disbursement_purpose` sql function within the migrations for more details.
+Schedule B disbursements aggregated by disbursement purpose category. To avoid double counting,
+memoed items are not included.
+Purpose is a combination of transaction codes, category codes and disbursement description.
+See the `disbursement_purpose` sql function within the migrations for more details.
+'''
+
+SCHEDULE_B_BY_RECIPIENT_TAG = '''
+Schedule B disbursements aggregated by recipient name. To avoid double counting,
+memoed items are not included.
+'''
+
+SCHEDULE_B_BY_RECIPIENT_ID_TAG = '''
+Schedule B disbursements aggregated by recipient committee ID, if applicable.
+To avoid double counting, memoed items are not included.
 '''
 
 SCHEDULE_C_TAG = '''
@@ -500,13 +520,13 @@ these limits are detailed in Chapter 7 of the FEC Campaign Guide for Political P
 
 SIZE_DESCRIPTION = '''
 This endpoint aggregates Schedule A donations based on size:
-
+```
  - $200 and under\n\
  - $200.01 - $499.99\n\
  - $500 - $999.99\n\
  - $1000 - $1999.99\n\
  - $2000 +\n\
-
+```
 In cases where the donations are $200 or less, the results include small donations
 that are reported on Schedule A, but filers are not required to itemize those small
 donations, so we also add unitemized contributions. Unitemized contributions come
@@ -524,6 +544,22 @@ The total all contributions in the following ranges:
   -2000 $2000 +\n\
 ```
 Unitemized contributions are included in the `0` category.
+'''
+
+COUNT = '''
+Number of records making up the total.
+'''
+
+SCHEDULE_A_SIZE_CANDIDATE_TAG = '''
+Schedule A receipts aggregated by contribution size for a candidate.
+'''
+
+SCHEDULE_A_STATE_CANDIDATE_TAG = '''
+Schedule A receipts aggregated by contribution state for a candidate.
+'''
+
+TOTAL_CANDIDATE_TAG = '''
+Aggregated candidate receipts and disbursements grouped by cycle.
 '''
 
 STATE_AGGREGATE = '''

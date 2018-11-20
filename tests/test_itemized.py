@@ -125,6 +125,15 @@ class TestItemized(ApiBaseTest):
         response = self.app.get(api.url_for(ScheduleAView, contributor_zip='96%', cycle=2018))
         self.assertEqual(response.status_code, 400)
 
+    def test_sched_a_contributor_committee_type_filter(self):
+        [
+            factories.ScheduleAFactory(contributor_committee_type='S'),
+            factories.ScheduleAFactory(contributor_committee_type='S'),
+            factories.ScheduleAFactory(contributor_committee_type='P'),
+        ]
+        results = self._results(api.url_for(ScheduleAView, contributor_committee_type='S', **self.kwargs))
+        self.assertEqual(len(results), 2)
+
     def test_filter_multi_start_with(self):
         [
             factories.ScheduleAFactory(contributor_zip=1296789)
@@ -628,6 +637,17 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleBView, min_amount=100, max_amount=150))
         self.assertTrue(all(100 <= each['disbursement_amount'] <= 150 for each in results))
 
+    def test_sort_sched_b_ignores_nulls_last_parameter(self):
+        disbursements = [
+            factories.ScheduleBFactory(disbursement_amount=50),
+            factories.ScheduleBFactory(disbursement_amount=200, disbursement_date=datetime.date(2016, 3, 1)),
+            factories.ScheduleBFactory(disbursement_amount=150, disbursement_date=datetime.date(2016, 2, 1)),
+            factories.ScheduleBFactory(disbursement_amount=100, disbursement_date=datetime.date(2016, 1, 1)),
+        ]
+        sub_ids = [str(each.sub_id) for each in disbursements]
+        results = self._results(api.url_for(ScheduleBView, sort='-disbursement_date', sort_nulls_last=True, **self.kwargs))
+        self.assertEqual([each['sub_id'] for each in results], sub_ids)
+
     def test_amount_sched_e(self):
         [
             factories.ScheduleEFactory(expenditure_amount=50),
@@ -641,6 +661,17 @@ class TestItemized(ApiBaseTest):
         self.assertTrue(all(each['expenditure_amount'] <= 150 for each in results))
         results = self._results(api.url_for(ScheduleEView, min_amount=100, max_amount=150))
         self.assertTrue(all(100 <= each['expenditure_amount'] <= 150 for each in results))
+
+    def test_sort_sched_e(self):
+        expenditures = [
+            factories.ScheduleEFactory(expenditure_amount=50),
+            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1)),
+            factories.ScheduleEFactory(expenditure_amount=150, expenditure_date=datetime.date(2016, 2, 1)),
+            factories.ScheduleEFactory(expenditure_amount=200, expenditure_date=datetime.date(2016, 3, 1)),
+        ]
+        sub_ids = [str(each.sub_id) for each in expenditures]
+        results = self._results(api.url_for(ScheduleEView, sort='-expenditure_date', sort_nulls_last=True))
+        self.assertEqual([each['sub_id'] for each in results], sub_ids[::-1])
 
     def test_filters_sched_e(self):
         filters = [

@@ -117,9 +117,9 @@ class IndicesValidator(IndexValidator):
                     status_code=422
                 )
 
-def make_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True,
-        default_nulls_only=False):
-    return {
+def make_sort_args(default=None, validator=None, default_hide_null=False,
+        default_nulls_only=False, default_sort_nulls_last=False, show_nulls_last_arg=True):
+    args = {
         'sort': fields.Str(
             missing=default,
             validate=validator,
@@ -132,13 +132,20 @@ def make_sort_args(default=None, validator=None, default_hide_null=False, defaul
         'sort_null_only': fields.Bool(
             missing=default_nulls_only,
             description='Toggle that filters out all rows having sort column that is non-null'
-        )
+        ),
+
     }
+    if show_nulls_last_arg:
+        args['sort_nulls_last'] = fields.Bool(
+            missing=default_sort_nulls_last,
+            description='Toggle that sorts null values last'
+        )
+    return args
 
 
-def make_multi_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True,
-        default_nulls_only=False):
-    args = make_sort_args(default, validator, default_hide_null, default_reverse_nulls, default_nulls_only)
+def make_multi_sort_args(default=None, validator=None, default_hide_null=False,
+        default_nulls_only=False, default_sort_nulls_last=False):
+    args = make_sort_args(default, validator, default_hide_null, default_nulls_only, default_sort_nulls_last)
     args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True,
         description='Provide a field to sort by. Use - for descending order.',)
     return args
@@ -477,6 +484,12 @@ schedule_a = {
         description=docs.TWO_YEAR_TRANSACTION_PERIOD,
         required=True,
         missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
+    ),
+    'contributor_committee_type': fields.List(
+        IStr(validate=validate.OneOf([
+            '', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q',
+            'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
+        description=docs.COMMITTEE_TYPE,
     ),
 }
 
