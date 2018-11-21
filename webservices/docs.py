@@ -1268,3 +1268,21 @@ Explore relevant statutes, regulations and Commission actions.
 LEGAL_SEARCH = '''
 Search legal documents by type, or across all document types using keywords, parameter values and ranges.
 '''
+MIN_RECEIPT_DATE = '''
+Selects all filings received after this date
+'''
+MAX_RECEIPT_DATE = '''
+Selects all filings received before this date
+'''
+MIN_COVERAGE_END_DATE = '''
+Ending date of the reporting period after this date
+'''
+MAX_COVERAGE_END_DATE = '''
+Ending date of the reporting period before this date
+'''
+MIN_TRANSACTION_DATA_COMPLETE_DATE = '''
+Select all filings processed completely after this date
+'''
+MAX_TRANSACTION_DATA_COMPLETE_DATE = '''
+Select all filings processed completely before this date
+'''
