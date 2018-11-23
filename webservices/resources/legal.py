@@ -195,42 +195,6 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
 def apply_mur_adr_specific_query_params(query, **kwargs):
     must_clauses = []
-    if kwargs.get('mur_no'):
-        must_clauses.append(Q('terms', no=kwargs.get('mur_no')))
-    if kwargs.get('mur_respondents'):
-        must_clauses.append(Q('match', respondents=kwargs.get('mur_respondents')))
-    if kwargs.get('mur_dispositions'):
-        must_clauses.append(Q('term', disposition__data__disposition=kwargs.get('mur_dispositions')))
-    if kwargs.get('mur_election_cycles'):
-        must_clauses.append(Q('term', election_cycles=kwargs.get('mur_election_cycles')))
-
-    if kwargs.get('mur_document_category'):
-        must_clauses = [Q('terms', documents__category=kwargs.get('mur_document_category'))]
-
-    #if the query contains min or max open date, add as a range clause ("Q(range)")
-    #to the set of must_clauses
-
-    #gte = greater than or equal to and lte = less than or equal to (see elasticsearch docs)
-    date_range = {}
-    if kwargs.get('mur_min_open_date'):
-        date_range['gte'] = kwargs.get('mur_min_open_date')
-    if kwargs.get('mur_max_open_date'):
-        date_range['lte'] = kwargs.get('mur_max_open_date')
-    if date_range:
-        must_clauses.append(Q("range", open_date=date_range))
-
-    date_range = {}
-    if kwargs.get('mur_min_close_date'):
-        date_range['gte'] = kwargs.get('mur_min_close_date')
-    if kwargs.get('mur_max_close_date'):
-        date_range['lte'] = kwargs.get('mur_max_close_date')
-    if date_range:
-        must_clauses.append(Q("range", close_date=date_range))
-
-    # Generic fields
-
-    # Refactor MURs to use `case_` filters
-    # once we change the front end to use generic params (fec-cms issue #2351)
 
     if kwargs.get('case_respondents'):
         must_clauses.append(Q('match', respondents=kwargs.get('case_respondents')))
