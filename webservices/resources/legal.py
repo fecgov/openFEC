@@ -245,9 +245,9 @@ def apply_af_specific_query_params(query, **kwargs):
 
     date_range = {}
     if kwargs.get('af_min_fd_date'):
-        date_range['gte'] = kwargs.get('mur_min_fd_date')
+        date_range['gte'] = kwargs.get('af_min_fd_date')
     if kwargs.get('af_max_fd_date'):
-        date_range['lte'] = kwargs.get('mur_max_fd_date')
+        date_range['lte'] = kwargs.get('af_max_fd_date')
     if date_range:
         must_clauses.append(Q("range", final_determination_date=date_range))
 
