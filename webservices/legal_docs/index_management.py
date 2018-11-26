@@ -597,13 +597,13 @@ def move_archived_murs():
     es.reindex(body=body, wait_for_completion=True, request_timeout=1500)
 
 
-def create_backup_repository(repository=BACKUP_REPOSITORY_NAME):
+def configure_backup_repository(repository=BACKUP_REPOSITORY_NAME):
     '''
-    Create s3 backup repository using api credentials.
-    This should only need to get run once.
+    Configure s3 backup repository using api credentials.
+    This needs to get re-run when s3 credentials change for each API deployment
     '''
     es = utils.get_elasticsearch_connection()
-    logger.info("Creating backup repository: {0}".format(repository))
+    logger.info("Configuring backup repository: {0}".format(repository))
     body = {
         'type': 's3',
         'settings': {
@@ -618,21 +618,12 @@ def create_backup_repository(repository=BACKUP_REPOSITORY_NAME):
 
 def create_elasticsearch_backup(repository_name=None, snapshot_name="auto_backup"):
     '''
-    Create elasticsearch shapshot in the `legal_s3_repository`.
+    Create elasticsearch shapshot in the `legal_s3_repository` or specified repository.
     '''
     es = utils.get_elasticsearch_connection()
 
     repository_name = repository_name or BACKUP_REPOSITORY_NAME
-    logger.info("Verifying repository setup")
-    try:
-        es.snapshot.verify_repository(repository=repository_name)
-    except elasticsearch.exceptions.NotFoundError:
-        logger.error(
-            "Unable to verify repository {0}. Configure repository with create_backup_repository command.".format(
-                repository_name
-            )
-        )
-        return
+    configure_backup_repository(repository_name)
 
     snapshot_name = "{0}_{1}".format(
         datetime.datetime.today().strftime('%Y%m%d'), snapshot_name
@@ -649,13 +640,17 @@ def create_elasticsearch_backup(repository_name=None, snapshot_name="auto_backup
 
 def restore_elasticsearch_backup(repository_name=None, snapshot_name=None):
     '''
-    Delete docs index
-    Restore from elasticsearch snapshot
-    Default to most recent snapshot, optionally specify `snapshot_name`
+    Restore elasticsearch from backup in the event of catastrophic failure at the infrastructure layer or user error.
+
+    -Delete docs index
+    -Restore from elasticsearch snapshot
+    -Default to most recent snapshot, optionally specify `snapshot_name`
     '''
     es = utils.get_elasticsearch_connection()
 
     repository_name = repository_name or BACKUP_REPOSITORY_NAME
+    configure_backup_repository(repository_name)
+
     most_recent_snapshot_name = get_most_recent_snapshot(repository_name)
     snapshot_name = snapshot_name or most_recent_snapshot_name
 
