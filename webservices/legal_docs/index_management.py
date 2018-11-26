@@ -558,6 +558,17 @@ def restore_from_staging_index():
     }
     es.reindex(body=body, wait_for_completion=True, request_timeout=1500)
 
+    move_aliases_from_staging_to_docs_index()
+
+
+def move_aliases_from_staging_to_docs_index():
+    """
+    Move `docs_index` and `docs_search` aliases to point to the `docs` index.
+    Delete index `docs_staging`.
+    """
+
+    es = utils.get_elasticsearch_connection()
+
     logger.info("Move aliases 'docs_index' and 'docs_search' to point to 'docs'")
     es.indices.update_aliases(body={"actions": [
         {"remove": {"index": 'docs_staging', "alias": 'docs_index'}},
@@ -654,7 +665,11 @@ def restore_elasticsearch_backup(repository_name=None, snapshot_name=None):
     most_recent_snapshot_name = get_most_recent_snapshot(repository_name)
     snapshot_name = snapshot_name or most_recent_snapshot_name
 
-    logger.info("Deleting docs index")
+    # For zero-downtime restores
+    if es.indices.exists('docs'):
+        logger.info('Found docs index. Creating staging index for zero-downtime restore')
+        create_staging_index()
+
     delete_docs_index()
 
     logger.info("Retrieving snapshot: {0}".format(snapshot_name))
@@ -671,6 +686,10 @@ def restore_elasticsearch_backup(repository_name=None, snapshot_name=None):
                 most_recent_snapshot_name
             )
         )
+
+    if es.indices.exists('docs_staging'):
+        move_aliases_from_staging_to_docs_index()
+
 
 def get_most_recent_snapshot(repository_name=None):
     '''
