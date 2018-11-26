@@ -658,7 +658,7 @@ def restore_elasticsearch_backup(repository_name=None, snapshot_name=None):
     delete_docs_index()
 
     logger.info("Retrieving snapshot: {0}".format(snapshot_name))
-    body = {"indices": "docs"}
+    body = {"indices": "docs,archived_murs"}
     result = es.snapshot.restore(
         repository=BACKUP_REPOSITORY_NAME, snapshot=snapshot_name, body=body
     )
