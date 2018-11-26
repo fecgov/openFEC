@@ -28,7 +28,7 @@ from .index_management import (
     create_staging_index,
     restore_from_staging_index,
     move_archived_murs,
-    create_backup_repository,
+    configure_backup_repository,
     create_elasticsearch_backup,
     restore_elasticsearch_backup,
 )
