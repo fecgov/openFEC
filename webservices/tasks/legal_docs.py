@@ -74,11 +74,16 @@ def reload_all_aos():
 
 @app.task(once={'graceful': True}, base=QueueOnce)
 def create_es_backup():
-    logger.info("Weekly (%s) elasticsearch backup starting", datetime.date.today().strftime("%A"))
-    create_elasticsearch_backup()
-    logger.info("Weekly (%s) elasticsearch backup completed", datetime.date.today().strftime("%A"))
-    slack_message = 'Weekly elasticsearch backup completed in {0} space'.format(get_app_name())
-    utils.post_to_slack(slack_message, '#bots')
+    try:
+        logger.info("Weekly (%s) elasticsearch backup starting", datetime.date.today().strftime("%A"))
+        create_elasticsearch_backup()
+        logger.info("Weekly (%s) elasticsearch backup completed", datetime.date.today().strftime("%A"))
+        slack_message = 'Weekly elasticsearch backup completed in {0} space'.format(get_app_name())
+        utils.post_to_slack(slack_message, '#bots')
+    except Exception as error:
+        logger.exception(error)
+        slack_message = '*ERROR* elasticsearch backup failed for {0}. Check logs.'.format(get_app_name())
+        utils.post_to_slack(slack_message, '#bots')
 
 def refresh_aos(conn):
     row = conn.execute(RECENTLY_MODIFIED_STARTING_AO).first()
