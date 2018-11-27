@@ -24,11 +24,11 @@ from .load_legal_docs import (
 from .index_management import (
     create_docs_index,
     create_archived_murs_index,
-    delete_docs_index,
+    delete_all_indices,
     create_staging_index,
     restore_from_staging_index,
     move_archived_murs,
-    create_backup_repository,
+    configure_backup_repository,
     create_elasticsearch_backup,
     restore_elasticsearch_backup,
 )
