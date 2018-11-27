@@ -422,6 +422,8 @@ ANALYZER_SETTINGS = {
 
 BACKUP_REPOSITORY_NAME = "legal_s3_repository"
 
+BACKUP_DIRECTORY = "es-backups"
+
 
 def create_docs_index():
     """
@@ -628,6 +630,7 @@ def configure_backup_repository(repository=BACKUP_REPOSITORY_NAME):
             'region': env.get_credential("region"),
             'access_key': env.get_credential("access_key_id"),
             'secret_key': env.get_credential("secret_access_key"),
+            'base_path': BACKUP_DIRECTORY,
         },
     }
     es.snapshot.create_repository(repository=repository, body=body)
