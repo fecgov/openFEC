@@ -684,6 +684,8 @@ def restore_elasticsearch_backup(repository_name=None, snapshot_name=None):
     )
     if result.get('accepted'):
         logger.info("Successfully restored snapshot: {0}".format(snapshot_name))
+        if es.indices.exists('docs_staging'):
+            move_aliases_to_docs_index()
     else:
         logger.error("Unable to restore snapshot: {0}".format(snapshot_name))
         logger.info(
@@ -691,9 +693,6 @@ def restore_elasticsearch_backup(repository_name=None, snapshot_name=None):
                 most_recent_snapshot_name
             )
         )
-
-    if es.indices.exists('docs_staging'):
-        move_aliases_to_docs_index()
 
 
 def get_most_recent_snapshot(repository_name=None):
