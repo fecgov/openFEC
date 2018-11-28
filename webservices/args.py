@@ -485,7 +485,7 @@ schedule_a = {
         required=True,
         missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
     ),
-    'contributor_committee_type': fields.List(
+    'recipient_committee_type': fields.List(
         IStr(validate=validate.OneOf([
             '', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q',
             'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
