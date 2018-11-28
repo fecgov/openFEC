@@ -76,6 +76,7 @@ class ScheduleEView(ItemizedResource):
                     'expenditure_date',
                     'expenditure_amount',
                     'office_total_ytd',
+                    'support_oppose_indicator'
                 ]),
             ),
         )

@@ -767,6 +767,10 @@ schedule_e = {
         IStr(validate=validate.OneOf(['S', 'O'])),
         description='Support or opposition',
     ),
+    'last_support_oppose_indicator': fields.Str(missing=None,
+        description='When sorting by `support_oppose_indicator`,'
+        'this is populated with the `support_oppose_indicator` of the last result.'
+        'However, you will need to pass the index of that last result to `last_index` to get the next page.'),
     'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
 }
 
