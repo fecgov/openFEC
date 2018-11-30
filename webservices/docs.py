@@ -768,6 +768,45 @@ REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
     - MSY Monthly Semi-Annual (YE)\n\
 '
 
+LIMITED_REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
+    - 10D Pre-Election\n\
+    - 10G Pre-General\n\
+    - 10P Pre-Primary\n\
+    - 10R Pre-Run-Off\n\
+    - 10S Pre-Special\n\
+    - 12C Pre-Convention\n\
+    - 12G Pre-General\n\
+    - 12P Pre-Primary\n\
+    - 12R Pre-Run-Off\n\
+    - 12S Pre-Special\n\
+    - 30D Post-Election\n\
+    - 30G Post-General\n\
+    - 30P Post-Primary\n\
+    - 30R Post-Run-Off\n\
+    - 30S Post-Special\n\
+    - 60D Post-Convention\n\
+    - M1  January Monthly\n\
+    - M10 October Monthly\n\
+    - M11 November Monthly\n\
+    - M12 December Monthly\n\
+    - M2  February Monthly\n\
+    - M3  March Monthly\n\
+    - M4  April Monthly\n\
+    - M5  May Monthly\n\
+    - M6  June Monthly\n\
+    - M7  July Monthly\n\
+    - M8  August Monthly\n\
+    - M9  September Monthly\n\
+    - MY  Mid-Year Report\n\
+    - Q1  April Quarterly\n\
+    - Q2  July Quarterly\n\
+    - Q3  October Quarterly\n\
+    - TER Termination Report\n\
+    - YE  Year-End\n\
+    - ADJ COMP ADJUST AMEND\n\
+    - CA  COMPREHENSIVE AMEND\n\
+'
+
 REQUEST_TYPE = 'Requests for additional information (RFAIs) sent to filers. The request type is based on the type of document filed:\n\
     - 1 Statement of Organization\n\
     - 2 Report of Receipts and Expenditures (Form 3 and 3X)\n\
@@ -780,7 +819,9 @@ REQUEST_TYPE = 'Requests for additional information (RFAIs) sent to filers. The 
     - 9 From Multi Candidate Status\n\
 '
 
-REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. '+REPORT_TYPE
+REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. ' + REPORT_TYPE
+
+LIMITED_REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. ' + LIMITED_REPORT_TYPE
 
 RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
 STATE_GENERIC = 'US state or territory'
