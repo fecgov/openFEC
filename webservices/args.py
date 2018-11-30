@@ -326,8 +326,8 @@ filings = {
 efilings = {
     'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'min_receipt_date': fields.DateTime(description='Selects all items received by FEC after this date or datetime'),
-    'max_receipt_date': fields.DateTime(description='Selects all items received by FEC before this date or datetime'),
+    'min_receipt_date': fields.Date(description=docs.MIN_RECEIPT_DATE),
+    'max_receipt_date': fields.Date(description=docs.MAX_RECEIPT_DATE),
 }
 
 reports = {
@@ -335,8 +335,8 @@ reports = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE_W_EXCLUDE),
-    'is_amended': fields.Bool(description='Report has been amended'),
-    'most_recent': fields.Bool(description='Report is either new or is the most-recently filed amendment'),
+    'is_amended': fields.Bool(description=docs.IS_AMENDED),
+    'most_recent': fields.Bool(description=docs.MOST_RECENT),
     'filer_type': fields.Str(
         validate=validate.OneOf(['e-file', 'paper']),
         description=docs.MEANS_FILED,
@@ -345,8 +345,8 @@ reports = {
     'max_disbursements_amount': Currency(description=docs.MAX_FILTER),
     'min_receipts_amount': Currency(description=docs.MIN_FILTER),
     'max_receipts_amount': Currency(description=docs.MAX_FILTER),
-    'min_receipt_date': fields.DateTime(description='Selects all items received by FEC after this date or datetime'),
-    'max_receipt_date': fields.DateTime(description='Selects all items received by FEC before this date or datetime'),
+    'max_receipt_date': fields.Date(description=docs.MAX_REPORT_RECEIPT_DATE),
+    'min_receipt_date': fields.Date(description=docs.MIN_REPORT_RECEIPT_DATE),
     'min_cash_on_hand_end_period_amount': Currency(description=docs.MIN_FILTER),
     'max_cash_on_hand_end_period_amount': Currency(description=docs.MAX_FILTER),
     'min_debts_owed_amount': Currency(description=docs.MIN_FILTER),
@@ -370,7 +370,7 @@ committee_reports = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE_W_EXCLUDE),
-    'is_amended': fields.Bool(description='Report has been amended'),
+    'is_amended': fields.Bool(description=docs.IS_AMENDED),
     'min_disbursements_amount': Currency(description=docs.MIN_FILTER),
     'max_disbursements_amount': Currency(description=docs.MAX_FILTER),
     'min_receipts_amount': Currency(description=docs.MIN_FILTER),
@@ -424,44 +424,47 @@ itemized = {
                                           ' down to all entries from form `F3X` line number `16`.')
 }
 
-reporting_dates = {
-    'min_due_date': fields.Date(description='Date the report is due'),
-    'max_due_date': fields.Date(description='Date the report is due'),
-    'report_year': fields.List(fields.Int, description='Year of report'),
-    'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE),
-    'min_create_date': fields.Date(description='Date this record was added to the system'),
-    'max_create_date': fields.Date(description='Date this record was added to the system'),
-    'min_update_date': fields.Date(description='Date this record was last updated'),
-    'max_update_date': fields.Date(description='Date this record was last updated'),
-}
 
-election_dates = {
-    'election_state': fields.List(fields.Str, description='State or territory of the office sought'),
-    'election_district': fields.List(fields.Str, description='House district of the office sought, if applicable.'),
-    'election_party': fields.List(fields.Str, description='Party, if applicable.'),
-    'office_sought': fields.List(fields.Str(validate=validate.OneOf(['H', 'S', 'P'])), description='House, Senate or presidential office'),
-    'min_election_date': fields.Date(description='Date of election'),
-    'max_election_date': fields.Date(description='Date of election'),
-    'election_type_id': fields.List(fields.Str, description='Election type'),
-    'min_update_date': fields.Date(description='Date this record was last updated'),
-    'max_update_date': fields.Date(description='Date this record was last updated'),
-    'min_create_date': fields.Date(description='Date this record was added to the system'),
-    'max_create_date': fields.Date(description='Date this record was added to the system'),
-    'election_year': fields.List(fields.Str, description='Year of election'),
-    'min_primary_general_date': fields.Date(description='Date of primary or general election'),
-    'max_primary_general_date': fields.Date(description='Date of primary or general election'),
-}
-
+# ====tag:dates -- endpoints [start]========
 calendar_dates = {
     'calendar_category_id': fields.List(fields.Int, description=docs.CATEGORY),
     'description': fields.List(IStr, description=docs.CAL_DESCRIPTION),
     'summary': fields.List(IStr, description=docs.SUMMARY),
-    'min_start_date': fields.DateTime(description='The minimum start date and time'),
-    'min_end_date': fields.DateTime(description='The minimum end date and time'),
-    'max_start_date': fields.DateTime(description='The maximum start date and time'),
-    'max_end_date': fields.DateTime(description='The maximum end date and time'),
+    'min_start_date': fields.Date(description=docs.MIN_START_DATE),
+    'min_end_date': fields.Date(description=docs.MIN_END_DATE),
+    'max_start_date': fields.Date(description=docs.MAX_START_DATE),
+    'max_end_date': fields.Date(description=docs.MAX_END_DATE),
     'event_id': fields.Int(description=docs.EVENT_ID),
 }
+
+election_dates = {
+    'election_state': fields.List(fields.Str, description=docs.ELECTION_STATE),
+    'election_district': fields.List(fields.Str, description=docs.ELECTION_DISTRICT),
+    'election_party': fields.List(fields.Str, description=docs.ELECTION_PARTY),
+    'office_sought': fields.List(fields.Str(validate=validate.OneOf(['H', 'S', 'P'])), description=docs.OFFICE_SOUGHT),
+    'min_election_date': fields.Date(description=docs.MIN_ELECTION_DATE),
+    'max_election_date': fields.Date(description=docs.MAX_ELECTION_DATE),
+    'election_type_id': fields.List(fields.Str, description=docs.ELECTION_TYPE_ID),
+    'min_create_date': fields.Date(description=docs.MIN_CREATE_DATE),
+    'max_create_date': fields.Date(description=docs.MAX_CREATE_DATE),
+    'min_update_date': fields.Date(description=docs.MIN_UPDATE_DATE),
+    'max_update_date': fields.Date(description=docs.MAX_UPDATE_DATE),
+    'election_year': fields.List(fields.Str, description=docs.ELECTION_YEAR),
+    'min_primary_general_date': fields.Date(description=docs.MIN_PRIMARY_GENERAL_DATE),
+    'max_primary_general_date': fields.Date(description=docs.MAX_PRIMARY_GENERAL_DATE),
+}
+
+reporting_dates = {
+    'min_due_date': fields.Date(description=docs.MIN_DUE_DATE),
+    'max_due_date': fields.Date(description=docs.MAX_DUE_DATE),
+    'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
+    'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE),
+    'min_create_date': fields.Date(description=docs.MIN_CREATE_DATE),
+    'max_create_date': fields.Date(description=docs.MAX_CREATE_DATE),
+    'min_update_date': fields.Date(description=docs.MIN_UPDATE_DATE),
+    'max_update_date': fields.Date(description=docs.MAX_UPDATE_DATE),
+}
+# ====tag:dates -- endpoints [end]========
 
 schedule_a = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
@@ -851,10 +854,10 @@ operations_log = {
     'form_type': fields.List(IStr, description=docs.FORM_TYPE),
     'amendment_indicator': fields.List(IStr, description=docs.AMENDMENT_INDICATOR),
     'status_num': fields.List(fields.Str(validate=validate.OneOf(['0', '1'])), description=docs.STATUS_NUM),
-    'min_receipt_date': fields.DateTime(description=docs.MIN_RECEIPT_DATE),
-    'max_receipt_date': fields.DateTime(description=docs.MAX_RECEIPT_DATE),
-    'min_coverage_end_date': fields.DateTime(description=docs.MIN_COVERAGE_END_DATE),
-    'max_coverage_end_date': fields.DateTime(description=docs.MAX_COVERAGE_END_DATE),
+    'min_receipt_date': fields.Date(description=docs.MIN_RECEIPT_DATE),
+    'max_receipt_date': fields.Date(description=docs.MAX_RECEIPT_DATE),
+    'min_coverage_end_date': fields.Date(description=docs.MIN_COVERAGE_END_DATE),
+    'max_coverage_end_date': fields.Date(description=docs.MAX_COVERAGE_END_DATE),
     'min_transaction_data_complete_date': fields.Date(description=docs.MIN_TRANSACTION_DATA_COMPLETE_DATE),
     'max_transaction_data_complete_date': fields.Date(description=docs.MAX_TRANSACTION_DATA_COMPLETE_DATE),
 }
