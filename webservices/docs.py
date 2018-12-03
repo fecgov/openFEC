@@ -1286,3 +1286,40 @@ Select all filings processed completely after this date
 MAX_TRANSACTION_DATA_COMPLETE_DATE = '''
 Select all filings processed completely before this date
 '''
+
+LAST_EXPENDITURE_DATE = '''
+When sorting by `expenditure_date`,
+this is populated with the `expenditure_date` of the last result.
+However, you will need to pass the index of that last result to
+`last_index` to get the next page.
+'''
+
+LAST_EXPENDITURE_AMOUNT = '''
+When sorting by `expenditure_amount`,
+this is populated with the `expenditure_amount` of the last result.
+However, you will need to pass the index of that last result to
+`last_index` to get the next page.
+'''
+LAST_OFFICE_TOTAL_YTD = '''
+When sorting by `office_total_ytd`,
+this is populated with the `office_total_ytd` of the last result.
+However, you will need to pass the index of that last result to
+`last_index` to get the next page.'
+'''
+
+LAST_SUPPOSE_OPPOSE_INDICATOR = '''
+When sorting by `support_oppose_indicator`,
+this is populated with the `support_oppose_indicator` of the last result.
+However, you will need to pass the index of that last result to `last_index`
+to get the next page.'
+'''
+
+PAYEE_NAME = '''
+Name of the entity that received the payment.
+'''
+IS_NOTICE = '''
+Record filed as 24- or 48-hour notice.
+'''
+filing_form = '''
+The form type filed by the canidate of committee
+'''
