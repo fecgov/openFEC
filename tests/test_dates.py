@@ -86,7 +86,7 @@ class TestCalendarDates(ApiBaseTest):
         factories.CalendarDateFactory(end_date=datetime.datetime(2015, 1, 2))
 
         filter_fields = [
-            ('min_start_date', '2015-01-01'),
+            ('min_start_date', '01/01/2015'),
             ('calendar_category_id', 7),
             ('min_end_date', '2014-01-01'),
             # this is not passing or working :/

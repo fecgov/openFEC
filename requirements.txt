@@ -26,8 +26,8 @@ git+https://github.com/18F/slate.git
 
 # Marshalling
 flask-apispec==0.7.0
-marshmallow==2.6.0
-marshmallow-sqlalchemy==0.8.0
+marshmallow==2.16.3
+marshmallow-sqlalchemy==0.15.0
 git+https://github.com/jmcarp/marshmallow-pagination@master
 
 # Data export
