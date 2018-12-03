@@ -811,6 +811,9 @@ ACTIVE_THROUGH = 'Last year a candidate was active. This field is specific to th
 HAS_RAISED_FUNDS = 'A boolean that describes if a candidate\'s committee has ever received any receipts for their campaign for this particular office. (Candidates have separate candidate IDs for each office.)'
 FEDERAL_FUNDS_FLAG = 'A boolean the describes if a presidential candidate has accepted federal funds. The flag will be false for House and Senate candidates.'
 
+CANDIDATE_ELECTION_YEARS = 'Years in which a candidate ran for office.'
+CANDIDATE_ELECTION_YEAR = 'Year a candidate runs for federal office.'
+
 # committees
 COMMITTEE_NAME = 'The name of the committee. If a committee changes its name, \
     the most recent name will be shown. Committee names are not unique. Use committee_id \
