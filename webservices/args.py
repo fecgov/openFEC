@@ -742,36 +742,28 @@ entities = {
 }
 
 schedule_e = {
-    'candidate_office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description=docs.OFFICE),
+    'candidate_office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])),
+        description=docs.OFFICE),
     'candidate_party': fields.List(IStr, description=docs.PARTY),
     'candidate_office_state': fields.List(IStr, description=docs.STATE_GENERIC),
     'candidate_office_district': fields.List(District, description=docs.DISTRICT),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'filing_form': fields.List(IStr, description='Filing form'),
+    'filing_form': fields.List(IStr, description=docs.FORM_TYPE),
     'last_expenditure_date': fields.Date(missing=None,
-        description='When sorting by `expenditure_date`,'
-        'this is populated with the `expenditure_date` of the last result.'
-        'However, you will need to pass the index of that last result to `last_index` to get the next page.'),
+        description=docs.LAST_EXPENDITURE_DATE),
     'last_expenditure_amount': fields.Float(missing=None,
-        description='When sorting by `expenditure_amount`,'
-        'this is populated with the `expenditure_amount` of the last result.'
-        'However, you will need to pass the index of that last result to `last_index` to get the next page.'),
+        description=docs.LAST_EXPENDITURE_AMOUNT),
     'last_office_total_ytd': fields.Float(missing=None,
-        description='When sorting by `office_total_ytd`,'
-        'this is populated with the `office_total_ytd` of the last result.'
-        'However, you will need to pass the index of that last result to `last_index` to get the next page.'),
-    'payee_name': fields.List(fields.Str, description='Name of the entity that received the payment'),
+        description=docs.LAST_OFFICE_TOTAL_YTD),
+    'payee_name': fields.List(fields.Str, description=docs.PAYEE_NAME),
     'support_oppose_indicator': fields.List(
         IStr(validate=validate.OneOf(['S', 'O'])),
-        description='Support or opposition',
-    ),
+        description=docs.SUPPORT_OPPOSE_INDICATOR),
     'last_support_oppose_indicator': fields.Str(missing=None,
-        description='When sorting by `support_oppose_indicator`,'
-        'this is populated with the `support_oppose_indicator` of the last result.'
-        'However, you will need to pass the index of that last result to `last_index` to get the next page.'),
-    'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
+        description=docs.LAST_SUPPOSE_OPPOSE_INDICATOR),
+    'is_notice': fields.List(fields.Bool, description=docs.IS_NOTICE),
 }
 
 schedule_e_efile = {
