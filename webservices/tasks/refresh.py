@@ -27,4 +27,3 @@ def refresh_materialized_views():
         manage.logger.exception(error)
         slack_message = '*ERROR* nightly update failed for {0}. Check logs.'.format(get_app_name())
         utils.post_to_slack(slack_message, '#bots')
-        manage.logger.exception(error)

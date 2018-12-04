@@ -41,10 +41,14 @@ manager.command(legal_docs.create_docs_index)
 manager.command(legal_docs.create_archived_murs_index)
 manager.command(legal_docs.create_staging_index)
 manager.command(legal_docs.restore_from_staging_index)
-manager.command(legal_docs.delete_docs_index)
+manager.command(legal_docs.delete_all_indices)
 manager.command(legal_docs.move_archived_murs)
 manager.command(legal_docs.initialize_current_legal_docs)
 manager.command(legal_docs.refresh_current_legal_docs_zero_downtime)
+manager.command(legal_docs.configure_backup_repository)
+manager.command(legal_docs.create_elasticsearch_backup)
+manager.command(legal_docs.restore_elasticsearch_backup)
+
 
 def execute_sql_file(path):
     """This helper is typically used within a multiprocessing pool; create a new database

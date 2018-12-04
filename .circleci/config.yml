@@ -103,6 +103,15 @@ jobs:
             curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.32.0" | tar xzv -C $HOME/bin
             cf install-plugin autopilot -f -r CF-Community
 
+      - add_ssh_keys # add Bastion host private keys configured in the UI
+      - run: echo $FEC_BASTION_HOST_PUBLIC_KEY >> ~/.ssh/known_hosts # copy Bastion host public key
+
+      - run: $FEC_BASTION_DEV_TUNNEL # establsh tunnel/port mapping to 'dev' RDS from CircleCI container through Bastion host.
+ 
+      - run: $FEC_BASTION_STAGE_TUNNEL # establsh tunnel/port mapping to 'stage' RDS from CircleCI container through Bastion host.
+ 
+      - run: $FEC_BASTION_PROD_TUNNEL # establsh tunnel/port mapping to 'prod' RDS from CircleCI container through Bastion host.
+
       - deploy:
           name: Deploy API
           command: |
