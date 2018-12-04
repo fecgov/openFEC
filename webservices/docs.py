@@ -839,7 +839,7 @@ FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 
     - F99  Miscellaneous Text\n\
     - FRQ  Request for Additional Information\n\
 '
-REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
+BASE_REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
     - 10D Pre-Election\n\
     - 10G Pre-General\n\
     - 10P Pre-Primary\n\
@@ -874,6 +874,11 @@ REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
     - Q3  October Quarterly\n\
     - TER Termination Report\n\
     - YE  Year-End\n\
+    - ADJ COMP ADJUST AMEND\n\
+    - CA  COMPREHENSIVE AMEND\n\
+'
+
+REPORT_TYPE = BASE_REPORT_TYPE + '\
     - 90S Post Inaugural Supplement\n\
     - 90D Post Inaugural\n\
     - 48  48 Hour Notification\n\
@@ -902,6 +907,8 @@ REQUEST_TYPE = 'Requests for additional information (RFAIs) sent to filers. The 
 '
 
 REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. ' + REPORT_TYPE
+
+BASE_REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. ' + BASE_REPORT_TYPE
 
 RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
 
