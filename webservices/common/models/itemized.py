@@ -407,7 +407,9 @@ class ScheduleBEfile(BaseRawItemized):
 
 
 class ScheduleC(PdfMixin, BaseItemized):
-    __tablename__ = 'ofec_sched_c_mv'
+    __table_args__ = {'schema': 'disclosure'}
+    __tablename__ = 'fec_fitem_sched_c'
+
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
     incurred_date = db.Column('incurred_dt', db.DateTime)
@@ -702,7 +704,8 @@ class ScheduleEEfile(BaseRawItemized):
 
 
 class ScheduleF(PdfMixin, BaseItemized):
-    __tablename__ = 'ofec_sched_f_mv'
+    __table_args__ = {'schema': 'disclosure'}
+    __tablename__ = 'fec_fitem_sched_f'
 
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
