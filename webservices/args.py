@@ -334,7 +334,7 @@ reports = {
     'year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
-    'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE_W_EXCLUDE),
+    'report_type': fields.List(fields.Str, description=docs.BASE_REPORT_TYPE_W_EXCLUDE),
     'is_amended': fields.Bool(description=docs.IS_AMENDED),
     'most_recent': fields.Bool(description=docs.MOST_RECENT),
     'filer_type': fields.Str(
@@ -369,7 +369,7 @@ committee_reports = {
     'year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
-    'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE_W_EXCLUDE),
+    'report_type': fields.List(fields.Str, description=docs.BASE_REPORT_TYPE_W_EXCLUDE),
     'is_amended': fields.Bool(description=docs.IS_AMENDED),
     'min_disbursements_amount': Currency(description=docs.MIN_FILTER),
     'max_disbursements_amount': Currency(description=docs.MAX_FILTER),
