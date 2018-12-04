@@ -12,6 +12,7 @@ from smart_open import smart_open
 from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
+from webservices.legal_docs.index_management import BACKUP_DIRECTORY
 
 from webservices.tasks import app
 from webservices.tasks import utils as task_utils
@@ -145,7 +146,7 @@ def export_query(path, qs):
 
 @app.task
 def clear_bucket():
-    permanent_dir = ('legal', 'bulk-downloads')
+    permanent_dir = ('legal', 'bulk-downloads', BACKUP_DIRECTORY)
     for obj in task_utils.get_bucket().objects.all():
         if not obj.key.startswith(permanent_dir):
             obj.delete()

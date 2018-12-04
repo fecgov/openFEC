@@ -1,9 +1,11 @@
 import logging
-
 import elasticsearch
 import copy
+import datetime
 
 from webservices import utils
+from webservices.env import env
+
 
 logger = logging.getLogger(__name__)
 
@@ -418,6 +420,10 @@ ANALYZER_SETTINGS = {
     "analysis": {"analyzer": {"default": {"type": "english"}}}
 }
 
+BACKUP_REPOSITORY_NAME = "legal_s3_repository"
+
+BACKUP_DIRECTORY = "es-backups"
+
 
 def create_docs_index():
     """
@@ -479,7 +485,7 @@ def create_archived_murs_index():
     })
 
 
-def delete_docs_index():
+def delete_all_indices():
     """
     Delete index `docs`.
     This is usually done in preparation for restoring indexes from a snapshot backup.
@@ -489,6 +495,12 @@ def delete_docs_index():
     try:
         logger.info("Delete index 'docs'")
         es.indices.delete('docs')
+    except elasticsearch.exceptions.NotFoundError:
+        pass
+
+    try:
+        logger.info("Delete index 'archived_murs'")
+        es.indices.delete('archived_murs')
     except elasticsearch.exceptions.NotFoundError:
         pass
 
@@ -554,6 +566,17 @@ def restore_from_staging_index():
     }
     es.reindex(body=body, wait_for_completion=True, request_timeout=1500)
 
+    move_aliases_to_docs_index()
+
+
+def move_aliases_to_docs_index():
+    """
+    Move `docs_index` and `docs_search` aliases to point to the `docs` index.
+    Delete index `docs_staging`.
+    """
+
+    es = utils.get_elasticsearch_connection()
+
     logger.info("Move aliases 'docs_index' and 'docs_search' to point to 'docs'")
     es.indices.update_aliases(body={"actions": [
         {"remove": {"index": 'docs_staging', "alias": 'docs_index'}},
@@ -591,3 +614,101 @@ def move_archived_murs():
 
     logger.info("Copy archived MURs from 'docs' index to 'archived_murs' index")
     es.reindex(body=body, wait_for_completion=True, request_timeout=1500)
+
+
+def configure_backup_repository(repository=BACKUP_REPOSITORY_NAME):
+    '''
+    Configure s3 backup repository using api credentials.
+    This needs to get re-run when s3 credentials change for each API deployment
+    '''
+    es = utils.get_elasticsearch_connection()
+    logger.info("Configuring backup repository: {0}".format(repository))
+    body = {
+        'type': 's3',
+        'settings': {
+            'bucket': env.get_credential("bucket"),
+            'region': env.get_credential("region"),
+            'access_key': env.get_credential("access_key_id"),
+            'secret_key': env.get_credential("secret_access_key"),
+            'base_path': BACKUP_DIRECTORY,
+        },
+    }
+    es.snapshot.create_repository(repository=repository, body=body)
+
+
+def create_elasticsearch_backup(repository_name=None, snapshot_name="auto_backup"):
+    '''
+    Create elasticsearch shapshot in the `legal_s3_repository` or specified repository.
+    '''
+    es = utils.get_elasticsearch_connection()
+
+    repository_name = repository_name or BACKUP_REPOSITORY_NAME
+    configure_backup_repository(repository_name)
+
+    snapshot_name = "{0}_{1}".format(
+        datetime.datetime.today().strftime('%Y%m%d'), snapshot_name
+    )
+    logger.info("Creating snapshot {0}".format(snapshot_name))
+    result = es.snapshot.create(
+        repository=repository_name, snapshot=snapshot_name
+    )
+    if result.get('accepted'):
+        logger.info("Successfully created snapshot: {0}".format(snapshot_name))
+    else:
+        logger.error("Unable to create snapshot: {0}".format(snapshot_name))
+
+
+def restore_elasticsearch_backup(repository_name=None, snapshot_name=None):
+    '''
+    Restore elasticsearch from backup in the event of catastrophic failure at the infrastructure layer or user error.
+
+    -Delete docs index
+    -Restore from elasticsearch snapshot
+    -Default to most recent snapshot, optionally specify `snapshot_name`
+    '''
+    es = utils.get_elasticsearch_connection()
+
+    repository_name = repository_name or BACKUP_REPOSITORY_NAME
+    configure_backup_repository(repository_name)
+
+    most_recent_snapshot_name = get_most_recent_snapshot(repository_name)
+    snapshot_name = snapshot_name or most_recent_snapshot_name
+
+    if es.indices.exists('docs'):
+        logger.info('Found docs index. Creating staging index for zero-downtime restore')
+        create_staging_index()
+
+    delete_all_indices()
+
+    logger.info("Retrieving snapshot: {0}".format(snapshot_name))
+    body = {"indices": "docs,archived_murs"}
+    result = es.snapshot.restore(
+        repository=BACKUP_REPOSITORY_NAME, snapshot=snapshot_name, body=body
+    )
+    if result.get('accepted'):
+        logger.info("Successfully restored snapshot: {0}".format(snapshot_name))
+        if es.indices.exists('docs_staging'):
+            move_aliases_to_docs_index()
+    else:
+        logger.error("Unable to restore snapshot: {0}".format(snapshot_name))
+        logger.info(
+            "You may want to try the most recent snapshot: {0}".format(
+                most_recent_snapshot_name
+            )
+        )
+
+
+def get_most_recent_snapshot(repository_name=None):
+    '''
+    Get the list of snapshots (sorted by date, ascending) and
+    return most recent snapshot name
+    '''
+    es = utils.get_elasticsearch_connection()
+
+    repository_name = repository_name or BACKUP_REPOSITORY_NAME
+    logger.info("Retreiving most recent snapshot")
+    snapshot_list = es.snapshot.get(
+        repository=repository_name, snapshot="*"
+    ).get('snapshots')
+
+    return snapshot_list.pop().get('snapshot')
