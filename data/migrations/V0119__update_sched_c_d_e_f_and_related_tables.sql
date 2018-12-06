@@ -1,5 +1,5 @@
 -- ----------------------------
--- This migration file address Issue #3089: Switching API to the fecp-driven sched_c, sched_e, sched_f related tables
+-- This migration file address Issue #3089: Switching API to the fecp-driven sched_c, sched_e, sched_f, sched_d related tables
 -- ----------------------------
 
 -- ----------------------------
@@ -358,5 +358,50 @@ BEGIN
     WHEN others THEN 
       RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
 END$$;
+
+  
+-- ----------------------------
+-- ----------------------------
+-- disclosure.fec_fitem_sched_d
+-- ----------------------------
+-- ----------------------------
+DO $$
+BEGIN
+    EXECUTE format('ALTER TABLE disclosure.fec_fitem_sched_d ADD COLUMN creditor_debtor_name_text tsvector');
+    EXCEPTION 
+             WHEN duplicate_column THEN 
+                null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+CREATE OR REPLACE FUNCTION disclosure.fec_fitem_sched_d_insert()
+  RETURNS trigger AS
+$BODY$
+begin
+	new.creditor_debtor_name_text := to_tsvector(new.cred_dbtr_nm);
+
+    	return new;
+end
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION disclosure.fec_fitem_sched_d_insert()
+  OWNER TO fec;
+
+DROP TRIGGER IF EXISTS tri_fec_fitem_sched_d ON disclosure.fec_fitem_sched_d;
+
+CREATE TRIGGER tri_fec_fitem_sched_d
+  BEFORE INSERT
+  ON disclosure.fec_fitem_sched_d
+  FOR EACH ROW
+  EXECUTE PROCEDURE disclosure.fec_fitem_sched_d_insert();
+  
+/*
+
+UPDATE disclosure.fec_fitem_sched_d SET creditor_debtor_name_text = to_tsvector(cred_dbtr_nm);
+
+*/
+
 
   
