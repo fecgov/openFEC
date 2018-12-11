@@ -260,6 +260,14 @@ Year that the record applies to. Sometimes records are amended in subsequent
 years so this can differ from underlying form's receipt date.
 '''
 
+IS_AMENDED = '''
+Report has been amended
+'''
+
+MOST_RECENT = '''
+Report is either new or is the most-recently filed amendment
+'''
+
 TWO_YEAR_TRANSACTION_PERIOD = '''
 This is a two-year period that is derived from the year a transaction took place in the
 Itemized Schedule A and Schedule B tables. In cases where we have the date of the transaction
@@ -627,16 +635,46 @@ Reporting deadlines, election dates FEC meetings, events etc.
 '''
 
 CALENDAR_DATES = '''
-Combines the election and reporting dates with Commission meetings, conferences, outreach, Advisory Opinions, rules, litigation dates and other
+Combines the election and reporting dates with Commission meetings, conferences, outreach, Advisory Opinions, rules, \
+litigation dates and other
 events into one calendar.
 
 State and report type filtering is no longer available.
 '''
 
+MIN_START_DATE = '''
+The minimum start date.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MIN_END_DATE = '''
+The minimum end date.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MAX_START_DATE = '''
+The maximum start date.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MAX_END_DATE = '''
+The maximum end date.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+LOCATION = '''
+Can be state address or room.
+'''
+
+START_DATE = '''
+Date the event starts(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+END_DATE = '''
+Date the event ends(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
 CALENDAR_EXPORT = '''
 Returns CSV or ICS for downloading directly into calendar applications like Google, Outlook or other applications.
 
-Combines the election and reporting dates with Commission meetings, conferences, outreach, Advisory Opinions, rules, litigation dates and other
+Combines the election and reporting dates with Commission meetings, conferences, outreach, Advisory Opinions, rules, \
+litigation dates and other
 events into one calendar.
 
 State filtering now applies to elections, reports and reporting periods.
@@ -650,18 +688,101 @@ that creates the calendar.
 
 '''
 
+ELECTION_DATES = '''
+FEC election dates since 1995.
+'''
+
+ELECTION_STATE = '''
+State or territory of the office sought.
+'''
+
+ELECTION_DISTRICT = '''
+House district of the office sought, if applicable.
+'''
+
+ELECTION_PARTY = '''
+Party, if applicable.
+'''
+
+OFFICE_SOUGHT = '''
+House, Senate or presidential office.
+'''
+
+MIN_ELECTION_DATE = '''
+The minimum date of election.
+'''
+
+MAX_ELECTION_DATE = '''
+The maximum date of election.
+'''
+
+ELECTION_TYPE_ID = '''
+Election type id
+'''
+
+MIN_CREATE_DATE = '''
+The minimum date this record was added to the system.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MAX_CREATE_DATE = '''
+The maximum date this record was added to the system.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MIN_UPDATE_DATE = '''
+The minimum date this record was last updated.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MAX_UPDATE_DATE = '''
+The maximum date this record was last updated.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MIN_PRIMARY_GENERAL_DATE = '''
+The minimum date of primary or general election.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MAX_PRIMARY_GENERAL_DATE = '''
+The maximum date of primary or general election.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+ELECTION_STATUS_ID = '''
+Records are disregarded if election status is not 1. Those records are erroneous.
+'''
+
+OPEN_SEAT_FLAG = '''
+Signifies if the contest has no incumbent running.
+'''
+
+EVENT_URL = '''
+A url for that event
+'''
+
+REPORT_YEAR = '''
+Year of report
+'''
+
+MIN_DUE_DATE = '''
+The minimum date the report is due.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MAX_DUE_DATE = '''
+The maximum date the report is due.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
 COMMUNICATION_TAG = '''
 Reports of communication costs by corporations and membership organizations
 from the FEC [F7 forms](http://www.fec.gov/pdf/forms/fecform7.pdf).
 '''
 ELECTIONEERING = '''
-An electioneering communication is any broadcast, cable or satellite communication that fulfills each of the following conditions:
+An electioneering communication is any broadcast, cable or satellite communication that fulfills \
+each of the following conditions:
 
 _The communication refers to a clearly identified federal candidate._
 
-_The communication is publicly distributed by a television station, radio station, cable television system or satellite system for a fee._
+_The communication is publicly distributed by a television station, radio station, cable television system \
+or satellite system for a fee._
 
-_The communication is distributed within 60 days prior to a general election or 30 days prior to a primary election to federal office._
+_The communication is distributed within 60 days prior to a general election or 30 days prior \
+to a primary election to federal office._
 '''
 
 COMMUNICATION_COST = '''
@@ -718,7 +839,7 @@ FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 
     - F99  Miscellaneous Text\n\
     - FRQ  Request for Additional Information\n\
 '
-REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
+BASE_REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
     - 10D Pre-Election\n\
     - 10G Pre-General\n\
     - 10P Pre-Primary\n\
@@ -753,6 +874,11 @@ REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
     - Q3  October Quarterly\n\
     - TER Termination Report\n\
     - YE  Year-End\n\
+    - ADJ COMP ADJUST AMEND\n\
+    - CA  COMPREHENSIVE AMEND\n\
+'
+
+REPORT_TYPE = BASE_REPORT_TYPE + '\
     - 90S Post Inaugural Supplement\n\
     - 90D Post Inaugural\n\
     - 48  48 Hour Notification\n\
@@ -780,36 +906,61 @@ REQUEST_TYPE = 'Requests for additional information (RFAIs) sent to filers. The 
     - 9 From Multi Candidate Status\n\
 '
 
-REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. '+REPORT_TYPE
+REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. ' + REPORT_TYPE
+
+BASE_REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. ' + BASE_REPORT_TYPE
 
 RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
+
 STATE_GENERIC = 'US state or territory'
+
 ZIP_CODE = 'Zip code'
 
 #candidates
 CANDIDATE_NAME = 'Name of candidate running for office'
+
 OFFICE_FULL = 'Federal office candidate runs for: House, Senate or presidential'
+
 OFFICE = 'Federal office candidate runs for: H, S or P'
+
 STATE = 'US state or territory where a candidate runs for office'
+
 YEAR = 'See records pertaining to a particular election year. The list of election years \
 is based on a candidate filing a statement of candidacy (F2) for that year.'
+
 DISTRICT = 'Two-digit US House distirict of the office the candidate is running for. \
 Presidential, Senate and House at-large candidates will have District 00.'
+
 CANDIDATE_STATUS = 'One-letter code explaining if the candidate is:\n\
         - C present candidate\n\
         - F future candidate\n\
         - N not yet a candidate\n\
         - P prior candidate\n\
 '
+
 LAST_F2_DATE = 'The day the FEC received the candidate\'s most recent Form 2'
+
 FIRST_CANDIDATE_FILE_DATE = 'The day the FEC received the candidate\'s first filing. \
 This is a F2 candidate registration.'
+
 LAST_CANDIDATE_FILE_DATE = 'The day the FEC received the candidate\'s most recent filing'
-INCUMBENT_CHALLENGE = "One-letter code ('I', 'C', 'O') explaining if the candidate is an incumbent, a challenger, or if the seat is open."
+
+INCUMBENT_CHALLENGE = "One-letter code ('I', 'C', 'O') explaining if the candidate is an incumbent, a challenger, \
+or if the seat is open."
+
 INCUMBENT_CHALLENGE_FULL = 'Explains if the candidate is an incumbent, a challenger, or if the seat is open.'
-ACTIVE_THROUGH = 'Last year a candidate was active. This field is specific to the candidate_id so if the same person runs for another office, there may be a different record for them.'
-HAS_RAISED_FUNDS = 'A boolean that describes if a candidate\'s committee has ever received any receipts for their campaign for this particular office. (Candidates have separate candidate IDs for each office.)'
-FEDERAL_FUNDS_FLAG = 'A boolean the describes if a presidential candidate has accepted federal funds. The flag will be false for House and Senate candidates.'
+
+ACTIVE_THROUGH = 'Last year a candidate was active. This field is specific to the candidate_id so \
+if the same person runs for another office, there may be a different record for them.'
+
+HAS_RAISED_FUNDS = 'A boolean that describes if a candidate\'s committee has ever received any receipts \
+for their campaign for this particular office. (Candidates have separate candidate IDs for each office.)'
+
+FEDERAL_FUNDS_FLAG = 'A boolean the describes if a presidential candidate has accepted federal funds. \
+The flag will be false for House and Senate candidates.'
+
+CANDIDATE_ELECTION_YEARS = 'Years in which a candidate ran for office.'
+CANDIDATE_ELECTION_YEAR = 'Year a candidate runs for federal office.'
 
 # committees
 COMMITTEE_NAME = 'The name of the committee. If a committee changes its name, \
@@ -906,7 +1057,8 @@ RECIPIENT_ID = 'The FEC identifier should be represented here if the entity rece
 the disbursement is registered with the FEC.'
 
 # communication cost and electioneering
-SUPPORT_OPPOSE_INDICATOR = 'Explains if the money was spent in order to support or oppose a candidate or candidates. (Coded S or O for support or oppose.) This indicator applies to independent expenditures and communication costs.'
+SUPPORT_OPPOSE_INDICATOR = 'Explains if the money was spent in order to support or oppose a candidate or candidates. \
+(Coded S or O for support or oppose.) This indicator applies to independent expenditures and communication costs.'
 
 # schedule B
 PURPOSE = 'Purpose of the expenditure'
@@ -968,12 +1120,23 @@ DEBTS_OWED_TO_COMMITTEE = 'Debts owed to the committee'
 RECEIPTS = 'Anything of value (money, goods, services or property) received by a political committee'
 
 # can't tack on period or year without being really confusing
-INDIVIDUAL_ITEMIZED_CONTRIBUTIONS = 'Individual itemized contributions are from individuals whose aggregate contributions total over $200 per individual per year. Be aware, some filers choose to itemize donations $200 or less.'
-INDIVIDUAL_ITEMIZED_CONTRIBUTIONS_PERIOD = 'Individual itemized contributions are from individuals whose aggregate contributions total over $200 per individual per year. This amount represents the total of these receipts for the reporting period.'
-INDIVIDUAL_ITEMIZED_CONTRIBUTIONS_YTD = 'Individual itemized contributions are from individuals whose aggregate contributions total over $200 per individual per year. This amount represents the total of these receipts for the year to date.'
-INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS = 'Unitemized contributions are made individuals whose aggregate contributions total $200 or less per individual per year. Be aware, some filers choose to itemize donations $200 or less and in that case those donations will appear in the itemized total.'
-INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS_PERIOD = 'Unitemized contributions are from individuals whose aggregate contributions total $200 or less per individual per year. This amount represents the total of these receipts for the reporting period.'
-INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS_YTD = 'Itemized contributions are from individuals whose aggregate contributions total $200 or less per individual per year. This amount represents the total of these receipts for the year to date.'
+INDIVIDUAL_ITEMIZED_CONTRIBUTIONS = 'Individual itemized contributions are from individuals whose aggregate \
+contributions total over $200 per individual per year. Be aware, some filers choose to itemize donations $200 or less.'
+INDIVIDUAL_ITEMIZED_CONTRIBUTIONS_PERIOD = 'Individual itemized contributions are from individuals whose aggregate \
+contributions total over $200 per individual per year. This amount represents the total of these receipts \
+for the reporting period.'
+INDIVIDUAL_ITEMIZED_CONTRIBUTIONS_YTD = 'Individual itemized contributions are from individuals whose aggregate \
+contributions total over $200 per individual per year. This amount represents the total of these receipts \
+for the year to date.'
+INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS = 'Unitemized contributions are made individuals whose aggregate contributions \
+total $200 or less per individual per year. Be aware, some filers choose to itemize donations $200 or less and \
+in that case those donations will appear in the itemized total.'
+INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS_PERIOD = 'Unitemized contributions are from individuals whose aggregate \
+contributions total $200 or less per individual per year. This amount represents the total of these receipts \
+for the reporting period.'
+INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS_YTD = 'Itemized contributions are from individuals whose aggregate \
+contributions total $200 or less per individual per year. This amount represents the total of these receipts \
+for the year to date.'
 
 
 POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS = 'Party committees contributions'
@@ -1063,15 +1226,18 @@ FED_DISBURSEMENTS = 'Total federal disbursements'
 
 # calendar
 CATEGORY = '''
-Each type of event has a calendar category with an integer id. Options are: Open Meetings: 32, Executive Sessions: 39, Public Hearings: 40,
+Each type of event has a calendar category with an integer id. Options are: Open Meetings: 32, Executive Sessions: 39, \
+Public Hearings: 40,
 Conferences: 33, Roundtables: 34, Election Dates: 36, Federal Holidays: 37, FEA Periods: 38, Commission Meetings: 20,
 Reporting Deadlines: 21, Conferences and Outreach: 22, AOs and Rules: 23, Other: 24, Quarterly: 25, Monthly: 26,
 Pre and Post-Elections: 27, EC Periods:28, and IE Periods: 29
 '''
-CAL_STATE = 'The state field only applies to election dates and reporting deadlines, reporting periods and all other dates do not have the array of states to filter on'
+CAL_STATE = 'The state field only applies to election dates and reporting deadlines, reporting periods and \
+all other dates do not have the array of states to filter on'
 CAL_DESCRIPTION = 'Brief description of event'
 SUMMARY = 'Longer description of event'
-EVENT_ID = 'An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'
+EVENT_ID = 'An unique ID for an event. Useful for downloading a single event to your calendar. \
+This ID is not a permanent, persistent ID.'
 
 # efiling
 EFILING_TAG = '''
@@ -1101,12 +1267,15 @@ AMENDMENT_INDICATOR = '''
     -C   consolidated\n\
     -M   multi-candidate\n\
     -S   secondary\n\n\
-    Null might be new or amendment. If amendment indicator is null and the filings is the first or first in a chain treat it as if it was a new. If it is not the first or first in a chain then treat the filing as an amendment.\n\
+    Null might be new or amendment. If amendment indicator is null and the filings is the first or \
+    first in a chain treat it as if it was a new. If it is not the first or first in a chain then \
+    treat the filing as an amendment.\n\
 '''
 
 AMENDED_BY = '''
 If this report has been amended, this field gives the file_number of the report that should be used. For example,
-if a report is amended multiple times, the first report and the first amendment will have the file_number of the final amended
+if a report is amended multiple times, the first report and the first amendment will have the file_number \
+of the final amended
 report in the ameded_by field and the final report will have no id in the amended_by field.
 '''
 AMENDS_FILE = '''
@@ -1129,17 +1298,29 @@ also incorporate any changes made by committees, if any report covering the peri
 EFILE_REPORTS += WIP_TAG
 
 MIN_FILTER = 'Filter for all amounts greater than a value.'
+
 MAX_FILTER = 'Filter for all amounts less than a value.'
+
+MIN_REPORT_RECEIPT_DATE = '''
+Selects all items received by FEC after this date(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MAX_REPORT_RECEIPT_DATE = '''
+Selects all items received by FEC before this date(MM/DD/YYYY or YYYY-MM-DD)
+'''
 
 ENTITY_RECEIPTS_TOTLAS = '''
 Provides cumulative receipt totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
 
-This is [the sql](https://github.com/fecgov/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
+This is [the sql](https://github.com/fecgov/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) \
+that creates these calculations.
 '''
 ENTITY_DISBURSEMENTS_TOTLAS = '''
-Provides cumulative disbursement totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
+Provides cumulative disbursement totals by entity type, over a two year cycle. Totals are adjusted \
+to avoid double counting.
 
-This is [the sql](https://github.com/fecgov/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
+This is [the sql](https://github.com/fecgov/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) \
+that creates these calculations.
 '''
 
 # Audit api
@@ -1148,9 +1329,9 @@ The agency’s monitoring process may detect potential violations through a revi
 Commission audit. By law, all enforcement cases must remain confidential until they’re closed.
 
 The Commission is required by law to audit Presidential campaigns that accept public funds. In addition, the Commission
-audits a committee when it appears not to have met the threshold requirements for substantial compliance with the Federal
-Election Campaign Act. The audit determines whether the committee complied with limitations, prohibitions and disclosure
-requirements.
+audits a committee when it appears not to have met the threshold requirements for substantial compliance \
+with the Federal Election Campaign Act. The audit determines whether the committee complied with limitations, \
+prohibitions and disclosure requirements.
 
 These endpoints contain Final Audit Reports approved by the Commission since inception.
 '''
@@ -1253,36 +1434,99 @@ Forms with coverage date - \n\
 Forms without coverage date - \n\
     year from the receipt date.\n\
 '''
+
 FORM_TYPE = '''
 Indicates the type of form that was filed.\n\
 ex: F1, F2, F3P, F3X etc...
 '''
+
 OPERATIONS_LOG = '''
 The Operations log contains details of each report loaded into the database. It is primarily
 used as status check to determine when all of the data processes, from initial entry through
 review are complete.
 '''
+
 LEGAL = '''
 Explore relevant statutes, regulations and Commission actions.
 '''
+
 LEGAL_SEARCH = '''
 Search legal documents by type, or across all document types using keywords, parameter values and ranges.
 '''
+
 MIN_RECEIPT_DATE = '''
-Selects all filings received after this date
+Selects all filings received after this date(MM/DD/YYYY or YYYY-MM-DD)
 '''
+
 MAX_RECEIPT_DATE = '''
-Selects all filings received before this date
+Selects all filings received before this date(MM/DD/YYYY or YYYY-MM-DD)
 '''
+
 MIN_COVERAGE_END_DATE = '''
-Ending date of the reporting period after this date
+Ending date of the reporting period after this date(MM/DD/YYYY or YYYY-MM-DD)
 '''
+
 MAX_COVERAGE_END_DATE = '''
-Ending date of the reporting period before this date
+Ending date of the reporting period before this date(MM/DD/YYYY or YYYY-MM-DD)
 '''
+
 MIN_TRANSACTION_DATA_COMPLETE_DATE = '''
-Select all filings processed completely after this date
+Select all filings processed completely after this date(MM/DD/YYYY or YYYY-MM-DD)
 '''
+
 MAX_TRANSACTION_DATA_COMPLETE_DATE = '''
-Select all filings processed completely before this date
+Select all filings processed completely before this date(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+SUMMERY_DATA_COMPLETE_DATE = '''
+Date when the report is entered into the database
+'''
+
+SUMMERY_DATA_VERIFICATION_DATE = '''
+Same day or a day after the report is loaded in the database
+'''
+
+TRANSACTION_DATA_COMPLETE_DATE = '''
+Date when the report is processed completely
+'''
+
+TRANSACTION_COVERAGE_DATE = '''
+Date through which transaction-level data is available
+'''
+
+LAST_EXPENDITURE_DATE = '''
+When sorting by `expenditure_date`,
+this is populated with the `expenditure_date` of the last result.
+However, you will need to pass the index of that last result to
+`last_index` to get the next page.
+'''
+
+LAST_EXPENDITURE_AMOUNT = '''
+When sorting by `expenditure_amount`,
+this is populated with the `expenditure_amount` of the last result.
+However, you will need to pass the index of that last result to
+`last_index` to get the next page.
+'''
+LAST_OFFICE_TOTAL_YTD = '''
+When sorting by `office_total_ytd`,
+this is populated with the `office_total_ytd` of the last result.
+However, you will need to pass the index of that last result to
+`last_index` to get the next page.'
+'''
+
+LAST_SUPPOSE_OPPOSE_INDICATOR = '''
+When sorting by `support_oppose_indicator`,
+this is populated with the `support_oppose_indicator` of the last result.
+However, you will need to pass the index of that last result to `last_index`
+to get the next page.'
+'''
+
+PAYEE_NAME = '''
+Name of the entity that received the payment.
+'''
+IS_NOTICE = '''
+Record filed as 24- or 48-hour notice.
+'''
+filing_form = '''
+The form type filed by the canidate of committee
 '''

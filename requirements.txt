@@ -19,15 +19,15 @@ gunicorn==19.7.1
 gevent==1.2.2
 webargs==0.18.0
 ujson==1.33
-requests==2.18.4
+requests==2.20.1
 elasticsearch==5.5.1
 elasticsearch-dsl==5.4.0
 git+https://github.com/18F/slate.git
 
 # Marshalling
 flask-apispec==0.7.0
-marshmallow==2.6.0
-marshmallow-sqlalchemy==0.8.0
+marshmallow==2.16.3
+marshmallow-sqlalchemy==0.15.0
 git+https://github.com/jmcarp/marshmallow-pagination@master
 
 # Data export
