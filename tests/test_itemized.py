@@ -741,3 +741,23 @@ class TestItemized(ApiBaseTest):
             results = self._results(api.url_for(ScheduleEEfileView, **{label: values[0]}))
             assert len(results) == 1
             assert results[0][column.key] == values[0]
+
+    def test_schedule_e_sort_args_descending(self):
+        [
+            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
+                    committee_id='101', support_oppose_indicator='s'),
+            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
+                    committee_id='101', support_oppose_indicator='o'),
+        ]
+        results = self._results(api.url_for(ScheduleEView, sort='-support_oppose_indicator'))
+        self.assertEqual(results[0]['support_oppose_indicator'], 's')
+
+    def test_schedule_e_sort_args_ascending(self):
+        [
+            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
+                    committee_id='101', support_oppose_indicator='s'),
+            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
+                    committee_id='101', support_oppose_indicator='o'),
+        ]
+        results = self._results(api.url_for(ScheduleEView, sort='support_oppose_indicator'))
+        self.assertEqual(results[0]['support_oppose_indicator'], 'o')
