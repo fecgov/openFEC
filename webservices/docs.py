@@ -1530,3 +1530,22 @@ Record filed as 24- or 48-hour notice.
 filing_form = '''
 The form type filed by the canidate of committee
 '''
+CALCULATED_CANDIDATE_SHARE = '''
+"If an electioneering cost targets several candidates, the total cost is
+divided by the number of candidates. If it only mentions one candidate
+the full cost of the communication is listed."
+'''
+COMMUNICATION_DT = '''
+It is the airing, broadcast, cablecast or other dissemination of the communication.
+'''
+PUBLIC_DISTRIBUTION_DT = '''
+The pubic distribution date is the date that triggers disclosure of the
+electioneering communication (date reported on page 1 of Form 9).
+'''
+DISBURSEMENT_DT = '''
+Disbursement date includes actual disbursements and execution of contracts creating
+an obligation to make disbursements (SB date of disbursement).
+'''
+EC_SUB_ID = '''
+The identifier for each electioneering record.
+'''
