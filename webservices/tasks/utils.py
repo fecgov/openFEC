@@ -10,8 +10,6 @@ from boto.s3.key import Key
 
 import boto3
 
-import requests
-
 from webservices.env import env
 
 

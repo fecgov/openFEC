@@ -40,12 +40,12 @@ class BaseCandidate(BaseModel):
     # ? difference between district and district_number
     district_number = db.Column(db.Integer, index=True, doc=docs.CANDIDATE_STATUS)
     election_districts = db.Column(ARRAY(db.String), index=True, doc=docs.DISTRICT)
-    election_years = db.Column(ARRAY(db.Integer), index=True, doc='Years in which a candidate ran for office.')
+    election_years = db.Column(ARRAY(db.Integer), index=True, doc=docs.CANDIDATE_ELECTION_YEARS)
     cycles = db.Column(ARRAY(db.Integer), index=True, doc=docs.CANDIDATE_CYCLE)
     candidate_status = db.Column(db.String(1), index=True, doc=docs.CANDIDATE_STATUS)
     incumbent_challenge = db.Column(db.String(1), index=True, doc=docs.INCUMBENT_CHALLENGE)
     incumbent_challenge_full = db.Column(db.String(10), doc=docs.INCUMBENT_CHALLENGE_FULL)
-    load_date = db.Column(db.Date, index=True, doc=docs.LOAD_DATE)
+    load_date = db.Column(db.DateTime, index=True, doc=docs.LOAD_DATE)
 
     first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_CANDIDATE_FILE_DATE)
     last_file_date = db.Column(db.Date, doc=docs.LAST_CANDIDATE_FILE_DATE)
@@ -149,5 +149,5 @@ class CandidateElection(db.Model):
     __tablename__ = 'ofec_candidate_election_mv'
 
     candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)
-    cand_election_year = db.Column(db.Integer, primary_key=True, index=True, doc='Year a candidate runs for federal office.')
+    cand_election_year = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CANDIDATE_ELECTION_YEAR)
     prev_election_year = db.Column(db.Integer, index=True)
