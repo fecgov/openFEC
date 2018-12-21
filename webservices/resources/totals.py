@@ -13,7 +13,6 @@ committee_type_map = {
     'house-senate': 'H',
     'presidential': 'P',
     'ie-only': 'I',
-    'pac-party': None,
     'pac': 'O',
     'party': 'X'
 }
@@ -40,7 +39,7 @@ default_candidate_schemas = (models.CandidateCommitteeTotalsHouseSenate, schemas
     params={
         'committee_type': {
             'description': 'House, Senate, presidential, independent expenditure only',
-            'enum': ['presidential', 'pac-party', 'pac', 'party', 'house-senate', 'ie-only'],
+            'enum': ['presidential', 'pac', 'party', 'house-senate', 'ie-only'],
         },
     },
 )
@@ -73,7 +72,20 @@ class TotalsView(utils.Resource):
             query = query.filter(totals_class.committee_id == committee_id)
         if kwargs.get('cycle'):
             query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
+        if committee_type == 'pac':
+            query = query.filter(
+                sa.or_(
+                    models.CommitteeTotalsPacParty.committee_type.in_(['N', 'O', 'Q', 'V', 'W'])
+                )
+            )
+        if committee_type == 'party':
+            query = query.filter(
+                sa.or_(
+                    models.CommitteeTotalsPacParty.committee_type.in_(['X', 'Y'])
+                )
+            )
         return query, totals_class, totals_schema
+
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
         if committee_id is not None:
