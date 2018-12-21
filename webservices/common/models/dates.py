@@ -59,7 +59,7 @@ class ElectionDate(db.Model, FecAppMixin):
     election_year = db.Column('election_yr', db.Integer, index=True, doc=docs.ELECTION_YEAR)
     # I think this is mislabeled
     primary_general_date = db.Column('pg_date', db.Date, index=True)
-    election_status_id = db.Column('trc_election_status_id', db.Integer, index=True, doc='Records are disregarded if election status is not 1. Those records are erroneous.')
+    election_status_id = db.Column('trc_election_status_id', db.Integer, index=True, doc=docs.ELECTION_STATUS_ID)
 
     @property
     def election_type_full(self):
@@ -76,7 +76,7 @@ class ElectionClassDate(db.Model):
     state_desc = db.Column(db.String, doc=docs.STATE)
     district = db.Column(db.Integer, index=True, doc=docs.DISTRICT)
     election_year = db.Column('election_yr', db.Integer, index=True, doc=docs.ELECTION_YEAR)
-    open_seat_flag = db.Column('open_seat_flg', db.String, doc='Signifies if the contest has no incumbent running')
+    open_seat_flag = db.Column('open_seat_flg', db.String, doc=docs.OPEN_SEAT_FLAG)
     create_date = db.Column(db.Date, doc=docs.CREATE_DATE)
     election_type_id = db.Column(db.String, doc=docs.ELECTION_TYPE)
     #? double check this
@@ -95,11 +95,11 @@ class CalendarDate(db.Model):
     category = db.Column(db.String, index=True, doc=docs.CATEGORY)
     calendar_category_id = db.Column(db.Integer, doc=docs.CATEGORY)
     state = db.Column('states', ARRAY(db.String), index=True, doc=docs.CAL_STATE)
-    location = db.Column(db.String, index=True, doc='Can be state address or room.')
-    start_date = db.Column(db.DateTime, index=True, doc='Date the event starts')
-    end_date = db.Column(db.DateTime, index=True, doc='Date the event ends')
+    location = db.Column(db.String, index=True, doc=docs.LOCATION)
+    start_date = db.Column(db.DateTime, index=True, doc=docs.START_DATE)
+    end_date = db.Column(db.DateTime, index=True, doc=docs.END_DATE)
     all_day = db.Column(db.Boolean)
-    url = db.Column(db.String, doc='A url for that event')
+    url = db.Column(db.String, doc=docs.EVENT_URL)
 
     summary_text = db.Column(TSVECTOR)
     description_text = db.Column(TSVECTOR)

@@ -125,13 +125,13 @@ class TestItemized(ApiBaseTest):
         response = self.app.get(api.url_for(ScheduleAView, contributor_zip='96%', cycle=2018))
         self.assertEqual(response.status_code, 400)
 
-    def test_sched_a_contributor_committee_type_filter(self):
+    def test_sched_a_recipient_committee_type_filter(self):
         [
-            factories.ScheduleAFactory(contributor_committee_type='S'),
-            factories.ScheduleAFactory(contributor_committee_type='S'),
-            factories.ScheduleAFactory(contributor_committee_type='P'),
+            factories.ScheduleAFactory(recipient_committee_type='S'),
+            factories.ScheduleAFactory(recipient_committee_type='S'),
+            factories.ScheduleAFactory(recipient_committee_type='P'),
         ]
-        results = self._results(api.url_for(ScheduleAView, contributor_committee_type='S', **self.kwargs))
+        results = self._results(api.url_for(ScheduleAView, recipient_committee_type='S', **self.kwargs))
         self.assertEqual(len(results), 2)
 
     def test_filter_multi_start_with(self):
@@ -741,3 +741,23 @@ class TestItemized(ApiBaseTest):
             results = self._results(api.url_for(ScheduleEEfileView, **{label: values[0]}))
             assert len(results) == 1
             assert results[0][column.key] == values[0]
+
+    def test_schedule_e_sort_args_descending(self):
+        [
+            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
+                    committee_id='101', support_oppose_indicator='s'),
+            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
+                    committee_id='101', support_oppose_indicator='o'),
+        ]
+        results = self._results(api.url_for(ScheduleEView, sort='-support_oppose_indicator'))
+        self.assertEqual(results[0]['support_oppose_indicator'], 's')
+
+    def test_schedule_e_sort_args_ascending(self):
+        [
+            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
+                    committee_id='101', support_oppose_indicator='s'),
+            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
+                    committee_id='101', support_oppose_indicator='o'),
+        ]
+        results = self._results(api.url_for(ScheduleEView, sort='support_oppose_indicator'))
+        self.assertEqual(results[0]['support_oppose_indicator'], 'o')
