@@ -140,6 +140,10 @@ class TotalsPacPartyFactory(BaseTotalsFactory):
     class Meta:
         model = models.CommitteeTotalsPacParty
 
+class TotalsPacFactory(BaseTotalsFactory):
+    class Meta:
+        model = models.CommitteeTotalsPacParty
+
 class TotalsPartyFactory(BaseTotalsFactory):
     class Meta:
         model = models.CommitteeTotalsPacParty
