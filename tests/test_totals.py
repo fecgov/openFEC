@@ -187,6 +187,73 @@ class TestTotals(ApiBaseTest):
         results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
         self.assertEqual(results[0], fields)
 
+    def test_Pac_totals(self):
+        committee_id = 'C8675311'
+        transaction_coverage = factories.TransactionCoverageFactory(
+            committee_id=committee_id,
+            fec_election_year=2016)
+        history = factories.CommitteeHistoryFactory(
+            committee_id=committee_id,
+            committee_type='O',
+        )
+        pac_party_fields = {
+            'committee_id': committee_id,
+            'cycle': 2016,
+            'all_loans_received': 1,
+            'allocated_federal_election_levin_share': 2,
+            'coordinated_expenditures_by_party_committee': 3,
+            'fed_candidate_committee_contributions': 4,
+            'fed_candidate_contribution_refunds': 5,
+            'fed_disbursements': 6,
+            'fed_election_activity': 7,
+            'fed_operating_expenditures': 8,
+            'fed_receipts': 9,
+            'federal_funds': 2,
+            'independent_expenditures': 10,
+            'loan_repayments_made': 11,
+            'loan_repayments_received': 12,
+            'loans_made': 13,
+            'loans_and_loan_repayments_received': 2,
+            'loans_and_loan_repayments_made': 2,
+            'non_allocated_fed_election_activity': 14,
+            'total_transfers': 15,
+            'other_fed_operating_expenditures': 16,
+            'other_fed_receipts': 17,
+            'shared_fed_activity': 18,
+            'shared_fed_activity_nonfed': 19,
+            'shared_fed_operating_expenditures': 20,
+            'shared_nonfed_operating_expenditures': 21,
+            'transfers_from_affiliated_party': 22,
+            'transfers_from_nonfed_account': 23,
+            'transfers_from_nonfed_levin': 24,
+            'transfers_to_affiliated_committee': 25,
+            'net_contributions': 127,
+            'net_operating_expenditures': 128,
+            'exp_subject_limits': 4,
+            'exp_prior_years_subject_limits': 4,
+            'total_exp_subject_limits': 4,
+            'refunds_relating_convention_exp': 4,
+            'itemized_refunds_relating_convention_exp': 4,
+            'unitemized_refunds_relating_convention_exp': 4,
+            'other_refunds': 4,
+            'itemized_other_refunds': 4,
+            'unitemized_other_refunds': 4,
+            'itemized_other_income': 4,
+            'unitemized_other_income': 4,
+            'convention_exp': 4,
+            'itemized_convention_exp': 4,
+            'unitemized_convention_exp': 4,
+            'itemized_other_disb': 4,
+            'unitemized_other_disb': 4,
+        }
+        fields = utils.extend(pac_party_fields, shared_fields)
+        committee_total = factories.TotalsPacPartyFactory(**fields)
+
+        fields = utils.extend(fields, transaction_coverage_fields)
+
+        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
+        self.assertEqual(results[0], fields)
+
     def test_party_totals(self):
 
         committee_id = 'C00540005'
