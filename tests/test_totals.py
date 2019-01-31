@@ -196,7 +196,7 @@ class TestTotals(ApiBaseTest):
             committee_id=committee_id,
             committee_type='O',
         )
-        pac_party_fields = {
+        pac_fields = {
             'committee_id': committee_id,
             'cycle': 2016,
             'all_loans_received': 1,
@@ -246,8 +246,8 @@ class TestTotals(ApiBaseTest):
             'itemized_other_disb': 4,
             'unitemized_other_disb': 4,
         }
-        fields = utils.extend(pac_party_fields, shared_fields)
-        committee_total = factories.TotalsPacPartyFactory(**fields)
+        fields = utils.extend(pac_fields, shared_fields)
+        committee_total = factories.TotalsPacFactory(**fields)
 
         fields = utils.extend(fields, transaction_coverage_fields)
 
