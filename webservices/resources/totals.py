@@ -31,6 +31,9 @@ candidate_totals_schema_map = {
     'H': (models.CandidateCommitteeTotalsHouseSenate, schemas.CandidateCommitteeTotalsHouseSenatePageSchema),
     'S': (models.CandidateCommitteeTotalsHouseSenate, schemas.CandidateCommitteeTotalsHouseSenatePageSchema),
 }
+pac_cmte_list = {'N', 'O', 'Q', 'V', 'W'}
+
+party_cmte_list = {'X', 'Y'}
 
 default_candidate_schemas = (models.CandidateCommitteeTotalsHouseSenate, schemas.CandidateCommitteeTotalsHouseSenatePageSchema)
 
@@ -40,7 +43,7 @@ default_candidate_schemas = (models.CandidateCommitteeTotalsHouseSenate, schemas
     params={
         'committee_type': {
             'description': 'House, Senate, presidential, independent expenditure only',
-            'enum': ['presidential', 'pac-party', 'pac', 'party', 'house-senate', 'ie-only'],
+            'enum': ['presidential', 'pac', 'party', 'pac-party', 'house-senate', 'ie-only'],
         },
     },
 )
@@ -73,6 +76,18 @@ class TotalsView(utils.Resource):
             query = query.filter(totals_class.committee_id == committee_id)
         if kwargs.get('cycle'):
             query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
+        if committee_type == 'pac':
+            query = query.filter(
+                models.CommitteeTotalsPacParty.committee_type.in_(pac_cmte_list)
+            )
+        if committee_type == 'party':
+            query = query.filter(
+                models.CommitteeTotalsPacParty.committee_type.in_(party_cmte_list)
+            )
+        if committee_type == 'pac-party':
+            query = query.filter(
+                models.CommitteeTotalsPacParty.committee_type.in_(pac_cmte_list.union(party_cmte_list))
+            )
         return query, totals_class, totals_schema
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
