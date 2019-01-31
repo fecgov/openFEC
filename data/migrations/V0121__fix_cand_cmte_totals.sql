@@ -8,9 +8,10 @@ Issue #https://github.com/fecgov/fec-cms/issues/2631
     c) recreate `MV` with new logic
     d) `create or replace ofec_totals_candidate_committees_vw` -> `select all` from new `MV`
 
- - Round election year (line 37/63)
- - Use cand_election year instead of fec_election_yr (line 63)
- - Fix cycle for full election cycles (line 203)
+ - Round election year (line 39/66)
+ - Use cand_election year instead of fec_election_yr (line 66)
+ - Fix cycle for full election cycles (line 206)
+ - Join election totals on election year, not cycle
 
 */
 
@@ -45,6 +46,7 @@ WITH last_cycle AS (
         ), ending_totals_per_cycle AS (
          SELECT last.cycle,
             last.candidate_id,
+            max(last.election_year) AS election_year,
             max(last.coverage_end_date) AS coverage_end_date,
             max(last.transaction_coverage_date) AS transaction_coverage_date,
             min(last.coverage_start_date) AS coverage_start_date,
@@ -197,7 +199,7 @@ WITH last_cycle AS (
             max(totals.coverage_end_date) AS coverage_end_date,
             max(totals.transaction_coverage_date) AS transaction_coverage_date
            FROM (cycle_totals_with_ending_aggregates totals
-             LEFT JOIN public.ofec_candidate_election_vw election ON ((((totals.candidate_id)::text = (election.candidate_id)::text) AND (totals.cycle <= (election.cand_election_year)::numeric) AND (totals.cycle > (election.prev_election_year)::numeric))))
+             LEFT JOIN public.ofec_candidate_election_vw election ON ((((totals.candidate_id)::text = (election.candidate_id)::text) AND (totals.election_year <= (election.cand_election_year)::numeric) AND (totals.cycle > (election.prev_election_year)::numeric))))
           GROUP BY totals.candidate_id, election.cand_election_year
         ), election_totals_with_ending_aggregates AS (
          SELECT et.candidate_id,
@@ -250,11 +252,14 @@ WITH last_cycle AS (
             totals.last_net_operating_expenditures,
             totals.last_net_contributions
            FROM ((ending_totals_per_cycle totals
-             LEFT JOIN public.ofec_candidate_election_vw election ON ((((totals.candidate_id)::text = (election.candidate_id)::text) AND (totals.cycle = (election.cand_election_year)::numeric))))
+             LEFT JOIN public.ofec_candidate_election_vw election ON ((((totals.candidate_id)::text = (election.candidate_id)::text) AND (totals.election_year = (election.cand_election_year)::numeric))))
              LEFT JOIN election_totals et ON ((((totals.candidate_id)::text = (et.candidate_id)::text) AND (totals.cycle = et.cycle))))
           WHERE (totals.cycle > (1979)::numeric)
         )
- SELECT cycle_totals_with_ending_aggregates.candidate_id,
+ SELECT DISTINCT ON (cycle_totals_with_ending_aggregates.candidate_id,
+        cycle_totals_with_ending_aggregates.full_election,
+        cycle_totals_with_ending_aggregates.cycle)
+    cycle_totals_with_ending_aggregates.candidate_id,
     cycle_totals_with_ending_aggregates.cycle,
     cycle_totals_with_ending_aggregates.election_year,
     cycle_totals_with_ending_aggregates.coverage_start_date,
@@ -305,7 +310,10 @@ WITH last_cycle AS (
     cycle_totals_with_ending_aggregates.last_net_contributions
    FROM cycle_totals_with_ending_aggregates
 UNION ALL
- SELECT election_totals_with_ending_aggregates.candidate_id,
+ SELECT DISTINCT ON (election_totals_with_ending_aggregates.candidate_id,
+        election_totals_with_ending_aggregates.full_election,
+        election_totals_with_ending_aggregates.cycle)
+    election_totals_with_ending_aggregates.candidate_id,
     election_totals_with_ending_aggregates.cycle,
     election_totals_with_ending_aggregates.election_year,
     election_totals_with_ending_aggregates.coverage_start_date,
@@ -391,6 +399,7 @@ WITH last_cycle AS (
         ), ending_totals_per_cycle AS (
          SELECT last.cycle,
             last.candidate_id,
+            max(last.election_year) AS election_year,
             max(last.coverage_end_date) AS coverage_end_date,
             max(last.transaction_coverage_date) AS transaction_coverage_date,
             min(last.coverage_start_date) AS coverage_start_date,
@@ -543,7 +552,7 @@ WITH last_cycle AS (
             max(totals.coverage_end_date) AS coverage_end_date,
             max(totals.transaction_coverage_date) AS transaction_coverage_date
            FROM (cycle_totals_with_ending_aggregates totals
-             LEFT JOIN public.ofec_candidate_election_vw election ON ((((totals.candidate_id)::text = (election.candidate_id)::text) AND (totals.cycle <= (election.cand_election_year)::numeric) AND (totals.cycle > (election.prev_election_year)::numeric))))
+             LEFT JOIN public.ofec_candidate_election_vw election ON ((((totals.candidate_id)::text = (election.candidate_id)::text) AND (totals.election_year <= (election.cand_election_year)::numeric) AND (totals.cycle > (election.prev_election_year)::numeric))))
           GROUP BY totals.candidate_id, election.cand_election_year
         ), election_totals_with_ending_aggregates AS (
          SELECT et.candidate_id,
@@ -596,11 +605,14 @@ WITH last_cycle AS (
             totals.last_net_operating_expenditures,
             totals.last_net_contributions
            FROM ((ending_totals_per_cycle totals
-             LEFT JOIN public.ofec_candidate_election_vw election ON ((((totals.candidate_id)::text = (election.candidate_id)::text) AND (totals.cycle = (election.cand_election_year)::numeric))))
+             LEFT JOIN public.ofec_candidate_election_vw election ON ((((totals.candidate_id)::text = (election.candidate_id)::text) AND (totals.election_year = (election.cand_election_year)::numeric))))
              LEFT JOIN election_totals et ON ((((totals.candidate_id)::text = (et.candidate_id)::text) AND (totals.cycle = et.cycle))))
           WHERE (totals.cycle > (1979)::numeric)
         )
- SELECT cycle_totals_with_ending_aggregates.candidate_id,
+ SELECT DISTINCT ON (cycle_totals_with_ending_aggregates.candidate_id,
+        cycle_totals_with_ending_aggregates.full_election,
+        cycle_totals_with_ending_aggregates.cycle)
+    cycle_totals_with_ending_aggregates.candidate_id,
     cycle_totals_with_ending_aggregates.cycle,
     cycle_totals_with_ending_aggregates.election_year,
     cycle_totals_with_ending_aggregates.coverage_start_date,
@@ -651,7 +663,10 @@ WITH last_cycle AS (
     cycle_totals_with_ending_aggregates.last_net_contributions
    FROM cycle_totals_with_ending_aggregates
 UNION ALL
- SELECT election_totals_with_ending_aggregates.candidate_id,
+ SELECT DISTINCT ON (election_totals_with_ending_aggregates.candidate_id,
+        election_totals_with_ending_aggregates.full_election,
+        election_totals_with_ending_aggregates.cycle)
+    election_totals_with_ending_aggregates.candidate_id,
     election_totals_with_ending_aggregates.cycle,
     election_totals_with_ending_aggregates.election_year,
     election_totals_with_ending_aggregates.coverage_start_date,
