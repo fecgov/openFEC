@@ -135,7 +135,7 @@ class TestElections(ApiBaseTest):
                 disbursements=75,
                 committee_id=self.committees[0].committee_id,
                 coverage_end_date=datetime.datetime(2012, 9, 30),
-                last_cash_on_hand_end_period=1979,
+                last_cash_on_hand_end_period=100,
                 cycle=2012,
             ),
             factories.TotalsHouseSenateFactory(
@@ -143,7 +143,7 @@ class TestElections(ApiBaseTest):
                 disbursements=75,
                 committee_id=self.committees[1].committee_id,
                 coverage_end_date=datetime.datetime(2012, 12, 31),
-                last_cash_on_hand_end_period=1979,
+                last_cash_on_hand_end_period=100,
                 cycle=2012,
             ),
             factories.TotalsHouseSenateFactory(
@@ -151,7 +151,7 @@ class TestElections(ApiBaseTest):
                 disbursements=75,
                 committee_id=self.committees[1].committee_id,
                 coverage_end_date=datetime.datetime(2012, 12, 31),
-                last_cash_on_hand_end_period=1979,
+                last_cash_on_hand_end_period=300,
                 cycle=2010,
             ),
         ]
@@ -200,7 +200,7 @@ class TestElections(ApiBaseTest):
             )
         )
         totals = self.totals
-        cash_on_hand_totals = self.totals[:2]
+        cash_on_hand_totals = self.totals[:3]
         expected = {
             'candidate_id': self.candidate.candidate_id,
             'candidate_name': self.candidate.name,
@@ -234,7 +234,7 @@ class TestElections(ApiBaseTest):
         # by including money that was raised and transferred
         # to the other committees in the joint fundraiser.
         totals_without_jfc = self.totals[1:]
-        cash_on_hand_without_jfc = self.totals[1:2]
+        cash_on_hand_without_jfc = self.totals[1:]
         expected = {
             'candidate_id': self.candidate.candidate_id,
             'candidate_name': self.candidate.name,
@@ -246,8 +246,9 @@ class TestElections(ApiBaseTest):
         }
         assert len(results) == 1
         assert_dicts_subset(results[0], expected)
-        assert set(results[0]['committee_ids']) == set(each.committee_id for each in self.committees if each.designation != 'J')
-
+        assert set(results[0]['committee_ids']) == set(
+            each.committee_id for each in self.committees
+            if each.designation != 'J')
     def test_election_summary(self):
         results = self._response(api.url_for(ElectionSummary, office='senate', cycle=2012, state='NY'))
         totals = [each for each in self.totals if each.cycle == 2012]
