@@ -172,7 +172,7 @@ class ElectionView(ApiResource):
             CandidateCommitteeLink.committee_id,
             totals_model.receipts,
             totals_model.disbursements,
-            totals_model.last_cash_on_hand_end_period.label('cash_on_hand_end_period'),
+            totals_model.last_cash_on_hand_end_period,
             totals_model.coverage_end_date,
             sa.case(
                 [(CandidateCommitteeLink.committee_designation == 'P', CandidateCommitteeLink.committee_id)]  # noqa
@@ -186,7 +186,7 @@ class ElectionView(ApiResource):
 
     def _get_latest(self, pairs):
         latest = db.session.query(
-            pairs.c.cash_on_hand_end_period,
+            pairs.c.last_cash_on_hand_end_period,
             pairs.c.candidate_id,
         ).distinct(
             pairs.c.candidate_id,
@@ -198,7 +198,7 @@ class ElectionView(ApiResource):
         ).subquery()
         return db.session.query(
             latest.c.candidate_id,
-            sa.func.sum(sa.func.coalesce(latest.c.cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
+            sa.func.sum(sa.func.coalesce(latest.c.last_cash_on_hand_end_period, 0.0)),
         ).group_by(
             latest.c.candidate_id,
         )
@@ -213,7 +213,7 @@ class ElectionView(ApiResource):
             sa.func.max(pairs.c.office).label('office'),
             sa.func.sum(sa.func.coalesce(pairs.c.receipts, 0.0)).label('total_receipts'),
             sa.func.sum(sa.func.coalesce(pairs.c.disbursements, 0.0)).label('total_disbursements'),
-            sa.func.sum(sa.func.coalesce(pairs.c.cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
+            sa.func.sum(sa.func.coalesce(pairs.c.last_cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
             sa.func.array_agg(sa.distinct(pairs.c.cmte_id)).label('committee_ids'),
             sa.func.max(pairs.c.coverage_end_date).label('coverage_end_date'),
             sa.func.max(pairs.c.candidate_pcc_id).label('candidate_pcc_id')
