@@ -191,7 +191,7 @@ class CandidateTotalsView(utils.Resource):
             query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
         if candidate_id:
             query = query.filter(totals_class.candidate_id == candidate_id)
-        if kwargs.get('full_election'):
+        if kwargs.get('full_election') is not None:
             query = query.filter(totals_class.full_election == kwargs['full_election'])
         return query, totals_class, totals_schema
 
