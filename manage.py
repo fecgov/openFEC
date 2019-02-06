@@ -165,23 +165,6 @@ def load_election_dates():
 
     logger.info('Finished loading election dates.')
 
-
-@manager.command
-def refresh_itemized():
-    """This run nightly to refresh the itemized schedule E data."""
-
-    rebuild_itemized_e()
-
-    logger.info('Finished rebuilding schedule data.')
-
-@manager.command
-def rebuild_itemized_e():
-    """Used to rebuild the itemized Schedule E data."""
-    logger.info('Rebuilding Schedule E...')
-    execute_sql_file('data/refresh/rebuild_schedule_e.sql')
-    logger.info('Finished rebuilding Schedule E.')
-
-
 @manager.command
 def refresh_materialized(concurrent=True):
     """Refresh materialized views in dependency order
@@ -232,9 +215,7 @@ def refresh_materialized(concurrent=True):
         'reports_presidential': ['ofec_reports_presidential_mv'],
         'sched_a_by_size_merged': ['ofec_sched_a_aggregate_size_merged_mv'],
         'sched_a_by_state_recipient_totals': ['ofec_sched_a_aggregate_state_recipient_totals_mv'],
-        'sched_c': ['ofec_sched_c_mv'],
         'sched_e_by_candidate': ['ofec_sched_e_aggregate_candidate_mv'],
-        'sched_f': ['ofec_sched_f_mv'],
         'totals_candidate_committee': ['ofec_totals_candidate_committees_mv'],
         'totals_combined': ['ofec_totals_combined_mv'],
         'totals_house_senate': ['ofec_totals_house_senate_mv'],

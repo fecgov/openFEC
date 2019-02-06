@@ -17,7 +17,6 @@ def refresh_materialized_views():
     """
     manage.logger.info('Starting nightly refresh...')
     try:
-        manage.refresh_itemized()
         manage.refresh_materialized()
         download.clear_bucket()
         slack_message = '*Success* nightly updates for {0} completed'.format(get_app_name())
