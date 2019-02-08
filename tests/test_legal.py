@@ -211,14 +211,14 @@ class SearchTest(unittest.TestCase):
                                      doc_type=mock.ANY)
 
     @patch.object(es, 'search')
-    def test_query_dsl_with_mur_filters(self, es_search):
+    def test_query_dsl_with_case_filters(self, es_search):
         response = self.app.get('/v1/legal/search/', query_string={
                                 'q': 'embezzle',
                                 'type': 'murs',
-                                'mur_min_open_date': '2012-01-01',
-                                'mur_max_open_date': '2013-12-31',
-                                'mur_min_close_date': '2014-01-01',
-                                'mur_max_close_date': '2015-12-31'})
+                                'case_min_open_date': '2012-01-01',
+                                'case_max_open_date': '2013-12-31',
+                                'case_min_close_date': '2014-01-01',
+                                'case_max_close_date': '2015-12-31'})
         assert response.status_code == 200
 
         expected_query = {
