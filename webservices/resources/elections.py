@@ -1,5 +1,4 @@
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 from sqlalchemy import cast, Integer
 from flask_apispec import doc, marshal_with
 
