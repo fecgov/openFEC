@@ -150,7 +150,6 @@ class ElectionView(ApiResource):
         pairs = self._get_pairs(basicPairs).subquery()
         aggregates = self._get_aggregates(pairs).subquery()
         candAggregates = self._get_candAggregates(aggregates).subquery()
-        # latest = self._get_latest(pairs).subquery()
 
         final_query = db.session.query(
             candAggregates,
@@ -159,11 +158,6 @@ class ElectionView(ApiResource):
             BaseConcreteCommittee,
             candAggregates.c.candidate_pcc_id == BaseConcreteCommittee.committee_id
         ).distinct()
-
-        print('***********************Final_query')
-        print(str(final_query.statement.compile(
-            dialect=postgresql.dialect(),
-            compile_kwargs={"literal_binds": True})))
 
         return final_query
 
@@ -197,7 +191,11 @@ class ElectionView(ApiResource):
         # get cash_on_hand_end_period info from the latest financial report
         #   per candidate_id/candidate_election_year/cmte_id
     
-        # Window params
+        # when newlest financial report not filed yet, the financial data columns will be null, 
+        #   take the data from the previous filing for calculation.
+        # However, when the latest fincial report filed, but COH is null, the null (will be convert to 0 in final calculation) should be used.
+
+        # Window params   
         window_p = {
         'partition_by': [basicPairs.c.candidate_id, basicPairs.c.candidate_election_year, basicPairs.c.committee_id], 
         'order_by': [sa.case([(basicPairs.c.coverage_end_date.isnot(None), basicPairs.c.two_year_period)]).desc().nullslast()]
@@ -219,25 +217,6 @@ class ElectionView(ApiResource):
             basicPairs.c.candidate_pcc_id
         )
         return pairs
-
-    # def _get_latest(self, pairs):
-    #     latest = db.session.query(
-    #         pairs.c.last_cash_on_hand_end_period,
-    #         pairs.c.candidate_id,
-    #     ).distinct(
-    #         pairs.c.candidate_id,
-    #         pairs.c.cmte_id,
-    #     ).order_by(
-    #         pairs.c.candidate_id,
-    #         pairs.c.cmte_id,
-    #         sa.desc(pairs.c.two_year_period),
-    #     ).subquery()
-    #     return db.session.query(
-    #         latest.c.candidate_id,
-    #         sa.func.sum(sa.func.coalesce(latest.c.last_cash_on_hand_end_period, 0.0)),
-    #     ).group_by(
-    #         latest.c.candidate_id,
-    #     )
 
     def _get_aggregates(self, pairs):
         # sum up values per candidate_id/candidate_election_year/cmte_id
