@@ -135,7 +135,7 @@ class TestElections(ApiBaseTest):
                 disbursements=75,
                 committee_id=self.committees[0].committee_id,
                 coverage_end_date=datetime.datetime(2012, 9, 30),
-                last_cash_on_hand_end_period=1979,
+                last_cash_on_hand_end_period=100,
                 cycle=2012,
             ),
             factories.TotalsHouseSenateFactory(
@@ -143,7 +143,7 @@ class TestElections(ApiBaseTest):
                 disbursements=75,
                 committee_id=self.committees[1].committee_id,
                 coverage_end_date=datetime.datetime(2012, 12, 31),
-                last_cash_on_hand_end_period=1979,
+                last_cash_on_hand_end_period=100,
                 cycle=2012,
             ),
             factories.TotalsHouseSenateFactory(
@@ -151,8 +151,92 @@ class TestElections(ApiBaseTest):
                 disbursements=75,
                 committee_id=self.committees[1].committee_id,
                 coverage_end_date=datetime.datetime(2012, 12, 31),
-                last_cash_on_hand_end_period=1979,
+                last_cash_on_hand_end_period=300,
                 cycle=2010,
+            ),
+        ]
+
+        self.president_candidate = factories.CandidateDetailFactory()
+        self.president_candidates = [
+
+            factories.CandidateHistoryFactory(
+                candidate_id=self.president_candidate.candidate_id,
+                state='NY',
+                two_year_period=2020,
+                office='P',
+                candidate_inactive=False,
+                candidate_election_year=2020,
+            ),
+            factories.CandidateHistoryFactory(
+                candidate_id=self.president_candidate.candidate_id,
+                state='NY',
+                two_year_period=2018,
+                office='P',
+                candidate_inactive=False,
+                candidate_election_year=2020,
+            ),
+        ]
+        self.president_committees = [
+            factories.CommitteeHistoryFactory(cycle=2020, designation='P'),
+            factories.CommitteeHistoryFactory(cycle=2020, designation='J'),
+        ]
+        [
+            factories.CandidateElectionFactory(candidate_id=self.president_candidate.candidate_id, cand_election_year=year)
+            for year in [2016, 2020]
+        ]
+        [
+            factories.CommitteeDetailFactory(committee_id=each.committee_id)
+            for each in self.president_committees
+        ]
+        db.session.flush()
+        self.president_candidate_committee_links = [
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.president_candidate.candidate_id,
+                committee_id=self.president_committees[0].committee_id,
+                committee_designation='P',
+                fec_election_year=2020,
+                cand_election_year=2020
+            ),
+
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.president_candidate.candidate_id,
+                committee_id=self.president_committees[0].committee_id,
+                committee_designation='P',
+                fec_election_year=2018,
+                cand_election_year=2020
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.president_candidate.candidate_id,
+                committee_id=self.president_committees[1].committee_id,
+                committee_designation='P',
+                fec_election_year=2018,
+                cand_election_year=2020
+            )
+        ]
+        self.presidential_totals = [
+            factories.TotalsPresidentialFactory(
+                receipts=50,
+                disbursements=75,
+                committee_id=self.president_committees[0].committee_id,
+                coverage_end_date=datetime.datetime(2019, 9, 30),
+                last_cash_on_hand_end_period=0,
+                cycle=2020,
+            ),
+            factories.TotalsPresidentialFactory(
+                receipts=1,
+                disbursements=1,
+                committee_id=self.president_committees[1].committee_id,
+                coverage_end_date=datetime.datetime(2017, 12, 31),
+                last_cash_on_hand_end_period=100,
+                cycle=2018,
+            ),
+            factories.TotalsPresidentialFactory(
+                receipts=25,
+                disbursements=10,
+                committee_id=self.president_committees[0].committee_id,
+                coverage_end_date=datetime.datetime(2017, 12, 31),
+                last_cash_on_hand_end_period=300,
+                cycle=2018,
             ),
         ]
 
@@ -216,6 +300,27 @@ class TestElections(ApiBaseTest):
             each.committee_id for each in self.committees
             if each.designation != 'J')
 
+    def test_president_elections_full(self):
+        results = self._results(
+            api.url_for(
+                ElectionView,
+                office='president', cycle=2020, election_full='true',
+            )
+        )
+        totals = self.presidential_totals
+        cash_on_hand_totals = self.presidential_totals[:2]
+        expected = {
+            'candidate_id': self.president_candidate.candidate_id,
+            'candidate_name': self.president_candidate.name,
+            'incumbent_challenge_full': self.president_candidate.incumbent_challenge_full,
+            'party_full': self.president_candidate.party_full,
+            'total_receipts': sum(each.receipts for each in totals),
+            'total_disbursements': sum(each.disbursements for each in totals),
+            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in cash_on_hand_totals),
+        }
+        assert len(results) == 1
+        assert_dicts_subset(results[0], expected)
+
     def test_electionview_excludes_jfc(self):
         self.candidate_committee_links[0].committee_designation = 'J'
         self.committees[0].designation = 'J'
@@ -246,8 +351,9 @@ class TestElections(ApiBaseTest):
         }
         assert len(results) == 1
         assert_dicts_subset(results[0], expected)
-        assert set(results[0]['committee_ids']) == set(each.committee_id for each in self.committees if each.designation != 'J')
-
+        assert set(results[0]['committee_ids']) == set(
+            each.committee_id for each in self.committees
+            if each.designation != 'J')
     def test_election_summary(self):
         results = self._response(api.url_for(ElectionSummary, office='senate', cycle=2012, state='NY'))
         totals = [each for each in self.totals if each.cycle == 2012]
