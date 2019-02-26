@@ -72,6 +72,7 @@ def sqla_conn_string():
     if not sqla_conn_string:
         print("Environment variable SQLA_CONN is empty; running against " + "local `cfdm_test`")
         sqla_conn_string = 'postgresql://:@/cfdm_test'
+    print('db:{}'.format(sqla_conn_string))
     return sqla_conn_string
 
 # app.debug = True

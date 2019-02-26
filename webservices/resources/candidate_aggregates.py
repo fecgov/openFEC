@@ -149,7 +149,6 @@ class TotalsCandidateView(ApiResource):
             ('party', history.party),
             ('state', history.state),
             ('district', history.district),
-            ('candidate_inactive', history.candidate_inactive)
         ]
 
     def filter_range_fields(self, model):
@@ -166,9 +165,13 @@ class TotalsCandidateView(ApiResource):
         ('has_raised_funds', models.CandidateTotal.has_raised_funds),
         ('federal_funds_flag', models.CandidateTotal.federal_funds_flag),
         ('election_full', models.CandidateTotal.is_election),
+        ('candidate_inactive', models.CandidateHistoryWithFuture.candidate_inactive),
     ]
 
     def build_query(self, **kwargs):
+        #print(**kwargs)
+        for k,v in kwargs.items():
+            print(k,v)
         history = models.CandidateHistoryWithFuture
         query = db.session.query(
             history.__table__,
@@ -188,8 +191,13 @@ class TotalsCandidateView(ApiResource):
                 models.CandidateSearch,
                 history.candidate_id == models.CandidateSearch.id,
             )
+        # if kargs.get('candidate_inactive'):    
+        #     query = query.filter(
+        #         history.candidate_inactive == kwargs['candidate_inactive']
+        #     ) 
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history, models.CandidateTotal))
         query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         query = filters.filter_match(query, kwargs, self.filter_match_fields)
+        print('********current query:{}'.format(query))
         return query
