@@ -192,3 +192,40 @@ class TotalsCandidateView(ApiResource):
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         query = filters.filter_match(query, kwargs, self.filter_match_fields)
         return query
+
+@doc(
+    tags=['candidate'],
+    description=docs.TOTAL_BY_OFFICE_TAG,
+)
+class AggregateByOfficeView(ApiResource):
+
+    schema = schemas.TotalByOfficeSchema
+    page_schema = schemas.TotalByOfficePageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.totals_by_office,
+            args.make_sort_args(),
+        )
+
+    def build_query(self, **kwargs):
+        history = models.CandidateHistoryWithFuture
+        total = models.CandidateTotal
+        check_active = ~db.session.query(
+            history
+        ).filter(
+            history.candidate_id == total.candidate_id,
+            history.candidate_election_year == total.election_year,
+            history.candidate_inactive.is_(True)
+        ).exists()
+
+        query = db.session.query(
+            sa.func.sum(total.receipts).label('total_receipt'),
+            sa.func.sum(total.disbursements).label('total_disbursement')
+        ).filter(
+            sa.func.substr(total.candidate_id, 1, 1) == kwargs['office'],
+            total.election_year == kwargs['election_year']
+        ).filter(check_active)
+        return query
