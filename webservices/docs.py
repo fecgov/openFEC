@@ -1549,3 +1549,6 @@ an obligation to make disbursements (SB date of disbursement).
 EC_SUB_ID = '''
 The identifier for each electioneering record.
 '''
+
+TOTAL_BY_OFFICE_TAG = ''' Aggregated candidate receipts and disbursements grouped by office by cycle.
+'''
