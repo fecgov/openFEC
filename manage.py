@@ -254,7 +254,7 @@ def cf_startup():
     """Migrate schemas on `cf push`."""
     check_config()
     if env.index == '0':
-        subprocess.Popen(['python', 'manage.py', 'refresh_materialized'])
+        subprocess.Popen(['python', '', 'refresh_materialized'])
 
 @manager.command
 def load_efile_sheets():
@@ -286,7 +286,7 @@ def load_efile_sheets():
 @manager.command
 def slack_message(message):
     """ Sends a message to the bots channel. you can add this command to ping you when a task is done, etc.
-    run ./manage.py slack_message 'The message you want to post'
+    run ./ slack_message 'The message you want to post'
     """
     post_to_slack(message, '#bots')
 
