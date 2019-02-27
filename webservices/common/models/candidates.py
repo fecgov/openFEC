@@ -115,6 +115,11 @@ class CandidateHistory(BaseCandidate):
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
 
 class CandidateHistoryWithFuture(BaseCandidate):
+    """
+    fix the candidate total not showing up for future cycles.
+    refer to this link for details:
+    https://github.com/fecgov/openFEC/pull/3219 
+    """
     __tablename__ = 'ofec_candidate_history_with_future_election_mv'
 
     candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)
