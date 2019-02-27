@@ -171,9 +171,6 @@ class TotalsCandidateView(ApiResource):
 
     @print_query
     def build_query(self, **kwargs):
-        #print(**kwargs)
-        # for k,v in kwargs.items():
-        #     print(k,v)
         history = models.CandidateHistoryWithFuture
         query = db.session.query(
             history.__table__,
@@ -201,5 +198,4 @@ class TotalsCandidateView(ApiResource):
         query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         query = filters.filter_match(query, kwargs, self.filter_match_fields)
-        # print('********current query:{}'.format(query))
         return query

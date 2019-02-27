@@ -17,7 +17,8 @@ def timing(func):
         return res
     return wrapper
 
-
+# TODO: check this link to have an updated version of query print:
+# https://stackoverflow.com/questions/5631078/sqlalchemy-print-the-actual-query
 def print_query(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
