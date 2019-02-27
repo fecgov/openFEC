@@ -2,6 +2,7 @@ import sqlalchemy as sa
 
 from flask_apispec import doc, marshal_with
 
+from webservices.resources.decorators import print_query
 from webservices import args
 from webservices import utils
 from webservices import docs
@@ -165,8 +166,10 @@ class TotalsCandidateView(ApiResource):
         ('has_raised_funds', models.CandidateTotal.has_raised_funds),
         ('federal_funds_flag', models.CandidateTotal.federal_funds_flag),
         ('election_full', models.CandidateTotal.is_election),
+        ('candidate_inactive', models.CandidateHistoryWithFuture.candidate_inactive),
     ]
 
+    @print_query
     def build_query(self, **kwargs):
         history = models.CandidateHistoryWithFuture
         query = db.session.query(
@@ -187,6 +190,10 @@ class TotalsCandidateView(ApiResource):
                 models.CandidateSearch,
                 history.candidate_id == models.CandidateSearch.id,
             )
+        # if kargs.get('candidate_inactive'):    
+        #     query = query.filter(
+        #         history.candidate_inactive == kwargs['candidate_inactive']
+        #     ) 
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history, models.CandidateTotal))
         query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
