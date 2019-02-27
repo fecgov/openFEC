@@ -105,7 +105,7 @@ class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.M
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
     committee_name = db.Column('com_name', db.String, doc=docs.COMMITTEE_NAME)
     receipt_date = db.Column('timestamp', db.DateTime, index=True, doc=docs.RECEIPT_DATE)
-    filed_date = db.Column('filed_date', db.Date, index=True, doc=docs.RECEIPT_DATE)
+    filed_date = db.Column('filed_date', db.Date, index=True, doc=docs.FILED_DATE)
     load_timestamp = db.Column('create_dt', db.DateTime, doc=docs.LOAD_DATE)
     coverage_start_date = db.Column('from_date', db.Date, doc=docs.COVERAGE_START_DATE)
     coverage_end_date = db.Column('through_date', db.Date, doc=docs.COVERAGE_END_DATE)

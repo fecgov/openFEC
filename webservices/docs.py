@@ -912,6 +912,8 @@ BASE_REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. ' + BASE_
 
 RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
 
+FILED_DATE = 'Timestamp of electronic or paper record that FEC received'
+
 STATE_GENERIC = 'US state or territory'
 
 ZIP_CODE = 'Zip code'
