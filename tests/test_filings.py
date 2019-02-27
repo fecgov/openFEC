@@ -175,6 +175,17 @@ class TestEfileFiles(ApiBaseTest):
                 if min_date.isoformat() <= each['filed_date'] <= max_date.isoformat()
             )
         )
+    def test_filter_receipt_date_efile(self):
+
+        [
+            factories.EFilingsFactory(committee_id='C013', beginning_image_number=5,
+                filed_date=datetime.date(2015, 1, 1)),
+            factories.EFilingsFactory(committee_id='C014', beginning_image_number=6,
+                filed_date=datetime.date(2015, 1, 2)),
+        ]
+        results = self._results(api.url_for(EFilingsView,
+            min_receipt_date=datetime.date(2015, 1, 1), max_receipt_date=datetime.date(2015, 1, 2)))
+        self.assertEqual(len(results), 2)
 
     def test_efilings(self):
         """ Check filings returns in general endpoint"""
