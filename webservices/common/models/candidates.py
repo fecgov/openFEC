@@ -61,14 +61,14 @@ class BaseCandidate(BaseModel):
 
 
 class BaseConcreteCandidate(BaseCandidate):
-    __tablename__ = 'ofec_candidate_detail_mv'
+    __tablename__ = 'ofec_candidate_detail_vw'
 
     candidate_id = db.Column(db.String, unique=True, doc=docs.CANDIDATE_ID)
 
 
 class Candidate(BaseConcreteCandidate):
     __table_args__ = {'extend_existing': True}
-    __tablename__ = 'ofec_candidate_detail_mv'
+    __tablename__ = 'ofec_candidate_detail_vw'
 
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
 
@@ -89,7 +89,7 @@ class Candidate(BaseConcreteCandidate):
 
 class CandidateDetail(BaseConcreteCandidate):
     __table_args__ = {'extend_existing': True}
-    __tablename__ = 'ofec_candidate_detail_mv'
+    __tablename__ = 'ofec_candidate_detail_vw'
 
     address_city = db.Column(db.String(100), doc='City of candidate\'s address, as reported on their Form 2.')
     address_state = db.Column(db.String(2), doc='State of candidate\'s address, as reported on their Form 2.')
@@ -101,7 +101,7 @@ class CandidateDetail(BaseConcreteCandidate):
 
 
 class CandidateHistory(BaseCandidate):
-    __tablename__ = 'ofec_candidate_history_mv'
+    __tablename__ = 'ofec_candidate_history_vw'
 
     candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)
     two_year_period = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CANDIDATE_CYCLE)
@@ -115,7 +115,7 @@ class CandidateHistory(BaseCandidate):
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
 
 class CandidateHistoryWithFuture(BaseCandidate):
-    __tablename__ = 'ofec_candidate_history_with_future_election_mv'
+    __tablename__ = 'ofec_candidate_history_with_future_election_vw'
 
     candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)
     two_year_period = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CANDIDATE_CYCLE)
@@ -146,7 +146,7 @@ class CandidateTotal(db.Model):
 
 
 class CandidateElection(db.Model):
-    __tablename__ = 'ofec_candidate_election_mv'
+    __tablename__ = 'ofec_candidate_election_vw'
 
     candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)
     cand_election_year = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CANDIDATE_ELECTION_YEAR)
