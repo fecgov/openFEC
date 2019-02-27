@@ -716,7 +716,7 @@ candidate_totals = {
     'max_debts_owed_by_committee': Currency(description='Maximum debt'),
     'federal_funds_flag': fields.Bool(description=docs.FEDERAL_FUNDS_FLAG),
     'has_raised_funds': fields.Bool(description=docs.HAS_RAISED_FUNDS),
-    'candidate_inactive':fields.Bool(missing=False, description='Candidate inactive'),
+    'is_active':fields.Bool(description='Candidate is active'),
 }
 
 totals_committee_aggregate = {
