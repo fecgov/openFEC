@@ -222,10 +222,25 @@ class AggregateByOfficeView(ApiResource):
         ).exists()
 
         query = db.session.query(
+            sa.func.substr(total.candidate_id, 1, 1).label('office'),
+            total.election_year.label('election_year'),
             sa.func.sum(total.receipts).label('total_receipt'),
             sa.func.sum(total.disbursements).label('total_disbursement')
         ).filter(
-            sa.func.substr(total.candidate_id, 1, 1) == kwargs['office'],
-            total.election_year == kwargs['election_year']
-        ).filter(check_active)
+            total.is_election == True  # noqa
+        )
+
+        if kwargs.get('office') and kwargs['office'] is not None:
+            query = query.filter(
+                sa.func.substr(total.candidate_id, 1, 1) == kwargs['office']
+            )
+        if kwargs.get('election_year'):
+            query = query.filter(
+                total.election_year.in_(kwargs['election_year'])
+            )
+        # by default, active_candidates is set to true
+        if kwargs['active_candidates'] == True:  # noqa
+            query = query.filter(check_active)
+
+        query = query.group_by(sa.func.substr(total.candidate_id, 1, 1), total.election_year)
         return query

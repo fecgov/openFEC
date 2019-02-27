@@ -289,7 +289,7 @@ api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules
 
 api.add_resource(candidate_aggregates.TotalsCandidateView, '/candidates/totals/')
 api.add_resource(totals.ScheduleAByStateRecipientTotalsView, '/schedules/schedule_a/by_state/totals/')
-api.add_resource(candidate_aggregates.AggregateByOfficeView, '/total/by_office/')
+api.add_resource(candidate_aggregates.AggregateByOfficeView, '/candidates/totals/by_office/')
 
 api.add_resource(
     aggregates.CommunicationCostByCandidateView,

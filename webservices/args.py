@@ -859,6 +859,7 @@ operations_log = {
 }
 
 totals_by_office = {
-    'election_year': fields.Int(required=True, description=docs.CANDIDATE_CYCLE),
-    'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), required=True, description='Governmental office candidate runs for: House, Senate or presidential'),
+    'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
+    'active_candidates': fields.Bool(missing=True, description=docs.ACTIVE_CANDIDATE),
 }
