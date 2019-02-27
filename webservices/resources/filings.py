@@ -111,7 +111,7 @@ class EFilingsView(views.ApiResource):
         ('committee_id', models.EFilings.committee_id),
     ]
     filter_range_fields = [
-        (('min_receipt_date', 'max_receipt_date'), models.EFilings.receipt_date),
+        (('min_receipt_date', 'max_receipt_date'), models.EFilings.filed_date),
     ]
 
     @property
