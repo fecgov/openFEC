@@ -213,6 +213,7 @@ class AggregateByOfficeView(ApiResource):
     def build_query(self, **kwargs):
         history = models.CandidateHistoryWithFuture
         total = models.CandidateTotal
+        # check to see if candidate is marked as inactive in history
         check_active = ~db.session.query(
             history
         ).filter(
