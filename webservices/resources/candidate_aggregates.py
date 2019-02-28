@@ -166,7 +166,7 @@ class TotalsCandidateView(ApiResource):
         ('has_raised_funds', models.CandidateTotal.has_raised_funds),
         ('federal_funds_flag', models.CandidateTotal.federal_funds_flag),
         ('election_full', models.CandidateTotal.is_election),
-        ('candidate_inactive', models.CandidateHistoryWithFuture.candidate_inactive),
+        # ('candidate_inactive', models.CandidateHistoryWithFuture.candidate_inactive),
     ]
 
     @print_query
@@ -190,10 +190,10 @@ class TotalsCandidateView(ApiResource):
                 models.CandidateSearch,
                 history.candidate_id == models.CandidateSearch.id,
             )
-        # if kargs.get('candidate_inactive'):    
-        #     query = query.filter(
-        #         history.candidate_inactive == kwargs['candidate_inactive']
-        #     ) 
+        if kwargs.get('active_candidates'):  #load active candidates only if True 
+            query = query.filter(
+                history.candidate_inactive.is_(False)
+            ) 
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history, models.CandidateTotal))
         query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
