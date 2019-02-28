@@ -192,7 +192,7 @@ class TotalsCandidateView(ApiResource):
             )
         if kwargs.get('active_candidates'):  #load active candidates only if True 
             query = query.filter(
-                history.candidate_inactive.is_(False)
+                history.candidate_inactive == False
             ) 
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history, models.CandidateTotal))
         query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))

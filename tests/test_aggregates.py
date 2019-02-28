@@ -719,3 +719,92 @@ class TestCandidateAggregates(ApiBaseTest):
         )
         assert len(results) == 1
         assert_dicts_subset(results[0], {'cycle': self.next_cycle, 'receipts': 55000})
+
+
+
+
+class TestCandidateTotalsByActiveCandidates(ApiBaseTest):
+    def setUp(self):
+        super().setUp()
+        self.candidate_1 = factories.CandidateHistoryFutureFactory(
+            candidate_id='S123',
+            two_year_period=2016,
+            candidate_election_year=2016,
+            candidate_inactive=True,
+        )
+        self.candidate_2 = factories.CandidateHistoryFutureFactory(
+            candidate_id='S456',
+            two_year_period=2016,
+            candidate_election_year=2016,
+            candidate_inactive=False,
+        )
+        # self.candidate_3 = factories.CandidateHistoryFutureFactory(
+        #     candidate_id='S789',
+        #     two_year_period=2014,
+        #     candidate_election_year=2016,
+        #     candidate_inactive=True,
+        # )
+        # self.candidate_4 = factories.CandidateHistoryFutureFactory(
+        #     candidate_id='P123',
+        #     two_year_period=2018,
+        #     candidate_election_year=2020,
+        # )
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_1.candidate_id,
+            is_election=True,
+            receipts=100,
+            cycle=2016,
+            election_year=2016,
+        )
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_2.candidate_id,
+            is_election=True,
+            receipts=21,
+            cycle=2016,
+            election_year=2016,
+        )
+        # factories.CandidateTotalFactory(
+        #     candidate_id=self.candidate_3.candidate_id,
+        #     is_election=True,
+        #     receipts=5000,
+        #     cycle=2016,
+        #     election_year=2016,
+        # )
+        # factories.CandidateTotalFactory(
+        #     candidate_id=self.candidate_4.candidate_id,
+        #     is_election=True,
+        #     receipts=10000,
+        #     cycle=2020,
+        #     election_year=2020,
+        # )
+    def test_candidate_totals_by_active_candidates(self):
+        # bu default only load active candidates
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+            )
+        )
+        print(results)
+        assert len(results) == 1
+
+        # load active candidates only
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                office='S',
+                active_candidates=True,
+            )
+        )
+        print(results)
+        assert len(results) == 1
+
+        # load all candidates
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                office='S',
+                active_candidates=False,
+            )
+        )
+        print(results)
+        assert len(results) == 2
