@@ -857,3 +857,9 @@ operations_log = {
     'min_transaction_data_complete_date': fields.Date(description=docs.MIN_TRANSACTION_DATA_COMPLETE_DATE),
     'max_transaction_data_complete_date': fields.Date(description=docs.MAX_TRANSACTION_DATA_COMPLETE_DATE),
 }
+
+totals_by_office = {
+    'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
+    'active_candidates': fields.Bool(missing=True, description=docs.ACTIVE_CANDIDATE),
+}

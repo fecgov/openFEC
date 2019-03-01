@@ -19,6 +19,7 @@ from webservices.resources.candidate_aggregates import (
     ScheduleABySizeCandidateView,
     ScheduleAByStateCandidateView,
     TotalsCandidateView,
+    AggregateByOfficeView,
 )
 
 class TestCommitteeAggregates(ApiBaseTest):
@@ -719,3 +720,87 @@ class TestCandidateAggregates(ApiBaseTest):
         )
         assert len(results) == 1
         assert_dicts_subset(results[0], {'cycle': self.next_cycle, 'receipts': 55000})
+
+class TestCandidateTotalsByOffice(ApiBaseTest):
+    def setUp(self):
+        super().setUp()
+        self.candidate_1 = factories.CandidateHistoryFutureFactory(
+            candidate_id='S123',
+            candidate_election_year=2016,
+        )
+        self.candidate_2 = factories.CandidateHistoryFutureFactory(
+            candidate_id='S456',
+            candidate_election_year=2016,
+        )
+        self.candidate_3 = factories.CandidateHistoryFutureFactory(
+            candidate_id='S789',
+            two_year_period=2014,
+            candidate_election_year=2016,
+            candidate_inactive=True,
+        )
+        self.candidate_4 = factories.CandidateHistoryFutureFactory(
+            candidate_id='P123',
+            two_year_period=2018,
+            candidate_election_year=2020,
+        )
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_1.candidate_id,
+            is_election=True,
+            receipts=100,
+            cycle=2016,
+            election_year=2016,
+        )
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_1.candidate_id,
+            is_election=False,
+            receipts=200,
+            cycle=2016,
+            election_year=2016,
+        )
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_2.candidate_id,
+            is_election=True,
+            receipts=21,
+            cycle=2016,
+            election_year=2016,
+        )
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_3.candidate_id,
+            is_election=True,
+            receipts=5000,
+            cycle=2016,
+            election_year=2016,
+        )
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_4.candidate_id,
+            is_election=True,
+            receipts=10000,
+            cycle=2020,
+            election_year=2020,
+        )
+    def test_candidate_totals_by_office(self):
+        results = self._results(
+            api.url_for(
+                AggregateByOfficeView,
+            )
+        )
+        assert len(results) == 2
+
+        results = self._results(
+            api.url_for(
+                AggregateByOfficeView,
+                office='S'
+            )
+        )
+        assert len(results) == 1
+        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipt': 121})
+
+        results = self._results(
+            api.url_for(
+                AggregateByOfficeView,
+                office='S',
+                active_candidates=False,
+            )
+        )
+        assert len(results) == 1
+        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipt': 5121})
