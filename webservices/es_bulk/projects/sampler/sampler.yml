@@ -1,0 +1,149 @@
+master_query: >
+    (SELECT
+        cmte_id,
+        contbr_nm,
+        contbr_st1,
+        contbr_st2,
+        contbr_city,
+        contbr_st,
+        contbr_zip,
+        entity_tp,
+        election_tp,
+        contb_aggregate_ytd,
+        contb_receipt_dt,
+        contb_receipt_amt,
+        receipt_tp,
+        cand_id,
+        action_cd,
+        tran_id,
+        schedule_type,
+        line_num,
+        image_num,
+        CAST(file_num as varchar),
+        CAST(link_id as varchar),
+        orig_sub_id,
+        CAST(sub_id as varchar),
+        filing_form,
+        rpt_tp,
+        CAST(rpt_yr as varchar),
+        CAST(two_year_transaction_period as varchar),
+        pdf_url,
+        is_individual,
+        pg_date,
+        line_number_label,
+        cmte_tp
+    FROM disclosure.fec_fitem_sched_a_2017_2018 limit 10000000)
+    UNION
+    (SELECT
+        cmte_id,
+        contbr_nm,
+        contbr_st1,
+        contbr_st2,
+        contbr_city,
+        contbr_st,
+        contbr_zip,
+        entity_tp,
+        election_tp,
+        contb_aggregate_ytd,
+        contb_receipt_dt,
+        contb_receipt_amt,
+        receipt_tp,
+        cand_id,
+        action_cd,
+        tran_id,
+        schedule_type,
+        line_num,
+        image_num,
+        CAST(file_num as varchar),
+        CAST(link_id as varchar),
+        orig_sub_id,
+        CAST(sub_id as varchar),
+        filing_form,
+        rpt_tp,
+        CAST(rpt_yr as varchar),
+        CAST(two_year_transaction_period as varchar),
+        pdf_url,
+        is_individual,
+        pg_date,
+        line_number_label,
+        cmte_tp
+    FROM disclosure.fec_fitem_sched_a_2015_2016 limit 10000000);
+ 
+
+hidden_fields: []
+
+
+
+slave_queries: []
+
+
+# sample_bag:
+#     sql: >
+#          select ws.id sample_id,
+#                 ws.created sample_created_date,
+#                 ws.populated sample_populated_date,
+#                 ws.creator_id sample_creator_user_id,
+#                 ws.percentage sample_percentage,
+#                 ws.bag_id bag_id,
+#                 wb.cts_bag_key cts_bag_key,
+#                 wb.created bag_created_date,
+#                 wb.populated bag_populated_date,
+#                 wb.name bag_name,
+#                 wb.status bag_status,
+#                 wb.status_modified bag_status_date,
+#                 wb.status_modified_by_id bag_status_user_id,
+#                 wb.cts_bag_instance_key cts_bag_instance_key,
+#                 wb.project_id project_id,
+#                 wb.purged bag_purged_date
+#                 from web_sample ws, web_bag wb
+#                 where ws.bag_id=wb.id;
+#     merge_key: 'sample_id'
+#     aggregation_fields: []
+
+
+
+# project:
+#      sql: >
+#         select wp.id project_id,
+#                wp.name project_name,
+#                wp.cts_project_id cts_project_id
+#         from web_project wp;
+#      merge_key: 'project_id'
+#      aggregation_fields: []
+
+
+
+# tag:
+#     sql: >
+#         select wft.filesample_id filesample_id, wt.name tag
+#         from web_tag wt, web_filesample_tags wft
+#         where wt.id = wft.tag_id;
+#     merge_key: 'filesample_id'
+#     aggregation_fields: ['tag']
+
+# checked_by_user:
+#     sql: >
+#         select user.id checked_by_user_id,
+#                user.username checked_by_user,
+#                if(strcmp(user.last_name,''), concat(user.last_name, ', ', user.first_name), user.first_name) checked_by_user_name
+#         from auth_user user;
+#     merge_key: 'checked_by_user_id'
+#     aggregation_fields: []
+
+# sample_creator_user:
+#     sql: >
+#         select user.id sample_creator_user_id,
+#                user.username sample_creator_user,
+#                if(strcmp(user.last_name,''), concat(user.last_name, ', ', user.first_name), user.first_name) sample_creator_user_name
+#         from auth_user user;
+#     merge_key: 'sample_creator_user_id'
+#     aggregation_fields: []
+
+# bag_status_user:
+#     sql: >
+#         select user.id bag_status_user_id,
+#                user.username bag_status_user,
+#                if(strcmp(user.last_name,''), concat(user.last_name, ', ', user.first_name), user.first_name) bag_status_user_name
+#         from auth_user user;
+#     merge_key: 'bag_status_user_id'
+#     aggregation_fields: []
