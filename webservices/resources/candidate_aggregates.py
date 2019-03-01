@@ -169,10 +169,11 @@ class TotalsCandidateView(ApiResource):
         # ('candidate_inactive', models.CandidateHistoryWithFuture.candidate_inactive),
     ]
 
-    @print_query
+    #@print_query
     def build_query(self, **kwargs):
         history = models.CandidateHistoryWithFuture
         query = db.session.query(
+            #history
             history.__table__,
             models.CandidateTotal.__table__
         ).join(
