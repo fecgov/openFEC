@@ -168,7 +168,6 @@ class TotalsCandidateView(ApiResource):
         ('election_full', models.CandidateTotal.is_election),
     ]
 
-    #@print_query
     def build_query(self, **kwargs):
         history = models.CandidateHistoryWithFuture
         query = db.session.query(
