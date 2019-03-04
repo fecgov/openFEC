@@ -912,6 +912,8 @@ BASE_REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. ' + BASE_
 
 RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
 
+FILED_DATE = 'Timestamp of electronic or paper record that FEC received'
+
 STATE_GENERIC = 'US state or territory'
 
 ZIP_CODE = 'Zip code'
@@ -1550,7 +1552,9 @@ EC_SUB_ID = '''
 The identifier for each electioneering record.
 '''
 
-ACTIVE_CANDIDATE = ''' 
-Candidates who are actively running. By default, only active candidates
+TOTAL_BY_OFFICE_TAG = ''' Aggregated candidate receipts and disbursements grouped by office by cycle.
+'''
+
+ACTIVE_CANDIDATE = ''' Candidates who are actively running. By default, only active candidates
 data is returned. When False is selected, active and inactive candidates data is returned.
 '''
