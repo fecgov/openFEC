@@ -166,14 +166,12 @@ class TotalsCandidateView(ApiResource):
         ('has_raised_funds', models.CandidateTotal.has_raised_funds),
         ('federal_funds_flag', models.CandidateTotal.federal_funds_flag),
         ('election_full', models.CandidateTotal.is_election),
-        # ('candidate_inactive', models.CandidateHistoryWithFuture.candidate_inactive),
     ]
 
     #@print_query
     def build_query(self, **kwargs):
         history = models.CandidateHistoryWithFuture
         query = db.session.query(
-            #history
             history.__table__,
             models.CandidateTotal.__table__
         ).join(
