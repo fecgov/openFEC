@@ -155,26 +155,43 @@ class TestEfileFiles(ApiBaseTest):
 
     def test_filter_date_efile(self):
         [
-            factories.EFilingsFactory(committee_id='C010', beginning_image_number=2, receipt_date=datetime.date(2012, 1, 1)),
-            factories.EFilingsFactory(committee_id='C011', beginning_image_number=3, receipt_date=datetime.date(2013, 1, 1)),
-            factories.EFilingsFactory(committee_id='C012', beginning_image_number=4, receipt_date=datetime.date(2014, 1, 1)),
-            factories.EFilingsFactory(committee_id='C013', beginning_image_number=5, receipt_date=datetime.date(2015, 1, 1)),
+
+            factories.EFilingsFactory(committee_id='C010', beginning_image_number=2, filed_date=datetime.date(2012, 1, 1)),
+            factories.EFilingsFactory(committee_id='C011', beginning_image_number=3, filed_date=datetime.date(2013, 1, 1)),
+            factories.EFilingsFactory(committee_id='C012', beginning_image_number=4, filed_date=datetime.date(2014, 1, 1)),
+            factories.EFilingsFactory(committee_id='C013', beginning_image_number=5, filed_date=datetime.date(2015, 1, 1)),
+
         ]
 
         min_date = datetime.date(2013, 1, 1)
         r = self._results(api.url_for(EFilingsView))
         results = self._results(api.url_for(EFilingsView, min_receipt_date=min_date))
-        self.assertTrue(all(each for each in results if each['receipt_date'] >= min_date.isoformat()))
+
+        self.assertTrue(all(each for each in results if each['filed_date'] >= min_date.isoformat()))
         max_date = datetime.date(2014, 1, 1)
         results = self._results(api.url_for(EFilingsView, max_receipt_date=max_date))
-        self.assertTrue(all(each for each in results if each['receipt_date'] <= max_date.isoformat()))
+        self.assertTrue(all(each for each in results if each['filed_date'] <= max_date.isoformat()))
+
         results = self._results(api.url_for(EFilingsView, min_receipt_date=min_date, max_receipt_date=max_date))
         self.assertTrue(
             all(
                 each for each in results
-                if min_date.isoformat() <= each['receipt_date'] <= max_date.isoformat()
+
+                if min_date.isoformat() <= each['filed_date'] <= max_date.isoformat()
             )
         )
+    def test_filter_receipt_date_efile(self):
+
+        [
+            factories.EFilingsFactory(committee_id='C013', beginning_image_number=5,
+                filed_date=datetime.date(2015, 1, 1)),
+            factories.EFilingsFactory(committee_id='C014', beginning_image_number=6,
+                filed_date=datetime.date(2015, 1, 2)),
+        ]
+        results = self._results(api.url_for(EFilingsView,
+            min_receipt_date=datetime.date(2015, 1, 1), max_receipt_date=datetime.date(2015, 1, 2)))
+        self.assertEqual(len(results), 2)
+
 
     def test_efilings(self):
         """ Check filings returns in general endpoint"""
