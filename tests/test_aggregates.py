@@ -656,7 +656,7 @@ class TestCandidateAggregates(ApiBaseTest):
         assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 75})
 
         # candidate_zero
-        # by default, load active candidates only
+        # by default, load all candidates
         results = self._results(
             api.url_for(
                 TotalsCandidateView,
@@ -664,7 +664,8 @@ class TestCandidateAggregates(ApiBaseTest):
                 cycle=2018,
             )
         )
-        assert len(results) == 0
+        assert len(results) == 1
+        assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 0})
 
          #active candidate test
         results = self._results(
@@ -672,11 +673,10 @@ class TestCandidateAggregates(ApiBaseTest):
                 TotalsCandidateView,
                 candidate_id=self.candidate_zero.candidate_id,
                 cycle=2018,
-                active_candidates=False
+                active_candidates=True
             )
         )
-        assert len(results) == 1
-        assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 0})
+        assert len(results) == 0
 
         # candidate_17_18
         results = self._results(
@@ -700,6 +700,17 @@ class TestCandidateAggregates(ApiBaseTest):
         )
         assert len(results) == 1
         assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 100})
+
+      # active candidats tst3: load active candidates only
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate_17_18.candidate_id,
+                cycle=2018,
+                active_candidates=True
+            )
+        )
+        assert len(results) == 1
 
         # candidate_17_only
         results = self._results(
