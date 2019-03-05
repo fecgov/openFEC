@@ -120,6 +120,7 @@ class CandidateHistoryWithFuture(BaseCandidate):
     refer to this link for details:
     https://github.com/fecgov/openFEC/pull/3219 
     """
+
     __tablename__ = 'ofec_candidate_history_with_future_election_mv'
 
     candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)

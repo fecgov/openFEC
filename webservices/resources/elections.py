@@ -145,23 +145,26 @@ class ElectionView(ApiResource):
     def build_query(self, **kwargs):
         utils.check_election_arguments(kwargs)
         totals_model = office_totals_map[kwargs['office']]
-        pairs = self._get_pairs(totals_model, kwargs).subquery()
+        basicPairs = self._get_basicPairs(totals_model, kwargs).subquery()
+        pairs = self._get_pairs(basicPairs).subquery()
         aggregates = self._get_aggregates(pairs).subquery()
-        latest = self._get_latest(pairs).subquery()
-        return db.session.query(
-            aggregates,
-            latest,
+
+        candAggregates = self._get_candAggregates(aggregates).subquery()
+
+        final_query = db.session.query(
+            candAggregates,
             BaseConcreteCommittee.name.label('candidate_pcc_name')
         ).outerjoin(
-            latest,
-            aggregates.c.candidate_id == latest.c.candidate_id,
-        ).outerjoin(
             BaseConcreteCommittee,
-            aggregates.c.candidate_pcc_id == BaseConcreteCommittee.committee_id
+            candAggregates.c.candidate_pcc_id == BaseConcreteCommittee.committee_id
         ).distinct()
 
-    def _get_pairs(self, totals_model, kwargs):
-        pairs = CandidateHistory.query.with_entities(
+        return final_query
+
+
+    def _get_basicPairs(self, totals_model, kwargs):
+        # get basic data for election totals
+        basicPairs = CandidateHistory.query.with_entities(
             CandidateHistory.candidate_id,
             CandidateHistory.name,
             CandidateHistory.party_full,
@@ -169,10 +172,12 @@ class ElectionView(ApiResource):
             CandidateHistory.office,
             CandidateHistory.two_year_period,
             CandidateHistory.candidate_election_year,
-            CandidateCommitteeLink.committee_id,
-            totals_model.receipts,
-            totals_model.disbursements,
-            totals_model.last_cash_on_hand_end_period.label('cash_on_hand_end_period'),
+
+            CandidateCommitteeLink.committee_id.label('committee_id'),
+            totals_model.receipts.label('receipts'),
+            totals_model.disbursements.label('disbursements'),
+            totals_model.last_cash_on_hand_end_period.label('last_cash_on_hand_end_period'),
+
             totals_model.coverage_end_date,
             sa.case(
                 [(CandidateCommitteeLink.committee_designation == 'P', CandidateCommitteeLink.committee_id)]  # noqa
@@ -180,48 +185,93 @@ class ElectionView(ApiResource):
         ).filter(
             CandidateCommitteeLink.committee_designation.in_(['P', 'A'])
         )
-        pairs = join_candidate_totals(pairs, kwargs, totals_model)
-        pairs = filter_candidate_totals(pairs, kwargs, totals_model)
+        basicPairs = join_candidate_totals(basicPairs, kwargs, totals_model)
+        basicPairs = filter_candidate_totals(basicPairs, kwargs, totals_model)
+
+
+        return basicPairs
+
+    def _get_pairs(self, basicPairs):
+        # get cash_on_hand_end_period info from the latest financial report
+        #   per candidate_id/candidate_election_year/cmte_id
+    
+        # when newlest financial report not filed yet, the financial data columns will be null, 
+        #   take the data from the previous filing for calculation.
+        # However, when the latest fincial report filed, but COH is null, the null (will be convert to 0 in final calculation) should be used.
+
+        # Window params   
+        window_p = {
+        'partition_by': [basicPairs.c.candidate_id, basicPairs.c.candidate_election_year, basicPairs.c.committee_id], 
+        'order_by': [sa.case([(basicPairs.c.coverage_end_date.isnot(None), basicPairs.c.two_year_period)]).desc().nullslast()]
+        }
+    
+        pairs = db.session.query(
+            basicPairs.c.candidate_id,
+            basicPairs.c.name,
+            basicPairs.c.party_full,
+            basicPairs.c.incumbent_challenge_full,
+            basicPairs.c.office,
+            basicPairs.c.two_year_period,
+            basicPairs.c.candidate_election_year,
+            basicPairs.c.committee_id,
+            basicPairs.c.receipts.label('receipts'),
+            basicPairs.c.disbursements.label('disbursements'),
+            sa.func.first_value(basicPairs.c.last_cash_on_hand_end_period).over(**window_p).label('last_cash_on_hand_end_period'),
+            sa.func.first_value(basicPairs.c.coverage_end_date).over(**window_p).label('coverage_end_date'),
+            basicPairs.c.candidate_pcc_id
+
+        )
         return pairs
 
-    def _get_latest(self, pairs):
-        latest = db.session.query(
-            pairs.c.cash_on_hand_end_period,
-            pairs.c.candidate_id,
-        ).distinct(
-            pairs.c.candidate_id,
-            pairs.c.cmte_id,
-        ).order_by(
-            pairs.c.candidate_id,
-            pairs.c.cmte_id,
-            sa.desc(pairs.c.two_year_period),
-        ).subquery()
-        return db.session.query(
-            latest.c.candidate_id,
-            sa.func.sum(sa.func.coalesce(latest.c.cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
-        ).group_by(
-            latest.c.candidate_id,
-        )
-
     def _get_aggregates(self, pairs):
-        return db.session.query(
+        # sum up values per candidate_id/candidate_election_year/cmte_id
+        aggregates = db.session.query(
             pairs.c.candidate_id,
             pairs.c.candidate_election_year,
+
+            pairs.c.committee_id,
+
             sa.func.max(pairs.c.name).label('candidate_name'),
             sa.func.max(pairs.c.party_full).label('party_full'),
             sa.func.max(pairs.c.incumbent_challenge_full).label('incumbent_challenge_full'),
             sa.func.max(pairs.c.office).label('office'),
-            sa.func.sum(sa.func.coalesce(pairs.c.receipts, 0.0)).label('total_receipts'),
-            sa.func.sum(sa.func.coalesce(pairs.c.disbursements, 0.0)).label('total_disbursements'),
-            sa.func.sum(sa.func.coalesce(pairs.c.cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
-            sa.func.array_agg(sa.distinct(pairs.c.cmte_id)).label('committee_ids'),
+
+            sa.func.sum(sa.func.coalesce(pairs.c.receipts, 0.0)).label('receipts'),
+            sa.func.sum(sa.func.coalesce(pairs.c.disbursements, 0.0)).label('disbursements'),
+            sa.func.max(sa.func.coalesce(pairs.c.last_cash_on_hand_end_period, 0.0)).label('last_cash_on_hand_end_period'),
+
             sa.func.max(pairs.c.coverage_end_date).label('coverage_end_date'),
             sa.func.max(pairs.c.candidate_pcc_id).label('candidate_pcc_id')
         ).group_by(
             pairs.c.candidate_id,
-            pairs.c.candidate_election_year
-        )
 
+            pairs.c.candidate_election_year,
+            pairs.c.committee_id
+
+        )
+        return aggregates
+
+
+    def _get_candAggregates(self, aggregates):
+        # sum up values per candidate_id/candidate_election_year
+        candAggregates=db.session.query(
+            aggregates.c.candidate_id,
+            aggregates.c.candidate_election_year,
+            sa.func.max(aggregates.c.candidate_name).label('candidate_name'),
+            sa.func.max(aggregates.c.party_full).label('party_full'),
+            sa.func.max(aggregates.c.incumbent_challenge_full).label('incumbent_challenge_full'),
+            sa.func.max(aggregates.c.office).label('office'),
+            sa.func.sum(sa.func.coalesce(aggregates.c.receipts, 0.0)).label('total_receipts'),
+            sa.func.sum(sa.func.coalesce(aggregates.c.disbursements, 0.0)).label('total_disbursements'),
+            sa.func.sum(sa.func.coalesce(aggregates.c.last_cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
+            sa.func.array_agg(sa.distinct(aggregates.c. committee_id)).label('committee_ids'),
+            sa.func.max(aggregates.c.coverage_end_date).label('coverage_end_date'),
+            sa.func.max(aggregates.c.candidate_pcc_id).label('candidate_pcc_id')
+        ).group_by(
+            aggregates.c.candidate_id,
+            aggregates.c.candidate_election_year
+        )
+        return candAggregates
 
 @doc(
     description=docs.ELECTION_SEARCH,

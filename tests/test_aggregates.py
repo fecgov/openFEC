@@ -149,6 +149,7 @@ class TestCommitteeAggregates(ApiBaseTest):
     def test_disbursement_recipient_id_total(self):
         committee = factories.CommitteeHistoryFactory(cycle=2012)
 
+
         aggregate = factories.ScheduleBByRecipientIDFactory(
             committee_id=committee.committee_id,
             cycle=committee.cycle,
@@ -177,6 +178,7 @@ class TestCommitteeAggregates(ApiBaseTest):
             'memo_count': aggregate.memo_count,
         }
         self.assertEqual(results[0], expected)
+
 
 class TestAggregates(ApiBaseTest):
     cases = [
@@ -383,6 +385,7 @@ class TestCandidateAggregates(ApiBaseTest):
             two_year_period=2018,
             candidate_election_year=2018,
             candidate_inactive=True,
+
         )
         factories.CandidateDetailFactory(
             candidate_id=self.candidate_zero.candidate_id,
@@ -401,6 +404,7 @@ class TestCandidateAggregates(ApiBaseTest):
             two_year_period=2018,
             candidate_election_year=2018,
             candidate_inactive=False,
+
         )
         self.committees_17_18 = [
             factories.CommitteeHistoryFactory(cycle=2018, designation='P'),
@@ -689,6 +693,7 @@ class TestCandidateAggregates(ApiBaseTest):
         assert len(results) == 1
         assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 100})
 
+
       # active candidats tst2
         results = self._results(
             api.url_for(
@@ -759,9 +764,8 @@ class TestCandidateAggregates(ApiBaseTest):
         assert_dicts_subset(results[0], {'cycle': self.next_cycle, 'receipts': 55000})
 
 
+class TestCandidateTotalsByOffice(ApiBaseTest):
 
-
-class TestCandidateTotalsByActiveCandidates(ApiBaseTest):
     def setUp(self):
         super().setUp()
         self.candidate_1 = factories.CandidateHistoryFutureFactory(
