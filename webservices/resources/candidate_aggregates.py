@@ -203,7 +203,6 @@ class TotalsCandidateView(ApiResource):
         query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         query = filters.filter_match(query, kwargs, self.filter_match_fields)
-        print(query)
         return query
 
 @doc(
