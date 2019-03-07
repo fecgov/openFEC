@@ -9,6 +9,7 @@ import os
 import sqlalchemy as sa
 import flask_cors as cors
 import flask_restful as restful
+from datetime import datetime, time
 
 from flask import abort
 from flask import request
@@ -157,10 +158,16 @@ def limit_remote_addr():
 
 def get_cache_duration(url):
 
+    # Time in seconds
     EFILING_CACHE = 0
     LEGAL_CACHE = 60 * 5
     CALENDAR_CACHE = 60 * 5
     DEFAULT_CACHE = 60 * 60
+    PEAK_HOURS_CACHE = 60 * 60 * 5
+
+    # cloud.gov time is in UTC (add 5 for ET)
+    PEAK_HOURS_START = time(9 + 5)  # 9:00 ET
+    PEAK_HOURS_END = time(17 + 5)  # 17:00 ET
 
     if '/efile/' in url:
         return EFILING_CACHE
@@ -168,6 +175,13 @@ def get_cache_duration(url):
         return CALENDAR_CACHE
     elif '/legal/' in url:
         return LEGAL_CACHE
+
+    within_extra_caching_hours = (
+        PEAK_HOURS_START <= datetime.now().time() <= PEAK_HOURS_END
+    )
+
+    if within_extra_caching_hours:
+        return PEAK_HOURS_CACHE
 
     return DEFAULT_CACHE
 
