@@ -165,9 +165,13 @@ def get_cache_duration(url):
     DEFAULT_CACHE = 60 * 60
     PEAK_HOURS_CACHE = 60 * 60 * 5
 
-    # cloud.gov time is in UTC (add 5 for ET)
+    # cloud.gov time is in UTC (UTC = ET + 5 hours)
     PEAK_HOURS_START = time(9 + 5)  # 9:00 ET
     PEAK_HOURS_END = time(17 + 5)  # 17:00 ET
+
+    now_between_peak_hours = (
+        PEAK_HOURS_START <= datetime.now().time() <= PEAK_HOURS_END
+    )
 
     if '/efile/' in url:
         return EFILING_CACHE
@@ -175,12 +179,7 @@ def get_cache_duration(url):
         return CALENDAR_CACHE
     elif '/legal/' in url:
         return LEGAL_CACHE
-
-    within_extra_caching_hours = (
-        PEAK_HOURS_START <= datetime.now().time() <= PEAK_HOURS_END
-    )
-
-    if within_extra_caching_hours:
+    elif now_between_peak_hours:
         return PEAK_HOURS_CACHE
 
     return DEFAULT_CACHE
