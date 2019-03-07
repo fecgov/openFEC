@@ -38,7 +38,7 @@ class ScheduleBView(ItemizedResource):
 
     ]
     filter_match_fields = [
-        ('two_year_transaction_period', models.ScheduleB.two_year_transaction_period),
+        # ('two_year_transaction_period', models.ScheduleB.two_year_transaction_period),
     ]
     filter_fulltext_fields = [
         ('recipient_name', models.ScheduleB.recipient_name_text),
@@ -75,6 +75,9 @@ class ScheduleBView(ItemizedResource):
                 form, line_no = kwargs.get('line_number').split('-')
                 query = query.filter_by(filing_form=form.upper())
                 query = query.filter_by(line_number=line_no)
+        if 'two_year_transaction_period' in kwargs:
+            query = filters.filter_match_fields(query, kwargs, ['two_year_transaction_period'])
+        print(query)
         return query
 
 

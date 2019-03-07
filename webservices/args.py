@@ -485,8 +485,8 @@ schedule_a = {
     ),
     'two_year_transaction_period': fields.Int(
         description=docs.TWO_YEAR_TRANSACTION_PERIOD,
-        required=True,
-        missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
+        # required=True,
+        # missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
     ),
     'recipient_committee_type': fields.List(
         IStr(validate=validate.OneOf([
@@ -561,8 +561,8 @@ schedule_b = {
     'last_disbursement_amount': fields.Float(missing=None, description='When sorting by `disbursement_amount`, this is populated with the `disbursement_amount` of the last result.  However, you will need to pass the index of that last result to `last_index` to get the next page.'),
     'two_year_transaction_period': fields.Int(
         description=docs.TWO_YEAR_TRANSACTION_PERIOD,
-        required=True,
-        missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
+        # required=True,
+        # missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
     ),
     'spender_committee_type': fields.List(
         IStr(validate=validate.OneOf([

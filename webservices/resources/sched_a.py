@@ -42,7 +42,7 @@ class ScheduleAView(ItemizedResource):
     ]
     filter_match_fields = [
         ('is_individual', models.ScheduleA.is_individual),
-        ('two_year_transaction_period', models.ScheduleA.two_year_transaction_period),
+        # ('two_year_transaction_period', models.ScheduleA.two_year_transaction_period),
     ]
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleA.contribution_receipt_date),
@@ -101,6 +101,9 @@ class ScheduleAView(ItemizedResource):
                 form, line_no = kwargs.get('line_number').split('-')
                 query = query.filter_by(filing_form=form.upper())
                 query = query.filter_by(line_number=line_no)
+        if 'two_year_transaction_period' in kwargs:
+            query = filters.filter_match(query, kwargs, ['two_year_transaction_period'])
+        print(query)
         return query
 
 @doc(
