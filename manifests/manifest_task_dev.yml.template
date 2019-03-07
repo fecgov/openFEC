@@ -19,5 +19,5 @@ applications:
   - fec-api-search56
   - fec-creds-dev
   - fec-redis
-  stack: cflinuxfs2
+  stack: cflinuxfs3
   health-check-type: process
