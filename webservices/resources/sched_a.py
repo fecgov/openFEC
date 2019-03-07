@@ -80,7 +80,11 @@ class ScheduleAView(ItemizedResource):
         )
 
     def build_query(self, **kwargs):
+        for k,v in kwargs.items():
+            print(k,v)
+        print('*****done.')
         query = super().build_query(**kwargs)
+        #print(query)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
         zip_list = []
         if kwargs.get('contributor_zip'):
@@ -101,8 +105,10 @@ class ScheduleAView(ItemizedResource):
                 form, line_no = kwargs.get('line_number').split('-')
                 query = query.filter_by(filing_form=form.upper())
                 query = query.filter_by(line_number=line_no)
+        # print(query)
         if 'two_year_transaction_period' in kwargs:
-            query = filters.filter_match(query, kwargs, ['two_year_transaction_period'])
+            match_f = [('two_year_transaction_period', models.ScheduleA.two_year_transaction_period)]
+            query = filters.filter_match(query, kwargs, match_f)
         print(query)
         return query
 

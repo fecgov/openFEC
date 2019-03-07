@@ -5,6 +5,7 @@ from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
+from webservices import filters
 from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
@@ -76,8 +77,8 @@ class ScheduleBView(ItemizedResource):
                 query = query.filter_by(filing_form=form.upper())
                 query = query.filter_by(line_number=line_no)
         if 'two_year_transaction_period' in kwargs:
-            query = filters.filter_match_fields(query, kwargs, ['two_year_transaction_period'])
-        print(query)
+            match_f = [('two_year_transaction_period', models.ScheduleB.two_year_transaction_period)]
+            query = filters.filter_match(query, kwargs, match_f)
         return query
 
 
