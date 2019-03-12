@@ -716,6 +716,7 @@ candidate_totals = {
     'max_debts_owed_by_committee': Currency(description='Maximum debt'),
     'federal_funds_flag': fields.Bool(description=docs.FEDERAL_FUNDS_FLAG),
     'has_raised_funds': fields.Bool(description=docs.HAS_RAISED_FUNDS),
+    'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
 }
 
 totals_committee_aggregate = {
@@ -856,4 +857,10 @@ operations_log = {
     'max_coverage_end_date': fields.Date(description=docs.MAX_COVERAGE_END_DATE),
     'min_transaction_data_complete_date': fields.Date(description=docs.MIN_TRANSACTION_DATA_COMPLETE_DATE),
     'max_transaction_data_complete_date': fields.Date(description=docs.MAX_TRANSACTION_DATA_COMPLETE_DATE),
+}
+
+totals_by_office = {
+    'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
+    'active_candidates': fields.Bool(missing=True, description=docs.ACTIVE_CANDIDATE),
 }

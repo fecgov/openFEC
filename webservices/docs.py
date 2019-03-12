@@ -912,6 +912,8 @@ BASE_REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. ' + BASE_
 
 RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
 
+FILED_DATE = 'Timestamp of electronic or paper record that FEC received'
+
 STATE_GENERIC = 'US state or territory'
 
 ZIP_CODE = 'Zip code'
@@ -1548,4 +1550,12 @@ an obligation to make disbursements (SB date of disbursement).
 '''
 EC_SUB_ID = '''
 The identifier for each electioneering record.
+'''
+
+TOTAL_BY_OFFICE_TAG = ''' Aggregated candidate receipts and disbursements grouped by office by cycle.
+'''
+
+ACTIVE_CANDIDATE = ''' Candidates who are actively running. if no value specified, all candidates
+data is returned. When True is specified, only active candidates data are returned. When False is 
+specified, only inactive candidates data is returned.
 '''

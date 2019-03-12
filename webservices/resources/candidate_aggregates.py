@@ -187,8 +187,73 @@ class TotalsCandidateView(ApiResource):
                 models.CandidateSearch,
                 history.candidate_id == models.CandidateSearch.id,
             )
+
+        if 'is_active_candidate' in kwargs and kwargs.get('is_active_candidate'):  #load active candidates only if True
+            query = query.filter(
+                history.candidate_inactive == False
+            )
+        elif 'is_active_candidate' in kwargs and not kwargs.get('is_active_candidate'):  #load inactive candidates only if False
+            query = query.filter(
+                history.candidate_inactive == True
+            )
+        else: #load all candidates
+            pass
+
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history, models.CandidateTotal))
         query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         query = filters.filter_match(query, kwargs, self.filter_match_fields)
+        return query
+
+@doc(
+    tags=['candidate'],
+    description=docs.TOTAL_BY_OFFICE_TAG,
+)
+class AggregateByOfficeView(ApiResource):
+
+    schema = schemas.TotalByOfficeSchema
+    page_schema = schemas.TotalByOfficePageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.totals_by_office,
+            args.make_sort_args(),
+        )
+
+    def build_query(self, **kwargs):
+        history = models.CandidateHistoryWithFuture
+        total = models.CandidateTotal
+        # check to see if candidate is marked as inactive in history
+        check_active = ~db.session.query(
+            history
+        ).filter(
+            history.candidate_id == total.candidate_id,
+            history.candidate_election_year == total.election_year,
+            history.candidate_inactive.is_(True)
+        ).exists()
+
+        query = db.session.query(
+            sa.func.substr(total.candidate_id, 1, 1).label('office'),
+            total.election_year.label('election_year'),
+            sa.func.sum(total.receipts).label('total_receipt'),
+            sa.func.sum(total.disbursements).label('total_disbursement')
+        ).filter(
+            total.is_election == True  # noqa
+        )
+
+        if kwargs.get('office') and kwargs['office'] is not None:
+            query = query.filter(
+                sa.func.substr(total.candidate_id, 1, 1) == kwargs['office']
+            )
+        if kwargs.get('election_year'):
+            query = query.filter(
+                total.election_year.in_(kwargs['election_year'])
+            )
+        # by default, active_candidates is set to true
+        if kwargs['active_candidates'] == True:  # noqa
+            query = query.filter(check_active)
+
+        query = query.group_by(sa.func.substr(total.candidate_id, 1, 1), total.election_year)
         return query
