@@ -1,5 +1,5 @@
 git+https://github.com/fecgov/apispec.git@dev
-prance[osv]>=0.11 # use apispec[validation] once we no longer fork apispec
+#prance[osv]>=0.11 # pathlib dependency is breaking pytest
 cfenv==0.5.2
 invoke==0.15.0
 psycopg2==2.7.1
