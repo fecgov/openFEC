@@ -149,6 +149,7 @@ class TestCommitteeAggregates(ApiBaseTest):
     def test_disbursement_recipient_id_total(self):
         committee = factories.CommitteeHistoryFactory(cycle=2012)
 
+
         aggregate = factories.ScheduleBByRecipientIDFactory(
             committee_id=committee.committee_id,
             cycle=committee.cycle,
@@ -177,6 +178,7 @@ class TestCommitteeAggregates(ApiBaseTest):
             'memo_count': aggregate.memo_count,
         }
         self.assertEqual(results[0], expected)
+
 
 class TestAggregates(ApiBaseTest):
     cases = [
@@ -382,6 +384,8 @@ class TestCandidateAggregates(ApiBaseTest):
             candidate_id='H321',
             two_year_period=2018,
             candidate_election_year=2018,
+            candidate_inactive=True,
+
         )
         factories.CandidateDetailFactory(
             candidate_id=self.candidate_zero.candidate_id,
@@ -399,6 +403,8 @@ class TestCandidateAggregates(ApiBaseTest):
             candidate_id='S456',
             two_year_period=2018,
             candidate_election_year=2018,
+            candidate_inactive=False,
+
         )
         self.committees_17_18 = [
             factories.CommitteeHistoryFactory(cycle=2018, designation='P'),
@@ -654,6 +660,7 @@ class TestCandidateAggregates(ApiBaseTest):
         assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 75})
 
         # candidate_zero
+        # by default, load all candidates, current candidate should return 
         results = self._results(
             api.url_for(
                 TotalsCandidateView,
@@ -663,6 +670,28 @@ class TestCandidateAggregates(ApiBaseTest):
         )
         assert len(results) == 1
         assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 0})
+
+         #active candidate test: loading active candidates result nothing
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate_zero.candidate_id,
+                cycle=2018,
+                is_active_candidate=True
+            )
+        )
+        assert len(results) == 0
+
+         #active candidate test: loading inactive candidates result current one
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate_zero.candidate_id,
+                cycle=2018,
+                is_active_candidate=False
+            )
+        )
+        assert len(results) == 1
 
         # candidate_17_18
         results = self._results(
@@ -674,6 +703,29 @@ class TestCandidateAggregates(ApiBaseTest):
         )
         assert len(results) == 1
         assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 100})
+
+
+      # active candidats tst2: load inactive candidates result nothing
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate_17_18.candidate_id,
+                cycle=2018,
+                is_active_candidate=False
+            )
+        )
+        assert len(results) == 0
+
+      # active candidats tst3: load active candidates only
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate_17_18.candidate_id,
+                cycle=2018,
+                is_active_candidate=True
+            )
+        )
+        assert len(results) == 1
 
         # candidate_17_only
         results = self._results(
@@ -721,7 +773,9 @@ class TestCandidateAggregates(ApiBaseTest):
         assert len(results) == 1
         assert_dicts_subset(results[0], {'cycle': self.next_cycle, 'receipts': 55000})
 
+
 class TestCandidateTotalsByOffice(ApiBaseTest):
+
     def setUp(self):
         super().setUp()
         self.candidate_1 = factories.CandidateHistoryFutureFactory(
