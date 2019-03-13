@@ -36,6 +36,7 @@ class ScheduleBView(ItemizedResource):
         ('recipient_committee_id', models.ScheduleB.recipient_committee_id),
         ('disbursement_purpose_category', models.ScheduleB.disbursement_purpose_category),
         ('spender_committee_type', models.ScheduleB.spender_committee_type),
+        ('two_year_transaction_period', models.ScheduleB.two_year_transaction_period),
 
     ]
     filter_match_fields = [
@@ -76,9 +77,9 @@ class ScheduleBView(ItemizedResource):
                 form, line_no = kwargs.get('line_number').split('-')
                 query = query.filter_by(filing_form=form.upper())
                 query = query.filter_by(line_number=line_no)
-        if 'two_year_transaction_period' in kwargs:
-            match_f = [('two_year_transaction_period', models.ScheduleB.two_year_transaction_period)]
-            query = filters.filter_match(query, kwargs, match_f)
+        # if 'two_year_transaction_period' in kwargs:
+        #     match_f = [('two_year_transaction_period', models.ScheduleB.two_year_transaction_period)]
+        #     query = filters.filter_match(query, kwargs, match_f)
         return query
 
 

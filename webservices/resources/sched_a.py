@@ -39,6 +39,7 @@ class ScheduleAView(ItemizedResource):
         ('contributor_city', models.ScheduleA.contributor_city),
         ('contributor_state', models.ScheduleA.contributor_state),
         ('recipient_committee_type', models.ScheduleA.recipient_committee_type),
+        ('two_year_transaction_period', models.ScheduleA.two_year_transaction_period),
     ]
     filter_match_fields = [
         ('is_individual', models.ScheduleA.is_individual),
@@ -106,9 +107,9 @@ class ScheduleAView(ItemizedResource):
                 query = query.filter_by(filing_form=form.upper())
                 query = query.filter_by(line_number=line_no)
         # print(query)
-        if 'two_year_transaction_period' in kwargs:
-            match_f = [('two_year_transaction_period', models.ScheduleA.two_year_transaction_period)]
-            query = filters.filter_match(query, kwargs, match_f)
+        # if 'two_year_transaction_period' in kwargs:
+        #     match_f = [('two_year_transaction_period', models.ScheduleA.two_year_transaction_period)]
+        #     query = filters.filter_match(query, kwargs, match_f)
         print(query)
         return query
 
