@@ -226,7 +226,7 @@ class AggregateByOfficeView(ApiResource):
         history = models.CandidateHistoryWithFuture
         total = models.CandidateTotal
         # check to see if candidate is marked as inactive in history
-        check_active = ~db.session.query(
+        check_cand_status = db.session.query(
             history
         ).filter(
             history.candidate_id == total.candidate_id,
@@ -237,8 +237,8 @@ class AggregateByOfficeView(ApiResource):
         query = db.session.query(
             sa.func.substr(total.candidate_id, 1, 1).label('office'),
             total.election_year.label('election_year'),
-            sa.func.sum(total.receipts).label('total_receipt'),
-            sa.func.sum(total.disbursements).label('total_disbursement')
+            sa.func.sum(total.receipts).label('total_receipts'),
+            sa.func.sum(total.disbursements).label('total_disbursements')
         ).filter(
             total.is_election == True  # noqa
         )
@@ -251,9 +251,13 @@ class AggregateByOfficeView(ApiResource):
             query = query.filter(
                 total.election_year.in_(kwargs['election_year'])
             )
-        # by default, active_candidates is set to true
-        if kwargs['active_candidates'] == True:  # noqa
-            query = query.filter(check_active)
+
+        if 'is_active_candidate' in kwargs and kwargs.get('is_active_candidate'):
+            query = query.filter(~check_cand_status)
+        elif 'is_active_candidate' in kwargs and not kwargs.get('is_active_candidate'):
+            query = query.filter(check_cand_status)
+        else:   # load all candidates
+            pass
 
         query = query.group_by(sa.func.substr(total.candidate_id, 1, 1), total.election_year)
         return query

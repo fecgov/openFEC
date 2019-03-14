@@ -832,6 +832,7 @@ class TestCandidateTotalsByOffice(ApiBaseTest):
             cycle=2020,
             election_year=2020,
         )
+
     def test_candidate_totals_by_office(self):
         results = self._results(
             api.url_for(
@@ -847,14 +848,24 @@ class TestCandidateTotalsByOffice(ApiBaseTest):
             )
         )
         assert len(results) == 1
-        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipt': 121})
+        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipts': 5121})
 
         results = self._results(
             api.url_for(
                 AggregateByOfficeView,
                 office='S',
-                active_candidates=False,
+                is_active_candidate=True,
             )
         )
         assert len(results) == 1
-        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipt': 5121})
+        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipts': 121})
+
+        results = self._results(
+            api.url_for(
+                AggregateByOfficeView,
+                office='S',
+                is_active_candidate=False,
+            )
+        )
+        assert len(results) == 1
+        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipts': 5000})
