@@ -87,6 +87,7 @@ endpoints = [
     "/efile/reports/presidential/?api_key={api_key}",
     "/efile/reports/pac-party/?api_key={api_key}",
     "/filings/?api_key={api_key}",  # this one is also shooting for trailing slash issue
+    "/candidates/totals/by_office/?api_key={api_key}",
 ]
 
 
