@@ -237,8 +237,8 @@ class AggregateByOfficeView(ApiResource):
         query = db.session.query(
             sa.func.substr(total.candidate_id, 1, 1).label('office'),
             total.election_year.label('election_year'),
-            sa.func.sum(total.receipts).label('total_receipt'),
-            sa.func.sum(total.disbursements).label('total_disbursement')
+            sa.func.sum(total.receipts).label('total_receipts'),
+            sa.func.sum(total.disbursements).label('total_disbursements')
         ).filter(
             total.is_election == True  # noqa
         )

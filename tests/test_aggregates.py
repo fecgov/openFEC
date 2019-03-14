@@ -848,7 +848,7 @@ class TestCandidateTotalsByOffice(ApiBaseTest):
             )
         )
         assert len(results) == 1
-        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipt': 5121})
+        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipts': 5121})
 
         results = self._results(
             api.url_for(
@@ -858,7 +858,7 @@ class TestCandidateTotalsByOffice(ApiBaseTest):
             )
         )
         assert len(results) == 1
-        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipt': 121})
+        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipts': 121})
 
         results = self._results(
             api.url_for(
@@ -868,4 +868,4 @@ class TestCandidateTotalsByOffice(ApiBaseTest):
             )
         )
         assert len(results) == 1
-        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipt': 5000})
+        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipts': 5000})
