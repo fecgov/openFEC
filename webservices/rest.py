@@ -156,43 +156,42 @@ def limit_remote_addr():
                 abort(403)
 
 
-def get_cache_duration(url):
+def get_cache_header(url):
 
     # Time in seconds
     EFILING_CACHE = 0
     LEGAL_CACHE = 60 * 5
     CALENDAR_CACHE = 60 * 5
     DEFAULT_CACHE = 60 * 60
-    PEAK_HOURS_CACHE = 60 * 60 * 5
 
-    # cloud.gov time is in UTC (UTC = ET + 5 hours)
-    PEAK_HOURS_START = time(9 + 5)  # 9:00 ET
-    PEAK_HOURS_END = time(17 + 5)  # 17:00 ET
+    # cloud.gov time is in UTC (UTC = ET + 4 or 5 hours, depending on DST)
+    PEAK_HOURS_START = time(13)  # 9:00 ET + 4 = 13:00 UTC
+    PEAK_HOURS_END = time(23, 30)    # 19:30 ET + 4 = 23:30 UTC
 
-    now_between_peak_hours = (
-        PEAK_HOURS_START <= datetime.now().time() <= PEAK_HOURS_END
-    )
+    DEFAULT_HEADER_TYPE = 'Cache-Control'
+    DEFAULT_HEADER_PREFIX = 'public, max-age='
 
     if '/efile/' in url:
-        return EFILING_CACHE
+        return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, EFILING_CACHE)
     elif '/calendar-dates/' in url:
-        return CALENDAR_CACHE
+        return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, CALENDAR_CACHE)
     elif '/legal/' in url:
-        return LEGAL_CACHE
-    elif now_between_peak_hours:
-        return PEAK_HOURS_CACHE
+        return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, LEGAL_CACHE)
+    # This will work differently in local environment - will use local timezone
+    elif PEAK_HOURS_START <= datetime.now().time() <= PEAK_HOURS_END:
+        peak_hours_expiration_time = datetime.combine(
+            datetime.now().date(), PEAK_HOURS_END
+        ).strftime('%a, %d %b %Y %H:%M:%S GMT')
+        return 'Expires', peak_hours_expiration_time
 
-    return DEFAULT_CACHE
+    return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, DEFAULT_CACHE)
 
 
 @app.after_request
 def add_caching_headers(response):
 
-    cache_duration = get_cache_duration(request.path)
-    response.headers.add(
-        'Cache-Control',
-        'public, max-age={}'.format(cache_duration)
-    )
+    cache_header_type, cache_header = get_cache_header(request.path)
+    response.headers.add(cache_header_type, cache_header)
     return response
 
 
