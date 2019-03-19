@@ -55,7 +55,7 @@ def get_graph():
     graph.add_edge('candidate_detail', 'candidate_election')
     graph.add_edge('candidate_detail', 'candidate_history_future')
 
-    graph.add_edge('candidate_aggregates', 'candidate_history_future')
+    graph.add_edge('candidate_history_future', 'candidate_aggregates')
 
     graph.add_edge('committee_history', 'committee_detail')
 
