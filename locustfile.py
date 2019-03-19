@@ -86,19 +86,19 @@ large_records_sched_a = [
 
 # took the worst performing queries from the log https://logs.fr.cloud.gov/goto/be56820fc05ef241c62c5641f16dcd3e
 poor_performance_a = [
-    {'sort_nulls_large': True, 'contributor_name': 'paul+johnson', 'two_year_transaction_period': 2014, 'min_date': '01%2F01%2F2013', 'max_date': '12%2F31%2F2014','contributor_state': 'IN', 'sort': '-contribution_receipt_date', 'per_page': 30, 'is_individual': True},
-    {'sort_nulls_large': True, 'contributor_name': 'Robert+F+Pence', 'two_year_transaction_period': 2014, 'min_date': '01%2F01%2F2013', 'max_date': '12%2F31%2F2014', 'sort': '-contribution_receipt_date', 'per_page': 100, 'is_individual': True},
-    {'sort_nulls_large': True, 'contributor_name': 'tom+lewis', 'contributor_name': 'thomas+lewis', 'two_year_transaction_period': 2016, 'min_date': '01%2F01%2F2015', 'max_date': '12%2F31%2F2016', 'sort': '-contribution_receipt_amount', 'per_page': 30, 'is_individual': True},
-    {'sort_nulls_large': True, 'contributor_name': 'Becher%2C+S', 'two_year_transaction_period': 2016, 'min_date': '01%2F01%2F2015', 'max_date': '12%2F31%2F2016&', 'contributor_state': 'FL', 'sort': '-contribution_receipt_date', 'per_page': 30, 'is_individual': True},
-    {'sort_nulls_large': True, 'contributor_name': 'Becher', 'two_year_transaction_period': 2016, 'min_date': '01%2F01%2F2015', 'max_date': '12%2F31%2F2016', 'contributor_state':'FL', 'sort':'-contribution_receipt_date', 'per_page': 30, 'is_individual': True},
+    {'sort_nulls_last': True, 'contributor_name': 'paul+johnson', 'two_year_transaction_period': 2014, 'min_date': '2013-01-01', 'max_date': '2014-12-31','contributor_state': 'IN', 'sort': '-contribution_receipt_date', 'per_page': 30, 'is_individual': True},
+    {'sort_nulls_last': True, 'contributor_name': 'Robert+F+Pence', 'two_year_transaction_period': 2014, 'min_date': '2013-01-01', 'max_date': '2014-12-31', 'sort': '-contribution_receipt_date', 'per_page': 100, 'is_individual': True},
+    {'sort_nulls_last': True, 'contributor_name': 'tom+lewis', 'contributor_name': 'thomas+lewis', 'two_year_transaction_period': 2016, 'min_date': '2015-01-01', 'max_date': '2016-12-31', 'sort': '-contribution_receipt_amount', 'per_page': 30, 'is_individual': True},
+    {'sort_nulls_last': True, 'contributor_name': 'Becher%2C+S', 'two_year_transaction_period': 2016, 'min_date': '2015-01-01', 'max_date': '2016-12-31', 'contributor_state': 'FL', 'sort': '-contribution_receipt_date', 'per_page': 30, 'is_individual': True},
+    {'sort_nulls_last': True, 'contributor_name': 'Becher', 'two_year_transaction_period': 2016, 'min_date': '2015-01-01', 'max_date': '2016-12-31', 'contributor_state':'FL', 'sort':'-contribution_receipt_date', 'per_page': 30, 'is_individual': True},
 ]
 
 poor_performance_b = [
-    {'sort_nulls_large': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4070720161305573871},
-    {'sort_nulls_large': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4062420161300286190},
-    {'sort_nulls_large': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4062120161299938749},
-    {'sort_nulls_large': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4061720161299122923},
-    {'sort_nulls_large': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4061720161299122723},
+    {'sort_nulls_last': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4070720161305573871},
+    {'sort_nulls_last': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4062420161300286190},
+    {'sort_nulls_last': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4062120161299938749},
+    {'sort_nulls_last': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4061720161299122923},
+    {'sort_nulls_last': True, 'two_year_transaction_period': 2016, 'per_page': 100, 'sort':'disbursement_date', 'last_disbursement_date': '2016-03-03', 'last_index': 4061720161299122723},
 ]
 
 
@@ -250,14 +250,18 @@ class Tasks(locust.TaskSet):
     def load_schedule_a_problematic(self):
         params = random.choice(poor_performance_a)
         params['api_key'] = API_KEY
-        self.client.get('schedules/schedule_a/', name='load_schedule_a_problematic', params=params)
+        print('params:{}'.format(params))
+        resp = self.client.get('schedules/schedule_a/', name='load_schedule_a_problematic', params=params)
+
+        print('*********fetch_prob_schedule_a response:{}'.format(resp))
 
     @locust.task
     def load_schedule_b_problematic(self):
         params = random.choice(poor_performance_b)
         params['api_key'] = API_KEY
-        self.client.get('schedules/schedule_b/', name='load_schedule_b_problematic', params=params)
-    
+        resp = self.client.get('schedules/schedule_b/', name='load_schedule_b_problematic', params=params)
+        print('*********fetch_schedule_b response:{}'.format(resp))
+
     @locust.task
     def load_audit_category(self):
         params = {
