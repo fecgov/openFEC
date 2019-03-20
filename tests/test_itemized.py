@@ -69,7 +69,7 @@ class TestItemized(ApiBaseTest):
         ]
 
         response = self._response(api.url_for(ScheduleAView))
-        self.assertEqual(len(response['results']), 1)
+        self.assertEqual(len(response['results']), 2)
 
     def test_two_year_transaction_period_limits_results_per_cycle(self):
         receipts = [
