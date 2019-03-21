@@ -71,6 +71,16 @@ class ScheduleA(BaseItemized):
     __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'fec_fitem_sched_a'
 
+    # override the entry from the BaseItemized using either one of the following two
+    # committee = utils.related_committee_history('committee_id', cycle_label='two_year_transaction_period', use_modulus=False)
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleA.committee_id) == CommitteeHistory.committee_id,
+            ScheduleA.two_year_transaction_period == CommitteeHistory.cycle,
+        )'''
+    )
+
     committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_NAME)
 
     # Contributor info
@@ -78,11 +88,12 @@ class ScheduleA(BaseItemized):
     entity_type_desc = db.Column('entity_tp_desc', db.String)
     unused_contbr_id = db.Column('contbr_id', db.String)
     contributor_prefix = db.Column('contbr_prefix', db.String)
+    # bring in committee info of the contributor_id
     contributor = db.relationship(
         'CommitteeHistory',
         primaryjoin='''and_(
             foreign(ScheduleA.contributor_id) == CommitteeHistory.committee_id,
-            ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
+            ScheduleA.two_year_transaction_period == CommitteeHistory.cycle,
         )'''
     )
 
@@ -243,16 +254,27 @@ class ScheduleB(BaseItemized):
     __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'fec_fitem_sched_b'
 
+    # override the entry from the BaseItemized using either one of the following two
+    # committee = utils.related_committee_history('committee_id', cycle_label='two_year_transaction_period', use_modulus=False)
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleB.committee_id) == CommitteeHistory.committee_id,
+            ScheduleB.two_year_transaction_period == CommitteeHistory.cycle,
+        )'''
+    )
+
     # Recipient info
     entity_type = db.Column('entity_tp', db.String)
     entity_type_desc = db.Column('entity_tp_desc', db.String)
     unused_recipient_committee_id = db.Column('recipient_cmte_id', db.String)
     recipient_committee_id = db.Column('clean_recipient_cmte_id', db.String)
+    # bring in committee info of the recipient_committee
     recipient_committee = db.relationship(
         'CommitteeHistory',
         primaryjoin='''and_(
             foreign(ScheduleB.recipient_committee_id) == CommitteeHistory.committee_id,
-            ScheduleB.report_year + ScheduleB.report_year % 2 == CommitteeHistory.cycle,
+            ScheduleB.two_year_transaction_period == CommitteeHistory.cycle,
         )'''
     )
     recipient_name = db.Column('recipient_nm', db.String)
