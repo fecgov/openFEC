@@ -213,35 +213,9 @@ class TestElections(ApiBaseTest):
                 cand_election_year=2020
             )
         ]
-        # self.presidential_totals = [
-        #     factories.TotalsPresidentialFactory(
-        #         receipts=50,
-        #         disbursements=75,
-        #         committee_id=self.president_committees[0].committee_id,
-        #         coverage_end_date=datetime.datetime(2019, 9, 30),
-        #         last_cash_on_hand_end_period=0,
-        #         cycle=2020,
-        #     ),
-        #     factories.TotalsPresidentialFactory(
-        #         receipts=1,
-        #         disbursements=1,
-        #         committee_id=self.president_committees[1].committee_id,
-        #         coverage_end_date=datetime.datetime(2017, 12, 31),
-        #         last_cash_on_hand_end_period=100,
-        #         cycle=2018,
-        #     ),
-        #     factories.TotalsPresidentialFactory(
-        #         receipts=25,
-        #         disbursements=10,
-        #         committee_id=self.president_committees[0].committee_id,
-        #         coverage_end_date=datetime.datetime(2017, 12, 31),
-        #         last_cash_on_hand_end_period=300,
-        #         cycle=2018,
-        #     ),
-        # ]
 
         self.presidential_totals = [
-            factories.TotalsPresidentialFactory_New(
+            factories.TotalsCombinedFactory(
                 receipts=50,
                 disbursements=75,
                 committee_id=self.president_committees[0].committee_id,
@@ -249,7 +223,7 @@ class TestElections(ApiBaseTest):
                 last_cash_on_hand_end_period=0,
                 cycle=2020,
             ),
-            factories.TotalsPresidentialFactory_New(
+            factories.TotalsCombinedFactory(
                 receipts=1,
                 disbursements=1,
                 committee_id=self.president_committees[1].committee_id,
@@ -257,7 +231,7 @@ class TestElections(ApiBaseTest):
                 last_cash_on_hand_end_period=100,
                 cycle=2018,
             ),
-            factories.TotalsPresidentialFactory_New(
+            factories.TotalsCombinedFactory(
                 receipts=25,
                 disbursements=10,
                 committee_id=self.president_committees[0].committee_id,

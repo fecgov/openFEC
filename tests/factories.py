@@ -444,6 +444,6 @@ class TransactionCoverageFactory(BaseFactory):
     class Meta:
         model = models.TransactionCoverage
 
-class TotalsPresidentialFactory_New(BaseTotalsFactory):
+class TotalsCombinedFactory(BaseTotalsFactory):
     class Meta:
         model = models.CommitteeTotalsCombined
