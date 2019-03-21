@@ -15,12 +15,13 @@ from webservices.common.models import (
     db, CandidateHistory, CandidateCommitteeLink,
     CommitteeTotalsPresidential, CommitteeTotalsHouseSenate,
     ElectionsList, ZipsDistricts, ScheduleEByCandidate,
-    StateElectionOfficeInfo, BaseConcreteCommittee
+    StateElectionOfficeInfo, BaseConcreteCommittee,
+    CommitteeTotalsCombined,
 )
 
 
 office_totals_map = {
-    'president': CommitteeTotalsPresidential,
+    'president': CommitteeTotalsCombined,
     'senate': CommitteeTotalsHouseSenate,
     'house': CommitteeTotalsHouseSenate,
 }
@@ -157,7 +158,6 @@ class ElectionView(ApiResource):
             BaseConcreteCommittee,
             candAggregates.c.candidate_pcc_id == BaseConcreteCommittee.committee_id
         ).distinct()
-
         return final_query
 
     def _get_basicPairs(self, totals_model, kwargs):
@@ -189,17 +189,16 @@ class ElectionView(ApiResource):
     def _get_pairs(self, basicPairs):
         # get cash_on_hand_end_period info from the latest financial report
         #   per candidate_id/candidate_election_year/cmte_id
-    
-        # when newlest financial report not filed yet, the financial data columns will be null, 
+        # when newlest financial report not filed yet, the financial data columns will be null,
         #   take the data from the previous filing for calculation.
         # However, when the latest fincial report filed, but COH is null, the null (will be convert to 0 in final calculation) should be used.
 
-        # Window params   
+        # Window params
         window_p = {
-        'partition_by': [basicPairs.c.candidate_id, basicPairs.c.candidate_election_year, basicPairs.c.committee_id], 
+        'partition_by': [basicPairs.c.candidate_id, basicPairs.c.candidate_election_year, basicPairs.c.committee_id],
         'order_by': [sa.case([(basicPairs.c.coverage_end_date.isnot(None), basicPairs.c.two_year_period)]).desc().nullslast()]
         }
-    
+
         pairs = db.session.query(
             basicPairs.c.candidate_id,
             basicPairs.c.name,
@@ -241,7 +240,7 @@ class ElectionView(ApiResource):
 
     def _get_candAggregates(self, aggregates):
         # sum up values per candidate_id/candidate_election_year
-        candAggregates=db.session.query(
+        candAggregates = db.session.query(
             aggregates.c.candidate_id,
             aggregates.c.candidate_election_year,
             sa.func.max(aggregates.c.candidate_name).label('candidate_name'),
