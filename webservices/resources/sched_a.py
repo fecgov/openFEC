@@ -110,7 +110,10 @@ class ScheduleAView(ItemizedResource):
         # if 'two_year_transaction_period' in kwargs:
         #     match_f = [('two_year_transaction_period', models.ScheduleA.two_year_transaction_period)]
         #     query = filters.filter_match(query, kwargs, match_f)
-        print(query)
+        # from sqlalchemy.dialects import postgresql
+        # print(str(query.statement.compile(
+        #     dialect=postgresql.dialect(),
+        #     compile_kwargs={"literal_binds": True})))
         return query
 
 @doc(

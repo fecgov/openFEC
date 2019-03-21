@@ -94,7 +94,7 @@ app.config['SQLALCHEMY_FOLLOWERS'] = [
 ]
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
-# app.config['SQLALCHEMY_ECHO'] = True
+app.config['SQLALCHEMY_ECHO'] = True
 
 # Modify app configuration and logging level for production
 if not app.debug:
