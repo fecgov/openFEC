@@ -166,7 +166,7 @@ def get_cache_header(url):
 
     # cloud.gov time is in UTC (UTC = ET + 4 or 5 hours, depending on DST)
     PEAK_HOURS_START = time(13)  # 9:00 ET + 4 = 13:00 UTC
-    PEAK_HOURS_END = time(23, 30)    # 19:30 ET + 4 = 23:30 UTC
+    PEAK_HOURS_END = time(23, 30)  # 19:30 ET + 4 = 23:30 UTC
 
     DEFAULT_HEADER_TYPE = 'Cache-Control'
     DEFAULT_HEADER_PREFIX = 'public, max-age='
@@ -178,7 +178,10 @@ def get_cache_header(url):
     elif '/legal/' in url:
         return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, LEGAL_CACHE)
     # This will work differently in local environment - will use local timezone
-    elif PEAK_HOURS_START <= datetime.now().time() <= PEAK_HOURS_END:
+    elif (
+        '/schedules/' in url
+        and PEAK_HOURS_START <= datetime.now().time() <= PEAK_HOURS_END
+    ):
         peak_hours_expiration_time = datetime.combine(
             datetime.now().date(), PEAK_HOURS_END
         ).strftime('%a, %d %b %Y %H:%M:%S GMT')
