@@ -443,3 +443,7 @@ class OperationsLogFactory(BaseFactory):
 class TransactionCoverageFactory(BaseFactory):
     class Meta:
         model = models.TransactionCoverage
+
+class TotalsCombinedFactory(BaseTotalsFactory):
+    class Meta:
+        model = models.CommitteeTotalsCombined
