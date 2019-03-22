@@ -7,6 +7,7 @@ Some candidates file on F3 and F3P - this adjusts the COH calculation
 where there is more than one totals row for the same cycle for the same committee
 
 Line 200: max(COH) instead of sum(COH)
+Line 201: max(debt) instead of sum(debt)
 
 - 1) Fix logic for ofec_candidate_totals_vw
     a) `create or replace ofec_candidate_totals_vw` to use new `MV` logic
@@ -62,7 +63,7 @@ CREATE OR REPLACE VIEW ofec_candidate_totals_vw AS
             sum(totals_1.disbursements) AS disbursements,
             (sum(totals_1.receipts) > (0)::numeric) AS has_raised_funds,
             max(totals_1.last_cash_on_hand_end_period) AS cash_on_hand_end_period,
-            sum(totals_1.last_debts_owed_by_committee) AS debts_owed_by_committee,
+            max(totals_1.last_debts_owed_by_committee) AS debts_owed_by_committee,
             min(totals_1.coverage_start_date) AS coverage_start_date,
             max(totals_1.coverage_end_date) AS coverage_end_date,
             (array_agg(totals_1.federal_funds_flag) @> ARRAY[true]) AS federal_funds_flag
@@ -197,7 +198,7 @@ CREATE MATERIALIZED VIEW public.ofec_candidate_totals_mv AS
             sum(totals_1.disbursements) AS disbursements,
             (sum(totals_1.receipts) > (0)::numeric) AS has_raised_funds,
             max(totals_1.last_cash_on_hand_end_period) AS cash_on_hand_end_period,
-            sum(totals_1.last_debts_owed_by_committee) AS debts_owed_by_committee,
+            max(totals_1.last_debts_owed_by_committee) AS debts_owed_by_committee,
             min(totals_1.coverage_start_date) AS coverage_start_date,
             max(totals_1.coverage_end_date) AS coverage_end_date,
             (array_agg(totals_1.federal_funds_flag) @> ARRAY[true]) AS federal_funds_flag
