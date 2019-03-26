@@ -1,16 +1,18 @@
-**Develop**
+## Develop
 [![CircleCI](https://circleci.com/gh/fecgov/openFEC.svg?style=svg)](https://circleci.com/gh/fecgov/openFEC)
 [![Test Coverage](https://img.shields.io/codecov/c/github/fecgov/openFEC/develop.svg)](https://codecov.io/github/fecgov/openFEC)
 
-**Master**
+## Master
 [![Test Coverage](https://img.shields.io/codecov/c/github/fecgov/openFEC/master.svg)](https://codecov.io/github/fecgov/openFEC)
 
-**API**
-[![Known Vulnerabilities](https://snyk.io/test/github/fecgov/openFEC/badge.svg)](https://snyk.io/test/github/fecgov/openFEC)
 
-**Flyway**
-[![Known Vulnerabilities](https://snyk.io/test/github/fecgov/openfec/badge.svg?targetFile=data%2Fflyway%2Fbuild.gradle)](https://snyk.io/test/github/fecgov/openfec?targetFile=data%2Fflyway%2Fbuild.gradle)
-
+## Snyk Vulnerabilities
+**package.json**
+[![Known Vulnerabilities](https://snyk.io/test/github/fecgov/openFEC/badge.svg?targetFile=package.json)](https://snyk.io/test/github/fecgov/openFEC?targetFile=package.json)
+**requirements.txt**
+[![Known Vulnerabilities](https://snyk.io/test/github/fecgov/openFEC/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/fecgov/openFEC?targetFile=package.json)
+**flyway**
+[![Known Vulnerabilities](https://snyk.io/test/github/fecgov/openfec/badge.svg?targetFile=data/flyway/build.gradle)](https://snyk.io/test/github/fecgov/openfec?targetFile=data/flyway/build.gradle)
 
 ## About this project
 The Federal Election Commission (FEC) releases information to the public about money that's raised and spent in federal elections — that's elections for US President, Senate, and House of Representatives.
