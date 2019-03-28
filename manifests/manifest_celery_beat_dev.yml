@@ -1,7 +1,7 @@
 ---
 path: ../
 memory: 1G
-stack: cflinuxfs2
+stack: cflinuxfs3
 buildpack: python_buildpack
 env:
   NEW_RELIC_APP_NAME: fec | celery beat | dev

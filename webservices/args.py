@@ -862,5 +862,5 @@ operations_log = {
 totals_by_office = {
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
-    'active_candidates': fields.Bool(missing=True, description=docs.ACTIVE_CANDIDATE),
+    'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
 }

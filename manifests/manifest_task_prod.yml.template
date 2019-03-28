@@ -20,4 +20,4 @@ applications:
   - fec-api-search56
   - fec-creds-prod
   - fec-redis
-  stack: cflinuxfs2
+  stack: cflinuxfs3
