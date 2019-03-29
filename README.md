@@ -5,11 +5,12 @@
 **Master**
 [![Test Coverage](https://img.shields.io/codecov/c/github/fecgov/openFEC/master.svg)](https://codecov.io/github/fecgov/openFEC)
 
-**API**
-[![Known Vulnerabilities](https://snyk.io/test/github/fecgov/openFEC/badge.svg)](https://snyk.io/test/github/fecgov/openFEC)
-
-**Flyway**
-[![Known Vulnerabilities](https://snyk.io/test/github/fecgov/openfec/badge.svg?targetFile=data%2Fflyway%2Fbuild.gradle)](https://snyk.io/test/github/fecgov/openfec?targetFile=data%2Fflyway%2Fbuild.gradle)
+**package.json**
+[![Known Vulnerabilities](https://snyk.io/test/github/fecgov/openFEC/badge.svg)](https://snyk.io/test/github/fecgov/openFEC?targetFile=package.json)
+**requirements.txt**
+[![Known Vulnerabilities](https://snyk.io/test/github/fecgov/openFEC/badge.svg)](https://snyk.io/test/github/fecgov/openFEC?targetFile=package.json)
+**flyway**
+[![Known Vulnerabilities](https://snyk.io/test/github/fecgov/openFEC/badge.svg)](https://snyk.io/test/github/fecgov/openfec?targetFile=data/flyway/build.gradle)
 
 
 ## About this project
