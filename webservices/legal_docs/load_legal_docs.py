@@ -303,7 +303,10 @@ def get_subject_tree(html, tree=None):
         tree.append({'text': subject})
     else:
         print(html)
-        raise Exception("Could not parse next token.")
+        # Handle the special scenarios when archived murs do not
+        # have any subject(s) Ex: 2186,1412
+        subject = 'Unavailable'
+        tree.append({'text': subject})
 
     if not empty:
         tail = (root or list_item or unordered_list or end_list)
