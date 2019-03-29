@@ -202,7 +202,10 @@ totals AS
     totals.coverage_end_date,
     COALESCE(totals.federal_funds_flag, false) AS federal_funds_flag
    FROM ofec_candidate_history_with_future_election_vw cand
-     LEFT JOIN combined_totals totals ON cand.candidate_id::text = totals.candidate_id::text AND cand.two_year_period = totals.cycle
+     LEFT JOIN combined_totals totals 
+     ON cand.candidate_id::text = totals.candidate_id::text 
+     AND cand.candidate_election_year = totals.election_year
+     AND cand.two_year_period = totals.cycle
 ;
 
 DROP MATERIALIZED VIEW IF EXISTS public.ofec_candidate_totals_mv_tmp;
@@ -388,7 +391,10 @@ totals AS
     totals.coverage_end_date,
     COALESCE(totals.federal_funds_flag, false) AS federal_funds_flag
    FROM ofec_candidate_history_with_future_election_vw cand
-     LEFT JOIN combined_totals totals ON cand.candidate_id::text = totals.candidate_id::text AND cand.two_year_period = totals.cycle
+     LEFT JOIN combined_totals totals 
+     ON cand.candidate_id::text = totals.candidate_id::text 
+     AND cand.candidate_election_year = totals.election_year
+     AND cand.two_year_period = totals.cycle
 WITH DATA;
 
 --Permissions
@@ -397,7 +403,7 @@ GRANT ALL ON TABLE public.ofec_candidate_totals_mv_tmp TO fec;
 GRANT SELECT ON TABLE public.ofec_candidate_totals_mv_tmp TO fec_read;
 
 --Indexes
-CREATE UNIQUE INDEX idx_ofec_candidate_totals_mv_tmp_cand_id_cycle_is_election ON public.ofec_candidate_totals_mv_tmp USING btree (candidate_id, cycle, is_election);
+CREATE UNIQUE INDEX idx_ofec_candidate_totals_mv_tmp_cand_id_elec_yr_cycle_is_elect ON public.ofec_candidate_totals_mv_tmp USING btree (candidate_id, election_year, cycle, is_election);
 
 CREATE INDEX idx_ofec_candidate_totals_mv_tmp_cand_id ON public.ofec_candidate_totals_mv_tmp USING btree (candidate_id);
 
@@ -422,7 +428,7 @@ DROP MATERIALIZED VIEW public.ofec_candidate_totals_mv;
 ALTER MATERIALIZED VIEW IF EXISTS public.ofec_candidate_totals_mv_tmp RENAME TO ofec_candidate_totals_mv;
 
 -- rename indexes
-ALTER INDEX IF EXISTS idx_ofec_candidate_totals_mv_tmp_cand_id_cycle_is_election RENAME TO idx_ofec_candidate_totals_mv_cand_id_cycle_is_election;
+ALTER INDEX IF EXISTS idx_ofec_candidate_totals_mv_tmp_cand_id_elec_yr_cycle_is_elect RENAME TO idx_ofec_candidate_totals_mv_cand_id_elec_yr_cycle_is_elect;
 
 ALTER INDEX IF EXISTS idx_ofec_candidate_totals_mv_tmp_cand_id RENAME TO idx_ofec_candidate_totals_mv_cand_id;
 
