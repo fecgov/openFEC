@@ -9,8 +9,8 @@ jobs:
       # use `-browsers` prefix for selenium tests, e.g. `<image_name>-browsers`
 
       # Python
-      #- image: circleci/python:3.6.4-jessie-browsers
-      - image: circleci/python:3.6.4-stretch
+      - image: circleci/python:3.6.4-jessie-browsers
+      # - image: circleci/python:3.6.4-stretch
         environment:
           TZ: America/New_York
           SQLA_TEST_CONN: postgresql://postgres@0.0.0.0/cfdm_unit_test
@@ -24,6 +24,14 @@ jobs:
     working_directory: ~/repo
 
     steps:
+      - run: |
+        sudo rm /etc/apt/sources.list
+        echo "deb http://archive.debian.org/debian/ jessie-backports main" | sudo tee -a /etc/apt/sources.list
+        echo "deb-src http://archive.debian.org/debian/ jessie-backports main" | sudo tee -a /etc/apt/sources.list
+        echo "Acquire::Check-Valid-Until false;" | sudo tee -a /etc/apt/apt.conf.d/10-nocheckvalid
+        echo 'Package: *\nPin: origin "archive.debian.org"\nPin-Priority: 500' | sudo tee -a /etc/apt/preferences.d/10-archive-pin
+        sudo apt-get update
+
       - checkout
 
       - run:
