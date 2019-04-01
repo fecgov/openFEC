@@ -39,6 +39,11 @@ jobs:
           # Commands listed here are from the CircleCI PostgreSQL config docs:
           # https://circleci.com/docs/2.0/postgres-config/#postgresql-circleci-configuration-example
           command: |
+                 sudo rm /etc/apt/sources.list
+                 echo "deb http://archive.debian.org/debian/ jessie-backports main" | sudo tee -a /etc/apt/sources.list
+                 echo "deb-src http://archive.debian.org/debian/ jessie-backports main" | sudo tee -a /etc/apt/sources.list
+                 echo "Acquire::Check-Valid-Until false;" | sudo tee -a /etc/apt/apt.conf.d/10-nocheckvalid
+                 echo 'Package: *\nPin: origin "archive.debian.org"\nPin-Priority: 500' | sudo tee -a /etc/apt/preferences.d/10-archive-pin
             sudo apt-get update -qq && sudo apt-get install -y build-essential postgresql-client
             echo 'export PATH=/usr/lib/postgresql/9.6/bin/:$PATH' >> $BASH_ENV
 
