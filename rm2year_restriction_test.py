@@ -62,73 +62,6 @@ endpoints = [
 
 ]
 
-# a list of endpoints pulled from rest.py
-# endpoints = [
-#     "/committees/?api_key={api_key}",
-#     "/candidates/?api_key={api_key}",
-#     "/candidates/search/?api_key={api_key}",
-#     "/candidate/{candidate_id}/?api_key={api_key}",
-#     "/committee/{committee_id}/candidates/?api_key={api_key}",
-#     "/candidate/{candidate_id}/history/?api_key={api_key}",
-#     "/candidate/{candidate_id}/history/2018/?api_key={api_key}",
-#     "/committee/{committee_id}/candidates/history/?api_key={api_key}",
-#     "/committee/{committee_id}/candidates/history/2018/?api_key={api_key}",
-#     "/committee/{committee_id}/?api_key={api_key}",
-#     "/candidate/{candidate_id}/committees/?api_key={api_key}",
-#     "/committee/{committee_id}/history/?api_key={api_key}",
-#     "/committee/{committee_id}/history/2018/?api_key={api_key}",
-#     "/candidate/{candidate_id}/committees/history/?api_key={api_key}",
-#     "/candidate/{candidate_id}/committees/history/2018/?api_key={api_key}",
-#     "/totals/{committee_type}/?api_key={api_key}",
-#     "/committee/{committee_id}/totals/?api_key={api_key}",
-#     "/candidate/{candidate_id}/totals/?api_key={api_key}",
-#     "/reports/{committee_type}/?api_key={api_key}",
-#     "/committee/{committee_id}/reports/?api_key={api_key}",
-#     "/names/candidates/?q=clinton&api_key={api_key}",
-#     "/names/committees/?q=clinton&api_key={api_key}",
-#     "/schedules/schedule_a/{sub_id}/?api_key={api_key}",
-#     "/schedules/schedule_a/efile/?api_key={api_key}",
-#     "/schedules/schedule_b/{sub_id}/?api_key={api_key}",
-#     "/schedules/schedule_b/efile/?api_key={api_key}",
-#     "/schedules/schedule_c/?api_key={api_key}",
-#     "/schedules/schedule_d/?api_key={api_key}",
-#     "/schedules/schedule_e/?api_key={api_key}",
-#     "/schedules/schedule_e/efile/?api_key={api_key}",
-#     "/schedules/schedule_f/{sub_id}/?api_key={api_key}",
-#     "/communication-costs/?api_key={api_key}",
-#     "/electioneering/?api_key={api_key}",
-#     "/elections/?cycle=2018&office=president&api_key={api_key}",
-#     "/elections/search/?api_key={api_key}",
-#     "/elections/summary/?cycle=2018&office=president&api_key={api_key}",
-#     "/state-election-office/?state=MD&api_key={api_key}",
-#     "/election-dates/?api_key={api_key}",
-#     "/reporting-dates/?api_key={api_key}",
-#     "/calendar-dates/?api_key={api_key}",
-#     "/calendar-dates/export/?api_key={api_key}",
-#     "/rad-analyst/?api_key={api_key}",
-#     "/efile/filings/?api_key={api_key}",
-#     "/totals/by_entity/?cycle=2018&api_key={api_key}",
-#     "/audit-primary-category/?api_key={api_key}",
-#     "/audit-category/?api_key={api_key}",
-#     "/audit-case/?api_key={api_key}",
-#     "/names/audit_candidates/?q=clinton&api_key={api_key}",
-#     "/names/audit_committees/?q=&clinton&api_key={api_key}",
-#     "/schedules/schedule_a/by_size/by_candidate/?candidate_id={candidate_id}&cycle=2018&api_key={api_key}",
-#     "/schedules/schedule_a/by_state/by_candidate/?candidate_id={candidate_id}&cycle=2018&api_key={api_key}",
-#     "/candidates/totals/?api_key={api_key}",
-#     "/schedules/schedule_a/by_state/totals/?api_key={api_key}",
-#     "/communication_costs/by_candidate/?api_key={api_key}",
-#     "/committee/{committee_id}/communication_costs/by_candidate/?api_key={api_key}",
-#     "/electioneering/by_candidate/?api_key={api_key}",
-#     "/committee/{committee_id}/electioneering/by_candidate/?api_key={api_key}",
-#     "/committee/{committee_id}/filings/?api_key={api_key}",
-#     "/candidate/{candidate_id}/filings/?api_key={api_key}",
-#     "/efile/reports/house-senate/?api_key={api_key}",
-#     "/efile/reports/presidential/?api_key={api_key}",
-#     "/efile/reports/pac-party/?api_key={api_key}",
-#     "/filings/?api_key={api_key}",  # this one is also shooting for trailing slash issue
-# ]
-
 
 @click.command()
 @click.option(
@@ -145,18 +78,11 @@ def check_endpoints(server, api_key):
     """Simple script to check all endpoints status quickly."""
     for endp in endpoints:
         t1 = time.time()
-        # curr_request = server + "/v1" + endp 
         curr_request = (server + "/v1" + endp).format(
                 api_key=api_key,
-                # committee_id=COMMITTEE_ID,
-                # candidate_id=CANDIDATE_ID,
-                # committee_type=COMMITTEE_TYPE,
-                # sub_id=SUB_ID,
             )
         print('current request:\n{}'.format(curr_request))
         r = requests.get(curr_request)
-        #import json
-        #print(r.text)
         if r.status_code == 200:
             t2 = time.time()
             print("-- response comes back in: {} second.".format(round(t2-t1,2)))

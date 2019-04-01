@@ -158,15 +158,6 @@ class ScheduleAView(ItemizedResource):
                 form, line_no = kwargs.get('line_number').split('-')
                 query = query.filter_by(filing_form=form.upper())
                 query = query.filter_by(line_number=line_no)
-        # print(query)
-        # if 'two_year_transaction_period' in kwargs:
-        #     match_f = [('two_year_transaction_period', models.ScheduleA.two_year_transaction_period)]
-        #     query = filters.filter_match(query, kwargs, match_f)
-        # from sqlalchemy.dialects import postgresql
-        # print(str(query.statement.compile(
-        #     dialect=postgresql.dialect(),
-        #     compile_kwargs={"literal_binds": True})))
-        # print(literalquery(query))    
         return query
 
 @doc(
