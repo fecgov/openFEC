@@ -9,8 +9,8 @@ jobs:
       # use `-browsers` prefix for selenium tests, e.g. `<image_name>-browsers`
 
       # Python
-      - image: circleci/python:3.6.4-jessie-browsers
-      # - image: circleci/python:3.6.4-stretch
+      # - image: circleci/python:3.6.4-jessie-browsers
+      - image: circleci/python:3.6.4-stretch
         environment:
           TZ: America/New_York
           SQLA_TEST_CONN: postgresql://postgres@0.0.0.0/cfdm_unit_test
@@ -37,8 +37,6 @@ jobs:
       - run:
           name: Install flyway
           command: |
-            echo "deb http://deb.debian.org/debian jessie main" > /etc/apt/sources.list
-            echo "deb http://deb.debian.org/debian stable-updates main" >> /etc/apt/sources.list
             # sudo rm /etc/apt/sources.list
             # echo "deb http://archive.debian.org/debian/ jessie-backports main" | sudo tee -a /etc/apt/sources.list
             # echo "deb-src http://archive.debian.org/debian/ jessie-backports main" | sudo tee -a /etc/apt/sources.list
