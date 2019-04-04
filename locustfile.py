@@ -28,7 +28,8 @@ except KeyError:
 
 CYCLES = range(1980, 2018, 2)
 CANDIDATES = [
-    "bush" "cheney",
+    "bush",
+    "cheney",
     "gore",
     "lieberman",
     "kerry",
@@ -38,7 +39,8 @@ CANDIDATES = [
     "mccain",
     "palin",
     "clinton",
-    "sanders" "omalley",
+    "sanders",
+    "omalley",
     "rubio",
     "graham",
     "kasich",
