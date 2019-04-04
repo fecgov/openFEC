@@ -54,22 +54,23 @@ class TestItemized(ApiBaseTest):
         )
     #This is the only test that the years will have to be bumped when in a new cycle
     #maybe refactor to use some logic based on current year?
-    def test_two_year_transaction_period_default_supplied_automatically(self):
-        receipts = [
-            factories.ScheduleAFactory(
-                report_year=2016,
-                contribution_receipt_date=datetime.date(2016, 1, 1),
-                two_year_transaction_period=2016
-            ),
-            factories.ScheduleAFactory(
-                report_year=2018,
-                contribution_receipt_date=datetime.date(2018, 1, 1),
-                two_year_transaction_period=2018
-            ),
-        ]
+    # remove this one because we are removing 2-year period restriction
+    # def test_two_year_transaction_period_default_supplied_automatically(self):
+    #     receipts = [
+    #         factories.ScheduleAFactory(
+    #             report_year=2016,
+    #             contribution_receipt_date=datetime.date(2016, 1, 1),
+    #             two_year_transaction_period=2016
+    #         ),
+    #         factories.ScheduleAFactory(
+    #             report_year=2018,
+    #             contribution_receipt_date=datetime.date(2018, 1, 1),
+    #             two_year_transaction_period=2018
+    #         ),
+    #     ]
 
-        response = self._response(api.url_for(ScheduleAView))
-        self.assertEqual(len(response['results']), 1)
+    #     response = self._response(api.url_for(ScheduleAView))
+    #     self.assertEqual(len(response['results']), 1)
 
     def test_two_year_transaction_period_limits_results_per_cycle(self):
         receipts = [

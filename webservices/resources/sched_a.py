@@ -39,10 +39,10 @@ class ScheduleAView(ItemizedResource):
         ('contributor_city', models.ScheduleA.contributor_city),
         ('contributor_state', models.ScheduleA.contributor_state),
         ('recipient_committee_type', models.ScheduleA.recipient_committee_type),
+        ('two_year_transaction_period', models.ScheduleA.two_year_transaction_period),
     ]
     filter_match_fields = [
         ('is_individual', models.ScheduleA.is_individual),
-        ('two_year_transaction_period', models.ScheduleA.two_year_transaction_period),
     ]
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleA.contribution_receipt_date),
