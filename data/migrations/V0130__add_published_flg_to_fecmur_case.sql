@@ -2,7 +2,7 @@
 This is for issue #3573 Add filter to only show published cases on /legal/
 */
 
-ALTER TABLE fecmur.case add column if not exists published_flg bool;
+ALTER TABLE fecmur.case add column if not exists published_flg bool default true;
 
 
 CREATE OR REPLACE VIEW fecmur.cases_with_parsed_case_serial_numbers_vw AS 
