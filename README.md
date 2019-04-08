@@ -58,7 +58,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
 		   
 		   ```
 		   flyway.locations=filesystem:/Users/<user>/<project>/api/openFEC/data/migrations
-		   flyway.url=jdbc:postgresql://localhost:5432/cfdm_test?user=&password=
+		   flyway.url=jdbc:postgresql://localhost:5432/cfdm_test?user=<your local database username>&password=<your local database password>
 		   ```
 		   
 		   to enable connection to a local database (e.g., `cfdm_test` from [Create
