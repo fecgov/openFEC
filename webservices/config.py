@@ -24,9 +24,6 @@ SQL_CONFIG = {
     'START_YEAR': get_cycle_start(1980),
     'START_YEAR_AGGREGATE': get_cycle_start(2008),
     'END_YEAR_ITEMIZED': get_cycle_start(CURRENT_YEAR),
-    # CYCLE_END_YEAR_ITEMIZED will need to be updated every cycle
-    # once we have meaningful data
-    'CYCLE_END_YEAR_ITEMIZED': 2018,
     'PARTITION_START_YEAR': 1978,
     'PARTITION_END_YEAR': 2018,
 }
