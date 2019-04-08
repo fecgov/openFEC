@@ -38,8 +38,8 @@ jobs:
           command: |
             sudo apt-get update && sudo apt-get install -y default-jdk
             mkdir flyway
-            curl -s https://repo.maven.apache.org/maven2/org/flywaydb/flyway-commandline/5.1.3/flyway-commandline-5.1.3-linux-x64.tar.gz | tar zxv -C flyway
-            echo 'export PATH=./flyway/flyway-5.1.3:$PATH' >> $BASH_ENV
+            curl -s https://repo.maven.apache.org/maven2/org/flywaydb/flyway-commandline/5.2.4/flyway-commandline-5.2.4-linux-x64.tar.gz | tar zxv -C flyway
+            echo 'export PATH=./flyway/flyway-5.2.4:$PATH' >> $BASH_ENV
 
       - restore_cache:
           keys:
