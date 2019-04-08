@@ -51,7 +51,20 @@ We are always trying to improve our documentation. If you have suggestions or ru
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](https://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
     * Elastic Search 5.6 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/_installation.html))
-    * Flyway 5.0.x ([download](https://flywaydb.org/getstarted/download))
+    * Flyway 5.2.4 ([download](https://flywaydb.org/getstarted/download))
+		* After downloading, open `flyway5.2.4/conf/flyway.conf` and set
+           the flyway environment variables `flyway.url` and
+           `flyway.locations` as
+		   
+		   ```
+		   flyway.locations=filesystem:/Users/<user>/<project>/api/openFEC/data/migrations
+		   flyway.url=jdbc:postgresql://localhost:5432/cfdm_test?user=&password=
+		   ```
+		   
+		   to enable connection to a local database (e.g., `cfdm_test` from [Create
+           a test database](https://github.com/fecgov/openFEC#create-a-development-database), below) and specify the location of the database migration files (*SQL)
+       * See [Database migrations](https://github.com/fecgov/openFEC#database-migration) for more information on installing and configuring flyway
+        
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
 
@@ -633,11 +646,11 @@ You can optionally choose to restrict traffic that goes to the mirrors/replicas 
 `flyway` is the tool used for database migration.
 
 #### Installing `flyway`
-`Flyway` is a Java application and requires a Java runtime environment (JRE) for execution.
+`flyway` is a Java application and requires a Java runtime environment (JRE) for execution.
 
-It is recommended that you install the JRE separately using your package manager of choice, e.g., `Homebrew`, `apt`, etc, and download the version without the JRE e.g. `flyway-commandline-5.1.3.tar.gz` from [Flyway downloads](https://flywaydb.org/getstarted/download). This way, you have complete control over your Java version and can use the JRE for other applications like `Elasticsearch`. If you have trouble with a separate JRE or are not comfortable with managing a separate JRE, you can download the `flyway` archive that bundles the JRE, e.g., `flyway-commandline-5.1.3-macosx-x64.tar.gz`, `flyway-commandline-5.1.3-linux-x64.tar.gz`, etc.
+It is recommended that you install the JRE separately using your package manager of choice, e.g., `Homebrew`, `apt`, etc, and download the version without the JRE e.g. `flyway-commandline-5.2.4.tar.gz` from [Flyway downloads](https://flywaydb.org/getstarted/download). This way, you have complete control over your Java version and can use the JRE for other applications like `Elasticsearch`. If you have trouble with a separate JRE or are not comfortable with managing a separate JRE, you can download the `flyway` archive that bundles the JRE, e.g., `flyway-commandline-5.2.4-macosx-x64.tar.gz`, `flyway-commandline-5.2.4-linux-x64.tar.gz`, etc.
 
-Expand the downloaded archive. Add `<target_directory>/flyway/flyway-5.1.3` to your `PATH` where `target_directory` is the directory in which the archive has been expanded.
+Expand the downloaded archive. Add `<target_directory>/flyway/flyway-5.2.4` to your `PATH` where `target_directory` is the directory in which the archive has been expanded.
 
 #### How `flyway` works
 All database schema modification code is checked into version control in the directory `data/migrations` in the form of SQL files that follow a strict naming convention - `V<version_number>__<descriptive_name>.sql`. `flyway` also maintains a table in the target database called `flyway_schema_history` which tracks the migration versions that have already been applied.
