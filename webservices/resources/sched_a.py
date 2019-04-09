@@ -12,6 +12,10 @@ from webservices.common import views
 from webservices.common.views import ItemizedResource
 from webservices import exceptions
 
+"""
+two years restriction removed from schedule_a. For details, refer:
+https://github.com/fecgov/openFEC/issues/3595
+"""
 
 @doc(
     tags=['receipts'],
@@ -117,7 +121,6 @@ class ScheduleAEfileView(views.ApiResource):
         ('committee_id', models.ScheduleAEfile.committee_id),
         ('contributor_city', models.ScheduleAEfile.contributor_city),
         ('contributor_state', models.ScheduleAEfile.contributor_state),
-        #('contributor_name', models.ScheduleAEfile.contr)
     ]
 
     filter_range_fields = [

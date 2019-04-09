@@ -9,6 +9,10 @@ from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
 
+"""
+two years restriction removed from schedule_b. For details, refer:
+https://github.com/fecgov/openFEC/issues/3595
+"""
 
 @doc(
     tags=['disbursements'],
@@ -38,9 +42,6 @@ class ScheduleBView(ItemizedResource):
         ('two_year_transaction_period', models.ScheduleB.two_year_transaction_period),
 
     ]
-    # filter_match_fields = [
-    #     ('two_year_transaction_period', models.ScheduleB.two_year_transaction_period),
-    # ]
     filter_fulltext_fields = [
         ('recipient_name', models.ScheduleB.recipient_name_text),
         ('disbursement_description', models.ScheduleB.disbursement_description_text),
@@ -70,7 +71,7 @@ class ScheduleBView(ItemizedResource):
         query = query.options(sa.orm.joinedload(models.ScheduleB.recipient_committee))
         #might be worth looking to factoring these out into the filter script
         if kwargs.get('sub_id'):
-            query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
+            query = query.filter_by(sub_id = int(kwargs.get('sub_id')))
         if kwargs.get('line_number'):
             if len(kwargs.get('line_number').split('-')) == 2:
                 form, line_no = kwargs.get('line_number').split('-')
@@ -93,19 +94,15 @@ class ScheduleBEfileView(views.ApiResource):
         ('committee_id', models.ScheduleBEfile.committee_id),
         ('recipient_city', models.ScheduleBEfile.recipient_city),
         ('recipient_state', models.ScheduleBEfile.recipient_state),
-        #('recipient_committee_id', models.ScheduleBEfile.recipient_committee_id),
-        #('disbursement_purpose_category', models.ScheduleB.disbursement_purpose_category),
     ]
 
     filter_fulltext_fields = [
-        #('recipient_name', models.ScheduleB.recipient_name_text),
         ('disbursement_description', models.ScheduleBEfile.disbursement_description),
     ]
 
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleBEfile.disbursement_date),
         (('min_amount', 'max_amount'), models.ScheduleBEfile.disbursement_amount),
-        #(('min_image_number', 'max_image_number'), models.ScheduleBE.image_number),
     ]
 
     @property
