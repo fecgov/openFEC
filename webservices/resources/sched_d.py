@@ -83,4 +83,7 @@ class ScheduleDViewBySubId(ApiResource):
     def args(self):
         return utils.extend(
             args.paging,
+            args.make_sort_args(
+                default='load_date',
+            )
         )
