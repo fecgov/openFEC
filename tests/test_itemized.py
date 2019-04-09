@@ -55,9 +55,14 @@ class TestItemized(ApiBaseTest):
 
     def test_multiple_two_year_transaction_period_schedule_a(self):
         """
-        testing schedule_a api can take multiple cyccles now
+        testing schedule_a api can take multiple cycles now
         """
         receipts = [
+            factories.ScheduleAFactory(
+                report_year=2014,
+                contribution_receipt_date=datetime.date(2014, 1, 1),
+                two_year_transaction_period=2014
+            ),
             factories.ScheduleAFactory(
                 report_year=2016,
                 contribution_receipt_date=datetime.date(2016, 1, 1),
@@ -81,6 +86,10 @@ class TestItemized(ApiBaseTest):
         testing schedule_b api can take multiple cyccles now
         """
         receipts = [
+            factories.ScheduleBFactory(
+                report_year=2014,
+                two_year_transaction_period=2014
+            ),
             factories.ScheduleBFactory(
                 report_year=2016,
                 two_year_transaction_period=2016
