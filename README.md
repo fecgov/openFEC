@@ -132,7 +132,7 @@ createdb cfdm_test
 Set the environment variable SQLA_SAMPLE_DB_CONN to point to this database, using:
 
 ```
-export SQLA_SAMPLE_DB_CONN=<psql:address-to-box>
+export SQLA_SAMPLE_DB_CONN="postgresql://<username>:<password>@localhost:<port - default is 5432>/cfdm_test"
 ```
 
 Load our sample data into the development database (`cfdm_test`) by running:
