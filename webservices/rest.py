@@ -135,7 +135,7 @@ def handle_error(error):
 
 # api.data.gov
 TRUSTED_PROXIES = ('54.208.160.112', '54.208.160.151')
-BLOCKED_IPS = ('95.216.186.66')
+BLOCKED_IPS = ('95.216.186.66', '109.252.57.42')
 FEC_API_WHITELIST_IPS = env.get_credential('FEC_API_WHITELIST_IPS', False)
 
 @app.before_request
