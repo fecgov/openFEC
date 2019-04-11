@@ -2,7 +2,7 @@ git+https://github.com/fecgov/apispec.git@dev
 #prance[osv]>=0.11 # pathlib dependency is breaking pytest
 cfenv==0.5.2
 invoke==0.15.0
-kombu==4.3.0
+kombu==4.5.0
 psycopg2==2.7.3.2
 Flask==1.0.2
 Flask-Cors==3.0.6
