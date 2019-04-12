@@ -284,7 +284,14 @@ class AggregateByOfficeByPartyView(ApiResource):
 
         query = db.session.query(
             total.office.label('office'),
-            total.party.label('party'),
+            #total.party.label('party'),
+            sa.case(
+                [
+                (total.party=='DFL','DEM'),
+                (total.party=='DEM','DEM'),
+                (total.party=='REP','REP'),
+                ], else_='Other'
+                ).label('party'),
             total.election_year.label('election_year'),
             sa.func.sum(total.receipts).label('total_receipts'),
             sa.func.sum(total.disbursements).label('total_disbursements')
@@ -316,5 +323,12 @@ class AggregateByOfficeByPartyView(ApiResource):
         else:   # load all candidates
             pass
 
-        query = query.group_by(total.office, total.party, total.election_year)
+        query = query.group_by(total.office, sa.case(
+                [
+                (total.party=='DFL','DEM'),
+                (total.party=='DEM','DEM'),
+                (total.party=='REP','REP'),
+                ], else_='Other'
+                ), total.election_year)
+
         return query

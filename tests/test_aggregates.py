@@ -894,7 +894,6 @@ class TestCandidateTotalsByOfficeByParty(ApiBaseTest):
             office='S',
             party='DEM',
             candidate_inactive=False,
-
         )
         factories.CandidateTotalFactory(
             candidate_id='S3333',
@@ -915,7 +914,6 @@ class TestCandidateTotalsByOfficeByParty(ApiBaseTest):
             office='P',
             party='DEM',
             candidate_inactive=False,
-
         )
         factories.CandidateTotalFactory(
             candidate_id='P2222',
@@ -935,15 +933,26 @@ class TestCandidateTotalsByOfficeByParty(ApiBaseTest):
             election_year=2016,
             office='H',
             party='REP',
-            candidate_inactive=True,
+            candidate_inactive=False,
         )
+        factories.CandidateTotalFactory(
+            candidate_id='H2222',
+            is_election=True,
+            receipts=300,
+            disbursements=300,
+            election_year=2016,
+            office='H',
+            party='GRE',
+            candidate_inactive=False,
+        )
+
     def test_candidate_totals_by_office_by_party(self):
         results = self._results(
             api.url_for(
                 AggregateByOfficeByPartyView,
             )
         )
-        assert len(results) == 5
+        assert len(results) == 6
 
         results = self._results(
             api.url_for(
@@ -955,24 +964,15 @@ class TestCandidateTotalsByOfficeByParty(ApiBaseTest):
         assert_dicts_subset(results[0], {'election_year': 2016, 'party': 'DEM', 'total_receipts': 100, 'total_disbursements': 100})            
         assert_dicts_subset(results[1], {'election_year': 2016, 'party': 'REP', 'total_receipts': 10000, 'total_disbursements': 10000})            
 
-        results = self._results(
-            api.url_for(
-                AggregateByOfficeByPartyView,
-                office='S',
-                party='DEM',
-                is_active_candidate=True,
-            )
-        )
-        assert len(results) == 0
 
         results = self._results(
             api.url_for(
                 AggregateByOfficeByPartyView,
-                office='P',
-                party='DEM',
+                office='H',
                 is_active_candidate=True,
             )
         )
-        assert len(results) == 1
-        assert_dicts_subset(results[0], {'election_year': 2016, 'party': 'DEM', 'total_receipts': 100000, 'total_disbursements': 100000})            
+        assert len(results) == 2
+        assert_dicts_subset(results[0], {'election_year': 2016, 'party': 'Other', 'total_receipts': 300, 'total_disbursements': 300})            
+        assert_dicts_subset(results[1], {'election_year': 2016, 'party': 'REP', 'total_receipts': 200, 'total_disbursements': 200})            
 

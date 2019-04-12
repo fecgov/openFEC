@@ -868,6 +868,5 @@ totals_by_office = {
 totals_by_office_by_party = {
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
-    'party': fields.Str(description=docs.PARTY),
     'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
 }

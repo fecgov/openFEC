@@ -10,6 +10,10 @@ A unique identifier assigned to each candidate registered with the FEC.
 If a person runs for several offices, that person will have separate candidate IDs for each office.
 '''
 
+CANDIDATE_INACTIVE = '''
+True indicates that a candidate is inactive.
+'''
+
 COMMITTEE_ID = '''
 A unique identifier assigned to each committee or filer registered with the FEC. In general \
 committee id's begin with the letter C which is followed by eight digits.

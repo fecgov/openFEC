@@ -145,7 +145,7 @@ class CandidateTotal(db.Model):
     has_raised_funds = db.Column(db.Boolean, index=True, doc=docs.HAS_RAISED_FUNDS)
     party = db.Column(db.String(3), index=True, doc=docs.PARTY)
     office = db.Column(db.String(1), index=True, doc=docs.OFFICE)
-    candidate_inactive = db.Column(db.Boolean, doc='True indicates that a candidate is inactive.')
+    candidate_inactive = db.Column(db.Boolean, doc=docs.CANDIDATE_INACTIVE)
 
 class CandidateElection(db.Model):
     __tablename__ = 'ofec_candidate_election_mv'
