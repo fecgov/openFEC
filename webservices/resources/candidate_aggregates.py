@@ -303,10 +303,6 @@ class AggregateByOfficeByPartyView(ApiResource):
             query = query.filter(
                 total.office == kwargs['office']
             )
-        if kwargs.get('party') and kwargs['party'] is not None:
-            query = query.filter(
-                total.party == kwargs['party']
-            )
         if kwargs.get('election_year'):
             query = query.filter(
                 total.election_year.in_(kwargs['election_year'])
