@@ -135,10 +135,11 @@ def handle_error(error):
 
 # api.data.gov
 TRUSTED_PROXIES = ('54.208.160.112', '54.208.160.151')
-BLOCKED_IPS = ('95.216.186.66', '109.252.57.42')
+BLOCKED_IPS = env.get_credential('BLOCKED_IPS', [])
 FEC_API_WHITELIST_IPS = env.get_credential('FEC_API_WHITELIST_IPS', False)
 # Search this key_id in the API umbrella admin interface to look up the API KEY
 DOWNLOAD_WHITELIST_API_KEY_ID = env.get_credential('DOWNLOAD_WHITELIST_API_KEY_ID')
+RESTRICT_DOWNLOADS = env.get_credential('RESTRICT_DOWNLOADS')
 
 @app.before_request
 def limit_remote_addr():
@@ -156,12 +157,11 @@ def limit_remote_addr():
                 abort(403)
             if source_ip in BLOCKED_IPS:
                 abort(403)
-            if '/download/' in request.url:
+            if RESTRICT_DOWNLOADS and '/download/' in request.url:
                 # 'X-Api-User-Id' header is passed through by the API umbrella
                 request_api_key_id = request.headers.get('X-Api-User-Id')
                 if request_api_key_id != DOWNLOAD_WHITELIST_API_KEY_ID:
                     abort(403)
-
 
 
 def get_cache_header(url):
