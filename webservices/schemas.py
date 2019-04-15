@@ -491,6 +491,7 @@ augment_models(
     models.CommitteeTotalsHouseSenate,
     models.CommitteeTotalsPacParty,
     models.CommitteeTotalsIEOnly,
+    models.CommitteeTotalsPerCycle,
 )
 
 make_candidate_totals_schema = functools.partial(
@@ -513,7 +514,8 @@ totals_schemas = (
     schemas['CommitteeTotalsPresidentialSchema'],
     schemas['CommitteeTotalsHouseSenateSchema'],
     schemas['CommitteeTotalsPacPartySchema'],
-    schemas['CommitteeTotalsIEOnlySchema']
+    schemas['CommitteeTotalsIEOnlySchema'],
+    schemas['CommitteeTotalsPerCycleSchema']
 )
 CommitteeTotalsSchema = type('CommitteeTotalsSchema', totals_schemas, {})
 CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)

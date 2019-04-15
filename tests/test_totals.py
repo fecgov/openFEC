@@ -79,7 +79,7 @@ class TestTotals(ApiBaseTest):
         }
 
         fields = utils.extend(shared_fields, presidential_fields)
-        committee_total = factories.TotalsPresidentialFactory(**fields)
+        committee_total = factories.CommitteeTotalsPerCycleFactory(**fields)
 
         fields = utils.extend(fields, transaction_coverage_fields)
 
