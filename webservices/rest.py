@@ -161,7 +161,7 @@ def limit_remote_addr():
                 abort(403)
             if source_ip in BLOCKED_IPS:
                 abort(403)
-            if RESTRICT_DOWNLOADS and '/download/' in request.url:
+            if RESTRICT_DOWNLOADS not in falses and '/download/' in request.url:
                 # 'X-Api-User-Id' header is passed through by the API umbrella
                 request_api_key_id = request.headers.get('X-Api-User-Id')
                 if request_api_key_id != DOWNLOAD_WHITELIST_API_KEY_ID:
