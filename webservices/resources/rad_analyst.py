@@ -21,7 +21,7 @@ class RadAnalystView(ApiResource):
     filter_fulltext_fields = [
         ('name', model.name_txt),
         ('analyst_email', model.analyst_email),
-        ('analyst_title', model.analyst_title),
+        ('title', model.title),
     ]
 
     filter_multi_fields = [
