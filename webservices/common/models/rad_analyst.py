@@ -14,7 +14,7 @@ class RadAnalyst(db.Model):
     analyst_short_id = db.Column(db.Numeric(4, 0), doc='Short ID of RAD analyst.')
     first_name = db.Column(db.String(255), index=True, doc='Fist name of RAD analyst')
     last_name = db.Column(db.String(100), index=True, doc='Last name of RAD analyst')
-    analyst_email = db.Column(db.String(100), index=True, doc='Email of RAD analyst')
+    email = db.Column('analyst_email', db.String(100), index=True, doc='Email of RAD analyst')
     title = db.Column('analyst_title', db.String(100), index=True, doc='Title of RAD analyst')
     telephone_ext = db.Column(db.Numeric(4, 0), index=True, doc='Telephone extension of RAD analyst')
     rad_branch = db.Column(db.String(100), index=True, doc='Branch of RAD analyst')

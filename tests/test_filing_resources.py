@@ -25,9 +25,11 @@ class TestFilerResources(ApiBaseTest):
 
     def test_filters(self):
         [
-            factories.RadAnalystFactory(telephone_ext=123, committee_id='C0001', title='xyz'),
-            factories.RadAnalystFactory(telephone_ext=456, committee_id='C0002', title='abc'),
-            factories.RadAnalystFactory(analyst_id=789, committee_id='C0003'),
+            factories.RadAnalystFactory(telephone_ext=123, committee_id='C0001', title='xyz 111'),
+            factories.RadAnalystFactory(telephone_ext=456, committee_id='C0002', title='abc',
+                                        email='test2@fec.gov'),
+            factories.RadAnalystFactory(analyst_id=789, committee_id='C0003',
+                                        email='test1@fec.gov'),
             factories.RadAnalystFactory(analyst_id=1011, analyst_short_id=11, committee_id='C0004'),
         ]
 
@@ -36,7 +38,8 @@ class TestFilerResources(ApiBaseTest):
             ('telephone_ext', 123),
             ('analyst_id', 789),
             ('analyst_short_id', 11),
-            ('title', 'abc'),
+            ('title', 'xyz 111'),
+            ('email', ['test1@fec.gov', 'test2@fec.gov']),
         )
 
         # checking one example from each field
