@@ -368,6 +368,20 @@ class CommunicationCostFactory(BaseFactory):
         model = models.CommunicationCost
     sub_id = factory.Sequence(lambda n: n)
 
+class ScheduleDViewFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleD
+    sub_id = factory.Sequence(lambda n: n)
+
+    @factory.post_generation
+    def update_fulltext(obj, create, extracted, **kwargs):
+        obj.creditor_debtor_name_text = sa.func.to_tsvector(obj.creditor_debtor_name)
+
+class ScheduleDViewBySubIdFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleD
+    sub_id = factory.Sequence(lambda n: n)
+
 
 class ElectioneeringFactory(BaseFactory):
     class Meta:
