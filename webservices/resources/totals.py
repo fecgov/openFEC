@@ -19,7 +19,7 @@ committee_type_map = {
 }
 
 totals_schema_map = {
-    'P': (models.CommitteeTotalsPresidential, schemas.CommitteeTotalsPresidentialPageSchema),
+    'P': (models.CommitteeTotalsPerCycle, schemas.CommitteeTotalsPerCyclePageSchema),
     'H': (models.CommitteeTotalsHouseSenate, schemas.CommitteeTotalsHouseSenatePageSchema),
     'S': (models.CommitteeTotalsHouseSenate, schemas.CommitteeTotalsHouseSenatePageSchema),
     'I': (models.CommitteeTotalsIEOnly, schemas.CommitteeTotalsIEOnlyPageSchema),

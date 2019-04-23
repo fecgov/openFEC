@@ -483,10 +483,8 @@ schedule_a = {
         fields.Str(validate=validate.OneOf(['individual', 'committee'])),
         description='Filters individual or committee contributions based on line number'
     ),
-    'two_year_transaction_period': fields.Int(
+    'two_year_transaction_period': fields.List(fields.Int,
         description=docs.TWO_YEAR_TRANSACTION_PERIOD,
-        required=True,
-        missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
     ),
     'recipient_committee_type': fields.List(
         IStr(validate=validate.OneOf([
@@ -559,12 +557,10 @@ schedule_b = {
     'disbursement_purpose_category': fields.List(IStr, description='Disbursement purpose category'),
     'last_disbursement_date': fields.Date(missing=None, description='When sorting by `disbursement_date`, this is populated with the `disbursement_date` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
     'last_disbursement_amount': fields.Float(missing=None, description='When sorting by `disbursement_amount`, this is populated with the `disbursement_amount` of the last result.  However, you will need to pass the index of that last result to `last_index` to get the next page.'),
-    'two_year_transaction_period': fields.Int(
+    'two_year_transaction_period': fields.List(fields.Int,
         description=docs.TWO_YEAR_TRANSACTION_PERIOD,
-        required=True,
-        missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
     ),
-    'spender_committee_type': fields.List(
+   'spender_committee_type': fields.List(
         IStr(validate=validate.OneOf([
             '', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q',
             'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
@@ -860,6 +856,12 @@ operations_log = {
 }
 
 totals_by_office = {
+    'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
+    'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
+}
+
+totals_by_office_by_party = {
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
     'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),

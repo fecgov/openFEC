@@ -284,3 +284,27 @@ class CommitteeTotalsCombined(CommitteeTotals):
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
     net_operating_expenditures = db.Column('last_net_operating_expenditures', db.Numeric(30, 2))
     net_contributions = db.Column('last_net_contributions', db.Numeric(30, 2))
+
+class CommitteeTotalsPerCycle(CommitteeTotals):
+    __tablename__ = 'ofec_committee_totals_per_cycle_vw'
+
+    idx = db.Column('sub_id', db.Integer, primary_key=True)
+    candidate_contribution = db.Column(db.Numeric(30, 2))
+    exempt_legal_accounting_disbursement = db.Column(db.Numeric(30, 2))
+    federal_funds = db.Column(db.Numeric(30, 2))
+    fundraising_disbursements = db.Column(db.Numeric(30, 2))
+    loan_repayments_made = db.Column(db.Numeric(30, 2))
+    loans_received = db.Column(db.Numeric(30, 2))
+    loans_received_from_candidate = db.Column(db.Numeric(30, 2))
+    offsets_to_fundraising_expenditures = db.Column(db.Numeric(30, 2))
+    offsets_to_legal_accounting = db.Column(db.Numeric(30, 2))
+    total_offsets_to_operating_expenditures = db.Column(db.Numeric(30, 2))
+    other_loans_received = db.Column(db.Numeric(30, 2))
+    other_receipts = db.Column(db.Numeric(30, 2))
+    repayments_loans_made_by_candidate = db.Column(db.Numeric(30, 2))
+    repayments_other_loans = db.Column(db.Numeric(30, 2))
+    transfers_from_affiliated_committee = db.Column(db.Numeric(30, 2))
+    transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
+    cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
+    net_operating_expenditures = db.Column('last_net_operating_expenditures', db.Numeric(30, 2))
+    net_contributions = db.Column('last_net_contributions', db.Numeric(30, 2))

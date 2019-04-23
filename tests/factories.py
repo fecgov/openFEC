@@ -447,3 +447,8 @@ class TransactionCoverageFactory(BaseFactory):
 class TotalsCombinedFactory(BaseTotalsFactory):
     class Meta:
         model = models.CommitteeTotalsCombined
+
+class CommitteeTotalsPerCycleFactory(BaseTotalsFactory):
+    class Meta:
+        model = models.CommitteeTotalsPerCycle
+    idx = factory.Sequence(lambda n: n)
