@@ -8,7 +8,6 @@ from webargs import ValidationError, fields, validate
 
 from webservices import docs
 from webservices.common.models import db
-from webservices.config import SQL_CONFIG
 
 def _validate_natural(value):
     if value < 0:
@@ -64,6 +63,7 @@ class OptionValidator(object):
 
     :param list values: Valid options.
     """
+
     def __init__(self, values):
         self.values = values
 
@@ -82,6 +82,7 @@ class IndexValidator(OptionValidator):
     :param list exclude: Optional list of columns to exclude.
     :param list extra: Optional list of extra columns to include.
     """
+
     def __init__(self, model, extra=None, exclude=None):
         self.model = model
         self.extra = extra or []
@@ -483,7 +484,8 @@ schedule_a = {
         fields.Str(validate=validate.OneOf(['individual', 'committee'])),
         description='Filters individual or committee contributions based on line number'
     ),
-    'two_year_transaction_period': fields.List(fields.Int,
+    'two_year_transaction_period': fields.List(
+        fields.Int,
         description=docs.TWO_YEAR_TRANSACTION_PERIOD,
     ),
     'recipient_committee_type': fields.List(
@@ -557,10 +559,11 @@ schedule_b = {
     'disbursement_purpose_category': fields.List(IStr, description='Disbursement purpose category'),
     'last_disbursement_date': fields.Date(missing=None, description='When sorting by `disbursement_date`, this is populated with the `disbursement_date` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
     'last_disbursement_amount': fields.Float(missing=None, description='When sorting by `disbursement_amount`, this is populated with the `disbursement_amount` of the last result.  However, you will need to pass the index of that last result to `last_index` to get the next page.'),
-    'two_year_transaction_period': fields.List(fields.Int,
+    'two_year_transaction_period': fields.List(
+        fields.Int,
         description=docs.TWO_YEAR_TRANSACTION_PERIOD,
     ),
-   'spender_committee_type': fields.List(
+    'spender_committee_type': fields.List(
         IStr(validate=validate.OneOf([
             '', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q',
             'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
@@ -570,7 +573,8 @@ schedule_b = {
 
 schedule_b_efile = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    #'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here if the contributor is registered with the FEC.'),
+    #'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here
+    # if the contributor is registered with the FEC.'),
     #'recipient_name': fields.List(fields.Str, description='Name of recipient'),
     'disbursement_description': fields.List(fields.Str, description='Description of disbursement'),
     'image_number': fields.List(
@@ -591,12 +595,23 @@ schedule_b_by_purpose = {
 }
 
 schedule_c = {
+    # TODO(jmcarp) Request integer image numbers from FEC and update argument types
+    'image_number': fields.List(
+        fields.Str,
+        description=docs.IMAGE_NUMBER,
+    ),
+    'min_image_number': fields.Str(),
+    'max_image_number': fields.Str(),
+    'min_amount': Currency(description=docs.MIN_FILTER),
+    'max_amount': Currency(description=docs.MAX_FILTER),
+    'line_number': fields.Str(description=docs.LINE_NUMBER),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_name': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
-    'loaner_name': fields.List(fields.Str, description=docs.LOAN_SOURCE),
-    'min_payment_to_date': fields.Int(description='Minimum payment to date'),
-    'max_payment_to_date': fields.Int(description='Maximum payment to date'),
-
+    'loan_source_name': fields.List(fields.Str, description=docs.LOAN_SOURCE),
+    'min_payment_to_date': fields.Int(description=docs.MIN_PAYMENT_DATE),
+    'max_payment_to_date': fields.Int(description=docs.MAX_PAYMENT_DATE),
+    'min_incurred_date': fields.Date(missing=None, description=docs.MIN_INCURRED_DATE),
+    'max_incurred_date': fields.Date(missing=None, description=docs.MAX_INCURRED_DATE),
 }
 
 schedule_e_by_candidate = {
@@ -612,6 +627,7 @@ schedule_e_by_candidate = {
         description='Support or opposition'
     ),
 }
+
 #These arguments will evolve with updated filtering needs
 schedule_d = {
     'min_payment_period': fields.Float(),
@@ -807,7 +823,6 @@ schedule_a_by_state_recipient_totals = {
         description=docs.COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS
     ),
 }
-
 
 # endpoint audit-primary-category
 auditPrimaryCategory = {

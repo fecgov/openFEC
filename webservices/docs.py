@@ -1303,9 +1303,23 @@ also incorporate any changes made by committees, if any report covering the peri
 '''
 EFILE_REPORTS += WIP_TAG
 
-MIN_FILTER = 'Filter for all amounts greater than a value.'
+LINE_NUMBER = '''
+Filter for form and line number using the following format:
+`FORM-LINENUMBER`.  For example an argument such as `F3X-16` would filter
+down to all entries from form `F3X` line number `16`.
+'''
 
-MAX_FILTER = 'Filter for all amounts less than a value.'
+IMAGE_NUMBER = '''
+The image number of the page where the schedule item is reported.
+'''
+
+MIN_FILTER = '''
+Filter for all amounts greater than a value.
+'''
+
+MAX_FILTER = '''
+Filter for all amounts less than a value.
+'''
 
 MIN_REPORT_RECEIPT_DATE = '''
 Selects all items received by FEC after this date(MM/DD/YYYY or YYYY-MM-DD)
@@ -1313,6 +1327,21 @@ Selects all items received by FEC after this date(MM/DD/YYYY or YYYY-MM-DD)
 
 MAX_REPORT_RECEIPT_DATE = '''
 Selects all items received by FEC before this date(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MIN_PAYMENT_DATE = '''
+Minimum payment to date
+'''
+
+MAX_PAYMENT_DATE = '''
+Maximum payment to date
+'''
+
+MIN_INCURRED_DATE = '''
+Minimum incurred date
+'''
+MAX_INCURRED_DATE = '''
+Maximum incurred date
 '''
 
 ENTITY_RECEIPTS_TOTLAS = '''

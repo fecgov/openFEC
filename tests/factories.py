@@ -218,6 +218,22 @@ class ScheduleBFactory(BaseFactory):
         obj.disbursement_description_text = sa.func.to_tsvector(obj.disbursement_description)
 
 
+class ScheduleCFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleC
+    sub_id = factory.Sequence(lambda n: n)
+
+    @factory.post_generation
+    def update_fulltext(obj, create, extracted, **kwargs):
+        obj.candidate_name_text = sa.func.to_tsvector(obj.candidate_name)
+        obj.loan_source_name_text = sa.func.to_tsvector(obj.loan_source_name)
+
+class ScheduleCViewBySubIdFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleC
+    sub_id = factory.Sequence(lambda n: n)
+
+
 class ScheduleEFactory(BaseFactory):
     class Meta:
         model = models.ScheduleE
