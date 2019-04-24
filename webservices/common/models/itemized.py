@@ -537,7 +537,16 @@ class ScheduleD(PdfMixin, BaseItemized):
     schedule_type = db.Column(db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     election_cycle = db.Column(db.Integer)
-    load_date = db.Column('pg_date', db.DateTime)
+    load_date = db.Column('pg_date', db.Date)
+
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleD.committee_id) == CommitteeHistory.committee_id,
+            ScheduleD.election_cycle == CommitteeHistory.cycle,
+        )''',
+        lazy='joined',
+    )
 
     @property
     def pdf_url(self):
