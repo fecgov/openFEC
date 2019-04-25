@@ -61,23 +61,27 @@ class TestItemized(ApiBaseTest):
             factories.ScheduleAFactory(
                 report_year=2014,
                 contribution_receipt_date=datetime.date(2014, 1, 1),
-                two_year_transaction_period=2014
+                two_year_transaction_period=2014,
+                committee_id='C001'
             ),
             factories.ScheduleAFactory(
                 report_year=2016,
                 contribution_receipt_date=datetime.date(2016, 1, 1),
-                two_year_transaction_period=2016
+                two_year_transaction_period=2016,
+                committee_id='C001'
             ),
             factories.ScheduleAFactory(
                 report_year=2018,
                 contribution_receipt_date=datetime.date(2018, 1, 1),
-                two_year_transaction_period=2018
+                two_year_transaction_period=2018,
+                committee_id='C001'
             ),
         ]
         response = self._response(
             api.url_for(
                 ScheduleAView,
                 two_year_transaction_period=[2016, 2018],
+                committee_id='C001',
         ))
         self.assertEqual(len(response['results']), 2)
 
@@ -617,7 +621,7 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(response.status_code, 422)
 
     def test_pagination_bad_per_page(self):
-        response = self.app.get(api.url_for(ScheduleAView, per_page=999))
+        response = self.app.get(api.url_for(ScheduleAView, two_year_transaction_period=2018, per_page=999))
         self.assertEqual(response.status_code, 422)
 
     def test_image_number(self):
@@ -637,11 +641,11 @@ class TestItemized(ApiBaseTest):
             factories.ScheduleAFactory(image_number='3'),
             factories.ScheduleAFactory(image_number='4'),
         ]
-        results = self._results(api.url_for(ScheduleAView, min_image_number='2'))
+        results = self._results(api.url_for(ScheduleAView, min_image_number='2', two_year_transaction_period=2016))
         self.assertTrue(all(each['image_number'] >= '2' for each in results))
-        results = self._results(api.url_for(ScheduleAView, max_image_number='3'))
+        results = self._results(api.url_for(ScheduleAView, max_image_number='3', two_year_transaction_period=2016))
         self.assertTrue(all(each['image_number'] <= '3' for each in results))
-        results = self._results(api.url_for(ScheduleAView, min_image_number='2', max_image_number='3'))
+        results = self._results(api.url_for(ScheduleAView, min_image_number='2', max_image_number='3', two_year_transaction_period=2016))
         self.assertTrue(all('2' <= each['image_number'] <= '3' for each in results))
 
     def test_amount_sched_a(self):
@@ -651,11 +655,11 @@ class TestItemized(ApiBaseTest):
             factories.ScheduleAFactory(contribution_receipt_amount=150),
             factories.ScheduleAFactory(contribution_receipt_amount=200),
         ]
-        results = self._results(api.url_for(ScheduleAView, min_amount=100))
+        results = self._results(api.url_for(ScheduleAView, min_amount=100, two_year_transaction_period=2016))
         self.assertTrue(all(each['contribution_receipt_amount'] >= 100 for each in results))
-        results = self._results(api.url_for(ScheduleAView, max_amount=150))
+        results = self._results(api.url_for(ScheduleAView, max_amount=150, two_year_transaction_period=2016))
         self.assertTrue(all(each['contribution_receipt_amount'] <= 150 for each in results))
-        results = self._results(api.url_for(ScheduleAView, min_amount=100, max_amount=150))
+        results = self._results(api.url_for(ScheduleAView, min_amount=100, max_amount=150, two_year_transaction_period=2016))
         self.assertTrue(all(100 <= each['contribution_receipt_amount'] <= 150 for each in results))
 
     def test_amount_sched_b(self):
