@@ -84,6 +84,24 @@ class ScheduleAView(ItemizedResource):
         )
 
     def build_query(self, **kwargs):
+        secondary_index_options = [
+            'committee_id',
+            'contributor_id',
+            'contributor_name',
+            'contributor_city',
+            'contributor_zip',
+            'contributor_employer',
+            'contributor_occupation',
+            'image_number',
+            'line_number',
+        ]
+        two_year_transaction_periods = set(kwargs.get('two_year_transaction_period', []))
+        if len(two_year_transaction_periods) != 1:
+            if not any(kwargs.get(field) for field in secondary_index_options):
+                raise exceptions.ApiError(
+                    "Please choose a single `two_year_transaction_period` or add one of the following filters to your query: `{}`".format("`, `".join(secondary_index_options)),
+                    status_code=400,
+                )
         query = super().build_query(**kwargs)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
         zip_list = []
