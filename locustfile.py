@@ -241,15 +241,15 @@ class Tasks(locust.TaskSet):
         else:
             return []
 
-    # @locust.task
-    # def load_home(self):
-    #     params = {"api_key": API_KEY}
-    #     self.client.get("", name="home", params=params)
+    @locust.task
+    def load_home(self):
+        params = {"api_key": API_KEY}
+        self.client.get("", name="home", params=params)
 
     # @locust.task
     # def test_download(self):
     #     """
-    #     a quick test on downlaod api. this test need to generate a aynamic query
+    #     a quick test on downlaod api. this test need to generate a dynamic query
     #     each time in order to be queued for celery processing.
     #     the filename payload is optional(cms ajax call do pass in a filename each time.)
     #     """
@@ -275,103 +275,103 @@ class Tasks(locust.TaskSet):
     #         json=payload,
     #     )
 
-    # @locust.task
-    # def load_candidates_search(self, term=None):
-    #     term = term or random.choice(CANDIDATES)
-    #     params = {"api_key": API_KEY, "sort": "-receipts", "q": term}
-    #     self.client.get("candidates/search", name="candidate_search", params=params)
+    @locust.task
+    def load_candidates_search(self, term=None):
+        term = term or random.choice(CANDIDATES)
+        params = {"api_key": API_KEY, "sort": "-receipts", "q": term}
+        self.client.get("candidates/search", name="candidate_search", params=params)
 
-    # @locust.task
-    # def load_committees_search(self, term=None):
-    #     term = term or random.choice(CANDIDATES)
-    #     params = {"api_key": API_KEY, "sort": "-receipts", "q": term}
-    #     self.client.get("committees", name="committee_search", params=params)
+    @locust.task
+    def load_committees_search(self, term=None):
+        term = term or random.choice(CANDIDATES)
+        params = {"api_key": API_KEY, "sort": "-receipts", "q": term}
+        self.client.get("committees", name="committee_search", params=params)
 
-    # @locust.task
-    # def load_candidates_table(self):
-    #     params = {
-    #         "cycle": [random.choice(CYCLES) for _ in range(3)],
-    #         "api_key": API_KEY,
-    #     }
-    #     self.client.get("candidates", name="candidates_table", params=params)
+    @locust.task
+    def load_candidates_table(self):
+        params = {
+            "cycle": [random.choice(CYCLES) for _ in range(3)],
+            "api_key": API_KEY,
+        }
+        self.client.get("candidates", name="candidates_table", params=params)
 
-    # @locust.task
-    # def load_committees_table(self):
-    #     params = {
-    #         "cycle": [random.choice(CYCLES) for _ in range(3)],
-    #         "api_key": API_KEY,
-    #     }
-    #     self.client.get("committees", name="committees_table", params=params)
+    @locust.task
+    def load_committees_table(self):
+        params = {
+            "cycle": [random.choice(CYCLES) for _ in range(3)],
+            "api_key": API_KEY,
+        }
+        self.client.get("committees", name="committees_table", params=params)
 
-    # @locust.task
-    # def load_candidate_detail(self, candidate_id=None):
-    #     params = {"api_key": API_KEY}
-    #     candidate_id = candidate_id or random.choice(self.candidates)
-    #     self.client.get(
-    #         os.path.join("candidate", candidate_id),
-    #         name="candidate_detail",
-    #         params=params,
-    #     )
+    @locust.task
+    def load_candidate_detail(self, candidate_id=None):
+        params = {"api_key": API_KEY}
+        candidate_id = candidate_id or random.choice(self.candidates)
+        self.client.get(
+            os.path.join("candidate", candidate_id),
+            name="candidate_detail",
+            params=params,
+        )
 
-    # @locust.task
-    # def load_committee_detail(self, committee_id=None):
-    #     params = {"api_key": API_KEY}
-    #     committee_id = committee_id or random.choice(self.committees)
-    #     self.client.get(
-    #         os.path.join("committee", committee_id),
-    #         name="committee_detail",
-    #         params=params,
-    #     )
+    @locust.task
+    def load_committee_detail(self, committee_id=None):
+        params = {"api_key": API_KEY}
+        committee_id = committee_id or random.choice(self.committees)
+        self.client.get(
+            os.path.join("committee", committee_id),
+            name="committee_detail",
+            params=params,
+        )
 
-    # @locust.task
-    # def load_candidate_totals(self, candidate_id=None):
-    #     params = {"api_key": API_KEY}
-    #     candidate_id = candidate_id or random.choice(self.candidates)
-    #     self.client.get(
-    #         os.path.join("candidate", candidate_id, "totals"),
-    #         name="candidate_totals",
-    #         params=params,
-    #     )
+    @locust.task
+    def load_candidate_totals(self, candidate_id=None):
+        params = {"api_key": API_KEY}
+        candidate_id = candidate_id or random.choice(self.candidates)
+        self.client.get(
+            os.path.join("candidate", candidate_id, "totals"),
+            name="candidate_totals",
+            params=params,
+        )
 
-    # @locust.task
-    # def load_committee_totals(self, committee_id=None):
-    #     params = {"api_key": API_KEY}
-    #     committee_id = committee_id or random.choice(self.committees)
-    #     self.client.get(
-    #         os.path.join("committee", committee_id, "totals"),
-    #         name="committee_totals",
-    #         params=params,
-    #     )
+    @locust.task
+    def load_committee_totals(self, committee_id=None):
+        params = {"api_key": API_KEY}
+        committee_id = committee_id or random.choice(self.committees)
+        self.client.get(
+            os.path.join("committee", committee_id, "totals"),
+            name="committee_totals",
+            params=params,
+        )
 
-    # @locust.task
-    # def load_legal_documents_search(self, term=None):
-    #     term = term or random.choice(CANDIDATES)
-    #     params = {"q": term, "api_key": API_KEY}
-    #     self.client.get("legal/search", name="legal_search", params=params)
+    @locust.task
+    def load_legal_documents_search(self, term=None):
+        term = term or random.choice(CANDIDATES)
+        params = {"q": term, "api_key": API_KEY}
+        self.client.get("legal/search", name="legal_search", params=params)
 
-    # @locust.task
-    # def get_mur(self):
-    #     params = {"api_key": API_KEY}
-    #     self.client.get("legal/docs/murs/7074", name="legal_get_mur", params=params)
+    @locust.task
+    def get_mur(self):
+        params = {"api_key": API_KEY}
+        self.client.get("legal/docs/murs/7074", name="legal_get_mur", params=params)
 
-    # @locust.task
-    # def get_adr(self):
-    #     params = {"api_key": API_KEY}
-    #     self.client.get("legal/docs/adrs/668", name="legal_get_adr", params=params)
+    @locust.task
+    def get_adr(self):
+        params = {"api_key": API_KEY}
+        self.client.get("legal/docs/adrs/668", name="legal_get_adr", params=params)
 
-    # @locust.task
-    # def get_admin_fine(self):
-    #     params = {"api_key": API_KEY}
-    #     self.client.get(
-    #         "legal/docs/admin_fines/2274", name="legal_get_admin_fine", params=params
-    #     )
+    @locust.task
+    def get_admin_fine(self):
+        params = {"api_key": API_KEY}
+        self.client.get(
+            "legal/docs/admin_fines/2274", name="legal_get_admin_fine", params=params
+        )
 
-    # @locust.task
-    # def get_ao(self):
-    #     params = {"api_key": API_KEY}
-    #     self.client.get(
-    #         "legal/docs/advisory_opinions/2018-07", name="legal_get_ao", params=params
-    #     )
+    @locust.task
+    def get_ao(self):
+        params = {"api_key": API_KEY}
+        self.client.get(
+            "legal/docs/advisory_opinions/2018-07", name="legal_get_ao", params=params
+        )
 
     @locust.task
     def load_schedule_a_small(self):
@@ -419,25 +419,25 @@ class Tasks(locust.TaskSet):
             "schedules/schedule_b/", name="load_schedule_b_problematic", params=params
         )
 
-    # @locust.task
-    # def load_audit_category(self):
-    #     params = {"api_key": API_KEY}
-    #     self.client.get("audit-category/", name="load_audit_category", params=params)
+    @locust.task
+    def load_audit_category(self):
+        params = {"api_key": API_KEY}
+        self.client.get("audit-category/", name="load_audit_category", params=params)
 
-    # @locust.task
-    # def load_filings(self):
-    #     params = {"api_key": API_KEY}
-    #     self.client.get("filings/", name="load_filings", params=params)
+    @locust.task
+    def load_filings(self):
+        params = {"api_key": API_KEY}
+        self.client.get("filings/", name="load_filings", params=params)
 
-    # @locust.task
-    # def load_totals(self):
-    #     params = {"api_key": API_KEY}
-    #     self.client.get("totals/P/", name="load_totals", params=params)
+    @locust.task
+    def load_totals(self):
+        params = {"api_key": API_KEY}
+        self.client.get("totals/P/", name="load_totals", params=params)
 
-    # @locust.task
-    # def load_reports(self):
-    #     params = {"api_key": API_KEY}
-    #     self.client.get("reports/P/", name="load_reports", params=params)
+    @locust.task
+    def load_reports(self):
+        params = {"api_key": API_KEY}
+        self.client.get("reports/P/", name="load_reports", params=params)
 
 
 class Swarm(locust.HttpLocust):
