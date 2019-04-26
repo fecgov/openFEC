@@ -1,5 +1,8 @@
 /*
 This is to solve issue #3700
+column cand_election_yr in disclosure.cand_cmte_linkage is not designed to be used
+to represents the election_yr that the candidate's cycle(fec_election_yr) financial data should belongs to.
+new column election_yr_to_be_included in ofec_cand_cmte_linkage_mv is a calculated field for this purpose.
 */
 
 -- Replace the definition of ofec_candidate_totals_vw to have the new mv's defintion
@@ -64,7 +67,7 @@ totals AS
   totals_1.coverage_end_date,
   totals_1.federal_funds_flag
   FROM (link
-  JOIN totals totals_1 ON ((((link.cmte_id)::text = (totals_1.committee_id)::text) AND (link.fec_election_yr = (totals_1.cycle)::numeric))))
+  LEFT OUTER JOIN totals totals_1 ON ((((link.cmte_id)::text = (totals_1.committee_id)::text) AND (link.fec_election_yr = (totals_1.cycle)::numeric))))
 )
 , cycle_cmte_totals AS 
 -- sum up data per cand_id/election_year/cycle/cmte_id

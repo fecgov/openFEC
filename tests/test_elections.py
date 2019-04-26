@@ -115,12 +115,21 @@ class TestElections(ApiBaseTest):
                 committee_id=self.committees[0].committee_id,
                 committee_designation='A',
                 fec_election_year=2012,
+                election_yr_to_be_included = 2012,
             ),
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=self.candidate.candidate_id,
                 committee_id=self.committees[1].committee_id,
                 committee_designation='P',
                 fec_election_year=2012,
+                election_yr_to_be_included = 2012,
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[1].committee_id,
+                committee_designation='P',
+                fec_election_year=2010,
+                election_yr_to_be_included = 2012,
             ),
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=self.candidate.candidate_id,
@@ -195,7 +204,8 @@ class TestElections(ApiBaseTest):
                 committee_id=self.president_committees[0].committee_id,
                 committee_designation='P',
                 fec_election_year=2020,
-                cand_election_year=2020
+                cand_election_year=2020,
+                election_yr_to_be_included = 2020,                
             ),
 
             factories.CandidateCommitteeLinkFactory(
@@ -203,14 +213,16 @@ class TestElections(ApiBaseTest):
                 committee_id=self.president_committees[0].committee_id,
                 committee_designation='P',
                 fec_election_year=2018,
-                cand_election_year=2020
+                cand_election_year=2020,
+                election_yr_to_be_included = 2020,       
             ),
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=self.president_candidate.candidate_id,
                 committee_id=self.president_committees[1].committee_id,
                 committee_designation='P',
                 fec_election_year=2018,
-                cand_election_year=2020
+                cand_election_year=2020,
+                election_yr_to_be_included = 2020,       
             )
         ]
 
@@ -295,11 +307,25 @@ class TestElections(ApiBaseTest):
             'total_disbursements': sum(each.disbursements for each in totals),
             'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in cash_on_hand_totals),
         }
+        print (results[0]['total_receipts'])
+        print (results[0]['total_disbursements'])
+        print (results[0]['cash_on_hand_end_period'])
         assert len(results) == 1
         assert_dicts_subset(results[0], expected)
         assert set(results[0]['committee_ids']) == set(
             each.committee_id for each in self.committees
             if each.designation != 'J')
+
+    def test_elections_year_null(self):
+        results = self._results(
+            api.url_for(
+                ElectionView,
+                office='senate', cycle=2010, state='NY', election_full='true',
+            )
+        )
+        totals = self.totals
+        cash_on_hand_totals = self.totals[:2]
+        assert len(results) == 0
 
     def test_president_elections_full(self):
         results = self._results(
