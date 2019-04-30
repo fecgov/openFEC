@@ -215,8 +215,9 @@ def load_cases(case_type, case_no=None):
                     logger.info("{0} {1}(s) loaded".format(case_count, case_type))
                 else:
                     logger.info("Found an unpublished case - deleting from ES")
-                    es.delete_by_query(index='docs_index', body={'query': {"term" : { "no" : case_no }}}, doc_type=get_es_type(case_type))
-                    logger.info('Sucessfully deleted {} {} from ES'.format(case_type, case_no))
+                    es.delete_by_query(index='docs_index', body={'query': {"term": {"no": case_no}}},
+                        doc_type=get_es_type(case_type))
+                    logger.info('Successfully deleted {} {} from ES'.format(case_type, case_no))
     else:
         logger.error("Invalid case_type: must be 'MUR', 'ADR', or 'AF'.")
 
