@@ -261,7 +261,7 @@ totals AS
   totals_1.coverage_end_date,
   totals_1.federal_funds_flag
   FROM (link
-  JOIN totals totals_1 ON ((((link.cmte_id)::text = (totals_1.committee_id)::text) AND (link.fec_election_yr = (totals_1.cycle)::numeric))))
+  LEFT OUTER JOIN totals totals_1 ON ((((link.cmte_id)::text = (totals_1.committee_id)::text) AND (link.fec_election_yr = (totals_1.cycle)::numeric))))
 )
 , cycle_cmte_totals AS 
 -- sum up data per cand_id/election_year/cycle/cmte_id
