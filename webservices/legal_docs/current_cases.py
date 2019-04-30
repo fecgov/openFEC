@@ -17,7 +17,8 @@ ALL_CASES = """
         case_id,
         case_no,
         name,
-        case_type
+        case_type,
+        published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
     WHERE case_type = %s
     ORDER BY case_serial
@@ -28,7 +29,8 @@ SINGLE_CASE = """
         case_id,
         case_no,
         name,
-        case_type
+        case_type,
+        published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
     WHERE case_type = %s
     AND case_no = %s
@@ -206,10 +208,16 @@ def load_cases(case_type, case_no=None):
         case_count = 0
         for case in get_cases(case_type, case_no):
             if case is not None:
-                logger.info("Loading {0}: {1}".format(case_type, case['no']))
-                es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
-                case_count += 1
-        logger.info("{0} {1}(s) loaded".format(case_count, case_type))
+                if case.get('published_flg'):
+                    logger.info("Loading {0}: {1}".format(case_type, case['no']))
+                    es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
+                    case_count += 1
+                    logger.info("{0} {1}(s) loaded".format(case_count, case_type))
+                else:
+                    logger.info("Found an unpublished case - deleting from ES")
+                    es.delete_by_query(index='docs_index', body={'query': {"term": {"no": case_no}}},
+                        doc_type=get_es_type(case_type))
+                    logger.info('Successfully deleted {} {} from ES'.format(case_type, case_no))
     else:
         logger.error("Invalid case_type: must be 'MUR', 'ADR', or 'AF'.")
 
@@ -242,6 +250,7 @@ def get_single_case(case_type, case_no):
                 'doc_id': '{0}_{1}'.format(case_type.lower(), row['case_no']),
                 'no': row['case_no'],
                 'name': row['name'],
+                'published_flg': row['published_flg'],
                 'sort1': sort1,
                 'sort2': sort2,
             }

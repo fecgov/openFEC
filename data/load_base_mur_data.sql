@@ -37,4 +37,5 @@ INSERT INTO fecmur.subject VALUES (17, 'Presidential', '2016-08-26 12:12:37.9798
 INSERT INTO fecmur.subject VALUES (18, 'Reporting', '2016-08-26 12:12:37.979847');
 INSERT INTO fecmur.subject VALUES (19, 'Soft Money', '2016-08-26 12:12:37.979847');
 INSERT INTO fecmur.subject VALUES (20, 'Solicitation', '2016-08-26 12:12:37.979847');
+INSERT INTO fecmur.subject VALUES (101, 'Unpublished MUR', '2016-08-26 12:12:37.979847');
 
