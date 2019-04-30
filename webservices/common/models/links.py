@@ -11,3 +11,4 @@ class CandidateCommitteeLink(db.Model):
     fec_election_year = db.Column('fec_election_yr', db.Integer)
     committee_designation = db.Column('cmte_dsgn', db.String)
     committee_type = db.Column('cmte_tp', db.String)
+    election_yr_to_be_included = db.Column('election_yr_to_be_included', db.Integer)
