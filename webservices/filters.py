@@ -72,16 +72,16 @@ def filter_fulltext(query, kwargs, fields):
                     sa.not_(column.match(utils.parse_fulltext(value)))
                     for value in exclude_list
                 ]
-                for value in exclude_list:
-                    filters.append(column.match(value))
+ #               for value in exclude_list:
+ #                   filters.append(column.match(value))
                 query = query.filter(sa.and_(*filters))
             if include_list:
                 filters = [
                     column.match(utils.parse_fulltext(value))
                     for value in include_list
                 ]
-                for value in include_list:
-                    filters.append(column.match(value))
+#                for value in include_list:
+#                    filters.append(column.match(value))
                 query = query.filter(sa.or_(*filters))
     return query
 

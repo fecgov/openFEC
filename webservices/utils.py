@@ -240,10 +240,17 @@ def extend(*dicts):
 
 
 def parse_fulltext(text):
-    return ' & '.join([
-        part + ':*'
-        for part in re.sub(r'\W', ' ', text).split()
-    ])
+    if ' ' in text:
+        return ' & '.join([
+            part + ':*'
+            for part in re.sub(r'\W', ' ', text).split()
+        ])
+    else:
+        one_word = re.sub(r'\W', ' ', text).split()
+        if one_word:
+            return one_word[0] + ':*'
+        else:
+            return ' '
 
 
 office_args_required = ['office', 'cycle']
