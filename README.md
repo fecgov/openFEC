@@ -23,10 +23,12 @@ The new FEC.gov aims to make campaign finance information more accessible (and u
 
 ## This repository, [openFEC](https://github.com/fecgov/openfec), is home to the FEC’s API
 All FEC repositories:
-- [FEC](https://github.com/fecgov/fec): a general discussion forum. We [compile feedback](https://github.com/fecgiv/fec/issues) from the FEC.gov feedback widget here, and this is the best place to submit general feedback.
+- [FEC](https://github.com/fecgov/fec): a general discussion forum. We [compile feedback](https://github.com/fecgov/fec/issues) from the FEC.gov feedback widget here, and this is the best place to submit general feedback.
 - [openFEC](https://github.com/fecgov/openfec): the first RESTful API for the Federal Election Commission
-- [fec-cms](https://github.com/fecgov/fec-cms): this project's content management system (CMS)
-- [fec-proxy](https://github.com/fecgov/fec-proxy): this is a lightweight app that coordinates the paths between the web app and CMS
+- [fec-eregs](https://github.com/fecgov/fec-eregs): the FEC's Code of Federal Regulations explorer
+- [fec-cms](https://github.com/fecgov/fec-cms): the content management system (CMS) for FEC.gov
+- [fec-proxy](https://github.com/fecgov/fec-proxy): the proxy application to manage and route requests coming to the FEC.gov site
+- [fec-infrastructure](https://github.com/fecgov/fec-infrastructure): manages the gov cloud RDS instances
 
 
 ## Get involved
