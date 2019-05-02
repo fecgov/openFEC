@@ -2,8 +2,8 @@
 https://api.open.fec.gov/v1/schedules/schedule_b/?spender_committee_type=W&sort=-disbursement_date&per_page=20&sort_null_only=false&sort_hide_null=false&api_key=DEMO_KEY&two_year_transaction_period=2018&two_year_transaction_period=2016&two_year_transaction_period=2014
 >cycle141618_purpose_cat_other
 https://api.open.fec.gov/v1/schedules/schedule_b/?sort=-disbursement_date&per_page=20&sort_null_only=false&disbursement_purpose_category=other&sort_hide_null=false&api_key=DEMO_KEY&two_year_transaction_period=2018&two_year_transaction_period=2016&two_year_transaction_period=2014
->cycle141618_line_num_23
-https://api.open.fec.gov/v1/schedules/schedule_b/?sort_hide_null=false&per_page=20&two_year_transaction_period=2018&two_year_transaction_period=2016&two_year_transaction_period=2014&sort=-disbursement_date&api_key=DEMO_KEY&line_number=23&sort_null_only=false
+>cycle141618_line_num_F3X-23
+https://api.open.fec.gov/v1/schedules/schedule_b/?sort_hide_null=false&per_page=20&two_year_transaction_period=2018&two_year_transaction_period=2016&two_year_transaction_period=2014&sort=-disbursement_date&api_key=DEMO_KEY&line_number=F3X-23&sort_null_only=false
 >cycle141618_desp_contribution2
 https://api.open.fec.gov/v1/schedules/schedule_b/?sort_hide_null=false&per_page=20&two_year_transaction_period=2018&two_year_transaction_period=2016&two_year_transaction_period=2014&sort=-disbursement_date&api_key=DEMO_KEY&sort_null_only=false&disbursement_description=contribution:2 earmark:1
 >cycle141618_cmte_id_actblue
@@ -15,4 +15,4 @@ https://api.open.fec.gov/v1/schedules/schedule_b/?sort_hide_null=false&per_page=
 >cycle141618_top_recipent_name
 https://api.open.fec.gov/v1/schedules/schedule_b/?sort_hide_null=false&per_page=20&two_year_transaction_period=2018&two_year_transaction_period=2016&two_year_transaction_period=2014&sort=-disbursement_date&api_key=DEMO_KEY&sort_null_only=false&recipient_name=democratic congressional campaign 
 >cycle141618_combine
-https://api.open.fec.gov/v1/schedules/schedule_b/?spender_committee_type=W&sort=-disbursement_date&line_number=23&per_page=20&sort_null_only=false&disbursement_purpose_category=other&sort_hide_null=false&api_key=DEMO_KEY&committee_id=C00401224&two_year_transaction_period=2018&two_year_transaction_period=2016&two_year_transaction_period=2014&disbursement_description=travel
+https://api.open.fec.gov/v1/schedules/schedule_b/?spender_committee_type=W&sort=-disbursement_date&line_number=F3X-23&per_page=20&sort_null_only=false&disbursement_purpose_category=other&sort_hide_null=false&api_key=DEMO_KEY&committee_id=C00401224&two_year_transaction_period=2018&two_year_transaction_period=2016&two_year_transaction_period=2014&disbursement_description=travel
