@@ -756,6 +756,34 @@ class TestItemized(ApiBaseTest):
             assert len(results) == 1
             assert results[0][column.key] == values[0]
 
+    def test_filter_fulltext_sched_e_pass(self):
+        """
+        test names that expect to be returned
+        """
+        payee_names = [
+            'Test.com', 'Test com', 'Testerosa', 'Test#com', 't&t'
+        ]
+        [
+            factories.ScheduleEFactory(payee_name=payee)
+            for payee in payee_names
+        ]
+        results = self._results(api.url_for(ScheduleEView, payee_name='t&t'))
+        self.assertEqual(len(results), len(payee_names))
+
+    # def test_filter_fulltest_sched_e_fail(self):
+    #     """
+    #     test names that expect no returns
+    #     """
+    #     payee_names = [
+    #         '#', '##', '@#$%^&*', '%', '', '  '
+    #     ]
+    #     [
+    #         factories.ScheduleEFactory(payee_name_text=payee)
+    #         for payee in payee_names
+    #     ]
+    #     results = self._results(api.url_for(ScheduleEView, payee_name=payee_names))
+    #     self.assertEquals(len(results), 0)
+
     def test_filters_sched_a_efile(self):
         filters = [
             ('image_number', ScheduleAEfile.image_number, ['123', '456']),
