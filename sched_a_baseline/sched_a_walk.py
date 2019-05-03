@@ -11,12 +11,12 @@ sort_hide_null=false&per_page=30&is_individual=true&two_year_transaction_period
 sort=-contribution_receipt_date&sort_nulls_last=false&api_key=DEMO_KEY&
 recipient_committee_type=W
 
->>top line_num not loading with 141618:
+>>top line_num - this one need to be re-tested
 https://api-stage.open.fec.gov/v1/schedules/schedule_a?
 sort_hide_null=false&per_page=30&is_individual=true&
 two_year_transaction_period=2016&two_year_transaction_period=2018
 &two_year_transaction_period=2014&sort=-contribution_receipt_date
-&sort_nulls_last=false&api_key=DEMO_KEY&line_number=11AI
+&sort_nulls_last=false&api_key=DEMO_KEY&line_number=F3X-11AI
 
 >>self_employed not loading:
 https://api-stage.open.fec.gov/v1/schedules/schedule_a?
