@@ -17,6 +17,7 @@ dependencies {
         exclude group: 'org.hsqldb', module: 'hsqldb'
         exclude group: 'org.mariadb.jdbc', module: 'mariadb-java-client'
         exclude group: 'org.xerial', module: 'sqlite-jdbc'
+	exclude group: 'com.google.protobuf', module: 'protobuf-java'
     }
 }
 
