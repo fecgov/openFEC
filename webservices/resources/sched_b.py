@@ -8,7 +8,7 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
-
+from webservices import exceptions
 """
 two years restriction removed from schedule_b. For details, refer:
 https://github.com/fecgov/openFEC/issues/3595
@@ -73,10 +73,16 @@ class ScheduleBView(ItemizedResource):
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id = int(kwargs.get('sub_id')))
         if kwargs.get('line_number'):
+            # line number is a composite value of 'filing_form-line_number'
             if len(kwargs.get('line_number').split('-')) == 2:
                 form, line_no = kwargs.get('line_number').split('-')
                 query = query.filter_by(filing_form=form.upper())
                 query = query.filter_by(line_number=line_no)
+            else:
+                raise exceptions.ApiError(
+                    'Invalid line_number detected.',
+                    status_code=400,
+                )
         return query
 
 

@@ -78,7 +78,7 @@ class ScheduleAView(ItemizedResource):
                     'contribution_receipt_date',
                     'contribution_receipt_amount',
                     'contributor_aggregate_ytd',
-                ]),
+               ]),
                 show_nulls_last_arg=False,
             )
         )
@@ -93,6 +93,7 @@ class ScheduleAView(ItemizedResource):
             'contributor_employer',
             'contributor_occupation',
             'image_number',
+            'line_number',
         ]
         two_year_transaction_periods = set(kwargs.get('two_year_transaction_period', []))
         if len(two_year_transaction_periods) != 1:
@@ -118,10 +119,16 @@ class ScheduleAView(ItemizedResource):
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         if kwargs.get('line_number'):
+            # line_number is a composite value of 'filing_form-line_number'
             if len(kwargs.get('line_number').split('-')) == 2:
                 form, line_no = kwargs.get('line_number').split('-')
                 query = query.filter_by(filing_form=form.upper())
                 query = query.filter_by(line_number=line_no)
+            else:
+                raise exceptions.ApiError(
+                    "Invalid line_number detected.",
+                    status_code=400,
+                )
         return query
 
 @doc(
