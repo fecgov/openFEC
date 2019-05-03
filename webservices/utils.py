@@ -240,17 +240,16 @@ def extend(*dicts):
 
 
 def parse_fulltext(text):
-    if ' ' in text:
-        return ' & '.join([
-            part + ':*'
-            for part in re.sub(r'\W', ' ', text).split()
-        ])
-    else:
-        one_word = re.sub(r'\W', ' ', text).split()
-        if one_word:
-            return one_word[0] + ':*'
-        else:
-            return ' '
+    """
+    return search string for tsquery containing the portion of each of the entered words
+    up to the first non-word character
+    """
+    # get list of entered words (in a single field)
+    words = re.split(r'\s+', text)
+    # get the portions of the words up to the first non-word character
+    word_parts = [re.match(r'(.*?)\W', word).group()[:-1] if re.match(r'(.*?)\W', word) else word for word in words]
+    # remove any empty strings from word_parts list and return the words in a formatted string
+    return ' & '.join([word_part + ':*' for word_part in word_parts if word_part])
 
 
 office_args_required = ['office', 'cycle']
