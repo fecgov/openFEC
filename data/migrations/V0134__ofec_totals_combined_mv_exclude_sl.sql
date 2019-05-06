@@ -362,10 +362,10 @@ CREATE INDEX idx_ofec_totals_combined_mv_tmp_cmte_dsgn_full_sub_id
     (committee_designation_full COLLATE pg_catalog."default", sub_id);
 CREATE INDEX idx_ofec_totals_combined_mv_tmp_cmte_id_sub_id
     ON public.ofec_totals_combined_mv_tmp USING btree
-    (committee_id COLLATE pg_catalog."default", sub_id);
+    (committee_id , sub_id);
 CREATE INDEX idx_ofec_totals_combined_mv_tmp_cmte_tp_full_sub_id
     ON public.ofec_totals_combined_mv_tmp USING btree
-    (committee_type_full COLLATE pg_catalog."default", sub_id);
+    (committee_type_full, sub_id);
 CREATE INDEX idx_ofec_totals_combined_mv_tmp_cycle_sub_id
     ON public.ofec_totals_combined_mv_tmp USING btree
     (cycle, sub_id);
@@ -386,7 +386,7 @@ DROP MATERIALIZED VIEW public.ofec_totals_combined_mv;
 ALTER MATERIALIZED VIEW IF EXISTS public.ofec_totals_combined_mv_tmp RENAME TO ofec_totals_combined_mv;
 
 -- rename indexes
-ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_dsgn_full_sub_id RENAME TO idx_ofec_totals_combined_mv _cmte_dsgn_full_sub_id;
+ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_dsgn_full_sub_id RENAME TO idx_ofec_totals_combined_mv_cmte_dsgn_full_sub_id;
 ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_id_sub_id RENAME TO idx_ofec_totals_combined_mv_cmte_id_sub_id;
 ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_tp_full_sub_id RENAME TO idx_ofec_totals_combined_mv_cmte_tp_full_sub_id;
 ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cycle_sub_id RENAME TO idx_ofec_totals_combined_mv_cycle_sub_id;
