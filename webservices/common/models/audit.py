@@ -6,12 +6,10 @@ from webservices import docs
 
 from .base import db
 
-class AuditBase(object):
-    __table_args__ = {"schema": "auditsearch"}
-
 
 # endpoint: audit-primary-category
-class AuditPrimaryCategory(AuditBase, db.Model):
+class AuditPrimaryCategory(db.Model):
+    __table_args__ = {"schema": "auditsearch"}
     __tablename__ = 'finding_vw'
 
     primary_category_id = db.Column(db.String, index=True, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
@@ -20,7 +18,8 @@ class AuditPrimaryCategory(AuditBase, db.Model):
 
 
 # endpoint: audit-category
-class AuditCategoryRelation(AuditBase, db.Model):
+class AuditCategoryRelation(db.Model):
+    __table_args__ = {"schema": "auditsearch"}
     __tablename__ = 'finding_rel_vw'
 
     primary_category_id = db.Column(db.String, index=True, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
@@ -41,6 +40,7 @@ class AuditCategory(AuditPrimaryCategory):
 
 # endpoint audit-case
 class AuditCaseSubCategory(db.Model):
+    __table_args__ = {"schema": "auditsearch"}
     __tablename__ = 'ofec_audit_case_sub_category_rel_mv'
     audit_case_id = db.Column(db.String, primary_key=True, doc=docs.AUDIT_CASE_ID)
     primary_category_id = db.Column(db.String, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
@@ -51,6 +51,7 @@ class AuditCaseSubCategory(db.Model):
 
 # endpoint audit-case
 class AuditCaseCategoryRelation(db.Model):
+    __table_args__ = {"schema": "auditsearch"}
     __tablename__ = 'ofec_audit_case_category_rel_mv'
     audit_case_id = db.Column(db.String, primary_key=True, doc=docs.AUDIT_CASE_ID)
     primary_category_id = db.Column(db.String, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
@@ -68,6 +69,7 @@ class AuditCaseCategoryRelation(db.Model):
 
 # endpoint audit-case
 class AuditCase(db.Model):
+    __table_args__ = {"schema": "auditsearch"}
     __tablename__ = 'ofec_audit_case_mv'
     idx = db.Column(db.Integer, primary_key=True, index=True)
     primary_category_id = db.Column(db.String, index=True, doc=docs.PRIMARY_CATEGORY_ID)
@@ -98,6 +100,7 @@ class AuditCase(db.Model):
 
 # endpoint audit/search/name/candidates
 class AuditCandidateSearch(db.Model):
+    __table_args__ = {"schema": "auditsearch"}
     __tablename__ = 'ofec_candidate_fulltext_audit_mv'
 
     idx = db.Column(db.String, primary_key=True)
@@ -108,6 +111,7 @@ class AuditCandidateSearch(db.Model):
 
 # endpoint audit/search/name/committees
 class AuditCommitteeSearch(db.Model):
+    __table_args__ = {"schema": "auditsearch"}
     __tablename__ = 'ofec_committee_fulltext_audit_mv'
 
     idx = db.Column(db.String, primary_key=True)
