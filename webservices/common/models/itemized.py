@@ -427,14 +427,21 @@ class ScheduleBEfile(BaseRawItemized):
         lazy='joined',
     )
 
-
 class ScheduleC(PdfMixin, BaseItemized):
     __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'fec_fitem_sched_c'
 
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleC.committee_id) == CommitteeHistory.committee_id,
+            ScheduleC.cycle == CommitteeHistory.cycle,
+        )''',
+        lazy='joined',
+    )
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
-    incurred_date = db.Column('incurred_dt', db.DateTime)
+    incurred_date = db.Column('incurred_dt', db.Date)
     loan_source_prefix = db.Column('loan_src_prefix', db.String)
     loan_source_first_name = db.Column('loan_src_f_nm', db.String)
     loan_source_middle_name = db.Column('loan_src_m_nm', db.String)
@@ -537,7 +544,16 @@ class ScheduleD(PdfMixin, BaseItemized):
     schedule_type = db.Column(db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     election_cycle = db.Column(db.Integer)
-    load_date = db.Column('pg_date', db.DateTime)
+    load_date = db.Column('pg_date', db.Date)
+
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleD.committee_id) == CommitteeHistory.committee_id,
+            ScheduleD.election_cycle == CommitteeHistory.cycle,
+        )''',
+        lazy='joined',
+    )
 
     @property
     def pdf_url(self):

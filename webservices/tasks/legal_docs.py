@@ -32,7 +32,7 @@ RECENTLY_MODIFIED_STARTING_AO = """
 """
 
 RECENTLY_MODIFIED_CASES = """
-    SELECT case_no, case_type, pg_date
+    SELECT case_no, case_type, pg_date, published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
     WHERE pg_date >= NOW() - '8 hour'::INTERVAL
     ORDER BY case_serial
@@ -98,10 +98,15 @@ def refresh_cases(conn):
     rs = conn.execute(RECENTLY_MODIFIED_CASES)
     if rs.returns_rows:
         load_count = 0
+        deleted_case_count = 0
         for row in rs:
             logger.info("%s %s found modified at %s", row["case_type"], row["case_no"], row["pg_date"])
             load_cases(row["case_type"], row["case_no"])
-            load_count += 1
-        logger.info("Total of %d case(s) loaded", load_count)
+            if row["published_flg"]:
+                load_count += 1
+                logger.info("Total of %d case(s) loaded...", load_count)
+            else:
+                deleted_case_count += 1
+                logger.info("Total of %d case(s) unpublished...", deleted_case_count)
     else:
         logger.info("No modified cases found")

@@ -32,6 +32,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'mur_type': 'current',
             'election_cycles': [2016],
             'doc_id': 'mur_1',
+            'published_flg': True,
             'participants': [],
             'subjects': [mur_subject],
             'respondents': [],
@@ -44,7 +45,34 @@ class TestLoadCurrentCases(BaseTestCase):
             'sort1': -1,
             'sort2': None
         }
-        self.create_case(1, expected_mur['no'], expected_mur['name'], mur_subject)
+        self.create_case(1, expected_mur['no'], expected_mur['name'], mur_subject, expected_mur['published_flg'])
+        actual_mur = next(get_cases('MUR'))
+
+        assert actual_mur == expected_mur
+
+    @patch('webservices.legal_docs.current_cases.get_bucket')
+    def test_unpublished_mur(self, get_bucket):
+        mur_subject = 'Unpublished MUR'
+        expected_mur = {
+            'no': '101',
+            'name': 'Test Unpublished MUR',
+            'mur_type': 'current',
+            'election_cycles': [2016],
+            'doc_id': 'mur_101',
+            'published_flg': False,
+            'participants': [],
+            'subjects': [mur_subject],
+            'respondents': [],
+            'documents': [],
+            'commission_votes': [],
+            'dispositions': [],
+            'close_date': None,
+            'open_date': None,
+            'url': '/legal/matter-under-review/101/',
+            'sort1': -101,
+            'sort2': None
+        }
+        self.create_case(101, expected_mur['no'], expected_mur['name'], mur_subject, expected_mur['published_flg'])
         actual_mur = next(get_cases('MUR'))
 
         assert actual_mur == expected_mur
@@ -57,6 +85,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'name': 'Simple ADR',
             'election_cycles': [2016],
             'doc_id': 'adr_1',
+            'published_flg': True,
             'participants': [],
             'subjects': [adr_subject],
             'respondents': [],
@@ -69,7 +98,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'sort1': -1,
             'sort2': None
         }
-        self.create_case(1, expected_adr['no'], expected_adr['name'], adr_subject, 'ADR')
+        self.create_case(1, expected_adr['no'], expected_adr['name'], adr_subject, expected_adr['published_flg'], 'ADR')
         actual_adr = next(get_cases('ADR'))
 
         assert actual_adr == expected_adr
@@ -81,6 +110,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'no': '1',
             'name': 'Big Admin Fine',
             'doc_id': 'af_1',
+            'published_flg': True,
             'documents': [],
             'commission_votes': [{'action': None, 'vote_date': None}],
             'committee_id': 'C001',
@@ -101,7 +131,8 @@ class TestLoadCurrentCases(BaseTestCase):
             'sort1': -1,
             'sort2': None
         }
-        self.create_case(1, expected_admin_fine['no'], expected_admin_fine['name'], dummy_subject, 'AF')
+        self.create_case(1, expected_admin_fine['no'], expected_admin_fine['name'],
+            dummy_subject, expected_admin_fine['published_flg'], 'AF')
         self.create_admin_fine(1,
             expected_admin_fine['committee_id'],
             expected_admin_fine['report_year'],
@@ -130,6 +161,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'no': '1',
             'name': 'MUR with participants',
             'mur_type': 'current',
+            'published_flg': True,
             'election_cycles': [2016],
             'doc_id': 'mur_1',
             'subjects': [mur_subject],
@@ -148,7 +180,7 @@ class TestLoadCurrentCases(BaseTestCase):
                     filename.replace(' ', '-'))),
         ]
 
-        self.create_case(case_id, expected_mur['no'], expected_mur['name'], mur_subject)
+        self.create_case(case_id, expected_mur['no'], expected_mur['name'], mur_subject, expected_mur['published_flg'])
         for entity_id, participant in enumerate(participants):
             role, name = participant
             self.create_participant(case_id, entity_id, role, name)
@@ -175,7 +207,8 @@ class TestLoadCurrentCases(BaseTestCase):
         name = 'Open Elections LLC'
         mur_subject = 'Fraudulent misrepresentation'
         pg_date = '2016-10-08'
-        self.create_case(case_id, case_no, name, mur_subject)
+        published_flg = True
+        self.create_case(case_id, case_no, name, mur_subject, published_flg)
 
         entity_id = 1
         event_date = '2005-01-01'
@@ -246,6 +279,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'subjects': ['Fraudulent misrepresentation'],
             'respondents': [],
             'documents': [], 'participants': [], 'no': '1', 'doc_id': 'mur_1',
+            'published_flg': True,
             'mur_type': 'current', 'name': 'Open Elections LLC', 'open_date': datetime(2005, 1, 1, 0, 0),
             'election_cycles': [2016],
             'close_date': datetime(2008, 1, 1, 0, 0),
@@ -264,6 +298,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'mur_type': 'current',
             'election_cycles': [2016],
             'doc_id': 'mur_1',
+            'published_flg': True,
             'participants': [],
             'subjects': [mur_subject],
             'respondents': [],
@@ -282,6 +317,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'mur_type': 'current',
             'election_cycles': [2016],
             'doc_id': 'mur_2',
+            'published_flg': True,
             'participants': [],
             'subjects': [mur_subject],
             'respondents': [],
@@ -300,6 +336,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'mur_type': 'current',
             'election_cycles': [2016],
             'doc_id': 'mur_3',
+            'published_flg': True,
             'participants': [],
             'subjects': [mur_subject],
             'respondents': [],
@@ -312,9 +349,9 @@ class TestLoadCurrentCases(BaseTestCase):
             'sort1': -3,
             'sort2': None
         }
-        self.create_case(1, expected_mur1['no'], expected_mur1['name'], mur_subject)
-        self.create_case(2, expected_mur2['no'], expected_mur2['name'], mur_subject)
-        self.create_case(3, expected_mur3['no'], expected_mur3['name'], mur_subject)
+        self.create_case(1, expected_mur1['no'], expected_mur1['name'], mur_subject, expected_mur1['published_flg'])
+        self.create_case(2, expected_mur2['no'], expected_mur2['name'], mur_subject, expected_mur2['published_flg'])
+        self.create_case(3, expected_mur3['no'], expected_mur3['name'], mur_subject, expected_mur3['published_flg'])
 
         gen = get_cases('MUR')
         assert(next(gen)) == expected_mur1
@@ -324,13 +361,13 @@ class TestLoadCurrentCases(BaseTestCase):
         actual_murs = [mur for mur in get_cases('MUR', '2')]
         assert actual_murs == [expected_mur2]
 
-    def create_case(self, case_id, case_no, name, subject_description, case_type='MUR'):
+    def create_case(self, case_id, case_no, name, subject_description, published_flg, case_type='MUR'):
         subject_id = self.connection.execute(
             "SELECT subject_id FROM fecmur.subject "
             " WHERE description = %s ", subject_description).scalar()
         self.connection.execute(
-            "INSERT INTO fecmur.case (case_id, case_no, name, case_type) "
-            "VALUES (%s, %s, %s, %s)", case_id, case_no, name, case_type)
+            "INSERT INTO fecmur.case (case_id, case_no, name, published_flg, case_type) "
+            "VALUES (%s, %s, %s, %s, %s)", case_id, case_no, name, published_flg, case_type)
         if case_type != 'AF':
             self.connection.execute(
                 "INSERT INTO fecmur.case_subject (case_id, subject_id, relatedsubject_id) "

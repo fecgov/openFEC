@@ -1,5 +1,5 @@
 import unittest
-
+from sqlalchemy.dialects import postgresql
 from flask import request
 from webargs import flaskparser
 
@@ -120,9 +120,9 @@ class TestSort(ApiBaseTest):
                                               candidate_inactive=False, district='02', office='S')
         ]
         candidateCmteLinks = [
-            factories.CandidateCommitteeLinkFactory(committee_id='H1234', candidate_id='C1234', fec_election_year=2016,committee_designation='P'),
+            factories.CandidateCommitteeLinkFactory(committee_id='H1234', candidate_id='C1234', fec_election_year=2016,committee_designation='P', election_yr_to_be_included = 2016),
             factories.CandidateCommitteeLinkFactory(committee_id='H5678', candidate_id='C5678', fec_election_year=2016,
-                                                    committee_designation='P')
+                                                    committee_designation='P', election_yr_to_be_included = 2016)
 
         ]
         cmteTotalsFactory = [
