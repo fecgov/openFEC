@@ -21,7 +21,7 @@ gevent==1.2.2
 webargs==0.18.0
 ujson==1.33
 requests==2.21.0
-elasticsearch==5.5.1
+elasticsearch==5.5.3
 elasticsearch-dsl==5.4.0
 git+https://github.com/18F/slate.git
 
@@ -32,7 +32,7 @@ marshmallow-sqlalchemy==0.15.0
 git+https://github.com/jmcarp/marshmallow-pagination@master
 
 # Data export
-smart_open==1.7.1
+smart_open==1.8.0
 
 # Task queue
 celery==4.1.1 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
