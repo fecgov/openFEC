@@ -1,3 +1,9 @@
+
+LINE_NUMBER_ERROR = """
+Invalid line_number detected. A valid line_number is using the following format:
+'FORM-LINENUMBER'.  Check the api doc for more info.
+"""
+
 class ApiError(Exception):
     status_code = 400
 

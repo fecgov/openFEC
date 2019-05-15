@@ -125,7 +125,7 @@ class ScheduleAView(ItemizedResource):
                 query = query.filter_by(line_number=line_no)
             else:
                 raise exceptions.ApiError(
-                    "Invalid line_number detected.",
+                    exceptions.LINE_NUMBER_ERROR,
                     status_code=400,
                 )
         return query

@@ -13,6 +13,9 @@ from webservices import exceptions
 two years restriction removed from schedule_b. For details, refer:
 https://github.com/fecgov/openFEC/issues/3595
 """
+LINE_NUMBER_ERROR = """
+
+"""
 
 @doc(
     tags=['disbursements'],
@@ -80,7 +83,7 @@ class ScheduleBView(ItemizedResource):
                 query = query.filter_by(line_number=line_no)
             else:
                 raise exceptions.ApiError(
-                    'Invalid line_number detected.',
+                    exceptions.LINE_NUMBER_ERROR,
                     status_code=400,
                 )
         return query

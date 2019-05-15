@@ -11,7 +11,6 @@ from webservices.resources.sched_a import ScheduleAView, ScheduleAEfileView
 from webservices.resources.sched_b import ScheduleBView, ScheduleBEfileView
 from webservices.resources.sched_e import ScheduleEView, ScheduleEEfileView
 
-
 class TestItemized(ApiBaseTest):
     kwargs = {'two_year_transaction_period': 2016}
 
