@@ -93,7 +93,6 @@ class ScheduleAView(ItemizedResource):
             'contributor_employer',
             'contributor_occupation',
             'image_number',
-            'line_number',
         ]
         two_year_transaction_periods = set(kwargs.get('two_year_transaction_period', []))
         if len(two_year_transaction_periods) != 1:
