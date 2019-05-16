@@ -87,54 +87,29 @@ CASE
 	WHEN yrs.next_election IS NULL THEN
 	    CASE
 	    WHEN cand.fec_election_yr <= yrs.cand_election_yr+yrs.cand_election_yr%2 AND (yrs.cand_election_yr-cand.fec_election_yr <
-		    CASE
-		    WHEN substr(cand.cand_id, 1, 1) = 'P'::text THEN 4
-		    WHEN substr(cand.cand_id, 1, 1) = 'S'::text THEN 6
-		    WHEN substr(cand.cand_id, 1, 1) = 'H'::text THEN 2
-		    ELSE NULL::integer
-		    END::numeric) 
+		    election_duration (substr(cand.cand_id, 1, 1)::text)) 
 	    THEN yrs.cand_election_yr
 	    ELSE NULL::numeric
 	    END
 	-- #6
 	-- this is a special case of #7
 	WHEN cand.fec_election_yr > cand.cand_election_yr AND yrs.next_election%2 =1 and cand.fec_election_yr < yrs.next_election AND cand.fec_election_yr <= (yrs.next_election+yrs.next_election%2 -
-		CASE
-		WHEN substr(cand.cand_id, 1, 1) = 'P'::text THEN 4
-		WHEN substr(cand.cand_id, 1, 1) = 'S'::text THEN 6
-		WHEN substr(cand.cand_id, 1, 1) = 'H'::text THEN 2
-		ELSE NULL::integer
-		END::numeric) 
+		election_duration (substr(cand.cand_id, 1, 1)::text)) 
 	THEN null
 	-- #7
 	-- when fec_election_yr is between previous cand_election and next_election, and fec_election_cycle is within the duration of the next_election cycle
 	WHEN cand.fec_election_yr > cand.cand_election_yr AND cand.fec_election_yr < yrs.next_election AND cand.fec_election_yr > (yrs.next_election -
-		CASE
-		WHEN substr(cand.cand_id, 1, 1) = 'P'::text THEN 4
-		WHEN substr(cand.cand_id, 1, 1) = 'S'::text THEN 6
-		WHEN substr(cand.cand_id, 1, 1) = 'H'::text THEN 2
-		ELSE NULL::integer
-		END::numeric) 
+		election_duration (substr(cand.cand_id, 1, 1)::text)) 
 	THEN yrs.next_election
 	-- #8
 	-- when fec_election_yr is after previous cand_election, but NOT within the duration of the next_election cycle (previous cand_election and the next_election has gaps)
 	WHEN cand.fec_election_yr > cand.cand_election_yr AND cand.fec_election_yr <= (yrs.next_election -
-		CASE
-		WHEN substr(cand.cand_id, 1, 1) = 'P'::text THEN 4
-		WHEN substr(cand.cand_id, 1, 1) = 'S'::text THEN 6
-		WHEN substr(cand.cand_id, 1, 1) = 'H'::text THEN 2
-		ELSE NULL::integer
-		END::numeric) 
+		election_duration (substr(cand.cand_id, 1, 1)::text)) 
 	THEN NULL::numeric
 	-- #9
 	-- fec_election_yr are within THIS election_cycle
 	WHEN cand.fec_election_yr < cand.cand_election_yr AND (yrs.cand_election_yr-cand.fec_election_yr <
-		CASE
-		WHEN substr(cand.cand_id, 1, 1) = 'P'::text THEN 4
-		WHEN substr(cand.cand_id, 1, 1) = 'S'::text THEN 6
-		WHEN substr(cand.cand_id, 1, 1) = 'H'::text THEN 2
-		ELSE NULL::integer
-		END::numeric) 
+		election_duration (substr(cand.cand_id, 1, 1)::text)) 
 	THEN yrs.cand_election_yr
 	-- 
 ELSE NULL::numeric
@@ -557,12 +532,11 @@ SELECT row_number() OVER () AS idx,
             WHEN yrs.next_election IS NULL THEN
             CASE
             WHEN link.fec_election_yr <= yrs.cand_election_yr AND (yrs.cand_election_yr-link.fec_election_yr <
-            CASE
-            WHEN link.cmte_tp::text = 'P'::text THEN 4
-            WHEN link.cmte_tp::text = 'S'::text THEN 6
-            WHEN link.cmte_tp::text = 'H'::text THEN 2
-            ELSE NULL::integer
-            END::numeric) 
+                CASE WHEN link.cmte_tp::text in ('H', 'S', 'P')
+                THEN election_duration (link.cmte_tp::text)
+                ELSE null
+                END
+            ) 
             THEN yrs.cand_election_yr
                 ELSE NULL::numeric
                 END
@@ -571,32 +545,29 @@ SELECT row_number() OVER () AS idx,
 	    -- note: different from the calculation in candidate_history the next_election here is a rounded number so it need to include <=
 	    WHEN link.fec_election_yr > link.cand_election_yr AND link.fec_election_yr <= yrs.next_election AND link.fec_election_yr > (yrs.next_election -
         --WHEN link.fec_election_yr > link.cand_election_yr AND link.fec_election_yr > (yrs.next_election -
-                CASE
-                WHEN link.cmte_tp::text = 'P'::text THEN 4
-                WHEN link.cmte_tp::text = 'S'::text THEN 6
-                WHEN link.cmte_tp::text = 'H'::text THEN 2
-                ELSE NULL::integer
-                END::numeric) 
+                CASE WHEN link.cmte_tp::text in ('H', 'S', 'P')
+                THEN election_duration (link.cmte_tp::text)
+                ELSE null
+                END
+            ) 
                 THEN yrs.next_election
         -- #5
 	    -- when fec_election_yr is after previous cand_election, but NOT within the duration of the next_election cycle (previous cand_election and the next_election has gaps)
             WHEN link.fec_election_yr > link.cand_election_yr AND link.fec_election_yr <= (yrs.next_election -
-                CASE
-                WHEN link.cmte_tp::text = 'P'::text THEN 4
-                WHEN link.cmte_tp::text = 'S'::text THEN 6
-                WHEN link.cmte_tp::text = 'H'::text THEN 2
-                ELSE NULL::integer
-                END::numeric) 
+                CASE WHEN link.cmte_tp::text in ('H', 'S', 'P')
+                THEN election_duration (link.cmte_tp::text)
+                ELSE null
+                END
+            ) 
                 THEN NULL::numeric
         -- #6                
 	    -- fec_election_yr are within THIS election_cycle
             WHEN link.fec_election_yr < link.cand_election_yr AND (yrs.cand_election_yr-link.fec_election_yr <
-                CASE
-                WHEN link.cmte_tp::text = 'P'::text THEN 4
-                WHEN link.cmte_tp::text = 'S'::text THEN 6
-                WHEN link.cmte_tp::text = 'H'::text THEN 2
-                ELSE NULL::integer
-                END::numeric) 
+                CASE WHEN link.cmte_tp::text in ('H', 'S', 'P')
+                THEN election_duration (link.cmte_tp::text)
+                ELSE null
+                END
+            ) 
                 THEN yrs.cand_election_yr
             ELSE NULL::numeric
         END::numeric(4,0) AS election_yr_to_be_included
