@@ -38,9 +38,9 @@ class AuditCategory(AuditPrimaryCategory):
             uselist=True,
         )
 
+
 # endpoint audit-case
 class AuditCaseSubCategory(db.Model):
-    __table_args__ = {"schema": "auditsearch"}
     __tablename__ = 'ofec_audit_case_sub_category_rel_mv'
     audit_case_id = db.Column(db.String, primary_key=True, doc=docs.AUDIT_CASE_ID)
     primary_category_id = db.Column(db.String, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
@@ -51,7 +51,6 @@ class AuditCaseSubCategory(db.Model):
 
 # endpoint audit-case
 class AuditCaseCategoryRelation(db.Model):
-    __table_args__ = {"schema": "auditsearch"}
     __tablename__ = 'ofec_audit_case_category_rel_mv'
     audit_case_id = db.Column(db.String, primary_key=True, doc=docs.AUDIT_CASE_ID)
     primary_category_id = db.Column(db.String, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
@@ -69,7 +68,6 @@ class AuditCaseCategoryRelation(db.Model):
 
 # endpoint audit-case
 class AuditCase(db.Model):
-    __table_args__ = {"schema": "auditsearch"}
     __tablename__ = 'ofec_audit_case_mv'
     idx = db.Column(db.Integer, primary_key=True, index=True)
     primary_category_id = db.Column(db.String, index=True, doc=docs.PRIMARY_CATEGORY_ID)
@@ -100,7 +98,6 @@ class AuditCase(db.Model):
 
 # endpoint audit/search/name/candidates
 class AuditCandidateSearch(db.Model):
-    __table_args__ = {"schema": "auditsearch"}
     __tablename__ = 'ofec_candidate_fulltext_audit_mv'
 
     idx = db.Column(db.String, primary_key=True)
@@ -111,7 +108,6 @@ class AuditCandidateSearch(db.Model):
 
 # endpoint audit/search/name/committees
 class AuditCommitteeSearch(db.Model):
-    __table_args__ = {"schema": "auditsearch"}
     __tablename__ = 'ofec_committee_fulltext_audit_mv'
 
     idx = db.Column(db.String, primary_key=True)
