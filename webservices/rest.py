@@ -108,7 +108,7 @@ cors.CORS(app)
 
 class FlaskRestParser(FlaskParser):
 
-    def handle_error(self, error):
+    def handle_error(self, error, req, schema, status_code, error_headers):
         message = error.messages
         status_code = getattr(error, 'status_code', 422)
         raise exceptions.ApiError(message, status_code)
