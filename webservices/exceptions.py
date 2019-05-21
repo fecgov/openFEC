@@ -1,7 +1,7 @@
 
-LINE_NUMBER_ERROR = """
-Invalid line_number detected. A valid line_number is using the following format:
-'FORM-LINENUMBER'.  Check the api doc for more info.
+LINE_NUMBER_ERROR = """Invalid line_number detected. A valid line_number is using the following format:
+'FORM-LINENUMBER'.  For example an argument such as 'F3X-16' would filter down to all schedule a entries
+from formF 3X line number 16.
 """
 
 class ApiError(Exception):
