@@ -136,6 +136,10 @@ def make_sort_args(default=None, validator=None, default_hide_null=False,
         ),
 
     }
+    
+    # this is a handy flag to turn sort_nulls_last on and off
+    # check https://github.com/fecgov/openFEC/issues/3775 and 
+    # https://github.com/fecgov/openFEC/issues/3494 for details
     if show_nulls_last_arg:
         args['sort_nulls_last'] = fields.Bool(
             missing=default_sort_nulls_last,
