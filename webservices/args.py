@@ -1,10 +1,11 @@
 import functools
 
 from marshmallow.compat import text_type
+from marshmallow import ValidationError
 
 import sqlalchemy as sa
 
-from webargs import ValidationError, fields, validate
+from webargs import fields, validate
 
 from webservices import docs
 from webservices.common.models import db
@@ -71,7 +72,6 @@ class OptionValidator(object):
         if value.lstrip('-') not in self.values:
             raise ValidationError(
                 'Cannot sort on value "{0}"'.format(value),
-                status_code=422
             )
 
 
@@ -115,7 +115,6 @@ class IndicesValidator(IndexValidator):
             if sort_column.lstrip('-') not in self.values:
                 raise ValidationError(
                     'Cannot sort on value "{0}"'.format(value),
-                    status_code=422
                 )
 
 def make_sort_args(default=None, validator=None, default_hide_null=False,
