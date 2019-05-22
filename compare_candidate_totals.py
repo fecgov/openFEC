@@ -15,21 +15,18 @@ api_key = os.environ.get("FEC_API_KEY")
 @click.option('--year', default=2020, help='Start year')
 @click.option('--candidate-id', default=None, help='Check one candidate')
 @click.option(
-    '--envs', default='dev,prod', help='Which envs to check. No spaces please'
+    '--envs', default='dev,prod', help='Which envs to check. Format as dev,stage,prod (No spaces please)'
 )
 def compare_candidate_totals(office_types, year, candidate_id, envs):
 
     mismatch_list = set([])
     envs_list = envs.split(",")
-
     url_lookup = {
         'local': 'http://localhost:5000',
         'dev': 'https://fec-dev-api.app.cloud.gov',
         'stage': 'https://api-stage.open.fec.gov',
         'prod': 'https://api.open.fec.gov',
     }
-    envs_to_check = {env: url_lookup[env] for env in envs_list}
-
     candidate_datatable = (
         "/candidates/totals/?candidate_id={0}&election_year={1}"
         "&election_full={2}&sort=-receipts&api_key=" + api_key
@@ -40,7 +37,7 @@ def compare_candidate_totals(office_types, year, candidate_id, envs):
         "&office={3}&sort_nulls_last=true&sort=-total_receipts&per_page=100"
         "&api_key=" + api_key
     )
-
+    envs_to_check = {env: url_lookup[env] for env in envs_list}
     endpoints = ['datatable', 'candidate', 'election']
     values_to_check = ['receipts', 'disbursements', 'cash_on_hand_end_period']
 
@@ -174,7 +171,6 @@ def compare_candidate_totals(office_types, year, candidate_id, envs):
             for value in values_to_check:
                 # Grab the baseline value for the first environment
                 baseline = result_list[0].get(endpoint, value)
-
                 # If any values differ across environment
                 if any(
                     result.get(endpoint, value) != baseline for result in result_list
