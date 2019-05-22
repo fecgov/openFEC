@@ -4,16 +4,21 @@ import click
 
 api_key = os.environ.get("FEC_API_KEY")
 
+
 @click.command()
-@click.option('--office-types', default=['H', 'S', 'P'], help='Which offices to check. Format as H,S')
+@click.option(
+    '--office-types',
+    default=['H', 'S', 'P'],
+    help='Which offices to check. Format as H,S',
+)
 @click.option('--year', default=2020, help='Start year')
 @click.option('--candidate-id', help='Check one candidate')
-#@click.option('--envs', default=['dev', 'prod'], help='Which envs to check')
+# @click.option('--envs', default=['dev', 'prod'], help='Which envs to check')
 def compare_candidate_totals(office_types, year, candidate_id, envs):
 
     mismatch_list = set([])
 
-    #local_url = 'http://localhost:5000'
+    # local_url = 'http://localhost:5000'
     dev_url = 'https://fec-dev-api.app.cloud.gov'
     prod_url = 'https://api.open.fec.gov'
 
@@ -150,11 +155,7 @@ def compare_candidate_totals(office_types, year, candidate_id, envs):
             print("\nMismatch list ({}): {}".format(env, mismatch_list))
 
         for endpoint in endpoints:
-            print(
-                "\n****Checking across environments: {} ****\n".format(
-                    endpoint
-                )
-            )
+            print("\n****Checking across environments: {} ****\n".format(endpoint))
             for value in values_to_check:
                 # Grab the baseline value for the first environment
                 baseline = result_list[0].get(endpoint).get(value)
@@ -190,7 +191,10 @@ def get_top_candidates(office_types=['P', 'S', 'H'], start_year=2020, candidate_
     if 'P' in office_types:
         # Top 20 presidential
         top_candidates.extend(
-            requests.get(candidate_url + "&election_year={}&office=P&per_page=20".format(start_year))
+            requests.get(
+                candidate_url
+                + "&election_year={}&office=P&per_page=20".format(start_year)
+            )
             .json()
             .get('results')
         )
@@ -199,14 +203,20 @@ def get_top_candidates(office_types=['P', 'S', 'H'], start_year=2020, candidate_
         # Start year plus next two elections
         for year in range(start_year, start_year + 5, 2):
             top_candidates.extend(
-                requests.get(candidate_url + "&election_year={}&office=S&per_page=30".format(year))
+                requests.get(
+                    candidate_url
+                    + "&election_year={}&office=S&per_page=30".format(year)
+                )
                 .json()
                 .get('results')
             )
     if 'H' in office_types:
         # Top 100 house
         top_candidates.extend(
-            requests.get(candidate_url + "&election_year={}&office=H&per_page=100".format(start_year))
+            requests.get(
+                candidate_url
+                + "&election_year={}&office=H&per_page=100".format(start_year)
+            )
             .json()
             .get('results')
         )
@@ -215,6 +225,7 @@ def get_top_candidates(office_types=['P', 'S', 'H'], start_year=2020, candidate_
 
 class Results(object):
     """docstring for Results"""
+
     def __init__(self, env):
         self.env = env
         self.result_type = None
