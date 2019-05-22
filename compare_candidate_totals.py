@@ -10,13 +10,13 @@ api_key = os.environ.get("FEC_API_KEY")
 # Click can't take lists as args - must be strings
 @click.command()
 @click.option(
-    '--office-types',
-    default='H, S, P',
-    help='Which offices to check. Format as H,S',
+    '--office-types', default='H, S, P', help='Which offices to check. Format as H,S'
 )
 @click.option('--year', default=2020, help='Start year')
 @click.option('--candidate-id', default=None, help='Check one candidate')
-@click.option('--envs', default='dev,prod', help='Which envs to check. No spaces please')
+@click.option(
+    '--envs', default='dev,prod', help='Which envs to check. No spaces please'
+)
 def compare_candidate_totals(office_types, year, candidate_id, envs):
 
     mismatch_list = set([])
@@ -30,12 +30,16 @@ def compare_candidate_totals(office_types, year, candidate_id, envs):
     }
     envs_to_check = {env: url_lookup[env] for env in envs_list}
 
-    candidate_datatable = "/candidates/totals/?candidate_id={0}&election_year={1}" \
+    candidate_datatable = (
+        "/candidates/totals/?candidate_id={0}&election_year={1}"
         "&election_full={2}&sort=-receipts&api_key=" + api_key
+    )
     candidate_profile = "/candidate/{0}/totals/?cycle={1}&api_key=" + api_key
-    election_profile = "/elections/?candidate_id={0}&cycle={1}&election_full={2}" \
-        "&office={3}&sort_nulls_last=true&sort=-total_receipts&per_page=100" \
+    election_profile = (
+        "/elections/?candidate_id={0}&cycle={1}&election_full={2}"
+        "&office={3}&sort_nulls_last=true&sort=-total_receipts&per_page=100"
         "&api_key=" + api_key
+    )
 
     endpoints = ['datatable', 'candidate', 'election']
     values_to_check = ['receipts', 'disbursements', 'cash_on_hand_end_period']
@@ -68,8 +72,7 @@ def compare_candidate_totals(office_types, year, candidate_id, envs):
             if candidate.get('office') == "H":
                 # Add state and district to elections
                 election_profile_url += "&state={}&district={}&election_full={}".format(
-                    candidate.get('state'),
-                    candidate.get('district'), 'False'
+                    candidate.get('state'), candidate.get('district'), 'False'
                 )
                 # 2-year totals for candidate profile page
                 candidate_profile_url += "&full_election=False"
@@ -109,7 +112,9 @@ def compare_candidate_totals(office_types, year, candidate_id, envs):
             )
 
             datatable_results = requests.get(datatable_url).json().get('results')
-            candidate_results = (requests.get(candidate_profile_url).json().get('results'))
+            candidate_results = (
+                requests.get(candidate_profile_url).json().get('results')
+            )
 
             # This is a list of all candidates - we'll need to loop through them to match
             all_election_results = (
@@ -172,18 +177,14 @@ def compare_candidate_totals(office_types, year, candidate_id, envs):
 
                 # If any values differ across environment
                 if any(
-                    result.get(endpoint, value) != baseline
-                    for result in result_list
+                    result.get(endpoint, value) != baseline for result in result_list
                 ):
                     print("\n!!! ERROR - environment results don't match!!!")
                     print("| Data source | Total {} |\n|--|--|".format(value))
                     for result in result_list:
                         print(
                             "| {} {} {}\t\t|\t${:,.2f}|".format(
-                                endpoint,
-                                value,
-                                result.env,
-                                result.get(endpoint, value),
+                                endpoint, value, result.env, result.get(endpoint, value)
                             )
                         )
                     mismatch_list.add((candidate_id, candidate_name))
