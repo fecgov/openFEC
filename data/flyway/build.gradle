@@ -12,11 +12,13 @@ dependencies {
         exclude group: 'com.h2database', module: 'h2'
         exclude group: 'com.pivotal.jdbc', module: 'greenplumdriver'
         exclude group: 'net.sourceforge.jtds', module: 'jtds'
+	exclude group: 'mysql', module: 'mysql-connector-java'
         exclude group: 'org.apache.derby', module: 'derby'
         exclude group: 'org.apache.derby', module: 'derbyclient'
         exclude group: 'org.hsqldb', module: 'hsqldb'
         exclude group: 'org.mariadb.jdbc', module: 'mariadb-java-client'
         exclude group: 'org.xerial', module: 'sqlite-jdbc'
+	exclude group: 'com.google.protobuf', module: 'protobuf-java'
     }
 }
 

@@ -238,6 +238,30 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_employer'], 'Vandelay Industries')
 
+    def test_filter_fulltext_employer_dot(self):
+        employers = ['Test.com', 'Test. com', 'Test .com', 'Testcom', 'Test com']
+        [
+            factories.ScheduleAFactory(contributor_employer=employer)
+            for employer in employers
+        ]
+        results = self._results(api.url_for(ScheduleAView, contributor_employer='Test.com', **self.kwargs))
+        self.assertEqual(results[0]['contributor_employer'], 'Test.com')
+
+    def test_filter_fulltext_employer_and(self):
+        employers = ['Test&Test', 'Test & Test', 'Test& Test', 'Test &Test']
+        [
+            factories.ScheduleAFactory(contributor_employer=employer)
+            for employer in employers
+        ]
+        results = self._results(api.url_for(ScheduleAView, contributor_employer='Test&Test', **self.kwargs))
+        self.assertIn(results[0]['contributor_employer'], employers)
+        results = self._results(api.url_for(ScheduleAView, contributor_employer='Test & Test', **self.kwargs))
+        self.assertIn(results[0]['contributor_employer'], employers)
+        results = self._results(api.url_for(ScheduleAView, contributor_employer='Test& Test', **self.kwargs))
+        self.assertIn(results[0]['contributor_employer'], employers)
+        results = self._results(api.url_for(ScheduleAView, contributor_employer='Test &Test', **self.kwargs))
+        self.assertIn(results[0]['contributor_employer'], employers)
+        
     def test_filter_fulltext_occupation(self):
         occupations = ['Attorney at Law', 'Doctor of Philosophy']
         filings = [
@@ -731,6 +755,36 @@ class TestItemized(ApiBaseTest):
             results = self._results(api.url_for(ScheduleEView, **{label: values[0]}))
             assert len(results) == 1
             assert results[0][column.key] == values[0]
+
+    def test_filter_fulltext_sched_e_pass(self):
+        """
+        test names that expect to be returned
+        """
+        payee_names = [
+            'Test.com', 'Test com', 'Testerosa', 'Test#com', 'Test.com and Test.com'
+        ]
+        [
+            factories.ScheduleEFactory(payee_name=payee)
+            for payee in payee_names
+        ]
+        results = self._results(api.url_for(ScheduleEView, payee_name='test'))
+        for result in results:
+            print(result, '\n')
+        self.assertEqual(len(results), len(payee_names))
+
+    def test_filter_fulltest_sched_e_fail(self):
+        """
+        test names that expect no returns
+        """
+        payee_names = [
+            '#', '##', '@#$%^&*', '%', '', '  '
+        ]
+        [
+            factories.ScheduleEFactory(payee_name_text=payee)
+            for payee in payee_names
+        ]
+        results = self._results(api.url_for(ScheduleEView, payee_name=payee_names))
+        self.assertEquals(len(results), 0)
 
     def test_filters_sched_a_efile(self):
         filters = [
