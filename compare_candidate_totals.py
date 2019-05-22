@@ -51,20 +51,19 @@ def compare_candidate_totals(office_types, year, candidate_id, envs):
         for env, base_url in envs_to_check.items():
             # make a Results object to save this env's results
             env_results = Results(env)
-            datatable_url, candidate_profile_url, election_profile_url = candidate.get_urls(base_url)
+            datatable_url, candidate_url, election_url = candidate.get_urls(base_url)
 
-            print(
-                f"\n**** Checking: {candidate.id}, {candidate.name} in {env}. Election year is {candidate.election}. ****\n"
-            )
+            print(f"\n**** Checking: {candidate.id}, {candidate.name} in {env}. " \
+                  f"Election year is {candidate.election}. ****\n")
 
             print(f"\nCandidate totals datatable: {get_printable(datatable_url)}")
-            print(f"\nCandidate profile totals: {get_printable(candidate_profile_url)}")
-            print(f"\nElection profile totals: {get_printable(election_profile_url)}")
+            print(f"\nCandidate profile totals: {get_printable(candidate_url)}")
+            print(f"\nElection profile totals: {get_printable(election_url)}")
 
             datatable_results = get_results(datatable_url)
-            candidate_results = get_results(candidate_profile_url)
+            candidate_results = get_results(candidate_url)
             # This is a list of all candidates in an election
-            all_election_results = get_results(election_profile_url)
+            all_election_results = get_results(election_url)
             # Loop through them to match the candidate
             for election_result in all_election_results:
                 if election_result.get("candidate_id") == candidate.id:
@@ -74,7 +73,9 @@ def compare_candidate_totals(office_types, year, candidate_id, envs):
             if not all([datatable_results, candidate_results, election_match]):
                 print("\nERROR: No results for one endpoint")
                 print(f"Candidate datatable results? {datatable_results is not None}")
-                print(f"Candidate profile page results? {candidate_results is not None}")
+                print(
+                    f"Candidate profile page results? {candidate_results is not None}"
+                )
                 print(f"Election profile page results? {election_match is not None}")
                 mismatch_list.add((candidate.id, candidate.name))
             else:
@@ -110,7 +111,8 @@ def compare_candidate_totals(office_types, year, candidate_id, envs):
                 baseline = env_results_list[0].get(endpoint, value)
                 # If any values differ across environment
                 if any(
-                    result.get(endpoint, value) != baseline for result in env_results_list
+                    result.get(endpoint, value) != baseline
+                    for result in env_results_list
                 ):
                     print("\n!!! ERROR - environment results don't match!!!")
                     print(f"| Data source | Total {value} |\n|--|--|")
@@ -126,23 +128,37 @@ def compare_candidate_totals(office_types, year, candidate_id, envs):
 def get_top_candidates(office_types, start_year, candidate_id):
 
     top_candidates = []
-    candidate_url = "https://api.open.fec.gov/v1/candidates/totals/?" \
-        "sort_hide_null=false&sort_nulls_last=true&is_active_candidate=True" \
+    candidate_url = (
+        "https://api.open.fec.gov/v1/candidates/totals/?"
+        "sort_hide_null=false&sort_nulls_last=true&is_active_candidate=True"
         "&election_full=true&sort=-receipts&page=1&api_key=" + api_key
+    )
     if candidate_id:
         candidate_url += f"&candidate_id={candidate_id}"
     print("Getting candidate info")
     if "P" in office_types:
         # Top 20 presidential
-        top_candidates.extend(get_results(candidate_url + f"&election_year={start_year}&office=P&per_page=20"))
-    elif "S" in office_types:
+        top_candidates.extend(
+            get_results(
+                candidate_url + f"&election_year={start_year}&office=P&per_page=20"
+            )
+        )
+    if "S" in office_types:
         # Top 30 senate, 3 cycles
         # Start year plus next two elections
         for year in range(start_year, start_year + 5, 2):
-            top_candidates.extend(get_results(candidate_url + f"&election_year={year}&office=S&per_page=30"))
-    elif "H" in office_types:
+            top_candidates.extend(
+                get_results(
+                    candidate_url + f"&election_year={year}&office=S&per_page=30"
+                )
+            )
+    if "H" in office_types:
         # Top 100 house
-        top_candidates.extend(get_results(candidate_url + f"&election_year={start_year}&office=H&per_page=100"))
+        top_candidates.extend(
+            get_results(
+                candidate_url + f"&election_year={start_year}&office=H&per_page=100"
+            )
+        )
 
     return top_candidates
 
@@ -171,6 +187,7 @@ class Results(object):
 
 class Candidate(object):
     """docstring for Candidate"""
+
     def __init__(self, candidate):
         self.id = candidate.get("candidate_id")
         self.name = candidate.get("name")
@@ -186,42 +203,37 @@ class Candidate(object):
             + "/v1"
             + candidate_datatable.format(self.id, self.election, "true")
         )
-        candidate_profile_url = (
-            base_url
-            + "/v1"
-            + candidate_profile.format(self.id, self.election)
+        candidate_url = (
+            base_url + "/v1" + candidate_profile.format(self.id, self.election)
         )
-        election_profile_url = (
+        election_url = (
             base_url
             + "/v1"
             + election_profile.format(
-                self.id,
-                self.election,
-                "true",
-                self.office_full.lower(),
+                self.id, self.election, "true", self.office_full.lower()
             )
         )
 
         # Office-specific queries
         if self.office == "H":
             # Add state and district to elections
-            election_profile_url += f"&state={self.state}&district={self.district}&election_full=False"
+            election_url += (
+                f"&state={self.state}&district={self.district}&election_full=False"
+            )
             # 2-year totals for candidate profile page
-            candidate_profile_url += "&full_election=False"
+            candidate_url += "&full_election=False"
 
         elif self.office == "S":
             # Add state to elections
-            election_profile_url += (
-                f"&state={self.state}&election_full=True"
-            )
+            election_url += f"&state={self.state}&election_full=True"
             # 6-year totals for candidate profile page
-            candidate_profile_url += "&full_election=True"
+            candidate_url += "&full_election=True"
 
         elif self.office == "P":
             # 4-year totals for candidate profile page
-            candidate_profile_url += "&full_election=True"
+            candidate_url += "&full_election=True"
 
-        return datatable_url, candidate_profile_url, election_profile_url
+        return datatable_url, candidate_url, election_url
 
 
 def get_printable(url):
