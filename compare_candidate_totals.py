@@ -10,22 +10,24 @@ api_key = os.environ.get("FEC_API_KEY")
 # Click can't take lists as args - must be strings
 @click.command()
 @click.option(
-    '--office-types', default='H, S, P', help='Which offices to check. Format as H,S'
+    "--office-types", default="H, S, P", help="Which offices to check. Format as H,S"
 )
-@click.option('--year', default=2020, help='Start year')
-@click.option('--candidate-id', default=None, help='Check one candidate')
+@click.option("--year", default=2020, help="Start year")
+@click.option("--candidate-id", default=None, help="Check one candidate")
 @click.option(
-    '--envs', default='dev,prod', help='Which envs to check. Format as dev,stage,prod (No spaces please)'
+    "--envs",
+    default="dev,prod",
+    help="Which envs to check. Format as dev,stage,prod (No spaces please)",
 )
 def compare_candidate_totals(office_types, year, candidate_id, envs):
 
     mismatch_list = set([])
     envs_list = envs.split(",")
     url_lookup = {
-        'local': 'http://localhost:5000',
-        'dev': 'https://fec-dev-api.app.cloud.gov',
-        'stage': 'https://api-stage.open.fec.gov',
-        'prod': 'https://api.open.fec.gov',
+        "local": "http://localhost:5000",
+        "dev": "https://fec-dev-api.app.cloud.gov",
+        "stage": "https://api-stage.open.fec.gov",
+        "prod": "https://api.open.fec.gov",
     }
     candidate_datatable = (
         "/candidates/totals/?candidate_id={0}&election_year={1}"
@@ -38,122 +40,108 @@ def compare_candidate_totals(office_types, year, candidate_id, envs):
         "&api_key=" + api_key
     )
     envs_to_check = {env: url_lookup[env] for env in envs_list}
-    endpoints = ['datatable', 'candidate', 'election']
-    values_to_check = ['receipts', 'disbursements', 'cash_on_hand_end_period']
+    endpoints = ["datatable", "candidate", "election"]
+    values_to_check = ["receipts", "disbursements", "cash_on_hand_end_period"]
 
     for candidate in get_top_candidates(office_types, year, candidate_id):
 
         result_list = []
-        candidate_id = candidate.get('candidate_id')
-        candidate_name = candidate.get('name')
-        candidate_election = candidate.get('election_year')
+        candidate_id = candidate.get("candidate_id")
+        candidate_name = candidate.get("name")
+        candidate_election = candidate.get("election_year")
+        candidate_office = candidate.get("office")
 
         for env, base_url in envs_to_check.items():
-
+            # make a Results object to save this env's results
             results = Results(env)
-
-            datatable_url = (base_url + "/v1" + candidate_datatable).format(
-                candidate_id, candidate_election, 'true'
+            datatable_url = (
+                base_url
+                + "/v1"
+                + candidate_datatable.format(candidate_id, candidate_election, "true")
             )
-            candidate_profile_url = (base_url + "/v1" + candidate_profile).format(
-                candidate_id, candidate_election
+            candidate_profile_url = (
+                base_url
+                + "/v1"
+                + candidate_profile.format(candidate_id, candidate_election)
             )
-            election_profile_url = (base_url + "/v1" + election_profile).format(
-                candidate_id,
-                candidate_election,
-                'true',
-                candidate.get('office_full').lower(),
+            election_profile_url = (
+                base_url
+                + "/v1"
+                + election_profile.format(
+                    candidate_id,
+                    candidate_election,
+                    "true",
+                    candidate.get("office_full").lower(),
+                )
             )
 
             # Office-specific queries
-            if candidate.get('office') == "H":
+            if candidate_office == "H":
                 # Add state and district to elections
-                election_profile_url += "&state={}&district={}&election_full={}".format(
-                    candidate.get('state'), candidate.get('district'), 'False'
-                )
+                election_profile_url += f"&state={candidate.get('state')}&district={candidate.get('district')}&election_full=False"
                 # 2-year totals for candidate profile page
                 candidate_profile_url += "&full_election=False"
 
-            if candidate.get('office') == "S":
+            elif candidate_office == "S":
                 # Add state to elections
-                election_profile_url += "&state={}&election_full={}".format(
-                    candidate.get('state'), 'True'
+                election_profile_url += (
+                    f"&state={candidate.get('state')}&election_full=True"
                 )
                 # 6-year totals for candidate profile page
                 candidate_profile_url += "&full_election=True"
 
-            if candidate.get('office') == "P":
+            elif candidate_office == "P":
                 # 4-year totals for candidate profile page
                 candidate_profile_url += "&full_election=True"
 
             print(
-                "\n**** Checking: {}, {} in {}. Election year is {}. ****\n".format(
-                    candidate_id, candidate_name, env, candidate_election
-                )
+                f"\n**** Checking: {candidate_id}, {candidate_name} in {env}. Election year is {candidate_election}. ****\n"
             )
 
-            print(
-                "\nCandidate totals datatable url: {}".format(
-                    get_printable_url(datatable_url)
-                )
-            )
-            print(
-                "\nCandidate profile page totals url: {}".format(
-                    get_printable_url(candidate_profile_url)
-                )
-            )
-            print(
-                "\nElection profile page totals url: {}".format(
-                    get_printable_url(election_profile_url)
-                )
-            )
+            print(f"\nCandidate totals datatable: {get_printable(datatable_url)}")
+            print(f"\nCandidate profile totals: {get_printable(candidate_profile_url)}")
+            print(f"\nElection profile totals: {get_printable(election_profile_url)}")
 
-            datatable_results = requests.get(datatable_url).json().get('results')
+            datatable_results = requests.get(datatable_url).json().get("results")
             candidate_results = (
-                requests.get(candidate_profile_url).json().get('results')
+                requests.get(candidate_profile_url).json().get("results")
             )
 
             # This is a list of all candidates - we'll need to loop through them to match
             all_election_results = (
-                requests.get(election_profile_url).json().get('results')
+                requests.get(election_profile_url).json().get("results")
             )
             for election_result in all_election_results:
-                if election_result.get('candidate_id') == candidate_id:
+                if election_result.get("candidate_id") == candidate_id:
                     election_match = election_result
                     break
 
             if not all([datatable_results, candidate_results, election_match]):
                 print("\nERROR: No results for one endpoint")
                 print(
-                    "Candidate datatable has results? {}".format(
-                        datatable_results is not None
-                    )
+                    f"Candidate datatable has results? {datatable_results is not None}"
                 )
                 print(
-                    "Candidate profile page has results? {}".format(
-                        candidate_results is not None
-                    )
+                    f"Candidate profile page has results? {candidate_results is not None}"
                 )
                 print(
-                    "Election profile page has results? {}".format(
-                        election_match is not None
-                    )
+                    f"Election profile page has results? {election_match is not None}"
                 )
                 mismatch_list.add((candidate_id, candidate_name))
             else:
                 # Take the top result
-                results.set('datatable', datatable_results[0])
-                results.set('candidate', candidate_results[0])
-                # Take the matched results
-                results.set('election', election_match)
+                results.set("datatable", datatable_results[0])
+                results.set("candidate", candidate_results[0])
+                # Take the matched result
+                results.set("election", election_match)
                 for value in values_to_check:
-                    baseline = results.get('datatable', value)
+                    baseline = results.get("datatable", value)
                     if any(
                         results.get(endpoint, value) != baseline
                         for endpoint in endpoints
                     ):
-                        print("\n!!! ERROR - {} results don't match!!!\n".format(value))
-                        print("| Data source | Total {} |\n|--|--|".format(value))
+                        print(f"\n!!! ERROR - {value} results don't match!!!\n")
+                        print(f"| Data source | Total {value} |\n|--|--|")
                         for endpoint in endpoints:
                             print(
                                 "| {} datatable or profile page \t\t|\t${:,.2f}|".format(
@@ -161,13 +149,13 @@ def compare_candidate_totals(office_types, year, candidate_id, envs):
                                 )
                             )
                         mismatch_list.add((candidate_id, candidate_name))
-
+            # Add this env's results to the list so we can cross-compare later
             result_list.append(results)
 
-            print("\nMismatch list ({}): {}".format(env, mismatch_list))
+            print(f"\nMismatch list ({env}): {mismatch_list}")
 
         for endpoint in endpoints:
-            print("\n****Checking across environments: {} ****\n".format(endpoint))
+            print(f"\n****Checking across environments: {endpoint} ****\n")
             for value in values_to_check:
                 # Grab the baseline value for the first environment
                 baseline = result_list[0].get(endpoint, value)
@@ -176,7 +164,7 @@ def compare_candidate_totals(office_types, year, candidate_id, envs):
                     result.get(endpoint, value) != baseline for result in result_list
                 ):
                     print("\n!!! ERROR - environment results don't match!!!")
-                    print("| Data source | Total {} |\n|--|--|".format(value))
+                    print(f"| Data source | Total {value} |\n|--|--|")
                     for result in result_list:
                         print(
                             "| {} {} {}\t\t|\t${:,.2f}|".format(
@@ -193,39 +181,36 @@ def get_top_candidates(office_types, start_year, candidate_id):
         api_key
     )
     if candidate_id:
-        candidate_url += "&candidate_id={}".format(candidate_id)
+        candidate_url += f"&candidate_id={candidate_id}"
     print("Getting candidate info")
-    if 'P' in office_types:
+    if "P" in office_types:
         # Top 20 presidential
         top_candidates.extend(
             requests.get(
-                candidate_url
-                + "&election_year={}&office=P&per_page=20".format(start_year)
+                candidate_url + f"&election_year={start_year}&office=P&per_page=20"
             )
             .json()
-            .get('results')
+            .get("results")
         )
-    if 'S' in office_types:
+    if "S" in office_types:
         # Top 30 senate, 3 cycles
         # Start year plus next two elections
         for year in range(start_year, start_year + 5, 2):
             top_candidates.extend(
                 requests.get(
-                    candidate_url
-                    + "&election_year={}&office=S&per_page=30".format(year)
+                    candidate_url + f"&election_year={year}&office=S&per_page=30"
                 )
                 .json()
-                .get('results')
+                .get("results")
             )
-    if 'H' in office_types:
+    if "H" in office_types:
         # Top 100 house
         top_candidates.extend(
             requests.get(
-                candidate_url
-                + "&election_year={}&office=H&per_page=100".format(start_year)
+                candidate_url + f"&election_year={start_year}&office=H&per_page=100"
             )
             .json()
-            .get('results')
+            .get("results")
         )
     return top_candidates
 
@@ -240,20 +225,20 @@ class Results(object):
     def set(self, result_type, value):
         # Clean up inconsistencies in labellings
         # 0.00 is Falsy
-        if value.get('total_receipts') is not None:
-            value['receipts'] = value['total_receipts']
-        if value.get('total_disbursements') is not None:
-            value['disbursements'] = value['total_disbursements']
-        if value.get('last_cash_on_hand_end_period') is not None:
-            value['cash_on_hand_end_period'] = value['last_cash_on_hand_end_period']
+        if value.get("total_receipts") is not None:
+            value["receipts"] = value["total_receipts"]
+        if value.get("total_disbursements") is not None:
+            value["disbursements"] = value["total_disbursements"]
+        if value.get("last_cash_on_hand_end_period") is not None:
+            value["cash_on_hand_end_period"] = value["last_cash_on_hand_end_period"]
         self.result_type = value
 
     def get(self, result_type, value):
         return self.result_type.get(value)
 
 
-def get_printable_url(url):
-    return url.replace(api_key, 'DEMO_KEY')
+def get_printable(url):
+    return url.replace(api_key, "DEMO_KEY")
 
 
 if __name__ == "__main__":
