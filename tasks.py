@@ -155,12 +155,12 @@ SPACE_URLS = {
 
 
 @task
-def deploy(ctx, space=None, branch=None, login=None, yes=False, skip_migrations=False):
+def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database=False):
     """Deploy app to Cloud Foundry. Log in using credentials stored per environment
     like `FEC_CF_USERNAME_DEV` and `FEC_CF_PASSWORD_DEV`; push to either `space` or t
     he space detected from the name and tags of the current branch. Note: Must pass `space`
     or `branch` if repo is in detached HEAD mode, e.g. when running on Circle.
-    To skip migrations, pass the flag `--skip-migrations`.
+    To run migrations, pass the flag `--migrate-database`.
     """
     # Detect space
     repo = git.Repo('.')
@@ -181,7 +181,7 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, skip_migrations=
     # Target space
     ctx.run('cf target -o fec-beta-fec -s {0}'.format(space), echo=True)
 
-    if skip_migrations:
+    if not migrate_database:
         print("\nSkipping migrations. Database not migrated.\n")
     else:
         migration_env_var = 'FEC_MIGRATOR_SQLA_CONN_{0}'.format(space.upper())

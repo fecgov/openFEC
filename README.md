@@ -55,16 +55,16 @@ We are always trying to improve our documentation. If you have suggestions or ru
 		* After downloading, open `flyway5.2.4/conf/flyway.conf` and set
            the flyway environment variables `flyway.url` and
            `flyway.locations` as
-		   
+
 		   ```
 		   flyway.locations=filesystem:/Users/<user>/<project>/api/openFEC/data/migrations
 		   flyway.url=jdbc:postgresql://localhost:5432/cfdm_test?user=<your local database username>&password=<your local database password>
 		   ```
-		   
+
 		   to enable connection to a local database (e.g., `cfdm_test` from [Create
            a test database](https://github.com/fecgov/openFEC#create-a-development-database), below) and specify the location of the database migration files (*SQL)
        * See [Database migrations](https://github.com/fecgov/openFEC#database-migration) for more information on installing and configuring flyway
-        
+
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
 
@@ -338,10 +338,10 @@ invoke deploy --space dev
 
 This command will explicitly target the `dev` space.
 
-To skip migrations with a manual deploy, run:
+To run migrations with a manual deploy, run:
 
 ```
-invoke deploy --space dev --skip-migrations
+invoke deploy --space dev --migrate-database
 ```
 
 

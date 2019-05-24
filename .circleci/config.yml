@@ -107,9 +107,9 @@ jobs:
       - run: echo $FEC_BASTION_HOST_PUBLIC_KEY >> ~/.ssh/known_hosts # copy Bastion host public key
 
       - run: $FEC_BASTION_DEV_TUNNEL # establsh tunnel/port mapping to 'dev' RDS from CircleCI container through Bastion host.
- 
+
       - run: $FEC_BASTION_STAGE_TUNNEL # establsh tunnel/port mapping to 'stage' RDS from CircleCI container through Bastion host.
- 
+
       - run: $FEC_BASTION_PROD_TUNNEL # establsh tunnel/port mapping to 'prod' RDS from CircleCI container through Bastion host.
 
       - deploy:
@@ -121,4 +121,4 @@ jobs:
             [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
             . venv/bin/activate
             nvm use default
-            invoke deploy --branch $CIRCLE_BRANCH --login True --yes
+            invoke deploy --branch $CIRCLE_BRANCH --login True --yes --migrate-database
