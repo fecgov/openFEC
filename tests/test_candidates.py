@@ -140,6 +140,7 @@ class CandidateFormatTest(ApiBaseTest):
             factories.CandidateFactory(cycles=[2006]),
             factories.CandidateFactory(candidate_id='BARLET'),
             factories.CandidateFactory(candidate_id='RITCHIE'),
+            factories.CandidateFactory(candidate_inactive=True),
         ]
 
         filter_fields = (
@@ -148,7 +149,8 @@ class CandidateFormatTest(ApiBaseTest):
             ('state', 'CA'),
             ('party', 'DEM'),
             ('cycle', '2006'),
-            ('candidate_id', ['BARTLET', 'RITCHIE'])
+            ('candidate_id', ['BARTLET', 'RITCHIE']),
+            ('is_active_candidate', False),
         )
 
         # checking one example from each field

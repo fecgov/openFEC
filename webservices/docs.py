@@ -1591,7 +1591,7 @@ TOTAL_BY_OFFICE_TAG = ''' Aggregated candidate receipts and disbursements groupe
 TOTAL_BY_OFFICE_BY_PARTY_TAG= ''' Aggregated candidate receipts and disbursements grouped by office by party by cycle.
 '''
 
-ACTIVE_CANDIDATE = ''' Candidates who are actively running. if no value specified, all candidates
-data is returned. When True is specified, only active candidates data are returned. When False is 
-specified, only inactive candidates data is returned.
+ACTIVE_CANDIDATE = ''' Candidates who are actively seeking office. If no value is specified, all candidates
+are returned. When True is specified, only active candidates are returned. When False is
+specified, only inactive candidates are returned.
 '''
