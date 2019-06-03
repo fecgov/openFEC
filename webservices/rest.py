@@ -229,6 +229,11 @@ def page_not_found(exception):
     wrapped = ResponseException(str(exception), exception.code, type(exception))
     return wrapped.wrappedException, wrapped.status
 
+@app.errorhandler(403)
+def forbidden(exception):
+    wrapped = ResponseException(str(exception), exception.code, type(exception))
+    return wrapped.wrappedException, wrapped.status
+
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')
 api.add_resource(
