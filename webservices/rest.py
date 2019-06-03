@@ -135,7 +135,7 @@ def handle_error(error):
 
 
 # api.data.gov
-TRUSTED_PROXY_IPS = env.get_credential('TRUSTED_PROXY_IPS')
+TRUSTED_PROXY_IPS = utils.split_env_var(env.get_credential('TRUSTED_PROXY_IPS', ''))
 # Save blocked IPs as a long string, ex. "1.1.1.1, 2.2.2.2, 3.3.3.3"
 BLOCKED_IPS = env.get_credential('BLOCKED_IPS', '')
 FEC_API_WHITELIST_IPS = env.get_credential('FEC_API_WHITELIST_IPS', False)
