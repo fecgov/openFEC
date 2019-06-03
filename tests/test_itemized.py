@@ -11,7 +11,6 @@ from webservices.resources.sched_a import ScheduleAView, ScheduleAEfileView
 from webservices.resources.sched_b import ScheduleBView, ScheduleBEfileView
 from webservices.resources.sched_e import ScheduleEView, ScheduleEEfileView
 
-
 class TestItemized(ApiBaseTest):
     kwargs = {'two_year_transaction_period': 2016}
 
@@ -218,6 +217,16 @@ class TestItemized(ApiBaseTest):
 
         results = self._results(api.url_for(ScheduleBView, line_number='f3X-21', **self.kwargs))
         self.assertEqual(len(results), 1)
+
+        # invalid line_number testing for sched_b
+        response = self.app.get(api.url_for(ScheduleBView, line_number='f3x21', **self.kwargs))
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Invalid line_number', response.data)
+
+        # invalid line_number testing for sched_a
+        response = self.app.get(api.url_for(ScheduleAView, line_number='f3x16', **self.kwargs))
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Invalid line_number', response.data)
 
     def test_sched_b_spender_committee_type_filter(self):
         [
