@@ -24,6 +24,7 @@ from webargs.flaskparser import FlaskParser
 from flask_apispec import FlaskApiSpec
 from webservices import spec
 from webservices import exceptions
+from webservices import utils
 from webservices.common import util
 from webservices.common.models import db
 from webservices.resources import totals
@@ -90,7 +91,7 @@ app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
 ]
 app.config['SQLALCHEMY_FOLLOWERS'] = [
     sa.create_engine(follower.strip())
-    for follower in env.get_credential('SQLA_FOLLOWERS', '').split(',')
+    for follower in utils.split_env_var(env.get_credential('SQLA_FOLLOWERS', ''))
     if follower.strip()
 ]
 app.config['PROPAGATE_EXCEPTIONS'] = True
