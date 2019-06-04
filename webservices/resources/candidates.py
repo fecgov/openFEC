@@ -66,6 +66,7 @@ class CandidateList(ApiResource):
             kwargs['q'] = kwargs['name']
 
         query = super().build_query(**kwargs)
+        candidate_detail = models.Candidate
 
         if {'receipts', '-receipts'}.intersection(kwargs.get('sort', [])) and 'q' not in kwargs:
             raise exceptions.ApiError(
@@ -75,24 +76,36 @@ class CandidateList(ApiResource):
 
         if 'has_raised_funds' in kwargs:
             query = query.filter(
-                models.Candidate.flags.has(models.CandidateFlags.has_raised_funds == kwargs['has_raised_funds'])
+                candidate_detail.flags.has(models.CandidateFlags.has_raised_funds == kwargs['has_raised_funds'])
             )
         if 'federal_funds_flag' in kwargs:
             query = query.filter(
-                models.Candidate.flags.has(models.CandidateFlags.federal_funds_flag == kwargs['federal_funds_flag'])
+                candidate_detail.flags.has(models.CandidateFlags.federal_funds_flag == kwargs['federal_funds_flag'])
             )
 
         if kwargs.get('q'):
             query = query.join(
                 models.CandidateSearch,
-                models.Candidate.candidate_id == models.CandidateSearch.id,
+                candidate_detail.candidate_id == models.CandidateSearch.id,
             ).distinct()
 
         if kwargs.get('cycle'):
-            query = query.filter(models.Candidate.cycles.overlap(kwargs['cycle']))
+            query = query.filter(candidate_detail.cycles.overlap(kwargs['cycle']))
         if kwargs.get('election_year'):
-            query = query.filter(models.Candidate.election_years.overlap(kwargs['election_year']))
-
+            query = query.filter(candidate_detail.election_years.overlap(kwargs['election_year']))
+        if 'is_active_candidate' in kwargs and kwargs.get('is_active_candidate'):
+            # load active candidates only if True
+            query = query.filter(
+                candidate_detail.candidate_inactive == False # noqa
+            )
+        elif 'is_active_candidate' in kwargs and not kwargs.get('is_active_candidate'):
+            # load inactive candidates only if False
+            query = query.filter(
+                candidate_detail.candidate_inactive == True # noqa
+            )
+        else:
+            # load all candidates
+            pass
         return query
 
 

@@ -249,6 +249,7 @@ candidate_list = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'min_first_file_date': fields.Date(description='Selects all candidates whose first filing was received by the FEC after this date'),
     'max_first_file_date': fields.Date(description='Selects all candidates whose first filing was received by the FEC before this date'),
+    'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
 }
 
 candidate_history = {
