@@ -24,6 +24,7 @@ from webargs.flaskparser import FlaskParser
 from flask_apispec import FlaskApiSpec
 from webservices import spec
 from webservices import exceptions
+from webservices import utils
 from webservices.common import util
 from webservices.common.models import db
 from webservices.resources import totals
@@ -90,7 +91,7 @@ app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
 ]
 app.config['SQLALCHEMY_FOLLOWERS'] = [
     sa.create_engine(follower.strip())
-    for follower in env.get_credential('SQLA_FOLLOWERS', '').split(',')
+    for follower in utils.split_env_var(env.get_credential('SQLA_FOLLOWERS', ''))
     if follower.strip()
 ]
 app.config['PROPAGATE_EXCEPTIONS'] = True
@@ -134,7 +135,7 @@ def handle_error(error):
 
 
 # api.data.gov
-TRUSTED_PROXIES = ('54.208.160.112', '54.208.160.151')
+TRUSTED_PROXY_IPS = utils.split_env_var(env.get_credential('TRUSTED_PROXY_IPS', ''))
 # Save blocked IPs as a long string, ex. "1.1.1.1, 2.2.2.2, 3.3.3.3"
 BLOCKED_IPS = env.get_credential('BLOCKED_IPS', '')
 FEC_API_WHITELIST_IPS = env.get_credential('FEC_API_WHITELIST_IPS', False)
@@ -157,7 +158,7 @@ def limit_remote_addr():
         except ValueError:  # Not enough routes
             abort(403)
         else:
-            if api_data_route not in TRUSTED_PROXIES:
+            if api_data_route not in TRUSTED_PROXY_IPS:
                 abort(403)
             if source_ip in BLOCKED_IPS:
                 abort(403)
@@ -225,6 +226,11 @@ def handle_exception(exception):
 
 @app.errorhandler(404)
 def page_not_found(exception):
+    wrapped = ResponseException(str(exception), exception.code, type(exception))
+    return wrapped.wrappedException, wrapped.status
+
+@app.errorhandler(403)
+def forbidden(exception):
     wrapped = ResponseException(str(exception), exception.code, type(exception))
     return wrapped.wrappedException, wrapped.status
 
