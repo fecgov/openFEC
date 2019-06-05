@@ -389,7 +389,7 @@ ALTER INDEX IF EXISTS idx_ofec_candidate_totals_mv_tmp_party RENAME TO idx_ofec_
 -- ----------------------
 -- public.ofec_candidate_detail_mv
 -- ofec_candidate_detail_mv represent the latest candidate data of a candidate
--- update the sort order to have the latest candidate information of the latest candidate_election_year 
+-- update candidate information with the latest candidate_election_year that particular candidate has
 -- ----------------------
 DROP MATERIALIZED VIEW IF EXISTS public.ofec_candidate_detail_mv_tmp;
 
@@ -397,7 +397,7 @@ CREATE MATERIALIZED VIEW public.ofec_candidate_detail_mv_tmp AS
  SELECT DISTINCT ON (cand_hist.candidate_id) cand_hist.idx,
     cand_hist.load_date,
     cand_hist.two_year_period,
-    cand_hist.candidate_election_year,
+    first_value (cand_hist.candidate_election_year) over (partition by candidate_id order by cand_hist.candidate_election_year DESC NULLS LAST)::numeric(4, 0) as candidate_election_year,
     cand_hist.candidate_id,
     cand_hist.name,
     cand_hist.address_state,
@@ -424,7 +424,7 @@ CREATE MATERIALIZED VIEW public.ofec_candidate_detail_mv_tmp AS
     cand_hist.election_districts,
     cand_hist.active_through
    FROM ofec_candidate_history_vw cand_hist
-  ORDER BY cand_hist.candidate_id, cand_hist.candidate_election_year DESC nulls last
+  ORDER BY cand_hist.candidate_id, cand_hist.two_year_period DESC
 WITH DATA;
 
 ALTER TABLE public.ofec_candidate_detail_mv_tmp
