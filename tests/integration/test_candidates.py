@@ -18,7 +18,7 @@ class CandidatesTestCase(common.BaseTestCase):
         self.maxDiff = None
         self.request_context = rest.app.test_request_context()
         self.request_context.push()
-        self.connection = rest.db.engine.connect()
+        self.connection = db.engine.connect()
 
     def _response(self, qry):
         response = self.app.get(qry)
@@ -33,7 +33,6 @@ class CandidatesTestCase(common.BaseTestCase):
         return response['results']
 
     def test_candidate_counts_house(self):
-        connection = db.engine.connect()
         cand_valid_fec_yr_data = [
             {
                 'cand_valid_yr_id': 1,
@@ -64,11 +63,8 @@ class CandidatesTestCase(common.BaseTestCase):
             },
         ]
         election_year = 2020
-        sql_insert = "INSERT INTO disclosure.cand_valid_fec_yr " + \
-            "(cand_valid_yr_id, cand_id, fec_election_yr, cand_election_yr, " + \
-            "cand_status, cand_office, date_entered) VALUES (%(cand_valid_yr_id)s, %(cand_id)s, " + \
-            "%(fec_election_yr)s, %(cand_election_yr)s, %(cand_status)s, %(cand_office)s, %(date_entered)s)"
-        connection.execute(sql_insert, cand_valid_fec_yr_data)
+        self.create_cand_valid(cand_valid_fec_yr_data)
+
         cand_cmte_linkage_data = [
             {
                 'linkage_id': 2,
@@ -108,16 +104,27 @@ class CandidatesTestCase(common.BaseTestCase):
             }
 
         ]
+        self.create_cand_cmte_linkage(cand_cmte_linkage_data)
+
+        manage.refresh_materialized(concurrent=False)
+        sql_extract = "SELECT * from disclosure.cand_valid_fec_yr " + \
+            "WHERE cand_election_yr in ({}, {})".format(election_year - 1, election_year)
+        results_tab = self.connection.execute(sql_extract).fetchall()
+        results_api = self._results(rest.api.url_for(CandidateList, election_year=election_year))
+        self.assertEquals(len(results_tab), len(results_api))
+
+    def create_cand_valid(self, candidate_data):
+        sql_insert = "INSERT INTO disclosure.cand_valid_fec_yr " + \
+            "(cand_valid_yr_id, cand_id, fec_election_yr, cand_election_yr, " + \
+            "cand_status, cand_office, date_entered) VALUES (%(cand_valid_yr_id)s, %(cand_id)s, " + \
+            "%(fec_election_yr)s, %(cand_election_yr)s, %(cand_status)s, %(cand_office)s, %(date_entered)s)"
+        self.connection.execute(sql_insert, candidate_data)
+
+    def create_cand_cmte_linkage(self, linkage_data):
         sql_insert = "INSERT INTO disclosure.cand_cmte_linkage " + \
             "(linkage_id, cand_id, fec_election_yr, cand_election_yr, " + \
             "cmte_id, cmte_count_cand_yr, cmte_tp, cmte_dsgn, linkage_type, date_entered) " + \
             "VALUES (%(linkage_id)s, %(cand_id)s, " + \
             "%(fec_election_yr)s, %(cand_election_yr)s, %(cmte_id)s, %(cmte_count_cand_yr)s, " + \
             "%(cmte_tp)s, %(cmte_dsgn)s, %(linkage_type)s, %(date_entered)s)"
-        connection.execute(sql_insert, cand_cmte_linkage_data)
-        manage.refresh_materialized(concurrent=False)
-        sql_extract = "SELECT * from disclosure.cand_valid_fec_yr " + \
-            "WHERE cand_election_yr in (2019, 2020)"
-        results_tab = connection.execute(sql_extract).fetchall()
-        results_api = self._results(rest.api.url_for(CandidateList, election_year=election_year))
-        self.assertEquals(len(results_tab), len(results_api))
+        self.connection.execute(sql_insert, linkage_data)
