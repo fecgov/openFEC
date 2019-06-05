@@ -8,6 +8,7 @@ from tests import common
 from webservices import rest, __API_VERSION__
 from webservices.rest import db
 from webservices.resources.candidates import CandidateList
+from webservices.resources.candidate_aggregates import TotalsCandidateView
 
 @pytest.mark.usefixtures("migrate_db")
 class CandidatesTestCase(common.BaseTestCase):
@@ -110,8 +111,11 @@ class CandidatesTestCase(common.BaseTestCase):
         sql_extract = "SELECT * from disclosure.cand_valid_fec_yr " + \
             "WHERE cand_election_yr in ({}, {})".format(election_year - 1, election_year)
         results_tab = self.connection.execute(sql_extract).fetchall()
-        results_api = self._results(rest.api.url_for(CandidateList, election_year=election_year))
-        self.assertEquals(len(results_tab), len(results_api))
+        candidates_result_api = self._results(rest.api.url_for(CandidateList, election_year=election_year))
+        # TODO: Do we expect results for election_full=False?
+        # Results for house currently don't match for election_full=true and election_full=False
+        candidates_totals_results_api = self._results(rest.api.url_for(TotalsCandidateView, election_year=election_year, election_full=True))
+        assert len(results_tab) == len(candidates_result_api) == len(candidates_totals_results_api)
 
     def create_cand_valid(self, candidate_data):
         sql_insert = "INSERT INTO disclosure.cand_valid_fec_yr " + \
