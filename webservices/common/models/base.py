@@ -1,7 +1,7 @@
 import random
-
 import celery
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import orm
+from flask_sqlalchemy import SQLAlchemy as SQLAlchemyBase
 from flask_sqlalchemy import SignallingSession
 
 
@@ -47,11 +47,12 @@ class RoutingSession(SignallingSession):
         return super().get_bind(mapper=mapper, clause=clause)
 
 
-class RoutingSQLAlchemy(SQLAlchemy):
+class RoutingSQLAlchemy(SQLAlchemyBase):
+    """Override the default SQLAlchemyBase.create_session
+    to return a session factory that makes RoutingSession type sessions"""
 
     def create_session(self, options):
-        return RoutingSession(self, **options)
-
+        return orm.sessionmaker(class_=RoutingSession, db=self, **options)
 
 db = RoutingSQLAlchemy()
 

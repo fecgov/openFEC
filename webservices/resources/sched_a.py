@@ -78,7 +78,7 @@ class ScheduleAView(ItemizedResource):
                     'contribution_receipt_date',
                     'contribution_receipt_amount',
                     'contributor_aggregate_ytd',
-                ]),
+               ]),
                 show_nulls_last_arg=False,
             )
         )
@@ -118,10 +118,16 @@ class ScheduleAView(ItemizedResource):
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         if kwargs.get('line_number'):
+            # line_number is a composite value of 'filing_form-line_number'
             if len(kwargs.get('line_number').split('-')) == 2:
                 form, line_no = kwargs.get('line_number').split('-')
                 query = query.filter_by(filing_form=form.upper())
                 query = query.filter_by(line_number=line_no)
+            else:
+                raise exceptions.ApiError(
+                    exceptions.LINE_NUMBER_ERROR,
+                    status_code=400,
+                )
         return query
 
 @doc(

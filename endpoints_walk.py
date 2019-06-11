@@ -46,7 +46,7 @@ endpoints = [
     "/committee/{committee_id}/reports/?api_key={api_key}",
     "/names/candidates/?q=clinton&api_key={api_key}",
     "/names/committees/?q=clinton&api_key={api_key}",
-    "/schedules/schedule_a/{sub_id}/?api_key={api_key}",
+    "/schedules/schedule_a/{sub_id}/?two_year_transaction_period=2018&api_key={api_key}",
     "/schedules/schedule_a/efile/?api_key={api_key}",
     "/schedules/schedule_b/{sub_id}/?api_key={api_key}",
     "/schedules/schedule_b/efile/?api_key={api_key}",

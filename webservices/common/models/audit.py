@@ -6,12 +6,10 @@ from webservices import docs
 
 from .base import db
 
-class AuditBase(object):
-    __table_args__ = {"schema": "auditsearch"}
-
 
 # endpoint: audit-primary-category
-class AuditPrimaryCategory(AuditBase, db.Model):
+class AuditPrimaryCategory(db.Model):
+    __table_args__ = {"schema": "auditsearch"}
     __tablename__ = 'finding_vw'
 
     primary_category_id = db.Column(db.String, index=True, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
@@ -20,7 +18,8 @@ class AuditPrimaryCategory(AuditBase, db.Model):
 
 
 # endpoint: audit-category
-class AuditCategoryRelation(AuditBase, db.Model):
+class AuditCategoryRelation(db.Model):
+    __table_args__ = {"schema": "auditsearch"}
     __tablename__ = 'finding_rel_vw'
 
     primary_category_id = db.Column(db.String, index=True, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
@@ -38,6 +37,7 @@ class AuditCategory(AuditPrimaryCategory):
             primaryjoin=sa.orm.foreign(AuditCategoryRelation.primary_category_id) == self.primary_category_id,
             uselist=True,
         )
+
 
 # endpoint audit-case
 class AuditCaseSubCategory(db.Model):

@@ -71,6 +71,7 @@ class Candidate(BaseConcreteCandidate):
     __tablename__ = 'ofec_candidate_detail_mv'
 
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
+    candidate_inactive = db.Column(db.Boolean, doc=docs.ACTIVE_CANDIDATE)
 
     # Customize join to restrict to principal committees
     principal_committees = db.relationship(

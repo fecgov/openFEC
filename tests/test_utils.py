@@ -13,7 +13,7 @@ from webservices.resources import candidate_aggregates
 from webservices.resources import audit
 from webservices.resources import elections
 from webservices.rest import db
-from webservices.tasks import utils
+from webservices import utils
 
 from sqlalchemy.dialects import postgresql
 
@@ -153,3 +153,17 @@ class TestArgs(unittest.TestCase):
         with rest.app.test_request_context('?dollars=$24.50'):
             parsed = flaskparser.parser.parse({'dollars': args.Currency()}, request)
             self.assertEqual(parsed, {'dollars': 24.50})
+
+class TestEnvVarSplit(unittest.TestCase):
+
+    def test_env_var_split(self):
+        test_cases = [
+            "1.2.3.4, 5.6.7.8",
+            "1.2.3.4,  5.6.7.8",
+            "1.2.3.4,5.6.7.8",
+            " 1.2.3.4,  5.6.7.8 "
+        ]
+        expected = ["1.2.3.4", "5.6.7.8"]
+        for test_case in test_cases:
+            result = utils.split_env_var(test_case)
+            self.assertEqual(result, expected)

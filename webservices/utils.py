@@ -434,3 +434,7 @@ def post_to_slack(message, channel):
     )
     if response.status_code != 200:
         logger.error('SLACK ERROR- Message failed to send:{0}'.format(message))
+
+def split_env_var(env_var):
+    """ Remove whitespace and split to a list based of comma delimiter"""
+    return env_var.replace(" ", "").split(',')
