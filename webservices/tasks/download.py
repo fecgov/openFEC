@@ -29,12 +29,10 @@ def call_resource(path, qs):
     resource = resource_type()
     fields, kwargs = parse_kwargs(resource, qs)
     kwargs = utils.extend(arguments, kwargs)
-    if kwargs.get('form_type') and 'RFAI' in kwargs.get('form_type'):
-        #Adds FRQ types if RFAI was requested
-        kwargs.get('form_type').append('FRQ')
 
     for field in IGNORE_FIELDS:
         kwargs.pop(field, None)
+
     query, model, schema = unpack(resource.build_query(**kwargs), 3)
     count = counts.count_estimate(query, db.session)
     return {
