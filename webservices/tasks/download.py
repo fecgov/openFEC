@@ -29,8 +29,10 @@ def call_resource(path, qs):
     resource = resource_type()
     fields, kwargs = parse_kwargs(resource, qs)
     kwargs = utils.extend(arguments, kwargs)
+
     for field in IGNORE_FIELDS:
         kwargs.pop(field, None)
+
     query, model, schema = unpack(resource.build_query(**kwargs), 3)
     count = counts.count_estimate(query, db.session)
     return {
