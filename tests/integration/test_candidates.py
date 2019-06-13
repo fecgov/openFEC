@@ -8,17 +8,19 @@ from tests import common
 from webservices import rest, __API_VERSION__
 from webservices.rest import db
 from webservices.resources.candidates import CandidateList
+from webservices.resources.candidate_aggregates import TotalsCandidateView
+from webservices.resources.elections import ElectionView
+
 
 @pytest.mark.usefixtures("migrate_db")
 class CandidatesTestCase(common.BaseTestCase):
-
     def setUp(self):
         super().setUp()
         self.longMessage = True
         self.maxDiff = None
         self.request_context = rest.app.test_request_context()
         self.request_context.push()
-        self.connection = rest.db.engine.connect()
+        self.connection = db.engine.connect()
 
     def _response(self, qry):
         response = self.app.get(qry)
@@ -33,42 +35,48 @@ class CandidatesTestCase(common.BaseTestCase):
         return response['results']
 
     def test_candidate_counts_house(self):
-        connection = db.engine.connect()
+        """
+        Given base table candidate data, the list of candidates should be the same
+        For /candidates/, /candidates/totals/, and /elections/
+        """
         cand_valid_fec_yr_data = [
             {
                 'cand_valid_yr_id': 1,
-                'cand_id': '1',
+                'cand_id': 'H1',
                 'fec_election_yr': 2020,
                 'cand_election_yr': 2020,
                 'cand_status': 'A',
                 'cand_office': 'H',
-                'date_entered': 'now()'
+                'cand_office_st': 'MD',
+                'cand_office_district': '01',
+                'date_entered': 'now()',
             },
             {
                 'cand_valid_yr_id': 2,
-                'cand_id': '2',
+                'cand_id': 'H2',
                 'fec_election_yr': 2020,
                 'cand_election_yr': 2020,
                 'cand_status': 'A',
                 'cand_office': 'H',
-                'date_entered': 'now()'
+                'cand_office_st': 'MD',
+                'cand_office_district': '01',
+                'date_entered': 'now()',
             },
             {
                 'cand_valid_yr_id': 3,
-                'cand_id': '3',
+                'cand_id': 'H3',
                 'fec_election_yr': 2020,
                 'cand_election_yr': 2020,
                 'cand_status': 'A',
                 'cand_office': 'H',
-                'date_entered': 'now()'
+                'cand_office_st': 'MD',
+                'cand_office_district': '01',
+                'date_entered': 'now()',
             },
         ]
         election_year = 2020
-        sql_insert = "INSERT INTO disclosure.cand_valid_fec_yr " + \
-            "(cand_valid_yr_id, cand_id, fec_election_yr, cand_election_yr, " + \
-            "cand_status, cand_office, date_entered) VALUES (%(cand_valid_yr_id)s, %(cand_id)s, " + \
-            "%(fec_election_yr)s, %(cand_election_yr)s, %(cand_status)s, %(cand_office)s, %(date_entered)s)"
-        connection.execute(sql_insert, cand_valid_fec_yr_data)
+        self.create_cand_valid(cand_valid_fec_yr_data)
+
         cand_cmte_linkage_data = [
             {
                 'linkage_id': 2,
@@ -80,7 +88,7 @@ class CandidatesTestCase(common.BaseTestCase):
                 'cmte_tp': 'H',
                 'cmte_dsgn': 'P',
                 'linkage_type': 'P',
-                'date_entered': 'now()'
+                'date_entered': 'now()',
             },
             {
                 'linkage_id': 4,
@@ -92,7 +100,7 @@ class CandidatesTestCase(common.BaseTestCase):
                 'cmte_tp': 'H',
                 'cmte_dsgn': 'P',
                 'linkage_type': 'P',
-                'date_entered': 'now()'
+                'date_entered': 'now()',
             },
             {
                 'linkage_id': 6,
@@ -104,20 +112,56 @@ class CandidatesTestCase(common.BaseTestCase):
                 'cmte_tp': 'H',
                 'cmte_dsgn': 'P',
                 'linkage_type': 'P',
-                'date_entered': 'now()'
-            }
-
+                'date_entered': 'now()',
+            },
         ]
-        sql_insert = "INSERT INTO disclosure.cand_cmte_linkage " + \
-            "(linkage_id, cand_id, fec_election_yr, cand_election_yr, " + \
-            "cmte_id, cmte_count_cand_yr, cmte_tp, cmte_dsgn, linkage_type, date_entered) " + \
-            "VALUES (%(linkage_id)s, %(cand_id)s, " + \
-            "%(fec_election_yr)s, %(cand_election_yr)s, %(cmte_id)s, %(cmte_count_cand_yr)s, " + \
-            "%(cmte_tp)s, %(cmte_dsgn)s, %(linkage_type)s, %(date_entered)s)"
-        connection.execute(sql_insert, cand_cmte_linkage_data)
+        self.create_cand_cmte_linkage(cand_cmte_linkage_data)
+
         manage.refresh_materialized(concurrent=False)
-        sql_extract = "SELECT * from disclosure.cand_valid_fec_yr " + \
-            "WHERE cand_election_yr in (2019, 2020)"
-        results_tab = connection.execute(sql_extract).fetchall()
-        results_api = self._results(rest.api.url_for(CandidateList, election_year=election_year))
-        self.assertEquals(len(results_tab), len(results_api))
+        sql_extract = (
+            "SELECT * from disclosure.cand_valid_fec_yr "
+            + "WHERE cand_election_yr in ({}, {})".format(
+                election_year - 1, election_year
+            )
+        )
+        results_tab = self.connection.execute(sql_extract).fetchall()
+        params = {
+            'election_year': election_year,
+            'cycle': election_year,
+            'election_full': True,
+            'district': '01',
+            'state': 'MD',
+        }
+        candidates_api = self._results(rest.api.url_for(CandidateList, **params))
+        candidates_totals_api = self._results(
+            rest.api.url_for(TotalsCandidateView, **params)
+        )
+        elections_api = self._results(
+            rest.api.url_for(ElectionView, office='house', **params)
+        )
+        assert (
+            len(results_tab)
+            == len(candidates_api)
+            == len(candidates_totals_api)
+            == len(elections_api)
+        )
+
+    def create_cand_valid(self, candidate_data):
+        sql_insert = (
+            "INSERT INTO disclosure.cand_valid_fec_yr "
+            + "(cand_valid_yr_id, cand_id, fec_election_yr, cand_election_yr, "
+            + "cand_status, cand_office, cand_office_st, cand_office_district, date_entered) VALUES (%(cand_valid_yr_id)s, %(cand_id)s, "
+            + "%(fec_election_yr)s, %(cand_election_yr)s, %(cand_status)s, %(cand_office)s, %(cand_office_st)s, %(cand_office_district)s, %(date_entered)s)"
+        )
+        self.connection.execute(sql_insert, candidate_data)
+
+    def create_cand_cmte_linkage(self, linkage_data):
+        sql_insert = (
+            "INSERT INTO disclosure.cand_cmte_linkage "
+            + "(linkage_id, cand_id, fec_election_yr, cand_election_yr, "
+            + "cmte_id, cmte_count_cand_yr, cmte_tp, cmte_dsgn, linkage_type, date_entered) "
+            + "VALUES (%(linkage_id)s, %(cand_id)s, "
+            + "%(fec_election_yr)s, %(cand_election_yr)s, %(cmte_id)s, %(cmte_count_cand_yr)s, "
+            + "%(cmte_tp)s, %(cmte_dsgn)s, %(linkage_type)s, %(date_entered)s)"
+        )
+        self.connection.execute(sql_insert, linkage_data)
