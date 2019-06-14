@@ -330,3 +330,43 @@ GRANT SELECT ON TABLE ofec_candidate_fulltext_audit_mv TO fec_read;
 CREATE OR REPLACE VIEW ofec_candidate_fulltext_audit_vw AS SELECT * FROM ofec_candidate_fulltext_audit_mv;
 ALTER VIEW ofec_candidate_fulltext_audit_vw OWNER TO fec;
 GRANT SELECT ON ofec_candidate_fulltext_audit_vw TO fec_read;
+
+
+/*
+update to_tsvector for fec_fitem_sched_c
+*/
+
+DO $$
+BEGIN
+    EXECUTE format('ALTER TABLE disclosure.fec_fitem_sched_c ADD COLUMN candidate_name_text tsvector');
+    EXECUTE format('ALTER TABLE disclosure.fec_fitem_sched_c ADD COLUMN loan_source_name_text tsvector');
+    EXCEPTION 
+             WHEN duplicate_column THEN 
+                null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+
+CREATE OR REPLACE FUNCTION disclosure.fec_fitem_sched_c_insert()
+  RETURNS trigger AS
+$BODY$
+begin
+	new.candidate_name_text := to_tsvector(regexp_replace(new.cand_nm::text, '[^a-zA-Z0-9]', ' ', 'g'));
+	new.loan_source_name_text := to_tsvector(regexp_replace(new.loan_src_nm::text, '[^a-zA-Z0-9]', ' ', 'g'));
+
+    	return new;
+end
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION disclosure.fec_fitem_sched_c_insert()
+  OWNER TO fec;
+
+DROP TRIGGER IF EXISTS tri_fec_fitem_sched_c ON disclosure.fec_fitem_sched_c;
+
+CREATE TRIGGER tri_fec_fitem_sched_c
+  BEFORE INSERT
+  ON disclosure.fec_fitem_sched_c
+  FOR EACH ROW
+  EXECUTE PROCEDURE disclosure.fec_fitem_sched_c_insert();
