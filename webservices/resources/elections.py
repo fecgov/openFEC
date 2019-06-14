@@ -29,17 +29,20 @@ office_args_map = {
     'house': ['state', 'district'],
     'senate': ['state'],
 }
+election_durations = {
+    'senate': 6,
+    'president': 4,
+    'house': 2,
+}
 
 
-def cycle_length(elections):
-    return sa.case(
-        [
-            (elections.c.office == 'P', 4),
-            (elections.c.office == 'S', 6),
-            (elections.c.office == 'H', 2),
-        ]
-    )
-
+def get_cycle_duration(kwargs):
+    if kwargs.get('election_full'):
+        if kwargs.get('state', '').upper() == 'PR':
+            # PR house commissioners have 4-year cycles
+            return 4
+        return election_durations.get(kwargs['office'], 2)
+    return 2
 
 @doc(
     description=docs.ELECTION_SEARCH,
@@ -304,11 +307,7 @@ class ElectionSummary(utils.Resource):
         expenditures = filter_candidate_totals(expenditures, kwargs)
         return expenditures
 
-election_durations = {
-    'senate': 6,
-    'president': 4,
-    'house': 2,
-}
+
 
 def join_candidate_totals(query, kwargs, totals_model):
     """
@@ -337,14 +336,7 @@ def join_candidate_totals(query, kwargs, totals_model):
 
 
 def filter_candidate_totals(query, kwargs):
-    if kwargs.get('election_full'):
-        if kwargs.get('state', '').upper() == 'PR':
-            # PR house commissioners have 4-year cycles
-            duration = 4
-        else:
-            duration = election_durations.get(kwargs['office'], 2)
-    else:
-        duration = 2
+    duration = get_cycle_duration(kwargs)
     query = query.filter(
         CandidateHistory.two_year_period <= kwargs['cycle'],
         CandidateHistory.two_year_period > (kwargs['cycle'] - duration),
