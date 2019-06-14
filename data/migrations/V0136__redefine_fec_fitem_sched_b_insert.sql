@@ -212,3 +212,50 @@ COST 100;
 
 ALTER FUNCTION disclosure.ju_fec_fitem_sched_a_insert()
 OWNER TO fec;
+
+
+/*
+update to_tsvector definition for ofec_candidate_fulltext_audit_mv
+*/
+
+--
+-- 5)Name: ofec_candidate_fulltext_audit_mv; Type: MATERIALIZED VIEW; Schema: auditsearch; Owner: fec
+--
+DROP MATERIALIZED VIEW ofec_candidate_fulltext_audit_mv;
+CREATE MATERIALIZED VIEW ofec_candidate_fulltext_audit_mv AS
+WITH
+cand_info AS (
+    SELECT DISTINCT dc.cand_id,
+        dc.cand_name,
+        "substring"(dc.cand_name::text, 1,
+            CASE
+                WHEN strpos(dc.cand_name::text, ','::text) > 0 THEN strpos(dc.cand_name::text, ','::text) - 1
+                ELSE strpos(dc.cand_name::text, ','::text)
+            END) AS last_name,
+        "substring"(dc.cand_name::text, strpos(dc.cand_name::text, ','::text) + 1) AS first_name,
+        dc.fec_election_yr
+    FROM auditsearch.audit_case aa JOIN disclosure.cand_valid_fec_yr dc
+    ON (btrim(aa.cand_id) = dc.cand_id AND aa.election_cycle = dc.fec_election_yr)
+)
+SELECT DISTINCT ON (cand_id, cand_name)
+    row_number() over () AS idx,
+    cand_id AS id,
+    cand_name AS name,
+CASE
+    WHEN cand_name IS NOT NULL THEN
+        setweight(to_tsvector(regexp_replace(cand_name, '[^a-zA-Z0-9]', ' ', 'g')), 'A') ||
+        setweight(to_tsvector(regexp_replace(cand_id, '[^a-zA-Z0-9]', ' ', 'g')), 'B')
+    ELSE NULL::tsvector
+END AS fulltxt
+FROM cand_info
+ORDER BY cand_id
+WITH DATA;
+
+ALTER TABLE ofec_candidate_fulltext_audit_mv OWNER TO fec;
+
+CREATE UNIQUE INDEX ON ofec_candidate_fulltext_audit_mv(idx);
+CREATE INDEX ON ofec_candidate_fulltext_audit_mv using gin(fulltxt);
+
+
+GRANT ALL ON TABLE ofec_candidate_fulltext_audit_mv TO fec;
+GRANT SELECT ON TABLE ofec_candidate_fulltext_audit_mv TO fec_read;
