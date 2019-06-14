@@ -183,7 +183,7 @@ class ElectionView(ApiResource):
             CandidateCommitteeLink.committee_designation.in_(['P', 'A'])
         )
         basicPairs = join_candidate_totals(basicPairs, kwargs, totals_model)
-        basicPairs = filter_candidate_totals_with_alternative_cand_election_yr(basicPairs, kwargs, totals_model)
+        basicPairs = filter_candidate_totals(basicPairs, kwargs)
 
         return basicPairs
 
@@ -286,7 +286,7 @@ class ElectionSummary(utils.Resource):
             sa.func.sum(totals_model.disbursements).label('disbursements'),
         )
         aggregates = join_candidate_totals(aggregates, kwargs, totals_model)
-        aggregates = filter_candidate_totals(aggregates, kwargs, totals_model)
+        aggregates = filter_candidate_totals(aggregates, kwargs)
         return aggregates
 
     def _get_expenditures(self, kwargs):
@@ -301,7 +301,7 @@ class ElectionSummary(utils.Resource):
                 ScheduleEByCandidate.cycle == kwargs['cycle'],
             ),
         )
-        expenditures = filter_candidates(expenditures, kwargs)
+        expenditures = filter_candidate_totals(expenditures, kwargs)
         return expenditures
 
 election_durations = {
@@ -336,37 +336,7 @@ def join_candidate_totals(query, kwargs, totals_model):
     )
 
 
-def filter_candidates(query, kwargs):
-    duration = (
-        election_durations.get(kwargs['office'], 2)
-        if kwargs.get('election_full')
-        else 2
-    )
-    query = query.filter(
-        CandidateHistory.two_year_period <= kwargs['cycle'],
-        CandidateHistory.two_year_period > (kwargs['cycle'] - duration),
-        # CandidateHistory.cycles.any(kwargs['cycle']),
-        CandidateHistory.candidate_election_year + (CandidateHistory.candidate_election_year % 2) == kwargs['cycle'],
-        CandidateHistory.office == kwargs['office'][0].upper(),
-
-    )
-    if kwargs.get('state'):
-        query = query.filter(CandidateHistory.state == kwargs['state'])
-    if kwargs.get('district'):
-        query = query.filter(CandidateHistory.district == kwargs['district'])
-    return query
-
-
-def filter_candidate_totals(query, kwargs, totals_model):
-    query = filter_candidates(query, kwargs)
-    query = query.filter(
-        CandidateHistory.candidate_inactive == False,  # noqa
-        # CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
-    ).distinct()
-    return query
-
-
-def filter_candidate_totals_with_alternative_cand_election_yr(query, kwargs, totals_model):
+def filter_candidate_totals(query, kwargs):
     if kwargs.get('election_full'):
         if kwargs.get('state', '').upper() == 'PR':
             # PR house commissioners have 4-year cycles
