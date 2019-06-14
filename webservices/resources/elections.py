@@ -367,11 +367,14 @@ def filter_candidate_totals(query, kwargs, totals_model):
 
 
 def filter_candidate_totals_with_alternative_cand_election_yr(query, kwargs, totals_model):
-    duration = (
-        election_durations.get(kwargs['office'], 2)
-        if kwargs.get('election_full')
-        else 2
-    )
+    if kwargs.get('election_full'):
+        if kwargs.get('state', '').upper() == 'PR':
+            # PR house commissioners have 4-year cycles
+            duration = 4
+        else:
+            duration = election_durations.get(kwargs['office'], 2)
+    else:
+        duration = 2
     query = query.filter(
         CandidateHistory.two_year_period <= kwargs['cycle'],
         CandidateHistory.two_year_period > (kwargs['cycle'] - duration),
