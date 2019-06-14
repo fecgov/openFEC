@@ -98,22 +98,6 @@ CREATE TRIGGER tri_fec_fitem_sched_f
 update to_tsvector to confirm to new search functionality (omit special characters, replace with whitespace, vectorize)
 */
 
-SET search_path = public;
-
-DROP MATERIALIZED VIEW ofec_rad_mv;
-
-DROP FUNCTION IF EXISTS fix_party_spelling(branch text);
-
-----
-
-SET search_path = disclosure, pg_catalog;
-
-DROP VIEW rad_cmte_analyst_search_vw;
-
----
-
-SET search_path = public;
-
 CREATE VIEW ofec_rad_analyst_vw AS
     SELECT row_number() OVER () AS idx,
         ra.cmte_id AS committee_id,
