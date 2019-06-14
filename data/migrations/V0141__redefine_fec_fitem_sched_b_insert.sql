@@ -98,7 +98,7 @@ CREATE TRIGGER tri_fec_fitem_sched_f
 update to_tsvector to confirm to new search functionality (omit special characters, replace with whitespace, vectorize)
 */
 
-CREATE VIEW ofec_rad_analyst_vw AS
+CREATE OR REPLACE VIEW ofec_rad_analyst_vw AS
     SELECT row_number() OVER () AS idx,
         ra.cmte_id AS committee_id,
         cv.cmte_nm AS committee_name,
@@ -115,7 +115,7 @@ CREATE VIEW ofec_rad_analyst_vw AS
         an.telephone_ext,
         t.anlyst_title_desc AS analyst_title,
         an.email AS analyst_email,
-        ra.last_rp_change_dt AS assignment_update
+        ra.last_rp_change_dt AS assignment_update_date
     FROM rad_pri_user.rad_anlyst an
     JOIN rad_pri_user.rad_assgn ra
         ON an.anlyst_id = ra.anlyst_id
@@ -134,8 +134,49 @@ GRANT SELECT ON TABLE ofec_rad_analyst_vw TO openfec_read;
 
 /*
 update to_tsvector definition for ofec_commite_fulltext_audit_mv
+    a) `create or replace ofec_committee_fulltext_audit_mvw` to use new `MV` logic
+    b) drop old `MV`
+    c) recreate `MV` with new logic
+    d) `create or replace ofec_committee_fulltext_audit_mv` -> `select all` from new `MV`
 */
+
+
+-- a) `create or replace ofec_committee_fulltext_audit_mv` to use new `MV` logic
+
+CREATE OR REPLACE VIEW ofec_committee_fulltext_audit_vw AS
+WITH
+cmte_info AS (
+    SELECT DISTINCT dc.cmte_id,
+        dc.cmte_nm,
+        dc.fec_election_yr,
+        dc.cmte_dsgn,
+        dc.cmte_tp,
+        b.FILED_CMTE_TP_DESC::text AS cmte_desc
+    FROM auditsearch.audit_case aa, disclosure.cmte_valid_fec_yr dc, staging.ref_filed_cmte_tp b
+    WHERE btrim(aa.cmte_id) = dc.cmte_id 
+      AND aa.election_cycle = dc.fec_election_yr
+      AND dc.cmte_tp IN ('H', 'S', 'P', 'X', 'Y', 'Z', 'N', 'Q', 'I', 'O', 'U', 'V', 'W')
+      AND dc.cmte_tp = b.filed_cmte_tp_cd
+)
+SELECT DISTINCT ON (cmte_id, cmte_nm)
+    row_number() over () AS idx,
+    cmte_id AS id,
+    cmte_nm AS name,
+CASE
+    WHEN cmte_nm IS NOT NULL THEN
+        setweight(to_tsvector(regexp_replace(cmte_nm, '[^a-zA-Z0-9]', ' ', 'g')), 'A') ||
+        setweight(to_tsvector(regexp_replace(cmte_id, '[^a-zA-Z0-9]', ' ', 'g')), 'B')
+    ELSE NULL::tsvector
+END AS fulltxt
+FROM cmte_info 
+ORDER BY cmte_id;
+
+
+-- b) drop old mv
 DROP MATERIALIZED VIEW ofec_committee_fulltext_audit_mv;
+
+
+-- c) create new mv
 CREATE MATERIALIZED VIEW ofec_committee_fulltext_audit_mv AS
 WITH
 cmte_info AS (
@@ -173,6 +214,11 @@ CREATE INDEX ON ofec_committee_fulltext_audit_mv using gin(fulltxt);
 GRANT ALL ON TABLE public.ofec_committee_fulltext_audit_mv TO fec;
 GRANT SELECT ON TABLE public.ofec_committee_fulltext_audit_mv TO fec_read;
 
+-- d) `create or replace ofec_committee_fulltext_audit_vw` -> `select all` from new `MV`
+CREATE OR REPLACE VIEW ofec_committee_fulltext_audit_vw AS SELECT * FROM ofec_committee_fulltext_audit_mv;
+ALTER VIEW ofec_committee_fulltext_audit_vw OWNER TO fec;
+GRANT SELECT ON ofec_committee_fulltext_audit_vw TO fec_read;
+
 
 /*
 update to_tsvector definition for fec_fitem_sched_a
@@ -202,10 +248,46 @@ OWNER TO fec;
 update to_tsvector definition for ofec_candidate_fulltext_audit_mv
 */
 
---
--- 5)Name: ofec_candidate_fulltext_audit_mv; Type: MATERIALIZED VIEW; Schema: auditsearch; Owner: fec
---
+/*
+update to_tsvector definition for ofec_candidate_fulltext_audit_mv
+    a) `create or replace ofec_candidate_fulltext_audit_vw` to use new `MV` logic
+    b) drop old `MV`
+    c) recreate `MV` with new logic
+    d) `create or replace ofec_candidate_fulltext_audit_mv` -> `select all` from new `MV`
+*/
+-- a) `create or replace ofec_candidate_fulltext_audit_vw` to use new `MV` logic
+CREATE OR REPLACE VIEW ofec_candidate_fulltext_audit_vw AS
+WITH
+cand_info AS (
+    SELECT DISTINCT dc.cand_id,
+        dc.cand_name,
+        "substring"(dc.cand_name::text, 1,
+            CASE
+                WHEN strpos(dc.cand_name::text, ','::text) > 0 THEN strpos(dc.cand_name::text, ','::text) - 1
+                ELSE strpos(dc.cand_name::text, ','::text)
+            END) AS last_name,
+        "substring"(dc.cand_name::text, strpos(dc.cand_name::text, ','::text) + 1) AS first_name,
+        dc.fec_election_yr
+    FROM auditsearch.audit_case aa JOIN disclosure.cand_valid_fec_yr dc
+    ON (btrim(aa.cand_id) = dc.cand_id AND aa.election_cycle = dc.fec_election_yr)
+)
+SELECT DISTINCT ON (cand_id, cand_name)
+    row_number() over () AS idx,
+    cand_id AS id,
+    cand_name AS name,
+CASE
+    WHEN cand_name IS NOT NULL THEN
+        setweight(to_tsvector(regexp_replace(cand_name, '[^a-zA-Z0-9]', ' ', 'g')), 'A') ||
+        setweight(to_tsvector(regexp_replace(cand_id, '[^a-zA-Z0-9]', ' ', 'g')), 'B')
+    ELSE NULL::tsvector
+END AS fulltxt
+FROM cand_info
+ORDER BY cand_id;
+
+--    b) drop old `MV`
 DROP MATERIALIZED VIEW ofec_candidate_fulltext_audit_mv;
+
+--    c) recreate `MV` with new logic
 CREATE MATERIALIZED VIEW ofec_candidate_fulltext_audit_mv AS
 WITH
 cand_info AS (
@@ -243,3 +325,8 @@ CREATE INDEX ON ofec_candidate_fulltext_audit_mv using gin(fulltxt);
 
 GRANT ALL ON TABLE ofec_candidate_fulltext_audit_mv TO fec;
 GRANT SELECT ON TABLE ofec_candidate_fulltext_audit_mv TO fec_read;
+
+-- d) `create or replace ofec_candidate_fulltext_audit_vw` -> `select all` from new `MV`
+CREATE OR REPLACE VIEW ofec_candidate_fulltext_audit_vw AS SELECT * FROM ofec_candidate_fulltext_audit_mv;
+ALTER VIEW ofec_candidate_fulltext_audit_vw OWNER TO fec;
+GRANT SELECT ON ofec_candidate_fulltext_audit_vw TO fec_read;
