@@ -55,6 +55,42 @@ CREATE TRIGGER tri_fec_fitem_sched_b
   FOR EACH ROW
   EXECUTE PROCEDURE disclosure.fec_fitem_sched_b_insert();
 
+-- ----------------------------
+-- ----------------------------
+-- disclosure.fec_fitem_sched_d
+-- ----------------------------
+-- ----------------------------
+DO $$
+BEGIN
+    EXECUTE format('ALTER TABLE disclosure.fec_fitem_sched_d ADD COLUMN creditor_debtor_name_text tsvector');
+    EXCEPTION 
+             WHEN duplicate_column THEN 
+                null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+CREATE OR REPLACE FUNCTION disclosure.fec_fitem_sched_d_insert()
+  RETURNS trigger AS
+$BODY$
+begin
+	new.creditor_debtor_name_text := to_tsvector(regexp_replace(new.cred_dbtr_nm, '[^a-zA-Z0-9]', ' ', 'g'));
+
+    	return new;
+end
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION disclosure.fec_fitem_sched_d_insert()
+  OWNER TO fec;
+
+DROP TRIGGER IF EXISTS tri_fec_fitem_sched_d ON disclosure.fec_fitem_sched_d;
+
+CREATE TRIGGER tri_fec_fitem_sched_d
+  BEFORE INSERT
+  ON disclosure.fec_fitem_sched_d
+  FOR EACH ROW
+  EXECUTE PROCEDURE disclosure.fec_fitem_sched_d_insert();
 
 -- ----------------------------
 -- ----------------------------
