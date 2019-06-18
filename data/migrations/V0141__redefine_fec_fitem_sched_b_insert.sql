@@ -446,9 +446,12 @@ CREATE MATERIALIZED VIEW public.ofec_committee_fulltext_mv AS
 
 ALTER TABLE public.ofec_committee_fulltext_mv OWNER TO fec;
 
-CREATE UNIQUE INDEX ON ofec_committee_fulltext_mv(idx);
-CREATE INDEX ON ofec_committee_fulltext_mv using gin(fulltxt);
-
+CREATE INDEX ofec_committee_fulltext_mv_disbursements_idx1 ON public.ofec_committee_fulltext_mv USING btree (disbursements);
+CREATE INDEX ofec_committee_fulltext_mv_fulltxt_idx1 ON public.ofec_committee_fulltext_mv USING gin (fulltxt);
+CREATE UNIQUE INDEX ofec_committee_fulltext_mv_idx_idx1 ON public.ofec_committee_fulltext_mv USING btree (idx);
+CREATE INDEX ofec_committee_fulltext_mv_independent_expenditures_idx1 ON public.ofec_committee_fulltext_mv USING btree (independent_expenditures);
+CREATE INDEX ofec_committee_fulltext_mv_receipts_idx1 ON public.ofec_committee_fulltext_mv USING btree (receipts);
+CREATE INDEX ofec_committee_fulltext_mv_total_activity_idx1 ON public.ofec_committee_fulltext_mv USING btree (total_activity);
 
 GRANT ALL ON TABLE ofec_committee_fulltext_mv TO fec;
 GRANT SELECT ON TABLE ofec_committee_fulltext_mv TO fec_read;
