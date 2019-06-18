@@ -378,7 +378,7 @@ update to_tsvector definition for ofec_committee_fulltext_mv
     a) `create or replace ofec_committee_fulltext_vw` to use new `MV` logic
     b) drop old `MV`
     c) recreate `MV` with new logic
-    d) `create or replace ofec_candidate_fulltext_audit_mv` -> `select all` from new `MV`
+    d) `create or replace ofec_committee_fulltext_audit_vw` -> `select all` from new `MV`
 */
 -- a) `create or replace ofec_committee_fulltext_vw` to use new `MV` logic
 CREATE OR REPLACE VIEW public.ofec_committee_fulltext_vw AS
@@ -460,3 +460,91 @@ GRANT SELECT ON TABLE ofec_committee_fulltext_mv TO fec_read;
 CREATE OR REPLACE VIEW ofec_committee_fulltext_vw AS SELECT * FROM ofec_committee_fulltext_mv;
 ALTER VIEW ofec_committee_fulltext_vw OWNER TO fec;
 GRANT SELECT ON ofec_committee_fulltext_vw TO fec_read;
+
+
+/*
+update to_tsvector definition for ofec_candidate_fulltext_mv
+    a) `create or replace ofec_candidate_fulltext_vw` to use new `MV` logic
+    b) drop old `MV`
+    c) recreate `MV` with new logic
+    d) `create or replace ofec_candidate_fulltext_audit_vw` -> `select all` from new `MV`
+*/
+
+-- a) `create or replace ofec_candidate_fulltext_vw` to use new `MV` logic
+CREATE OR REPLACE VIEW public.ofec_candidate_fulltext_vw AS
+ WITH nicknames AS (
+         SELECT ofec_nicknames.candidate_id,
+            string_agg(ofec_nicknames.nickname, ' '::text) AS nicknames
+           FROM public.ofec_nicknames
+          GROUP BY ofec_nicknames.candidate_id
+        ), totals AS (
+         SELECT link.cand_id AS candidate_id,
+            sum(totals_1.receipts) AS receipts,
+            sum(totals_1.disbursements) AS disbursements
+           FROM (disclosure.cand_cmte_linkage link
+             JOIN public.ofec_totals_combined_vw totals_1 ON ((((link.cmte_id)::text = (totals_1.committee_id)::text) AND (link.fec_election_yr = (totals_1.cycle)::numeric))))
+          WHERE (((link.cmte_dsgn)::text = ANY (ARRAY[('P'::character varying)::text, ('A'::character varying)::text])) AND ((substr((link.cand_id)::text, 1, 1) = (link.cmte_tp)::text) OR ((link.cmte_tp)::text <> ALL (ARRAY[('P'::character varying)::text, ('S'::character varying)::text, ('H'::character varying)::text]))))
+          GROUP BY link.cand_id
+        )
+ SELECT DISTINCT ON (candidate_id) row_number() OVER () AS idx,
+    candidate_id AS id,
+    ofec_candidate_detail_vw.name,
+    ofec_candidate_detail_vw.office AS office_sought,
+        CASE
+            WHEN (ofec_candidate_detail_vw.name IS NOT NULL) THEN ((setweight(to_tsvector(regexp_replace((ofec_candidate_detail_vw.name)::text, '[^a-zA-Z0-9]', ' ', 'g')), 'A'::"char") || setweight(to_tsvector(COALESCE(regexp_replace(nicknames.nicknames, '[^a-zA-Z0-9]', ' ', 'g'), ''::text)), 'A'::"char")) || setweight(to_tsvector(regexp_replace((candidate_id)::text, '[^a-zA-Z0-9]', ' ', 'g')), 'B'::"char"))
+            ELSE NULL::tsvector
+        END AS fulltxt,
+    COALESCE(totals.receipts, (0)::numeric) AS receipts,
+    COALESCE(totals.disbursements, (0)::numeric) AS disbursements,
+    (COALESCE(totals.receipts, (0)::numeric) + COALESCE(totals.disbursements, (0)::numeric)) AS total_activity
+   FROM ((public.ofec_candidate_detail_vw
+     LEFT JOIN nicknames USING (candidate_id))
+     LEFT JOIN totals USING (candidate_id));
+
+-- b) drop old 'MV'
+DROP MATERIALIZED VIEW ofec_candidate_fulltext_mv;
+
+-- c) create 'MV' with new logic
+CREATE MATERIALIZED VIEW public.ofec_candidate_fulltext_mv AS
+ WITH nicknames AS (
+         SELECT ofec_nicknames.candidate_id,
+            string_agg(ofec_nicknames.nickname, ' '::text) AS nicknames
+           FROM public.ofec_nicknames
+          GROUP BY ofec_nicknames.candidate_id
+        ), totals AS (
+         SELECT link.cand_id AS candidate_id,
+            sum(totals_1.receipts) AS receipts,
+            sum(totals_1.disbursements) AS disbursements
+           FROM (disclosure.cand_cmte_linkage link
+             JOIN public.ofec_totals_combined_vw totals_1 ON ((((link.cmte_id)::text = (totals_1.committee_id)::text) AND (link.fec_election_yr = (totals_1.cycle)::numeric))))
+          WHERE (((link.cmte_dsgn)::text = ANY (ARRAY[('P'::character varying)::text, ('A'::character varying)::text])) AND ((substr((link.cand_id)::text, 1, 1) = (link.cmte_tp)::text) OR ((link.cmte_tp)::text <> ALL (ARRAY[('P'::character varying)::text, ('S'::character varying)::text, ('H'::character varying)::text]))))
+          GROUP BY link.cand_id
+        )
+ SELECT DISTINCT ON (candidate_id) row_number() OVER () AS idx,
+    candidate_id AS id,
+    ofec_candidate_detail_vw.name,
+    ofec_candidate_detail_vw.office AS office_sought,
+        CASE
+            WHEN (ofec_candidate_detail_vw.name IS NOT NULL) THEN ((setweight(to_tsvector((ofec_candidate_detail_vw.name)::text), 'A'::"char") || setweight(to_tsvector(COALESCE(nicknames.nicknames, ''::text)), 'A'::"char")) || setweight(to_tsvector((candidate_id)::text), 'B'::"char"))
+            ELSE NULL::tsvector
+        END AS fulltxt,
+    COALESCE(totals.receipts, (0)::numeric) AS receipts,
+    COALESCE(totals.disbursements, (0)::numeric) AS disbursements,
+    (COALESCE(totals.receipts, (0)::numeric) + COALESCE(totals.disbursements, (0)::numeric)) AS total_activity
+   FROM ((public.ofec_candidate_detail_vw
+     LEFT JOIN nicknames USING (candidate_id))
+     LEFT JOIN totals USING (candidate_id))
+  WITH DATA;
+
+ALTER TABLE public.ofec_candidate_fulltext_mv OWNER TO fec;
+
+CREATE INDEX ofec_candidate_fulltext_mv_disbursements_idx1 ON public.ofec_candidate_fulltext_mv USING btree (disbursements);
+CREATE INDEX ofec_candidate_fulltext_mv_fulltxt_idx1 ON public.ofec_candidate_fulltext_mv USING gin (fulltxt);
+CREATE UNIQUE INDEX ofec_candidate_fulltext_mv_idx_idx1 ON public.ofec_candidate_fulltext_mv USING btree (idx);
+CREATE INDEX ofec_candidate_fulltext_mv_receipts_idx1 ON public.ofec_candidate_fulltext_mv USING btree (receipts);
+CREATE INDEX ofec_candidate_fulltext_mv_total_activity_idx1 ON public.ofec_candidate_fulltext_mv USING btree (total_activity);
+
+-- d) `create or replace ofec_candidate_fulltext_audit_mv` -> `select all` from new `MV`
+CREATE OR REPLACE VIEW ofec_candidate_fulltext_vw AS SELECT * FROM ofec_candidate_fulltext_mv;
+ALTER VIEW ofec_candidate_fulltext_vw OWNER TO fec;
+GRANT SELECT ON ofec_candidate_fulltext_vw TO fec_read;
