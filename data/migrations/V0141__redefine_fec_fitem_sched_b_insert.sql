@@ -548,3 +548,110 @@ CREATE INDEX ofec_candidate_fulltext_mv_total_activity_idx1 ON public.ofec_candi
 CREATE OR REPLACE VIEW ofec_candidate_fulltext_vw AS SELECT * FROM ofec_candidate_fulltext_mv;
 ALTER VIEW ofec_candidate_fulltext_vw OWNER TO fec;
 GRANT SELECT ON ofec_candidate_fulltext_vw TO fec_read;
+
+
+
+
+/*
+update to_tsvector definition for ofec_electioneering_mv
+    a) `create or replace ofec_electioneering_vw` to use new `MV` logic
+    b) drop old `MV`
+    c) recreate `MV` with new logic
+    d) `create or replace ofec_candidate_fulltext_audit_vw` -> `select all` from new `MV`
+*/
+--  a) `create or replace ofec_electioneering_vw` to use new `MV` logic
+CREATE OR REPLACE VIEW ofec_electioneering_vw AS
+ SELECT row_number() OVER () AS idx,
+    electioneering_com_vw.cand_id,
+    electioneering_com_vw.cand_name,
+    electioneering_com_vw.cand_office,
+    electioneering_com_vw.cand_office_st,
+    electioneering_com_vw.cand_office_district,
+    electioneering_com_vw.cmte_id,
+    electioneering_com_vw.cmte_nm,
+    electioneering_com_vw.sb_image_num,
+    electioneering_com_vw.payee_nm,
+    electioneering_com_vw.payee_st1,
+    electioneering_com_vw.payee_city,
+    electioneering_com_vw.payee_st,
+    electioneering_com_vw.disb_desc,
+    electioneering_com_vw.disb_dt,
+    electioneering_com_vw.comm_dt,
+    electioneering_com_vw.pub_distrib_dt,
+    electioneering_com_vw.reported_disb_amt,
+    electioneering_com_vw.number_of_candidates,
+    electioneering_com_vw.calculated_cand_share,
+    electioneering_com_vw.sub_id,
+    electioneering_com_vw.link_id,
+    electioneering_com_vw.rpt_yr,
+    electioneering_com_vw.sb_link_id,
+    electioneering_com_vw.f9_begin_image_num,
+    electioneering_com_vw.receipt_dt,
+    electioneering_com_vw.election_tp,
+    electioneering_com_vw.file_num,
+    electioneering_com_vw.amndt_ind,
+    image_pdf_url((electioneering_com_vw.sb_image_num)::text) AS pdf_url,
+    to_tsvector(regexp_replace((electioneering_com_vw.disb_desc)::text, '[^a-zA-Z0-9]', ' ', 'g')) AS purpose_description_text
+   FROM electioneering_com_vw
+  WHERE (electioneering_com_vw.rpt_yr >= (1979)::numeric);
+
+-- b) drop old 'MV'
+DROP MATERIALIZED VIEW ofec_electioneering_mv;
+
+-- c) recreate `MV` with new logic
+CREATE MATERIALIZED VIEW ofec_electioneering_mv AS
+ SELECT row_number() OVER () AS idx,
+    electioneering_com_vw.cand_id,
+    electioneering_com_vw.cand_name,
+    electioneering_com_vw.cand_office,
+    electioneering_com_vw.cand_office_st,
+    electioneering_com_vw.cand_office_district,
+    electioneering_com_vw.cmte_id,
+    electioneering_com_vw.cmte_nm,
+    electioneering_com_vw.sb_image_num,
+    electioneering_com_vw.payee_nm,
+    electioneering_com_vw.payee_st1,
+    electioneering_com_vw.payee_city,
+    electioneering_com_vw.payee_st,
+    electioneering_com_vw.disb_desc,
+    electioneering_com_vw.disb_dt,
+    electioneering_com_vw.comm_dt,
+    electioneering_com_vw.pub_distrib_dt,
+    electioneering_com_vw.reported_disb_amt,
+    electioneering_com_vw.number_of_candidates,
+    electioneering_com_vw.calculated_cand_share,
+    electioneering_com_vw.sub_id,
+    electioneering_com_vw.link_id,
+    electioneering_com_vw.rpt_yr,
+    electioneering_com_vw.sb_link_id,
+    electioneering_com_vw.f9_begin_image_num,
+    electioneering_com_vw.receipt_dt,
+    electioneering_com_vw.election_tp,
+    electioneering_com_vw.file_num,
+    electioneering_com_vw.amndt_ind,
+    image_pdf_url((electioneering_com_vw.sb_image_num)::text) AS pdf_url,
+    to_tsvector(regexp_replace((electioneering_com_vw.disb_desc)::text, '[^a-zA-Z0-9]', ' ', 'g')) AS purpose_description_text
+   FROM electioneering_com_vw
+  WHERE (electioneering_com_vw.rpt_yr >= (1979)::numeric)
+ WITH DATA;
+
+ALTER TABLE ofec_electioneering_mv OWNER TO fec;
+
+CREATE INDEX ofec_electioneering_mv_tmp_calculated_cand_share_idx ON ofec_electioneering_mv USING btree (calculated_cand_share);
+CREATE INDEX ofec_electioneering_mv_tmp_cand_id_idx ON ofec_electioneering_mv USING btree (cand_id);
+CREATE INDEX ofec_electioneering_mv_tmp_cand_office_district_idx ON ofec_electioneering_mv USING btree (cand_office_district);
+CREATE INDEX ofec_electioneering_mv_tmp_cand_office_idx ON ofec_electioneering_mv USING btree (cand_office);
+CREATE INDEX ofec_electioneering_mv_tmp_cand_office_st_idx ON ofec_electioneering_mv USING btree (cand_office_st);
+CREATE INDEX ofec_electioneering_mv_tmp_cmte_id_idx ON ofec_electioneering_mv USING btree (cmte_id);
+CREATE INDEX ofec_electioneering_mv_tmp_disb_dt_idx1 ON ofec_electioneering_mv USING btree (disb_dt);
+CREATE INDEX ofec_electioneering_mv_tmp_f9_begin_image_num_idx ON ofec_electioneering_mv USING btree (f9_begin_image_num);
+CREATE UNIQUE INDEX ofec_electioneering_mv_tmp_idx_idx ON ofec_electioneering_mv USING btree (idx);
+CREATE INDEX ofec_electioneering_mv_tmp_purpose_description_text_idx1 ON ofec_electioneering_mv USING gin (purpose_description_text);
+CREATE INDEX ofec_electioneering_mv_tmp_reported_disb_amt_idx ON ofec_electioneering_mv USING btree (reported_disb_amt);
+CREATE INDEX ofec_electioneering_mv_tmp_rpt_yr_idx ON ofec_electioneering_mv USING btree (rpt_yr);
+CREATE INDEX ofec_electioneering_mv_tmp_sb_image_num_idx ON ofec_electioneering_mv USING btree (sb_image_num);
+
+-- d) `create or replace ofec_candidate_fulltext_audit_mv` -> `select all` from new `MV`
+CREATE OR REPLACE VIEW ofec_electioneering_vw AS SELECT * FROM ofec_electioneering_mv;
+ALTER VIEW ofec_electioneering_vw OWNER TO fec;
+GRANT SELECT ON TABLE ofec_electioneering_mv TO fec_read;
