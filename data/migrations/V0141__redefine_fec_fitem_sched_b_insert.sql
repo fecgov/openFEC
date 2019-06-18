@@ -370,3 +370,90 @@ CREATE TRIGGER tri_fec_fitem_sched_c
   ON disclosure.fec_fitem_sched_c
   FOR EACH ROW
   EXECUTE PROCEDURE disclosure.fec_fitem_sched_c_insert();
+
+
+
+/*
+update to_tsvector definition for ofec_committee_fulltext_mv
+    a) `create or replace ofec_committee_fulltext_vw` to use new `MV` logic
+    b) drop old `MV`
+    c) recreate `MV` with new logic
+    d) `create or replace ofec_candidate_fulltext_audit_mv` -> `select all` from new `MV`
+*/
+-- a) `create or replace ofec_committee_fulltext_vw` to use new `MV` logic
+CREATE OR REPLACE VIEW public.ofec_committee_fulltext_vw AS
+ WITH pacronyms AS (
+         SELECT ofec_pacronyms."ID NUMBER" AS committee_id,
+            string_agg(ofec_pacronyms."PACRONYM", ' '::text) AS pacronyms
+           FROM public.ofec_pacronyms
+          GROUP BY ofec_pacronyms."ID NUMBER"
+        ), totals AS (
+         SELECT ofec_totals_combined_vw.committee_id,
+            sum(ofec_totals_combined_vw.receipts) AS receipts,
+            sum(ofec_totals_combined_vw.disbursements) AS disbursements,
+            sum(ofec_totals_combined_vw.independent_expenditures) AS independent_expenditures
+           FROM public.ofec_totals_combined_vw
+          GROUP BY ofec_totals_combined_vw.committee_id
+        )
+ SELECT DISTINCT ON (committee_id) row_number() OVER () AS idx,
+    committee_id AS id,
+    cd.name,
+        CASE
+            WHEN (cd.name IS NOT NULL) THEN ((setweight(to_tsvector(regexp_replace((cd.name)::text, '[^a-zA-Z0-9]', ' ', 'g')), 'A'::"char") || setweight(to_tsvector(COALESCE(regexp_replace(pac.pacronyms, '[^a-zA-Z0-9]', ' ', 'g'), ''::text)), 'A'::"char")) || setweight(to_tsvector(regexp_replace((committee_id)::text, '[^a-zA-Z0-9]', ' ', 'g')), 'B'::"char"))
+            ELSE NULL::tsvector
+        END AS fulltxt,
+    COALESCE(totals.receipts, (0)::numeric) AS receipts,
+    COALESCE(totals.disbursements, (0)::numeric) AS disbursements,
+    COALESCE(totals.independent_expenditures, (0)::numeric) AS independent_expenditures,
+    ((COALESCE(totals.receipts, (0)::numeric) + COALESCE(totals.disbursements, (0)::numeric)) + COALESCE(totals.independent_expenditures, (0)::numeric)) AS total_activity
+   FROM ((public.ofec_committee_detail_vw cd
+     LEFT JOIN pacronyms pac USING (committee_id))
+     LEFT JOIN totals USING (committee_id));
+
+-- b) drop old MV
+DROP MATERIALIZED VIEW ofec_committee_fulltext_mv;
+
+-- c) recreate `MV` with new logic
+CREATE MATERIALIZED VIEW public.ofec_committee_fulltext_mv AS
+ WITH pacronyms AS (
+         SELECT ofec_pacronyms."ID NUMBER" AS committee_id,
+            string_agg(ofec_pacronyms."PACRONYM", ' '::text) AS pacronyms
+           FROM public.ofec_pacronyms
+          GROUP BY ofec_pacronyms."ID NUMBER"
+        ), totals AS (
+         SELECT ofec_totals_combined_vw.committee_id,
+            sum(ofec_totals_combined_vw.receipts) AS receipts,
+            sum(ofec_totals_combined_vw.disbursements) AS disbursements,
+            sum(ofec_totals_combined_vw.independent_expenditures) AS independent_expenditures
+           FROM public.ofec_totals_combined_vw
+          GROUP BY ofec_totals_combined_vw.committee_id
+        )
+ SELECT DISTINCT ON (committee_id) row_number() OVER () AS idx,
+    committee_id AS id,
+    cd.name,
+        CASE
+            WHEN (cd.name IS NOT NULL) THEN ((setweight(to_tsvector(regexp_replace((cd.name)::text, '[^a-zA-Z0-9]', ' ', 'g')), 'A'::"char") || setweight(to_tsvector(COALESCE(regexp_replace(pac.pacronyms, '[^a-zA-Z0-9]', ' ', 'g'), ''::text)), 'A'::"char")) || setweight(to_tsvector(regexp_replace((committee_id)::text, '[^a-zA-Z0-9]', ' ', 'g')), 'B'::"char"))
+            ELSE NULL::tsvector
+        END AS fulltxt,
+    COALESCE(totals.receipts, (0)::numeric) AS receipts,
+    COALESCE(totals.disbursements, (0)::numeric) AS disbursements,
+    COALESCE(totals.independent_expenditures, (0)::numeric) AS independent_expenditures,
+    ((COALESCE(totals.receipts, (0)::numeric) + COALESCE(totals.disbursements, (0)::numeric)) + COALESCE(totals.independent_expenditures, (0)::numeric)) AS total_activity
+   FROM ((public.ofec_committee_detail_vw cd
+     LEFT JOIN pacronyms pac USING (committee_id))
+     LEFT JOIN totals USING (committee_id))
+  WITH DATA;
+
+ALTER TABLE public.ofec_committee_fulltext_mv OWNER TO fec;
+
+CREATE UNIQUE INDEX ON ofec_committee_fulltext_mv(idx);
+CREATE INDEX ON ofec_committee_fulltext_mv using gin(fulltxt);
+
+
+GRANT ALL ON TABLE ofec_committee_fulltext_mv TO fec;
+GRANT SELECT ON TABLE ofec_committee_fulltext_mv TO fec_read;
+
+-- d) `create or replace ofec_committee_fulltext_mv` -> `select all` from new `MV`
+CREATE OR REPLACE VIEW ofec_committee_fulltext_vw AS SELECT * FROM ofec_committee_fulltext_mv;
+ALTER VIEW ofec_committee_fulltext_vw OWNER TO fec;
+GRANT SELECT ON ofec_committee_fulltext_vw TO fec_read;
