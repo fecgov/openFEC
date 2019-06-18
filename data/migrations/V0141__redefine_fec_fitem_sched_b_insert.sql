@@ -655,3 +655,35 @@ CREATE INDEX ofec_electioneering_mv_tmp_sb_image_num_idx ON ofec_electioneering_
 CREATE OR REPLACE VIEW ofec_electioneering_vw AS SELECT * FROM ofec_electioneering_mv;
 ALTER VIEW ofec_electioneering_vw OWNER TO fec;
 GRANT SELECT ON TABLE ofec_electioneering_mv TO fec_read;
+
+/*
+update to_tsvector for ofec_dates_vw
+*/
+
+create or replace view ofec_dates_vw as
+ (
+    -- most data comes from cal_event and is imported as is, it does not have state filtering.
+    select distinct on (category_name, event_name, description, location, start_date, end_date)
+        cal_event_id,
+        category_name::text as category,
+        event_name::text as summary,
+        describe_cal_event(category_name::text, event_name::text, description::text) as description,
+        null::text[] as states,
+        location::text,
+        start_date,
+        end_date,
+        use_time = 'N' as all_day,
+        url,
+        to_tsvector(regexp_replace(event_name, '[^a-zA-Z0-9]', ' ', 'g')) as summary_text,
+        to_tsvector(regexp_replace(describe_cal_event(category_name::text, event_name::text, description::text), '[^a-zA-Z0-9]', ' ', 'g')) as description_text,
+        cal_category_id as calendar_category_id
+    from fecapp.cal_event
+    join fecapp.cal_event_category using (cal_event_id)
+    join fecapp.cal_category using (cal_category_id)
+    where
+        -- the status of 3 narrows down the events to those that a published
+        cal_event_status_id = 3 and
+        active = 'Y'
+);
+
+ALTER TABLE ofec_dates_vw OWNER TO fec;
