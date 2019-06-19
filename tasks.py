@@ -5,7 +5,7 @@ import git
 
 from invoke import task
 from webservices.env import env
-from jdbc_utils import to_jdbc_url
+from jdbc_utils import get_jdbc_credentials
 
 
 DEFAULT_FRACTION = 0.5
@@ -184,18 +184,15 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
     if not migrate_database:
         print("\nSkipping migrations. Database not migrated.\n")
     else:
-        db_url = os.getenv('FEC_MIGRATOR_URL_{0}'.format(space.upper()))
-        migration_user = os.getenv('FEC_MIGRATOR_USERNAME_{0}'.format(space.upper()))
-        migration_password = os.getenv(
-            'FEC_MIGRATOR_PASSWORD_{0}'.format(space.upper())
-        )
+        migration_env_var = 'FEC_MIGRATOR_SQLA_CONN_{0}'.format(space.upper())
+        migration_conn = os.getenv(migration_env_var)
 
-        if not all((migration_user, migration_password, db_url)):
-            print("\nUnable to retrieve migration credentials.")
+        if not migration_conn:
+            print("\nUnable to retrieve {0}. Make sure the environmental variable is set.\n".format(migration_env_var))
             return
 
         print("\nMigrating database...")
-        jdbc_url = to_jdbc_url(db_url)
+        jdbc_url, migration_user, migration_password = get_jdbc_credentials(migration_conn)
         run_migrations(ctx, jdbc_url, migration_user, migration_password)
         print("Database migrated\n")
 
@@ -222,7 +219,7 @@ def create_sample_db(ctx):
 
     print("Loading schema...")
     db_conn = os.getenv('SQLA_SAMPLE_DB_CONN')
-    jdbc_url = to_jdbc_url(db_conn)
+    jdbc_url = get_jdbc_credentials(db_conn)
     run_migrations(ctx, jdbc_url)
     print("Schema loaded")
 
