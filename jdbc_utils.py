@@ -12,4 +12,7 @@ def get_jdbc_credentials(dbi_url):
 
 
 def remove_credentials(error):
-    return re.sub(r"\(.*", "", error)
+    message = "ERROR:"
+    if '(' in error:
+        message = error.split('(')[0]
+    return message
