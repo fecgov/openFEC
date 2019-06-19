@@ -185,7 +185,7 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
         print("\nSkipping migrations. Database not migrated.\n")
     else:
         migration_env_var = 'FEC_MIGRATOR_SQLA_CONN_{0}'.format(space.upper())
-        migration_conn = os.getenv(migration_env_var)
+        migration_conn = os.getenv(migration_env_var, '')
         jdbc_url, migration_user, migration_password = get_jdbc_credentials(
             migration_conn
         )
@@ -231,8 +231,8 @@ def create_sample_db(ctx):
 
     print("Loading schema...")
     db_conn = os.getenv('SQLA_SAMPLE_DB_CONN')
-    jdbc_url = get_jdbc_credentials(db_conn)
-    run_migrations(ctx, jdbc_url)
+    jdbc_url, migration_user, migration_password = get_jdbc_credentials(db_conn)
+    run_migrations(ctx, jdbc_url, migration_user, migration_password)
     print("Schema loaded")
 
     print("Loading sample data...")

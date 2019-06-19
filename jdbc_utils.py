@@ -8,8 +8,7 @@ def get_jdbc_credentials(dbi_url):
         username = match.group('username')
         password = match.group('password')
         return (jdbc_url, username, password)
-    return None
-
+    return (None, None, None)
 
 def remove_credentials(error):
     message = "ERROR:"
