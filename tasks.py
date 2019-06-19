@@ -184,16 +184,19 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
     if not migrate_database:
         print("\nSkipping migrations. Database not migrated.\n")
     else:
-        migration_env_var = 'FEC_MIGRATOR_SQLA_CONN_{0}'.format(space.upper())
-        migration_credential = os.getenv(migration_env_var)
+        db_url = os.getenv('FEC_MIGRATOR_URL_{0}'.format(space.upper()))
+        migration_user = os.getenv('FEC_MIGRATOR_USERNAME_{0}'.format(space.upper()))
+        migration_password = os.getenv(
+            'FEC_MIGRATOR_PASSWORD_{0}'.format(space.upper())
+        )
 
-        if migration_credential is None:
-            print("\nUnable to retrieve {0}. Make sure the environmental variable is set.\n".format(migration_env_var))
+        if not all((migration_user, migration_password, db_url)):
+            print("\nUnable to retrieve migration credentials.")
             return
 
         print("\nMigrating database...")
-        jdbc_url = to_jdbc_url(migration_credential)
-        run_migrations(ctx, jdbc_url)
+        jdbc_url = to_jdbc_url(db_url)
+        run_migrations(ctx, jdbc_url, migration_user, migration_password)
         print("Database migrated\n")
 
     # Set deploy variables
@@ -225,17 +228,20 @@ def create_sample_db(ctx):
 
     print("Loading sample data...")
     subprocess.check_call(
-        ['psql', '-v', 'ON_ERROR_STOP=1', '-f', 'data/sample_db.sql', db_conn],
+        ['psql', '-v', 'ON_ERROR_STOP=1', '-f', 'data/sample_db.sql', db_conn]
     )
     print("Sample data loaded")
 
     print("Refreshing materialized views...")
-    os.environ["SQLA_CONN"] = db_conn # SQLA_CONN is used by manage.py tasks
-    subprocess.check_call(
-        ['python', 'manage.py', 'refresh_materialized'],
-    )
+    os.environ["SQLA_CONN"] = db_conn  # SQLA_CONN is used by manage.py tasks
+    subprocess.check_call(['python', 'manage.py', 'refresh_materialized'])
     print("Materialized views refreshed")
 
+
 @task
-def run_migrations(ctx, jdbc_url):
-    ctx.run('flyway migrate -q -url="{0}" -locations=filesystem:data/migrations'.format(jdbc_url))
+def run_migrations(ctx, jdbc_url, migration_user, migration_password):
+    ctx.run(
+        'flyway migrate -q -url="{0}" -user="{1}" -password="{2}" -locations=filesystem:data/migrations'.format(
+            jdbc_url, migration_user, migration_password
+        )
+    )
