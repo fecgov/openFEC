@@ -7,7 +7,7 @@ import unittest
 from webtest import TestApp
 from nplusone.ext.flask_sqlalchemy import NPlusOne
 
-from jdbc_utils import to_jdbc_url
+from jdbc_utils import get_jdbc_credentials
 from webservices import rest
 from webservices.common import models
 from webservices import __API_VERSION__
@@ -116,7 +116,7 @@ def get_test_jdbc_url():
     Return the JDBC URL for TEST_CONN. If TEST_CONN cannot be successfully converted,
     it is probably the default Postgres instance with trust authentication
     """
-    jdbc_url = to_jdbc_url(TEST_CONN)
+    jdbc_url = get_jdbc_credentials(TEST_CONN)
     if jdbc_url is None:
         jdbc_url = "jdbc:" + TEST_CONN
     return jdbc_url

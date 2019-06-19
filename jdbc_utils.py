@@ -1,8 +1,11 @@
 import re
-def to_jdbc_url(dbi_url):
-    DB_URL_REGEX = re.compile(r'(?P<host_port>\S*)$')
+def get_jdbc_credentials(dbi_url):
+    DB_URL_REGEX = re.compile(r'postgresql://(?P<username>[^:]*):?(?P<password>\S*)@(?P<host_port>\S*)$')
     match = DB_URL_REGEX.match(dbi_url)
     if match:
-        jdbc_url = 'jdbc:postgresql://{}/fec'.format(match.group('host_port'))
-        return jdbc_url
+        jdbc_url = 'jdbc:postgresql://{}'.format(
+            match.group('host_port'))
+        username = match.group('username')
+        password = match.group('password')
+        return jdbc_url, username, password
     return None
