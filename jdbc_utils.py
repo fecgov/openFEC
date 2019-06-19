@@ -7,5 +7,9 @@ def get_jdbc_credentials(dbi_url):
             match.group('host_port'))
         username = match.group('username')
         password = match.group('password')
-        return jdbc_url, username, password
+        return (jdbc_url, username, password)
     return None
+
+
+def remove_credentials(error):
+    return re.sub(r"\(.*", "", error)

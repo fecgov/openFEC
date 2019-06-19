@@ -5,7 +5,7 @@ import git
 
 from invoke import task
 from webservices.env import env
-from jdbc_utils import get_jdbc_credentials
+from jdbc_utils import get_jdbc_credentials, remove_credentials
 
 
 DEFAULT_FRACTION = 0.5
@@ -186,15 +186,27 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
     else:
         migration_env_var = 'FEC_MIGRATOR_SQLA_CONN_{0}'.format(space.upper())
         migration_conn = os.getenv(migration_env_var)
+        jdbc_url, migration_user, migration_password = get_jdbc_credentials(
+            migration_conn
+        )
 
-        if not migration_conn:
-            print("\nUnable to retrieve {0}. Make sure the environmental variable is set.\n".format(migration_env_var))
+        if not all((jdbc_url, migration_user, migration_password)):
+            print(
+                "\nUnable to retrieve or parse {0}. Make sure the environmental variable is set and properly formatted.\n".format(
+                    migration_env_var
+                )
+            )
             return
 
         print("\nMigrating database...")
-        jdbc_url, migration_user, migration_password = get_jdbc_credentials(migration_conn)
-        run_migrations(ctx, jdbc_url, migration_user, migration_password)
-        print("Database migrated\n")
+
+        result = run_migrations(ctx, jdbc_url, migration_user, migration_password)
+        if result.failed:
+            print("Migration failed!")
+            print(remove_credentials(result.stderr))
+            return
+
+        print("Database migrated.\n")
 
     # Set deploy variables
     with open('.cfmeta', 'w') as fp:
@@ -237,8 +249,11 @@ def create_sample_db(ctx):
 
 @task
 def run_migrations(ctx, jdbc_url, migration_user, migration_password):
-    ctx.run(
+    response = ctx.run(
         'flyway migrate -q -url="{0}" -user="{1}" -password="{2}" -locations=filesystem:data/migrations'.format(
             jdbc_url, migration_user, migration_password
-        )
+        ),
+        hide=True,  # Hides error output which can contain credentials
+        warn=True,  # Continues upon error; Doesn't display error
     )
+    return response
