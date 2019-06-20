@@ -5,7 +5,7 @@ import git
 
 from invoke import task
 from webservices.env import env
-from jdbc_utils import get_jdbc_credentials, remove_credentials
+from jdbc_utils import get_jdbc_credentials, to_jdbc_url, remove_credentials
 
 
 DEFAULT_FRACTION = 0.5
@@ -231,8 +231,8 @@ def create_sample_db(ctx):
 
     print("Loading schema...")
     db_conn = os.getenv('SQLA_SAMPLE_DB_CONN')
-    jdbc_url, migration_user, migration_password = get_jdbc_credentials(db_conn)
-    run_migrations(ctx, jdbc_url, migration_user, migration_password)
+    jdbc_url = to_jdbc_url(db_conn)
+    run_migrations(ctx, jdbc_url)
     print("Schema loaded")
 
     print("Loading sample data...")
@@ -248,11 +248,14 @@ def create_sample_db(ctx):
 
 
 @task
-def run_migrations(ctx, jdbc_url, migration_user, migration_password):
+def run_migrations(ctx, jdbc_url, migration_user=None, migration_password=None):
+    command = 'flyway migrate -q -url="{0}" -locations=filesystem:data/migrations'.format(jdbc_url)
+    if migration_user:
+        command += ' -user="{}"'.format(migration_user)
+    if migration_password:
+        command += ' -password="{}"'.format(migration_password)
     response = ctx.run(
-        'flyway migrate -q -url="{0}" -user="{1}" -password="{2}" -locations=filesystem:data/migrations'.format(
-            jdbc_url, migration_user, migration_password
-        ),
+        command,
         hide=True,  # Hides error output which can contain credentials
         warn=True,  # Continues upon error; Doesn't display error
     )
