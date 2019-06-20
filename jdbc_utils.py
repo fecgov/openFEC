@@ -12,8 +12,10 @@ def get_jdbc_credentials(dbi_url):
 
 def to_jdbc_url(dbi_url):
     jdbc_url, username, password = get_jdbc_credentials(dbi_url)
-    if all((jdbc_url, username, password)):
-        jdbc_url = 'jdbc:postgresql://{}?user={}&password={}'.format(jdbc_url, username, password)
+    if jdbc_url:
+        jdbc_url = '{}?user={}'.format(jdbc_url, username)
+        if password:
+            jdbc_url += '&password={}'.format(password)
         return jdbc_url
     return None
 
