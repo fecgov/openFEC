@@ -10,6 +10,13 @@ def get_jdbc_credentials(dbi_url):
         return (jdbc_url, username, password)
     return (None, None, None)
 
+def to_jdbc_url(dbi_url):
+    jdbc_url, username, password = get_jdbc_credentials(dbi_url)
+    if all((jdbc_url, username, password)):
+        jdbc_url = 'jdbc:postgresql://{}?user={}&password={}'.format(jdbc_url, username, password)
+        return jdbc_url
+    return None
+
 def remove_credentials(error):
     message = "ERROR:"
     if '(' in error:
