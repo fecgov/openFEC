@@ -72,6 +72,7 @@ class Candidate(BaseConcreteCandidate):
 
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
     candidate_inactive = db.Column(db.Boolean, doc=docs.ACTIVE_CANDIDATE)
+    inactive_election_years = db.Column(ARRAY(db.Integer), index=True, doc='inactive years')
 
     # Customize join to restrict to principal committees
     principal_committees = db.relationship(
