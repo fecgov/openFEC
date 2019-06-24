@@ -24,14 +24,19 @@ def to_jdbc_url(dbi_url):
 
 
 def remove_credentials(error):
-    """Remove credentials from PostgreSQL erorrs, preserve the error codes."""
+    """
+    For PostgreSQL errors, strip out everything except error code and description.
+    This prevents usernames from being printed.
+    For other Flyway-specific errors, go ahead leave them intact.
+    """
     code_lookup = {
         '08001': 'Connection attempt failed',
         '28P01': 'Password authentication failed',
+        '42501': 'Insufficient priveledge'
     }
-    message = "PostgreSQL error"
     match = re.search(r'.*(SQL State  : )+(?P<error>[a-zA-Z0-9]{0,5})', error)
     if match:
         error_code = match.group('error')
-        message += ' {}: {}'.format(error_code, code_lookup.get(error_code, "Unrecognized code. See PostgreSQL docs."))
-    return message
+        return 'PostgreSQL error code {}: {}'.format(error_code, code_lookup.get(error_code, "Unrecognized code. See PostgreSQL docs."))
+    else:
+        return error
