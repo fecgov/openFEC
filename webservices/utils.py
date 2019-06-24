@@ -240,6 +240,9 @@ def extend(*dicts):
 
 
 def parse_fulltext(text):
+    '''
+    split on and remove any nonword characters for converion to ts_vector search
+    '''
     return ' & '.join([
         part + ':*'
         for part in re.sub(r'\W', ' ', text).split()
