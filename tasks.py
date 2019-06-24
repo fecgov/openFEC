@@ -3,7 +3,7 @@ import os
 import subprocess
 import git
 
-from invoke import task
+from invoke import task, exceptions
 from webservices.env import env
 from jdbc_utils import get_jdbc_credentials, to_jdbc_url, remove_credentials
 
@@ -196,7 +196,7 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
                     migration_env_var
                 )
             )
-            return
+            raise exceptions.Exit(1)
 
         print("\nMigrating database...")
 
@@ -204,7 +204,7 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
         if result.failed:
             print("Migration failed!")
             print(remove_credentials(result.stderr))
-            return
+            raise exceptions.Exit(1)
 
         print("Database migrated.\n")
 
