@@ -259,7 +259,7 @@ GRANT SELECT ON ofec_committee_fulltext_audit_vw TO fec_read;
 /*
 update to_tsvector definition for fec_fitem_sched_a
 */
-CREATE OR REPLACE FUNCTION disclosure.ju_fec_fitem_sched_a_insert()
+CREATE OR REPLACE FUNCTION disclosure.fec_fitem_sched_a_insert()
     RETURNS trigger AS
 $BODY$
 begin
@@ -276,7 +276,7 @@ $BODY$
 LANGUAGE plpgsql VOLATILE
 COST 100;
 
-ALTER FUNCTION disclosure.ju_fec_fitem_sched_a_insert()
+ALTER FUNCTION disclosure.fec_fitem_sched_a_insert()
 OWNER TO fec;
 
 
@@ -561,7 +561,7 @@ CREATE MATERIALIZED VIEW public.ofec_candidate_fulltext_mv AS
     ofec_candidate_detail_vw.name,
     ofec_candidate_detail_vw.office AS office_sought,
         CASE
-            WHEN (ofec_candidate_detail_vw.name IS NOT NULL) THEN ((setweight(to_tsvector((ofec_candidate_detail_vw.name)::text), 'A'::"char") || setweight(to_tsvector(COALESCE(nicknames.nicknames, ''::text)), 'A'::"char")) || setweight(to_tsvector((candidate_id)::text), 'B'::"char"))
+            WHEN (ofec_candidate_detail_vw.name IS NOT NULL) THEN ((setweight(to_tsvector(regexp_replace((ofec_candidate_detail_vw.name)::text, '[^a-zA-Z0-9]', ' ', 'g')), 'A'::"char") || setweight(to_tsvector(COALESCE(regexp_replace(nicknames.nicknames, '[^a-zA-Z0-9]', ' ', 'g'), ''::text)), 'A'::"char")) || setweight(to_tsvector(regexp_replace((candidate_id)::text, '[^a-zA-Z0-9]', ' ', 'g')), 'B'::"char"))
             ELSE NULL::tsvector
         END AS fulltxt,
     COALESCE(totals.receipts, (0)::numeric) AS receipts,
@@ -1008,7 +1008,7 @@ ff57.rpt_yr,
 ff57.election_cycle, 
 image_pdf_url(ff57.image_num) as pdf_url,
 coalesce(ff57.rpt_tp, '') in ('24', '48') AS is_notice, 
-to_tsvector(ff57.pye_nm),
+to_tsvector(regexp_replace(ff57.pye_nm, '[a-zA-Z0-9]', ' ', 'g')),
 fr.amndt_ind,
 fr.prev_file_num
 FROM disclosure.fec_fitem_f57 ff57
