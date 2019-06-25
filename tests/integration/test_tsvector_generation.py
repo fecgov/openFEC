@@ -34,7 +34,7 @@ class TriggerTestCase(common.BaseTestCase):
     def _results(self, qry):
         response = self._response(qry)
         return response['results']
-
+    
     def test_schedule_b_exclude(self):
         '''
         Test that for each set of names, searching by the parsed key returns all but the last result.
@@ -167,6 +167,102 @@ class TriggerTestCase(common.BaseTestCase):
             self.assertEquals(set(names[key]) - set(contbr_occupation_list), {names[key][-1]})
         connection.close()
 
+    def test_schedule_c_loan_source_name_text(self):
+        '''
+        Test to see that loan_src_nm insert is parsed correctly and retrieved as
+        expected from ts_vector column loan_source_name_text
+        '''
+        connection = db.engine.connect()
+        name = "O'Reilly"
+        names_good = {'O Reilly', "O'Reilly", 'O.Reilly', 'O-Reilly'}
+        names_bad = {'O', "O'Hare", "Reilly"}
+        i = 0
+        for n in names_good.union(names_bad):
+            i += 1
+            data = {
+                'loan_src_nm': n,
+                'sub_id': 9999999999999999970 + i,
+                'filing_form': 'F3'
+            }
+            insert = "INSERT INTO disclosure.fec_fitem_sched_c " + \
+                "(loan_src_nm, sub_id, filing_form) " + \
+                   " VALUES (%(loan_src_nm)s, %(sub_id)s, %(filing_form)s)"
+            connection.execute(insert, data)
+        manage.refresh_materialized(concurrent=False)
+        select = "SELECT * from disclosure.fec_fitem_sched_c " + \
+            "WHERE loan_source_name_text @@ to_tsquery('" + parse_fulltext(name) + "');"
+        results = connection.execute(select).fetchall()
+        loan_src_nm_list = {na[7] for na in results}
+        #assert all good names in result set
+        assert(names_good.issubset(loan_src_nm_list))
+        #assert no bad names in result set
+        assert(names_bad.isdisjoint(loan_src_nm_list))
+        connection.close()
+
+    def test_schedule_c_candidate_name_text(self):
+        '''
+        Test to see that cand_nm insert is parsed correctly and retrieved as
+        expected from ts_vector column candidate_name_text
+        '''
+        connection = db.engine.connect()
+        name = "O'Reilly"
+        names_good = {'O Reilly', "O'Reilly", 'O.Reilly', 'O-Reilly'}
+        names_bad = {'O', "O'Hare", "Reilly"}
+        i = 0
+        for n in names_good.union(names_bad):
+            i += 1
+            data = {
+                'cand_nm': n,
+                'sub_id': 9999999999999999960 + i,
+                'filing_form': 'F3'
+            }
+            insert = "INSERT INTO disclosure.fec_fitem_sched_c " + \
+                "(cand_nm, sub_id, filing_form) " + \
+                   " VALUES (%(cand_nm)s, %(sub_id)s, %(filing_form)s)"
+            connection.execute(insert, data)
+        manage.refresh_materialized(concurrent=False)
+        select = "SELECT * from disclosure.fec_fitem_sched_c " + \
+            "WHERE candidate_name_text @@ to_tsquery('" + parse_fulltext(name) + "');"
+        results = connection.execute(select).fetchall()
+        cand_nm_list = {na[32] for na in results}
+        #assert all good names in result set
+        assert(names_good.issubset(cand_nm_list))
+        #assert no bad names in result set
+        assert(names_bad.isdisjoint(cand_nm_list))
+        connection.close()
+
+    def test_schedule_d_creditor_debtor_name_text(self):
+        '''
+        Test to see that cred_dbtr_nm is parsed correctly and retrieved as
+        expected from ts_vector column creditor_debtor_name_text
+        '''
+        connection = db.engine.connect()
+        name = "O'Reilly"
+        names_good = {'O Reilly', "O'Reilly", 'O.Reilly', 'O-Reilly'}
+        names_bad = {'O', "O'Hare", "Reilly"}
+        i = 0
+        for n in names_good.union(names_bad):
+            i += 1
+            data = {
+                'cred_dbtr_nm': n,
+                'sub_id': 9999999999999999970 + i,
+                'filing_form': 'F3'
+            }
+            insert = "INSERT INTO disclosure.fec_fitem_sched_d " + \
+                "(cred_dbtr_nm, sub_id, filing_form) " + \
+                   " VALUES (%(cred_dbtr_nm)s, %(sub_id)s, %(filing_form)s)"
+            connection.execute(insert, data)
+        manage.refresh_materialized(concurrent=False)
+        select = "SELECT * from disclosure.fec_fitem_sched_d " + \
+            "WHERE creditor_debtor_name_text @@ to_tsquery('" + parse_fulltext(name) + "');"
+        results = connection.execute(select).fetchall()
+        cred_dbtr_nm_list = {na[3] for na in results}
+        #assert all good names in result set
+        assert(names_good.issubset(cred_dbtr_nm_list))
+        #assert no bad names in result set
+        assert(names_bad.isdisjoint(cred_dbtr_nm_list))
+        connection.close()
+        
     def test_schedule_f_payee_name_text(self):
         '''
         Test to see that pye_nm is parsed correctly and retrieved as
@@ -177,10 +273,10 @@ class TriggerTestCase(common.BaseTestCase):
         names_good = {'O Reilly', "O'Reilly", 'O.Reilly', 'O-Reilly'}
         names_bad = {'O', "O'Hare", "Reilly"}
         i = 0
-        for name in names_good.union(names_bad):
+        for n in names_good.union(names_bad):
             i += 1
             data = {
-                'pye_nm': name,
+                'pye_nm': n,
                 'sub_id': 9999999999999999970 + i,
                 'filing_form': 'F3'
             }
@@ -191,12 +287,8 @@ class TriggerTestCase(common.BaseTestCase):
         manage.refresh_materialized(concurrent=False)
         select = "SELECT * from disclosure.fec_fitem_sched_f " + \
             "WHERE payee_name_text @@ to_tsquery('" + parse_fulltext(name) + "');"
-        print('select')
-        print(select)
         results = connection.execute(select).fetchall()
-        print('results')
-        print(results)
-        pye_nm_list = {n[14] for n in results}
+        pye_nm_list = {na[14] for na in results}
         #assert all good names in result set
         assert(names_good.issubset(pye_nm_list))
         #assert no bad names in result set
