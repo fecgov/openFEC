@@ -63,6 +63,7 @@ def initialize_newrelic():
         settings.license_key = license_key
         newrelic.agent.initialize()
 
+
 initialize_newrelic()
 
 app = Flask(__name__)
@@ -75,6 +76,7 @@ def sqla_conn_string():
         print("Environment variable SQLA_CONN is empty; running against " + "local `cfdm_test`")
         sqla_conn_string = 'postgresql://:@/cfdm_test'
     return sqla_conn_string
+
 
 # app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
@@ -113,6 +115,7 @@ class FlaskRestParser(FlaskParser):
         message = error.messages
         status_code = getattr(error, 'status_code', 422)
         raise exceptions.ApiError(message, status_code)
+
 
 parser = FlaskRestParser()
 app.config['APISPEC_WEBARGS_PARSER'] = parser
@@ -192,8 +195,7 @@ def get_cache_header(url):
         return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, LEGAL_CACHE)
     # This will work differently in local environment - will use local timezone
     elif (
-        '/schedules/' in url
-        and PEAK_HOURS_START <= datetime.now().time() <= PEAK_HOURS_END
+        '/schedules/' in url and PEAK_HOURS_START <= datetime.now().time() <= PEAK_HOURS_END
     ):
         peak_hours_expiration_time = datetime.combine(
             datetime.now().date(), PEAK_HOURS_END
@@ -233,6 +235,7 @@ def page_not_found(exception):
 def forbidden(exception):
     wrapped = ResponseException(str(exception), exception.code, type(exception))
     return wrapped.wrappedException, wrapped.status
+
 
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')
@@ -307,6 +310,7 @@ def add_aggregate_resource(api, view, schedule, label):
         '/committee/<committee_id>/schedules/schedule_{schedule}/by_{label}/'.format(**locals()),
     )
 
+    
 add_aggregate_resource(api, aggregates.ScheduleABySizeView, 'a', 'size')
 add_aggregate_resource(api, aggregates.ScheduleAByStateView, 'a', 'state')
 add_aggregate_resource(api, aggregates.ScheduleAByZipView, 'a', 'zip')
@@ -321,6 +325,8 @@ add_aggregate_resource(api, aggregates.ScheduleEByCandidateView, 'e', 'candidate
 
 api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate/')
 api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate/')
+api.add_resource(candidate_aggregates.ScheduleAByStateCandidateTotalsView,
+                 '/schedules/schedule_a/by_state/by_candidate/totals/')
 
 api.add_resource(candidate_aggregates.TotalsCandidateView, '/candidates/totals/')
 api.add_resource(totals.ScheduleAByStateRecipientTotalsView, '/schedules/schedule_a/by_state/totals/')
