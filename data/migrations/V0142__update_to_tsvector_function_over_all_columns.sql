@@ -1,10 +1,4 @@
-
 /*
-column election_cycle and two_year_transaction_period in public.ofec_sched_b_master tables has exactly the same data
-So disclosure.fec_fitem_sched_b does not add the extra column two_year_transaction_period
-However, since existing API referencing column two_year_transaction_period a lot, rename election_cycle to two_year_transaction_period
-  to mitigate impact to API when switching from using public.ofec_sched_b_master tables to disclosure.fec_fitem_sched_b table
-
 redefine *._text triggers to replace all non-word characters with ' ' for better search specificity.
 */
 
@@ -14,21 +8,7 @@ redefine *._text triggers to replace all non-word characters with ' ' for better
 -- ----------------------------
 -- ----------------------------
 
-DO $$
-BEGIN
-    EXECUTE format('alter table disclosure.fec_fitem_sched_b rename column election_cycle to two_year_transaction_period');
-    EXCEPTION 
-             WHEN undefined_column THEN 
-                null;
-             WHEN others THEN 
-                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
-END$$;
 
-
-
-/*
-redefine tsvector specification for fec_fitem_sched_b_insert
-*/
 
 CREATE OR REPLACE FUNCTION disclosure.fec_fitem_sched_b_insert()
   RETURNS trigger AS
@@ -47,28 +27,13 @@ $BODY$
 ALTER FUNCTION disclosure.fec_fitem_sched_b_insert()
   OWNER TO fec;
 
-DROP TRIGGER IF EXISTS tri_fec_fitem_sched_b ON disclosure.fec_fitem_sched_b;
-
-CREATE TRIGGER tri_fec_fitem_sched_b
-  BEFORE INSERT
-  ON disclosure.fec_fitem_sched_b
-  FOR EACH ROW
-  EXECUTE PROCEDURE disclosure.fec_fitem_sched_b_insert();
 
 -- ----------------------------
 -- ----------------------------
 -- disclosure.fec_fitem_sched_d
 -- ----------------------------
 -- ----------------------------
-DO $$
-BEGIN
-    EXECUTE format('ALTER TABLE disclosure.fec_fitem_sched_d ADD COLUMN creditor_debtor_name_text tsvector');
-    EXCEPTION 
-             WHEN duplicate_column THEN 
-                null;
-             WHEN others THEN 
-                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
-END$$;
+
 
 CREATE OR REPLACE FUNCTION disclosure.fec_fitem_sched_d_insert()
   RETURNS trigger AS
@@ -84,28 +49,13 @@ $BODY$
 ALTER FUNCTION disclosure.fec_fitem_sched_d_insert()
   OWNER TO fec;
 
-DROP TRIGGER IF EXISTS tri_fec_fitem_sched_d ON disclosure.fec_fitem_sched_d;
-
-CREATE TRIGGER tri_fec_fitem_sched_d
-  BEFORE INSERT
-  ON disclosure.fec_fitem_sched_d
-  FOR EACH ROW
-  EXECUTE PROCEDURE disclosure.fec_fitem_sched_d_insert();
 
 -- ----------------------------
 -- ----------------------------
 -- disclosure.fec_fitem_sched_f
 -- ----------------------------
 -- ----------------------------
-DO $$
-BEGIN
-    EXECUTE format('ALTER TABLE disclosure.fec_fitem_sched_f ADD COLUMN payee_name_text tsvector');
-    EXCEPTION 
-             WHEN duplicate_column THEN 
-                null;
-             WHEN others THEN 
-                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
-END$$;
+
 
 CREATE OR REPLACE FUNCTION disclosure.fec_fitem_sched_f_insert()
   RETURNS trigger AS
@@ -121,18 +71,12 @@ $BODY$
 ALTER FUNCTION disclosure.fec_fitem_sched_f_insert()
   OWNER TO fec;
 
-DROP TRIGGER IF EXISTS tri_fec_fitem_sched_f ON disclosure.fec_fitem_sched_f;
 
-CREATE TRIGGER tri_fec_fitem_sched_f
-  BEFORE INSERT
-  ON disclosure.fec_fitem_sched_f
-  FOR EACH ROW
-  EXECUTE PROCEDURE disclosure.fec_fitem_sched_f_insert();
-
-/*
-
-update to_tsvector to confirm to new search functionality (omit special characters, replace with whitespace, vectorize)
-*/
+-- ----------------------------
+-- ----------------------------
+-- ofec_rad_analyst_vw
+-- ----------------------------
+-- ----------------------------
 
 CREATE OR REPLACE VIEW ofec_rad_analyst_vw AS
     SELECT row_number() OVER () AS idx,
@@ -372,16 +316,6 @@ GRANT SELECT ON ofec_candidate_fulltext_audit_vw TO fec_read;
 update to_tsvector for fec_fitem_sched_c
 */
 
-DO $$
-BEGIN
-    EXECUTE format('ALTER TABLE disclosure.fec_fitem_sched_c ADD COLUMN candidate_name_text tsvector');
-    EXECUTE format('ALTER TABLE disclosure.fec_fitem_sched_c ADD COLUMN loan_source_name_text tsvector');
-    EXCEPTION 
-             WHEN duplicate_column THEN 
-                null;
-             WHEN others THEN 
-                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
-END$$;
 
 
 CREATE OR REPLACE FUNCTION disclosure.fec_fitem_sched_c_insert()
@@ -399,13 +333,6 @@ $BODY$
 ALTER FUNCTION disclosure.fec_fitem_sched_c_insert()
   OWNER TO fec;
 
-DROP TRIGGER IF EXISTS tri_fec_fitem_sched_c ON disclosure.fec_fitem_sched_c;
-
-CREATE TRIGGER tri_fec_fitem_sched_c
-  BEFORE INSERT
-  ON disclosure.fec_fitem_sched_c
-  FOR EACH ROW
-  EXECUTE PROCEDURE disclosure.fec_fitem_sched_c_insert();
 
 /*
 update to_tsvector definition for ofec_committee_fulltext_mv
