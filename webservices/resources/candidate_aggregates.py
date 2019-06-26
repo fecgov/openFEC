@@ -97,6 +97,29 @@ class ScheduleABySizeCandidateView(utils.Resource):
         _, query = candidate_aggregate(ScheduleABySize, label_columns, group_columns, kwargs)
         return utils.fetch_page(query, kwargs, cap=None)
 
+@doc(
+    tags=['receipts'],
+    description=docs.SCHEDULE_A_STATE_CANDIDATE_TAG,
+)
+class ScheduleAByStateCandidateTotalsView(utils.Resource):
+
+    @use_kwargs(args.paging)
+    @use_kwargs(args.make_sort_args())
+    @use_kwargs(args.schedule_a_candidate_aggregate)
+    @marshal_with(schemas.ScheduleAByStateCandidatePageSchema())
+    def get(self, **kwargs):
+        _, query = candidate_aggregate(
+            ScheduleAByState,
+            [
+                ScheduleAByState.state,
+                sa.func.sum(ScheduleAByState.total).label('total'),
+                sa.func.max(ScheduleAByState.state_full).label('state_full'),
+                ScheduleAByState.count,
+            ],
+            [ScheduleAByState.state, ScheduleAByState.count],
+            kwargs,
+        )
+        return utils.fetch_page(query, kwargs, cap=0)
 
 @doc(
     tags=['receipts'],
