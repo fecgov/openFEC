@@ -482,6 +482,15 @@ schedule_a = {
             'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
         description=docs.COMMITTEE_TYPE,
     ),
+    'recipient_committee_org_type': fields.List(
+        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
+        description=docs.ORGANIZATION_TYPE,
+    ),
+    'recipient_committee_designation': fields.List(
+        IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
+        description=docs.DESIGNATION,
+    ),
+
 }
 
 schedule_a_e_file = {
@@ -557,6 +566,15 @@ schedule_b = {
             'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
         description=docs.COMMITTEE_TYPE,
     ),
+    'spender_committee_org_type': fields.List(
+        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
+        description=docs.ORGANIZATION_TYPE,
+    ),
+    'spender_committee_designation': fields.List(
+        IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
+        description=docs.DESIGNATION,
+    ),
+
 }
 
 schedule_b_efile = {
