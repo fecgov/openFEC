@@ -247,15 +247,6 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_employer'], 'Vandelay Industries')
 
-    def test_filter_fulltext_employer_dot(self):
-        employers = ['Test.com', 'Test. com', 'Test .com', 'Testcom', 'Test com']
-        [
-            factories.ScheduleAFactory(contributor_employer=employer)
-            for employer in employers
-        ]
-        results = self._results(api.url_for(ScheduleAView, contributor_employer='Test.com', **self.kwargs))
-        self.assertEqual(results[0]['contributor_employer'], 'Test.com')
-
     def test_filter_fulltext_employer_and(self):
         employers = ['Test&Test', 'Test & Test', 'Test& Test', 'Test &Test']
         [
