@@ -205,7 +205,7 @@ class TestElections(ApiBaseTest):
                 committee_designation='P',
                 fec_election_year=2020,
                 cand_election_year=2020,
-                election_yr_to_be_included = 2020,                
+                election_yr_to_be_included = 2020,
             ),
 
             factories.CandidateCommitteeLinkFactory(
@@ -214,7 +214,7 @@ class TestElections(ApiBaseTest):
                 committee_designation='P',
                 fec_election_year=2018,
                 cand_election_year=2020,
-                election_yr_to_be_included = 2020,       
+                election_yr_to_be_included = 2020,
             ),
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=self.president_candidate.candidate_id,
@@ -222,7 +222,7 @@ class TestElections(ApiBaseTest):
                 committee_designation='P',
                 fec_election_year=2018,
                 cand_election_year=2020,
-                election_yr_to_be_included = 2020,       
+                election_yr_to_be_included = 2020,
             )
         ]
 
@@ -307,9 +307,6 @@ class TestElections(ApiBaseTest):
             'total_disbursements': sum(each.disbursements for each in totals),
             'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in cash_on_hand_totals),
         }
-        print (results[0]['total_receipts'])
-        print (results[0]['total_disbursements'])
-        print (results[0]['cash_on_hand_end_period'])
         assert len(results) == 1
         assert_dicts_subset(results[0], expected)
         assert set(results[0]['committee_ids']) == set(
@@ -387,6 +384,134 @@ class TestElections(ApiBaseTest):
         self.assertEqual(results['count'], 1)
         self.assertEqual(results['receipts'], sum(each.receipts for each in totals))
         self.assertEqual(results['disbursements'], sum(each.disbursements for each in totals))
+
+class TestPRElections(ApiBaseTest):
+
+    def setUp(self):
+        super().setUp()
+        self.candidate = factories.CandidateDetailFactory()
+        self.candidates = [
+            factories.CandidateHistoryFactory(
+                candidate_id=self.candidate.candidate_id,
+                state='PR',
+                district='00',
+                two_year_period=2018,
+                election_years=[2020],
+                cycles=[2018, 2020],
+                office='H',
+                candidate_election_year=2020,
+            ),
+            factories.CandidateHistoryFactory(
+                candidate_id=self.candidate.candidate_id,
+                state='PR',
+                district='00',
+                two_year_period=2020,
+                election_years=[2020],
+                cycles=[2018, 2020],
+                office='H',
+                candidate_election_year=2020,
+            ),
+        ]
+        self.committees = [
+            factories.CommitteeHistoryFactory(cycle=2020, designation='P'),
+            factories.CommitteeHistoryFactory(cycle=2020, designation='A'),
+        ]
+        [
+            factories.CandidateElectionFactory(candidate_id=self.candidate.candidate_id, cand_election_year=year)
+            for year in [2016, 2020]
+        ]
+        [
+            factories.CommitteeDetailFactory(committee_id=each.committee_id)
+            for each in self.committees
+        ]
+        db.session.flush()
+        self.candidate_committee_links = [
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[0].committee_id,
+                committee_designation='P',
+                fec_election_year=2018,
+                election_yr_to_be_included=2020,
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[1].committee_id,
+                committee_designation='A',
+                fec_election_year=2018,
+                election_yr_to_be_included=2020,
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[0].committee_id,
+                committee_designation='P',
+                fec_election_year=2020,
+                election_yr_to_be_included=2020,
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[1].committee_id,
+                committee_designation='A',
+                fec_election_year=2020,
+                election_yr_to_be_included=2020,
+            ),
+        ]
+        self.totals = [
+            factories.TotalsHouseSenateFactory(
+                receipts=50,
+                disbursements=75,
+                committee_id=self.committees[1].committee_id,
+                coverage_end_date=datetime.datetime(2018, 12, 31),
+                last_cash_on_hand_end_period=100,
+                cycle=2018,
+            ),
+            factories.TotalsHouseSenateFactory(
+                receipts=50,
+                disbursements=75,
+                committee_id=self.committees[1].committee_id,
+                coverage_end_date=datetime.datetime(2020, 12, 31),
+                last_cash_on_hand_end_period=300,
+                cycle=2020,
+            ),
+        ]
+        db.session.flush()
+
+    def test_elections_2_year(self):
+        results = self._results(api.url_for(ElectionView, office='house', district='00',cycle=2020, state='PR'))
+        self.assertEqual(len(results), 1)
+        totals = [each for each in self.totals if each.cycle == 2020]
+        expected = {
+            'candidate_id': self.candidate.candidate_id,
+            'candidate_name': self.candidate.name,
+            'incumbent_challenge_full': self.candidate.incumbent_challenge_full,
+            'party_full': self.candidate.party_full,
+            'total_receipts': sum(each.receipts for each in totals),
+            'total_disbursements': sum(each.disbursements for each in totals),
+            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in totals),
+        }
+        assert_dicts_subset(results[0], expected)
+        assert set(each.committee_id for each in self.committees) == set(results[0]['committee_ids'])
+
+    def test_elections_full(self):
+        results = self._results(
+            api.url_for(
+                ElectionView,
+                office='house', district='00', cycle=2020, state='PR', election_full='true',
+            )
+        )
+        totals = self.totals
+        cash_on_hand_totals = self.totals[:2]
+        expected = {
+            'candidate_id': self.candidate.candidate_id,
+            'candidate_name': self.candidate.name,
+            'incumbent_challenge_full': self.candidate.incumbent_challenge_full,
+            'party_full': self.candidate.party_full,
+            'total_receipts': sum(each.receipts for each in totals),
+            'total_disbursements': sum(each.disbursements for each in totals),
+            'cash_on_hand_end_period': max(each.last_cash_on_hand_end_period for each in cash_on_hand_totals),
+        }
+        assert len(results) == 1
+        assert_dicts_subset(results[0], expected)
+
 
 class TestStateElectionOffices(ApiBaseTest):
 
