@@ -89,7 +89,7 @@ class ScheduleAView(ItemizedResource):
             'contributor_id',
             'contributor_name',
             'contributor_city',
-            #'contributor_zip',
+            'contributor_zip',
             'contributor_employer',
             'contributor_occupation',
             'image_number',

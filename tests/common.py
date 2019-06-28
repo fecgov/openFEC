@@ -12,7 +12,6 @@ from webservices import rest
 from webservices.common import models
 from webservices import __API_VERSION__
 
-
 TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
 rest.app.config['NPLUSONE_RAISE'] = True
 NPlusOne(rest.app)

@@ -3,9 +3,9 @@ import os
 import subprocess
 import git
 
-from invoke import task
+from invoke import task, exceptions
 from webservices.env import env
-from jdbc_utils import to_jdbc_url
+from jdbc_utils import get_jdbc_credentials, to_jdbc_url, remove_credentials
 
 
 DEFAULT_FRACTION = 0.5
@@ -185,16 +185,28 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
         print("\nSkipping migrations. Database not migrated.\n")
     else:
         migration_env_var = 'FEC_MIGRATOR_SQLA_CONN_{0}'.format(space.upper())
-        migration_credential = os.getenv(migration_env_var)
+        migration_conn = os.getenv(migration_env_var, '')
+        jdbc_url, migration_user, migration_password = get_jdbc_credentials(
+            migration_conn
+        )
 
-        if migration_credential is None:
-            print("\nUnable to retrieve {0}. Make sure the environmental variable is set.\n".format(migration_env_var))
-            return
+        if not all((jdbc_url, migration_user, migration_password)):
+            print(
+                "\nUnable to retrieve or parse {0}. Make sure the environmental variable is set and properly formatted.\n".format(
+                    migration_env_var
+                )
+            )
+            raise exceptions.Exit(1)
 
         print("\nMigrating database...")
-        jdbc_url = to_jdbc_url(migration_credential)
-        run_migrations(ctx, jdbc_url)
-        print("Database migrated\n")
+
+        result = run_migrations(ctx, jdbc_url, migration_user, migration_password)
+        if result.failed:
+            print("Migration failed!")
+            print(remove_credentials(result.stderr))
+            raise exceptions.Exit(1)
+
+        print("Database migrated.\n")
 
     # Set deploy variables
     with open('.cfmeta', 'w') as fp:
@@ -225,17 +237,26 @@ def create_sample_db(ctx):
 
     print("Loading sample data...")
     subprocess.check_call(
-        ['psql', '-v', 'ON_ERROR_STOP=1', '-f', 'data/sample_db.sql', db_conn],
+        ['psql', '-v', 'ON_ERROR_STOP=1', '-f', 'data/sample_db.sql', db_conn]
     )
     print("Sample data loaded")
 
     print("Refreshing materialized views...")
-    os.environ["SQLA_CONN"] = db_conn # SQLA_CONN is used by manage.py tasks
-    subprocess.check_call(
-        ['python', 'manage.py', 'refresh_materialized'],
-    )
+    os.environ["SQLA_CONN"] = db_conn  # SQLA_CONN is used by manage.py tasks
+    subprocess.check_call(['python', 'manage.py', 'refresh_materialized'])
     print("Materialized views refreshed")
 
+
 @task
-def run_migrations(ctx, jdbc_url):
-    ctx.run('flyway migrate -q -url="{0}" -locations=filesystem:data/migrations'.format(jdbc_url))
+def run_migrations(ctx, jdbc_url, migration_user=None, migration_password=None):
+    command = 'flyway migrate -q -url="{0}" -locations=filesystem:data/migrations'.format(jdbc_url)
+    if migration_user:
+        command += ' -user="{}"'.format(migration_user)
+    if migration_password:
+        command += ' -password="{}"'.format(migration_password)
+    response = ctx.run(
+        command,
+        hide=True,  # Hides error output which can contain credentials
+        warn=True,  # Continues upon error; Doesn't display error
+    )
+    return response

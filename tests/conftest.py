@@ -14,7 +14,7 @@ def migrate_db(request):
 
 def run_migrations():
     subprocess.check_call(
-        ['flyway', 'migrate', '-n', '-url=%s' % get_test_jdbc_url(), '-locations=filesystem:data/migrations'],)
+        ['flyway', 'migrate', '-n', '-url={0}'.format(get_test_jdbc_url()), '-locations=filesystem:data/migrations'],)
 
 def reset_schema():
     for schema in [
