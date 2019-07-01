@@ -2,7 +2,7 @@ git+https://github.com/fecgov/apispec.git@dev
 #prance[osv]>=0.11 # pathlib dependency is breaking pytest
 cfenv==0.5.2
 invoke==0.15.0
-kombu==4.5.0
+kombu==4.6.3
 psycopg2-binary==2.7.4
 Flask==1.0.2
 Flask-Cors==3.0.6
@@ -36,6 +36,6 @@ git+https://github.com/jmcarp/marshmallow-pagination@master
 smart_open==1.7.1
 
 # Task queue
-celery==4.1.1 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
-celery-once==1.2.0
+celery==4.3.0 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
+celery-once==3.0.0
 redis==3.2.0
