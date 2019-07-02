@@ -683,7 +683,7 @@ elections = {
         validate=validate.OneOf(['house', 'senate', 'president']),
         description=docs.OFFICE,
     ),
-    'election_full': fields.Bool(missing=False, description='Aggregate values over full election period'),
+    'election_full': fields.Bool(missing=True, description='Aggregate values over full election period'),
 }
 
 state_election_office_info = {

@@ -251,6 +251,7 @@ class TestAggregates(ApiBaseTest):
                     committee_id=self.committee.committee_id,
                     cycle=2012,
                     office='president',
+                    election_full=False,
                 )
             )
             assert len(results) == 1
@@ -708,7 +709,8 @@ class TestCandidateAggregates(ApiBaseTest):
                 TotalsCandidateView,
                 candidate_id=self.candidate_zero.candidate_id,
                 cycle=2018,
-                is_active_candidate=False
+                is_active_candidate=False,
+                election_full=False,
             )
         )
         assert len(results) == 1

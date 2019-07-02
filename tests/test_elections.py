@@ -274,7 +274,7 @@ class TestElections(ApiBaseTest):
         assert len(results) == 0
 
     def test_elections(self):
-        results = self._results(api.url_for(ElectionView, office='senate', cycle=2012, state='NY'))
+        results = self._results(api.url_for(ElectionView, office='senate', cycle=2012, state='NY', election_full=False))
         self.assertEqual(len(results), 1)
         totals = [each for each in self.totals if each.cycle == 2012]
         expected = {
@@ -379,7 +379,7 @@ class TestElections(ApiBaseTest):
             each.committee_id for each in self.committees
             if each.designation != 'J')
     def test_election_summary(self):
-        results = self._response(api.url_for(ElectionSummary, office='senate', cycle=2012, state='NY'))
+        results = self._response(api.url_for(ElectionSummary, office='senate', cycle=2012, state='NY', election_full=False))
         totals = [each for each in self.totals if each.cycle == 2012]
         self.assertEqual(results['count'], 1)
         self.assertEqual(results['receipts'], sum(each.receipts for each in totals))
@@ -476,7 +476,7 @@ class TestPRElections(ApiBaseTest):
         db.session.flush()
 
     def test_elections_2_year(self):
-        results = self._results(api.url_for(ElectionView, office='house', district='00',cycle=2020, state='PR'))
+        results = self._results(api.url_for(ElectionView, office='house', district='00',cycle=2020, state='PR', election_full=False))
         self.assertEqual(len(results), 1)
         totals = [each for each in self.totals if each.cycle == 2020]
         expected = {
