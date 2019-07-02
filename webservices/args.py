@@ -281,7 +281,7 @@ committee_list = {
 }
 
 committee_history = {
-    'election_full': election_full,
+    'election_full': fields.Bool(missing=True, description='Aggregate values over full election period'),
 }
 
 filings = {
