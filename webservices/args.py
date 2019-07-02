@@ -51,7 +51,7 @@ class District(fields.Str):
     def _deserialize(self, value, attr, data):
         return '{0:0>2}'.format(value)
 
-election_full = fields.Bool(missing=False, description='Aggregate values over full election period')
+election_full = fields.Bool(missing=True, description='Aggregate values over full election period')
 
 paging = {
     'page': Natural(missing=1, description='For paginating through results, starting at page 1'),
@@ -241,7 +241,7 @@ candidate_list = {
 }
 
 candidate_history = {
-    'election_full': fields.Bool(missing=True, description='Aggregate values over full election period'),
+    'election_full': election_full,
 }
 
 committee = {
@@ -281,7 +281,7 @@ committee_list = {
 }
 
 committee_history = {
-    'election_full': fields.Bool(missing=True, description='Aggregate values over full election period'),
+    'election_full': election_full,
 }
 
 filings = {
@@ -683,7 +683,7 @@ elections = {
         validate=validate.OneOf(['house', 'senate', 'president']),
         description=docs.OFFICE,
     ),
-    'election_full': fields.Bool(missing=True, description='Aggregate values over full election period'),
+    'election_full': election_full,
 }
 
 state_election_office_info = {
@@ -693,7 +693,7 @@ state_election_office_info = {
 schedule_a_candidate_aggregate = {
     'candidate_id': fields.List(IStr, required=True, description=docs.CANDIDATE_ID),
     'cycle': fields.List(fields.Int, required=True, description=docs.RECORD_CYCLE),
-    'election_full': fields.Bool(missing=True, description='Aggregate values over full election period'),
+    'election_full': election_full,
 }
 
 candidate_totals = {
@@ -702,7 +702,7 @@ candidate_totals = {
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description='Governmental office candidate runs for: House, Senate or presidential'),
-    'election_full': fields.Bool(missing=True, description='Aggregate values over full election period. Defaults to True.'),
+    'election_full': election_full,
     'state': fields.List(IStr, description='State of candidate'),
     'district': fields.List(District, description='District of candidate'),
     'party': fields.List(IStr, description='Three-letter party code'),
