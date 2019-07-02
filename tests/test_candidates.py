@@ -291,7 +291,7 @@ class TestCandidateHistory(ApiBaseTest):
         results = self._results(
             api.url_for(
                 CandidateHistoryView,
-                committee_id=self.committee.committee_id, cycle=2012,
+                committee_id=self.committee.committee_id, cycle=2012, election_full=False
             )
         )
         assert len(results) == 1
