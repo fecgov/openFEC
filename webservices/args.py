@@ -702,7 +702,7 @@ candidate_totals = {
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description='Governmental office candidate runs for: House, Senate or presidential'),
-    'election_full': election_full,
+    'election_full': fields.Bool(missing=True, description='Aggregate values over full election period. Defaults to True.'),
     'state': fields.List(IStr, description='State of candidate'),
     'district': fields.List(District, description='District of candidate'),
     'party': fields.List(IStr, description='Three-letter party code'),
