@@ -232,7 +232,11 @@ def create_sample_db(ctx):
     print("Loading schema...")
     db_conn = os.getenv('SQLA_SAMPLE_DB_CONN')
     jdbc_url = to_jdbc_url(db_conn)
-    run_migrations(ctx, jdbc_url)
+    result = run_migrations(ctx, jdbc_url)
+    if result.failed:
+        print("Migration failed!")
+        print(result)
+        return
     print("Schema loaded")
 
     print("Loading sample data...")
