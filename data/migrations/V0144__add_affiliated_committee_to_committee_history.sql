@@ -1,14 +1,19 @@
 /*
 This migration file is needed to solve https://github.com/fecgov/openFEC/issues/3807
 
-Add `affiliated_committee_name` to `ofec_committee_history_mv`
-and `public.ofec_committee_history_vw`
+Add `affiliated_committee_name` to:
+1)  `ofec_committee_history_mv` and `public.ofec_committee_history_vw`
+2)  `ofec_committee_detail_mv` and `public.ofec_committee_detail_vw`
 
     a) `create or replace `ofec_committee_history_vw` to use new `MV` logic
     b) drop old `MV`
     c) recreate `MV` with new logic
     d) `create or replace `ofec_committee_history_vw` -> `select all` from new `MV`
 */
+
+-- Add `affiliated_committee_name` to:
+-- 1)  `ofec_committee_history_mv` and `public.ofec_committee_history_vw`
+
 
 -- a) `create or replace `ofec_committee_history_vw` to use new `MV` logic
 CREATE OR REPLACE VIEW public.ofec_committee_history_vw AS
@@ -248,4 +253,218 @@ USING btree (committee_id, state);
 -- d) `create or replace `public.ofec_committee_history_vw` -> `select all` from new `MV`
 
 CREATE OR REPLACE VIEW public.ofec_committee_history_vw AS
-SELECT * FROM public.ofec_committee_history_mv
+SELECT * FROM public.ofec_committee_history_mv;
+
+-- Add `affiliated_committee_name` to:
+-- 2)  `ofec_committee_detail_mv` and `public.ofec_committee_detail_vw`
+
+-- a) `create or replace `XXX_vw` to use new `MV` logic
+
+CREATE OR REPLACE VIEW public.ofec_committee_detail_vw AS
+SELECT DISTINCT ON (ofec_committee_history_vw.committee_id)
+    ofec_committee_history_vw.idx,
+    ofec_committee_history_vw.cycle,
+    ofec_committee_history_vw.committee_id,
+    ofec_committee_history_vw.name,
+    ofec_committee_history_vw.treasurer_name,
+    ofec_committee_history_vw.treasurer_text,
+    ofec_committee_history_vw.organization_type,
+    ofec_committee_history_vw.organization_type_full,
+    ofec_committee_history_vw.street_1,
+    ofec_committee_history_vw.street_2,
+    ofec_committee_history_vw.city,
+    ofec_committee_history_vw.state,
+    ofec_committee_history_vw.state_full,
+    ofec_committee_history_vw.zip,
+    ofec_committee_history_vw.treasurer_city,
+    ofec_committee_history_vw.treasurer_name_1,
+    ofec_committee_history_vw.treasurer_name_2,
+    ofec_committee_history_vw.treasurer_name_middle,
+    ofec_committee_history_vw.treasurer_phone,
+    ofec_committee_history_vw.treasurer_name_prefix,
+    ofec_committee_history_vw.treasurer_state,
+    ofec_committee_history_vw.treasurer_street_1,
+    ofec_committee_history_vw.treasurer_street_2,
+    ofec_committee_history_vw.treasurer_name_suffix,
+    ofec_committee_history_vw.treasurer_name_title,
+    ofec_committee_history_vw.treasurer_zip,
+    ofec_committee_history_vw.custodian_city,
+    ofec_committee_history_vw.custodian_name_1,
+    ofec_committee_history_vw.custodian_name_2,
+    ofec_committee_history_vw.custodian_name_middle,
+    ofec_committee_history_vw.custodian_name_full,
+    ofec_committee_history_vw.custodian_phone,
+    ofec_committee_history_vw.custodian_name_prefix,
+    ofec_committee_history_vw.custodian_state,
+    ofec_committee_history_vw.custodian_street_1,
+    ofec_committee_history_vw.custodian_street_2,
+    ofec_committee_history_vw.custodian_name_suffix,
+    ofec_committee_history_vw.custodian_name_title,
+    ofec_committee_history_vw.custodian_zip,
+    ofec_committee_history_vw.email,
+    ofec_committee_history_vw.fax,
+    ofec_committee_history_vw.website,
+    ofec_committee_history_vw.form_type,
+    ofec_committee_history_vw.leadership_pac,
+    ofec_committee_history_vw.lobbyist_registrant_pac,
+    ofec_committee_history_vw.party_type,
+    ofec_committee_history_vw.party_type_full,
+    ofec_committee_history_vw.qualifying_date,
+    ofec_committee_history_vw.first_file_date,
+    ofec_committee_history_vw.last_file_date,
+    ofec_committee_history_vw.last_f1_date,
+    ofec_committee_history_vw.designation,
+    ofec_committee_history_vw.designation_full,
+    ofec_committee_history_vw.committee_type,
+    ofec_committee_history_vw.committee_type_full,
+    ofec_committee_history_vw.filing_frequency,
+    ofec_committee_history_vw.party,
+    ofec_committee_history_vw.party_full,
+    ofec_committee_history_vw.cycles,
+    ofec_committee_history_vw.candidate_ids,
+    ofec_committee_history_vw.affiliated_committee_name
+   FROM ofec_committee_history_vw
+  ORDER BY ofec_committee_history_vw.committee_id, ofec_committee_history_vw.cycle DESC;
+
+-- b) drop old `MV`
+
+DROP MATERIALIZED VIEW public.ofec_committee_detail_mv;
+
+-- c) recreate `MV` with new logic
+
+CREATE MATERIALIZED VIEW public.ofec_committee_detail_mv AS
+SELECT DISTINCT ON (ofec_committee_history_vw.committee_id)
+    ofec_committee_history_vw.idx,
+    ofec_committee_history_vw.cycle,
+    ofec_committee_history_vw.committee_id,
+    ofec_committee_history_vw.name,
+    ofec_committee_history_vw.treasurer_name,
+    ofec_committee_history_vw.treasurer_text,
+    ofec_committee_history_vw.organization_type,
+    ofec_committee_history_vw.organization_type_full,
+    ofec_committee_history_vw.street_1,
+    ofec_committee_history_vw.street_2,
+    ofec_committee_history_vw.city,
+    ofec_committee_history_vw.state,
+    ofec_committee_history_vw.state_full,
+    ofec_committee_history_vw.zip,
+    ofec_committee_history_vw.treasurer_city,
+    ofec_committee_history_vw.treasurer_name_1,
+    ofec_committee_history_vw.treasurer_name_2,
+    ofec_committee_history_vw.treasurer_name_middle,
+    ofec_committee_history_vw.treasurer_phone,
+    ofec_committee_history_vw.treasurer_name_prefix,
+    ofec_committee_history_vw.treasurer_state,
+    ofec_committee_history_vw.treasurer_street_1,
+    ofec_committee_history_vw.treasurer_street_2,
+    ofec_committee_history_vw.treasurer_name_suffix,
+    ofec_committee_history_vw.treasurer_name_title,
+    ofec_committee_history_vw.treasurer_zip,
+    ofec_committee_history_vw.custodian_city,
+    ofec_committee_history_vw.custodian_name_1,
+    ofec_committee_history_vw.custodian_name_2,
+    ofec_committee_history_vw.custodian_name_middle,
+    ofec_committee_history_vw.custodian_name_full,
+    ofec_committee_history_vw.custodian_phone,
+    ofec_committee_history_vw.custodian_name_prefix,
+    ofec_committee_history_vw.custodian_state,
+    ofec_committee_history_vw.custodian_street_1,
+    ofec_committee_history_vw.custodian_street_2,
+    ofec_committee_history_vw.custodian_name_suffix,
+    ofec_committee_history_vw.custodian_name_title,
+    ofec_committee_history_vw.custodian_zip,
+    ofec_committee_history_vw.email,
+    ofec_committee_history_vw.fax,
+    ofec_committee_history_vw.website,
+    ofec_committee_history_vw.form_type,
+    ofec_committee_history_vw.leadership_pac,
+    ofec_committee_history_vw.lobbyist_registrant_pac,
+    ofec_committee_history_vw.party_type,
+    ofec_committee_history_vw.party_type_full,
+    ofec_committee_history_vw.qualifying_date,
+    ofec_committee_history_vw.first_file_date,
+    ofec_committee_history_vw.last_file_date,
+    ofec_committee_history_vw.last_f1_date,
+    ofec_committee_history_vw.designation,
+    ofec_committee_history_vw.designation_full,
+    ofec_committee_history_vw.committee_type,
+    ofec_committee_history_vw.committee_type_full,
+    ofec_committee_history_vw.filing_frequency,
+    ofec_committee_history_vw.party,
+    ofec_committee_history_vw.party_full,
+    ofec_committee_history_vw.cycles,
+    ofec_committee_history_vw.candidate_ids,
+    ofec_committee_history_vw.affiliated_committee_name
+   FROM ofec_committee_history_vw
+  ORDER BY ofec_committee_history_vw.committee_id, ofec_committee_history_vw.cycle DESC;
+
+--Permissions
+
+ALTER TABLE public.ofec_committee_detail_mv
+  OWNER TO fec;
+GRANT ALL ON TABLE public.ofec_committee_detail_mv TO fec;
+GRANT SELECT ON TABLE public.ofec_committee_detail_mv TO fec_read;
+
+--Indices
+
+CREATE UNIQUE INDEX ofec_committee_detail_mv_idx_idx1
+ON ofec_committee_detail_mv USING btree (idx);
+
+CREATE INDEX ofec_committee_detail_mv_candidate_ids_idx1
+ON ofec_committee_detail_mv USING gin (candidate_ids);
+
+CREATE INDEX ofec_committee_detail_mv_committee_id_idx1
+ON ofec_committee_detail_mv USING btree (committee_id);
+
+CREATE INDEX ofec_committee_detail_mv_committee_type_full_idx1
+ON ofec_committee_detail_mv USING btree (committee_type_full);
+
+CREATE INDEX ofec_committee_detail_mv_committee_type_idx1
+ON ofec_committee_detail_mv USING btree (committee_type);
+
+CREATE INDEX ofec_committee_detail_mv_cycles_candidate_ids_idx1
+ON ofec_committee_detail_mv USING gin (cycles, candidate_ids);
+
+CREATE INDEX ofec_committee_detail_mv_cycles_idx1
+ON ofec_committee_detail_mv USING gin (cycles);
+
+CREATE INDEX ofec_committee_detail_mv_designation_full_idx1
+ON ofec_committee_detail_mv USING btree (designation_full);
+
+CREATE INDEX ofec_committee_detail_mv_designation_idx1
+ON ofec_committee_detail_mv USING btree (designation);
+
+CREATE INDEX ofec_committee_detail_mv_first_file_date_idx1
+ON ofec_committee_detail_mv USING btree (first_file_date);
+
+CREATE INDEX ofec_committee_detail_mv_last_file_date_idx1
+ON ofec_committee_detail_mv USING btree (last_file_date);
+
+CREATE INDEX ofec_committee_detail_mv_name_idx1
+ON ofec_committee_detail_mv USING btree (name);
+
+CREATE INDEX ofec_committee_detail_mv_organization_type_full_idx1
+ON ofec_committee_detail_mv USING btree (organization_type_full);
+
+CREATE INDEX ofec_committee_detail_mv_organization_type_idx1
+ON ofec_committee_detail_mv USING btree (organization_type);
+
+CREATE INDEX ofec_committee_detail_mv_party_full_idx1
+ON ofec_committee_detail_mv USING btree (party_full);
+
+CREATE INDEX ofec_committee_detail_mv_party_idx1
+ON ofec_committee_detail_mv USING btree (party);
+
+CREATE INDEX ofec_committee_detail_mv_state_idx1
+ON ofec_committee_detail_mv USING btree (state);
+
+CREATE INDEX ofec_committee_detail_mv_treasurer_name_idx1
+ON ofec_committee_detail_mv USING btree (treasurer_name);
+
+CREATE INDEX ofec_committee_detail_mv_treasurer_text_idx1
+ON ofec_committee_detail_mv USING gin (treasurer_text);
+
+-- d) `create or replace `public.XXX_vw` -> `select all` from new `MV`
+
+CREATE OR REPLACE VIEW public.ofec_committee_detail_vw AS
+SELECT * FROM public.ofec_committee_detail_mv;
