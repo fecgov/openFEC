@@ -11,6 +11,7 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
+from sqlalchemy.orm import aliased, contains_eager
 
 from webservices.common.models import (
     EFilings,
@@ -139,3 +140,14 @@ class ScheduleEEfileView(views.ApiResource):
                 ]),
             ),
         )
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+        filing_alias = aliased(models.EFilings)
+        query = query.join(filing_alias, self.model.filing)
+        query = query.options(contains_eager(self.model.filing, alias=filing_alias))
+        if kwargs.get('spender_name'):
+            query = query.filter(filing_alias.committee_name.like('%' + kwargs['spender_name'] + '%'))
+        if kwargs.get('filed_date'):
+            query = query.filter(filing_alias.filed_date == kwargs['filed_date'])
+
+        return query

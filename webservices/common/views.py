@@ -8,6 +8,7 @@ from webservices import exceptions
 from webservices.common import counts
 from webservices.common import models
 from webservices.utils import use_kwargs
+from sqlalchemy.dialects import postgresql
 
 class ApiResource(utils.Resource):
 
@@ -49,6 +50,9 @@ class ApiResource(utils.Resource):
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         if _apply_options:
             query = query.options(*self.query_options)
+        # print(str(query.statement.compile(
+        #     dialect=postgresql.dialect(),
+        #     compile_kwargs={'literal_binds': True})))
         return query
 
 

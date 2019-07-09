@@ -653,6 +653,7 @@ class ScheduleE(PdfMixin, BaseItemized):
 
 class ScheduleEEfile(BaseRawItemized):
     __tablename__ = 'real_efile_se_f57_vw'
+    # __tablename__ = 'real_efile_se_f57_vw_tmp_hc'
 
     file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
     related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
@@ -700,6 +701,12 @@ class ScheduleEEfile(BaseRawItemized):
     notary_sign_date = db.Column('not_date', db.Date)
 
     dissemination_date = db.Column('dissem_dt', db.Date)
+
+    ###new columns
+    # spender_name = db.Column('com_name', db.String)
+    # filing_date = db.Column('filed_date', db.Date)
+    # candidate_party = db.Column('party', db.String)
+    # most_recent_filing = db.Column('most_recent', db.Boolean)
 
     filing = db.relationship(
         'EFilings',

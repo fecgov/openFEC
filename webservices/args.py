@@ -787,6 +787,7 @@ schedule_e_efile = {
     'max_expenditure_date': fields.Date(description=docs.EXPENDITURE_MIN_DATE),
     'min_expenditure_amount': fields.Date(description=docs.EXPENDITURE_MIN_AMOUNT),
     'max_expenditure_amount': fields.Date(description=docs.EXPENDITURE_MAX_AMOUNT),
+    'spender_name': fields.Str(description=docs.COMMITTEE_NAME)
 }
 
 rad_analyst = {
