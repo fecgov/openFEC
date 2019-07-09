@@ -141,6 +141,7 @@ class CandidateFormatTest(ApiBaseTest):
             factories.CandidateFactory(candidate_id='BARLET'),
             factories.CandidateFactory(candidate_id='RITCHIE'),
             factories.CandidateFactory(candidate_inactive=True),
+            factories.CandidateFactory(inactive_election_years=[2012]),
         ]
 
         filter_fields = (

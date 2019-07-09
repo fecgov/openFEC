@@ -240,16 +240,13 @@ def extend(*dicts):
 
 
 def parse_fulltext(text):
-    """
-    return search string for tsquery containing the portion of each of the entered words
-    up to the first non-word character
-    """
-    # get list of entered words (in a single field)
-    words = re.split(r'\s+', text)
-    # get the portions of the words up to the first non-word character
-    word_parts = [re.match(r'(.*?)\W', word).group()[:-1] if re.match(r'(.*?)\W', word) else word for word in words]
-    # remove any empty strings from word_parts list and return the words in a formatted string
-    return ' & '.join([word_part + ':*' for word_part in word_parts if word_part])
+    '''
+    split on and remove any nonword characters for converion to ts_vector search
+    '''
+    return ' & '.join([
+        part + ':*'
+        for part in re.sub(r'\W', ' ', text).split()
+    ])
 
 
 office_args_required = ['office', 'cycle']

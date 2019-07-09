@@ -95,14 +95,21 @@ class CandidateList(ApiResource):
             query = query.filter(candidate_detail.election_years.overlap(kwargs['election_year']))
         if 'is_active_candidate' in kwargs and kwargs.get('is_active_candidate'):
             # load active candidates only if True
-            query = query.filter(
-                candidate_detail.candidate_inactive == False # noqa
-            )
+            if kwargs.get('election_year'):
+                query = query.filter(
+                    sa.or_(~(candidate_detail.inactive_election_years.contains(kwargs['election_year'])),
+                        candidate_detail.inactive_election_years.is_(None))
+                )
+            else:
+                query = query.filter(candidate_detail.candidate_inactive == False)# noqa
         elif 'is_active_candidate' in kwargs and not kwargs.get('is_active_candidate'):
             # load inactive candidates only if False
-            query = query.filter(
-                candidate_detail.candidate_inactive == True # noqa
-            )
+            if kwargs.get('election_year'):
+                query = query.filter(candidate_detail.inactive_election_years.overlap(kwargs['election_year']))
+            else:
+                query = query.filter(
+                    candidate_detail.candidate_inactive == True # noqa
+                )
         else:
             # load all candidates
             pass
