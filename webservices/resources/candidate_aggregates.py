@@ -121,13 +121,13 @@ class ScheduleAByStateCandidateTotalsView(utils.Resource):
             ],
             kwargs,
         )
-        
-        from sqlalchemy.dialects import postgresql
         q = query.subquery()
-        print('dir(query) = ', dir(q))
-        query = db.session.query(sa.func.sum(q.c.total).label('total'), sa.func.sum(q.c.count).label('count'), q.c.cand_id.label('candidate_id'), q.c.cycle).group_by(q.c.cand_id, q.c.cycle)
-
-        print(str(query.statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True})))
+        query = db.session.query(
+            sa.func.sum(q.c.total).label('total'),
+            sa.func.sum(q.c.count).label('count'),
+            q.c.cand_id.label('candidate_id'),
+            q.c.cycle
+        ).group_by(q.c.cand_id, q.c.cycle)
 
         return utils.fetch_page(query, kwargs, cap=0)
 
