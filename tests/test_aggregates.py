@@ -251,6 +251,7 @@ class TestAggregates(ApiBaseTest):
                     committee_id=self.committee.committee_id,
                     cycle=2012,
                     office='president',
+                    election_full=False,
                 )
             )
             assert len(results) == 1
@@ -396,6 +397,12 @@ class TestCandidateAggregates(ApiBaseTest):
             candidate_id=self.candidate_zero.candidate_id,
             cycle=2018,
             is_election=False,
+            receipts=0,
+        )
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_zero.candidate_id,
+            cycle=2018,
+            is_election=True,
             receipts=0,
         )
         # Create data for a candidate who ran in 2017 and 2018
@@ -650,6 +657,19 @@ class TestCandidateAggregates(ApiBaseTest):
         assert results[0] == expected
 
     def test_totals(self):
+        # 2-year totals
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                election_full=False
+            )
+        )
+        assert len(results) == 1
+        assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 75})
+
+        # Full-cycle totals (default is true)
         results = self._results(
             api.url_for(
                 TotalsCandidateView,
@@ -658,10 +678,10 @@ class TestCandidateAggregates(ApiBaseTest):
             )
         )
         assert len(results) == 1
-        assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 75})
+        assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 100})
 
         # candidate_zero
-        # by default, load all candidates, current candidate should return 
+        # by default, load all candidates, current candidate should return
         results = self._results(
             api.url_for(
                 TotalsCandidateView,
@@ -689,7 +709,8 @@ class TestCandidateAggregates(ApiBaseTest):
                 TotalsCandidateView,
                 candidate_id=self.candidate_zero.candidate_id,
                 cycle=2018,
-                is_active_candidate=False
+                is_active_candidate=False,
+                election_full=False,
             )
         )
         assert len(results) == 1
@@ -745,6 +766,7 @@ class TestCandidateAggregates(ApiBaseTest):
                 TotalsCandidateView,
                 candidate_id=self.candidate_20.candidate_id,
                 cycle=self.current_cycle,
+                election_full=False
             )
         )
         assert len(results) == 1
@@ -961,8 +983,8 @@ class TestCandidateTotalsByOfficeByParty(ApiBaseTest):
             )
         )
         assert len(results) == 2
-        assert_dicts_subset(results[0], {'election_year': 2016, 'party': 'DEM', 'total_receipts': 100, 'total_disbursements': 100})            
-        assert_dicts_subset(results[1], {'election_year': 2016, 'party': 'REP', 'total_receipts': 10000, 'total_disbursements': 10000})            
+        assert_dicts_subset(results[0], {'election_year': 2016, 'party': 'DEM', 'total_receipts': 100, 'total_disbursements': 100})
+        assert_dicts_subset(results[1], {'election_year': 2016, 'party': 'REP', 'total_receipts': 10000, 'total_disbursements': 10000})
 
 
         results = self._results(
@@ -973,6 +995,6 @@ class TestCandidateTotalsByOfficeByParty(ApiBaseTest):
             )
         )
         assert len(results) == 2
-        assert_dicts_subset(results[0], {'election_year': 2016, 'party': 'Other', 'total_receipts': 300, 'total_disbursements': 300})            
-        assert_dicts_subset(results[1], {'election_year': 2016, 'party': 'REP', 'total_receipts': 200, 'total_disbursements': 200})            
+        assert_dicts_subset(results[0], {'election_year': 2016, 'party': 'Other', 'total_receipts': 300, 'total_disbursements': 300})
+        assert_dicts_subset(results[1], {'election_year': 2016, 'party': 'REP', 'total_receipts': 200, 'total_disbursements': 200})
 
