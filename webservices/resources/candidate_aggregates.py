@@ -133,7 +133,7 @@ class ScheduleAByStateCandidateTotalsView(utils.Resource):
 
 @doc(
     tags=['receipts'],
-    description=docs.SCHEDULE_A_STATE_CANDIDATE_TAG,
+    description=docs.SCHEDULE_A_STATE_CANDIDATE_TOTAL_TAG,
 )
 class ScheduleAByStateCandidateView(utils.Resource):
 

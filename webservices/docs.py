@@ -570,6 +570,10 @@ SCHEDULE_A_STATE_CANDIDATE_TAG = '''
 Schedule A receipts aggregated by contribution state for a candidate.
 '''
 
+SCHEDULE_A_STATE_CANDIDATE_TOTAL_TAG = '''
+Schedule A receipts aggregated over all contribution states for a candidate.
+'''
+
 TOTAL_CANDIDATE_TAG = '''
 Aggregated candidate receipts and disbursements grouped by cycle.
 '''
