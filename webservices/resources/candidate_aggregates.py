@@ -116,9 +116,19 @@ class ScheduleAByStateCandidateTotalsView(utils.Resource):
                 sa.func.max(ScheduleAByState.state_full).label('state_full'),
                 ScheduleAByState.count,
             ],
-            [ScheduleAByState.state, ScheduleAByState.count],
+            [
+                ScheduleAByState.state, ScheduleAByState.count
+            ],
             kwargs,
         )
+        
+        from sqlalchemy.dialects import postgresql
+        q = query.subquery()
+        print('dir(query) = ', dir(q))
+        query = db.session.query(sa.func.sum(q.c.total).label('total'), sa.func.sum(q.c.count).label('count'), q.c.cand_id.label('candidate_id'), q.c.cycle).group_by(q.c.cand_id, q.c.cycle)
+
+        print(str(query.statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True})))
+
         return utils.fetch_page(query, kwargs, cap=0)
 
 @doc(
