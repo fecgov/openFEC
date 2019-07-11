@@ -444,7 +444,6 @@ make_reports_schema = functools.partial(
         'report_form': ma.fields.Str(),
         'document_description': ma.fields.Str(),
         'committee_type': ma.fields.Str(attribute='committee.committee_type'),
-        'committee_name': ma.fields.Str(attribute='committee.name'),
         'beginning_image_number': ma.fields.Str(),
         'end_image_number': ma.fields.Str(),
         'fec_file_id': ma.fields.Str(),
