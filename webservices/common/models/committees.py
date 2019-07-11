@@ -32,6 +32,7 @@ class BaseCommittee(BaseModel):
     designation_full = db.Column(db.String(25), index=True, doc=docs.DESIGNATION)
     organization_type = db.Column(db.String(1), index=True, doc=docs.ORGANIZATION_TYPE)
     organization_type_full = db.Column(db.String(100), index=True, doc=docs.ORGANIZATION_TYPE)
+    affiliated_committee_name = db.Column(db.String(100), doc='Affiliated committee or connected organization')
     party = db.Column(db.String(3), index=True, doc=docs.PARTY)
     party_full = db.Column(db.String(50), doc=docs.PARTY)
     state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
