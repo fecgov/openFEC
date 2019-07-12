@@ -458,7 +458,7 @@ CREATE UNIQUE INDEX idx_ofec_reports_pac_party_mv_tmp_idx
     USING btree
     (idx);
     
-CREATE INDEX idx_ofec_reports_pac_party_mv_tmp_beg_image_numb_idx
+CREATE INDEX idx_ofec_reports_pac_party_mv_tmp_beg_image_num_idx
     ON public.ofec_reports_pac_party_mv_tmp
     USING btree
     (beginning_image_number COLLATE pg_catalog."default", idx);
@@ -542,7 +542,7 @@ ALTER MATERIALIZED VIEW IF EXISTS public.ofec_reports_pac_party_mv_tmp
 -- rename all indexes
 ALTER INDEX public.idx_ofec_reports_pac_party_mv_tmp_idx RENAME TO idx_ofec_reports_pac_party_mv_idx;
     
-ALTER INDEX public.idx_ofec_reports_pac_party_mv_tmp_beg_image_numb_idx RENAME TO idx_ofec_reports_pac_party_mv_beg_image_numb_idx;
+ALTER INDEX public.idx_ofec_reports_pac_party_mv_tmp_beg_image_num_idx RENAME TO idx_ofec_reports_pac_party_mv_beg_image_num_idx;
     
 ALTER INDEX public.idx_ofec_reports_pac_party_mv_tmp_cmte_id_idx RENAME TO idx_ofec_reports_pac_party_mv_cmte_id_idx;
     
