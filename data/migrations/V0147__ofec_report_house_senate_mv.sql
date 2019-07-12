@@ -214,7 +214,7 @@ ALTER INDEX public.idx_ofec_reports_house_senate_mv_tmp_cyc_idx RENAME TO idx_of
     
 ALTER INDEX public.idx_ofec_reports_house_senate_mv_tmp_is_amen_idx RENAME TO idx_ofec_reports_house_senate_mv_is_amen_idx;
     
-ALTER INDEX public.idx_ofec_reports_house_senate_mv_tmp_rcpt_date_idx RENAME TO dx_ofec_reports_house_senate_mv_rcpt_date_idx;
+ALTER INDEX public.idx_ofec_reports_house_senate_mv_tmp_rcpt_date_idx RENAME TO idx_ofec_reports_house_senate_mv_rcpt_date_idx;
     
 ALTER INDEX public.idx_ofec_reports_house_senate_mv_tmp_rpt_type_idx RENAME TO idx_ofec_reports_house_senate_mv_rpt_type_idx;
     
