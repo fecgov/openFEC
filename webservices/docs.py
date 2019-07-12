@@ -265,11 +265,19 @@ years so this can differ from underlying form's receipt date.
 '''
 
 IS_AMENDED = '''
-Report has been amended
+False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.
 '''
 
 MOST_RECENT = '''
 Report is either new or is the most-recently filed amendment
+'''
+
+HTML_URL = '''
+HTML link to the filing.
+'''
+
+FEC_URL = '''
+fec link to the filing.
 '''
 
 TWO_YEAR_TRANSACTION_PERIOD = '''
