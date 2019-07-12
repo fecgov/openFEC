@@ -1074,6 +1074,8 @@ EXPENDITURE_MAX_DATE = 'Selects all items expended by this committee before this
 EXPENDITURE_MIN_DATE = 'Selects all items expended by this committee after this date'
 EXPENDITURE_MIN_AMOUNT = 'Selects all items expended by this committee greater than this amount'
 EXPENDITURE_MAX_AMOUNT = 'Selects all items expended by this committee less than this amount'
+DISSEMINATION_MAX_DATE = 'Selects all items distributed by this committee before this date'
+DISSEMINATION_MIN_DATE = 'Selects all items distributed by this committee after this date'
 
 
 # dates
@@ -1594,4 +1596,8 @@ TOTAL_BY_OFFICE_BY_PARTY_TAG= ''' Aggregated candidate receipts and disbursement
 ACTIVE_CANDIDATE = ''' Candidates who are actively seeking office. If no value is specified, all candidates
 are returned. When True is specified, only active candidates are returned. When False is
 specified, only inactive candidates are returned.
+'''
+DISSEMINATION_DATE = '''
+Date when a PAC distrubutes or disseminates an independent expenditure
+and pays for it in the same reporting period
 '''

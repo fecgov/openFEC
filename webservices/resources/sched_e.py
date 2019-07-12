@@ -12,6 +12,7 @@ from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
 from sqlalchemy.orm import aliased, contains_eager
+from sqlalchemy.dialects import postgresql
 
 from webservices.common.models import (
     EFilings,
@@ -115,15 +116,25 @@ class ScheduleEEfileView(views.ApiResource):
         ('committee_id', models.ScheduleEEfile.committee_id),
         ('candidate_id', models.ScheduleEEfile.candidate_id),
         ('support_oppose_indicator', models.ScheduleEEfile.support_oppose_indicator),
-        #('candidate_name', models.ScheduleEEfile.candidate_name),
+        ('candidate_party', models.ScheduleEEfile.candidate_party),
+        ('candidate_office', models.ScheduleEEfile.candidate_office),
+        ('candidate_office_state', models.ScheduleEEfile.cand_office_state),
+        ('candidate_office_district', models.ScheduleEEfile.cand_office_district)
     ]
 
     filter_range_fields = [
         (('min_expenditure_date', 'max_expenditure_date'), models.ScheduleEEfile.expenditure_date),
+        (('min_dissemination_date', 'max_dissemination_date'), models.ScheduleEEfile.dissemination_date),
     ]
 
     filter_fulltext_fields = [
         ('candidate_name', models.ScheduleEEfile.candidate_name),
+    ]
+
+    filter_match_fields = [
+        ('filer_type', models.Filings.means_filed),
+        ('is_amended', models.Filings.is_amended),
+        ('most_recent', models.ScheduleEEfile.most_recent),
     ]
 
     @property
@@ -145,9 +156,14 @@ class ScheduleEEfileView(views.ApiResource):
         filing_alias = aliased(models.EFilings)
         query = query.join(filing_alias, self.model.filing)
         query = query.options(contains_eager(self.model.filing, alias=filing_alias))
-        if kwargs.get('spender_name'):
-            query = query.filter(filing_alias.committee_name.like('%' + kwargs['spender_name'] + '%'))
+        # if kwargs.get('spender_name'):
+        #     query = query.filter(filing_alias.committee_name.like('%' + kwargs['spender_name'].upper() + '%'))
+            # values = [each.upper() for each in kwargs['spender_name']]
+            # print('*************', values)
+            # query = query.filter(filing_alias.committee_name.like(values))
         if kwargs.get('filed_date'):
             query = query.filter(filing_alias.filed_date == kwargs['filed_date'])
-
+        print(str(query.statement.compile(
+            dialect=postgresql.dialect(),
+            compile_kwargs={'literal_binds': True})))
         return query

@@ -783,11 +783,18 @@ schedule_e_efile = {
         IStr(validate=validate.OneOf(['S', 'O'])),
         description='Support or opposition',
     ),
-    'min_expenditure_date': fields.Date(description=docs.EXPENDITURE_MAX_DATE),
-    'max_expenditure_date': fields.Date(description=docs.EXPENDITURE_MIN_DATE),
+    'min_expenditure_date': fields.Date(description=docs.EXPENDITURE_MIN_DATE),
+    'max_expenditure_date': fields.Date(description=docs.EXPENDITURE_MAX_DATE),
+    'min_dissemination_date': fields.Date(description=docs.DISSEMINATION_MIN_DATE),
+    'max_dissemination_date': fields.Date(description=docs.DISSEMINATION_MAX_DATE),
     'min_expenditure_amount': fields.Date(description=docs.EXPENDITURE_MIN_AMOUNT),
     'max_expenditure_amount': fields.Date(description=docs.EXPENDITURE_MAX_AMOUNT),
-    'spender_name': fields.Str(description=docs.COMMITTEE_NAME)
+    'spender_name': fields.List(IStr, description=docs.COMMITTEE_NAME),
+    'candidate_party': fields.List(IStr, description=docs.PARTY),
+    'candidate_office': fields.List(IStr, description=docs.OFFICE),
+    'candidate_office_state': fields.List(IStr, description=docs.STATE),
+    'candidate_office_district': fields.List(IStr, description=docs.DISTRICT),
+    'most_recent': fields.Bool(description=docs.MOST_RECENT)
 }
 
 rad_analyst = {
