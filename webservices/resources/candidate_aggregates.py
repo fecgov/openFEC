@@ -99,7 +99,7 @@ class ScheduleABySizeCandidateView(utils.Resource):
 
 @doc(
     tags=['receipts'],
-    description=docs.SCHEDULE_A_STATE_CANDIDATE_TAG,
+    description=docs.SCHEDULE_A_STATE_CANDIDATE_TOTAL_TAG,
 )
 class ScheduleAByStateCandidateTotalsView(utils.Resource):
 
@@ -133,8 +133,9 @@ class ScheduleAByStateCandidateTotalsView(utils.Resource):
 
 @doc(
     tags=['receipts'],
-    description=docs.SCHEDULE_A_STATE_CANDIDATE_TOTAL_TAG,
+    description=docs.SCHEDULE_A_STATE_CANDIDATE_TAG,
 )
+
 class ScheduleAByStateCandidateView(utils.Resource):
 
     @use_kwargs(args.paging)
