@@ -18,6 +18,7 @@ from webservices.resources.aggregates import (
 from webservices.resources.candidate_aggregates import (
     ScheduleABySizeCandidateView,
     ScheduleAByStateCandidateView,
+    ScheduleAByStateCandidateTotalsView,
     TotalsCandidateView,
     AggregateByOfficeView,
     AggregateByOfficeByPartyView,
@@ -656,6 +657,49 @@ class TestCandidateAggregates(ApiBaseTest):
         }
         assert results[0] == expected
 
+    def test_by_state_candidate_totals(self):
+        [
+            factories.ScheduleAByStateFactory(
+                committee_id=self.committees[0].committee_id,
+                cycle=2012,
+                total=50.3,
+                state='NY',
+                state_full='New York',
+                count=30,
+            ),
+            factories.ScheduleAByStateFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2012,
+                total=150.11,
+                state='CT',
+                state_full='New York',
+                count=10,
+            ),
+            factories.ScheduleAByStateFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2012,
+                total=150.10,
+                state='NJ',
+                state_full='New Jersey',
+                count=60,
+            ),
+        ]
+        results = self._results(
+            api.url_for(
+                ScheduleAByStateCandidateTotalsView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+            )
+        )
+        assert len(results) == 1
+        expected = {
+            'candidate_id': self.candidate.candidate_id,
+            'cycle': 2012,
+            'total': 350.51,
+            'count': 100,
+        }
+        assert results[0] == expected
+        
     def test_totals(self):
         # 2-year totals
         results = self._results(

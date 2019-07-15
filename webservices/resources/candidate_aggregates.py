@@ -97,11 +97,45 @@ class ScheduleABySizeCandidateView(utils.Resource):
         _, query = candidate_aggregate(ScheduleABySize, label_columns, group_columns, kwargs)
         return utils.fetch_page(query, kwargs, cap=None)
 
+@doc(
+    tags=['receipts'],
+    description=docs.SCHEDULE_A_STATE_CANDIDATE_TOTAL_TAG,
+)
+class ScheduleAByStateCandidateTotalsView(utils.Resource):
+
+    @use_kwargs(args.paging)
+    @use_kwargs(args.make_sort_args())
+    @use_kwargs(args.schedule_a_candidate_aggregate)
+    @marshal_with(schemas.ScheduleAByStateCandidatePageSchema())
+    def get(self, **kwargs):
+        _, query = candidate_aggregate(
+            ScheduleAByState,
+            [
+                ScheduleAByState.state,
+                sa.func.sum(ScheduleAByState.total).label('total'),
+                sa.func.max(ScheduleAByState.state_full).label('state_full'),
+                ScheduleAByState.count,
+            ],
+            [
+                ScheduleAByState.state, ScheduleAByState.count
+            ],
+            kwargs,
+        )
+        q = query.subquery()
+        query = db.session.query(
+            sa.func.sum(q.c.total).label('total'),
+            sa.func.sum(q.c.count).label('count'),
+            q.c.cand_id.label('candidate_id'),
+            q.c.cycle
+        ).group_by(q.c.cand_id, q.c.cycle)
+
+        return utils.fetch_page(query, kwargs, cap=0)
 
 @doc(
     tags=['receipts'],
     description=docs.SCHEDULE_A_STATE_CANDIDATE_TAG,
 )
+
 class ScheduleAByStateCandidateView(utils.Resource):
 
     @use_kwargs(args.paging)
