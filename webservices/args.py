@@ -121,7 +121,7 @@ class IndicesValidator(IndexValidator):
         for sort_column in value:
             if sort_column.lstrip('-') not in self.values:
                 raise exceptions.ApiError(
-                    'Cannot sort on value "{0}"'.format(value),
+                    'Cannot sort on value "{0}"'.format(sort_column),
                     status_code=422,
                 )
 
