@@ -241,7 +241,10 @@ def extend(*dicts):
 
 def parse_fulltext(text):
     '''
-    split on and remove any nonword characters for converion to ts_vector search
+    split on and remove any nonword characters for converion to ts_vector search.
+    the 'text' argument is first unidecoded to remove accents, since both accented
+    and non-accented versions exist in the searched tsvector column. This will
+    lead to unaccented versions being returned when filed data does not contain accents.
     '''
     return ' & '.join([
         part + ':*'
