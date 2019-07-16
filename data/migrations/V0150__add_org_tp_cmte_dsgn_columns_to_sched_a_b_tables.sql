@@ -1127,10 +1127,10 @@ BEGIN
         EXECUTE format('CREATE INDEX %s_two_year_period_amt_sub_id %s ON %s USING btree (two_year_transaction_period, contb_receipt_amt, sub_id)', child_index_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX %s_contrib_emp_text_amt_sub_id %s ON %s USING gin (contributor_employer_text, contb_receipt_amt, sub_id)', child_index_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX %s_contrib_name_text_amt_sub_id %s ON %s USING gin (contributor_name_text, contb_receipt_amt, sub_id)', child_index_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX %s_org_tp_dt_sub_id%s ON %s USING btree (org_tp, contb_receipt_dt, sub_id)', child_index_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX %s_cmte_dsgn_dt_sub_id%s ON %s USING btree (cmte_dsgn, contb_receipt_dt, sub_id)', child_index_root, index_name_suffix, child_table_name);
-
         EXECUTE format('CREATE INDEX %s_cmte_tp_rcpt_amt_sub_id %s ON %s USING btree (cmte_tp COLLATE pg_catalog."default", contb_receipt_amt, sub_id)', child_index_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX %s_org_tp_amt_sub_id%s ON  %s USING btree (org_tp,  contb_receipt_amt, sub_id)', child_index_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX %s_cmte_dsgn_amt_sub_id%s ON %s USING btree (cmte_dsgn,  contb_receipt_amt, sub_id)', child_index_root, index_name_suffix, child_table_name);
+
     -- contb_receipt_dt
         EXECUTE format('CREATE INDEX %s_clean_contbr_id_dt_sub_id %s ON %s USING btree (clean_contbr_id COLLATE pg_catalog."default", contb_receipt_dt, sub_id)', child_index_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX %s_contbr_city_dt_sub_id %s ON %s USING btree (contbr_city COLLATE pg_catalog."default", contb_receipt_dt, sub_id)', child_index_root, index_name_suffix, child_table_name);
@@ -1143,10 +1143,9 @@ BEGIN
         EXECUTE format('CREATE INDEX %s_contrib_occ_text_dt_sub_id %s ON %s USING gin (contributor_occupation_text, contb_receipt_dt, sub_id)', child_index_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX %s_contrib_emp_text_dt_sub_id %s ON %s USING gin (contributor_employer_text, contb_receipt_dt, sub_id)', child_index_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX %s_contrib_name_text_dt_sub_id %s ON %s USING gin (contributor_name_text, contb_receipt_dt, sub_id)', child_index_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX %s_org_tp_rcpt_amt_sub_id%s ON  %s USING btree (org_tp,  contb_receipt_amt, sub_id)', child_index_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX %s_cmte_dsgn_rcpt_amt_sub_id%s ON %s USING btree (cmte_dsgn,  contb_receipt_amt, sub_id)', child_index_root, index_name_suffix, child_table_name);
-
         EXECUTE format('CREATE INDEX %s_cmte_tp_colsc_rcpt_dt_sub_id %s ON %s USING btree (cmte_tp COLLATE pg_catalog."default", (COALESCE(contb_receipt_dt, ''9999-12-31''::date::timestamp without time zone)), sub_id)', child_index_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX %s_org_tp_dt_sub_id%s ON %s USING btree (org_tp, contb_receipt_dt, sub_id)', child_index_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX %s_cmte_dsgn_dt_sub_id%s ON %s USING btree (cmte_dsgn, contb_receipt_dt, sub_id)', child_index_root, index_name_suffix, child_table_name);
     --
         EXECUTE format('CREATE INDEX %s_contbr_zip %s ON %s USING gin (contbr_zip COLLATE pg_catalog."default" gin_trgm_ops)', child_index_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX %s_entity_tp %s ON %s USING btree (entity_tp COLLATE pg_catalog."default")', child_index_root, index_name_suffix, child_table_name);
