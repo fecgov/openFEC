@@ -294,3 +294,35 @@ class TriggerTestCase(common.BaseTestCase):
         #assert no bad names in result set
         assert(names_bad.isdisjoint(pye_nm_list))
         connection.close()
+
+    def test_schedule_f_payee_name_text_accent(self):
+        '''
+        Test to see that pye_nm is parsed correctly and retrieved as
+        expected from ts_vector column payee_name_text
+        '''
+        connection = db.engine.connect()
+        names = {'ÁCCENTED NAME', 'ACCENTED NAME'}
+        i = 0
+        for n in names:
+            i += 1
+            data = {
+                'pye_nm': n,
+                'sub_id': 9999999998999999970 + i,
+                'filing_form': 'F3'
+            }
+            insert = "INSERT INTO disclosure.fec_fitem_sched_f " + \
+                "(pye_nm, sub_id, filing_form) " + \
+                   " VALUES (%(pye_nm)s, %(sub_id)s, %(filing_form)s)"
+            connection.execute(insert, data)
+        manage.refresh_materialized(concurrent=False)
+        select = "SELECT * from disclosure.fec_fitem_sched_f " + \
+            "WHERE payee_name_text @@ to_tsquery('" + parse_fulltext('ÁCCENTED NAME') + "');"
+        results = connection.execute(select).fetchall()
+        pye_nm_list = {na[14] for na in results}
+        assert(names.issubset(pye_nm_list))
+        select = "SELECT * from disclosure.fec_fitem_sched_f " + \
+            "WHERE payee_name_text @@ to_tsquery('" + parse_fulltext('ACCENTED NAME') + "');"
+        results = connection.execute(select).fetchall()
+        pye_nm_list = {na[14] for na in results}
+        assert(names.issubset(pye_nm_list))
+        connection.close()

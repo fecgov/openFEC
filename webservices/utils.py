@@ -2,6 +2,7 @@ import re
 import functools
 import json
 import logging
+import unidecode
 
 import requests
 import six
@@ -246,6 +247,7 @@ def parse_fulltext(text):
     and non-accented versions exist in the searched tsvector column. This will
     lead to unaccented versions being returned when filed data does not contain accents.
     '''
+    text = unidecode.unidecode(text)
     return ' & '.join([
         part + ':*'
         for part in re.sub(r'\W', ' ', text).split()
