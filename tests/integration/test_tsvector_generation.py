@@ -8,6 +8,9 @@ import re
 import manage
 
 from tests import common
+from webservices.rest import api
+from webservices.resources.sched_a import ScheduleAView
+from webservices.resources.sched_b import ScheduleBView
 from webservices import rest, __API_VERSION__
 from webservices.rest import db
 from webservices.utils import parse_fulltext
@@ -326,3 +329,61 @@ class TriggerTestCase(common.BaseTestCase):
         pye_nm_list = {na[14] for na in results}
         assert(names.issubset(pye_nm_list))
         connection.close()
+
+    def test_accent_insensitive_sched_a(self):
+        '''
+        Test to see that both accented and unaccented data are returned
+        '''
+        connection = db.engine.connect()
+        # each list value in the dict below has 3 "good" names, one "bad" name
+        names = {'Tést.com', 'Test com', 'Test .com', 'test.com', 'TEST.COM', 'Test.com'}
+        i = 0
+        for n in names:
+            i += 1
+            data = {
+                'contbr_employer': n,
+                'sub_id': 9999999959999999980 + i,
+                'filing_form': 'F3'
+            }
+            insert = "INSERT INTO disclosure.fec_fitem_sched_a " + \
+                "(contbr_employer, sub_id, filing_form) " + \
+                " VALUES (%(contbr_employer)s, %(sub_id)s, %(filing_form)s)"
+            connection.execute(insert, data)
+        manage.refresh_materialized(concurrent=False)
+        results = self._results(api.url_for(ScheduleAView, contributor_employer='Test.com'))
+        contbr_employer_list = {r['contributor_employer'] for r in results}
+        assert(names.issubset(contbr_employer_list))
+        results = self._results(api.url_for(ScheduleAView, contributor_employer='Tést.com'))
+        contbr_employer_list = {r['contributor_employer'] for r in results}
+        assert(names.issubset(contbr_employer_list))
+        connection.close()
+
+    def test_accent_insensitive_sched_b(self):
+        '''
+        Test to see that both accented and unaccented data are returned
+        '''
+        connection = db.engine.connect()
+        # each list value in the dict below has 3 "good" names, one "bad" name
+        names = {'ést-lou', 'Est lou', 'ést lóu', 'EST LOU', 'est lou', '@@@est      lou---@'}
+        i = 0
+        for n in names:
+            i += 1
+            data = {
+                'recipient_nm': n,
+                'sub_id': 9999999999995699990 + i,
+                'filing_form': 'F3'
+            }
+            insert = "INSERT INTO disclosure.fec_fitem_sched_b " + \
+                "(recipient_nm, sub_id, filing_form) " + \
+                " VALUES (%(recipient_nm)s, %(sub_id)s, %(filing_form)s)"
+            connection.execute(insert, data)
+        manage.refresh_materialized(concurrent=False)
+        results = self._results(api.url_for(ScheduleBView, contributor_employer='ést-lou'))
+        print('results = ', results)
+        contbr_employer_list = {r['recipient_name'] for r in results}
+        assert(names.issubset(contbr_employer_list))
+        results = self._results(api.url_for(ScheduleBView, contributor_employer='est lou'))
+        contbr_employer_list = {r['recipient_name'] for r in results}
+        assert(names.issubset(contbr_employer_list))
+        connection.close()
+
