@@ -2,7 +2,7 @@ import re
 import functools
 import json
 import logging
-import unidecode
+import unicodedata
 
 import requests
 import six
@@ -242,12 +242,24 @@ def extend(*dicts):
 
 def parse_fulltext(text):
     '''
-    split on and remove any nonword characters for converion to ts_vector search.
-    the 'text' argument is first unidecoded to remove accents, since both accented
-    and non-accented versions exist in the searched tsvector column. This will
-    lead to unaccented versions being returned when filed data does not contain accents.
+    The main purpose of parse_fulltext is to decompose user input into a safe form
+    for searching that is tightly coupled with the way filed data is decomposed into
+    TSVECTOR fields in the database.
+
+    The general procedure is to split on and remove any nonword characters for converion
+    to a form recogonized in the TSVECTOR search.  The 'text' argument is first unidecoded
+    to remove accents, since both accented and non-accented versions exist in the searched
+    tsvector column. This will lead to unaccented versions being returned when filed data
+    does not contain accents.
+
+    See Unicodedata documentation for additional details:
+    https://docs.python.org/2/library/unicodedata.html
+
+    "normalize" converts text to normal form (NFKD) and encodes it to ascii as a
+    bytestring. For further parsing in re.sub below, the string is first decoded into
+    ascii (the encode and decode are chained).
     '''
-    text = unidecode.unidecode(text)
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
     return ' & '.join([
         part + ':*'
         for part in re.sub(r'\W', ' ', text).split()

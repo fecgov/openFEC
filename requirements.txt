@@ -25,7 +25,6 @@ elasticsearch==5.5.1
 elasticsearch-dsl==5.4.0
 prompt-toolkit==2.0.6
 git+https://github.com/18F/slate.git
-Unidecode==1.0.23
 
 # Marshalling
 flask-apispec==0.7.0
