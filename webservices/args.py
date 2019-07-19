@@ -1,19 +1,21 @@
 import functools
 
 from marshmallow.compat import text_type
-from marshmallow import ValidationError
 
 import sqlalchemy as sa
 
 from webargs import fields, validate
 
 from webservices import docs
+from webservices import exceptions
 from webservices.common.models import db
 
 def _validate_natural(value):
     if value < 0:
-        raise ValidationError('Must be a natural number')
-
+        raise exceptions.ApiError(
+            'Must be a natural number',
+            status_code=422
+        )
 Natural = functools.partial(fields.Int, validate=_validate_natural)
 
 per_page = Natural(
@@ -44,9 +46,13 @@ class District(fields.Str):
         try:
             value = int(value)
         except (TypeError, ValueError):
-            raise ValidationError('District must be a number')
+            raise exceptions.ApiError(
+                'District must be a number',
+                status_code=422)
         if value < 0:
-            raise ValidationError('District must be a natural number')
+            raise exceptions.ApiError(
+                'District must be a natural number',
+                status_code=422)
 
     def _deserialize(self, value, attr, data):
         return '{0:0>2}'.format(value)
@@ -70,8 +76,9 @@ class OptionValidator(object):
 
     def __call__(self, value):
         if value.lstrip('-') not in self.values:
-            raise ValidationError(
+            raise exceptions.ApiError(
                 'Cannot sort on value "{0}"'.format(value),
+                status_code=422,
             )
 
 
@@ -113,8 +120,9 @@ class IndicesValidator(IndexValidator):
     def __call__(self, value):
         for sort_column in value:
             if sort_column.lstrip('-') not in self.values:
-                raise ValidationError(
-                    'Cannot sort on value "{0}"'.format(value),
+                raise exceptions.ApiError(
+                    'Cannot sort on value "{0}"'.format(sort_column),
+                    status_code=422,
                 )
 
 def make_sort_args(default=None, validator=None, default_hide_null=False,

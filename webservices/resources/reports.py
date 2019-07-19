@@ -6,7 +6,6 @@ from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices import filters
-from webservices.common import counts
 from webservices.common import models
 from webservices.common import views
 from webservices.utils import use_kwargs
@@ -81,7 +80,7 @@ def get_match_filters():
         },
     },
 )
-class ReportsView(utils.Resource):
+class ReportsView(views.ApiResource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.reports)
@@ -90,7 +89,6 @@ class ReportsView(utils.Resource):
     )
     @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
     def get(self, committee_type=None, **kwargs):
-        committee_id = kwargs.get('committee_id')
         query, reports_class, reports_schema = self.build_query(
             committee_type=committee_type,
             **kwargs
@@ -112,25 +110,19 @@ class ReportsView(utils.Resource):
         filter_multi_fields = [
             ('amendment_indicator', models.CommitteeReports.amendment_indicator),
             ('report_type', reports_class.report_type),
+            ('committee_id', reports_class.committee_id),
+            ('year', reports_class.report_year),
+            ('cycle', reports_class.cycle),
+            ('beginning_image_number', reports_class.beginning_image_number),
         ]
 
         if hasattr(reports_class, 'committee'):
             query = reports_class.query.outerjoin(reports_class.committee).options(sa.orm.contains_eager(reports_class.committee))
 
-        if kwargs.get('committee_id'):
-            query = query.filter(reports_class.committee_id.in_(kwargs['committee_id']))
         if kwargs.get('candidate_id'):
             query = query.filter(models.CommitteeHistory.candidate_ids.overlap([kwargs.get('candidate_id')]))
         if kwargs.get('type'):
             query = query.filter(models.CommitteeHistory.committee_type.in_(kwargs.get('type')))
-        if kwargs.get('year'):
-            query = query.filter(reports_class.report_year.in_(kwargs['year']))
-        if kwargs.get('cycle'):
-            query = query.filter(reports_class.cycle.in_(kwargs['cycle']))
-        if kwargs.get('beginning_image_number'):
-            query = query.filter(reports_class.beginning_image_number.in_(kwargs['beginning_image_number']))
-        if kwargs.get('is_amended') is not None:
-            query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
         query = filters.filter_range(query, kwargs, get_range_filters())
         query = filters.filter_match(query, kwargs, get_match_filters())
@@ -145,7 +137,7 @@ class ReportsView(utils.Resource):
         'committee_id': {'description': docs.COMMITTEE_ID},
     },
 )
-class CommitteeReportsView(utils.Resource):
+class CommitteeReportsView(views.ApiResource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.committee_reports)
@@ -177,21 +169,15 @@ class CommitteeReportsView(utils.Resource):
         filter_multi_fields = [
             ('amendment_indicator', models.CommitteeReports.amendment_indicator),
             ('report_type', reports_class.report_type),
+            ('year', reports_class.report_year),
+            ('cycle', reports_class.cycle),
+            ('beginning_image_number', reports_class.beginning_image_number),
         ]
         # Eagerly load committees if applicable
         if hasattr(reports_class, 'committee'):
             query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
-
         if committee_id is not None:
             query = query.filter_by(committee_id=committee_id)
-        if kwargs.get('year'):
-            query = query.filter(reports_class.report_year.in_(kwargs['year']))
-        if kwargs.get('cycle'):
-            query = query.filter(reports_class.cycle.in_(kwargs['cycle']))
-        if kwargs.get('beginning_image_number'):
-            query = query.filter(reports_class.beginning_image_number.in_(kwargs['beginning_image_number']))
-        if kwargs.get('is_amended') is not None:
-            query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
         query = filters.filter_range(query, kwargs, get_range_filters())
         query = filters.filter_match(query, kwargs, get_match_filters())
