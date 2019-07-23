@@ -18,64 +18,57 @@ from webservices.common.models import (
     db
 )
 
-
-election_duration = utils.get_election_duration(CandidateCommitteeLink.committee_type)
-
 def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
-    """Aggregate committee totals by candidate.
-
-    :param aggregate_model: SQLAlchemy aggregate model
-    :param list label_columns: List of label columns; must include group-by columns
-    :param list group_columns: List of group-by columns
-    :param dict kwargs: Parsed arguments from request
     """
-    cycle_column = (
-        CandidateElection.cand_election_year
-        if kwargs.get('election_full')
-        else CandidateCommitteeLink.fec_election_year
-    ).label('cycle')
+    This fix is for doubled totals caused by linkage_mv #3816
 
+    Use linkage.election_yr_to_be_included instead od ofec_candidate_election_mv for election_full=true
+
+    When election_full=true, aggregate is calculated on election_yr_to_be_included
+    When election_full=false, aggregate is calculated on fec_election_yr
+
+    As long as the linkage.election_yr_to_be_included is correct for PR, the aggregate data will be correct too
+    election year covers more than one fec_election_year
+    Aggregated data are calculated per fec_cycle only, no odd year
+
+    """
     rows = db.session.query(
-        CandidateCommitteeLink.candidate_id,
-        cycle_column,
-    ).join(
-        aggregate_model,
-        sa.and_(
-            CandidateCommitteeLink.committee_id == aggregate_model.committee_id,
-            CandidateCommitteeLink.fec_election_year == aggregate_model.cycle,
-        ),
+        CandidateCommitteeLink.candidate_id.label('candidate_id'),
+        CandidateCommitteeLink.committee_id.label('committee_id'),
+        CandidateCommitteeLink.fec_election_year.label('fec_election_year'),
+        CandidateCommitteeLink.election_yr_to_be_included.label('election_yr_to_be_included'),
     ).filter(
         (
-            cycle_column.in_(kwargs['cycle'])
-            if kwargs.get('cycle')
-            else True
+            CandidateCommitteeLink.fec_election_year.in_(kwargs['cycle'])
+            if not kwargs.get('election_full')
+            else CandidateCommitteeLink.election_yr_to_be_included.in_(kwargs['cycle'])
         ),
         CandidateCommitteeLink.candidate_id.in_(kwargs['candidate_id']),
         CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
-    )
-    rows = join_elections(rows, kwargs)
-    aggregates = rows.with_entities(
-        CandidateCommitteeLink.candidate_id,
+    ).distinct().subquery()
+
+    cycle_column = (
+        rows.c.election_yr_to_be_included
+        if kwargs.get('election_full')
+        else rows.c.fec_election_year
+    ).label('cycle')
+
+    aggregates = db.session.query(
+        rows.c.candidate_id,
         cycle_column,
         *label_columns
+    ).join(
+        aggregate_model,
+        sa.and_(
+            rows.c.committee_id == aggregate_model.committee_id,
+            rows.c.fec_election_year == aggregate_model.cycle,
+        )
     ).group_by(
-        CandidateCommitteeLink.candidate_id,
+        rows.c.candidate_id,
         cycle_column,
         *group_columns
     )
     return rows, aggregates
-
-def join_elections(query, kwargs):
-    if not kwargs.get('election_full'):
-        return query
-    return query.join(
-        CandidateElection,
-        sa.and_(
-            CandidateCommitteeLink.candidate_id == CandidateElection.candidate_id,
-            CandidateCommitteeLink.fec_election_year <= CandidateElection.cand_election_year,
-            CandidateCommitteeLink.fec_election_year > (CandidateElection.cand_election_year - election_duration),
-        ),
-    )
 
 @doc(
     tags=['receipts'],
@@ -91,9 +84,10 @@ class ScheduleABySizeCandidateView(utils.Resource):
         label_columns = [
             ScheduleABySize.size,
             sa.func.sum(ScheduleABySize.total).label('total'),
-            ScheduleABySize.count,
+            sa.func.sum(ScheduleABySize.count).label('count'),
         ]
-        group_columns = [ScheduleABySize.size, ScheduleABySize.count]
+        group_columns = [ScheduleABySize.size]
+
         _, query = candidate_aggregate(ScheduleABySize, label_columns, group_columns, kwargs)
         return utils.fetch_page(query, kwargs, cap=None)
 
@@ -125,9 +119,9 @@ class ScheduleAByStateCandidateTotalsView(utils.Resource):
         query = db.session.query(
             sa.func.sum(q.c.total).label('total'),
             sa.func.sum(q.c.count).label('count'),
-            q.c.cand_id.label('candidate_id'),
+            q.c.candidate_id.label('candidate_id'),
             q.c.cycle
-        ).group_by(q.c.cand_id, q.c.cycle)
+        ).group_by(q.c.candidate_id, q.c.cycle)
 
         return utils.fetch_page(query, kwargs, cap=0)
 
@@ -135,7 +129,6 @@ class ScheduleAByStateCandidateTotalsView(utils.Resource):
     tags=['receipts'],
     description=docs.SCHEDULE_A_STATE_CANDIDATE_TAG,
 )
-
 class ScheduleAByStateCandidateView(utils.Resource):
 
     @use_kwargs(args.paging)
@@ -149,13 +142,12 @@ class ScheduleAByStateCandidateView(utils.Resource):
                 ScheduleAByState.state,
                 sa.func.sum(ScheduleAByState.total).label('total'),
                 sa.func.max(ScheduleAByState.state_full).label('state_full'),
-                ScheduleAByState.count,
+                sa.func.sum(ScheduleAByState.count).label('count'),
             ],
-            [ScheduleAByState.state, ScheduleAByState.count],
+            [ScheduleAByState.state],
             kwargs,
         )
         return utils.fetch_page(query, kwargs, cap=0)
-
 
 @doc(
     tags=['candidate'],
@@ -222,15 +214,15 @@ class TotalsCandidateView(ApiResource):
                 history.candidate_id == models.CandidateSearch.id,
             )
 
-        if 'is_active_candidate' in kwargs and kwargs.get('is_active_candidate'):  #load active candidates only if True
+        if 'is_active_candidate' in kwargs and kwargs.get('is_active_candidate'):   # load active candidates only if True
             query = query.filter(
-                history.candidate_inactive == False
+                history.candidate_inactive == False # noqa
             )
-        elif 'is_active_candidate' in kwargs and not kwargs.get('is_active_candidate'):  #load inactive candidates only if False
+        elif 'is_active_candidate' in kwargs and not kwargs.get('is_active_candidate'):     # load inactive candidates only if False
             query = query.filter(
-                history.candidate_inactive == True
+                history.candidate_inactive == True  # noqa
             )
-        else: #load all candidates
+        else:  # load all candidates
             pass
 
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history, models.CandidateTotal))
@@ -354,11 +346,11 @@ class AggregateByOfficeByPartyView(ApiResource):
             pass
 
         query = query.group_by(total.office, sa.case(
-                [
-                (total.party=='DFL','DEM'),
-                (total.party=='DEM','DEM'),
-                (total.party=='REP','REP'),
-                ], else_='Other'
-                ), total.election_year)
+            [
+                (total.party == 'DFL', 'DEM'),
+                (total.party == 'DEM', 'DEM'),
+                (total.party == 'REP', 'REP'),
+            ], else_='Other'
+        ), total.election_year)
 
         return query
