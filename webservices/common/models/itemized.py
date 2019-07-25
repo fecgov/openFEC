@@ -99,6 +99,8 @@ class ScheduleA(BaseItemized):
 
     contributor_name = db.Column('contbr_nm', db.String, doc=docs.CONTRIBUTOR_NAME)
     recipient_committee_type = db.Column('cmte_tp', db.String(1), index=True)
+    recipient_committee_org_type = db.Column('org_tp', db.String(1), index=True)
+    recipient_committee_designation = db.Column('cmte_dsgn', db.String(1), index=True)
 
     contributor_name_text = db.Column(TSVECTOR)
     contributor_first_name = db.Column('contbr_nm_first', db.String)
@@ -359,6 +361,8 @@ class ScheduleB(BaseItemized):
     comm_dt = db.Column('comm_dt', db.Date)
 
     spender_committee_type = db.Column('cmte_tp', db.String(1), index=True)
+    spender_committee_org_type = db.Column('org_tp', db.String(1), index=True)
+    spender_committee_designation = db.Column('cmte_dsgn', db.String(1), index=True)
 
     @hybrid_property
     def sort_expressions(self):

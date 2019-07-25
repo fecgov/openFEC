@@ -172,6 +172,24 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleAView, recipient_committee_type='S', **self.kwargs))
         self.assertEqual(len(results), 2)
 
+    def test_sched_a_recipient_org_type_filter(self):
+        [
+            factories.ScheduleAFactory(recipient_committee_org_type='W'),
+            factories.ScheduleAFactory(recipient_committee_org_type='W'),
+            factories.ScheduleAFactory(recipient_committee_org_type='C'),
+        ]
+        results = self._results(api.url_for(ScheduleAView, recipient_committee_org_type='W', **self.kwargs))
+        self.assertEqual(len(results), 2)
+
+    def test_sched_a_recipient_designation_filter(self):
+        [
+            factories.ScheduleAFactory(recipient_committee_designation='P'),
+            factories.ScheduleAFactory(recipient_committee_designation='P'),
+            factories.ScheduleAFactory(recipient_committee_designation='A'),
+        ]
+        results = self._results(api.url_for(ScheduleAView, recipient_committee_designation='P', **self.kwargs))
+        self.assertEqual(len(results), 2)
+
     def test_filter_multi_start_with(self):
         [
             factories.ScheduleAFactory(contributor_zip=1296789)
@@ -237,6 +255,24 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleBView, spender_committee_type='S', **self.kwargs))
         self.assertEqual(len(results), 2)
 
+    def test_sched_b_spender_org_type_filter(self):
+        [
+            factories.ScheduleBFactory(spender_committee_org_type='W'),
+            factories.ScheduleBFactory(spender_committee_org_type='W'),
+            factories.ScheduleBFactory(spender_committee_org_type='C'),
+        ]
+        results = self._results(api.url_for(ScheduleBView, spender_committee_org_type='W', **self.kwargs))
+        self.assertEqual(len(results), 2)
+
+    def test_sched_b_spender_designation_filter(self):
+        [
+            factories.ScheduleBFactory(spender_committee_designation='P'),
+            factories.ScheduleBFactory(spender_committee_designation='P'),
+            factories.ScheduleBFactory(spender_committee_designation='A'),
+        ]
+        results = self._results(api.url_for(ScheduleBView, spender_committee_designation='P', **self.kwargs))
+        self.assertEqual(len(results), 2)
+
     def test_filter_fulltext_employer(self):
         employers = ['Acme Corporation', 'Vandelay Industries']
         filings = [
@@ -261,7 +297,7 @@ class TestItemized(ApiBaseTest):
         self.assertIn(results[0]['contributor_employer'], employers)
         results = self._results(api.url_for(ScheduleAView, contributor_employer='Test &Test', **self.kwargs))
         self.assertIn(results[0]['contributor_employer'], employers)
-        
+
     def test_filter_fulltext_occupation(self):
         occupations = ['Attorney at Law', 'Doctor of Philosophy']
         filings = [

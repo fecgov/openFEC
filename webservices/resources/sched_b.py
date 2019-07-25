@@ -42,6 +42,8 @@ class ScheduleBView(ItemizedResource):
         ('disbursement_purpose_category',
          models.ScheduleB.disbursement_purpose_category),
         ('spender_committee_type', models.ScheduleB.spender_committee_type),
+        ('spender_committee_org_type', models.ScheduleB.spender_committee_org_type),
+        ('spender_committee_designation', models.ScheduleB.spender_committee_designation),
         ('two_year_transaction_period',
          models.ScheduleB.two_year_transaction_period),
     ]
