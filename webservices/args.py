@@ -51,7 +51,7 @@ class District(fields.Str):
     def _deserialize(self, value, attr, data):
         return '{0:0>2}'.format(value)
 
-election_full = fields.Bool(missing=False, description='Aggregate values over full election period')
+election_full = fields.Bool(missing=True, description='Aggregate values over full election period')
 
 paging = {
     'page': Natural(missing=1, description='For paginating through results, starting at page 1'),

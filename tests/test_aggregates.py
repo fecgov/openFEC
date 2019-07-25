@@ -18,6 +18,7 @@ from webservices.resources.aggregates import (
 from webservices.resources.candidate_aggregates import (
     ScheduleABySizeCandidateView,
     ScheduleAByStateCandidateView,
+    ScheduleAByStateCandidateTotalsView,
     TotalsCandidateView,
     AggregateByOfficeView,
     AggregateByOfficeByPartyView,
@@ -251,6 +252,7 @@ class TestAggregates(ApiBaseTest):
                     committee_id=self.committee.committee_id,
                     cycle=2012,
                     office='president',
+                    election_full=False,
                 )
             )
             assert len(results) == 1
@@ -396,6 +398,12 @@ class TestCandidateAggregates(ApiBaseTest):
             candidate_id=self.candidate_zero.candidate_id,
             cycle=2018,
             is_election=False,
+            receipts=0,
+        )
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_zero.candidate_id,
+            cycle=2018,
+            is_election=True,
             receipts=0,
         )
         # Create data for a candidate who ran in 2017 and 2018
@@ -649,7 +657,63 @@ class TestCandidateAggregates(ApiBaseTest):
         }
         assert results[0] == expected
 
+    def test_by_state_candidate_totals(self):
+        [
+            factories.ScheduleAByStateFactory(
+                committee_id=self.committees[0].committee_id,
+                cycle=2012,
+                total=50.3,
+                state='NY',
+                state_full='New York',
+                count=30,
+            ),
+            factories.ScheduleAByStateFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2012,
+                total=150.11,
+                state='CT',
+                state_full='New York',
+                count=10,
+            ),
+            factories.ScheduleAByStateFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2012,
+                total=150.10,
+                state='NJ',
+                state_full='New Jersey',
+                count=60,
+            ),
+        ]
+        results = self._results(
+            api.url_for(
+                ScheduleAByStateCandidateTotalsView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+            )
+        )
+        assert len(results) == 1
+        expected = {
+            'candidate_id': self.candidate.candidate_id,
+            'cycle': 2012,
+            'total': 350.51,
+            'count': 100,
+        }
+        assert results[0] == expected
+        
     def test_totals(self):
+        # 2-year totals
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                election_full=False
+            )
+        )
+        assert len(results) == 1
+        assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 75})
+
+        # Full-cycle totals (default is true)
         results = self._results(
             api.url_for(
                 TotalsCandidateView,
@@ -658,10 +722,10 @@ class TestCandidateAggregates(ApiBaseTest):
             )
         )
         assert len(results) == 1
-        assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 75})
+        assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 100})
 
         # candidate_zero
-        # by default, load all candidates, current candidate should return 
+        # by default, load all candidates, current candidate should return
         results = self._results(
             api.url_for(
                 TotalsCandidateView,
@@ -689,7 +753,8 @@ class TestCandidateAggregates(ApiBaseTest):
                 TotalsCandidateView,
                 candidate_id=self.candidate_zero.candidate_id,
                 cycle=2018,
-                is_active_candidate=False
+                is_active_candidate=False,
+                election_full=False,
             )
         )
         assert len(results) == 1
@@ -745,6 +810,7 @@ class TestCandidateAggregates(ApiBaseTest):
                 TotalsCandidateView,
                 candidate_id=self.candidate_20.candidate_id,
                 cycle=self.current_cycle,
+                election_full=False
             )
         )
         assert len(results) == 1
@@ -961,8 +1027,8 @@ class TestCandidateTotalsByOfficeByParty(ApiBaseTest):
             )
         )
         assert len(results) == 2
-        assert_dicts_subset(results[0], {'election_year': 2016, 'party': 'DEM', 'total_receipts': 100, 'total_disbursements': 100})            
-        assert_dicts_subset(results[1], {'election_year': 2016, 'party': 'REP', 'total_receipts': 10000, 'total_disbursements': 10000})            
+        assert_dicts_subset(results[0], {'election_year': 2016, 'party': 'DEM', 'total_receipts': 100, 'total_disbursements': 100})
+        assert_dicts_subset(results[1], {'election_year': 2016, 'party': 'REP', 'total_receipts': 10000, 'total_disbursements': 10000})
 
 
         results = self._results(
@@ -973,6 +1039,6 @@ class TestCandidateTotalsByOfficeByParty(ApiBaseTest):
             )
         )
         assert len(results) == 2
-        assert_dicts_subset(results[0], {'election_year': 2016, 'party': 'Other', 'total_receipts': 300, 'total_disbursements': 300})            
-        assert_dicts_subset(results[1], {'election_year': 2016, 'party': 'REP', 'total_receipts': 200, 'total_disbursements': 200})            
+        assert_dicts_subset(results[0], {'election_year': 2016, 'party': 'Other', 'total_receipts': 300, 'total_disbursements': 300})
+        assert_dicts_subset(results[1], {'election_year': 2016, 'party': 'REP', 'total_receipts': 200, 'total_disbursements': 200})
 

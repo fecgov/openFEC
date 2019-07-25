@@ -265,11 +265,19 @@ years so this can differ from underlying form's receipt date.
 '''
 
 IS_AMENDED = '''
-Report has been amended
+False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.
 '''
 
 MOST_RECENT = '''
 Report is either new or is the most-recently filed amendment
+'''
+
+HTML_URL = '''
+HTML link to the filing.
+'''
+
+FEC_URL = '''
+fec link to the filing.
 '''
 
 TWO_YEAR_TRANSACTION_PERIOD = '''
@@ -568,6 +576,10 @@ Schedule A receipts aggregated by contribution size for a candidate.
 
 SCHEDULE_A_STATE_CANDIDATE_TAG = '''
 Schedule A receipts aggregated by contribution state for a candidate.
+'''
+
+SCHEDULE_A_STATE_CANDIDATE_TOTAL_TAG = '''
+Schedule A receipts aggregated over all contribution states for a candidate.
 '''
 
 TOTAL_CANDIDATE_TAG = '''
