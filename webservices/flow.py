@@ -77,11 +77,7 @@ def get_graph():
     ])
 
     graph.add_edges_from([
-        ('filing_amendments_presidential', 'reports_presidential'),
-        ('filing_amendments_house_senate', 'reports_house_senate'),
         ('filing_amendments_pac_party', 'reports_pac_party'),
-        ('filing_amendments_all', 'reports_presidential'),
-        ('filing_amendments_all', 'reports_house_senate'),
         ('filing_amendments_all', 'reports_pac_party'),
     ])
 
@@ -118,6 +114,8 @@ def get_graph():
     graph.add_edges_from([
         ('filings', 'totals_combined'),
         ('filings', 'report_pac_party_all'),
+        ('filings', 'reports_presidential'),
+        ('filings', 'reports_house_senate'),
     ])
 
     graph.add_edges_from([
