@@ -16,7 +16,7 @@ $BODY$
 begin
 	new.pdf_url := image_pdf_url(new.image_num);
 	new.disbursement_description_text := to_tsvector(parse_fulltext(new.disb_desc));
-	new.recipient_name_text := to_tsvector(concat(parse_fulltext(new.recipient_nm), ' ', parse_fulltext(new.clean_recipient_cmte_id)));
+	new.recipient_name_text := to_tsvector(concat(parse_fulltext(new.recipient_nm), ' ', new.clean_recipient_cmte_id));
 	new.disbursement_purpose_category := disbursement_purpose(new.disb_tp, new.disb_desc);
 	new.line_number_label := expand_line_number(new.filing_form, new.line_num);
   return new;
@@ -208,7 +208,7 @@ CREATE OR REPLACE FUNCTION disclosure.fec_fitem_sched_a_insert()
 $BODY$
 begin
 	new.pdf_url := image_pdf_url(new.image_num);
-	new.contributor_name_text := to_tsvector(concat(parse_fulltext(new.contbr_nm), ' ', parse_fulltext(new.clean_contbr_id)));
+	new.contributor_name_text := to_tsvector(concat(parse_fulltext(new.contbr_nm), ' ', new.clean_contbr_id));
 	new.contributor_employer_text := to_tsvector(parse_fulltext(new.contbr_employer));
 	new.contributor_occupation_text := to_tsvector(parse_fulltext(new.contbr_occupation));
 	new.is_individual := is_individual(new.contb_receipt_amt, new.receipt_tp, new.line_num, new.memo_cd, new.memo_text);
@@ -498,6 +498,8 @@ CREATE MATERIALIZED VIEW public.ofec_candidate_fulltext_mv AS
   WITH DATA;
 
 ALTER TABLE public.ofec_candidate_fulltext_mv OWNER TO fec;
+GRANT ALL ON TABLE ofec_candidate_fulltext_mv TO fec;
+GRANT SELECT ON TABLE ofec_candidate_fulltext_mv TO fec_read;
 
 CREATE INDEX ofec_candidate_fulltext_mv_disbursements_idx1 ON public.ofec_candidate_fulltext_mv USING btree (disbursements);
 CREATE INDEX ofec_candidate_fulltext_mv_fulltxt_idx1 ON public.ofec_candidate_fulltext_mv USING gin (fulltxt);
