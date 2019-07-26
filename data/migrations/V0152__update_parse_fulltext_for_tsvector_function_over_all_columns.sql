@@ -114,18 +114,15 @@ GRANT SELECT ON TABLE ofec_rad_analyst_vw TO openfec_read;
 
 /*
 update to_tsvector definition for ofec_commite_fulltext_audit_mv
-    a) `create or replace ofec_committee_fulltext_audit_mvw` to use new `MV` logic
-    b) drop old `MV`
-    c) recreate `MV` with new logic
-    d) `create or replace ofec_committee_fulltext_audit_mv` -> `select all` from new `MV`
+recipe based on 2019-07-26 post-postmortem discussion
 */
+-- ----------
+-- ofec_committee_fulltext_audit_mv
+-- ----------
+DROP  MATERIALIZED VIEW IF EXISTS public.ofec_committee_fulltext_audit_mv_tmp;
 
-
--- a) `create or replace ofec_committee_fulltext_audit_mv` to use new `MV` logic
-
-CREATE OR REPLACE VIEW ofec_committee_fulltext_audit_vw AS
-WITH
-cmte_info AS (
+CREATE MATERIALIZED VIEW ofec_committee_fulltext_audit_mv_tmp AS
+ WITH cmte_info AS (
     SELECT DISTINCT dc.cmte_id,
         dc.cmte_nm,
         dc.fec_election_yr,
@@ -137,67 +134,43 @@ cmte_info AS (
       AND aa.election_cycle = dc.fec_election_yr
       AND dc.cmte_tp IN ('H', 'S', 'P', 'X', 'Y', 'Z', 'N', 'Q', 'I', 'O', 'U', 'V', 'W')
       AND dc.cmte_tp = b.filed_cmte_tp_cd
-)
-SELECT DISTINCT ON (cmte_id, cmte_nm)
+      )
+ SELECT DISTINCT ON (cmte_id, cmte_nm)
     row_number() over () AS idx,
     cmte_id AS id,
     cmte_nm AS name,
-CASE
+ CASE
     WHEN cmte_nm IS NOT NULL THEN
         setweight(to_tsvector(parse_fulltext(cmte_nm)), 'A') ||
         setweight(to_tsvector(parse_fulltext(cmte_id)), 'B')
     ELSE NULL::tsvector
-END AS fulltxt
-FROM cmte_info 
-ORDER BY cmte_id;
-
-
--- b) drop old mv
-DROP MATERIALIZED VIEW ofec_committee_fulltext_audit_mv;
-
-
--- c) create new mv
-CREATE MATERIALIZED VIEW ofec_committee_fulltext_audit_mv AS
-WITH
-cmte_info AS (
-    SELECT DISTINCT dc.cmte_id,
-        dc.cmte_nm,
-        dc.fec_election_yr,
-        dc.cmte_dsgn,
-        dc.cmte_tp,
-        b.FILED_CMTE_TP_DESC::text AS cmte_desc
-    FROM auditsearch.audit_case aa, disclosure.cmte_valid_fec_yr dc, staging.ref_filed_cmte_tp b
-    WHERE btrim(aa.cmte_id) = dc.cmte_id 
-      AND aa.election_cycle = dc.fec_election_yr
-      AND dc.cmte_tp IN ('H', 'S', 'P', 'X', 'Y', 'Z', 'N', 'Q', 'I', 'O', 'U', 'V', 'W')
-      AND dc.cmte_tp = b.filed_cmte_tp_cd
-)
-SELECT DISTINCT ON (cmte_id, cmte_nm)
-    row_number() over () AS idx,
-    cmte_id AS id,
-    cmte_nm AS name,
-CASE
-    WHEN cmte_nm IS NOT NULL THEN
-        setweight(to_tsvector(parse_fulltext(cmte_nm)), 'A') ||
-        setweight(to_tsvector(parse_fulltext(cmte_id)), 'B')
-    ELSE NULL::tsvector
-END AS fulltxt
+ END AS fulltxt
 FROM cmte_info 
 ORDER BY cmte_id
 WITH DATA;
 
-ALTER TABLE ofec_committee_fulltext_audit_mv OWNER TO fec;
+ALTER TABLE public.ofec_committee_fulltext_audit_mv_tmp
+  OWNER TO fec;
+GRANT ALL ON TABLE public.ofec_committee_fulltext_audit_mv_tmp TO fec;
+GRANT SELECT ON TABLE public.ofec_committee_fulltext_audit_mv_tmp TO fec_read;
 
-CREATE UNIQUE INDEX ON ofec_committee_fulltext_audit_mv(idx);
-CREATE INDEX ON ofec_committee_fulltext_audit_mv using gin(fulltxt);
-
-GRANT ALL ON TABLE public.ofec_committee_fulltext_audit_mv TO fec;
-GRANT SELECT ON TABLE public.ofec_committee_fulltext_audit_mv TO fec_read;
-
--- d) `create or replace ofec_committee_fulltext_audit_vw` -> `select all` from new `MV`
-CREATE OR REPLACE VIEW ofec_committee_fulltext_audit_vw AS SELECT * FROM ofec_committee_fulltext_audit_mv;
-ALTER VIEW ofec_committee_fulltext_audit_vw OWNER TO fec;
-GRANT SELECT ON ofec_committee_fulltext_audit_vw TO fec_read;
+CREATE UNIQUE INDEX idx_ofec_committee_fulltext_audit_mv_tmp_idx
+ ON public.ofec_committee_fulltext_audit_mv_tmp
+ USING btree
+ (idx);
+CREATE INDEX idx_ofec_committee_fulltext_audit_mv_tmp_fulltxt
+ ON public.ofec_committee_fulltext_audit_mv_tmp
+ USING gin
+ (fulltxt);
+-- -------------
+CREATE OR REPLACE VIEW ofec_committee_fulltext_audit_vw AS
+SELECT * FROM public.ofec_committee_fulltext_audit_mv_tmp;
+-- -------------
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_committee_fulltext_audit_mv;
+ALTER MATERIALIZED VIEW IF EXISTS public.ofec_committee_fulltext_audit_mv_tmp RENAME TO ofec_committee_fulltext_audit_mv;
+-- -------------
+ALTER INDEX public.idx_ofec_committee_fulltext_audit_mv_tmp_idx RENAME TO idx_ofec_committee_fulltext_audit_mv_idx;
+ALTER INDEX public.idx_ofec_committee_fulltext_audit_mv_tmp_fulltxt RENAME TO idx_ofec_committee_fulltext_audit_mv_fulltxt;
 
 
 /*
@@ -226,19 +199,15 @@ OWNER TO fec;
 
 /*
 update to_tsvector definition for ofec_candidate_fulltext_audit_mv
+recipe based on 2019-07-26 post-mortem discussion
 */
+-- ----------
+-- ofec_candidate_fulltext_audit_mv
+-- ----------
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_candidate_fulltext_audit_mv_tmp;
 
-/*
-update to_tsvector definition for ofec_candidate_fulltext_audit_mv
-    a) `create or replace ofec_candidate_fulltext_audit_vw` to use new `MV` logic
-    b) drop old `MV`
-    c) recreate `MV` with new logic
-    d) `create or replace ofec_candidate_fulltext_audit_mv` -> `select all` from new `MV`
-*/
--- a) `create or replace ofec_candidate_fulltext_audit_vw` to use new `MV` logic
-CREATE OR REPLACE VIEW ofec_candidate_fulltext_audit_vw AS
-WITH
-cand_info AS (
+CREATE MATERIALIZED VIEW ofec_candidate_fulltext_audit_mv_tmp AS
+ WITH cand_info AS (
     SELECT DISTINCT dc.cand_id,
         dc.cand_name,
         "substring"(dc.cand_name::text, 1,
@@ -250,74 +219,48 @@ cand_info AS (
         dc.fec_election_yr
     FROM auditsearch.audit_case aa JOIN disclosure.cand_valid_fec_yr dc
     ON (btrim(aa.cand_id) = dc.cand_id AND aa.election_cycle = dc.fec_election_yr)
-)
-SELECT DISTINCT ON (cand_id, cand_name)
+    )
+ SELECT DISTINCT ON (cand_id, cand_name)
     row_number() over () AS idx,
     cand_id AS id,
     cand_name AS name,
-CASE
+ CASE
     WHEN cand_name IS NOT NULL THEN
         setweight(to_tsvector(parse_fulltext(cand_name)), 'A') ||
         setweight(to_tsvector(parse_fulltext(cand_id)), 'B')
     ELSE NULL::tsvector
-END AS fulltxt
-FROM cand_info
-ORDER BY cand_id;
-
---    b) drop old `MV`
-DROP MATERIALIZED VIEW ofec_candidate_fulltext_audit_mv;
-
---    c) recreate `MV` with new logic
-CREATE MATERIALIZED VIEW ofec_candidate_fulltext_audit_mv AS
-WITH
-cand_info AS (
-    SELECT DISTINCT dc.cand_id,
-        dc.cand_name,
-        "substring"(dc.cand_name::text, 1,
-            CASE
-                WHEN strpos(dc.cand_name::text, ','::text) > 0 THEN strpos(dc.cand_name::text, ','::text) - 1
-                ELSE strpos(dc.cand_name::text, ','::text)
-            END) AS last_name,
-        "substring"(dc.cand_name::text, strpos(dc.cand_name::text, ','::text) + 1) AS first_name,
-        dc.fec_election_yr
-    FROM auditsearch.audit_case aa JOIN disclosure.cand_valid_fec_yr dc
-    ON (btrim(aa.cand_id) = dc.cand_id AND aa.election_cycle = dc.fec_election_yr)
-)
-SELECT DISTINCT ON (cand_id, cand_name)
-    row_number() over () AS idx,
-    cand_id AS id,
-    cand_name AS name,
-CASE
-    WHEN cand_name IS NOT NULL THEN
-        setweight(to_tsvector(parse_fulltext(cand_name)), 'A') ||
-        setweight(to_tsvector(parse_fulltext(cand_id)), 'B')
-    ELSE NULL::tsvector
-END AS fulltxt
+ END AS fulltxt
 FROM cand_info
 ORDER BY cand_id
 WITH DATA;
 
-ALTER TABLE ofec_candidate_fulltext_audit_mv OWNER TO fec;
+ALTER TABLE public.ofec_candidate_fulltext_audit_mv_tmp
+  OWNER TO fec;
+GRANT ALL ON TABLE public.ofec_candidate_fulltext_audit_mv_tmp TO fec;
+GRANT SELECT ON TABLE public.ofec_candidate_fulltext_audit_mv_tmp TO fec_read;
 
-CREATE UNIQUE INDEX ON ofec_candidate_fulltext_audit_mv(idx);
-CREATE INDEX ON ofec_candidate_fulltext_audit_mv using gin(fulltxt);
-
-
-GRANT ALL ON TABLE ofec_candidate_fulltext_audit_mv TO fec;
-GRANT SELECT ON TABLE ofec_candidate_fulltext_audit_mv TO fec_read;
-
--- d) `create or replace ofec_candidate_fulltext_audit_vw` -> `select all` from new `MV`
-CREATE OR REPLACE VIEW ofec_candidate_fulltext_audit_vw AS SELECT * FROM ofec_candidate_fulltext_audit_mv;
-ALTER VIEW ofec_candidate_fulltext_audit_vw OWNER TO fec;
-GRANT SELECT ON ofec_candidate_fulltext_audit_vw TO fec_read;
+CREATE UNIQUE INDEX idx_ofec_candidate_fulltext_audit_mv_tmp_idx
+  ON public.ofec_candidate_fulltext_audit_mv_tmp
+  USING btree
+  (idx);
+CREATE INDEX idx_ofec_candidate_fulltext_audit_mv_tmp_fulltext
+  ON public.ofec_candidate_fulltext_audit_mv_tmp
+  USING gin
+  (fulltxt);
+-- ----------
+CREATE OR REPLACE VIEW ofec_candidate_fulltext_audit_vw AS
+SELECT * FROM public.ofec_candidate_fulltext_audit_mv_tmp;
+-- ----------
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_candidate_fulltext_audit_mv;
+ALTER MATERIALIZED VIEW IF EXISTS public.ofec_candidate_fulltext_audit_mv_tmp RENAME TO ofec_candidate_fulltext_audit_mv;
+-- ----------
+ALTER INDEX public.idx_ofec_candidate_fulltext_audit_mv_tmp_idx RENAME TO idx_ofec_candidate_fulltext_audit_mv_idx;
+ALTER INDEX public.idx_ofec_candidate_fulltext_audit_mv_tmp_fulltext RENAME TO idx_ofec_candidate_fulltext_audit_mv_fulltext;
 
 
 /*
 update to_tsvector for fec_fitem_sched_c
 */
-
-
-
 CREATE OR REPLACE FUNCTION disclosure.fec_fitem_sched_c_insert()
   RETURNS trigger AS
 $BODY$
@@ -336,46 +279,14 @@ ALTER FUNCTION disclosure.fec_fitem_sched_c_insert()
 
 /*
 update to_tsvector definition for ofec_committee_fulltext_mv
-    a) `create or replace ofec_committee_fulltext_vw` to use new `MV` logic
-    b) drop old `MV`
-    c) recreate `MV` with new logic
-    d) `create or replace ofec_committee_fulltext_audit_vw` -> `select all` from new `MV`
+recipe based on 2019-07-26 post-postmortem discussion
 */
--- a) `create or replace ofec_committee_fulltext_vw` to use new `MV` logic
-CREATE OR REPLACE VIEW public.ofec_committee_fulltext_vw AS
- WITH pacronyms AS (
-         SELECT ofec_pacronyms."ID NUMBER" AS committee_id,
-            string_agg(ofec_pacronyms."PACRONYM", ' '::text) AS pacronyms
-           FROM public.ofec_pacronyms
-          GROUP BY ofec_pacronyms."ID NUMBER"
-        ), totals AS (
-         SELECT ofec_totals_combined_vw.committee_id,
-            sum(ofec_totals_combined_vw.receipts) AS receipts,
-            sum(ofec_totals_combined_vw.disbursements) AS disbursements,
-            sum(ofec_totals_combined_vw.independent_expenditures) AS independent_expenditures
-           FROM public.ofec_totals_combined_vw
-          GROUP BY ofec_totals_combined_vw.committee_id
-        )
- SELECT DISTINCT ON (committee_id) row_number() OVER () AS idx,
-    committee_id AS id,
-    cd.name,
-        CASE
-            WHEN (cd.name IS NOT NULL) THEN ((setweight(to_tsvector(parse_fulltext((cd.name)::text)), 'A'::"char") || setweight(to_tsvector(COALESCE(parse_fulltext(pac.pacronyms), ''::text)), 'A'::"char")) || setweight(to_tsvector(parse_fulltext((committee_id)::text)), 'B'::"char"))
-            ELSE NULL::tsvector
-        END AS fulltxt,
-    COALESCE(totals.receipts, (0)::numeric) AS receipts,
-    COALESCE(totals.disbursements, (0)::numeric) AS disbursements,
-    COALESCE(totals.independent_expenditures, (0)::numeric) AS independent_expenditures,
-    ((COALESCE(totals.receipts, (0)::numeric) + COALESCE(totals.disbursements, (0)::numeric)) + COALESCE(totals.independent_expenditures, (0)::numeric)) AS total_activity
-   FROM ((public.ofec_committee_detail_vw cd
-     LEFT JOIN pacronyms pac USING (committee_id))
-     LEFT JOIN totals USING (committee_id));
+-- ----------
+-- ofec_committee_fulltext_mv
+-- ----------
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_committee_fulltext_mv_tmp;
 
--- b) drop old MV
-DROP MATERIALIZED VIEW ofec_committee_fulltext_mv;
-
--- c) recreate `MV` with new logic
-CREATE MATERIALIZED VIEW public.ofec_committee_fulltext_mv AS
+CREATE MATERIALIZED VIEW ofec_committee_fulltext_mv_tmp AS
  WITH pacronyms AS (
          SELECT ofec_pacronyms."ID NUMBER" AS committee_id,
             string_agg(ofec_pacronyms."PACRONYM", ' '::text) AS pacronyms
@@ -405,68 +316,59 @@ CREATE MATERIALIZED VIEW public.ofec_committee_fulltext_mv AS
      LEFT JOIN totals USING (committee_id))
   WITH DATA;
 
-ALTER TABLE public.ofec_committee_fulltext_mv OWNER TO fec;
+ALTER TABLE public.ofec_committee_fulltext_mv_tmp
+  OWNER TO fec;
+GRANT ALL ON TABLE public.ofec_committee_fulltext_mv_tmp TO fec;
+GRANT SELECT ON TABLE public.ofec_committee_fulltext_mv_tmp TO fec_read;
 
-CREATE INDEX ofec_committee_fulltext_mv_disbursements_idx1 ON public.ofec_committee_fulltext_mv USING btree (disbursements);
-CREATE INDEX ofec_committee_fulltext_mv_fulltxt_idx1 ON public.ofec_committee_fulltext_mv USING gin (fulltxt);
-CREATE UNIQUE INDEX ofec_committee_fulltext_mv_idx_idx1 ON public.ofec_committee_fulltext_mv USING btree (idx);
-CREATE INDEX ofec_committee_fulltext_mv_independent_expenditures_idx1 ON public.ofec_committee_fulltext_mv USING btree (independent_expenditures);
-CREATE INDEX ofec_committee_fulltext_mv_receipts_idx1 ON public.ofec_committee_fulltext_mv USING btree (receipts);
-CREATE INDEX ofec_committee_fulltext_mv_total_activity_idx1 ON public.ofec_committee_fulltext_mv USING btree (total_activity);
-
-GRANT ALL ON TABLE ofec_committee_fulltext_mv TO fec;
-GRANT SELECT ON TABLE ofec_committee_fulltext_mv TO fec_read;
-
--- d) `create or replace ofec_committee_fulltext_mv` -> `select all` from new `MV`
-CREATE OR REPLACE VIEW ofec_committee_fulltext_vw AS SELECT * FROM ofec_committee_fulltext_mv;
-ALTER VIEW ofec_committee_fulltext_vw OWNER TO fec;
-GRANT SELECT ON ofec_committee_fulltext_vw TO fec_read;
-
+CREATE INDEX idx_ofec_committee_fulltext_mv_tmp_disbursements
+ ON public.ofec_committee_fulltext_mv_tmp
+ USING btree
+ (disbursements);
+CREATE INDEX idx_ofec_committee_fulltext_mv_tmp_fulltxt
+ ON public.ofec_committee_fulltext_mv_tmp
+ USING gin
+ (fulltxt);
+CREATE UNIQUE INDEX idx_ofec_committee_fulltext_mv_tmp_idx
+ ON public.ofec_committee_fulltext_mv_tmp
+ USING btree
+ (idx);
+CREATE INDEX idx_ofec_committee_fulltext_mv_tmp_independent_expenditures
+ ON public.ofec_committee_fulltext_mv_tmp
+ USING btree
+ (independent_expenditures);
+CREATE INDEX idx_ofec_committee_fulltext_mv_tmp_receipts
+ ON public.ofec_committee_fulltext_mv_tmp
+ USING btree
+ (receipts);
+CREATE INDEX idx_ofec_committee_fulltext_mv_tmp_total_activity
+ ON public.ofec_committee_fulltext_mv_tmp
+ USING btree
+ (total_activity);
+-- ----------
+CREATE OR REPLACE VIEW ofec_committee_fulltext_vw AS
+ SELECT * FROM ofec_committee_fulltext_mv_tmp;
+-- ----------
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_committee_fulltext_mv;
+ALTER MATERIALIZED VIEW IF EXISTS public.ofec_committee_fulltext_mv_tmp RENAME TO ofec_committee_fulltext_mv;
+-- ----------
+ALTER INDEX public.idx_ofec_committee_fulltext_mv_tmp_disbursements RENAME TO idx_ofec_committee_fulltext_mv_disbursements;
+ALTER INDEX public.idx_ofec_committee_fulltext_mv_tmp_fulltxt RENAME TO idx_ofec_committee_fulltext_mv_fulltxt;
+ALTER INDEX public.idx_ofec_committee_fulltext_mv_tmp_idx RENAME TO idx_ofec_committee_fulltext_tmp_idx;
+ALTER INDEX public.idx_ofec_committee_fulltext_mv_tmp_independent_expenditures RENAME TO idx_ofec_committee_fulltext_mv_independent_expenditures;
+ALTER INDEX public.idx_ofec_committee_fulltext_mv_tmp_receipts RENAME TO idx_ofec_committee_fulltext_mv_receipts;
+ALTER INDEX public.idx_ofec_committee_fulltext_mv_tmp_total_activity RENAME TO idx_ofec_committee_fulltext_mv_total_activity;
 
 /*
 update to_tsvector definition for ofec_candidate_fulltext_mv
-    a) `create or replace ofec_candidate_fulltext_vw` to use new `MV` logic
-    b) drop old `MV`
-    c) recreate `MV` with new logic
-    d) `create or replace ofec_candidate_fulltext_audit_vw` -> `select all` from new `MV`
+recipe based on 2019-07-26 post-postmortem discussion
 */
+-- ----------
+-- ofec_candidate_fulltext_mv
+-- ----------
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_candidate_fulltext_mv_tmp;
 
--- a) `create or replace ofec_candidate_fulltext_vw` to use new `MV` logic
-CREATE OR REPLACE VIEW public.ofec_candidate_fulltext_vw AS
- WITH nicknames AS (
-         SELECT ofec_nicknames.candidate_id,
-            string_agg(ofec_nicknames.nickname, ' '::text) AS nicknames
-           FROM public.ofec_nicknames
-          GROUP BY ofec_nicknames.candidate_id
-        ), totals AS (
-         SELECT link.cand_id AS candidate_id,
-            sum(totals_1.receipts) AS receipts,
-            sum(totals_1.disbursements) AS disbursements
-           FROM (disclosure.cand_cmte_linkage link
-             JOIN public.ofec_totals_combined_vw totals_1 ON ((((link.cmte_id)::text = (totals_1.committee_id)::text) AND (link.fec_election_yr = (totals_1.cycle)::numeric))))
-          WHERE (((link.cmte_dsgn)::text = ANY (ARRAY[('P'::character varying)::text, ('A'::character varying)::text])) AND ((substr((link.cand_id)::text, 1, 1) = (link.cmte_tp)::text) OR ((link.cmte_tp)::text <> ALL (ARRAY[('P'::character varying)::text, ('S'::character varying)::text, ('H'::character varying)::text]))))
-          GROUP BY link.cand_id
-        )
- SELECT DISTINCT ON (candidate_id) row_number() OVER () AS idx,
-    candidate_id AS id,
-    ofec_candidate_detail_vw.name,
-    ofec_candidate_detail_vw.office AS office_sought,
-        CASE
-            WHEN (ofec_candidate_detail_vw.name IS NOT NULL) THEN ((setweight(to_tsvector(parse_fulltext((ofec_candidate_detail_vw.name)::text)), 'A'::"char") || setweight(to_tsvector(COALESCE(parse_fulltext(nicknames.nicknames), ''::text)), 'A'::"char")) || setweight(to_tsvector(parse_fulltext((candidate_id)::text)), 'B'::"char"))
-            ELSE NULL::tsvector
-        END AS fulltxt,
-    COALESCE(totals.receipts, (0)::numeric) AS receipts,
-    COALESCE(totals.disbursements, (0)::numeric) AS disbursements,
-    (COALESCE(totals.receipts, (0)::numeric) + COALESCE(totals.disbursements, (0)::numeric)) AS total_activity
-   FROM ((public.ofec_candidate_detail_vw
-     LEFT JOIN nicknames USING (candidate_id))
-     LEFT JOIN totals USING (candidate_id));
-
--- b) drop old 'MV'
-DROP MATERIALIZED VIEW ofec_candidate_fulltext_mv;
-
--- c) create 'MV' with new logic
-CREATE MATERIALIZED VIEW public.ofec_candidate_fulltext_mv AS
+CREATE MATERIALIZED VIEW public.ofec_candidate_fulltext_mv_tmp AS
  WITH nicknames AS (
          SELECT ofec_nicknames.candidate_id,
             string_agg(ofec_nicknames.nickname, ' '::text) AS nicknames
@@ -497,72 +399,54 @@ CREATE MATERIALIZED VIEW public.ofec_candidate_fulltext_mv AS
      LEFT JOIN totals USING (candidate_id))
   WITH DATA;
 
-ALTER TABLE public.ofec_candidate_fulltext_mv OWNER TO fec;
-GRANT ALL ON TABLE ofec_candidate_fulltext_mv TO fec;
-GRANT SELECT ON TABLE ofec_candidate_fulltext_mv TO fec_read;
+ALTER TABLE public.ofec_candidate_fulltext_mv_tmp
+ OWNER TO fec;
+GRANT ALL ON TABLE ofec_candidate_fulltext_mv_tmp TO fec;
+GRANT SELECT ON TABLE ofec_candidate_fulltext_mv_tmp TO fec_read;
 
-CREATE INDEX ofec_candidate_fulltext_mv_disbursements_idx1 ON public.ofec_candidate_fulltext_mv USING btree (disbursements);
-CREATE INDEX ofec_candidate_fulltext_mv_fulltxt_idx1 ON public.ofec_candidate_fulltext_mv USING gin (fulltxt);
-CREATE UNIQUE INDEX ofec_candidate_fulltext_mv_idx_idx1 ON public.ofec_candidate_fulltext_mv USING btree (idx);
-CREATE INDEX ofec_candidate_fulltext_mv_receipts_idx1 ON public.ofec_candidate_fulltext_mv USING btree (receipts);
-CREATE INDEX ofec_candidate_fulltext_mv_total_activity_idx1 ON public.ofec_candidate_fulltext_mv USING btree (total_activity);
-
--- d) `create or replace ofec_candidate_fulltext_audit_mv` -> `select all` from new `MV`
-CREATE OR REPLACE VIEW ofec_candidate_fulltext_vw AS SELECT * FROM ofec_candidate_fulltext_mv;
-ALTER VIEW ofec_candidate_fulltext_vw OWNER TO fec;
-GRANT SELECT ON ofec_candidate_fulltext_vw TO fec_read;
-
-
-
+CREATE INDEX idx_ofec_candidate_fulltext_mv_tmp_disbursements
+ ON public.ofec_candidate_fulltext_mv_tmp
+ USING btree
+ (disbursements);
+CREATE INDEX idx_ofec_candidate_fulltext_mv_tmp_fulltxt
+ ON public.ofec_candidate_fulltext_mv_tmp
+ USING gin
+ (fulltxt);
+CREATE UNIQUE INDEX idx_ofec_candidate_fulltext_mv_tmp_idx
+ ON public.ofec_candidate_fulltext_mv_tmp
+ USING btree
+ (idx);
+CREATE INDEX idx_ofec_candidate_fulltext_mv_tmp_receipts
+ ON public.ofec_candidate_fulltext_mv_tmp
+ USING btree
+ (receipts);
+CREATE INDEX idx_ofec_candidate_fulltext_mv_tmp_total_activity
+ ON public.ofec_candidate_fulltext_mv_tmp
+ USING btree
+ (total_activity);
+-- ----------
+CREATE OR REPLACE VIEW ofec_candidate_fulltext_vw AS
+SELECT * FROM ofec_candidate_fulltext_mv_tmp;
+-- ----------
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_candidate_fulltext_mv;
+ALTER MATERIALIZED VIEW IF EXISTS public.ofec_candidate_fulltext_mv_tmp RENAME TO ofec_candidate_fulltext_mv;
+-- ----------
+ALTER INDEX public.idx_ofec_candidate_fulltext_mv_tmp_disbursements RENAME TO idx_ofec_candidate_fulltext_mv_disbursements;
+ALTER INDEX public.idx_ofec_candidate_fulltext_mv_tmp_fulltxt RENAME TO idx_ofec_candidate_fulltext_mv_fulltxt;
+ALTER INDEX public.idx_ofec_candidate_fulltext_mv_tmp_idx RENAME TO idx_ofec_candidate_fulltext_mv_idx;
+ALTER INDEX public.idx_ofec_candidate_fulltext_mv_tmp_receipts RENAME TO idx_ofec_candidate_fulltext_mv_receipts;
+ALTER INDEX public.idx_ofec_candidate_fulltext_mv_tmp_total_activity RENAME TO idx_ofec_candidate_fulltext_mv_total_activity;
 
 /*
 update to_tsvector definition for ofec_electioneering_mv
-    a) `create or replace ofec_electioneering_vw` to use new `MV` logic
-    b) drop old `MV`
-    c) recreate `MV` with new logic
-    d) `create or replace ofec_candidate_fulltext_audit_vw` -> `select all` from new `MV`
+recipe based on 2019-07-26 post-postmortem discussion
 */
---  a) `create or replace ofec_electioneering_vw` to use new `MV` logic
-CREATE OR REPLACE VIEW ofec_electioneering_vw AS
- SELECT row_number() OVER () AS idx,
-    electioneering_com_vw.cand_id,
-    electioneering_com_vw.cand_name,
-    electioneering_com_vw.cand_office,
-    electioneering_com_vw.cand_office_st,
-    electioneering_com_vw.cand_office_district,
-    electioneering_com_vw.cmte_id,
-    electioneering_com_vw.cmte_nm,
-    electioneering_com_vw.sb_image_num,
-    electioneering_com_vw.payee_nm,
-    electioneering_com_vw.payee_st1,
-    electioneering_com_vw.payee_city,
-    electioneering_com_vw.payee_st,
-    electioneering_com_vw.disb_desc,
-    electioneering_com_vw.disb_dt,
-    electioneering_com_vw.comm_dt,
-    electioneering_com_vw.pub_distrib_dt,
-    electioneering_com_vw.reported_disb_amt,
-    electioneering_com_vw.number_of_candidates,
-    electioneering_com_vw.calculated_cand_share,
-    electioneering_com_vw.sub_id,
-    electioneering_com_vw.link_id,
-    electioneering_com_vw.rpt_yr,
-    electioneering_com_vw.sb_link_id,
-    electioneering_com_vw.f9_begin_image_num,
-    electioneering_com_vw.receipt_dt,
-    electioneering_com_vw.election_tp,
-    electioneering_com_vw.file_num,
-    electioneering_com_vw.amndt_ind,
-    image_pdf_url((electioneering_com_vw.sb_image_num)::text) AS pdf_url,
-    to_tsvector(parse_fulltext((electioneering_com_vw.disb_desc)::text)) AS purpose_description_text
-   FROM electioneering_com_vw
-  WHERE (electioneering_com_vw.rpt_yr >= (1979)::numeric);
+-- ----------
+-- ofec_electioneering_mv
+-- ----------
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_electioneering_mv_tmp;
 
--- b) drop old 'MV'
-DROP MATERIALIZED VIEW ofec_electioneering_mv;
-
--- c) recreate `MV` with new logic
-CREATE MATERIALIZED VIEW ofec_electioneering_mv AS
+CREATE MATERIALIZED VIEW ofec_electioneering_mv_tmp AS
  SELECT row_number() OVER () AS idx,
     electioneering_com_vw.cand_id,
     electioneering_com_vw.cand_name,
@@ -598,26 +482,83 @@ CREATE MATERIALIZED VIEW ofec_electioneering_mv AS
   WHERE (electioneering_com_vw.rpt_yr >= (1979)::numeric)
  WITH DATA;
 
-ALTER TABLE ofec_electioneering_mv OWNER TO fec;
+ALTER TABLE public.ofec_electioneering_mv_tmp
+ OWNER TO fec;
+GRANT ALL ON TABLE public.ofec_electioneering_mv_tmp TO fec;
+GRANT SELECT ON TABLE public.ofec_electioneering_mv_tmp TO fec_read;
 
-CREATE INDEX ofec_electioneering_mv_tmp_calculated_cand_share_idx ON ofec_electioneering_mv USING btree (calculated_cand_share);
-CREATE INDEX ofec_electioneering_mv_tmp_cand_id_idx ON ofec_electioneering_mv USING btree (cand_id);
-CREATE INDEX ofec_electioneering_mv_tmp_cand_office_district_idx ON ofec_electioneering_mv USING btree (cand_office_district);
-CREATE INDEX ofec_electioneering_mv_tmp_cand_office_idx ON ofec_electioneering_mv USING btree (cand_office);
-CREATE INDEX ofec_electioneering_mv_tmp_cand_office_st_idx ON ofec_electioneering_mv USING btree (cand_office_st);
-CREATE INDEX ofec_electioneering_mv_tmp_cmte_id_idx ON ofec_electioneering_mv USING btree (cmte_id);
-CREATE INDEX ofec_electioneering_mv_tmp_disb_dt_idx1 ON ofec_electioneering_mv USING btree (disb_dt);
-CREATE INDEX ofec_electioneering_mv_tmp_f9_begin_image_num_idx ON ofec_electioneering_mv USING btree (f9_begin_image_num);
-CREATE UNIQUE INDEX ofec_electioneering_mv_tmp_idx_idx ON ofec_electioneering_mv USING btree (idx);
-CREATE INDEX ofec_electioneering_mv_tmp_purpose_description_text_idx1 ON ofec_electioneering_mv USING gin (purpose_description_text);
-CREATE INDEX ofec_electioneering_mv_tmp_reported_disb_amt_idx ON ofec_electioneering_mv USING btree (reported_disb_amt);
-CREATE INDEX ofec_electioneering_mv_tmp_rpt_yr_idx ON ofec_electioneering_mv USING btree (rpt_yr);
-CREATE INDEX ofec_electioneering_mv_tmp_sb_image_num_idx ON ofec_electioneering_mv USING btree (sb_image_num);
-
--- d) `create or replace ofec_candidate_fulltext_audit_mv` -> `select all` from new `MV`
-CREATE OR REPLACE VIEW ofec_electioneering_vw AS SELECT * FROM ofec_electioneering_mv;
-ALTER VIEW ofec_electioneering_vw OWNER TO fec;
-GRANT SELECT ON TABLE ofec_electioneering_mv TO fec_read;
+CREATE INDEX idx_ofec_electioneering_mv_tmp_calculated_cand_share
+ ON ofec_electioneering_mv_tmp
+ USING btree
+ (calculated_cand_share);
+CREATE INDEX idx_ofec_electioneering_mv_tmp_cand_id
+ ON ofec_electioneering_mv_tmp
+ USING btree
+ (cand_id);
+CREATE INDEX idx_ofec_electioneering_mv_tmp_cand_office_district
+ ON ofec_electioneering_mv_tmp
+ USING btree
+ (cand_office_district);
+CREATE INDEX idx_ofec_electioneering_mv_tmp_cand_office
+ ON ofec_electioneering_mv_tmp
+ USING btree
+ (cand_office);
+CREATE INDEX idx_ofec_electioneering_mv_tmp_cand_office_st
+ ON ofec_electioneering_mv_tmp
+ USING btree
+ (cand_office_st);
+CREATE INDEX idx_ofec_electioneering_mv_tmp_cmte_id
+ ON ofec_electioneering_mv_tmp
+ USING btree
+ (cmte_id);
+CREATE INDEX idx_ofec_electioneering_mv_tmp_disb_dt
+ ON ofec_electioneering_mv_tmp
+ USING btree
+ (disb_dt);
+CREATE INDEX idx_ofec_electioneering_mv_tmp_f9_begin_image_num
+ ON ofec_electioneering_mv_tmp
+ USING btree
+ (f9_begin_image_num);
+CREATE UNIQUE INDEX idx_ofec_electioneering_mv_tmp_idx
+ ON ofec_electioneering_mv_tmp
+ USING btree
+ (idx);
+CREATE INDEX idx_ofec_electioneering_mv_tmp_purpose_description_text
+ ON ofec_electioneering_mv_tmp
+ USING gin
+ (purpose_description_text);
+CREATE INDEX idx_ofec_electioneering_mv_tmp_reported_disb_amt
+ ON ofec_electioneering_mv_tmp
+ USING btree
+ (reported_disb_amt);
+CREATE INDEX idx_ofec_electioneering_mv_tmp_rpt_yr
+ ON ofec_electioneering_mv_tmp
+ USING btree
+ (rpt_yr);
+CREATE INDEX idx_ofec_electioneering_mv_tmp_sb_image_num
+ ON ofec_electioneering_mv_tmp
+ USING btree
+ (sb_image_num);
+-- ----------
+CREATE OR REPLACE VIEW ofec_electioneering_vw AS
+SELECT * FROM public.ofec_electioneering_mv_tmp;
+-- ----------
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_electioneering_mv;
+ALTER MATERIALIZED VIEW IF EXISTS public.ofec_electioneering_mv_tmp RENAME TO ofec_electioneering_mv;
+-- ----------
+ALTER INDEX public.idx_ofec_electioneering_mv_tmp_calculated_cand_share RENAME TO idx_ofec_electioneering_mv_calculated_cand_share;
+ALTER INDEX public.idx_ofec_electioneering_mv_tmp_cand_id RENAME TO idx_ofec_electioneering_mv_cand_id;
+ALTER INDEX public.idx_ofec_electioneering_mv_tmp_cand_office_district RENAME TO idx_ofec_electioneering_mv_cand_office_district;
+ALTER INDEX public.idx_ofec_electioneering_mv_tmp_cand_office RENAME TO idx_ofec_electioneering_mv_cand_office;
+ALTER INDEX public.idx_ofec_electioneering_mv_tmp_cand_office_st RENAME TO idx_ofec_electioneering_mv_cand_office_st;
+ALTER INDEX public.idx_ofec_electioneering_mv_tmp_cmte_id RENAME TO idx_ofec_electioneering_mv_cmte_id;
+ALTER INDEX public.idx_ofec_electioneering_mv_tmp_disb_dt RENAME TO idx_ofec_electioneering_mv_disb_dt;
+ALTER INDEX public.idx_ofec_electioneering_mv_tmp_f9_begin_image_num RENAME TO idx_ofec_electioneering_mv_f9_begin_image_num;
+ALTER INDEX public.idx_ofec_electioneering_mv_tmp_idx RENAME TO idx_ofec_electioneering_mv_idx;
+ALTER INDEX public.idx_ofec_electioneering_mv_tmp_purpose_description_text RENAME TO idx_ofec_electioneering_mv_purpose_description_text;
+ALTER INDEX public.idx_ofec_electioneering_mv_tmp_reported_disb_amt RENAME TO idx_ofec_electioneering_mv_reported_disb_amt;
+ALTER INDEX public.idx_ofec_electioneering_mv_tmp_rpt_yr RENAME TO idx_ofec_electioneering_mv_rpt_yr;
+ALTER INDEX public.idx_ofec_electioneering_mv_tmp_sb_image_num RENAME TO idx_ofec_electioneering_mv_sb_image_num;
 
 /*
 update to_tsvector for ofec_dates_vw
@@ -650,14 +591,13 @@ create or replace view ofec_dates_vw as
 );
 
 ALTER TABLE ofec_dates_vw OWNER TO fec;
-
+GRANT ALL ON TABLE public.ofec_dates_vw TO fec;
+GRANT SELECT ON TABLE public.ofec_dates_vw TO fec_read;
 
 
 
 /*
 update to_tsvector definition for ofec_sched_e_mv
-according to notes below (from V0120__update_ofec_sched_e_mv_s_o_ind_handling.sql
-ofec_sched_e_vw is not used by API.
 */
 DROP MATERIALIZED VIEW IF EXISTS public.ofec_sched_e_mv_tmp;
 
@@ -1155,11 +1095,14 @@ create index IF NOT EXISTS idx_ofec_sched_e_mv_cand_office_tmp on ofec_sched_e_m
 create index IF NOT EXISTS idx_ofec_sched_e_mv_cand_office_st_tmp on ofec_sched_e_mv_tmp (cand_office_st);
 create index IF NOT EXISTS idx_ofec_sched_e_mv_cand_pty_tmp on ofec_sched_e_mv_tmp (cand_pty_affiliation);
 
--- -----------------------------------------------
--- public.ofec_sched_e_vw depends on public.ofec_sched_e_mv.  
--- It is not used by API OR other MV/VW yet.  Just drop and recreated
-DROP VIEW IF EXISTS public.ofec_sched_e_vw;
-
+-- ----------
+-- public.ofec_sched_e_vw depends on public.ofec_sched_e_mv.
+-- ----------
+-- ------------------------
+CREATE OR REPLACE VIEW ofec_sched_e_vw AS SELECT * FROM ofec_sched_e_mv_tmp;
+ALTER VIEW ofec_sched_e_vw OWNER TO fec;
+GRANT SELECT ON ofec_sched_e_vw TO fec_read;
+GRANT ALL ON public.ofec_sched_e_vw TO fec;
 DROP MATERIALIZED VIEW IF EXISTS public.ofec_sched_e_mv;
 
 ALTER MATERIALIZED VIEW IF EXISTS public.ofec_sched_e_mv_tmp RENAME TO ofec_sched_e_mv;
@@ -1178,32 +1121,19 @@ ALTER INDEX IF EXISTS idx_ofec_sched_e_mv_cand_office_st_tmp RENAME TO idx_ofec_
 ALTER INDEX IF EXISTS idx_ofec_sched_e_mv_cand_pty_tmp RENAME TO idx_ofec_sched_e_mv_cand_pty;
 
 
--- ------------------------
-CREATE OR REPLACE VIEW ofec_sched_e_vw AS SELECT * FROM ofec_sched_e_mv;
-ALTER VIEW ofec_sched_e_vw OWNER TO fec;
-GRANT SELECT ON ofec_sched_e_vw TO fec_read;
+
 
 
 /*
 This migration is needed to address change under V0144__add_affiliated_committee_to_committee_history.sql
-while also preserving the to_tsvector component
-
-Add `affiliated_committee_name` to:
-1)  `ofec_committee_history_mv` and `public.ofec_committee_history_vw`
-2)  `ofec_committee_detail_mv` and `public.ofec_committee_detail_vw`
-
-    a) `create or replace `ofec_committee_history_vw` to use new `MV` logic
-    b) drop old `MV`
-    c) recreate `MV` with new logic
-    d) `create or replace `ofec_committee_history_vw` -> `select all` from new `MV`
+recipe based on 2019-07-26 post-postmortem discussion
 */
+-- ----------
+-- ofec_committee_history_mv
+-- ----------
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_committee_history_mv_tmp;
 
--- Add `affiliated_committee_name` to:
--- 1)  `ofec_committee_history_mv` and `public.ofec_committee_history_vw`
-
-
--- a) `create or replace `ofec_committee_history_vw` to use new `MV` logic
-CREATE OR REPLACE VIEW public.ofec_committee_history_vw AS
+CREATE MATERIALIZED VIEW public.ofec_committee_history_mv_tmp AS
 WITH cycles AS (
          SELECT cmte_valid_fec_yr.cmte_id,
             (array_agg(cmte_valid_fec_yr.fec_election_yr))::integer[] AS cycles,
@@ -1292,162 +1222,83 @@ WITH cycles AS (
   WHERE ((cycles.max_cycle >= (1979)::numeric) AND (NOT ((fec_yr.cmte_id)::text IN ( SELECT DISTINCT unverified_filers_vw.cmte_id
            FROM unverified_filers_vw
           WHERE ((unverified_filers_vw.cmte_id)::text ~~ 'C%'::text)))))
-  ORDER BY fec_yr.cmte_id, fec_yr.fec_election_yr DESC, f1.rpt_yr DESC;
-
--- b) drop old `MV`
-
-DROP MATERIALIZED VIEW public.ofec_committee_history_mv;
-
--- c) recreate `MV` with new logic
-
-CREATE MATERIALIZED VIEW public.ofec_committee_history_mv AS
-WITH cycles AS (
-         SELECT cmte_valid_fec_yr.cmte_id,
-            (array_agg(cmte_valid_fec_yr.fec_election_yr))::integer[] AS cycles,
-            max(cmte_valid_fec_yr.fec_election_yr) AS max_cycle
-           FROM disclosure.cmte_valid_fec_yr
-          GROUP BY cmte_valid_fec_yr.cmte_id
-        ), dates AS (
-         SELECT f_rpt_or_form_sub.cand_cmte_id AS cmte_id,
-            min(f_rpt_or_form_sub.receipt_dt) AS first_file_date,
-            max(f_rpt_or_form_sub.receipt_dt) AS last_file_date,
-            max(f_rpt_or_form_sub.receipt_dt) FILTER (WHERE ((f_rpt_or_form_sub.form_tp)::text = 'F1'::text)) AS last_f1_date
-           FROM disclosure.f_rpt_or_form_sub
-          GROUP BY f_rpt_or_form_sub.cand_cmte_id
-        ), candidates AS (
-         SELECT cand_cmte_linkage.cmte_id,
-            (array_agg(DISTINCT cand_cmte_linkage.cand_id))::text[] AS candidate_ids
-           FROM disclosure.cand_cmte_linkage
-          GROUP BY cand_cmte_linkage.cmte_id
-        )
- SELECT DISTINCT ON (fec_yr.cmte_id, fec_yr.fec_election_yr) row_number() OVER () AS idx,
-    fec_yr.fec_election_yr AS cycle,
-    fec_yr.cmte_id AS committee_id,
-    fec_yr.cmte_nm AS name,
-    fec_yr.tres_nm AS treasurer_name,
-    to_tsvector(parse_fulltext((fec_yr.tres_nm)::text)) AS treasurer_text,
-    f1.org_tp AS organization_type,
-    expand_organization_type((f1.org_tp)::text) AS organization_type_full,
-    fec_yr.cmte_st1 AS street_1,
-    fec_yr.cmte_st2 AS street_2,
-    fec_yr.cmte_city AS city,
-    fec_yr.cmte_st AS state,
-    expand_state((fec_yr.cmte_st)::text) AS state_full,
-    fec_yr.cmte_zip AS zip,
-    f1.tres_city AS treasurer_city,
-    f1.tres_f_nm AS treasurer_name_1,
-    f1.tres_l_nm AS treasurer_name_2,
-    f1.tres_m_nm AS treasurer_name_middle,
-    f1.tres_ph_num AS treasurer_phone,
-    f1.tres_prefix AS treasurer_name_prefix,
-    f1.tres_st AS treasurer_state,
-    f1.tres_st1 AS treasurer_street_1,
-    f1.tres_st2 AS treasurer_street_2,
-    f1.tres_suffix AS treasurer_name_suffix,
-    f1.tres_title AS treasurer_name_title,
-    f1.tres_zip AS treasurer_zip,
-    f1.cust_rec_city AS custodian_city,
-    f1.cust_rec_f_nm AS custodian_name_1,
-    f1.cust_rec_l_nm AS custodian_name_2,
-    f1.cust_rec_m_nm AS custodian_name_middle,
-    f1.cust_rec_nm AS custodian_name_full,
-    f1.cust_rec_ph_num AS custodian_phone,
-    f1.cust_rec_prefix AS custodian_name_prefix,
-    f1.cust_rec_st AS custodian_state,
-    f1.cust_rec_st1 AS custodian_street_1,
-    f1.cust_rec_st2 AS custodian_street_2,
-    f1.cust_rec_suffix AS custodian_name_suffix,
-    f1.cust_rec_title AS custodian_name_title,
-    f1.cust_rec_zip AS custodian_zip,
-    fec_yr.cmte_email AS email,
-    f1.cmte_fax AS fax,
-    fec_yr.cmte_url AS website,
-    f1.form_tp AS form_type,
-    f1.leadership_pac,
-    f1.lobbyist_registrant_pac,
-    f1.cand_pty_tp AS party_type,
-    f1.cand_pty_tp_desc AS party_type_full,
-    f1.qual_dt AS qualifying_date,
-    ((dates.first_file_date)::text)::date AS first_file_date,
-    ((dates.last_file_date)::text)::date AS last_file_date,
-    ((dates.last_f1_date)::text)::date AS last_f1_date,
-    fec_yr.cmte_dsgn AS designation,
-    expand_committee_designation((fec_yr.cmte_dsgn)::text) AS designation_full,
-    fec_yr.cmte_tp AS committee_type,
-    expand_committee_type((fec_yr.cmte_tp)::text) AS committee_type_full,
-    fec_yr.cmte_filing_freq AS filing_frequency,
-    fec_yr.cmte_pty_affiliation AS party,
-    fec_yr.cmte_pty_affiliation_desc AS party_full,
-    cycles.cycles,
-    COALESCE(candidates.candidate_ids, '{}'::text[]) AS candidate_ids,
-    f1.affiliated_cmte_nm AS affiliated_committee_name
-   FROM ((((disclosure.cmte_valid_fec_yr fec_yr
-     LEFT JOIN fec_vsum_f1_vw f1 ON ((((fec_yr.cmte_id)::text = (f1.cmte_id)::text) AND (fec_yr.fec_election_yr >= f1.rpt_yr))))
-     LEFT JOIN cycles ON (((fec_yr.cmte_id)::text = (cycles.cmte_id)::text)))
-     LEFT JOIN dates ON (((fec_yr.cmte_id)::text = (dates.cmte_id)::text)))
-     LEFT JOIN candidates ON (((fec_yr.cmte_id)::text = (candidates.cmte_id)::text)))
-  WHERE ((cycles.max_cycle >= (1979)::numeric) AND (NOT ((fec_yr.cmte_id)::text IN ( SELECT DISTINCT unverified_filers_vw.cmte_id
-           FROM unverified_filers_vw
-          WHERE ((unverified_filers_vw.cmte_id)::text ~~ 'C%'::text)))))
-  ORDER BY fec_yr.cmte_id, fec_yr.fec_election_yr DESC, f1.rpt_yr DESC;
+  ORDER BY fec_yr.cmte_id, fec_yr.fec_election_yr DESC, f1.rpt_yr DESC
+WITH DATA;
 
 --Permissions
 
-ALTER TABLE public.ofec_committee_history_mv
+ALTER TABLE public.ofec_committee_history_mv_tmp
   OWNER TO fec;
-GRANT ALL ON TABLE public.ofec_committee_history_mv TO fec;
-GRANT SELECT ON TABLE public.ofec_committee_history_mv TO fec_read;
+GRANT ALL ON TABLE public.ofec_committee_history_mv_tmp TO fec;
+GRANT SELECT ON TABLE public.ofec_committee_history_mv_tmp TO fec_read;
 
 --Indices
 
-CREATE UNIQUE INDEX ofec_committee_history_mv_idx_idx1
-ON public.ofec_committee_history_mv
-USING btree (idx);
-
-CREATE INDEX ofec_committee_history_mv_committee_id_idx1
-ON public.ofec_committee_history_mv
-USING btree (committee_id);
-
-CREATE INDEX ofec_committee_history_mv_cycle_committee_id_idx1
-ON public.ofec_committee_history_mv
-USING btree (cycle, committee_id);
-
-CREATE INDEX ofec_committee_history_mv_cycle_idx1
-ON public.ofec_committee_history_mv
-USING btree (cycle);
-
-CREATE INDEX ofec_committee_history_mv_designation_idx1
-ON public.ofec_committee_history_mv
-USING btree (designation);
-
-CREATE INDEX ofec_committee_history_mv_first_file_date_idx
-ON public.ofec_committee_history_mv
-USING btree (first_file_date);
-
-CREATE INDEX ofec_committee_history_mv_name_idx1
-ON public.ofec_committee_history_mv
-USING btree (name);
-
-CREATE INDEX ofec_committee_history_mv_state_idx1
-ON public.ofec_committee_history_mv
-USING btree (state);
-
-CREATE INDEX ofec_committee_history_mv_comid_state_idx1
-ON public.ofec_committee_history_mv
-USING btree (committee_id, state);
-
-
--- d) `create or replace `public.ofec_committee_history_vw` -> `select all` from new `MV`
-
+CREATE UNIQUE INDEX idx_ofec_committee_history_mv_tmp_idx
+ ON public.ofec_committee_history_mv_tmp
+ USING btree
+ (idx);
+CREATE INDEX idx_ofec_committee_history_mv_tmp_committee_id
+ ON public.ofec_committee_history_mv_tmp
+ USING btree
+ (committee_id);
+CREATE INDEX idx_ofec_committee_history_mv_tmp_cycle_committee_id
+ ON public.ofec_committee_history_mv_tmp
+ USING btree
+ (cycle, committee_id);
+CREATE INDEX idx_ofec_committee_history_mv_tmp_cycle
+ ON public.ofec_committee_history_mv_tmp
+ USING btree
+ (cycle);
+CREATE INDEX idx_ofec_committee_history_mv_tmp_designation
+ ON public.ofec_committee_history_mv_tmp
+ USING btree
+ (designation);
+CREATE INDEX idx_ofec_committee_history_mv_tmp_first_file_date
+ ON public.ofec_committee_history_mv_tmp
+ USING btree
+ (first_file_date);
+CREATE INDEX idx_ofec_committee_history_mv_tmp_name
+ ON public.ofec_committee_history_mv_tmp
+ USING btree
+ (name);
+CREATE INDEX idx_ofec_committee_history_mv_tmp_state
+ ON public.ofec_committee_history_mv_tmp
+ USING btree
+ (state);
+CREATE INDEX idx_ofec_committee_history_mv_tmp_comid_state
+ ON public.ofec_committee_history_mv_tmp
+ USING btree
+ (committee_id, state);
+-- ----------
 CREATE OR REPLACE VIEW public.ofec_committee_history_vw AS
-SELECT * FROM public.ofec_committee_history_mv;
+SELECT * FROM public.ofec_committee_history_mv_tmp;
+-- ----------
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_committee_history_mv;
+ALTER MATERIALIZED VIEW IF EXISTS public.ofec_committee_history_mv_tmp RENAME TO ofec_committee_history_mv;
+-- ----------
+ALTER INDEX public.idx_ofec_committee_history_mv_tmp_idx RENAME TO idx_ofec_committee_history_mv_idx;
+ALTER INDEX public.idx_ofec_committee_history_mv_tmp_committee_id RENAME TO idx_ofec_committee_history_mv_committee_id;
+ALTER INDEX public.idx_ofec_committee_history_mv_tmp_cycle_committee_id RENAME TO idx_ofec_committee_history_mv_cycle_committee_id;
+ALTER INDEX public.idx_ofec_committee_history_mv_tmp_cycle RENAME TO idx_ofec_committee_history_mv_cycle;
+ALTER INDEX public.idx_ofec_committee_history_mv_tmp_designation RENAME TO idx_ofec_committee_history_mv_designation;
+ALTER INDEX public.idx_ofec_committee_history_mv_tmp_first_file_date RENAME TO idx_ofec_committee_history_mv_first_file_date;
+ALTER INDEX public.idx_ofec_committee_history_mv_tmp_name RENAME TO idx_ofec_committee_history_mv_name;
+ALTER INDEX public.idx_ofec_committee_history_mv_tmp_state RENAME TO idx_ofec_committee_history_mv_state;
+ALTER INDEX public.idx_ofec_committee_history_mv_tmp_comid_state RENAME TO idx_ofec_committee_history_mv_comid_state;
 
--- Add `affiliated_committee_name` to:
--- 2)  `ofec_committee_detail_mv` and `public.ofec_committee_detail_vw`
 
--- a) `create or replace `XXX_vw` to use new `MV` logic
 
-CREATE OR REPLACE VIEW public.ofec_committee_detail_vw AS
+/*
+update to_tsvector definition for ofec_committee_detail_mv
+recipe based on 2019-07-26 post-postmortem discussion
+*/
+-- ----------
+-- ofec_committee_detail_mv
+-- ----------
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_committee_detail_mv_tmp;
+
+CREATE MATERIALIZED VIEW public.ofec_committee_detail_mv_tmp AS
 SELECT DISTINCT ON (ofec_committee_history_vw.committee_id)
     ofec_committee_history_vw.idx,
     ofec_committee_history_vw.cycle,
@@ -1511,147 +1362,117 @@ SELECT DISTINCT ON (ofec_committee_history_vw.committee_id)
     ofec_committee_history_vw.candidate_ids,
     ofec_committee_history_vw.affiliated_committee_name
    FROM ofec_committee_history_vw
-  ORDER BY ofec_committee_history_vw.committee_id, ofec_committee_history_vw.cycle DESC;
-
--- b) drop old `MV`
-
-DROP MATERIALIZED VIEW public.ofec_committee_detail_mv;
-
--- c) recreate `MV` with new logic
-
-CREATE MATERIALIZED VIEW public.ofec_committee_detail_mv AS
-SELECT DISTINCT ON (ofec_committee_history_vw.committee_id)
-    ofec_committee_history_vw.idx,
-    ofec_committee_history_vw.cycle,
-    ofec_committee_history_vw.committee_id,
-    ofec_committee_history_vw.name,
-    ofec_committee_history_vw.treasurer_name,
-    ofec_committee_history_vw.treasurer_text,
-    ofec_committee_history_vw.organization_type,
-    ofec_committee_history_vw.organization_type_full,
-    ofec_committee_history_vw.street_1,
-    ofec_committee_history_vw.street_2,
-    ofec_committee_history_vw.city,
-    ofec_committee_history_vw.state,
-    ofec_committee_history_vw.state_full,
-    ofec_committee_history_vw.zip,
-    ofec_committee_history_vw.treasurer_city,
-    ofec_committee_history_vw.treasurer_name_1,
-    ofec_committee_history_vw.treasurer_name_2,
-    ofec_committee_history_vw.treasurer_name_middle,
-    ofec_committee_history_vw.treasurer_phone,
-    ofec_committee_history_vw.treasurer_name_prefix,
-    ofec_committee_history_vw.treasurer_state,
-    ofec_committee_history_vw.treasurer_street_1,
-    ofec_committee_history_vw.treasurer_street_2,
-    ofec_committee_history_vw.treasurer_name_suffix,
-    ofec_committee_history_vw.treasurer_name_title,
-    ofec_committee_history_vw.treasurer_zip,
-    ofec_committee_history_vw.custodian_city,
-    ofec_committee_history_vw.custodian_name_1,
-    ofec_committee_history_vw.custodian_name_2,
-    ofec_committee_history_vw.custodian_name_middle,
-    ofec_committee_history_vw.custodian_name_full,
-    ofec_committee_history_vw.custodian_phone,
-    ofec_committee_history_vw.custodian_name_prefix,
-    ofec_committee_history_vw.custodian_state,
-    ofec_committee_history_vw.custodian_street_1,
-    ofec_committee_history_vw.custodian_street_2,
-    ofec_committee_history_vw.custodian_name_suffix,
-    ofec_committee_history_vw.custodian_name_title,
-    ofec_committee_history_vw.custodian_zip,
-    ofec_committee_history_vw.email,
-    ofec_committee_history_vw.fax,
-    ofec_committee_history_vw.website,
-    ofec_committee_history_vw.form_type,
-    ofec_committee_history_vw.leadership_pac,
-    ofec_committee_history_vw.lobbyist_registrant_pac,
-    ofec_committee_history_vw.party_type,
-    ofec_committee_history_vw.party_type_full,
-    ofec_committee_history_vw.qualifying_date,
-    ofec_committee_history_vw.first_file_date,
-    ofec_committee_history_vw.last_file_date,
-    ofec_committee_history_vw.last_f1_date,
-    ofec_committee_history_vw.designation,
-    ofec_committee_history_vw.designation_full,
-    ofec_committee_history_vw.committee_type,
-    ofec_committee_history_vw.committee_type_full,
-    ofec_committee_history_vw.filing_frequency,
-    ofec_committee_history_vw.party,
-    ofec_committee_history_vw.party_full,
-    ofec_committee_history_vw.cycles,
-    ofec_committee_history_vw.candidate_ids,
-    ofec_committee_history_vw.affiliated_committee_name
-   FROM ofec_committee_history_vw
-  ORDER BY ofec_committee_history_vw.committee_id, ofec_committee_history_vw.cycle DESC;
+  ORDER BY ofec_committee_history_vw.committee_id, ofec_committee_history_vw.cycle DESC
+ WITH DATA;
 
 --Permissions
 
-ALTER TABLE public.ofec_committee_detail_mv
+ALTER TABLE public.ofec_committee_detail_mv_tmp
   OWNER TO fec;
-GRANT ALL ON TABLE public.ofec_committee_detail_mv TO fec;
-GRANT SELECT ON TABLE public.ofec_committee_detail_mv TO fec_read;
+GRANT ALL ON TABLE public.ofec_committee_detail_mv_tmp TO fec;
+GRANT SELECT ON TABLE public.ofec_committee_detail_mv_tmp TO fec_read;
 
 --Indices
 
-CREATE UNIQUE INDEX ofec_committee_detail_mv_idx_idx1
-ON ofec_committee_detail_mv USING btree (idx);
-
-CREATE INDEX ofec_committee_detail_mv_candidate_ids_idx1
-ON ofec_committee_detail_mv USING gin (candidate_ids);
-
-CREATE INDEX ofec_committee_detail_mv_committee_id_idx1
-ON ofec_committee_detail_mv USING btree (committee_id);
-
-CREATE INDEX ofec_committee_detail_mv_committee_type_full_idx1
-ON ofec_committee_detail_mv USING btree (committee_type_full);
-
-CREATE INDEX ofec_committee_detail_mv_committee_type_idx1
-ON ofec_committee_detail_mv USING btree (committee_type);
-
-CREATE INDEX ofec_committee_detail_mv_cycles_candidate_ids_idx1
-ON ofec_committee_detail_mv USING gin (cycles, candidate_ids);
-
-CREATE INDEX ofec_committee_detail_mv_cycles_idx1
-ON ofec_committee_detail_mv USING gin (cycles);
-
-CREATE INDEX ofec_committee_detail_mv_designation_full_idx1
-ON ofec_committee_detail_mv USING btree (designation_full);
-
-CREATE INDEX ofec_committee_detail_mv_designation_idx1
-ON ofec_committee_detail_mv USING btree (designation);
-
-CREATE INDEX ofec_committee_detail_mv_first_file_date_idx1
-ON ofec_committee_detail_mv USING btree (first_file_date);
-
-CREATE INDEX ofec_committee_detail_mv_last_file_date_idx1
-ON ofec_committee_detail_mv USING btree (last_file_date);
-
-CREATE INDEX ofec_committee_detail_mv_name_idx1
-ON ofec_committee_detail_mv USING btree (name);
-
-CREATE INDEX ofec_committee_detail_mv_organization_type_full_idx1
-ON ofec_committee_detail_mv USING btree (organization_type_full);
-
-CREATE INDEX ofec_committee_detail_mv_organization_type_idx1
-ON ofec_committee_detail_mv USING btree (organization_type);
-
-CREATE INDEX ofec_committee_detail_mv_party_full_idx1
-ON ofec_committee_detail_mv USING btree (party_full);
-
-CREATE INDEX ofec_committee_detail_mv_party_idx1
-ON ofec_committee_detail_mv USING btree (party);
-
-CREATE INDEX ofec_committee_detail_mv_state_idx1
-ON ofec_committee_detail_mv USING btree (state);
-
-CREATE INDEX ofec_committee_detail_mv_treasurer_name_idx1
-ON ofec_committee_detail_mv USING btree (treasurer_name);
-
-CREATE INDEX ofec_committee_detail_mv_treasurer_text_idx1
-ON ofec_committee_detail_mv USING gin (treasurer_text);
-
--- d) `create or replace `public.XXX_vw` -> `select all` from new `MV`
-
+CREATE UNIQUE INDEX idx_ofec_committee_detail_mv_tmp_idx
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (idx);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_candidate_ids
+ ON ofec_committee_detail_mv_tmp
+ USING gin
+ (candidate_ids);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_committee_id
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (committee_id);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_committee_type_full
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (committee_type_full);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_committee_type
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (committee_type);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_cycles_candidate_ids
+ ON ofec_committee_detail_mv_tmp
+ USING gin
+ (cycles, candidate_ids);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_cycles
+ ON ofec_committee_detail_mv_tmp
+ USING gin
+ (cycles);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_designation_full
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (designation_full);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_designation
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (designation);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_first_file_date
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (first_file_date);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_last_file_date
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (last_file_date);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_name
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (name);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_organization_type_full
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (organization_type_full);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_organization_type
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (organization_type);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_party_full
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (party_full);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_party
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (party);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_state
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (state);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_treasurer_name
+ ON ofec_committee_detail_mv_tmp
+ USING btree
+ (treasurer_name);
+CREATE INDEX idx_ofec_committee_detail_mv_tmp_treasurer_text
+ ON ofec_committee_detail_mv_tmp
+ USING gin
+ (treasurer_text);
+-- ----------
 CREATE OR REPLACE VIEW public.ofec_committee_detail_vw AS
-SELECT * FROM public.ofec_committee_detail_mv;
+SELECT * FROM public.ofec_committee_detail_mv_tmp;
+-- ----------
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_committee_detail_mv;
+ALTER MATERIALIZED VIEW IF EXISTS public.ofec_committee_detail_mv_tmp RENAME TO ofec_committee_detail_mv;
+-- ----------
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_idx RENAME TO idx_ofec_committee_detail_mv_idx;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_candidate_ids RENAME TO idx_ofec_committee_detail_mv_candidate_ids;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_committee_id RENAME TO idx_ofec_committee_detail_mv_committee_id;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_committee_type_full RENAME TO idx_ofec_committee_detail_mv_committee_type_full;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_committee_type RENAME TO idx_ofec_committee_detail_mv_committee_type;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_cycles_candidate_ids RENAME TO idx_ofec_committee_detail_mv_cycles_candidate_ids;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_cycles RENAME TO idx_ofec_committee_detail_mv_cycles;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_designation_full RENAME TO idx_ofec_committee_detail_mv_designation_full;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_designation RENAME TO idx_ofec_committee_detail_mv_designation;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_first_file_date RENAME TO idx_ofec_committee_detail_mv_first_file_date;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_last_file_date RENAME TO idx_ofec_committee_detail_mv_last_file_date;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_name RENAME TO idx_ofec_committee_detail_mv_name;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_organization_type_full RENAME TO idx_ofec_committee_detail_mv_organization_type_full;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_organization_type RENAME TO idx_ofec_committee_detail_mv_organization_type;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_party_full RENAME TO idx_ofec_committee_detail_mv_party_full;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_party RENAME TO idx_ofec_committee_detail_mv_party;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_state RENAME TO idx_ofec_committee_detail_mv_state;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_treasurer_name RENAME TO idx_ofec_committee_detail_mv_treasurer_name;
+ALTER INDEX public.idx_ofec_committee_detail_mv_tmp_treasurer_text RENAME TO idx_ofec_committee_detail_mv_treasurer_text;
