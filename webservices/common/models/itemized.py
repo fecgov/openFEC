@@ -700,10 +700,13 @@ class ScheduleEEfile(BaseRawItemized):
     category_code = db.Column('cat_code', db.String)
     #category_code_full = db.Column('catg_cd_desc', db.String)
     support_oppose_indicator = db.Column('supop', db.String)
-
     notary_sign_date = db.Column('not_date', db.Date)
+    dissemination_date = db.Column('dissem_dt', db.Date, doc=docs.DISSEMINATION_DATE)
 
-    dissemination_date = db.Column('dissem_dt', db.Date)
+    ###new columns
+    # spender_name = db.Column('com_name', db.String)
+    candidate_party = db.Column('cand_pty_affiliation', db.String)
+    most_recent = db.Column('most_recent', db.Boolean)
 
     filing = db.relationship(
         'EFilings',

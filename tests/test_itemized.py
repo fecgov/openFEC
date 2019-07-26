@@ -890,3 +890,15 @@ class TestItemized(ApiBaseTest):
         ]
         results = self._results(api.url_for(ScheduleEView, sort='support_oppose_indicator'))
         self.assertEqual(results[0]['support_oppose_indicator'], 'o')
+
+    def test_filter_most_recent_efilings(self):
+        [
+            factories.ScheduleEEfileFactory(candidate_office='P', candidate_id='P001',
+                candidate_party='DEM', most_recent=True),
+            factories.ScheduleEEfileFactory(candidate_office='H', candidate_id='H001',
+                candidate_party='REP', most_recent=False),
+            factories.ScheduleEEfileFactory(candidate_office='S', candidate_id='S001',
+                candidate_party='REP', most_recent=True),
+        ]
+        results = self._results(api.url_for(ScheduleEEfileView, most_recent=True))
+        self.assertEqual(len(results), 2)

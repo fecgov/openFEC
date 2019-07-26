@@ -7,6 +7,8 @@ from webservices import docs
 from webservices import filters
 from webservices import utils
 from webservices import schemas
+from sqlalchemy.orm import aliased, contains_eager
+from sqlalchemy.dialects import postgresql
 
 from webservices.common import models
 from webservices.common import views
@@ -114,6 +116,10 @@ class ScheduleEEfileView(views.ApiResource):
         ('committee_id', models.ScheduleEEfile.committee_id),
         ('candidate_id', models.ScheduleEEfile.candidate_id),
         ('support_oppose_indicator', models.ScheduleEEfile.support_oppose_indicator),
+        ('candidate_party', models.ScheduleEEfile.candidate_party),
+        ('candidate_office', models.ScheduleEEfile.candidate_office),
+        ('candidate_office_state', models.ScheduleEEfile.cand_office_state),
+        ('candidate_office_district', models.ScheduleEEfile.cand_office_district),
         #('candidate_name', models.ScheduleEEfile.candidate_name),
     ]
 
@@ -123,6 +129,10 @@ class ScheduleEEfileView(views.ApiResource):
 
     filter_fulltext_fields = [
         ('candidate_name', models.ScheduleEEfile.candidate_name),
+    ]
+
+    filter_match_fields = [
+        ('most_recent', models.ScheduleEEfile.most_recent),
     ]
 
     @property
@@ -139,3 +149,26 @@ class ScheduleEEfileView(views.ApiResource):
                 ]),
             ),
         )
+
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+        filing_alias = aliased(models.EFilings)
+        query = query.join(filing_alias, self.model.filing)
+        query = query.options(contains_eager(self.model.filing, alias=filing_alias))
+
+        if kwargs.get('spender_name'):
+                spender_filter = [
+                    filing_alias.committee_name.like('%' + value.upper() + '%')
+                    for value in kwargs.get('spender_name')
+                ]
+                query = query.filter(sa.or_(*spender_filter))
+
+        if kwargs.get('min_filed_date') is not None:
+            query = query.filter(filing_alias.filed_date >= kwargs['min_filed_date'])
+        if kwargs.get('max_filed_date') is not None:
+            query = query.filter(filing_alias.filed_date <= kwargs['max_filed_date'])
+
+        print(str(query.statement.compile(
+            dialect=postgresql.dialect(),
+            compile_kwargs={'literal_binds': True})))
+        return query

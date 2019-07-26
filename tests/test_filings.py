@@ -2,10 +2,8 @@ import datetime
 
 from tests import factories
 from tests.common import ApiBaseTest
-
 from webservices.rest import api
 from webservices.resources.filings import FilingsView, FilingsList, EFilingsView
-
 
 class TestFilings(ApiBaseTest):
 

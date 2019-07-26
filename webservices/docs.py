@@ -1607,3 +1607,11 @@ ACTIVE_CANDIDATE = ''' Candidates who are actively seeking office. If no value i
 are returned. When True is specified, only active candidates are returned. When False is
 specified, only inactive candidates are returned.
 '''
+
+DISSEMINATION_DATE = '''
+Date when a PAC distrubutes or disseminates an independent expenditure
+and pays for it in the same reporting period
+'''
+
+DISSEMINATION_MAX_DATE = 'Selects all items distributed by this committee before this date'
+DISSEMINATION_MIN_DATE = 'Selects all items distributed by this committee after this date'
