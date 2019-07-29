@@ -367,6 +367,7 @@ class TestCandidateAggregates(ApiBaseTest):
             committee_designation='P',
             committee_type='S',
             fec_election_year=2012,
+            election_yr_to_be_included=2012,
         )
         factories.CandidateCommitteeLinkFactory(
             candidate_id=self.candidate.candidate_id,
@@ -374,6 +375,7 @@ class TestCandidateAggregates(ApiBaseTest):
             committee_designation='A',
             committee_type='S',
             fec_election_year=2012,
+            election_yr_to_be_included=2012,
         )
         factories.CandidateCommitteeLinkFactory(
             candidate_id=self.candidate.candidate_id,
@@ -381,6 +383,7 @@ class TestCandidateAggregates(ApiBaseTest):
             committee_designation='A',
             committee_type='S',
             fec_election_year=2010,
+            election_yr_to_be_included=2012,
         )
         # Create a candidate_zero without a committee and $0 in CandidateTotal
         self.candidate_zero = factories.CandidateHistoryFutureFactory(
@@ -602,6 +605,13 @@ class TestCandidateAggregates(ApiBaseTest):
                 size=200,
                 count=20,
             ),
+            factories.ScheduleABySizeFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2010,
+                total=3,
+                size=200,
+                count=3,
+            ),
         ]
         results = self._results(
             api.url_for(
@@ -614,9 +624,27 @@ class TestCandidateAggregates(ApiBaseTest):
         expected = {
             'candidate_id': self.candidate.candidate_id,
             'cycle': 2012,
+            'total': 203,
+            'size': 200,
+            'count': 43,
+        }
+        assert results[0] == expected
+
+        results = self._results(
+            api.url_for(
+                ScheduleABySizeCandidateView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                election_full=False,
+            )
+        )
+        assert len(results) == 1
+        expected = {
+            'candidate_id': self.candidate.candidate_id,
+            'cycle': 2012,
             'total': 200,
             'size': 200,
-            'count': 20,
+            'count': 40,
         }
         assert results[0] == expected
 
@@ -638,6 +666,14 @@ class TestCandidateAggregates(ApiBaseTest):
                 state_full='New York',
                 count=30,
             ),
+            factories.ScheduleAByStateFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2010,
+                total=10.01,
+                state='NY',
+                state_full='New York',
+                count=3,
+            ),
         ]
         results = self._results(
             api.url_for(
@@ -650,10 +686,29 @@ class TestCandidateAggregates(ApiBaseTest):
         expected = {
             'candidate_id': self.candidate.candidate_id,
             'cycle': 2012,
+            'total': 210.01,
+            'state': 'NY',
+            'state_full': 'New York',
+            'count': 63,
+        }
+        assert results[0] == expected
+
+        results = self._results(
+            api.url_for(
+                ScheduleAByStateCandidateView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                election_full=False,
+            )
+        )
+        assert len(results) == 1
+        expected = {
+            'candidate_id': self.candidate.candidate_id,
+            'cycle': 2012,
             'total': 200,
             'state': 'NY',
             'state_full': 'New York',
-            'count': 30,
+            'count': 60,
         }
         assert results[0] == expected
 
