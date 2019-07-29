@@ -120,11 +120,11 @@ class ScheduleEEfileView(views.ApiResource):
         ('candidate_office', models.ScheduleEEfile.candidate_office),
         ('candidate_office_state', models.ScheduleEEfile.cand_office_state),
         ('candidate_office_district', models.ScheduleEEfile.cand_office_district),
-        #('candidate_name', models.ScheduleEEfile.candidate_name),
     ]
 
     filter_range_fields = [
         (('min_expenditure_date', 'max_expenditure_date'), models.ScheduleEEfile.expenditure_date),
+        (('min_dissemination_date', 'max_dissemination_date'), models.ScheduleEEfile.dissemination_date),
     ]
 
     filter_fulltext_fields = [
@@ -168,7 +168,7 @@ class ScheduleEEfileView(views.ApiResource):
         if kwargs.get('max_filed_date') is not None:
             query = query.filter(filing_alias.filed_date <= kwargs['max_filed_date'])
 
-        print(str(query.statement.compile(
-            dialect=postgresql.dialect(),
-            compile_kwargs={'literal_binds': True})))
+        # print(str(query.statement.compile(
+        #     dialect=postgresql.dialect(),
+        #     compile_kwargs={'literal_binds': True})))
         return query

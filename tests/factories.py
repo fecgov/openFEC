@@ -280,12 +280,6 @@ class EFilingsFactory(BaseFactory):
     class Meta:
         model = models.EFilings
 
-class ScheduleEFilingsRawFactory(BaseFactory):
-    file_number = factory.Sequence(lambda n: n)
-
-    class Meta:
-        model = models.ScheduleEEfile
-
 class BaseFilingFactory(BaseFactory):
     file_number = factory.Sequence(lambda n: n)
 

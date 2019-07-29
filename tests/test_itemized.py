@@ -857,9 +857,14 @@ class TestItemized(ApiBaseTest):
 
     def test_filters_sched_e_efile(self):
         filters = [
-            ('image_number', ScheduleEEfile.image_number, ['123', '456']),
             ('committee_id', ScheduleEEfile.committee_id, ['C01', 'C02']),
             ('support_oppose_indicator', ScheduleEEfile.support_oppose_indicator, ['S', 'O']),
+            ('most_recent', ScheduleEEfile.most_recent, [True, False]),
+            ('candidate_office', ScheduleEEfile.candidate_office, ['H', 'S', 'P']),
+            ('candidate_party', ScheduleEEfile.candidate_party, ['DEM', 'REP']),
+            # ('cand_office_state', ScheduleEEfile.cand_office_state, ['AZ', 'AK']),
+            # ('cand_office_district', ScheduleEEfile.cand_office_district, ['00', '01']),
+
         ]
         factories.EFilingsFactory(file_number=123)
         for label, column, values in filters:
@@ -891,14 +896,21 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleEView, sort='support_oppose_indicator'))
         self.assertEqual(results[0]['support_oppose_indicator'], 'o')
 
-    def test_filter_most_recent_efilings(self):
-        [
-            factories.ScheduleEEfileFactory(candidate_office='P', candidate_id='P001',
-                candidate_party='DEM', most_recent=True),
-            factories.ScheduleEEfileFactory(candidate_office='H', candidate_id='H001',
-                candidate_party='REP', most_recent=False),
-            factories.ScheduleEEfileFactory(candidate_office='S', candidate_id='S001',
-                candidate_party='REP', most_recent=True),
-        ]
-        results = self._results(api.url_for(ScheduleEEfileView, most_recent=True))
-        self.assertEqual(len(results), 2)
+    def test_schedule_efiling_dissemination_date_range(self):
+
+        min_date = datetime.date(2018, 1, 1)
+        max_date = datetime.date(2019, 12, 31)
+
+        results = self._results(api.url_for(ScheduleEEfileView, min_dissemination_date=min_date))
+        self.assertTrue(all(each for each in results if each['receipt_date'] >= min_date.isoformat()))
+
+        results = self._results(api.url_for(ScheduleEEfileView, max_dissemination_date=max_date))
+        self.assertTrue(all(each for each in results if each['receipt_date'] <= max_date.isoformat()))
+
+        results = self._results(api.url_for(ScheduleEEfileView, min_dissemination_date=min_date, max_dissemination_date=max_date))
+        self.assertTrue(
+            all(
+                each for each in results
+                if min_date.isoformat() <= each['dissemination_date'] <= max_date.isoformat()
+            )
+        )
