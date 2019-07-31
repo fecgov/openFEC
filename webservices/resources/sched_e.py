@@ -1,19 +1,14 @@
 import sqlalchemy as sa
-from sqlalchemy import func
-from flask_apispec import doc
 
+from flask_apispec import doc
 from webservices import args
 from webservices import docs
-from webservices import filters
 from webservices import utils
 from webservices import schemas
 from sqlalchemy.orm import aliased, contains_eager
-from sqlalchemy.dialects import postgresql
-
 from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
-
 from webservices.common.models import (
     EFilings,
     db
@@ -114,12 +109,11 @@ class ScheduleEEfileView(views.ApiResource):
     filter_multi_fields = [
         ('image_number', models.ScheduleEEfile.image_number),
         ('committee_id', models.ScheduleEEfile.committee_id),
-        ('candidate_id', models.ScheduleEEfile.candidate_id),
         ('support_oppose_indicator', models.ScheduleEEfile.support_oppose_indicator),
         ('candidate_party', models.ScheduleEEfile.candidate_party),
         ('candidate_office', models.ScheduleEEfile.candidate_office),
-        ('candidate_office_state', models.ScheduleEEfile.cand_office_state),
-        ('candidate_office_district', models.ScheduleEEfile.cand_office_district),
+        ('candidate_office_state', models.ScheduleEEfile.candidate_office_state),
+        ('candidate_office_district', models.ScheduleEEfile.candidate_office_district),
     ]
 
     filter_range_fields = [
@@ -128,7 +122,7 @@ class ScheduleEEfileView(views.ApiResource):
     ]
 
     filter_fulltext_fields = [
-        ('candidate_name', models.ScheduleEEfile.candidate_name),
+        ('candidate_search', models.ScheduleEEfile.cand_fulltxt),
     ]
 
     filter_match_fields = [
@@ -167,8 +161,4 @@ class ScheduleEEfileView(views.ApiResource):
             query = query.filter(filing_alias.filed_date >= kwargs['min_filed_date'])
         if kwargs.get('max_filed_date') is not None:
             query = query.filter(filing_alias.filed_date <= kwargs['max_filed_date'])
-
-        # print(str(query.statement.compile(
-        #     dialect=postgresql.dialect(),
-        #     compile_kwargs={'literal_binds': True})))
         return query

@@ -1,9 +1,10 @@
 import datetime
+import sqlalchemy as sa
 
 from tests import factories
+from webservices import rest
 from tests.common import ApiBaseTest
-
-from webservices.rest import api
+from webservices.rest import db,api
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
 from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile, EFilings
@@ -862,8 +863,8 @@ class TestItemized(ApiBaseTest):
             ('most_recent', ScheduleEEfile.most_recent, [True, False]),
             ('candidate_office', ScheduleEEfile.candidate_office, ['H', 'S', 'P']),
             ('candidate_party', ScheduleEEfile.candidate_party, ['DEM', 'REP']),
-            # ('cand_office_state', ScheduleEEfile.cand_office_state, ['AZ', 'AK']),
-            # ('cand_office_district', ScheduleEEfile.cand_office_district, ['00', '01']),
+            ('candidate_office_state', ScheduleEEfile.candidate_office_state, ['AZ', 'AK']),
+            ('candidate_office_district', ScheduleEEfile.candidate_office_district, ['00', '01']),
 
         ]
         factories.EFilingsFactory(file_number=123)
@@ -914,3 +915,14 @@ class TestItemized(ApiBaseTest):
                 if min_date.isoformat() <= each['dissemination_date'] <= max_date.isoformat()
             )
         )
+
+    def test_filter_sched_e_cand_search(self):
+        [
+            factories.ScheduleEEfileFactory(cand_fulltxt=sa.func.to_tsvector('C001, Rob, Senior')),
+            factories.ScheduleEEfileFactory(cand_fulltxt=sa.func.to_tsvector('C002, Ted, Berry')),
+            factories.ScheduleEEfileFactory(cand_fulltxt=sa.func.to_tsvector('C003, Rob, Junior')),
+        ]
+        factories.EFilingsFactory(file_number=123)
+        rest.db.session.flush()
+        results = self._results(api.url_for(ScheduleEEfileView, candidate_search='Rob'))
+        assert len(results) == 2
