@@ -212,6 +212,19 @@ def add_caching_headers(response):
     response.headers.add(cache_header_type, cache_header)
     return response
 
+@app.after_request
+def add_secure_headers(response):
+    """Add secure headers """
+
+    headers = {
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "Deny",
+        "X-XSS-Protection": "1; mode=block",
+        "Content-Security-Policy": "default-src 'none'; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; connect-src localhost:5000 *.fec.gov *.cloud.gov",
+    }
+    for header, value in headers.items():
+        response.headers.add(header, value)
+    return response
 
 @app.errorhandler(Exception)
 def handle_exception(exception):
@@ -310,7 +323,7 @@ def add_aggregate_resource(api, view, schedule, label):
         '/committee/<committee_id>/schedules/schedule_{schedule}/by_{label}/'.format(**locals()),
     )
 
-    
+
 add_aggregate_resource(api, aggregates.ScheduleABySizeView, 'a', 'size')
 add_aggregate_resource(api, aggregates.ScheduleAByStateView, 'a', 'state')
 add_aggregate_resource(api, aggregates.ScheduleAByZipView, 'a', 'zip')
