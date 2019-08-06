@@ -43,6 +43,8 @@ class ScheduleAView(ItemizedResource):
         ('contributor_city', models.ScheduleA.contributor_city),
         ('contributor_state', models.ScheduleA.contributor_state),
         ('recipient_committee_type', models.ScheduleA.recipient_committee_type),
+        ('recipient_committee_org_type', models.ScheduleA.recipient_committee_org_type),
+        ('recipient_committee_designation', models.ScheduleA.recipient_committee_designation),
         ('two_year_transaction_period', models.ScheduleA.two_year_transaction_period),
     ]
     filter_match_fields = [
