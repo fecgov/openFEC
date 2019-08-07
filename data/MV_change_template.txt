@@ -1,5 +1,5 @@
 /*
-Following is a quick summary of the properties of MV/VW that this our MV/VW pair theme based on:
+Following is a quick summary of the properties of MV/VW which our MV/VW pair theme based on:
 
 - Each MV has a VW as its interface, it is defined as:
 CREATE OR REPLACE VIEW ofec_xxxxxxx_vw AS SELECT * FROM ofec_xxxxxxx_mv;
