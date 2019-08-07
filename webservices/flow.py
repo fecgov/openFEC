@@ -35,7 +35,6 @@ def get_graph():
         'reports_house_senate',
         'reports_ie',
         'reports_pac_party',
-        'report_pac_party_all',
         'reports_presidential',
         'sched_a_by_size_merged',
         'sched_a_by_state_recipient_totals',
@@ -77,11 +76,6 @@ def get_graph():
     ])
 
     graph.add_edges_from([
-        ('filing_amendments_pac_party', 'reports_pac_party'),
-        ('filing_amendments_all', 'reports_pac_party'),
-    ])
-
-    graph.add_edges_from([
         ('totals_combined', 'totals_house_senate'),
         ('totals_combined', 'totals_presidential'),
         ('totals_combined', 'totals_pac_party'),
@@ -113,7 +107,7 @@ def get_graph():
 
     graph.add_edges_from([
         ('filings', 'totals_combined'),
-        ('filings', 'report_pac_party_all'),
+        ('filings', 'reports_pac_party'),
         ('filings', 'reports_presidential'),
         ('filings', 'reports_house_senate'),
     ])
