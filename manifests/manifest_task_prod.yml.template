@@ -8,6 +8,7 @@ applications:
   health-check-type: process
   env:
     FEC_API_WHITELIST_IPS: true
+    APP_NAME: fec | api | prod
     PRODUCTION: True
     WEB_CONCURRENCY: 4
   no-route: true
