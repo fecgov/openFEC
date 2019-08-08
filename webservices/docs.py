@@ -1616,6 +1616,6 @@ and pays for it in the same reporting period
 DISSEMINATION_MAX_DATE = 'Selects all items distributed by this committee before this date'
 DISSEMINATION_MIN_DATE = 'Selects all items distributed by this committee after this date'
 
-CANDIDATE_SEARCH = '''
-A filter to search by candiate id and or candidate first or last name
+CANDIDATE_FULL_SEARCH = '''
+Search for candidates by candiate id or candidate first or last name
 '''

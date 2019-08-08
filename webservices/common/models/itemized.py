@@ -700,7 +700,7 @@ class ScheduleEEfile(BaseRawItemized):
     support_oppose_indicator = db.Column('supop', db.String, doc=docs.SUPPORT_OPPOSE_INDICATOR)
     notary_sign_date = db.Column('not_date', db.Date)
     dissemination_date = db.Column('dissem_dt', db.Date, doc=docs.DISSEMINATION_DATE)
-    cand_fulltxt = db.Column(TSVECTOR, doc=docs.CANDIDATE_SEARCH)
+    cand_fulltxt = db.Column(TSVECTOR, doc=docs.CANDIDATE_FULL_SEARCH)
     candidate_party = db.Column('cand_pty_affiliation', db.String, doc=docs.PARTY)
     most_recent = db.Column('most_recent', db.Boolean, doc=docs.MOST_RECENT)
 
