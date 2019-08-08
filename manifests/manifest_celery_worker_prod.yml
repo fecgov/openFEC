@@ -5,10 +5,6 @@ stack: cflinuxfs3
 buildpack: python_buildpack
 env:
   FEC_API_WHITELIST_IPS: true
-  NEW_RELIC_APP_NAME: fec | celery worker | prod
-  NEW_RELIC_CONFIG_FILE: /home/vcap/app/newrelic.ini
-  NEW_RELIC_ENV: production
-  NEW_RELIC_LOG: stdout
   PRODUCTION: True
   WEB_CONCURRENCY: 4
 services:

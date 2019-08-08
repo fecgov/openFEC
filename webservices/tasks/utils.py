@@ -40,6 +40,3 @@ def get_json_data(response):
     # convert the response bytes data to a string
     python_str = json.dumps(response.data.decode('utf-8'))
     return python_str
-
-def get_app_name():
-    return env.get_credential('NEW_RELIC_APP_NAME')

@@ -54,18 +54,6 @@ from webservices.env import env
 from webservices.tasks.response_exception import ResponseException
 from webservices.tasks.error_code import ErrorCode
 
-
-def initialize_newrelic():
-    license_key = env.get_credential('NEW_RELIC_LICENSE_KEY')
-    if license_key:
-        import newrelic.agent
-        settings = newrelic.agent.global_settings()
-        settings.license_key = license_key
-        newrelic.agent.initialize()
-
-
-initialize_newrelic()
-
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 
