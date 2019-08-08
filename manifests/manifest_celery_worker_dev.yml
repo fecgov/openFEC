@@ -4,10 +4,7 @@ memory: 1G
 stack: cflinuxfs3
 buildpack: python_buildpack
 env:
-  NEW_RELIC_APP_NAME: fec | celery worker | dev
-  NEW_RELIC_CONFIG_FILE: /home/vcap/app/newrelic.ini
-  NEW_RELIC_ENV: development
-  NEW_RELIC_LOG: stdout
+  APP_NAME: fec | api | dev
   WEB_CONCURRENCY: 4
 services:
   - fec-api-search56

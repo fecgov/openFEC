@@ -42,4 +42,4 @@ def get_json_data(response):
     return python_str
 
 def get_app_name():
-    return env.get_credential('NEW_RELIC_APP_NAME')
+    return env.get_credential('APP_NAME')
