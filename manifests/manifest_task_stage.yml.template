@@ -7,10 +7,7 @@ applications:
   buildpack: python_buildpack
   env:
     FEC_API_WHITELIST_IPS: true
-    NEW_RELIC_APP_NAME: fec | api | stage
-    NEW_RELIC_CONFIG_FILE: newrelic.ini
-    NEW_RELIC_ENV: staging
-    NEW_RELIC_LOG: stdout
+    APP_NAME: fec | api | stage
     PRODUCTION: True
     WEB_CONCURRENCY: 4
   no-route: true

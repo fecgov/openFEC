@@ -12,7 +12,6 @@ Flask-SQLAlchemy==2.4.0
 python-dateutil==2.4.2
 sqlalchemy-postgres-copy==0.3.0
 networkx==1.11
-newrelic==2.96.0.80
 SQLAlchemy==1.3.1
 icalendar==3.9.1
 GitPython==1.0.1
