@@ -797,17 +797,13 @@ schedule_e = {
 }
 
 schedule_e_efile = {
-    'candidate_search': fields.List(fields.Str, description=docs.CANDIDATE_ID),
+    'candidate_search': fields.List(fields.Str, description=docs.CANDIDATE_FULL_SEARCH),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'payee_name': fields.List(fields.Str, description='Name of the entity that received the payment'),
-    'image_number': fields.List(
-        fields.Str,
-        description='The image number of the page where the schedule item is reported',
-    ),
+    'payee_name': fields.List(fields.Str, description=docs.PAYEE_NAME),
+    'image_number': fields.List(fields.Str, description=docs.IMAGE_NUMBER),
     'support_oppose_indicator': fields.List(
         IStr(validate=validate.OneOf(['S', 'O'])),
-        description='Support or opposition',
-    ),
+        description=docs.SUPPORT_OPPOSE_INDICATOR),
     'min_expenditure_date': fields.Date(description=docs.EXPENDITURE_MIN_DATE),
     'max_expenditure_date': fields.Date(description=docs.EXPENDITURE_MAX_DATE),
     'min_dissemination_date': fields.Date(description=docs.DISSEMINATION_MIN_DATE),

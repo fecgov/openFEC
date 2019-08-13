@@ -717,10 +717,10 @@ class ScheduleEEfile(BaseRawItemized):
     committee = db.relationship(
         'CommitteeHistory',
         primaryjoin='''and_(
-                                ScheduleEEfile.committee_id == CommitteeHistory.committee_id,
-                                extract('year', ScheduleEEfile.load_timestamp) +cast(extract('year',
-                                ScheduleEEfile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
-                                )''',
+                            ScheduleEEfile.committee_id == CommitteeHistory.committee_id,
+                            extract('year', ScheduleEEfile.load_timestamp) +cast(extract('year',
+                            ScheduleEEfile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
+                        )''',
         foreign_keys=committee_id,
         lazy='joined',
     )

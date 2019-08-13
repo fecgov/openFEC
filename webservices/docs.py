@@ -1113,9 +1113,6 @@ of the election.'
 # filings
 ENDING_IMAGE_NUMBER = 'Image number is an unique identifier for each page the electronic or paper \
 report. The last image number corresponds to the image number for the last page of the document.'
-IMAGE_NUMBER = 'An unique identifier for each page the electronic or paper \
-report.'
-
 
 # Reports and Totals
 
@@ -1322,7 +1319,7 @@ down to all entries from form `F3X` line number `16`.
 '''
 
 IMAGE_NUMBER = '''
-The image number of the page where the schedule item is reported.
+An unique identifier for each page where the electronic or paper filing is reported.
 '''
 
 MIN_FILTER = '''
