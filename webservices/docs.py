@@ -1113,9 +1113,6 @@ of the election.'
 # filings
 ENDING_IMAGE_NUMBER = 'Image number is an unique identifier for each page the electronic or paper \
 report. The last image number corresponds to the image number for the last page of the document.'
-IMAGE_NUMBER = 'An unique identifier for each page the electronic or paper \
-report.'
-
 
 # Reports and Totals
 
@@ -1322,7 +1319,7 @@ down to all entries from form `F3X` line number `16`.
 '''
 
 IMAGE_NUMBER = '''
-The image number of the page where the schedule item is reported.
+An unique identifier for each page where the electronic or paper filing is reported.
 '''
 
 MIN_FILTER = '''
@@ -1606,4 +1603,16 @@ TOTAL_BY_OFFICE_BY_PARTY_TAG= ''' Aggregated candidate receipts and disbursement
 ACTIVE_CANDIDATE = ''' Candidates who are actively seeking office. If no value is specified, all candidates
 are returned. When True is specified, only active candidates are returned. When False is
 specified, only inactive candidates are returned.
+'''
+
+DISSEMINATION_DATE = '''
+Date when a PAC distrubutes or disseminates an independent expenditure
+and pays for it in the same reporting period
+'''
+
+DISSEMINATION_MAX_DATE = 'Selects all items distributed by this committee before this date'
+DISSEMINATION_MIN_DATE = 'Selects all items distributed by this committee after this date'
+
+CANDIDATE_FULL_SEARCH = '''
+Search for candidates by candiate id or candidate first or last name
 '''
