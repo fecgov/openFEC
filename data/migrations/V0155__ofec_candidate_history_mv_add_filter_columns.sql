@@ -1,6 +1,14 @@
 /*
 This is part of migration files solving issues 
 	#3912 
+	Add tow columns:
+	fec_cycles_in_election
+	rounded_election_years 
+	
+	Currently, the front-end page round up candidate_election_year list to even number every time the page is called. 
+	Added column rounded_election_years will ease this calculation from front-end.
+	Also the page needs to filter fec_cycle to only include the fec_cycles that belongs to candidate_eletion_years list. 
+	The added fec_cycles_in_election column can be used directly by front-end.
 */
 
 -- ---------------------------------
@@ -177,8 +185,6 @@ SELECT row_number() OVER () AS idx,
     cycles.active_through,
     fec_cycles_in_election.fec_cycles_in_election,
 	cycles.rounded_election_years
-    --,fec_yr.cand_election_yr AS original_cand_election_yr
-    --,fec_yr.next_election
 FROM fec_yr
 LEFT JOIN cycles USING (cand_id)
 LEFT JOIN elections USING (cand_id)
@@ -253,7 +259,7 @@ CREATE UNIQUE INDEX idx_ofec_candidate_history_mv_tmp_idx
 CREATE OR REPLACE VIEW public.ofec_candidate_history_vw AS 
 SELECT * FROM public.ofec_candidate_history_mv_tmp;
 -- ---------------
--- drop the original view:
+-- drop the original materialized view:
 DROP MATERIALIZED VIEW IF EXISTS public.ofec_candidate_history_mv;
 
 -- rename the tmp MV to be real mv:
