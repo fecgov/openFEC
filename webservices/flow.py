@@ -103,6 +103,7 @@ def get_graph():
         ('totals_presidential', 'candidate_aggregates'),
         ('candidate_election', 'candidate_aggregates'),
         ('cand_cmte_linkage', 'candidate_aggregates'),
+        ('cand_cmte_linkage', 'candidate_history'),
     ])
 
     graph.add_edges_from([
