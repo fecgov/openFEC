@@ -684,26 +684,25 @@ class ScheduleEEfile(BaseRawItemized):
 
     # Candidate info
     candidate_id = db.Column('so_canid', db.String)
-    #candidate = utils.related_candidate_history('candidate_id', cycle_label='report_year')
     candidate_name = db.Column('so_can_name', db.String, doc=docs.CANDIDATE_NAME)
     candidate_prefix = db.Column('so_can_prefix', db.String)
     candidate_first_name = db.Column('so_can_fname', db.String)
     candidate_middle_name = db.Column('so_can_mname', db.String)
     candidate_suffix = db.Column('so_can_suffix', db.String)
     candidate_office = db.Column('so_can_off', db.String, doc=docs.OFFICE)
-    cand_office_state = db.Column('so_can_state', db.String, doc=docs.STATE_GENERIC)
-    cand_office_district = db.Column('so_can_dist', db.String, doc=docs.DISTRICT)
+    candidate_office_state = db.Column('so_can_state', db.String, doc=docs.STATE_GENERIC)
+    candidate_office_district = db.Column('so_can_dist', db.String, doc=docs.DISTRICT)
     expenditure_description = db.Column('exp_desc', db.String)
     expenditure_date = db.Column('exp_date', db.Date)
     expenditure_amount = db.Column('amount', db.Integer)
     office_total_ytd = db.Column('ytd', db.Float)
     category_code = db.Column('cat_code', db.String)
-    #category_code_full = db.Column('catg_cd_desc', db.String)
-    support_oppose_indicator = db.Column('supop', db.String)
-
+    support_oppose_indicator = db.Column('supop', db.String, doc=docs.SUPPORT_OPPOSE_INDICATOR)
     notary_sign_date = db.Column('not_date', db.Date)
-
-    dissemination_date = db.Column('dissem_dt', db.Date)
+    dissemination_date = db.Column('dissem_dt', db.Date, doc=docs.DISSEMINATION_DATE)
+    cand_fulltxt = db.Column(TSVECTOR, doc=docs.CANDIDATE_FULL_SEARCH)
+    candidate_party = db.Column('cand_pty_affiliation', db.String, doc=docs.PARTY)
+    most_recent = db.Column('most_recent', db.Boolean, doc=docs.MOST_RECENT)
 
     filing = db.relationship(
         'EFilings',
@@ -718,10 +717,10 @@ class ScheduleEEfile(BaseRawItemized):
     committee = db.relationship(
         'CommitteeHistory',
         primaryjoin='''and_(
-                                ScheduleEEfile.committee_id == CommitteeHistory.committee_id,
-                                extract('year', ScheduleEEfile.load_timestamp) +cast(extract('year',
-                                ScheduleEEfile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
-                                )''',
+                            ScheduleEEfile.committee_id == CommitteeHistory.committee_id,
+                            extract('year', ScheduleEEfile.load_timestamp) +cast(extract('year',
+                            ScheduleEEfile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
+                        )''',
         foreign_keys=committee_id,
         lazy='joined',
     )

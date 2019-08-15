@@ -1,9 +1,10 @@
 import datetime
+import sqlalchemy as sa
 
 from tests import factories
+from webservices import rest
 from tests.common import ApiBaseTest
-
-from webservices.rest import api
+from webservices.rest import db,api
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
 from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile, EFilings
@@ -857,9 +858,14 @@ class TestItemized(ApiBaseTest):
 
     def test_filters_sched_e_efile(self):
         filters = [
-            ('image_number', ScheduleEEfile.image_number, ['123', '456']),
             ('committee_id', ScheduleEEfile.committee_id, ['C01', 'C02']),
             ('support_oppose_indicator', ScheduleEEfile.support_oppose_indicator, ['S', 'O']),
+            ('most_recent', ScheduleEEfile.most_recent, [True, False]),
+            ('candidate_office', ScheduleEEfile.candidate_office, ['H', 'S', 'P']),
+            ('candidate_party', ScheduleEEfile.candidate_party, ['DEM', 'REP']),
+            ('candidate_office_state', ScheduleEEfile.candidate_office_state, ['AZ', 'AK']),
+            ('candidate_office_district', ScheduleEEfile.candidate_office_district, ['00', '01']),
+
         ]
         factories.EFilingsFactory(file_number=123)
         for label, column, values in filters:
@@ -890,3 +896,33 @@ class TestItemized(ApiBaseTest):
         ]
         results = self._results(api.url_for(ScheduleEView, sort='support_oppose_indicator'))
         self.assertEqual(results[0]['support_oppose_indicator'], 'o')
+
+    def test_schedule_efiling_dissemination_date_range(self):
+
+        min_date = datetime.date(2018, 1, 1)
+        max_date = datetime.date(2019, 12, 31)
+
+        results = self._results(api.url_for(ScheduleEEfileView, min_dissemination_date=min_date))
+        self.assertTrue(all(each for each in results if each['receipt_date'] >= min_date.isoformat()))
+
+        results = self._results(api.url_for(ScheduleEEfileView, max_dissemination_date=max_date))
+        self.assertTrue(all(each for each in results if each['receipt_date'] <= max_date.isoformat()))
+
+        results = self._results(api.url_for(ScheduleEEfileView, min_dissemination_date=min_date, max_dissemination_date=max_date))
+        self.assertTrue(
+            all(
+                each for each in results
+                if min_date.isoformat() <= each['dissemination_date'] <= max_date.isoformat()
+            )
+        )
+
+    def test_filter_sched_e_cand_search(self):
+        [
+            factories.ScheduleEEfileFactory(cand_fulltxt=sa.func.to_tsvector('C001, Rob, Senior')),
+            factories.ScheduleEEfileFactory(cand_fulltxt=sa.func.to_tsvector('C002, Ted, Berry')),
+            factories.ScheduleEEfileFactory(cand_fulltxt=sa.func.to_tsvector('C003, Rob, Junior')),
+        ]
+        factories.EFilingsFactory(file_number=123)
+        rest.db.session.flush()
+        results = self._results(api.url_for(ScheduleEEfileView, candidate_search='Rob'))
+        assert len(results) == 2

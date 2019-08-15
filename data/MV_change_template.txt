@@ -1,0 +1,129 @@
+/*
+Following is a quick summary of the properties of MV/VW which our MV/VW pair theme based on:
+
+- Each MV has a VW as its interface, it is defined as:
+CREATE OR REPLACE VIEW ofec_xxxxxxx_vw AS SELECT * FROM ofec_xxxxxxx_mv;
+
+- A child MV always referring to the parents' VW interface instead of directly referencing the parent MVs.
+
+- A view's query condition can be changed with CREATE OR REPLACE VIEW, even with other views depending on it.
+
+- One can add column to a VIEW, if the column is added to the end of the existing columns. With or without depending MV/VW.
+
+- Column name can be altered with ALTER TABLE xxxxx rename column xx to yy.  But not with the CREATE OR REPLACE VIEW statement, with or without depending MV/VW.
+
+- Column can not be inserted in the middle of a view with the CREATE OR REPLACE VIEW statement, the VIEW need to be dropped and recreated.  
+	However, if another VIEW is depending on it, the VIEW can not be dropped without dropping the depending VIEWS first.
+
+- Column can not be dropped from a view with the CREATE OR REPLACE VIEW statement, the VIEW need to be dropped and recreated.  
+	However, if another VIEW is depending on it, the VIEW can not be dropped without dropping the depending VIEW first.
+
+- When query from the VIEW, the query plan shows it will use the index on the base table.
+
+NOTE:
+The new Materialized View infrastructure break the chain reaction of the dependency of layers of MVs, but the dependency of API still need to be considered.  That is, if API(s) still pointing to the MV, the _tmp approach described below still need to be used.
+
+NOTE:
+ALWAYS keep the MV/VW pair in sync.  
+Do not just update the defination of a child VW to take in additional columns without updating the corresponding MV, that will break the pairing of a MV and its interface VW and start a chain of out-of-sync chaos for future maintenance.  
+
+NOTE: 
+IF a new MV/VW pair is added, or MV definition is updated to use different/added MVs as source, the following two files need to be updated to take care of the Materialized View refresh task in correct order, i.e. make sure the parents MV is refreshed before children MVs:
+manage.py 
+flow.py 
+
+NOTE:
+The owner of ALL MV/VW in public schema should be fec, and fec_read should have read permission. Remember to grant correct ownership/permission when create new MV/VW.
+
+After drop/create MV, all ownership and permission need to be re-granted.  The Create or Replace VW statement will keep the original permission without specifing the ownership/permission explicitly, but it is better to include the ownership/permission statement so one won't forget it.
+
+NOTE:
+In general, an index name in the format of
+idx_ofec_xxxxxxx_mv_columnNames (idx_ofec_xxxxxxx_mv_tmp_columnNames in the case of the __tmp MV) is used.  Be mindful when naming the index for the MV that the object name length limit in Postgresql is 63 bytes.  When over this limit, Postgresql will still create the index, but with truncated name.  In that case, the renaming index to remove the _tmp in the following step won't find the correct column to rename.  An abbreviated but meaningful column_name in the indexName should be considered, and try to keep them consistent for all indexes in an MV.  
+For example, use cand_id for candidate_id, cmte_id for committee_id, disb_dt for disbursement_date.
+
+
+General steps needed when updating the MV definition:
+
+Step 1. Create a _tmp MV with updated logic and/or added columns (note the general rules list in the beginning section) as required to solve the ticket.
+
+Step 2. Alter the interface VW to point to the new _tmp MV.  
+This step temporarily break the dependency of the MV/VW pair to allow the drop of the original MV.  
+ 
+CREATE OR REPLACE VIEW ofec_xxxxxxx_vw AS SELECT * FROM ofec_xxxxxxx_mv_tmp;
+
+Step 3. Drop the original MV.  Then rename the ofec_xxxxxxx_mv_tmp to ofec_xxxxxxx_mv.
+Drop/rename is much quicker than create MV step, using this approach minimize the downtime if any API is referencing the MVs.
+
+The interface VW created in step 2 will still be linked to this new MV (originally named ofec_xxxxxxx_mv_tmp now renamed to ofec_xxxxxxx_mv).  No need to repoint.
+
+(OPTIONAL Step 4) 
+If the main purpose of the ticket is to fix data of a child MV immediately, then add an refresh statement of the child MV after parent MV had been updated.  Please note, with API referencing the MV, "REFRESH CONCURRENTLY" is needed instead of simple "REFRESH" to allow refreshing data without locking out concurrent selects on the MV.  This option is only allowed if there is at least one unique index on the MV.  And refresh concurrently will take longer than simple refresh.
+
+NOTE:
+The above steps provide general guideline of this process.  It can have variations, depending on the situation. 
+For example, if a brand new MV/VW is created, there is no need to go through the _tmp approach.
+*/
+
+
+Following is an example of a migration file that change definition of a MATERIALIZED VIEW: 
+
+/*
+This migration file is to solve 
+issue #xxxx (brief description here)
+*/
+
+-- ---------------
+-- ofec_xxxxxxx_mv
+-- ---------------
+-- create a ofec_xxxxxxx_mv_tmp MV with the updated definition
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_xxxxxxx_mv_tmp;
+
+CREATE MATERIALIZED VIEW public.ofec_xxxxxxx_mv_tmp AS 
+	-- updated definition here
+WITH DATA;
+
+-- grant correct ownership/permission
+ALTER TABLE public.ofec_xxxxxxx_mv_tmp
+  OWNER TO fec;
+GRANT ALL ON TABLE public.ofec_xxxxxxx_mv_tmp TO fec;
+GRANT SELECT ON TABLE public.ofec_xxxxxxx_mv_tmp TO fec_read;
+
+-- create index on the _tmp MV
+CREATE UNIQUE INDEX idx_ofec_xxxxxxx_mv_tmp_columnName1
+  ON public.ofec_xxxxxxx_mv_tmp
+  USING btree
+  (columnName1 COLLATE pg_catalog."default");
+
+CREATE INDEX idx_ofec_xxxxxxx_mv_tmp_columnName2
+  ON public.ofec_xxxxxxx_mv_tmp
+  USING gin
+  (columnName2);
+
+-- update the interface VW to point to the updated _tmp MV
+-- ---------------
+CREATE OR REPLACE VIEW public.ofec_xxxxxxx_vw AS 
+SELECT * FROM public.ofec_xxxxxxx_mv_tmp;
+
+-- grant correct ownership/permission
+ALTER TABLE public.ofec_xxxxxxx_vw
+  OWNER TO fec;
+GRANT ALL ON TABLE public.ofec_xxxxxxx_vw TO fec;
+GRANT SELECT ON TABLE public.ofec_xxxxxxx_vw TO fec_read;
+
+-- DROP the original MV and rename the ofec_xxxxxxx_mv_tmp to ofec_xxxxxxx_mv
+-- ---------------
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_xxxxxxx_mv;
+
+ALTER MATERIALIZED VIEW IF EXISTS public.ofec_xxxxxxx_mv_tmp RENAME TO ofec_xxxxxxx_mv;
+
+-- Alter index name to remove the _tmp
+-- ---------------
+ALTER INDEX public.idx_ofec_xxxxxxx_mv_tmp_columnName1 RENAME TO idx_ofec_xxxxxxx_mv_columnName1;
+
+ALTER INDEX public.idx_ofec_xxxxxxx_mv_tmp_columnName2 RENAME TO idx_ofec_xxxxxxx_mv_columnName2;
+
+
+-- OPTIONAL, refresh child MV (ofec_yyyyyyy_mv) if need to see the result immediately
+-- ---------------
+REFRESH MATERIALIZED VIEW CONCURRENTLY ofec_yyyyyyy_mv;
