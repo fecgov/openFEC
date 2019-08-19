@@ -161,10 +161,8 @@ class TotalsCommitteeView(ApiResource):
     },
 )
 class CandidateTotalsView(utils.Resource):
-
     @use_kwargs(args.paging)
-    @use_kwargs(args.totals)
-    @use_kwargs(args.candidate_committee_totals)
+    @use_kwargs(args.candidate_totals_detail)
     @use_kwargs(args.make_sort_args(default='-cycle'))
     @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
     def get(self, candidate_id, **kwargs):
@@ -187,12 +185,23 @@ class CandidateTotalsView(utils.Resource):
             default_schemas,
         )
         query = totals_class.query
-        if kwargs.get('cycle'):
-            query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
-        if candidate_id:
-            query = query.filter(totals_class.candidate_id == candidate_id)
-        if kwargs.get('full_election') is not None:
-            query = query.filter(totals_class.full_election == kwargs['full_election'])
+        query = query.filter(totals_class.candidate_id == candidate_id)
+
+        if kwargs.get('election_full') is None:
+            # not pass election_full
+            if kwargs.get('cycle'):
+                # only filter by cycle
+                query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
+        else:
+            # pass election_full (true or false)
+            query = query.filter(totals_class.election_full == kwargs['election_full'])
+            if kwargs.get('cycle'):
+                if kwargs.get('election_full'):
+                    # if election_full = true, filter by candidate_election_year = cycle
+                    query = query.filter(totals_class.candidate_election_year.in_(kwargs['cycle']))
+                else:
+                    # if election_full = false, filter by cycle = cycle
+                    query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
         return query, totals_class, totals_schema
 
     def _resolve_committee_type(self, candidate_id=None, **kwargs):

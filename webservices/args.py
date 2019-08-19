@@ -57,7 +57,7 @@ class District(fields.Str):
     def _deserialize(self, value, attr, data):
         return '{0:0>2}'.format(value)
 
-election_full = fields.Bool(missing=True, description='Aggregate values over full election period')
+election_full = fields.Bool(missing=True, description=docs.ELECTION_FULL)
 
 paging = {
     'page': Natural(missing=1, description='For paginating through results, starting at page 1'),
@@ -281,12 +281,13 @@ committee_list = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'state': fields.List(IStr, description=docs.STATE_GENERIC),
     'party': fields.List(IStr, description=docs.PARTY),
-    'min_first_file_date': fields.Date(description='Filter for committees whose first filing was received on or after this date'),
-    'max_first_file_date': fields.Date(description='Filter for committees whose first filing was received on or before this date'),
-    'min_last_f1_date': fields.Date(description='Filter for committees whose latest Form 1 was received on or after this date'),
-    'max_last_f1_date': fields.Date(description='Filter for committees whose latest Form 1 was received on or before this date'),
+    'min_first_file_date': fields.Date(description=docs.MIN_FIRST_FILE_DATE),
+    'max_first_file_date': fields.Date(description=docs.MAX_FIRST_FILE_DATE),
+    'min_last_f1_date': fields.Date(description=docs.MIN_LAST_F1_DATE),
+    'max_last_f1_date': fields.Date(description=docs.MAX_LAST_F1_DATE),
     'treasurer_name': fields.List(fields.Str, description=docs.TREASURER_NAME),
 }
+
 
 committee_history = {
     'election_full': election_full,
@@ -399,8 +400,10 @@ totals_all = {
     'committee_id': fields.Str(description=docs.COMMITTEE_ID),
 }
 
-candidate_committee_totals = {
-    'full_election': fields.Bool(description='Get totals for full election period.')
+candidate_totals_detail = {
+    # no default value for election_full
+    'election_full': fields.Bool(description=docs.ELECTION_FULL),
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
 }
 
 
