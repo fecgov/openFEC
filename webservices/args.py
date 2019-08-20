@@ -797,22 +797,27 @@ schedule_e = {
 }
 
 schedule_e_efile = {
+    'candidate_search': fields.List(fields.Str, description=docs.CANDIDATE_FULL_SEARCH),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'payee_name': fields.List(fields.Str, description='Name of the entity that received the payment'),
-    'candidate_name': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
-    'image_number': fields.List(
-        fields.Str,
-        description='The image number of the page where the schedule item is reported',
-    ),
+    'payee_name': fields.List(fields.Str, description=docs.PAYEE_NAME),
+    'image_number': fields.List(fields.Str, description=docs.IMAGE_NUMBER),
     'support_oppose_indicator': fields.List(
         IStr(validate=validate.OneOf(['S', 'O'])),
-        description='Support or opposition',
-    ),
-    'min_expenditure_date': fields.Date(description=docs.EXPENDITURE_MAX_DATE),
-    'max_expenditure_date': fields.Date(description=docs.EXPENDITURE_MIN_DATE),
-    'min_expenditure_amount': fields.Date(description=docs.EXPENDITURE_MIN_AMOUNT),
-    'max_expenditure_amount': fields.Date(description=docs.EXPENDITURE_MAX_AMOUNT),
+        description=docs.SUPPORT_OPPOSE_INDICATOR),
+    'min_expenditure_date': fields.Date(description=docs.EXPENDITURE_MIN_DATE),
+    'max_expenditure_date': fields.Date(description=docs.EXPENDITURE_MAX_DATE),
+    'min_dissemination_date': fields.Date(description=docs.DISSEMINATION_MIN_DATE),
+    'max_dissemination_date': fields.Date(description=docs.DISSEMINATION_MAX_DATE),
+    'min_expenditure_amount': fields.Integer(description=docs.EXPENDITURE_MIN_AMOUNT),
+    'max_expenditure_amount': fields.Integer(description=docs.EXPENDITURE_MAX_AMOUNT),
+    'spender_name': fields.List(IStr, description=docs.COMMITTEE_NAME),
+    'candidate_party': fields.List(IStr, description=docs.PARTY),
+    'candidate_office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
+    'candidate_office_state': fields.List(IStr, description=docs.STATE),
+    'candidate_office_district': fields.List(IStr, description=docs.DISTRICT),
+    'most_recent': fields.Bool(description=docs.MOST_RECENT),
+    'min_filed_date': fields.Date(description=docs.FILED_DATE),
+    'max_filed_date': fields.Date(description=docs.FILED_DATE),
 }
 
 rad_analyst = {

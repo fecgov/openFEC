@@ -821,6 +821,7 @@ ItemizedScheduleEfilingsSchema = make_schema(
         'csv_url': ma.fields.Str(),
     },
     options={
+        'exclude': ['cand_fulltxt'],
         'relationships': [
             Relationship(
                 models.ScheduleEEfile.committee,
