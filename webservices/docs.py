@@ -45,7 +45,10 @@ RECORD_YEAR = '''
 Filter records to only those that were applicable to a given year.
 '''
 
-ELECTION_FULL = '`True` indicates that full election period of a candidate. `False` indicates that two year election cycle.'
+ELECTION_FULL = '''`True` indicates that full election period of a candidate.
+`False` indicates that two year election cycle.'''
+
+FULL_ELECTION = 'Parameter `full_election` is replaced by `election_full`. Please use `election_full` instead.'
 
 # committee uses a different definition for cycle because it is less straight forward
 CYCLE = '''
@@ -301,6 +304,8 @@ totals from 2013 and 2014, you would use 2014. In odd-numbered years, the curren
 is the next year — for example, in 2015, the current cycle is 2016.
 
 For presidential and Senate candidates, multiple two-year cycles exist between elections.
+
+Parameter `full_election` is replaced by `election_full`. Please use `election_full` instead.
 '''
 
 SCHEDULE_A_TAG = '''
