@@ -6,6 +6,7 @@ buildpack: python_buildpack
 env:
   FEC_API_WHITELIST_IPS: true
   APP_NAME: fec | api | stage
+  PRODUCTION: True
   WEB_CONCURRENCY: 4
 services:
   - fec-api-search56
