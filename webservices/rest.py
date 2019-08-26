@@ -202,7 +202,7 @@ def add_caching_headers(response):
 
 @app.after_request
 def add_secure_headers(response):
-    """Add secure headers """
+    """Add secure headers to each response"""
 
     headers = {
         "X-Content-Type-Options": "nosniff",
@@ -210,10 +210,24 @@ def add_secure_headers(response):
         "X-XSS-Protection": "1; mode=block",
     }
     if env.get_credential('PRODUCTION'):
-        headers["Content-Security-Policy"] = "default-src 'self' data: *.fec.gov *.app.cloud.gov; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; connect-src *.fec.gov *.cloud.gov"
-    # Add localhost options
+        headers["Content-Security-Policy"] = \
+            "default-src 'self' " \
+            "data: *.fec.gov *.app.cloud.gov; " \
+            "img-src 'self' data:; " \
+            "script-src 'self' 'unsafe-inline'; " \
+            "style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; " \
+            "font-src 'self' https://fonts.gstatic.com data:; " \
+            "connect-src *.fec.gov *.cloud.gov"
+    # local development options
     else:
-        headers["Content-Security-Policy"] = "default-src 'self' data: *.fec.gov *.app.cloud.gov localhost:* http://127.0.0.1:*; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; connect-src *.fec.gov *.cloud.gov localhost:* http://127.0.0.1:*"
+        headers["Content-Security-Policy"] = \
+            "default-src 'self' " \
+            "data: *.fec.gov *.app.cloud.gov localhost:* http://127.0.0.1:*; " \
+            "img-src 'self' data:; " \
+            "script-src 'self' 'unsafe-inline'; " \
+            "style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; " \
+            "font-src 'self' https://fonts.gstatic.com data:; " \
+            "connect-src *.fec.gov *.cloud.gov localhost:* http://127.0.0.1:*"
 
     for header, value in headers.items():
         response.headers.add(header, value)
