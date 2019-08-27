@@ -211,12 +211,13 @@ def add_secure_headers(response):
         "X-XSS-Protection": "1; mode=block",
     }
     content_security_policy = {
-        "default-src": "'self' data: *.fec.gov *.app.cloud.gov",
+        "default-src": "'self' *.fec.gov *.app.cloud.gov",
         "img-src": "'self' data:",
         "script-src": "'self' 'unsafe-inline'",
         "style-src": "'self' https://fonts.googleapis.com 'unsafe-inline'",
         "font-src": "'self' https://fonts.gstatic.com data:",
         "connect-src": "*.fec.gov *.cloud.gov",
+        "object-src": "'none'",
     }
     if env.app.get('space_name', 'local').lower() == 'local':
         content_security_policy["default-src"] += " localhost:* http://127.0.0.1:*"
