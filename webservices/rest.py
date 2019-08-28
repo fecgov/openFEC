@@ -204,7 +204,11 @@ def add_caching_headers(response):
 
 @app.after_request
 def add_secure_headers(response):
-    """Add secure headers to each response"""
+    """
+    Add secure headers to each response.
+    The 'unsafe-inline' Content Security Policy (CSP) setting is
+    needed for Swagger docs (see https://github.com/swagger-api/swagger-ui/issues/3370)
+    """
 
     headers = {
         "X-Content-Type-Options": "nosniff",
