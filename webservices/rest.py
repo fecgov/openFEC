@@ -6,6 +6,7 @@ full documentation visit: https://api.open.fec.gov/developers.
 import http
 import logging
 import os
+import ujson
 import sqlalchemy as sa
 import flask_cors as cors
 import flask_restful as restful
@@ -218,6 +219,7 @@ def add_secure_headers(response):
         "font-src": "'self' https://fonts.gstatic.com data:",
         "connect-src": "*.fec.gov *.cloud.gov",
         "object-src": "'none'",
+        "report-uri": "/report-csp-violation/",
     }
     if env.app.get('space_name', 'local').lower() == 'local':
         content_security_policy["default-src"] += " localhost:* http://127.0.0.1:*"
@@ -506,6 +508,17 @@ def api_ui():
         specs_url=url_for('docs.api_spec'),
         PRODUCTION=env.get_credential('PRODUCTION'),
     )
+
+
+@app.route('/report-csp-violation/', methods=['POST'])
+def report():
+    """
+    Log Content Security Policy (CSP) violations from the browser
+    for both API and CMS.
+    Reports come in with tag 'csp-report'
+    """
+    app.logger.info(ujson.loads(str(request.data, 'utf-8')))
+    return util.output_json("CSP violation reported", 200)
 
 
 app.register_blueprint(docs)
