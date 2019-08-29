@@ -131,6 +131,10 @@ CREATE UNIQUE INDEX idx_ofec_cand_cmte_linkage_mv_tmp_idx
 CREATE OR REPLACE VIEW public.ofec_cand_cmte_linkage_vw AS 
 SELECT * FROM public.ofec_cand_cmte_linkage_mv_tmp;
 -- ---------------
+ALTER TABLE public.ofec_cand_cmte_linkage_vw
+  OWNER TO fec;
+GRANT ALL ON TABLE public.ofec_cand_cmte_linkage_vw TO fec;
+GRANT SELECT ON TABLE public.ofec_cand_cmte_linkage_vw TO fec_read;
 
 -- drop old MV
 DROP MATERIALIZED VIEW public.ofec_cand_cmte_linkage_mv;
