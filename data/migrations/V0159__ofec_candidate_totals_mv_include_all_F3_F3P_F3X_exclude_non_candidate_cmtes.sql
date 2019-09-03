@@ -39,9 +39,9 @@ WITH totals AS (
             ofec_cand_cmte_linkage_vw.fec_election_yr,
             ofec_cand_cmte_linkage_vw.cmte_id
            FROM ofec_cand_cmte_linkage_vw
-          WHERE ofec_cand_cmte_linkage_vw.cmte_dsgn::text = ANY (ARRAY['P'::character varying::text, 'A'::character varying::text])
+          WHERE ofec_cand_cmte_linkage_vw.cmte_dsgn in ('P','A')
           -- should only include candidate committees 
-          AND substr(ofec_cand_cmte_linkage_vw.cand_id, 1, 1) = ofec_cand_cmte_linkage_vw.cmte_tp
+          AND ofec_cand_cmte_linkage_vw.cmte_tp in ('H','P','S')
           --
           GROUP BY ofec_cand_cmte_linkage_vw.cand_id, ofec_cand_cmte_linkage_vw.election_yr_to_be_included, ofec_cand_cmte_linkage_vw.fec_election_yr, ofec_cand_cmte_linkage_vw.cmte_id
         ), cycle_cmte_totals_basic AS (
