@@ -133,7 +133,7 @@ BLOCKED_IPS = env.get_credential('BLOCKED_IPS', '')
 FEC_API_WHITELIST_IPS = env.get_credential('FEC_API_WHITELIST_IPS', False)
 # Search this key_id in the API umbrella admin interface to look up the API KEY
 DOWNLOAD_WHITELIST_API_KEY_ID = env.get_credential('DOWNLOAD_WHITELIST_API_KEY_ID')
-RESTRICT_DOWNLOADS = env.get_credential('RESTRICT_DOWNLOADS')
+RESTRICT_DOWNLOADS = env.get_credential('RESTRICT_DOWNLOADS', False)
 
 @app.before_request
 def limit_remote_addr():
