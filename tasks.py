@@ -215,19 +215,22 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
 
     # Deploy API and worker applications
     for app in ('api', 'celery-worker', 'celery-beat'):
-        existing_app_deployed = ctx.run('cf app {0}'.format(app), echo=True, warn=True)
         # Option 1: use v3-zdt-push as described https://docs.cloud.service.gov.uk/get_started.html#use-cloud-foundry-api-version-3
-        # Do we need to create the app with the v3 commands as well?
-        #cmd = 'v3-zdt-push' if deployed.ok else 'v3-create-app'
-        # #add manifests
-        # ctx.run('cf {cmd} {app} -f manifests/manifest_{file}_{space}.yml'.format(
-        #     cmd=cmd,
-        #     app=app,
-        #     file=app.replace('-','_'),
-        #     space=space
-        # ), echo=True)
+        existing_app_deployed = ctx.run('cf app {0}'.format(app), echo=True, warn=True)
+        # TODO: Do we need to create the app with the v3 commands as well?
+        deploy_command = 'v3-zdt-push' if existing_app_deployed.ok else 'v3-create-app'
+        ctx.run('cf {cmd} {app}'.format(
+            cmd=deploy_command,
+            app=app), echo=True)
+        ctx.run('cf v3-apply-manifest {app} -f manifests/manifest_{file}_{space}.yml'.format(
+            app=app,
+            file=app.replace('-', '_'),
+            space=space
+        ), echo=True)
 
         # Option 2: hand-roll zero-downtime approach
+
+        """
         deploy_command = 'cf push {app} -f manifests/manifest_{file}_{space}.yml'.format(
             app=app,
             file=app.replace('-', '_'),
@@ -247,6 +250,7 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
                 ctx.run('cf rename {0}-venerable {0}'.format(app), echo=True)
         else:
             ctx.run(deploy_command, echo=True)
+        """
 
 @task
 def create_sample_db(ctx):
