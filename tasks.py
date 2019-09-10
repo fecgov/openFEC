@@ -244,14 +244,12 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
             new_app_deployed = ctx.run('cf app {0}'.format(app), echo=True, warn=True)
             # If that was successful, delete old venerable app
             if new_app_deployed.ok:
-                ctx.run('cf delete {0}-venerable'.format(app), echo=True)
+                ctx.run('cf delete -f {0}-venerable'.format(app), echo=True)
             # If not, fall back to venerable app
             else:
                 ctx.run('cf rename {0}-venerable {0}'.format(app), echo=True)
         else:
             ctx.run(deploy_command, echo=True)
-
-
 
 @task
 def create_sample_db(ctx):
