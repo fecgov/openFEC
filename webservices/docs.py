@@ -45,6 +45,11 @@ RECORD_YEAR = '''
 Filter records to only those that were applicable to a given year.
 '''
 
+ELECTION_FULL = '''`True` indicates that full election period of a candidate.
+`False` indicates that two year election cycle.'''
+
+FULL_ELECTION = 'Parameter `full_election` is replaced by `election_full`. Please use `election_full` instead.'
+
 # committee uses a different definition for cycle because it is less straight forward
 CYCLE = '''
 Filter records to only those that are applicable to a given two-year
@@ -299,6 +304,8 @@ totals from 2013 and 2014, you would use 2014. In odd-numbered years, the curren
 is the next year — for example, in 2015, the current cycle is 2016.
 
 For presidential and Senate candidates, multiple two-year cycles exist between elections.
+
+Parameter `full_election` is replaced by `election_full`. Please use `election_full` instead.
 '''
 
 SCHEDULE_A_TAG = '''
@@ -978,12 +985,31 @@ FEDERAL_FUNDS_FLAG = 'A boolean the describes if a presidential candidate has ac
 The flag will be false for House and Senate candidates.'
 
 CANDIDATE_ELECTION_YEARS = 'Years in which a candidate ran for office.'
+
 CANDIDATE_ELECTION_YEAR = 'Year a candidate runs for federal office.'
+
+ROUNDED_ELECTION_YEARS = 'Rounded election years in which a candidate ran for office'
+
+FEC_CYCLES_IN_ELECTION = 'FEC cycles are included in candidate election years.'
+
+LAST_CANDIDATE_ELECTION_YEAR = 'The last year of the cycle for this election.'
+
+F2_CANDIDATE_CITY = 'City of candidate\'s address, as reported on their Form 2.'
+
+F2_CANDIDATE_STATE = 'State of candidate\'s address, as reported on their Form 2.'
+
+F2_CANDIDATE_STREET_1 = 'Street of candidate\'s address, as reported on their Form 2.'
+
+F2_CANDIDATE_STREET_2 = 'Additional street information of candidate\'s address, as reported on their Form 2.'
+
+F2_CANDIDATE_ZIP = 'Zip code of candidate\'s address, as reported on their Form 2.'
+
 
 # committees
 COMMITTEE_NAME = 'The name of the committee. If a committee changes its name, \
     the most recent name will be shown. Committee names are not unique. Use committee_id \
     for looking up records.'
+
 COMMITTEE_YEAR = 'A year that the committee was active— (after original registration date \
     or filing but before expiration date)'
 FILING_FREQUENCY = 'The one-letter \n\
@@ -1045,12 +1071,25 @@ PAC_PARTY_TYPE = 'The one-letter type code of a PAC/Party organization:\n\
 
 TREASURER_NAME = 'Name of the Committee\'s treasurer. If multiple treasurers for the \
 committee, the most recent treasurer will be shown.'
+
 COMMITTEE_STATE = 'State of the committee\'s address as filed on the Form 1'
+
 FIRST_FILE_DATE = 'The day the FEC received the committee\'s first filing. \
 This is usually a Form 1 committee registration.'
+
 LAST_FILE_DATE = 'The day the FEC received the committee\'s most recent filing'
+
 LAST_F1_DATE = 'The day the FEC received the committee\'s most recent Form 1'
+
 MEANS_FILED = 'The method used to file with the FEC, either electronic or on paper.'
+
+MIN_FIRST_FILE_DATE = 'Filter for committees whose first filing was received on or after this date.'
+
+MAX_FIRST_FILE_DATE = 'Filter for committees whose first filing was received on or before this date.'
+
+MIN_LAST_F1_DATE = 'Filter for committees whose latest Form 1 was received on or after this date.'
+
+MAX_LAST_F1_DATE = 'Filter for committees whose latest Form 1 was received on or before this date.'
 
 # schedules
 MEMO_CODE = "'X' indicates that the amount is NOT to be included in the itemization total."

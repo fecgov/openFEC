@@ -208,34 +208,32 @@ class TestCandidateHistory(ApiBaseTest):
             factories.CandidateDetailFactory(candidate_id='P002'),
         ]
         self.histories = [
-            factories.CandidateHistoryFactory(candidate_id=self.candidates[0].candidate_id, two_year_period=2010),
-            factories.CandidateHistoryFactory(candidate_id=self.candidates[1].candidate_id, two_year_period=2012),
+            factories.CandidateHistoryFactory(
+                candidate_id=self.candidates[0].candidate_id,
+                two_year_period=2010,
+                candidate_election_year=2012,
+            ),
+            factories.CandidateHistoryFactory(
+                candidate_id=self.candidates[1].candidate_id,
+                two_year_period=2012,
+                candidate_election_year=2012,
+            ),
         ]
         db.session.flush()
         self.links = [
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=self.candidates[0].candidate_id,
                 committee_id=self.committee.committee_id,
+                election_yr_to_be_included=2012,
                 fec_election_year=2010,
                 committee_type='P',
             ),
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=self.candidates[1].candidate_id,
                 committee_id=self.committee.committee_id,
+                election_yr_to_be_included=2012,
                 fec_election_year=2012,
                 committee_type='P',
-            ),
-        ]
-        self.elections = [
-            factories.CandidateElectionFactory(
-                candidate_id=self.candidates[0].candidate_id,
-                cand_election_year=2012,
-                prev_election_year=2008,
-            ),
-            factories.CandidateElectionFactory(
-                candidate_id=self.candidates[1].candidate_id,
-                cand_election_year=2012,
-                prev_election_year=2008,
             ),
         ]
 
@@ -251,13 +249,17 @@ class TestCandidateHistory(ApiBaseTest):
         assert results[0]['two_year_period'] == history_2012.two_year_period
         assert results[1]['two_year_period'] == history_2008.two_year_period
 
-    def test_house_cand_history_between_cycles(self):
-        # Committee
-        factories.CommitteeDetailFactory()
+    def test_election_full(self):
+        # When elction_full=true, two_year_period should equal to candidate_election_year
         candidate = factories.CandidateDetailFactory(candidate_id='H001')
-        history = factories.CandidateHistoryFactory(
+        history_election_full_false = factories.CandidateHistoryFactory(
             candidate_id=candidate.candidate_id,
             two_year_period=2018,
+            candidate_election_year=2020,
+        )
+        history_election_full_true = factories.CandidateHistoryFactory(
+            candidate_id=candidate.candidate_id,
+            two_year_period=2020,
             candidate_election_year=2020,
         )
         db.session.flush()
@@ -266,26 +268,36 @@ class TestCandidateHistory(ApiBaseTest):
             candidate_id=candidate.candidate_id,
             fec_election_year=2018,
             committee_type='H',
+            election_yr_to_be_included=2020,
         )
-        factories.CandidateElectionFactory(
-            candidate_id=candidate.candidate_id,
-            cand_election_year=2020,
-            prev_election_year=2018,
+
+        # test election_full='false'
+        results_false = self._results(
+            api.url_for(
+                CandidateHistoryView,
+                candidate_id=candidate.candidate_id,
+                cycle=2018,
+                election_full='false',
+            )
         )
-        # Make sure future house candidate returns results
-        results = self._results(
+        assert len(results_false) == 1
+        assert results_false[0]['candidate_id'] == history_election_full_false.candidate_id
+        assert results_false[0]['two_year_period'] == history_election_full_false.two_year_period
+        assert results_false[0]['candidate_election_year'] == history_election_full_false.candidate_election_year
+
+        # test election_full='true'
+        results_true = self._results(
             api.url_for(
                 CandidateHistoryView,
                 candidate_id=candidate.candidate_id,
                 cycle=2020,
-                # election_full='false' is strictly 2-year period
                 election_full='true',
             )
         )
-        assert len(results) == 1
-        assert results[0]['candidate_id'] == history.candidate_id
-        assert results[0]['two_year_period'] == history.two_year_period
-        assert results[0]['candidate_election_year'] == history.candidate_election_year
+        assert len(results_true) == 1
+        assert results_true[0]['candidate_id'] == history_election_full_true.candidate_id
+        assert results_true[0]['two_year_period'] == history_election_full_true.two_year_period
+        assert results_true[0]['candidate_election_year'] == history_election_full_true.candidate_election_year
 
     def test_committee_cycle(self):
         results = self._results(
@@ -297,16 +309,3 @@ class TestCandidateHistory(ApiBaseTest):
         assert len(results) == 1
         assert results[0]['two_year_period'] == 2012
         assert results[0]['candidate_id'] == self.candidates[1].candidate_id
-
-    def test_election_full(self):
-        results = self._results(
-            api.url_for(
-                CandidateHistoryView,
-                committee_id=self.committee.committee_id, cycle=2012, election_full='true',
-            )
-        )
-        assert len(results) == 2
-        assert results[0]['two_year_period'] == 2010
-        assert results[0]['candidate_id'] == self.candidates[0].candidate_id
-        assert results[1]['two_year_period'] == 2012
-        assert results[1]['candidate_id'] == self.candidates[1].candidate_id

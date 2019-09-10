@@ -31,6 +31,7 @@ def output_json(data, code, headers=None):
     dumped = ujson.dumps(data, **settings) + '\n'
 
     resp = flask.make_response(dumped, code)
+    resp.mimetype = 'application/json'
     resp.headers.extend(headers or {})
     return resp
 

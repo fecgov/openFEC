@@ -103,6 +103,7 @@ def get_graph():
         ('totals_presidential', 'candidate_aggregates'),
         ('candidate_election', 'candidate_aggregates'),
         ('cand_cmte_linkage', 'candidate_aggregates'),
+        ('cand_cmte_linkage', 'candidate_history'),
     ])
 
     graph.add_edges_from([
@@ -116,6 +117,12 @@ def get_graph():
         ('candidate_election', 'totals_candidate_committee'),
         ('filings', 'totals_candidate_committee'),
         ('cand_cmte_linkage', 'totals_candidate_committee'),
+    ])
+
+    graph.add_edges_from([
+        ('cand_cmte_linkage', 'candidate_totals_detail'),
+        ('totals_combined', 'candidate_totals_detail'),
+        ('ofec_agg_coverage_date', 'candidate_totals_detail'),
     ])
 
     graph.add_edge('committee_history', 'communication_cost')
