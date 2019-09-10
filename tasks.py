@@ -215,8 +215,10 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
 
     # Deploy API and worker applications
     for app in ('api', 'celery-worker', 'celery-beat'):
-        # Option 1: use v3-zdt-push as described https://docs.cloud.service.gov.uk/get_started.html#use-cloud-foundry-api-version-3
         existing_app_deployed = ctx.run('cf app {0}'.format(app), echo=True, warn=True)
+
+        # Option 1: use v3-zdt-push as described https://docs.cloud.service.gov.uk/get_started.html#use-cloud-foundry-api-version-3
+        """
         # TODO: Do we need to create the app with the v3 commands as well?
         deploy_command = 'v3-zdt-push' if existing_app_deployed.ok else 'v3-create-app'
         ctx.run('cf {cmd} {app}'.format(
@@ -227,10 +229,9 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
             file=app.replace('-', '_'),
             space=space
         ), echo=True)
-
+        """
         # Option 2: hand-roll zero-downtime approach
 
-        """
         deploy_command = 'cf push {app} -f manifests/manifest_{file}_{space}.yml'.format(
             app=app,
             file=app.replace('-', '_'),
@@ -250,7 +251,6 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
                 ctx.run('cf rename {0}-venerable {0}'.format(app), echo=True)
         else:
             ctx.run(deploy_command, echo=True)
-        """
 
 @task
 def create_sample_db(ctx):

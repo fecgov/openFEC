@@ -1,18 +1,18 @@
-# ---
-# path: ../
-# memory: 1G
-# stack: cflinuxfs3
-# buildpack: python_buildpack
-# env:
-#   APP_NAME: fec | api | dev
-#   WEB_CONCURRENCY: 4
-# services:
-#   - fec-api-search56
-#   - fec-redis
-#   - fec-creds-dev
-#   - fec-s3-dev
-# routes:
-#   - route: fec-dev-api.app.cloud.gov
-# applications:
-#   - name: api
-#     instances: 1
+---
+path: ../
+memory: 1G
+stack: cflinuxfs3
+buildpack: python_buildpack
+env:
+  APP_NAME: fec | api | dev
+  WEB_CONCURRENCY: 4
+services:
+  - fec-api-search56
+  - fec-redis
+  - fec-creds-dev
+  - fec-s3-dev
+routes:
+  - route: fec-dev-api.app.cloud.gov
+applications:
+  - name: api
+    instances: 1
