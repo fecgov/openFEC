@@ -217,7 +217,8 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
     for app in ('api', 'celery-worker', 'celery-beat'):
         existing_app_deployed = ctx.run('cf app {0}'.format(app), echo=True, warn=True)
         # Option 1: use v3-zdt-push as described https://docs.cloud.service.gov.uk/get_started.html#use-cloud-foundry-api-version-3
-        # cmd = 'v3-zdt-push' if deployed.ok else 'v3-create-app'
+        # Do we need to create the app with the v3 commands as well?
+        #cmd = 'v3-zdt-push' if deployed.ok else 'v3-create-app'
         # #add manifests
         # ctx.run('cf {cmd} {app} -f manifests/manifest_{file}_{space}.yml'.format(
         #     cmd=cmd,
@@ -227,9 +228,6 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
         # ), echo=True)
 
         # Option 2: hand-roll zero-downtime approach
-        # Could also rename to venerable here and use manifest
-        # cf rename awesome-app awesome-app-venerable
-        # cf push awesome-app -f manufest
         deploy_command = 'cf push {app} -f manifests/manifest_{file}_{space}.yml'.format(
             app=app,
             file=app.replace('-', '_'),
@@ -240,8 +238,7 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
             # Rename existing app to venerable
             ctx.run('cf rename {0} {0}-venerable'.format(app), echo=True)
             # Deploy new version of app
-            ctx.run(deploy_command, echo=True)
-            new_app_deployed = ctx.run('cf app {0}'.format(app), echo=True, warn=True)
+            new_app_deployed = ctx.run(deploy_command, echo=True, warn=True)
             # If that was successful, delete old venerable app
             if new_app_deployed.ok:
                 ctx.run('cf delete -f {0}-venerable'.format(app), echo=True)
