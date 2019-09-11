@@ -133,7 +133,7 @@ BLOCKED_IPS = env.get_credential('BLOCKED_IPS', '')
 FEC_API_WHITELIST_IPS = env.get_credential('FEC_API_WHITELIST_IPS', False)
 # Search this key_id in the API umbrella admin interface to look up the API KEY
 DOWNLOAD_WHITELIST_API_KEY_ID = env.get_credential('DOWNLOAD_WHITELIST_API_KEY_ID')
-RESTRICT_DOWNLOADS = env.get_credential('RESTRICT_DOWNLOADS')
+RESTRICT_DOWNLOADS = env.get_credential('RESTRICT_DOWNLOADS', False)
 
 @app.before_request
 def limit_remote_addr():
@@ -143,8 +143,8 @@ def limit_remote_addr():
     - Block any flagged IPs
     - If we're restricting downloads, only allow requests from whitelisted key
     """
-    falses = (False, 'False', 'false', 'f')
-    if FEC_API_WHITELIST_IPS not in falses:
+    true_values = (True, 'True', 'true', 't')
+    if FEC_API_WHITELIST_IPS in true_values:
         try:
             *_, source_ip, api_data_route, cf_route = request.access_route
         except ValueError:  # Not enough routes
@@ -154,7 +154,7 @@ def limit_remote_addr():
                 abort(403)
             if source_ip in BLOCKED_IPS:
                 abort(403)
-            if RESTRICT_DOWNLOADS not in falses and '/download/' in request.url:
+            if RESTRICT_DOWNLOADS in true_values and '/download/' in request.url:
                 # 'X-Api-User-Id' header is passed through by the API umbrella
                 request_api_key_id = request.headers.get('X-Api-User-Id')
                 if request_api_key_id != DOWNLOAD_WHITELIST_API_KEY_ID:
