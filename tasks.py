@@ -252,6 +252,11 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
         else:
             ctx.run(deploy_command, echo=True)
 
+        # TODO: look at current logging and mirror
+        ctx.run('cf apps')
+        ctx.run('cf app {0}'.format(app))
+
+
 @task
 def create_sample_db(ctx):
     """
