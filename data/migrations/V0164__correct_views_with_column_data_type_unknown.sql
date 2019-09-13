@@ -10,9 +10,93 @@ This set of views need to be dropped for
 In addition, there are several views with columns of data type "unknown".  
 In this ticket, this will be corrected.
 
+ fec_f5_notice_vw           | form_tp
+
+ fec_f56_notice_vw          | filing_form
+ fec_f56_notice_vw          | schedule_type
+
+ fec_f57_notice_vw          | filing_form
+ fec_f57_notice_vw          | schedule_type
+
+ fec_f65_notice_vw          | filing_form
+ fec_f65_notice_vw          | schedule_type
+
+ fec_sched_e_notice_vw      | filing_form
+ fec_sched_e_notice_vw      | schedule_type
+
+ fec_form_1m_vw             | form_tp
+ fec_vsum_f2_vw             | form_tp
+ fec_vsum_f3_vw             | form_tp
+ fec_vsum_f3p_vw            | form_tp
+ fec_vsum_f3ps_vw           | form_tp
+ fec_vsum_f3s_vw            | form_tp
+ fec_vsum_f3x_vw            | form_tp
+ fec_vsum_f5_vw             | form_tp
+ fec_vsum_f7_vw             | form_tp
+ fec_vsum_f9_vw             | form_tp
 */
 
 -- ------------------
+-- fec_f5_notice_vw
+-- ------------------
+DROP VIEW IF EXISTS public.fec_f5_notice_vw;
+CREATE VIEW public.fec_f5_notice_vw AS
+ SELECT f5.indv_org_id,
+    f5.indv_org_nm,
+    f5.indv_l_nm,
+    f5.indv_f_nm,
+    f5.indv_m_nm,
+    f5.indv_prefix,
+    f5.indv_suffix,
+    f5.indv_org_st1,
+    f5.indv_org_st2,
+    f5.indv_org_city,
+    f5.indv_org_st,
+    f5.indv_org_zip,
+    f5.entity_tp,
+    f5.addr_chg_flg,
+    f5.qual_nonprofit_corp_ind,
+    f5.indv_org_employer,
+    f5.indv_org_occupation,
+    f5.amndt_ind,
+    f5.amndt_ind_desc,
+    f5.orig_amndt_dt,
+    f5.rpt_tp,
+    f5.rpt_tp_desc,
+    f5.rpt_pgi,
+    f5.rpt_pgi_desc,
+    f5.cvg_start_dt,
+    f5.cvg_end_dt,
+    f5.rpt_yr,
+    f5.receipt_dt,
+    (f5.rpt_yr + mod(f5.rpt_yr, (2)::numeric)) AS cycle,
+    f5.ttl_indt_contb,
+    f5.ttl_indt_exp,
+    f5.filer_nm,
+    f5.filer_sign_nm,
+    f5.filer_sign_dt,
+    f5.filer_l_nm,
+    f5.filer_f_nm,
+    f5.filer_m_nm,
+    f5.filer_prefix,
+    f5.filer_suffix,
+    f5.notary_sign_dt,
+    f5.notary_commission_exprtn_dt,
+    f5.notary_nm,
+    f5.sub_id,
+    f5.begin_image_num,
+    f5.end_image_num,
+    'F5'::character varying(8) AS form_tp,
+    f5.form_tp_desc,
+    f5.file_num,
+    f5.prev_file_num,
+    f5.mst_rct_file_num
+   FROM disclosure.nml_form_5 f5
+  WHERE ((f5.delete_ind IS NULL) AND ((f5.rpt_tp)::text = ANY (ARRAY[('24'::character varying)::text, ('48'::character varying)::text])));
+
+ALTER TABLE public.fec_f5_notice_vw OWNER TO fec;
+GRANT SELECT ON TABLE public.fec_f5_notice_vw TO fec_read;
+--------------------
 -- fec_f56_notice_vw
 -- ------------------
 DROP VIEW IF EXISTS public.fec_f56_notice_vw;
@@ -70,10 +154,8 @@ CREATE VIEW public.fec_f56_notice_vw AS
     disclosure.nml_form_5 f5
   WHERE ((f56.link_id = f5.sub_id) AND ((f5.rpt_tp)::text = ANY (ARRAY[('24'::character varying)::text, ('48'::character varying)::text])) AND ((f56.amndt_ind)::text <> 'D'::text) AND (f56.delete_ind IS NULL) AND (f5.delete_ind IS NULL));
 
-
 ALTER TABLE public.fec_f56_notice_vw OWNER TO fec;
 GRANT SELECT ON TABLE public.fec_f56_notice_vw TO fec_read;
-
 
 -- ------------------
 -- fec_f57_notice_vw
@@ -148,71 +230,9 @@ CREATE VIEW public.fec_f57_notice_vw AS
     disclosure.nml_form_5 f5
   WHERE ((f57.link_id = f5.sub_id) AND ((f5.rpt_tp)::text = ANY (ARRAY[('24'::character varying)::text, ('48'::character varying)::text])) AND ((f57.amndt_ind)::text <> 'D'::text) AND (f57.delete_ind IS NULL) AND (f5.delete_ind IS NULL));
 
-
 ALTER TABLE public.fec_f57_notice_vw OWNER TO fec;
 GRANT SELECT ON TABLE public.fec_f57_notice_vw TO fec_read;
 
--- ------------------
--- fec_f5_notice_vw
--- ------------------
-DROP VIEW IF EXISTS public.fec_f5_notice_vw;
-CREATE VIEW public.fec_f5_notice_vw AS
- SELECT f5.indv_org_id,
-    f5.indv_org_nm,
-    f5.indv_l_nm,
-    f5.indv_f_nm,
-    f5.indv_m_nm,
-    f5.indv_prefix,
-    f5.indv_suffix,
-    f5.indv_org_st1,
-    f5.indv_org_st2,
-    f5.indv_org_city,
-    f5.indv_org_st,
-    f5.indv_org_zip,
-    f5.entity_tp,
-    f5.addr_chg_flg,
-    f5.qual_nonprofit_corp_ind,
-    f5.indv_org_employer,
-    f5.indv_org_occupation,
-    f5.amndt_ind,
-    f5.amndt_ind_desc,
-    f5.orig_amndt_dt,
-    f5.rpt_tp,
-    f5.rpt_tp_desc,
-    f5.rpt_pgi,
-    f5.rpt_pgi_desc,
-    f5.cvg_start_dt,
-    f5.cvg_end_dt,
-    f5.rpt_yr,
-    f5.receipt_dt,
-    (f5.rpt_yr + mod(f5.rpt_yr, (2)::numeric)) AS cycle,
-    f5.ttl_indt_contb,
-    f5.ttl_indt_exp,
-    f5.filer_nm,
-    f5.filer_sign_nm,
-    f5.filer_sign_dt,
-    f5.filer_l_nm,
-    f5.filer_f_nm,
-    f5.filer_m_nm,
-    f5.filer_prefix,
-    f5.filer_suffix,
-    f5.notary_sign_dt,
-    f5.notary_commission_exprtn_dt,
-    f5.notary_nm,
-    f5.sub_id,
-    f5.begin_image_num,
-    f5.end_image_num,
-    'F5'::character varying(8) AS form_tp,
-    f5.form_tp_desc,
-    f5.file_num,
-    f5.prev_file_num,
-    f5.mst_rct_file_num
-   FROM disclosure.nml_form_5 f5
-  WHERE ((f5.delete_ind IS NULL) AND ((f5.rpt_tp)::text = ANY (ARRAY[('24'::character varying)::text, ('48'::character varying)::text])));
-
-
-ALTER TABLE public.fec_f5_notice_vw OWNER TO fec;
-GRANT SELECT ON TABLE public.fec_f5_notice_vw TO fec_read;
 -- ------------------
 -- fec_f65_notice_vw
 -- ------------------
@@ -270,7 +290,6 @@ CREATE VIEW public.fec_f65_notice_vw AS
    FROM disclosure.nml_form_65 f65,
     disclosure.nml_form_6 f6
   WHERE ((f65.link_id = f6.sub_id) AND ((f65.amndt_ind)::text <> 'D'::text) AND (f65.delete_ind IS NULL) AND (f6.delete_ind IS NULL));
-
 
 ALTER TABLE public.fec_f65_notice_vw OWNER TO fec;
 GRANT SELECT ON TABLE public.fec_f65_notice_vw TO fec_read;
@@ -370,75 +389,8 @@ CREATE VIEW public.fec_sched_e_notice_vw AS
     disclosure.nml_form_24 f24
   WHERE ((se.link_id = f24.sub_id) AND (f24.delete_ind IS NULL) AND (se.delete_ind IS NULL) AND ((se.amndt_ind)::text <> 'D'::text));
 
-
 ALTER TABLE public.fec_sched_e_notice_vw OWNER TO fec;
 GRANT SELECT ON TABLE public.fec_sched_e_notice_vw TO fec_read;
-
--- ------------------
--- fec_vsum_f5_vw
--- ------------------
-DROP VIEW IF EXISTS public.fec_vsum_f5_vw;
-CREATE VIEW public.fec_vsum_f5_vw AS
- SELECT f5.indv_org_id,
-    f5.indv_org_nm,
-    f5.indv_l_nm,
-    f5.indv_f_nm,
-    f5.indv_m_nm,
-    f5.indv_prefix,
-    f5.indv_suffix,
-    f5.indv_org_st1,
-    f5.indv_org_st2,
-    f5.indv_org_city,
-    f5.indv_org_st,
-    f5.indv_org_zip,
-    f5.entity_tp,
-    f5.addr_chg_flg,
-    f5.qual_nonprofit_corp_ind,
-    f5.indv_org_employer,
-    f5.indv_org_occupation,
-    f5.amndt_ind,
-    f5.amndt_ind_desc,
-    f5.orig_amndt_dt,
-    f5.rpt_tp,
-    f5.rpt_tp_desc,
-    f5.rpt_pgi,
-    f5.rpt_pgi_desc,
-    f5.cvg_start_dt,
-    f5.cvg_end_dt,
-    f5.rpt_yr,
-    f5.receipt_dt,
-    (f5.rpt_yr + mod(f5.rpt_yr, (2)::numeric)) AS election_cycle,
-    f5.ttl_indt_contb,
-    f5.ttl_indt_exp,
-    f5.filer_nm,
-    f5.filer_sign_nm,
-    f5.filer_sign_dt,
-    f5.filer_l_nm,
-    f5.filer_f_nm,
-    f5.filer_m_nm,
-    f5.filer_prefix,
-    f5.filer_suffix,
-    f5.notary_sign_dt,
-    f5.notary_commission_exprtn_dt,
-    f5.notary_nm,
-    f5.begin_image_num,
-    f5.end_image_num,
-    'F5'::character varying(8) AS form_tp,
-    f5.form_tp_desc,
-    f5.file_num,
-    f5.prev_file_num,
-    f5.mst_rct_file_num,
-    f5.sub_id,
-        CASE
-            WHEN (vs.orig_sub_id IS NOT NULL) THEN 'Y'::text
-            ELSE 'N'::text
-        END AS most_recent_filing_flag
-   FROM (disclosure.nml_form_5 f5
-     LEFT JOIN disclosure.v_sum_and_det_sum_report vs ON ((f5.sub_id = vs.orig_sub_id)))
-  WHERE ((f5.delete_ind IS NULL) AND ((f5.rpt_tp)::text <> ALL (ARRAY[('24'::character varying)::text, ('48'::character varying)::text])));
-
-ALTER TABLE public.fec_vsum_f5_vw OWNER TO fec;
-GRANT SELECT ON TABLE public.fec_vsum_f5_vw TO fec_read;
 
 -- ------------------
 -- fec_form_1m_vw
@@ -1361,6 +1313,72 @@ CREATE VIEW public.fec_vsum_f3x_vw AS
 
 ALTER TABLE public.fec_vsum_f3x_vw OWNER TO fec;
 GRANT SELECT ON TABLE public.fec_vsum_f3x_vw TO fec_read;
+-- ------------------
+-- fec_vsum_f5_vw
+-- ------------------
+DROP VIEW IF EXISTS public.fec_vsum_f5_vw;
+CREATE VIEW public.fec_vsum_f5_vw AS
+ SELECT f5.indv_org_id,
+    f5.indv_org_nm,
+    f5.indv_l_nm,
+    f5.indv_f_nm,
+    f5.indv_m_nm,
+    f5.indv_prefix,
+    f5.indv_suffix,
+    f5.indv_org_st1,
+    f5.indv_org_st2,
+    f5.indv_org_city,
+    f5.indv_org_st,
+    f5.indv_org_zip,
+    f5.entity_tp,
+    f5.addr_chg_flg,
+    f5.qual_nonprofit_corp_ind,
+    f5.indv_org_employer,
+    f5.indv_org_occupation,
+    f5.amndt_ind,
+    f5.amndt_ind_desc,
+    f5.orig_amndt_dt,
+    f5.rpt_tp,
+    f5.rpt_tp_desc,
+    f5.rpt_pgi,
+    f5.rpt_pgi_desc,
+    f5.cvg_start_dt,
+    f5.cvg_end_dt,
+    f5.rpt_yr,
+    f5.receipt_dt,
+    (f5.rpt_yr + mod(f5.rpt_yr, (2)::numeric)) AS election_cycle,
+    f5.ttl_indt_contb,
+    f5.ttl_indt_exp,
+    f5.filer_nm,
+    f5.filer_sign_nm,
+    f5.filer_sign_dt,
+    f5.filer_l_nm,
+    f5.filer_f_nm,
+    f5.filer_m_nm,
+    f5.filer_prefix,
+    f5.filer_suffix,
+    f5.notary_sign_dt,
+    f5.notary_commission_exprtn_dt,
+    f5.notary_nm,
+    f5.begin_image_num,
+    f5.end_image_num,
+    'F5'::character varying(8) AS form_tp,
+    f5.form_tp_desc,
+    f5.file_num,
+    f5.prev_file_num,
+    f5.mst_rct_file_num,
+    f5.sub_id,
+        CASE
+            WHEN (vs.orig_sub_id IS NOT NULL) THEN 'Y'::text
+            ELSE 'N'::text
+        END AS most_recent_filing_flag
+   FROM (disclosure.nml_form_5 f5
+     LEFT JOIN disclosure.v_sum_and_det_sum_report vs ON ((f5.sub_id = vs.orig_sub_id)))
+  WHERE ((f5.delete_ind IS NULL) AND ((f5.rpt_tp)::text <> ALL (ARRAY[('24'::character varying)::text, ('48'::character varying)::text])));
+
+ALTER TABLE public.fec_vsum_f5_vw OWNER TO fec;
+GRANT SELECT ON TABLE public.fec_vsum_f5_vw TO fec_read;
+
 -- ------------------
 -- fec_vsum_f7_vw
 -- ------------------

@@ -106,25 +106,6 @@ ALTER INDEX IF EXISTS idx_ofec_communication_cost_aggregate_candidate_mv_tmp_cyc
 
 ALTER INDEX IF EXISTS idx_ofec_communication_cost_aggregate_candidate_mv_tmp_total RENAME TO idx_ofec_communication_cost_aggregate_candidate_mv_total;
 
-/*
-SELECT f76.s_o_ind AS support_oppose_indicator,
-f76.org_id AS cmte_id,
-f76.s_o_cand_id AS cand_id,
-sum(f76.communication_cost) AS total,
-count(f76.communication_cost) AS count,
-date_part('year'::text, f76.communication_dt)::integer + date_part('year'::text, f76.communication_dt)::integer % 2 AS cycle
-FROM disclosure.fec_fitem_f76 as f76
-WHERE date_part('year'::text, f76.communication_dt) >= 1979::double precision AND f76.s_o_cand_id IS NOT NULL
-GROUP BY f76.org_id, f76.s_o_cand_id, f76.s_o_ind, (date_part('year'::text, f76.communication_dt)::integer + date_part('year'::text, f76.communication_dt)::integer % 2)
-except 
-select support_oppose_indicator,
-cmte_id,
-cand_id,
-total,
-count,
-cycle
-FROM public.ofec_communication_cost_aggregate_candidate_mv
-*/
 
 -- ------------------------------------------------
 -- ofec_communication_cost_mv
@@ -194,24 +175,6 @@ ALTER TABLE public.ofec_communication_cost_mv_tmp
 GRANT ALL ON TABLE public.ofec_communication_cost_mv_tmp TO fec;
 GRANT SELECT ON TABLE public.ofec_communication_cost_mv_tmp TO fec_read;
 
--- --------------
--- recreate the view
--- data type for column schedule_type in public.fec_fitem_f76_vw is undefined.
--- data type for column schedule_type in disclosure.fec_fitem_f76 is varchar(8)
--- can not repoint the view to the tmp MV with "CREATE OR REPLACE"
--- Need to DROP and CREATE
--- Since public.ofec_communication_cost_vw had no depending objects, it can be dropped and created without chain reaction
-DROP VIEW public.ofec_communication_cost_vw;
-
-CREATE OR REPLACE VIEW public.ofec_communication_cost_vw AS 
- SELECT * FROM ofec_communication_cost_mv_tmp;
-
-ALTER TABLE public.ofec_communication_cost_vw
-  OWNER TO fec;
-GRANT ALL ON TABLE public.ofec_communication_cost_vw TO fec;
-GRANT SELECT ON TABLE public.ofec_communication_cost_vw TO fec_read;
--- --------------
-
 -- indexes
 CREATE UNIQUE INDEX idx_ofec_communication_cost_mv_tmp_sub_id
   ON public.ofec_communication_cost_mv_tmp
@@ -278,6 +241,23 @@ CREATE INDEX idx_ofec_communication_cost_mv_tmp_s_o_ind
   USING btree
   (s_o_ind COLLATE pg_catalog."default");
 
+-- --------------
+-- recreate the view
+-- data type for column schedule_type in public.fec_fitem_f76_vw is undefined.
+-- data type for column schedule_type in disclosure.fec_fitem_f76 is varchar(8)
+-- can not repoint the view to the tmp MV with "CREATE OR REPLACE"
+-- Need to DROP and CREATE
+-- Since public.ofec_communication_cost_vw had no depending objects, it can be dropped and created without chain reaction
+DROP VIEW public.ofec_communication_cost_vw;
+
+CREATE OR REPLACE VIEW public.ofec_communication_cost_vw AS 
+ SELECT * FROM ofec_communication_cost_mv_tmp;
+
+ALTER TABLE public.ofec_communication_cost_vw
+  OWNER TO fec;
+GRANT ALL ON TABLE public.ofec_communication_cost_vw TO fec;
+GRANT SELECT ON TABLE public.ofec_communication_cost_vw TO fec_read;
+-- --------------
 
 -- drop old MV
 DROP MATERIALIZED VIEW IF EXISTS public.ofec_communication_cost_mv;
