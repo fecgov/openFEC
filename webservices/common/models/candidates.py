@@ -107,27 +107,29 @@ class CandidateHistory(BaseCandidate):
 
     candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)
     two_year_period = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CANDIDATE_CYCLE)
-    candidate_election_year = db.Column(db.Integer, doc="The last year of the cycle for this election.")
-    address_city = db.Column(db.String(100), doc='City of candidate\'s address, as reported on their Form 2.')
-    address_state = db.Column(db.String(2), doc='State of candidate\'s address, as reported on their Form 2.')
-    address_street_1 = db.Column(db.String(200), doc='Street of candidate\'s address, as reported on their Form 2.')
-    address_street_2 = db.Column(db.String(200), doc='Additional street information of candidate\'s address, as reported on their Form 2.')
-    address_zip = db.Column(db.String(10), doc='Zip code of candidate\'s address, as reported on their Form 2.')
-    candidate_inactive = db.Column(db.Boolean, doc='True indicates that a candidate is inactive.')
+    candidate_election_year = db.Column(db.Integer, doc=docs.LAST_CANDIDATE_ELECTION_YEAR)
+    address_city = db.Column(db.String(100), doc=docs.F2_CANDIDATE_CITY)
+    address_state = db.Column(db.String(2), doc=docs.F2_CANDIDATE_STATE)
+    address_street_1 = db.Column(db.String(200), doc=docs.F2_CANDIDATE_STREET_1)
+    address_street_2 = db.Column(db.String(200), doc=docs.F2_CANDIDATE_STREET_2)
+    address_zip = db.Column(db.String(10), doc=docs.F2_CANDIDATE_ZIP)
+    candidate_inactive = db.Column(db.Boolean, doc=docs.CANDIDATE_INACTIVE)
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
+    rounded_election_years = db.Column(ARRAY(db.Integer), index=True, doc=docs.ROUNDED_ELECTION_YEARS)
+    fec_cycles_in_election = db.Column(ARRAY(db.Integer), index=True, doc=docs.FEC_CYCLES_IN_ELECTION)
 
 class CandidateHistoryWithFuture(BaseCandidate):
     __tablename__ = 'ofec_candidate_history_with_future_election_mv'
 
     candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)
     two_year_period = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CANDIDATE_CYCLE)
-    candidate_election_year = db.Column(db.Integer, doc="The last year of the cycle for this election.")
-    address_city = db.Column(db.String(100), doc='City of candidate\'s address, as reported on their Form 2.')
-    address_state = db.Column(db.String(2), doc='State of candidate\'s address, as reported on their Form 2.')
-    address_street_1 = db.Column(db.String(200), doc='Street of candidate\'s address, as reported on their Form 2.')
-    address_street_2 = db.Column(db.String(200), doc='Additional street information of candidate\'s address, as reported on their Form 2.')
-    address_zip = db.Column(db.String(10), doc='Zip code of candidate\'s address, as reported on their Form 2.')
-    candidate_inactive = db.Column(db.Boolean, doc='True indicates that a candidate is inactive.')
+    candidate_election_year = db.Column(db.Integer, doc=docs.LAST_CANDIDATE_ELECTION_YEAR)
+    address_city = db.Column(db.String(100), doc=docs.F2_CANDIDATE_CITY)
+    address_state = db.Column(db.String(2), doc=docs.F2_CANDIDATE_STATE)
+    address_street_1 = db.Column(db.String(200), doc=docs.F2_CANDIDATE_STREET_1)
+    address_street_2 = db.Column(db.String(200), doc=docs.F2_CANDIDATE_STREET_2)
+    address_zip = db.Column(db.String(10), doc=docs.F2_CANDIDATE_ZIP)
+    candidate_inactive = db.Column(db.Boolean, doc=docs.CANDIDATE_INACTIVE)
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
 
 

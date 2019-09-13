@@ -183,9 +183,15 @@ class CommitteeHistoryView(ApiResource):
         query = models.CommitteeHistory.query
 
         if committee_id:
+            # use for
+            # '/committee/<string:committee_id>/history/',
+            # '/committee/<string:committee_id>/history/<int:cycle>/',
             query = query.filter(models.CommitteeHistory.committee_id == committee_id)
 
         if candidate_id:
+            # use for
+            # '/candidate/<candidate_id>/committees/history/',
+            #'/candidate/<candidate_id>/committees/history/<int:cycle>/',
             query = query.join(
                 models.CandidateCommitteeLink,
                 sa.and_(
@@ -194,33 +200,21 @@ class CommitteeHistoryView(ApiResource):
                 ),
             ).filter(
                 models.CandidateCommitteeLink.candidate_id == candidate_id,
-            ).distinct()
-
-        if cycle:
-            query = (
-                self._filter_elections(query, candidate_id, cycle)
-                if kwargs.get('election_full') and candidate_id
-                else query.filter(models.CommitteeHistory.cycle == cycle)
             )
-
+        if cycle:
+            # use for
+            # '/committee/<string:committee_id>/history/<int:cycle>/',
+            # '/candidate/<candidate_id>/committees/history/<int:cycle>/',
+            if kwargs.get('election_full') and candidate_id:
+                query = query.filter(
+                    models.CandidateCommitteeLink.election_yr_to_be_included == cycle,
+                ).order_by(
+                    models.CommitteeHistory.committee_id,
+                    sa.desc(models.CommitteeHistory.cycle),
+                ).distinct(
+                    # in same election_yr_to_be_included, remove duplicate committee
+                    models.CommitteeHistory.committee_id,
+                )
+            else:
+                query = query.filter(models.CommitteeHistory.cycle == cycle)
         return query
-
-    def _filter_elections(self, query, candidate_id, cycle):
-        """Round up to the next election including `cycle`."""
-        return query.join(
-            models.CandidateElection,
-            sa.and_(
-                models.CandidateCommitteeLink.candidate_id == models.CandidateElection.candidate_id,
-                models.CandidateCommitteeLink.fec_election_year <= models.CandidateElection.cand_election_year,
-                models.CandidateCommitteeLink.fec_election_year > models.CandidateElection.prev_election_year,
-            ),
-        ).filter(
-            models.CandidateElection.candidate_id == candidate_id,
-            cycle <= models.CandidateElection.cand_election_year,
-            cycle > models.CandidateElection.prev_election_year,
-        ).order_by(
-            models.CommitteeHistory.committee_id,
-            sa.desc(models.CommitteeHistory.cycle),
-        ).distinct(
-            models.CommitteeHistory.committee_id,
-        )

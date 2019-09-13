@@ -223,46 +223,31 @@ class CandidateHistoryView(ApiResource):
         query = super().build_query(**kwargs)
 
         if candidate_id:
+            # use for
+            # '/candidate/<string:candidate_id>/history/',
+            # '/candidate/<string:candidate_id>/history/<int:cycle>/',
             query = query.filter(models.CandidateHistory.candidate_id == candidate_id)
 
         if committee_id:
+            # use for
+            # '/committee/<string:committee_id>/candidates/history/',
+            # '/committee/<string:committee_id>/candidates/history/<int:cycle>/',
             query = query.join(
                 models.CandidateCommitteeLink,
                 models.CandidateCommitteeLink.candidate_id == models.CandidateHistory.candidate_id,
             ).filter(
                 models.CandidateCommitteeLink.committee_id == committee_id
             ).distinct()
-
         if cycle:
-            query = (
-                self._filter_elections(query, cycle)
-                if kwargs.get('election_full')
-                else query.filter(models.CandidateHistory.two_year_period == cycle)
-            )
+            # use for
+            # '/candidate/<string:candidate_id>/history/<int:cycle>/',
+            # '/committee/<string:committee_id>/candidates/history/<int:cycle>/',
+            if kwargs.get('election_full'):
+                query = query.filter(
+                    (models.CandidateHistory.candidate_election_year % 2 +
+                        models.CandidateHistory.candidate_election_year) == cycle
+                )
+            else:
+                query = query.filter(models.CandidateHistory.two_year_period == cycle)
 
         return query
-
-    def _filter_elections(self, query, cycle):
-        """Round up to the next election including `cycle`."""
-        return query.join(
-            models.CandidateElection,
-            sa.and_(
-                models.CandidateHistory.candidate_id == models.CandidateElection.candidate_id,
-                models.CandidateHistory.two_year_period <= models.CandidateElection.cand_election_year,
-                # For new house candidates that file for a future election,
-                #   the 2-year period will equal `prev_election_yr`
-                #   until we reach the 2-year period for that future election.
-                # This `>=` (rather than `>`)
-                #   guarantees results for candidate pages.
-                # A `SELECT DISTINCT` on `candidate_id` prevents duplicate rows.
-                models.CandidateHistory.two_year_period >= models.CandidateElection.prev_election_year,
-            ),
-        ).filter(
-            cycle <= models.CandidateElection.cand_election_year,
-            cycle > models.CandidateElection.prev_election_year,
-        ).order_by(
-            models.CandidateHistory.candidate_id,
-            sa.desc(models.CandidateHistory.two_year_period),
-        ).distinct(
-            models.CandidateHistory.candidate_id,
-        )

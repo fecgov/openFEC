@@ -6,6 +6,7 @@ full documentation visit: https://api.open.fec.gov/developers.
 import http
 import logging
 import os
+import ujson
 import sqlalchemy as sa
 import flask_cors as cors
 import flask_restful as restful
@@ -201,6 +202,43 @@ def add_caching_headers(response):
     return response
 
 
+@app.after_request
+def add_secure_headers(response):
+    """
+    Add secure headers to each response.
+    The 'unsafe-inline' Content Security Policy (CSP) setting is
+    needed for Swagger docs (see https://github.com/swagger-api/swagger-ui/issues/3370)
+    """
+
+    headers = {
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "Deny",
+        "X-XSS-Protection": "1; mode=block",
+    }
+    content_security_policy = {
+        "default-src": "'self' *.fec.gov *.app.cloud.gov",
+        "img-src": "'self' data:",
+        "script-src": "'self' 'unsafe-inline'",
+        "style-src": "'self' https://fonts.googleapis.com 'unsafe-inline'",
+        "font-src": "'self' https://fonts.gstatic.com data:",
+        "connect-src": "*.fec.gov *.cloud.gov",
+        "object-src": "'none'",
+        "report-uri": "/report-csp-violation/",
+    }
+    if env.app.get('space_name', 'local').lower() == 'local':
+        content_security_policy["default-src"] += " localhost:* http://127.0.0.1:*"
+        content_security_policy["connect-src"] += " localhost:* http://127.0.0.1:*"
+
+    headers["Content-Security-Policy"] = "".join(
+        "{0} {1}; ".format(directive, value)
+        for directive, value in content_security_policy.items()
+    )
+
+    for header, value in headers.items():
+        response.headers.add(header, value)
+    return response
+
+
 @app.errorhandler(Exception)
 def handle_exception(exception):
     wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
@@ -298,7 +336,7 @@ def add_aggregate_resource(api, view, schedule, label):
         '/committee/<committee_id>/schedules/schedule_{schedule}/by_{label}/'.format(**locals()),
     )
 
-    
+
 add_aggregate_resource(api, aggregates.ScheduleABySizeView, 'a', 'size')
 add_aggregate_resource(api, aggregates.ScheduleAByStateView, 'a', 'state')
 add_aggregate_resource(api, aggregates.ScheduleAByZipView, 'a', 'zip')
@@ -474,6 +512,17 @@ def api_ui():
         specs_url=url_for('docs.api_spec'),
         PRODUCTION=env.get_credential('PRODUCTION'),
     )
+
+
+@app.route('/report-csp-violation/', methods=['POST'])
+def report():
+    """
+    Log Content Security Policy (CSP) violations from the browser
+    for both API and CMS.
+    Reports come in with tag 'csp-report'
+    """
+    app.logger.info(ujson.loads(str(request.data, 'utf-8')))
+    return util.output_json("CSP violation reported", 200)
 
 
 app.register_blueprint(docs)
