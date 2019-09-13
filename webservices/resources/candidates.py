@@ -242,10 +242,12 @@ class CandidateHistoryView(ApiResource):
             # use for
             # '/candidate/<string:candidate_id>/history/<int:cycle>/',
             # '/committee/<string:committee_id>/candidates/history/<int:cycle>/',
-            query = query.filter(models.CandidateHistory.two_year_period == cycle)
             if kwargs.get('election_full'):
                 query = query.filter(
                     (models.CandidateHistory.candidate_election_year % 2 +
                         models.CandidateHistory.candidate_election_year) == cycle
                 )
+            else:
+                query = query.filter(models.CandidateHistory.two_year_period == cycle)
+
         return query

@@ -250,14 +250,14 @@ class TestCandidateHistory(ApiBaseTest):
         assert results[1]['two_year_period'] == history_2008.two_year_period
 
     def test_election_full(self):
-        # When elction_full=true, two_year_period should equal to candidate_election_year
+        # When election_full=true, return all two_year_periods with that candidate_election_year
         candidate = factories.CandidateDetailFactory(candidate_id='H001')
-        history_election_full_false = factories.CandidateHistoryFactory(
+        first_two_year_period = factories.CandidateHistoryFactory(
             candidate_id=candidate.candidate_id,
             two_year_period=2018,
             candidate_election_year=2020,
         )
-        history_election_full_true = factories.CandidateHistoryFactory(
+        second_two_year_period = factories.CandidateHistoryFactory(
             candidate_id=candidate.candidate_id,
             two_year_period=2020,
             candidate_election_year=2020,
@@ -281,9 +281,9 @@ class TestCandidateHistory(ApiBaseTest):
             )
         )
         assert len(results_false) == 1
-        assert results_false[0]['candidate_id'] == history_election_full_false.candidate_id
-        assert results_false[0]['two_year_period'] == history_election_full_false.two_year_period
-        assert results_false[0]['candidate_election_year'] == history_election_full_false.candidate_election_year
+        assert results_false[0]['candidate_id'] == first_two_year_period.candidate_id
+        assert results_false[0]['two_year_period'] == first_two_year_period.two_year_period
+        assert results_false[0]['candidate_election_year'] == first_two_year_period.candidate_election_year
 
         # test election_full='true'
         results_true = self._results(
@@ -294,10 +294,14 @@ class TestCandidateHistory(ApiBaseTest):
                 election_full='true',
             )
         )
-        assert len(results_true) == 1
-        assert results_true[0]['candidate_id'] == history_election_full_true.candidate_id
-        assert results_true[0]['two_year_period'] == history_election_full_true.two_year_period
-        assert results_true[0]['candidate_election_year'] == history_election_full_true.candidate_election_year
+        assert len(results_true) == 2
+        assert results_true[0]['candidate_id'] == second_two_year_period.candidate_id
+        assert results_true[0]['two_year_period'] == second_two_year_period.two_year_period
+        assert results_true[0]['candidate_election_year'] == second_two_year_period.candidate_election_year
+        # Default sort is two_year_period descending
+        assert results_true[1]['candidate_id'] == first_two_year_period.candidate_id
+        assert results_true[1]['two_year_period'] == first_two_year_period.two_year_period
+        assert results_true[1]['candidate_election_year'] == first_two_year_period.candidate_election_year
 
     def test_committee_cycle(self):
         results = self._results(
