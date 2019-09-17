@@ -99,9 +99,7 @@ def get_graph():
     ])
 
     graph.add_edges_from([
-        ('totals_house_senate', 'candidate_aggregates'),
-        ('totals_presidential', 'candidate_aggregates'),
-        ('candidate_election', 'candidate_aggregates'),
+        ('totals_combined', 'candidate_aggregates'),
         ('cand_cmte_linkage', 'candidate_aggregates'),
         ('cand_cmte_linkage', 'candidate_history'),
     ])
