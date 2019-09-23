@@ -1031,6 +1031,8 @@ DESIGNATION = 'The one-letter designation code of the organization:\n\
 '
 ORGANIZATION_TYPE = 'The one-letter code for the kind for organization:\n\
         - C corporation\n\
+        - H convention\n\
+        - I inaugural\n\
         - L labor organization\n\
         - M membership organization\n\
         - T trade association\n\
