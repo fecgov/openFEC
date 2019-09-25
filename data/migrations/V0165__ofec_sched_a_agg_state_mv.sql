@@ -12,6 +12,34 @@ Also for better readability.
 Since this is a new MV, flow.py and manage.py had been updated to add the refresh of MV
 */
 
+-- ------------------
+-- recreate the view 
+-- first edition: the new MV removed one column originally thought unnecessary 
+-- 	max(sa.idx) AS idx
+-- So view need to be recreate instead of create or replace
+--
+-- second edition: another endpoint do need to use the idx column.  Add it back.
+-- (the model ScheduleAByState inherits from BaseAggregate which inherits from BaseModel which references column idx)
+-- since the orginal migration file already run, this view still need to be recreated.
+-- ------------------
+DROP VIEW IF EXISTS public.ofec_sched_a_agg_state_vw;
+CREATE OR REPLACE VIEW public.ofec_sched_a_agg_state_vw AS 
+SELECT sa.cmte_id,
+    sa.cycle,
+    COALESCE(st.st, 'OT'::character varying) AS state,
+    COALESCE(sa.state_full, 'Other'::text) AS state_full,
+    max(sa.idx) AS idx,
+    sum(sa.total) AS total,
+    sum(sa.count) AS count
+   FROM disclosure.dsc_sched_a_aggregate_state sa
+     LEFT JOIN staging.ref_st st ON sa.state::text = st.st::text
+  GROUP BY sa.cmte_id, sa.cycle, st.st, sa.state_full;
+
+ALTER TABLE public.ofec_sched_a_agg_state_vw
+  OWNER TO fec;
+GRANT ALL ON TABLE public.ofec_sched_a_agg_state_vw TO fec;
+GRANT SELECT ON TABLE public.ofec_sched_a_agg_state_vw TO fec_read;
+
 -- ------------------------------------------------
 -- ofec_sched_a_agg_state_mv
 -- this is a new MATERIALIZED VIEW so there is no need to go through _tmp process
@@ -23,6 +51,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS public.ofec_sched_a_agg_state_mv AS
     sa.cycle,
     COALESCE(st.st, 'OT'::character varying) AS state,
     COALESCE(sa.state_full, 'Other'::text) AS state_full,
+    max(sa.idx) AS idx,
     sum(sa.total) AS total,
     sum(sa.count) AS count
    FROM disclosure.dsc_sched_a_aggregate_state sa
@@ -42,14 +71,7 @@ CREATE UNIQUE INDEX idx_ofec_sched_a_agg_state_mv_cmte_id_cycle_state
 ANALYZE public.ofec_sched_a_agg_state_mv;
 
 -- ------------------
--- recreate the view 
--- the new MV removed one unnecessary column 
---	(which was created for historical reason but we don't use it here)
--- 	max(sa.idx) AS idx
--- So view need to be recreate instead of create or replace
--- there is no other MV depending on this view, it is better to clean it now
 -- ------------------
-DROP VIEW IF EXISTS public.ofec_sched_a_agg_state_vw;
 CREATE OR REPLACE VIEW public.ofec_sched_a_agg_state_vw AS 
  SELECT * FROM public.ofec_sched_a_agg_state_mv;
 
