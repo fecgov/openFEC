@@ -31,6 +31,7 @@ def get_graph():
         'filing_amendments_presidential',
         'filings',
         'ofec_agg_coverage_date',
+        'ofec_sched_a_agg_state',
         'ofec_sched_e_mv',
         'reports_house_senate',
         'reports_ie',
