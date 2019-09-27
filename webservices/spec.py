@@ -24,10 +24,13 @@ def format_docstring(docstring):
 spec = APISpec(
     title='OpenFEC',
     version=__API_VERSION__,
-    info={'description': format_docstring(docs.API_DESCRIPTION)},
-    basePath='/v1',
-    produces=['application/json'],
+    openapi_version="2.0",
     plugins=[MarshmallowPlugin()],
+    info={'description': format_docstring(docs.API_DESCRIPTION)},
+    #basePath='/v1',
+    basePath='/',
+    produces=['application/json'],
+    
     securityDefinitions={
         'apiKey': {
             'type': 'apiKey',

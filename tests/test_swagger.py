@@ -11,7 +11,7 @@ class TestSwagger(unittest.TestCase):
     def test_swagger_valid(self):
         try:
             utils.validate_spec(spec)
-        except exceptions.SwaggerError as error:
+        except exceptions.OpenAPIError as error:
             self.fail(str(error))
 
     def test_format_docstring(self):

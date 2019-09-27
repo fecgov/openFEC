@@ -19,8 +19,8 @@ from sqlalchemy import func
 import sqlalchemy as sa
 
 
-spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
-spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
+spec.components.schema('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
+spec.components.schema('SeekInfo', schema=paging_schemas.SeekInfoSchema)
 
 # A namedtuple used to help capture any additional columns that should be
 # included with exported data:
@@ -207,7 +207,7 @@ schema_map["BaseF3PFiling"] = EFilingF3PSchema
 
 def register_schema(schema, definition_name=None):
     definition_name = definition_name or re.sub(r'Schema$', '', schema.__name__)
-    spec.definition(definition_name, schema=schema)
+    spec.components.schema(definition_name, schema=schema)
 
 
 def make_schema(model, class_name=None, fields=None, options=None):
@@ -431,8 +431,8 @@ CandidateSearchSchema = make_schema(
     },
 )
 CandidateSearchPageSchema = make_page_schema(CandidateSearchSchema)
-register_schema(CandidateSearchSchema)
-register_schema(CandidateSearchPageSchema)
+#register_schema(CandidateSearchSchema)
+#register_schema(CandidateSearchPageSchema)
 
 
 make_reports_schema = functools.partial(
@@ -948,7 +948,7 @@ class ElectionSchema(ma.Schema):
 augment_schemas(ElectionSchema)
 
 ElectionPageSchema = make_page_schema(ElectionSchema)
-register_schema(ElectionPageSchema)
+#register_schema(ElectionPageSchema)
 
 class ScheduleABySizeCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
