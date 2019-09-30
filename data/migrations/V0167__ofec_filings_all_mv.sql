@@ -57,6 +57,7 @@ SELECT row_number() OVER () AS idx,
     CASE
         WHEN upper(filing_history.form_tp::text) IN ('FRQ', 'F99') THEN filing_history.file_num
         WHEN upper(filing_history.form_tp::text) IN ('F1'::text, 'F1M'::text, 'F2'::text) THEN v1.mst_rct_file_num 
+        WHEN vs.orig_sub_id IS NOT NULL THEN vs.file_num
         ELSE amendments.mst_rct_file_num
     END AS most_recent_file_number,
     is_amended(amendments.mst_rct_file_num::integer, amendments.file_num::integer, filing_history.form_tp::text) AS is_amended,
