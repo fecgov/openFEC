@@ -1,4 +1,4 @@
-git+https://github.com/fecgov/apispec.git@dev
+apispec==0.39.0
 prance[osv]>=0.11
 cfenv==0.5.2
 invoke==0.15.0
