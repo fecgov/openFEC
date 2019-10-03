@@ -8,6 +8,7 @@ from webargs import fields, validate
 
 from webservices import docs
 from webservices import exceptions
+from webservices import utils
 from webservices.common.models import db
 
 def _validate_natural(value):
@@ -531,6 +532,10 @@ schedule_a_by_state = {
     'state': fields.List(IStr, description='State of contributor'),
     'hide_null': fields.Bool(missing=False, description='Exclude values with missing state'),
 }
+
+schedule_a_by_state_id_optional = utils.extend(
+    schedule_a_by_state,
+    {'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID)})
 
 schedule_a_by_zip = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),

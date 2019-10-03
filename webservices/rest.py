@@ -329,16 +329,21 @@ api.add_resource(audit.AuditCandidateNameSearch, '/names/audit_candidates/')
 api.add_resource(audit.AuditCommitteeNameSearch, '/names/audit_committees/')
 
 
-def add_aggregate_resource(api, view, schedule, label):
+def add_aggregate_resource(api, id_view, schedule, label, optional_id_view=None):
     api.add_resource(
-        view,
-        '/schedules/schedule_{schedule}/by_{label}/'.format(**locals()),
-        '/committee/<committee_id>/schedules/schedule_{schedule}/by_{label}/'.format(**locals()),
+        id_view,
+        '/committee/<committee_id>/schedules/schedule_{schedule}/by_{label}/'.format(**locals())
     )
+    print(optional_id_view)
+    if optional_id_view:
+        api.add_resource(
+            optional_id_view,
+            '/schedules/schedule_{schedule}/by_{label}/'.format(**locals()),
+        )
 
 
+add_aggregate_resource(api, aggregates.ScheduleAByStateView, 'a', 'state', aggregates.ScheduleAByStateIDOptionalView)
 add_aggregate_resource(api, aggregates.ScheduleABySizeView, 'a', 'size')
-add_aggregate_resource(api, aggregates.ScheduleAByStateView, 'a', 'state')
 add_aggregate_resource(api, aggregates.ScheduleAByZipView, 'a', 'zip')
 add_aggregate_resource(api, aggregates.ScheduleAByEmployerView, 'a', 'employer')
 add_aggregate_resource(api, aggregates.ScheduleAByOccupationView, 'a', 'occupation')
@@ -440,6 +445,7 @@ apidoc.register(costs.CommunicationCostView, blueprint='v1')
 apidoc.register(costs.ElectioneeringView, blueprint='v1')
 apidoc.register(aggregates.ScheduleABySizeView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByStateView, blueprint='v1')
+apidoc.register(aggregates.ScheduleAByStateIDOptionalView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByZipView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByEmployerView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByOccupationView, blueprint='v1')

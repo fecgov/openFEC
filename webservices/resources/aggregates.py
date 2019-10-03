@@ -88,7 +88,37 @@ class ScheduleAByStateView(AggregateResource):
         query = super().build_query(committee_id, **kwargs)
         if kwargs['hide_null']:
             query = query.filter(self.model.state_full != None)  # noqa
+        print(query)
         return query
+
+
+@doc(
+    tags=['receipts'],
+    description=("test test")
+)
+class ScheduleAByStateIDOptionalView(ApiResource):
+    """Things get weird when we inherit from ScheduleAByStateView"""
+
+    model = models.ScheduleAByState
+    schema = schemas.ScheduleAByStateSchema
+    page_schema = schemas.ScheduleAByStatePageSchema
+    query_args = args.schedule_a_by_state_id_optional
+
+    filter_multi_fields = [
+        ('cycles', models.ScheduleAByState.cycle),
+        ('state', models.ScheduleAByState.state),
+        ('committee_id', models.ScheduleAByState.committee_id),
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.schedule_a_by_state_id_optional,
+            args.make_sort_args(
+                default='-total',
+            ),
+        )
 
 @doc(
     tags=['receipts'],
