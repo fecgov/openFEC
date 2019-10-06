@@ -308,8 +308,6 @@ class TestAmendmentChain(BaseTestCase):
         assert len(results) == 1
 
         result = results[0]
-        print(result)
-        # self.assert_filings_equal(result, non_negative_f1)
         self.assert_filings_equal(result, negative_f1)
 
 
