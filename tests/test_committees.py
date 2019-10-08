@@ -322,10 +322,33 @@ class TestCommitteeHistory(ApiBaseTest):
     def setUp(self):
         super().setUp()
         self.candidate = factories.CandidateDetailFactory()
-        self.committees = [factories.CommitteeDetailFactory() for _ in range(2)]
+        self.committees = [factories.CommitteeDetailFactory() for _ in range(5)]
         self.histories = [
-            factories.CommitteeHistoryFactory(committee_id=self.committees[0].committee_id, cycle=2010),
-            factories.CommitteeHistoryFactory(committee_id=self.committees[1].committee_id, cycle=2012),
+            factories.CommitteeHistoryFactory(
+                committee_id=self.committees[0].committee_id,
+                cycle=2010,
+                designation='P'
+            ),
+            factories.CommitteeHistoryFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2012,
+                designation='P'
+            ),
+            factories.CommitteeHistoryFactory(
+                committee_id=self.committees[2].committee_id,
+                cycle=2014,
+                designation='P'
+            ),
+            factories.CommitteeHistoryFactory(
+                committee_id=self.committees[3].committee_id,
+                cycle=2014,
+                designation='A'
+            ),
+            factories.CommitteeHistoryFactory(
+                committee_id=self.committees[4].committee_id,
+                cycle=2014,
+                designation='J'
+            ),
         ]
 
         db.session.flush()
@@ -334,20 +357,52 @@ class TestCommitteeHistory(ApiBaseTest):
                 candidate_id=self.candidate.candidate_id,
                 committee_id=self.committees[0].committee_id,
                 fec_election_year=2010,
+                election_yr_to_be_included=2012,
                 committee_type='P',
+                committee_designation='P',
             ),
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=self.candidate.candidate_id,
                 committee_id=self.committees[1].committee_id,
                 fec_election_year=2012,
+                election_yr_to_be_included=2012,
                 committee_type='P',
+                committee_designation='P',
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[2].committee_id,
+                fec_election_year=2014,
+                committee_type='P',
+                committee_designation='P',
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[3].committee_id,
+                fec_election_year=2014,
+                committee_type='P',
+                committee_designation='A',
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[4].committee_id,
+                fec_election_year=2014,
+                committee_type='P',
+                committee_designation='J',
             ),
         ]
-        self.election = factories.CandidateElectionFactory(
-            candidate_id=self.candidate.candidate_id,
-            cand_election_year=2012,
-            prev_election_year=2008,
-        )
+        self.elections = [
+            factories.CandidateElectionFactory(
+                candidate_id=self.candidate.candidate_id,
+                cand_election_year=2012,
+                prev_election_year=2008,
+            ),
+            factories.CandidateElectionFactory(
+                candidate_id=self.candidate.candidate_id,
+                cand_election_year=2016,
+                prev_election_year=2012,
+            )
+        ]
 
     def test_candidate_cycle(self):
         results = self._results(
@@ -365,11 +420,24 @@ class TestCommitteeHistory(ApiBaseTest):
             api.url_for(
                 CommitteeHistoryView,
                 candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                election_full=True
             )
         )
         assert len(results) == 2
-        # Default sort for /committee/[ID]/history is cycle desc
-        assert results[0]['cycle'] == 2012
-        assert results[0]['committee_id'] == self.committees[1].committee_id
-        assert results[1]['cycle'] == 2010
-        assert results[1]['committee_id'] == self.committees[0].committee_id
+        # Sort order isn't working properly - see #4012
+        assert results[0]['committee_id'] == self.committees[0].committee_id
+        assert results[0]['cycle'] == 2010
+        assert results[1]['committee_id'] == self.committees[1].committee_id
+        assert results[1]['cycle'] == 2012
+
+    def test_designation(self):
+        results = self._results(
+            api.url_for(
+                CommitteeHistoryView,
+                candidate_id=self.candidate.candidate_id,
+                designation=['P', 'A']
+            )
+        )
+        assert len(results) == 4
+        assert 'J' not in [committee.get('designation') for committee in results]
