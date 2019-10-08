@@ -424,8 +424,7 @@ def get_elasticsearch_connection():
         url = es_conn.get_url(url='uri')
     else:
         url = 'http://localhost:9200'
-    es = Elasticsearch(url)
-
+    es = Elasticsearch(url, timeout=30, max_retries=10, retry_on_timeout=True)
     return es
 
 def print_literal_query_string(query):
