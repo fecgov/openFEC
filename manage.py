@@ -4,13 +4,12 @@ import glob
 import logging
 import subprocess
 import multiprocessing
-
 import networkx as nx
 import sqlalchemy as sa
+
 from flask_script import Server
 from flask_script import Manager
-
-from webservices import flow, partition
+from webservices import flow
 from webservices.common import models
 from webservices.env import env
 from webservices.rest import app, db
@@ -74,96 +73,6 @@ def execute_sql_folder(path, processes):
     else:
         for path in paths:
             execute_sql_file(path)
-
-@manager.command
-def load_nicknames():
-    """For improved search when candidates have a name that doesn't appear on their form.
-    Additional nicknames can be added to the csv for improved search.
-    """
-
-    logger.info('Loading nicknames...')
-
-    import pandas as pd
-    import sqlalchemy as sa
-
-    try:
-        table = sa.Table(
-            'ofec_nicknames',
-            db.metadata,
-            autoload_with=db.engine
-        )
-        db.engine.execute(table.delete())
-    except sa.exc.NoSuchTableError:
-        pass
-
-    load_table(
-        pd.read_csv('data/nicknames.csv'),
-        'ofec_nicknames',
-        if_exists='append'
-    )
-
-    logger.info('Finished loading nicknames.')
-
-@manager.command
-def load_pacronyms():
-    """For improved search of organizations that go by acronyms
-    """
-
-    logger.info('Loading pacronyms...')
-
-    import pandas as pd
-    import sqlalchemy as sa
-
-    try:
-        table = sa.Table(
-            'ofec_pacronyms',
-            db.metadata,
-            autoload_with=db.engine
-        )
-        db.engine.execute(table.delete())
-    except sa.exc.NoSuchTableError:
-        pass
-
-    load_table(
-        pd.read_excel('data/pacronyms.xlsx'),
-        'ofec_pacronyms',
-        if_exists='append'
-    )
-
-    logger.info('Finished loading pacronyms.')
-
-def load_table(frame, tablename, if_exists='replace', indexes=()):
-    import sqlalchemy as sa
-    frame.to_sql(tablename, db.engine, if_exists=if_exists)
-    table = sa.Table(tablename, db.metadata, autoload_with=db.engine)
-    for index in indexes:
-        sa.Index('{}_{}_idx'.format(tablename, index), table.c[index]).create(db.engine)
-
-@manager.command
-def build_districts():
-    """This creats the zipcode mapping for Congress based on data that is save as csvs.
-    """
-    import pandas as pd
-    load_table(pd.read_csv('data/fips_states.csv'), 'ofec_fips_states')
-    load_table(pd.read_csv('data/natl_zccd_delim.csv'), 'ofec_zips_districts', indexes=('ZCTA', ))
-
-@manager.command
-def load_election_dates():
-    """ This is from before we had direct access to election data and needed it, we are still using the
-    data from a csv, to populate the ElectionClassDate model.
-    """
-
-    logger.info('Loading election dates...')
-
-    import pandas as pd
-    frame = pd.read_excel('data/election_dates.xlsx')
-    frame.columns = [column.lower() for column in frame.columns]
-    load_table(
-        frame, 'ofec_election_dates',
-        indexes=('office', 'state', 'district', 'election_yr', 'senate_class'),
-    )
-
-    logger.info('Finished loading election dates.')
 
 @manager.command
 def refresh_materialized(concurrent=True):
@@ -256,32 +165,6 @@ def cf_startup():
     check_config()
     if env.index == '0':
         subprocess.Popen(['python', 'manage.py', 'refresh_materialized'])
-
-@manager.command
-def load_efile_sheets():
-    """Run this management command if there are changes to incoming efiling data structures.
-    It will make the json mapping from the spreadsheets you provide it
-    """
-    import pandas as pd
-    sheet_map = {4: 'efile_guide_f3', 5: 'efile_guide_f3p', 6: 'efile_guide_f3x'}
-    for i in range(4, 7):
-        table = sheet_map.get(i)
-        df = pd.read_excel(
-            # /Users/jonathancarmack/Documents/repos/openFEC
-            io="data/real_efile_to_form_line_numbers.xlsx",
-            #index_col="summary line number",
-            sheetname=i,
-            skiprows=7,
-
-        )
-        df = df.fillna(value="N/A")
-        df = df.rename(columns={'fecp column name (column a value)': 'fecp_col_a',
-                                'fecp column name (column b value)': 'fecp_col_b',
-                                })
-        form_column = table.split('_')[2] + " line number"
-        columns_to_drop = ['summary line number', form_column, 'Unnamed: 5']
-        df.drop(columns_to_drop, axis=1, inplace=True)
-        df.to_json(path_or_buf="data/" + table + ".json", orient='values')
 
 
 @manager.command
