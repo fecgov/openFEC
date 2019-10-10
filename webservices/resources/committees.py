@@ -168,6 +168,10 @@ class CommitteeHistoryView(ApiResource):
     schema = schemas.CommitteeHistorySchema
     page_schema = schemas.CommitteeHistoryPageSchema
 
+    filter_multi_fields = [
+        ('designation', models.CommitteeHistory.designation),
+    ]
+
     @property
     def args(self):
         return utils.extend(
@@ -180,7 +184,7 @@ class CommitteeHistoryView(ApiResource):
         )
 
     def build_query(self, committee_id=None, candidate_id=None, cycle=None, **kwargs):
-        query = models.CommitteeHistory.query
+        query = super().build_query(**kwargs)
 
         if committee_id:
             # use for

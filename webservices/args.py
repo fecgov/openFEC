@@ -297,6 +297,10 @@ committee_list = {
 
 committee_history = {
     'election_full': election_full,
+    'designation': fields.List(
+        IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
+        description=docs.DESIGNATION,
+    ),
 }
 
 filings = {
