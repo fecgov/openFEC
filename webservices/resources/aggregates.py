@@ -116,7 +116,7 @@ class ScheduleAByStateView(AggregateResource):
         )
 
     def build_query(self, **kwargs):
-        query = super().build_query(self, **kwargs)
+        query = super().build_query(**kwargs)
         if kwargs['hide_null']:
             query = query.filter(self.model.state_full != None)  # noqa
         return query

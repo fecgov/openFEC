@@ -537,8 +537,8 @@ large result sets are approximate; you will want to page through the records unt
 '''
 
 SCHEDULE_E_BY_CANDIDATE = '''
-'Schedule E receipts aggregated by recipient candidate. To avoid double '
-'counting, memoed items are not included.'
+Schedule E receipts aggregated by recipient candidate. To avoid double
+counting, memoed items are not included.
 '''
 
 SCHEDULE_F_TAG = '''
@@ -567,23 +567,6 @@ from the summary section of the forms. It represents the total money brought in 
 donors that are not reported on Schedule A and have given $200 or less.
 '''
 
-# These will be DEPRECATED soon.
-SCHEDULE_A_BY_SIZE_COMMITTEE_ID = '''
-This endpoint aggregates Schedule A donations based on size:
-```
- - $200 and under\n\
- - $200.01 - $499.99\n\
- - $500 - $999.99\n\
- - $1000 - $1999.99\n\
- - $2000 +\n\
-```
-In cases where the donations are $200 or less, the results include small donations
-that are reported on Schedule A, but filers are not required to itemize those small
-donations, so we also add unitemized contributions. Unitemized contributions come
-from the summary section of the forms. It represents the total money brought in from
-donors that are not reported on Schedule A and have given $200 or less.
-'''
-
 SCHEDULE_A_BY_STATE = '''
 Schedule A individual receipts aggregated by contributor state.
 This is an aggregate of only individual contributions. To avoid double counting,
@@ -593,18 +576,18 @@ state totals.
 '''
 
 SCHEDULE_A_BY_ZIP = '''
-'Schedule A receipts aggregated by contributor zip code. To avoid double '
-'counting, memoed items are not included.'
+Schedule A receipts aggregated by contributor zip code. To avoid double
+counting, memoed items are not included.
 '''
 
 SCHEDULE_A_BY_EMPLOYER = '''
-'Schedule A receipts aggregated by contributor employer name. To avoid double '
-'counting, memoed items are not included.'
+Schedule A receipts aggregated by contributor employer name. To avoid double
+counting, memoed items are not included.
 '''
 
 SCHEDULE_A_BY_OCCUPATION = '''
-'Schedule A receipts aggregated by contributor occupation. To avoid double '
-'counting, memoed items are not included.'
+Schedule A receipts aggregated by contributor occupation. To avoid double
+counting, memoed items are not included.'
 '''
 
 SIZE = '''

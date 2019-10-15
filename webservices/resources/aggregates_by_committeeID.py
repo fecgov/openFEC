@@ -43,10 +43,9 @@ class AggregateResource(ApiResource):
             query = query.filter(self.model.committee_id == committee_id)
         return query
 
-
 @doc(
     tags=['receipts'],
-    description=docs.SCHEDULE_A_BY_SIZE_COMMITTEE_ID,
+    description='This endpoint is `DEPRECATED`. Please use /schedules/schedule_a/by_size/?committee_id=<committee_ID>',
 )
 class ScheduleABySizeByCommitteeIDView(AggregateResource):
 
@@ -62,12 +61,7 @@ class ScheduleABySizeByCommitteeIDView(AggregateResource):
 
 @doc(
     tags=['receipts'],
-    description=(
-        'Schedule A individual receipts aggregated by contributor state.'
-        'This is an aggregate of only individual contributions. To avoid double counting,memoed items are not included.'
-        'Transactions $200 and under do not have to beitemized, if those contributions are not itemized,'
-        'they will not be included in thestate totals.'
-    )
+    description='This endpoint is `DEPRECATED`. Please use /schedules/schedule_a/by_state/?committee_id=<committee_ID>'   
 )
 class ScheduleAByStateByCommitteeIDView(AggregateResource):
 
@@ -98,10 +92,7 @@ class ScheduleAByStateByCommitteeIDView(AggregateResource):
 
 @doc(
     tags=['receipts'],
-    description=(
-        'Schedule A receipts aggregated by contributor zip code.'
-        'To avoid double counting, memoed items are not included.'
-    )
+    description='This endpoint is `DEPRECATED`. Please use /schedules/schedule_a/by_zip/?committee_id=<committee_ID>',
 )
 class ScheduleAByZipByCommitteeIDView(AggregateResource):
 
@@ -117,10 +108,7 @@ class ScheduleAByZipByCommitteeIDView(AggregateResource):
 
 @doc(
     tags=['receipts'],
-    description=(
-        'Schedule A receipts aggregated by contributor zip code.'
-        'To avoid double counting, memoed items are not included.'
-    )
+    description='This endpoint is `DEPRECATED`. Please use /schedules/schedule_a/by_employer/?committee_id=<committee_ID>',
 )
 class ScheduleAByEmployerByCommitteeIDView(AggregateResource):
 
@@ -143,10 +131,7 @@ class ScheduleAByEmployerByCommitteeIDView(AggregateResource):
 
 @doc(
     tags=['receipts'],
-    description=(
-        'Schedule A receipts aggregated by contributor occupation.'
-        'To avoid double counting, memoed items are not included.'
-    )
+    description='This endpoint is `DEPRECATED`. Please use /schedules/schedule_a/by_occupation/?committee_id=<committee_ID>',
 )
 class ScheduleAByOccupationByCommitteeIDView(AggregateResource):
 
@@ -169,12 +154,7 @@ class ScheduleAByOccupationByCommitteeIDView(AggregateResource):
 
 @doc(
     tags=['disbursements'],
-    description=(
-        'Schedule B disbursements aggregated by disbursement purpose category.'
-        'To avoid double counting, memoed items are not included.Purpose is a combination of transaction codes,'
-        'category codes and disbursement description.'
-        'See the `disbursement_purpose` sql function within the migrations for more details.'
-    )
+    description='This endpoint is `DEPRECATED`. Please use /schedules/schedule_b/by_purpose/?committee_id=<committee_ID>',
 )
 class ScheduleBByPurposeByCommitteeIDView(AggregateResource):
 
@@ -191,10 +171,7 @@ class ScheduleBByPurposeByCommitteeIDView(AggregateResource):
 
 @doc(
     tags=['disbursements'],
-    description=(
-        'Schedule B disbursements aggregated by recipient name.'
-        'To avoid double counting, memoed items are not included.'
-    )
+    description='This endpoint is `DEPRECATED`. Please use /schedules/schedule_b/by_recipient/?committee_id=<committee_ID>',
 )
 class ScheduleBByRecipientByCommitteeIDView(AggregateResource):
 
@@ -212,10 +189,7 @@ class ScheduleBByRecipientByCommitteeIDView(AggregateResource):
 
 @doc(
     tags=['disbursements'],
-    description=(
-        'Schedule B disbursements aggregated by recipient committee ID, if applicable.'
-        'To avoid double counting, memoed items are not included.'
-    )
+    description='This endpoint is `DEPRECATED`. Please use /schedules/schedule_b/by_recipient_id/?committee_id=<committee_ID>',
 )
 class ScheduleBByRecipientIDByCommitteeIDView(AggregateResource):
 
@@ -323,10 +297,7 @@ class CandidateAggregateResource(AggregateResource):
 
 @doc(
     tags=['independent expenditures'],
-    description=(
-        'Schedule E receipts aggregated by recipient candidate. To avoid double '
-        'counting, memoed items are not included.'
-    )
+    description='This endpoint is `DEPRECATED`. Please use /schedules/schedule_e/by_candidate/?committee_id=<committee_ID>',
 )
 class ScheduleEByCandidateByCommitteeIDView(CandidateAggregateResource):
 
