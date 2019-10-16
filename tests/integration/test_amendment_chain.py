@@ -24,7 +24,8 @@ class TestAmendmentChain(BaseTestCase):
         'most_recent_file_number': 1180841,
         'most_recent': True,
         'report_type': None,
-        'form_type': 'F1'
+        'form_type': 'F1',
+        'begin_image_num': '20180131001'
     }
     STOCK_SECOND_F1 = {
         'committee_id': 'C006',
@@ -37,7 +38,8 @@ class TestAmendmentChain(BaseTestCase):
         'most_recent_file_number': 1180862,
         'most_recent': True,
         'report_type': None,
-        'form_type': 'F1'
+        'form_type': 'F1',
+        'begin_image_num': '20180228002'
     }
 
     def setUp(self):
@@ -130,7 +132,8 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent_file_number': 20003,
             'most_recent': False,
             'report_type': 'Q2',
-            'form_type': 'F3'
+            'form_type': 'F3',
+            'begin_image_num': '20180715001'
         }
         form_3_q2_amend_1 = {
             'committee_id': 'C006',
@@ -143,7 +146,8 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent_file_number': 20003,
             'most_recent': False,
             'report_type': 'Q2',
-            'form_type': 'F3'
+            'form_type': 'F3',
+            'begin_image_num': '20180815001'
         }
         form_3_q3_new = {
             'committee_id': 'C006',
@@ -156,7 +160,8 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent_file_number': 30002,
             'most_recent': False,
             'report_type': 'Q3',
-            'form_type': 'F3'
+            'form_type': 'F3',
+            'begin_image_num': '20181015001'
         }
         form_3_q3_amend_1 = {
             'committee_id': 'C006',
@@ -169,7 +174,8 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent_file_number': 30002,
             'most_recent': True,
             'report_type': 'Q3',
-            'form_type': 'F3'
+            'form_type': 'F3',
+            'begin_image_num': '20181115001'
         }
         form_3_q2_amend_2 = {
             'committee_id': 'C006',
@@ -182,13 +188,17 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent_file_number': 20003,
             'most_recent': True,
             'report_type': 'Q2',
-            'form_type': 'F3'
+            'form_type': 'F3',
+            'begin_image_num': '20181215001'
         }
         self.create_filing(1, form_3_q2_new)
         self.create_filing(2, form_3_q2_amend_1)
         self.create_filing(3, form_3_q3_new)
         self.create_filing(4, form_3_q3_amend_1)
         self.create_filing(5, form_3_q2_amend_2)
+
+        self.insert_vsum(4, form_3_q3_amend_1)
+        self.insert_vsum(5, form_3_q2_amend_2)
 
         # Refresh downstream `ofec_amendments_mv` and `ofec_filings_all_mv`
         manage.refresh_materialized(concurrent=False)
@@ -219,7 +229,8 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent_file_number': 3333,
             'most_recent': False,
             'report_type': None,
-            'form_type': 'F1'
+            'form_type': 'F1',
+            'begin_image_num': '20180131004'
         }
         second_f1 = {
             'committee_id': 'C006',
@@ -232,7 +243,8 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent_file_number': 3333,
             'most_recent': False,
             'report_type': None,
-            'form_type': 'F1'
+            'form_type': 'F1',
+            'begin_image_num': '20180228001'
         }
         third_f1 = {
             'committee_id': 'C006',
@@ -245,7 +257,8 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent_file_number': 3333,
             'most_recent': True,
             'report_type': None,
-            'form_type': 'F1'
+            'form_type': 'F1',
+            'begin_image_num': '20180328001'
         }
         unusual_entry_for_second_f1 = copy.deepcopy(second_f1)
         unusual_entry_for_second_f1['previous_file_number'] = unusual_entry_for_second_f1['file_number']
@@ -276,10 +289,11 @@ class TestAmendmentChain(BaseTestCase):
             'file_number': -1180841,
             'amendment_chain': None,
             'previous_file_number': -1180841,
-            'most_recent_file_number': None,
-            'most_recent': None,
+            'most_recent_file_number': -1180841,
+            'most_recent': True,
             'report_type': None,
-            'form_type': 'F1'
+            'form_type': 'F1',
+            'begin_image_num': '20180131005'
         }
 
         non_negative_f1 = copy.deepcopy(self.STOCK_FIRST_F1)
@@ -294,12 +308,19 @@ class TestAmendmentChain(BaseTestCase):
         assert len(results) == 1
 
         result = results[0]
-        self.assert_filings_equal(result, non_negative_f1)
+        self.assert_filings_equal(result, negative_f1)
+
+
+    def insert_vsum(self, sub_id, expected_filing):
+        self.connection.execute(
+            "INSERT INTO disclosure.v_sum_and_det_sum_report (orig_sub_id, form_tp_cd,cmte_id, file_num) "
+            "VALUES (%s, %s, %s, %s)", sub_id, expected_filing['form_type'], expected_filing['committee_id'], expected_filing['file_number']
+        )
 
     def create_filing(self, sub_id, expected_filing):
         self.connection.execute(
-            "INSERT INTO disclosure.f_rpt_or_form_sub (sub_id, cand_cmte_id, form_tp, rpt_yr, rpt_tp, amndt_ind, receipt_dt, file_num, prev_file_num) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", sub_id, expected_filing['committee_id'], expected_filing['form_type'], expected_filing['report_year'], expected_filing['report_type'], expected_filing['amendment_indicator'], int(expected_filing['receipt_date'].strftime("%Y%m%d")), expected_filing['file_number'], expected_filing['previous_file_number']
+            "INSERT INTO disclosure.f_rpt_or_form_sub (sub_id, cand_cmte_id, form_tp, rpt_yr, rpt_tp, amndt_ind, receipt_dt, file_num, prev_file_num, begin_image_num) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", sub_id, expected_filing['committee_id'], expected_filing['form_type'], expected_filing['report_year'], expected_filing['report_type'], expected_filing['amendment_indicator'], int(expected_filing['receipt_date'].strftime("%Y%m%d")), expected_filing['file_number'], expected_filing['previous_file_number'], expected_filing['begin_image_num']
         )
 
     def assert_filings_equal(self, api_result, expected_filing):
