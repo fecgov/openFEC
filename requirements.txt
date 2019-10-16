@@ -22,7 +22,6 @@ ujson==1.33
 requests==2.21.0
 elasticsearch==5.5.1
 elasticsearch-dsl==5.4.0
-prompt-toolkit==2.0.6
 git+https://github.com/18F/slate.git
 
 # Marshalling
