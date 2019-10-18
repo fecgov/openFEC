@@ -152,19 +152,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     return query
 
 def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
-    must_query = [Q('term', _type=type_)]
-
-    if q:
-        must_query.append(Q('query_string', query=q))
-
-    query = Search().using(es) \
-        .query(Q('bool', must=must_query)) \
-        .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
-        .highlight_options(require_field_match=False) \
-        .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
-        .extra(size=hits_returned, from_=from_hit) \
-        .index('docs_search') \
-        .sort("sort1", "sort2")
+    query = generic_query_builder(q, type_, from_hit, hits_returned, **kwargs)
 
     must_clauses = []
     if kwargs.get('case_no'):
@@ -181,18 +169,13 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
 
 def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
-    must_query = [Q('term', _type=type_)]
+    # Only pass query string to document list below
+    query = generic_query_builder(None, type_, from_hit, hits_returned, **kwargs)
+
     should_query = [get_ao_document_query(q, **kwargs),
                 Q('query_string', query=q, fields=['no', 'name', 'summary'])]
 
-    query = Search().using(es) \
-        .query(Q('bool', must=must_query, should=should_query, minimum_should_match=1)) \
-        .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
-        .highlight_options(require_field_match=False) \
-        .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
-        .extra(size=hits_returned, from_=from_hit) \
-        .index('docs_search') \
-        .sort("sort1", "sort2")
+    query = query.query('bool', should=should_query, minimum_should_match=1)
 
     return apply_ao_specific_query_params(query, **kwargs)
 
