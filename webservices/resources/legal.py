@@ -135,7 +135,10 @@ class UniversalSearch(utils.Resource):
         return results
 
 def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
-    must_query = [Q('term', _type=type_), Q('query_string', query=q)]
+    must_query = [Q('term', _type=type_)]
+
+    if q:
+        must_query.append(Q('query_string', query=q))
 
     query = Search().using(es) \
         .query(Q('bool', must=must_query)) \
