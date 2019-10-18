@@ -28,7 +28,7 @@ git+https://github.com/18F/slate.git
 flask-apispec==0.7.0
 marshmallow==2.16.3
 marshmallow-sqlalchemy==0.15.0
-git+https://github.com/jmcarp/marshmallow-pagination@master
+git+https://github.com/fecgov/marshmallow-pagination@master
 
 # Data export
 smart_open==1.7.1
