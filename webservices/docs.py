@@ -447,14 +447,6 @@ Note: because the Schedule B data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
 '''
 
-MEMO_TOTAL = '''
-Schedule B disbursements aggregated by memoed items only
-'''
-
-NON_MEMO_TOTAL = '''
-Schedule B disbursements aggregated by non-memoed items only
-'''
-
 SCHEDULE_B_BY_PURPOSE = '''
 Schedule B disbursements aggregated by disbursement purpose category. To avoid double counting,
 memoed items are not included.
@@ -462,14 +454,22 @@ Purpose is a combination of transaction codes, category codes and disbursement d
 See the `disbursement_purpose` sql function within the migrations for more details.
 '''
 
-SCHEDULE_B_BY_RECIPIENT_TAG = '''
+SCHEDULE_B_BY_RECIPIENT = '''
 Schedule B disbursements aggregated by recipient name. To avoid double counting,
 memoed items are not included.
 '''
 
-SCHEDULE_B_BY_RECIPIENT_ID_TAG = '''
+SCHEDULE_B_BY_RECIPIENT_ID = '''
 Schedule B disbursements aggregated by recipient committee ID, if applicable.
 To avoid double counting, memoed items are not included.
+'''
+
+MEMO_TOTAL = '''
+Schedule B disbursements aggregated by memoed items only
+'''
+
+NON_MEMO_TOTAL = '''
+Schedule B disbursements aggregated by non-memoed items only
 '''
 
 SCHEDULE_C_TAG = '''
@@ -527,12 +527,18 @@ results with the following pagination information:
 
 To fetch the next page of sorted results, append `last_index=3023037` and
 `last_expenditure_amount=` to the URL.  We strongly advise paging through
-these results by using the sort indices (defaults to sort by disbursement date, e.g. `last_disbursement_date`), otherwise
-some resources may be unintentionally filtered out.  This resource uses keyset pagination to improve query performance
+these results by using the sort indices (defaults to sort by disbursement date,
+e.g. `last_disbursement_date`), otherwise some resources may be unintentionally
+filtered out.  This resource uses keyset pagination to improve query performance
 and these indices are required to properly page through this large dataset.
 
 Note: because the Schedule E data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
+'''
+
+SCHEDULE_E_BY_CANDIDATE = '''
+Schedule E receipts aggregated by recipient candidate. To avoid double
+counting, memoed items are not included.
 '''
 
 SCHEDULE_F_TAG = '''
@@ -545,7 +551,7 @@ These coordinated party expenditures do not count against the contribution limit
 these limits are detailed in Chapter 7 of the FEC Campaign Guide for Political Party Committees.
 '''
 
-SIZE_DESCRIPTION = '''
+SCHEDULE_A_BY_SIZE = '''
 This endpoint aggregates Schedule A donations based on size:
 ```
  - $200 and under\n\
@@ -559,6 +565,29 @@ that are reported on Schedule A, but filers are not required to itemize those sm
 donations, so we also add unitemized contributions. Unitemized contributions come
 from the summary section of the forms. It represents the total money brought in from
 donors that are not reported on Schedule A and have given $200 or less.
+'''
+
+SCHEDULE_A_BY_STATE = '''
+Schedule A individual receipts aggregated by contributor state.
+This is an aggregate of only individual contributions. To avoid double counting,
+memoed items are not included. Transactions $200 and under do not have to be
+itemized, if those contributions are not itemized, they will not be included in the
+state totals.
+'''
+
+SCHEDULE_A_BY_ZIP = '''
+Schedule A receipts aggregated by contributor zip code. To avoid double
+counting, memoed items are not included.
+'''
+
+SCHEDULE_A_BY_EMPLOYER = '''
+Schedule A receipts aggregated by contributor employer name. To avoid double
+counting, memoed items are not included.
+'''
+
+SCHEDULE_A_BY_OCCUPATION = '''
+Schedule A receipts aggregated by contributor occupation. To avoid double
+counting, memoed items are not included.'
 '''
 
 SIZE = '''
@@ -593,15 +622,7 @@ TOTAL_CANDIDATE_TAG = '''
 Aggregated candidate receipts and disbursements grouped by cycle.
 '''
 
-STATE_AGGREGATE = '''
-Schedule A individual receipts aggregated by contributor state.
-This is an aggregate of only individual contributions. To avoid double counting,
-memoed items are not included. Transactions $200 and under do not have to be
-itemized, if those contributions are not itemized, they will not be included in the
-state totals.
-'''
-
-STATE_AGGREGATE_RECIPIENT_TOTALS = STATE_AGGREGATE + '''
+STATE_AGGREGATE_RECIPIENT_TOTALS = SCHEDULE_A_BY_STATE + '''
 These receipts are then added together by committee type for the total amount
 of each type, grouped by state and cycle.
 '''
@@ -808,6 +829,8 @@ _The communication is distributed within 60 days prior to a general election or 
 to a primary election to federal office._
 '''
 
+ELECTIONEERING_AGGREGATE = 'Electioneering costs aggregated by candidate'
+
 COMMUNICATION_COST = '''
 52 U.S.C. 30118 allows "communications by a corporation to its stockholders and
 executive or administrative personnel and their families or by a labor organization
@@ -815,6 +838,8 @@ to its members and their families on any subject," including the express advocac
 the election or defeat of any Federal candidate.  The costs of such communications
 must be reported to the Federal Election Commission under certain circumstances.
 '''
+
+COMMUNICATION_COST_AGGREGATE = 'Communication cost aggregated by candidate ID and committee ID.'
 
 FILER_RESOURCES = '''
 Useful tools for those who file with the FEC.
@@ -1091,6 +1116,9 @@ MIN_LAST_F1_DATE = 'Filter for committees whose latest Form 1 was received on or
 
 MAX_LAST_F1_DATE = 'Filter for committees whose latest Form 1 was received on or before this date.'
 
+CANDIDATE_MIN_FIRST_FILE_DATE = 'Selects all candidates whose first filing was received by the FEC after this date.'
+CANDIDATE_MAX_FIRST_FILE_DATE = 'Selects all candidates whose first filing was received by the FEC before this date.'
+
 # schedules
 MEMO_CODE = "'X' indicates that the amount is NOT to be included in the itemization total."
 
@@ -1107,25 +1135,34 @@ CONTRIBUTOR_ZIP = 'Zip code of contributor'
 IS_INDIVIDUAL = 'Restrict to non-earmarked individual contributions where memo code is true. \
 Filtering individuals is useful to make sure contributions are not double reported and in creating \
 breakdowns of the amount of money coming from individuals.'
+MISSING_STATE = 'Exclude values with missing state'
 
 # schedule B
-RECIPIENT_NAME = 'Name of the entity receiving the disbursement'
+DISBURSEMENT_DESCRIPTION = 'Description of disbursement'
+DISBURSEMENT_PURPOSE_CATEGORY = 'Disbursement purpose category'
+LAST_DISBURSEMENT_AMOUNT = 'When sorting by `disbursement_amount`, this is populated with the `disbursement_amount` of \
+the last result.  However, you will need to pass the index of that last result to `last_index` to get the next page.'
+LAST_DISBURSEMENT_DATE = 'When sorting by `disbursement_date`, this is populated with the `disbursement_date` of \
+the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'
+RECIPIENT_CITY = 'City of recipient'
+RECIPIENT_COMMITTEE_ID = 'The FEC identifier should be represented here if the contributor is registered with the FEC.'
 RECIPIENT_ID = 'The FEC identifier should be represented here if the entity receiving \
 the disbursement is registered with the FEC.'
+RECIPIENT_NAME = 'Name of the entity receiving the disbursement'
+RECIPIENT_STATE = 'State of recipient'
+
+PURPOSE = 'Purpose of the expenditure'
 
 # communication cost and electioneering
 SUPPORT_OPPOSE_INDICATOR = 'Explains if the money was spent in order to support or oppose a candidate or candidates. \
 (Coded S or O for support or oppose.) This indicator applies to independent expenditures and communication costs.'
-
-# schedule B
-PURPOSE = 'Purpose of the expenditure'
 
 # schedule E
 EXPENDITURE_MAX_DATE = 'Selects all items expended by this committee before this date'
 EXPENDITURE_MIN_DATE = 'Selects all items expended by this committee after this date'
 EXPENDITURE_MIN_AMOUNT = 'Selects all items expended by this committee greater than this amount'
 EXPENDITURE_MAX_AMOUNT = 'Selects all items expended by this committee less than this amount'
-
+SUPPORT_OPPOSE = 'Support or opposition'
 
 # dates
 DUE_DATE = 'Date the report is due'
