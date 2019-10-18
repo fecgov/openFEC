@@ -11,14 +11,15 @@ command, then open localhost:8089 to run tests.
 import os
 import random
 import resource
-
 import locust
 
+from locust_big_queries import big_queries
 
 # Avoid "Too many open files" error
 resource.setrlimit(resource.RLIMIT_NOFILE, (9999, 999999))
 
 API_KEY = os.environ["FEC_API_KEY"]
+DOWNLOAD_KEY = os.environ["FEC_DOWNLOAD_API_KEY"]
 
 # it seems like AUTH is NOT used for current tests
 try:
@@ -215,6 +216,8 @@ class Tasks(locust.TaskSet):
     def on_start(self):
         self.candidates = self.fetch_ids("candidates", "candidate_id")
         self.committees = self.fetch_ids("committees", "committee_id")
+        if not (API_KEY and DOWNLOAD_KEY):
+            print("Set API_KEY and DOWNLOAD_KEY env vars")
 
     def fetch_ids(self, endpoint, key):
         params = {"api_key": API_KEY}
@@ -239,7 +242,7 @@ class Tasks(locust.TaskSet):
         _cycle = (_year + 1) if _year % 2 == 1 else _year
 
         params = {
-            "api_key": API_KEY,
+            "api_key": DOWNLOAD_KEY,
             "sort_hide_null": False,
             "sort_nulls_last": False,
             "two_year_transaction_period": _cycle,
@@ -255,6 +258,13 @@ class Tasks(locust.TaskSet):
             params=params,
             json=payload,
         )
+
+    @locust.task
+    def load_big_queries(self, term=None):
+        endpoint = random.choice(list(big_queries.keys()))
+        params = random.choice(big_queries[endpoint])
+        params["api_key"] = API_KEY
+        self.client.get(endpoint, name="load_big_queries", params=params)
 
     @locust.task
     def load_candidates_search(self, term=None):
