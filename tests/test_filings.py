@@ -56,26 +56,41 @@ class TestFilings(ApiBaseTest):
             factories.FilingsFactory(committee_id='C0004'),
             factories.FilingsFactory(committee_id='C0005'),
             factories.FilingsFactory(candidate_id='H0001'),
-            factories.FilingsFactory(beginning_image_number=123456789021234567),
-            factories.FilingsFactory(form_type='3'),
-            factories.FilingsFactory(primary_general_indicator='G'),
             factories.FilingsFactory(amendment_indicator='A'),
+            factories.FilingsFactory(beginning_image_number=123456789021234567),
+            factories.FilingsFactory(committee_type='P'),
+            factories.FilingsFactory(cycle=2000),
+            factories.FilingsFactory(document_type='X'),
+            factories.FilingsFactory(file_number=123),
+            factories.FilingsFactory(form_category='REPORT'),
+            factories.FilingsFactory(form_category='REPORT'),
+            factories.FilingsFactory(form_type='3'),
+            factories.FilingsFactory(office='H'),
+            factories.FilingsFactory(party='DEM'),
+            factories.FilingsFactory(primary_general_indicator='G'),
             factories.FilingsFactory(report_type='POST GENERAL'),
             factories.FilingsFactory(report_year=1999),
-            factories.FilingsFactory(document_type='X'),
-            factories.FilingsFactory(cycle=2000),
+            factories.FilingsFactory(request_type='5'),
+            factories.FilingsFactory(state='MD'),
         ]
 
         filter_fields = (
-            ('beginning_image_number', 123456789021234567),
-            ('form_type', '3'),
-            ('primary_general_indicator', 'G'),
             ('amendment_indicator', 'A'),
+            ('beginning_image_number', 123456789021234567),
+            ('committee_type', 'P'),
+            ('cycle', 2000),
+            ('document_type', 'X'),
+            ('file_number', 123),
+            ('form_category', 'REPORT'),
+            ('form_type', '3'),
+            ('office', 'H'),
+            ('party', 'DEM'),
+            ('primary_general_indicator', 'G'),
             ('report_type', 'Post General'),
             ('report_year', 1999),
+            ('request_type', '5'),
+            ('state', 'MD'),
             ('candidate_id', 'H0001'),
-            ('document_type', 'X'),
-            ('cycle', 2000),
         )
 
         # checking one example from each field
@@ -134,7 +149,6 @@ class TestFilings(ApiBaseTest):
         results = self._results(api.url_for(FilingsList, sort=['-coverage_end_date', '-beginning_image_number']))
         self.assertEqual(results[0]['beginning_image_number'], '0')
 
-
     def test_regex(self):
         """ Getting rid of extra text that comes in the tables."""
         factories.FilingsFactory(
@@ -153,14 +167,29 @@ class TestEfileFiles(ApiBaseTest):
 
     def test_filter_date_efile(self):
         [
-            factories.EFilingsFactory(committee_id='C010', beginning_image_number=2, filed_date=datetime.date(2012, 1, 1)),
-            factories.EFilingsFactory(committee_id='C011', beginning_image_number=3, filed_date=datetime.date(2013, 1, 1)),
-            factories.EFilingsFactory(committee_id='C012', beginning_image_number=4, filed_date=datetime.date(2014, 1, 1)),
-            factories.EFilingsFactory(committee_id='C013', beginning_image_number=5, filed_date=datetime.date(2015, 1, 1)),
+            factories.EFilingsFactory(
+                committee_id='C010',
+                beginning_image_number=2,
+                filed_date=datetime.date(2012, 1, 1),
+            ),
+            factories.EFilingsFactory(
+                committee_id='C011',
+                beginning_image_number=3,
+                filed_date=datetime.date(2013, 1, 1),
+            ),
+            factories.EFilingsFactory(
+                committee_id='C012',
+                beginning_image_number=4,
+                filed_date=datetime.date(2014, 1, 1)
+            ),
+            factories.EFilingsFactory(
+                committee_id='C013',
+                beginning_image_number=5,
+                filed_date=datetime.date(2015, 1, 1)
+            ),
         ]
 
         min_date = datetime.date(2013, 1, 1)
-        r = self._results(api.url_for(EFilingsView))
         results = self._results(api.url_for(EFilingsView, min_receipt_date=min_date))
         self.assertTrue(all(each for each in results if each['filed_date'] >= min_date.isoformat()))
         max_date = datetime.date(2014, 1, 1)
@@ -173,6 +202,7 @@ class TestEfileFiles(ApiBaseTest):
                 if min_date.isoformat() <= each['filed_date'] <= max_date.isoformat()
             )
         )
+
     def test_filter_receipt_date_efile(self):
 
         [

@@ -24,20 +24,21 @@ class BaseFilings(views.ApiResource):
     page_schema = schemas.FilingsPageSchema
 
     filter_multi_fields = [
-        ('beginning_image_number', models.Filings.beginning_image_number),
-        ('report_type', models.Filings.report_type),
-        ('document_type', models.Filings.document_type),
-        ('report_year', models.Filings.report_year),
-        ('form_type', models.Filings.form_type),
-        ('request_type', models.Filings.request_type),
-        ('file_number', models.Filings.file_number),
-        ('primary_general_indicator', models.Filings.primary_general_indicator),
         ('amendment_indicator', models.Filings.amendment_indicator),
+        ('beginning_image_number', models.Filings.beginning_image_number),
+        ('committee_type', models.Filings.committee_type),
         ('cycle', models.Filings.cycle),
-        ('state', models.Filings.state),
-        ('party', models.Filings.party),
+        ('document_type', models.Filings.document_type),
+        ('file_number', models.Filings.file_number),
+        ('form_category', models.Filings.form_category),
+        ('form_type', models.Filings.form_type),
         ('office', models.Filings.office),
-        ('committe_type', models.Filings.cmte_tp),
+        ('party', models.Filings.party),
+        ('primary_general_indicator', models.Filings.primary_general_indicator),
+        ('report_type', models.Filings.report_type),
+        ('report_year', models.Filings.report_year),
+        ('request_type', models.Filings.request_type),
+        ('state', models.Filings.state),
     ]
 
     filter_range_fields = [
