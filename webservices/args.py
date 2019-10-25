@@ -16,6 +16,8 @@ def _validate_natural(value):
             'Must be a natural number',
             status_code=422
         )
+
+
 Natural = functools.partial(fields.Int, validate=_validate_natural)
 
 per_page = Natural(
@@ -56,6 +58,7 @@ class District(fields.Str):
 
     def _deserialize(self, value, attr, data):
         return '{0:0>2}'.format(value)
+
 
 election_full = fields.Bool(missing=True, description=docs.ELECTION_FULL)
 
@@ -172,6 +175,7 @@ def make_seek_args(field=fields.Int, description=None):
             description=description or 'Index of last result from previous page',
         ),
     }
+
 
 names = {
     'q': fields.List(fields.Str, required=True, description='Name (candidate or committee) to search for'),
