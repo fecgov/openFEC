@@ -882,6 +882,7 @@ schedule_e = {
 schedule_e_efile = {
     'candidate_search': fields.List(fields.Str, description=docs.CANDIDATE_FULL_SEARCH),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'payee_name': fields.List(fields.Str, description=docs.PAYEE_NAME),
     'image_number': fields.List(fields.Str, description=docs.IMAGE_NUMBER),
     'support_oppose_indicator': fields.List(

@@ -110,6 +110,7 @@ class ScheduleEEfileView(views.ApiResource):
     filter_multi_fields = [
         ('image_number', models.ScheduleEEfile.image_number),
         ('committee_id', models.ScheduleEEfile.committee_id),
+        ('candidate_id', models.ScheduleEEfile.candidate_id),
         ('support_oppose_indicator', models.ScheduleEEfile.support_oppose_indicator),
         ('candidate_party', models.ScheduleEEfile.candidate_party),
         ('candidate_office', models.ScheduleEEfile.candidate_office),
