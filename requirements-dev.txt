@@ -1,19 +1,13 @@
 # Development
 # TODO(jmcarp) Install from PyPI after 0.2.4 release
 git+https://github.com/18F/rdbms-subsetter
-ipython==7.5.0
 
 # Testing
 pytest==3.7.4
 pytest-cov==2.5.1
 factory_boy==2.8.1
-faker==0.7.18
 nplusone==0.8.0
 webtest==2.0.27
 pdbpp==0.9.1
-pygments==2.2.0
 click==6.7
 
-#efiling
-pandas==0.23.0 # this is a temporary upgrade to allow python 3.7.4--eventually pandas will be removed
-xlrd==0.9.4

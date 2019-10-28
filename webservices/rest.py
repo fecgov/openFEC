@@ -38,6 +38,7 @@ from webservices.resources import sched_e
 from webservices.resources import sched_f
 from webservices.resources import download
 from webservices.resources import aggregates
+from webservices.resources import aggregates_by_committeeID
 from webservices.resources import candidate_aggregates
 from webservices.resources import candidates
 from webservices.resources import committees
@@ -67,7 +68,7 @@ def sqla_conn_string():
     return sqla_conn_string
 
 
-# app.debug = True
+#app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -328,26 +329,35 @@ api.add_resource(audit.AuditCaseView, '/audit-case/')
 api.add_resource(audit.AuditCandidateNameSearch, '/names/audit_candidates/')
 api.add_resource(audit.AuditCommitteeNameSearch, '/names/audit_committees/')
 
+api.add_resource(aggregates.ScheduleABySizeView, '/schedules/schedule_a/by_size/')
+api.add_resource(aggregates.ScheduleAByStateView, '/schedules/schedule_a/by_state/')
+api.add_resource(aggregates.ScheduleAByZipView, '/schedules/schedule_a/by_zip/')
+api.add_resource(aggregates.ScheduleAByEmployerView, '/schedules/schedule_a/by_employer/')
+api.add_resource(aggregates.ScheduleAByOccupationView, '/schedules/schedule_a/by_occupation/')
+api.add_resource(aggregates.ScheduleBByRecipientView, '/schedules/schedule_b/by_recipient/')
+api.add_resource(aggregates.ScheduleBByRecipientIDView, '/schedules/schedule_b/by_recipient_id/')
+api.add_resource(aggregates.ScheduleBByPurposeView, '/schedules/schedule_b/by_purpose/')
+api.add_resource(aggregates.ScheduleEByCandidateView, '/schedules/schedule_e/by_candidate/')
 
-def add_aggregate_resource(api, view, schedule, label):
-    api.add_resource(
-        view,
-        '/schedules/schedule_{schedule}/by_{label}/'.format(**locals()),
-        '/committee/<committee_id>/schedules/schedule_{schedule}/by_{label}/'.format(**locals()),
-    )
-
-
-add_aggregate_resource(api, aggregates.ScheduleABySizeView, 'a', 'size')
-add_aggregate_resource(api, aggregates.ScheduleAByStateView, 'a', 'state')
-add_aggregate_resource(api, aggregates.ScheduleAByZipView, 'a', 'zip')
-add_aggregate_resource(api, aggregates.ScheduleAByEmployerView, 'a', 'employer')
-add_aggregate_resource(api, aggregates.ScheduleAByOccupationView, 'a', 'occupation')
-
-add_aggregate_resource(api, aggregates.ScheduleBByRecipientView, 'b', 'recipient')
-add_aggregate_resource(api, aggregates.ScheduleBByRecipientIDView, 'b', 'recipient_id')
-add_aggregate_resource(api, aggregates.ScheduleBByPurposeView, 'b', 'purpose')
-
-add_aggregate_resource(api, aggregates.ScheduleEByCandidateView, 'e', 'candidate')
+# These 9 endpoints will be DEPRECATED soon.
+api.add_resource(aggregates_by_committeeID.ScheduleABySizeByCommitteeIDView,
+    '/committee/<committee_id>/schedules/schedule_a/by_size/')
+api.add_resource(aggregates_by_committeeID.ScheduleAByStateByCommitteeIDView,
+    '/committee/<committee_id>/schedules/schedule_a/by_state/')
+api.add_resource(aggregates_by_committeeID.ScheduleAByZipByCommitteeIDView,
+    '/committee/<committee_id>/schedules/schedule_a/by_zip/')
+api.add_resource(aggregates_by_committeeID.ScheduleAByEmployerByCommitteeIDView,
+    '/committee/<committee_id>/schedules/schedule_a/by_employer/')
+api.add_resource(aggregates_by_committeeID.ScheduleAByOccupationByCommitteeIDView,
+    '/committee/<committee_id>/schedules/schedule_a/by_occupation/')
+api.add_resource(aggregates_by_committeeID.ScheduleBByRecipientByCommitteeIDView,
+    '/committee/<committee_id>/schedules/schedule_b/by_recipient/')
+api.add_resource(aggregates_by_committeeID.ScheduleBByRecipientIDByCommitteeIDView,
+    '/committee/<committee_id>/schedules/schedule_b/by_recipient_id/')
+api.add_resource(aggregates_by_committeeID.ScheduleBByPurposeByCommitteeIDView,
+    '/committee/<committee_id>/schedules/schedule_b/by_purpose/')
+api.add_resource(aggregates_by_committeeID.ScheduleEByCandidateByCommitteeIDView,
+    '/committee/<committee_id>/schedules/schedule_e/by_candidate/')
 
 api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate/')
 api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate/')
@@ -447,6 +457,18 @@ apidoc.register(aggregates.ScheduleBByRecipientView, blueprint='v1')
 apidoc.register(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
 apidoc.register(aggregates.ScheduleBByPurposeView, blueprint='v1')
 apidoc.register(aggregates.ScheduleEByCandidateView, blueprint='v1')
+
+# These 9 endpoints will be DEPRECATED soon.
+apidoc.register(aggregates_by_committeeID.ScheduleABySizeByCommitteeIDView, blueprint='v1')
+apidoc.register(aggregates_by_committeeID.ScheduleAByStateByCommitteeIDView, blueprint='v1')
+apidoc.register(aggregates_by_committeeID.ScheduleAByZipByCommitteeIDView, blueprint='v1')
+apidoc.register(aggregates_by_committeeID.ScheduleAByEmployerByCommitteeIDView, blueprint='v1')
+apidoc.register(aggregates_by_committeeID.ScheduleAByOccupationByCommitteeIDView, blueprint='v1')
+apidoc.register(aggregates_by_committeeID.ScheduleBByRecipientByCommitteeIDView, blueprint='v1')
+apidoc.register(aggregates_by_committeeID.ScheduleBByRecipientIDByCommitteeIDView, blueprint='v1')
+apidoc.register(aggregates_by_committeeID.ScheduleBByPurposeByCommitteeIDView, blueprint='v1')
+apidoc.register(aggregates_by_committeeID.ScheduleEByCandidateByCommitteeIDView, blueprint='v1')
+
 apidoc.register(aggregates.CommunicationCostByCandidateView, blueprint='v1')
 apidoc.register(aggregates.ElectioneeringByCandidateView, blueprint='v1')
 apidoc.register(candidate_aggregates.ScheduleABySizeCandidateView, blueprint='v1')

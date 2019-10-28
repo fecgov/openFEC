@@ -16,19 +16,10 @@ from webservices.resources.candidates import CandidateView
 
 class CommitteeFormatTest(ApiBaseTest):
 
-    # TODO: When we move to python 3.7, use datetime.date.fromisoformat('1982-12-31')
-
-    date_1982_12_31 = datetime.date(1982, 12, 31)
-    date_2012_01_01 = datetime.date(2012, 1, 1)
-    date_2015_01_01 = datetime.date(2015, 1, 1)
-    date_2015_02_01 = datetime.date(2015, 2, 1)
-    date_2015_02_03 = datetime.date(2015, 2, 3)
-    date_2015_03_01 = datetime.date(2015, 3, 1)
-    date_2015_04_01 = datetime.date(2015, 4, 1)
 
     def test_committee_list_fields(self):
         committee = factories.CommitteeFactory(
-            first_file_date=self.date_1982_12_31,
+            first_file_date=datetime.date.fromisoformat('1982-12-31'),
             committee_type='P',
             treasurer_name='Robert J. Lipshutz',
             party='DEM',
@@ -37,7 +28,7 @@ class CommitteeFormatTest(ApiBaseTest):
         result = response['results'][0]
         # main fields
         # original registration date doesn't make sense in this example, need to look into this more
-        self.assertEqual(result['first_file_date'], self.date_1982_12_31.isoformat())
+        self.assertEqual(result['first_file_date'], datetime.date.fromisoformat('1982-12-31').isoformat())
         self.assertEqual(result['committee_type'], committee.committee_type)
         self.assertEqual(result['treasurer_name'], committee.treasurer_name)
         self.assertEqual(result['party'], committee.party)
@@ -84,7 +75,7 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_detail_fields(self):
         committee = factories.CommitteeDetailFactory(
-            first_file_date=self.date_1982_12_31,
+            first_file_date=datetime.date.fromisoformat('1982-12-31'),
             committee_type='P',
             treasurer_name='Robert J. Lipshutz',
             party='DEM',
@@ -185,7 +176,7 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_year_filter_skips_null_first_file_date(self):
         # Build fixtures
-        dates = [self.date_2012_01_01, self.date_2015_01_01]
+        dates = [datetime.date.fromisoformat('2012-01-01'), datetime.date.fromisoformat('2015-01-01')]
         [
             factories.CommitteeFactory(first_file_date=None, last_file_date=None),
             factories.CommitteeFactory(first_file_date=dates[0], last_file_date=None),
@@ -290,29 +281,29 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_date_filters(self):
         [
-            factories.CommitteeFactory(first_file_date=self.date_2015_01_01),
-            factories.CommitteeFactory(first_file_date=self.date_2015_02_01),
-            factories.CommitteeFactory(first_file_date=self.date_2015_03_01),
-            factories.CommitteeFactory(first_file_date=self.date_2015_04_01),
+            factories.CommitteeFactory(first_file_date=datetime.date.fromisoformat('2015-01-01')),
+            factories.CommitteeFactory(first_file_date=datetime.date.fromisoformat('2015-02-01')),
+            factories.CommitteeFactory(first_file_date=datetime.date.fromisoformat('2015-03-01')),
+            factories.CommitteeFactory(first_file_date=datetime.date.fromisoformat('2015-04-01')),
         ]
         results = self._results(
-            api.url_for(CommitteeList, min_first_file_date=self.date_2015_02_01))
+            api.url_for(CommitteeList, min_first_file_date=datetime.date.fromisoformat('2015-02-01')))
         self.assertTrue(
-            all(each['first_file_date'] >= self.date_2015_02_01.isoformat() for each in results))
+            all(each['first_file_date'] >= datetime.date.fromisoformat('2015-02-01').isoformat() for each in results))
         results = self._results(
-            api.url_for(CommitteeList, max_first_file_date=self.date_2015_02_03))
+            api.url_for(CommitteeList, max_first_file_date=datetime.date.fromisoformat('2015-02-03')))
         self.assertTrue(
-            all(each['first_file_date'] <= self.date_2015_02_03.isoformat() for each in results))
+            all(each['first_file_date'] <= datetime.date.fromisoformat('2015-02-03').isoformat() for each in results))
         results = self._results(
             api.url_for(
                 CommitteeList,
-                min_first_file_date=self.date_2015_02_01,
-                max_first_file_date=self.date_2015_03_01,
+                min_first_file_date=datetime.date.fromisoformat('2015-02-01'),
+                max_first_file_date=datetime.date.fromisoformat('2015-03-01'),
             )
         )
         self.assertTrue(
             all(
-                self.date_2015_02_01.isoformat() <= each['first_file_date'] <= self.date_2015_03_01.isoformat()
+                datetime.date.fromisoformat('2015-02-01').isoformat() <= each['first_file_date'] <= datetime.date.fromisoformat('2015-03-01').isoformat()
                 for each in results
             )
         )
@@ -322,10 +313,33 @@ class TestCommitteeHistory(ApiBaseTest):
     def setUp(self):
         super().setUp()
         self.candidate = factories.CandidateDetailFactory()
-        self.committees = [factories.CommitteeDetailFactory() for _ in range(2)]
+        self.committees = [factories.CommitteeDetailFactory() for _ in range(5)]
         self.histories = [
-            factories.CommitteeHistoryFactory(committee_id=self.committees[0].committee_id, cycle=2010),
-            factories.CommitteeHistoryFactory(committee_id=self.committees[1].committee_id, cycle=2012),
+            factories.CommitteeHistoryFactory(
+                committee_id=self.committees[0].committee_id,
+                cycle=2010,
+                designation='P'
+            ),
+            factories.CommitteeHistoryFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2012,
+                designation='P'
+            ),
+            factories.CommitteeHistoryFactory(
+                committee_id=self.committees[2].committee_id,
+                cycle=2014,
+                designation='P'
+            ),
+            factories.CommitteeHistoryFactory(
+                committee_id=self.committees[3].committee_id,
+                cycle=2014,
+                designation='A'
+            ),
+            factories.CommitteeHistoryFactory(
+                committee_id=self.committees[4].committee_id,
+                cycle=2014,
+                designation='J'
+            ),
         ]
 
         db.session.flush()
@@ -334,20 +348,52 @@ class TestCommitteeHistory(ApiBaseTest):
                 candidate_id=self.candidate.candidate_id,
                 committee_id=self.committees[0].committee_id,
                 fec_election_year=2010,
+                election_yr_to_be_included=2012,
                 committee_type='P',
+                committee_designation='P',
             ),
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=self.candidate.candidate_id,
                 committee_id=self.committees[1].committee_id,
                 fec_election_year=2012,
+                election_yr_to_be_included=2012,
                 committee_type='P',
+                committee_designation='P',
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[2].committee_id,
+                fec_election_year=2014,
+                committee_type='P',
+                committee_designation='P',
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[3].committee_id,
+                fec_election_year=2014,
+                committee_type='P',
+                committee_designation='A',
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[4].committee_id,
+                fec_election_year=2014,
+                committee_type='P',
+                committee_designation='J',
             ),
         ]
-        self.election = factories.CandidateElectionFactory(
-            candidate_id=self.candidate.candidate_id,
-            cand_election_year=2012,
-            prev_election_year=2008,
-        )
+        self.elections = [
+            factories.CandidateElectionFactory(
+                candidate_id=self.candidate.candidate_id,
+                cand_election_year=2012,
+                prev_election_year=2008,
+            ),
+            factories.CandidateElectionFactory(
+                candidate_id=self.candidate.candidate_id,
+                cand_election_year=2016,
+                prev_election_year=2012,
+            )
+        ]
 
     def test_candidate_cycle(self):
         results = self._results(
@@ -365,11 +411,24 @@ class TestCommitteeHistory(ApiBaseTest):
             api.url_for(
                 CommitteeHistoryView,
                 candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                election_full=True
             )
         )
         assert len(results) == 2
-        # Default sort for /committee/[ID]/history is cycle desc
-        assert results[0]['cycle'] == 2012
-        assert results[0]['committee_id'] == self.committees[1].committee_id
-        assert results[1]['cycle'] == 2010
-        assert results[1]['committee_id'] == self.committees[0].committee_id
+        # Sort order isn't working properly - see #4012
+        assert results[0]['committee_id'] == self.committees[0].committee_id
+        assert results[0]['cycle'] == 2010
+        assert results[1]['committee_id'] == self.committees[1].committee_id
+        assert results[1]['cycle'] == 2012
+
+    def test_designation(self):
+        results = self._results(
+            api.url_for(
+                CommitteeHistoryView,
+                candidate_id=self.candidate.candidate_id,
+                designation=['P', 'A']
+            )
+        )
+        assert len(results) == 4
+        assert 'J' not in [committee.get('designation') for committee in results]

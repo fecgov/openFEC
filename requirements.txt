@@ -22,14 +22,13 @@ ujson==1.33
 requests==2.21.0
 elasticsearch==5.5.1
 elasticsearch-dsl==5.4.0
-prompt-toolkit==2.0.6
 git+https://github.com/18F/slate.git
 
 # Marshalling
 flask-apispec==0.7.0
 marshmallow==2.16.3
 marshmallow-sqlalchemy==0.15.0
-git+https://github.com/jmcarp/marshmallow-pagination@master
+git+https://github.com/fecgov/marshmallow-pagination@master
 
 # Data export
 smart_open==1.7.1

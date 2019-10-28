@@ -1,45 +1,20 @@
 from tests import factories
-from tests.common import ApiBaseTest, assert_dicts_subset
+from tests.common import ApiBaseTest
 
 from webservices.utils import get_current_cycle
 
 from webservices import schemas
 from webservices.rest import db, api
-from webservices.resources.aggregates import (
-    CommunicationCostByCandidateView,
-    ElectioneeringByCandidateView,
-    ScheduleAByEmployerView,
-    ScheduleAByStateView,
-    ScheduleBByPurposeView,
-    ScheduleBByRecipientView,
-    ScheduleEByCandidateView,
-    ScheduleBByRecipientIDView,
-)
-from webservices.resources.candidate_aggregates import (
-    ScheduleABySizeCandidateView,
-    ScheduleAByStateCandidateView,
-    ScheduleAByStateCandidateTotalsView,
-    TotalsCandidateView,
-    AggregateByOfficeView,
-    AggregateByOfficeByPartyView,
+from webservices.resources.aggregates_by_committeeID import (
+    # ScheduleAByEmployerByCommitteeIDView,
+    ScheduleBByPurposeByCommitteeIDView,
+    ScheduleAByStateByCommitteeIDView,
+    ScheduleBByRecipientByCommitteeIDView,
+    ScheduleBByRecipientIDByCommitteeIDView,
+    ScheduleEByCandidateByCommitteeIDView,
 )
 
 class TestCommitteeAggregates(ApiBaseTest):
-    def test_stable_sort(self):
-        rows = [
-            factories.ScheduleAByEmployerFactory(
-                committee_id='C001',
-                employer='omnicorp-{}'.format(idx),
-                total=538,
-            )
-            for idx in range(100)
-        ]
-        employers = []
-        for page in range(2):
-            results = self._results(api.url_for(ScheduleAByEmployerView, sort='-total', per_page=50, page=page + 1))
-            employers.extend(result['employer'] for result in results)
-        assert len(set(employers)) == len(rows)
-
     def test_by_state(self):
         [
             factories.ScheduleAByStateFactory(
@@ -65,18 +40,10 @@ class TestCommitteeAggregates(ApiBaseTest):
                 state='OT',
                 state_full='Other',
             ),
-            factories.ScheduleAByStateFactory(
-                committee_id='C0001',
-                cycle=2016,
-                total=200,
-                state='CT',
-                state_full='Connecticut',
-                count=2,
-            ),
         ]
         results = self._results(
             api.url_for(
-                ScheduleAByStateView,
+                ScheduleAByStateByCommitteeIDView,
                 committee_id='C0001',
                 cycle=2012
             )
@@ -85,28 +52,22 @@ class TestCommitteeAggregates(ApiBaseTest):
 
         results = self._results(
             api.url_for(
-                ScheduleAByStateView,
+                ScheduleAByStateByCommitteeIDView,
+                committee_id='C0002',
                 state='NY',
-            )
-        )
-        assert len(results) == 2
-
-        results = self._results(
-            api.url_for(
-                ScheduleAByStateView,
-                cycle=2018,
-                state='OT',
             )
         )
         assert len(results) == 1
 
         results = self._results(
             api.url_for(
-                ScheduleAByStateView,
-                committee_id='C0001',
+                ScheduleAByStateByCommitteeIDView,
+                committee_id='C0003',
+                cycle=2018,
+                state='OT',
             )
         )
-        assert len(results) == 2
+        assert len(results) == 1
 
     def test_disbursement_purpose(self):
         committee = factories.CommitteeHistoryFactory(cycle=2012)
@@ -118,7 +79,7 @@ class TestCommitteeAggregates(ApiBaseTest):
         )
         results = self._results(
             api.url_for(
-                ScheduleBByPurposeView,
+                ScheduleBByPurposeByCommitteeIDView,
                 committee_id=committee.committee_id,
                 cycle=2012,
                 purpose='Administrative'
@@ -146,7 +107,7 @@ class TestCommitteeAggregates(ApiBaseTest):
         )
         results = self._results(
             api.url_for(
-                ScheduleBByRecipientView,
+                ScheduleBByRecipientByCommitteeIDView,
                 committee_id=committee.committee_id,
                 cycle=2012,
                 recipient_name='Starboard Strategies'
@@ -178,7 +139,7 @@ class TestCommitteeAggregates(ApiBaseTest):
         )
         results = self._results(
             api.url_for(
-                ScheduleBByRecipientIDView,
+                ScheduleBByRecipientIDByCommitteeIDView,
                 committee_id=committee.committee_id,
                 cycle=2012,
                 recipient_id='C00507368'
@@ -201,18 +162,8 @@ class TestAggregates(ApiBaseTest):
     cases = [
         (
             factories.ScheduleEByCandidateFactory,
-            ScheduleEByCandidateView,
+            ScheduleEByCandidateByCommitteeIDView,
             schemas.ScheduleEByCandidateSchema,
-        ),
-        (
-            factories.CommunicationCostByCandidateFactory,
-            CommunicationCostByCandidateView,
-            schemas.CommunicationCostByCandidateSchema,
-        ),
-        (
-            factories.ElectioneeringByCandidateFactory,
-            ElectioneeringByCandidateView,
-            schemas.ElectioneeringByCandidateSchema,
         ),
     ]
 
@@ -321,6 +272,7 @@ class TestAggregates(ApiBaseTest):
             results = self._results(
                 api.url_for(
                     resource,
+                    committee_id=self.committee.committee_id,
                     office='president',
                     cycle=2012,
                 )
@@ -628,40 +580,6 @@ class TestCandidateAggregates(ApiBaseTest):
                 count=3,
             ),
         ]
-        results = self._results(
-            api.url_for(
-                ScheduleABySizeCandidateView,
-                candidate_id=self.candidate.candidate_id,
-                cycle=2012,
-            )
-        )
-        assert len(results) == 1
-        expected = {
-            'candidate_id': self.candidate.candidate_id,
-            'cycle': 2012,
-            'total': 203,
-            'size': 200,
-            'count': 43,
-        }
-        assert results[0] == expected
-
-        results = self._results(
-            api.url_for(
-                ScheduleABySizeCandidateView,
-                candidate_id=self.candidate.candidate_id,
-                cycle=2012,
-                election_full=False,
-            )
-        )
-        assert len(results) == 1
-        expected = {
-            'candidate_id': self.candidate.candidate_id,
-            'cycle': 2012,
-            'total': 200,
-            'size': 200,
-            'count': 40,
-        }
-        assert results[0] == expected
 
     def test_by_state(self):
         [
@@ -690,430 +608,3 @@ class TestCandidateAggregates(ApiBaseTest):
                 count=3,
             ),
         ]
-        results = self._results(
-            api.url_for(
-                ScheduleAByStateCandidateView,
-                candidate_id=self.candidate.candidate_id,
-                cycle=2012,
-            )
-        )
-        assert len(results) == 1
-        expected = {
-            'candidate_id': self.candidate.candidate_id,
-            'cycle': 2012,
-            'total': 210.01,
-            'state': 'NY',
-            'state_full': 'New York',
-            'count': 63,
-        }
-        assert results[0] == expected
-
-        results = self._results(
-            api.url_for(
-                ScheduleAByStateCandidateView,
-                candidate_id=self.candidate.candidate_id,
-                cycle=2012,
-                election_full=False,
-            )
-        )
-        assert len(results) == 1
-        expected = {
-            'candidate_id': self.candidate.candidate_id,
-            'cycle': 2012,
-            'total': 200,
-            'state': 'NY',
-            'state_full': 'New York',
-            'count': 60,
-        }
-        assert results[0] == expected
-
-    def test_by_state_candidate_totals(self):
-        [
-            factories.ScheduleAByStateFactory(
-                committee_id=self.committees[0].committee_id,
-                cycle=2012,
-                total=50.3,
-                state='NY',
-                state_full='New York',
-                count=30,
-            ),
-            factories.ScheduleAByStateFactory(
-                committee_id=self.committees[1].committee_id,
-                cycle=2012,
-                total=150.11,
-                state='CT',
-                state_full='New York',
-                count=10,
-            ),
-            factories.ScheduleAByStateFactory(
-                committee_id=self.committees[1].committee_id,
-                cycle=2012,
-                total=150.10,
-                state='NJ',
-                state_full='New Jersey',
-                count=60,
-            ),
-        ]
-        results = self._results(
-            api.url_for(
-                ScheduleAByStateCandidateTotalsView,
-                candidate_id=self.candidate.candidate_id,
-                cycle=2012,
-            )
-        )
-        assert len(results) == 1
-        expected = {
-            'candidate_id': self.candidate.candidate_id,
-            'cycle': 2012,
-            'total': 350.51,
-            'count': 100,
-        }
-        assert results[0] == expected
-
-    def test_totals(self):
-        # 2-year totals
-        results = self._results(
-            api.url_for(
-                TotalsCandidateView,
-                candidate_id=self.candidate.candidate_id,
-                cycle=2012,
-                election_full=False
-            )
-        )
-        assert len(results) == 1
-        assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 75})
-
-        # Full-cycle totals (default is true)
-        results = self._results(
-            api.url_for(
-                TotalsCandidateView,
-                candidate_id=self.candidate.candidate_id,
-                cycle=2012,
-            )
-        )
-        assert len(results) == 1
-        assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 100})
-
-        # candidate_zero
-        # by default, load all candidates, current candidate should return
-        results = self._results(
-            api.url_for(
-                TotalsCandidateView,
-                candidate_id=self.candidate_zero.candidate_id,
-                cycle=2018,
-            )
-        )
-        assert len(results) == 1
-        assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 0})
-
-        #active candidate test: loading active candidates result nothing
-        results = self._results(
-            api.url_for(
-                TotalsCandidateView,
-                candidate_id=self.candidate_zero.candidate_id,
-                cycle=2018,
-                is_active_candidate=True
-            )
-        )
-        assert len(results) == 0
-
-        #active candidate test: loading inactive candidates result current one
-        results = self._results(
-            api.url_for(
-                TotalsCandidateView,
-                candidate_id=self.candidate_zero.candidate_id,
-                cycle=2018,
-                is_active_candidate=False,
-                election_full=False,
-            )
-        )
-        assert len(results) == 1
-
-        # candidate_17_18
-        results = self._results(
-            api.url_for(
-                TotalsCandidateView,
-                candidate_id=self.candidate_17_18.candidate_id,
-                cycle=2018,
-            )
-        )
-        assert len(results) == 1
-        assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 100})
-
-        # active candidats tst2: load inactive candidates result nothing
-        results = self._results(
-            api.url_for(
-                TotalsCandidateView,
-                candidate_id=self.candidate_17_18.candidate_id,
-                cycle=2018,
-                is_active_candidate=False
-            )
-        )
-        assert len(results) == 0
-
-        # active candidats tst3: load active candidates only
-        results = self._results(
-            api.url_for(
-                TotalsCandidateView,
-                candidate_id=self.candidate_17_18.candidate_id,
-                cycle=2018,
-                is_active_candidate=True
-            )
-        )
-        assert len(results) == 1
-
-        # candidate_17_only
-        results = self._results(
-            api.url_for(
-                TotalsCandidateView,
-                candidate_id=self.candidate_17_only.candidate_id,
-                cycle=2018,
-            )
-        )
-        assert len(results) == 1
-        assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 150})
-
-        # candidate_20
-        results = self._results(
-            api.url_for(
-                TotalsCandidateView,
-                candidate_id=self.candidate_20.candidate_id,
-                cycle=self.current_cycle,
-                election_full=False
-            )
-        )
-        assert len(results) == 1
-        assert_dicts_subset(results[0], {'cycle': self.current_cycle, 'receipts': 25000})
-
-    def test_totals_full(self):
-        results = self._results(
-            api.url_for(
-                TotalsCandidateView,
-                candidate_id=self.candidate.candidate_id,
-                cycle=2012,
-                election_full='true',
-            )
-        )
-        assert len(results) == 1
-        assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 100})
-
-        # candidate_20
-        results = self._results(
-            api.url_for(
-                TotalsCandidateView,
-                candidate_id=self.candidate_20.candidate_id,
-                cycle=self.next_cycle,
-                election_full='true',
-            )
-        )
-        assert len(results) == 1
-        assert_dicts_subset(results[0], {'cycle': self.next_cycle, 'receipts': 55000})
-
-
-class TestCandidateTotalsByOffice(ApiBaseTest):
-
-    def setUp(self):
-        super().setUp()
-        self.candidate_1 = factories.CandidateHistoryFutureFactory(
-            candidate_id='S123',
-            candidate_election_year=2016,
-        )
-        self.candidate_2 = factories.CandidateHistoryFutureFactory(
-            candidate_id='S456',
-            candidate_election_year=2016,
-        )
-        self.candidate_3 = factories.CandidateHistoryFutureFactory(
-            candidate_id='S789',
-            two_year_period=2014,
-            candidate_election_year=2016,
-            candidate_inactive=True,
-        )
-        self.candidate_4 = factories.CandidateHistoryFutureFactory(
-            candidate_id='P123',
-            two_year_period=2018,
-            candidate_election_year=2020,
-        )
-        factories.CandidateTotalFactory(
-            candidate_id=self.candidate_1.candidate_id,
-            is_election=True,
-            receipts=100,
-            cycle=2016,
-            election_year=2016,
-        )
-        factories.CandidateTotalFactory(
-            candidate_id=self.candidate_1.candidate_id,
-            is_election=False,
-            receipts=200,
-            cycle=2016,
-            election_year=2016,
-        )
-        factories.CandidateTotalFactory(
-            candidate_id=self.candidate_2.candidate_id,
-            is_election=True,
-            receipts=21,
-            cycle=2016,
-            election_year=2016,
-        )
-        factories.CandidateTotalFactory(
-            candidate_id=self.candidate_3.candidate_id,
-            is_election=True,
-            receipts=5000,
-            cycle=2016,
-            election_year=2016,
-        )
-        factories.CandidateTotalFactory(
-            candidate_id=self.candidate_4.candidate_id,
-            is_election=True,
-            receipts=10000,
-            cycle=2020,
-            election_year=2020,
-        )
-
-    def test_candidate_totals_by_office(self):
-        results = self._results(
-            api.url_for(
-                AggregateByOfficeView,
-            )
-        )
-        assert len(results) == 2
-
-        results = self._results(
-            api.url_for(
-                AggregateByOfficeView,
-                office='S'
-            )
-        )
-        assert len(results) == 1
-        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipts': 5121})
-
-        results = self._results(
-            api.url_for(
-                AggregateByOfficeView,
-                office='S',
-                is_active_candidate=True,
-            )
-        )
-        assert len(results) == 1
-        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipts': 121})
-
-        results = self._results(
-            api.url_for(
-                AggregateByOfficeView,
-                office='S',
-                is_active_candidate=False,
-            )
-        )
-        assert len(results) == 1
-        assert_dicts_subset(results[0], {'election_year': 2016, 'total_receipts': 5000})
-
-class TestCandidateTotalsByOfficeByParty(ApiBaseTest):
-
-    def setUp(self):
-        super().setUp()
-        factories.CandidateTotalFactory(
-            candidate_id='S11111',
-            is_election=True,
-            receipts=100,
-            disbursements=100,
-            election_year=2016,
-            office='S',
-            party='DEM',
-            candidate_inactive=True,
-        )
-        factories.CandidateTotalFactory(
-            candidate_id='S2222',
-            is_election=False,
-            receipts=1000,
-            disbursements=1000,
-            election_year=2016,
-            office='S',
-            party='DEM',
-            candidate_inactive=False,
-        )
-        factories.CandidateTotalFactory(
-            candidate_id='S3333',
-            is_election=True,
-            receipts=10000,
-            disbursements=10000,
-            election_year=2016,
-            office='S',
-            party='REP',
-            candidate_inactive=False,
-        )
-        factories.CandidateTotalFactory(
-            candidate_id='P11111',
-            is_election=True,
-            receipts=100000,
-            disbursements=100000,
-            election_year=2016,
-            office='P',
-            party='DEM',
-            candidate_inactive=False,
-        )
-        factories.CandidateTotalFactory(
-            candidate_id='P2222',
-            is_election=True,
-            receipts=1000000,
-            disbursements=1000000,
-            election_year=2016,
-            office='P',
-            party='REP',
-            candidate_inactive=True,
-        )
-        factories.CandidateTotalFactory(
-            candidate_id='H1111',
-            is_election=True,
-            receipts=200,
-            disbursements=200,
-            election_year=2016,
-            office='H',
-            party='REP',
-            candidate_inactive=False,
-        )
-        factories.CandidateTotalFactory(
-            candidate_id='H2222',
-            is_election=True,
-            receipts=300,
-            disbursements=300,
-            election_year=2016,
-            office='H',
-            party='GRE',
-            candidate_inactive=False,
-        )
-
-    def test_candidate_totals_by_office_by_party(self):
-        results = self._results(
-            api.url_for(
-                AggregateByOfficeByPartyView,
-            )
-        )
-        assert len(results) == 6
-
-        results = self._results(
-            api.url_for(
-                AggregateByOfficeByPartyView,
-                office='S'
-            )
-        )
-        assert len(results) == 2
-        assert_dicts_subset(
-            results[0], {'election_year': 2016, 'party': 'DEM', 'total_receipts': 100, 'total_disbursements': 100}
-        )
-        assert_dicts_subset(
-            results[1], {'election_year': 2016, 'party': 'REP', 'total_receipts': 10000, 'total_disbursements': 10000}
-        )
-
-        results = self._results(
-            api.url_for(
-                AggregateByOfficeByPartyView,
-                office='H',
-                is_active_candidate=True,
-            )
-        )
-        assert len(results) == 2
-        assert_dicts_subset(
-            results[0], {'election_year': 2016, 'party': 'Other', 'total_receipts': 300, 'total_disbursements': 300}
-        )
-        assert_dicts_subset(
-            results[1], {'election_year': 2016, 'party': 'REP', 'total_receipts': 200, 'total_disbursements': 200}
-        )

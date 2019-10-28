@@ -249,8 +249,8 @@ candidate_detail = {
 candidate_list = {
     'q': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'min_first_file_date': fields.Date(description='Selects all candidates whose first filing was received by the FEC after this date'),
-    'max_first_file_date': fields.Date(description='Selects all candidates whose first filing was received by the FEC before this date'),
+    'min_first_file_date': fields.Date(description=docs.CANDIDATE_MIN_FIRST_FILE_DATE),
+    'max_first_file_date': fields.Date(description=docs.CANDIDATE_MAX_FIRST_FILE_DATE),
     'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
 }
 
@@ -297,20 +297,24 @@ committee_list = {
 
 committee_history = {
     'election_full': election_full,
+    'designation': fields.List(
+        IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
+        description=docs.DESIGNATION,
+    ),
 }
 
 filings = {
     'committee_type': fields.Str(description=docs.COMMITTEE_TYPE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'is_amended': fields.Bool(description='Filing has been amended'),
-    'most_recent': fields.Bool(description='Filing is either new or is the most-recently filed amendment'),
+    'is_amended': fields.Bool(description=docs.IS_AMENDED),
+    'most_recent': fields.Bool(description=docs.MOST_RECENT),
     'report_type': fields.List(IStr, description=docs.REPORT_TYPE),
     'request_type': fields.List(IStr, description=docs.REQUEST_TYPE),
     'document_type': fields.List(IStr, description=docs.DOC_TYPE),
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
-    'min_receipt_date': fields.Date(description='Selects all items received by FEC after this date'),
-    'max_receipt_date': fields.Date(description='Selects all items received by FEC before this date'),
+    'min_receipt_date': fields.Date(description=docs.MIN_RECEIPT_DATE),
+    'max_receipt_date': fields.Date(description=docs.MAX_RECEIPT_DATE),
     'form_type': fields.List(IStr, description=docs.FORM_TYPE),
     'state': fields.List(IStr, description=docs.STATE),
     'district': fields.List(IStr, description=docs.DISTRICT),
@@ -524,28 +528,33 @@ schedule_a_e_file = {
 schedule_a_by_size = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'size': fields.List(fields.Int(validate=validate.OneOf([0, 200, 500, 1000, 2000])), description=docs.SIZE),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
 
 schedule_a_by_state = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'state': fields.List(IStr, description='State of contributor'),
-    'hide_null': fields.Bool(missing=False, description='Exclude values with missing state'),
+    'state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'hide_null': fields.Bool(missing=False, description=docs.MISSING_STATE),
 }
 
 schedule_a_by_zip = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'zip': fields.List(fields.Str, description='Zip code'),
-    'state': fields.List(IStr, description='State of contributor'),
+    'zip': fields.List(fields.Str, description=docs.CONTRIBUTOR_ZIP),
+    'state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
 
 schedule_a_by_employer = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'employer': fields.List(IStr, description=docs.EMPLOYER),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
 
 schedule_a_by_occupation = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'occupation': fields.List(IStr, description=docs.OCCUPATION),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
 
 schedule_a_by_contributor = {
@@ -553,29 +562,99 @@ schedule_a_by_contributor = {
     'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
 }
 
+schedule_b_by_purpose = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'purpose': fields.List(fields.Str, description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+}
+
 schedule_b_by_recipient = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'recipient_name': fields.List(fields.Str, description=docs.RECIPIENT_NAME),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
 
 schedule_b_by_recipient_id = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'recipient_id': fields.List(IStr, description=docs.RECIPIENT_ID),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
+
+# start --- These 9 args will be DEPRECATED soon.
+schedule_a_by_size_committee_id = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'size': fields.List(fields.Int(validate=validate.OneOf([0, 200, 500, 1000, 2000])), description=docs.SIZE),
+}
+
+schedule_a_by_state_committee_id = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
+    'hide_null': fields.Bool(missing=False, description=docs.MISSING_STATE),
+}
+
+schedule_a_by_zip_committee_id = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'zip': fields.List(fields.Str, description=docs.CONTRIBUTOR_ZIP),
+    'state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
+}
+
+schedule_a_by_employer_committee_id = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'employer': fields.List(IStr, description=docs.EMPLOYER),
+}
+
+schedule_a_by_occupation_committee_id = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'occupation': fields.List(IStr, description=docs.OCCUPATION),
+}
+
+schedule_b_by_purpose_committee_id = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'purpose': fields.List(fields.Str, description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
+}
+
+schedule_b_by_recipient_committee_id = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'recipient_name': fields.List(fields.Str, description=docs.RECIPIENT_NAME),
+}
+
+schedule_b_by_recipient_id_committee_id = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'recipient_id': fields.List(IStr, description=docs.RECIPIENT_ID),
+}
+
+schedule_e_by_candidate_committee_id = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'office': fields.Str(
+        validate=validate.OneOf(['house', 'senate', 'president']),
+        description=docs.OFFICE,
+    ),
+    'support_oppose': IStr(
+        missing=None,
+        validate=validate.OneOf(['S', 'O']),
+        description=docs.SUPPORT_OPPOSE,
+    ),
+}
+# end --- This 9 args will be DEPRECATED soon.
 
 schedule_b = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here if the contributor is registered with the FEC.'),
-    'recipient_name': fields.List(fields.Str, description='Name of recipient'),
-    'disbursement_description': fields.List(fields.Str, description='Description of disbursement'),
-    'recipient_city': fields.List(IStr, description='City of recipient'),
-    'recipient_state': fields.List(IStr, description='State of recipient'),
-    'disbursement_purpose_category': fields.List(IStr, description='Disbursement purpose category'),
-    'last_disbursement_date': fields.Date(missing=None, description='When sorting by `disbursement_date`, this is populated with the `disbursement_date` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
-    'last_disbursement_amount': fields.Float(missing=None, description='When sorting by `disbursement_amount`, this is populated with the `disbursement_amount` of the last result.  However, you will need to pass the index of that last result to `last_index` to get the next page.'),
-    'two_year_transaction_period': fields.List(
-        fields.Int,
-        description=docs.TWO_YEAR_TRANSACTION_PERIOD,
+    'disbursement_description': fields.List(fields.Str, description=docs.DISBURSEMENT_DESCRIPTION),
+    'disbursement_purpose_category': fields.List(IStr, description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
+    'last_disbursement_amount': fields.Float(missing=None, description=docs.LAST_DISBURSEMENT_AMOUNT),
+    'last_disbursement_date': fields.Date(missing=None, description=docs.LAST_DISBURSEMENT_DATE),
+    'recipient_city': fields.List(IStr, description=docs.RECIPIENT_CITY),
+    'recipient_committee_id': fields.List(IStr, description=docs.RECIPIENT_COMMITTEE_ID),
+    'recipient_name': fields.List(fields.Str, description=docs.RECIPIENT_NAME),
+    'recipient_state': fields.List(IStr, description=docs.RECIPIENT_STATE),
+    'spender_committee_designation': fields.List(
+        IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
+        description=docs.DESIGNATION,
+    ),
+    'spender_committee_org_type': fields.List(
+        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
+        description=docs.ORGANIZATION_TYPE,
     ),
     'spender_committee_type': fields.List(
         IStr(validate=validate.OneOf([
@@ -583,15 +662,10 @@ schedule_b = {
             'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
         description=docs.COMMITTEE_TYPE,
     ),
-    'spender_committee_org_type': fields.List(
-        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
-        description=docs.ORGANIZATION_TYPE,
+    'two_year_transaction_period': fields.List(
+        fields.Int,
+        description=docs.TWO_YEAR_TRANSACTION_PERIOD,
     ),
-    'spender_committee_designation': fields.List(
-        IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
-        description=docs.DESIGNATION,
-    ),
-
 }
 
 schedule_b_efile = {
@@ -612,10 +686,6 @@ schedule_b_efile = {
     'max_amount': Currency(description='Filter for all amounts less than a value.'),
 }
 
-schedule_b_by_purpose = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'purpose': fields.List(fields.Str, description='Disbursement purpose category'),
-}
 
 schedule_c = {
     # TODO(jmcarp) Request integer image numbers from FEC and update argument types
@@ -637,20 +707,6 @@ schedule_c = {
     'max_incurred_date': fields.Date(missing=None, description=docs.MAX_INCURRED_DATE),
 }
 
-schedule_e_by_candidate = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'office': fields.Str(
-        validate=validate.OneOf(['house', 'senate', 'president']),
-        description=docs.OFFICE,
-    ),
-    'support_oppose': IStr(
-        missing=None,
-        validate=validate.OneOf(['S', 'O']),
-        description='Support or opposition'
-    ),
-}
-
 #These arguments will evolve with updated filtering needs
 schedule_d = {
     'min_payment_period': fields.Float(),
@@ -661,6 +717,20 @@ schedule_d = {
     'creditor_debtor_name': fields.List(fields.Str),
     'nature_of_debt': fields.Str(),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+}
+schedule_e_by_candidate = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'office': fields.Str(
+        validate=validate.OneOf(['house', 'senate', 'president']),
+        description=docs.OFFICE,
+    ),
+    'support_oppose': IStr(
+        missing=None,
+        validate=validate.OneOf(['S', 'O']),
+        description=docs.SUPPORT_OPPOSE,
+    ),
 }
 
 schedule_f = {
@@ -675,7 +745,7 @@ communication_cost = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'support_oppose_indicator': fields.List(
         IStr(validate=validate.OneOf(['S', 'O'])),
-        description='Support or opposition',
+        description=docs.SUPPORT_OPPOSE,
     ),
 }
 
@@ -736,7 +806,7 @@ candidate_totals = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description='Governmental office candidate runs for: House, Senate or presidential'),
+    'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description=docs.OFFICE),
     'election_full': election_full,
     'state': fields.List(IStr, description='State of candidate'),
     'district': fields.List(District, description='District of candidate'),
