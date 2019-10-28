@@ -72,7 +72,7 @@ SELECT row_number() OVER () AS idx,
         WHEN upper(filing_history.form_tp::text) IN ('FRQ', 'F99') THEN true
         WHEN upper(filing_history.form_tp::text) IN ('F1'::text, 'F1M'::text, 'F2'::text) AND filing_history.file_num = v1.mst_rct_file_num THEN true
         WHEN upper(filing_history.form_tp::text) = 'F5'::text AND filing_history.rpt_tp::text IN ('24'::text, '48'::text) THEN NULL
-        WHEN upper(filing_history.form_tp::text) IN ('F6'::text, 'F13'::text) THEN NULL
+        WHEN upper(filing_history.form_tp::text) = 'F6'::text THEN NULL
         WHEN vs.orig_sub_id IS NOT NULL THEN true
         WHEN vs.orig_sub_id IS NULL THEN false
         ELSE NULL
