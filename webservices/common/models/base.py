@@ -1,6 +1,7 @@
 import random
 import celery
 from sqlalchemy import orm
+from flask import request
 from flask_sqlalchemy import SQLAlchemy as SQLAlchemyBase
 from flask_sqlalchemy import SignallingSession
 
@@ -42,6 +43,10 @@ class RoutingSession(SignallingSession):
 
     def get_bind(self, mapper=None, clause=None):
         if self.use_follower:
+            if 'schedule_a' in request.path:
+                print("Choose replica 1")
+            else:
+                print("Choose replica 2")
             return random.choice(self.followers)
 
         return super().get_bind(mapper=mapper, clause=clause)
