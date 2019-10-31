@@ -880,6 +880,8 @@ schedule_e = {
     'is_notice': fields.List(fields.Bool, description=docs.IS_NOTICE),
     'min_dissemination_date': fields.Date(description=docs.DISSEMINATION_MIN_DATE),
     'max_dissemination_date': fields.Date(description=docs.DISSEMINATION_MAX_DATE),
+    'min_filing_date': fields.Date(description=docs.MIN_RECEIPT_DATE),
+    'max_filing_date': fields.Date(description=docs.MAX_RECEIPT_DATE)
 }
 
 schedule_e_efile = {
