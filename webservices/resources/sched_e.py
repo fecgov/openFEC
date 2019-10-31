@@ -8,13 +8,7 @@ from webservices import schemas
 from sqlalchemy.orm import aliased, contains_eager
 from webservices.common import models
 from webservices.common import views
-from webservices.common import counts
 from webservices.common.views import ItemizedResource
-from webservices.common.models import (
-    EFilings,
-    db
-)
-
 
 @doc(
     tags=['independent expenditures'],

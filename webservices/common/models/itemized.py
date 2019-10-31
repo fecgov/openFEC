@@ -565,10 +565,9 @@ class ScheduleD(PdfMixin, BaseItemized):
 
 
 class ScheduleE(PdfMixin, BaseItemized):
-    # __tablename__ = 'ofec_sched_e_mv'
-    __tablename__ = 'ofec_sched_e_mv_tmp_jj'
-    sub_id = db.Column(db.String, primary_key=True)
+    __tablename__ = 'ofec_sched_e_mv'
 
+    sub_id = db.Column(db.String, primary_key=True)
     # Payee info
     payee_prefix = db.Column(db.String)
     payee_name = db.Column('pye_nm', db.String)
@@ -591,12 +590,12 @@ class ScheduleE(PdfMixin, BaseItemized):
     expenditure_description = db.Column('exp_desc', db.String)
     expenditure_date = db.Column('exp_dt', db.Date)
     dissemination_date = db.Column('dissem_dt', db.Date)
+    filing_date = db.Column('filing_date', db.Date)
     expenditure_amount = db.Column('exp_amt', db.Float)
     office_total_ytd = db.Column('cal_ytd_ofc_sought', db.Float)
     category_code = db.Column('catg_cd', db.String)
     category_code_full = db.Column('catg_cd_desc', db.String)
     support_oppose_indicator = db.Column('s_o_ind', db.String)
-    filing_date = db.Column('filing_date', db.Date)
 
     memo_code = db.Column('memo_cd', db.String)
     memo_code_full = db.Column('memo_cd_desc', db.String)

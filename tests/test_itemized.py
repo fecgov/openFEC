@@ -824,9 +824,9 @@ class TestItemized(ApiBaseTest):
         self.assertEquals(len(results), 0)
 
     def test_filters_sched_e_dissemination_date_range(self):
-        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2020, 12, 30))
-        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2019, 8, 29))
-        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2018, 10, 25))
+        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2023, 12, 30))
+        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2021, 8, 29))
+        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2019, 10, 25))
         factories.ScheduleEFactory(dissemination_date=datetime.datetime(2017, 6, 22))
         factories.ScheduleEFactory(dissemination_date=datetime.datetime(2015, 10, 15))
 
@@ -835,9 +835,23 @@ class TestItemized(ApiBaseTest):
         assert len(results) == 5
 
         results = self._results(api.url_for(ScheduleEView,
-            max_dissemination_date=datetime.date.fromisoformat('2018-10-25')))
-        assert len(results) == 3
+            max_dissemination_date=datetime.date.fromisoformat('2021-10-25')))
+        assert len(results) == 4
 
+    def test_filters_sched_e_filing_date_range(self):
+        factories.ScheduleEFactory(filing_date=datetime.datetime(2023, 12, 30))
+        factories.ScheduleEFactory(filing_date=datetime.datetime(2021, 8, 29))
+        factories.ScheduleEFactory(filing_date=datetime.datetime(2019, 10, 25))
+        factories.ScheduleEFactory(filing_date=datetime.datetime(2017, 6, 22))
+        factories.ScheduleEFactory(filing_date=datetime.datetime(2015, 10, 15))
+
+        results = self._results(api.url_for(ScheduleEView,
+            min_filing_date=datetime.date.fromisoformat('2015-01-01')))
+        assert len(results) == 5
+
+        results = self._results(api.url_for(ScheduleEView,
+            max_filing_date=datetime.date.fromisoformat('2021-10-25')))
+        assert len(results) == 4
 
     def test_filters_sched_a_efile(self):
         filters = [
