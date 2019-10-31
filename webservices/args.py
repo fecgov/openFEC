@@ -878,6 +878,8 @@ schedule_e = {
     'last_support_oppose_indicator': fields.Str(missing=None,
         description=docs.LAST_SUPPOSE_OPPOSE_INDICATOR),
     'is_notice': fields.List(fields.Bool, description=docs.IS_NOTICE),
+    'min_dissemination_date': fields.Date(description=docs.DISSEMINATION_MIN_DATE),
+    'max_dissemination_date': fields.Date(description=docs.DISSEMINATION_MAX_DATE),
 }
 
 schedule_e_efile = {

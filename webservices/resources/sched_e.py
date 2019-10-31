@@ -56,6 +56,8 @@ class ScheduleEView(ItemizedResource):
         (('min_date', 'max_date'), models.ScheduleE.expenditure_date),
         (('min_amount', 'max_amount'), models.ScheduleE.expenditure_amount),
         (('min_image_number', 'max_image_number'), models.ScheduleE.image_number),
+        (('min_dissemination_date', 'max_dissemination_date'), models.ScheduleE.dissemination_date),
+
     ]
     query_options = [
         sa.orm.joinedload(models.ScheduleE.candidate),

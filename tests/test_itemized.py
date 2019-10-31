@@ -823,6 +823,22 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleEView, payee_name=payee_names))
         self.assertEquals(len(results), 0)
 
+    def test_filters_sched_e_dissemination_date_range(self):
+        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2020, 12, 30))
+        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2019, 8, 29))
+        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2018, 10, 25))
+        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2017, 6, 22))
+        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2015, 10, 15))
+
+        results = self._results(api.url_for(ScheduleEView,
+            min_dissemination_date=datetime.date.fromisoformat('2015-01-01')))
+        assert len(results) == 5
+
+        results = self._results(api.url_for(ScheduleEView,
+            max_dissemination_date=datetime.date.fromisoformat('2018-10-25')))
+        assert len(results) == 3
+
+
     def test_filters_sched_a_efile(self):
         filters = [
             ('image_number', ScheduleAEfile.image_number, ['123', '456']),
