@@ -877,6 +877,21 @@ class TestItemized(ApiBaseTest):
             assert len(results) == 1
             assert results[0][column.key] == values[0]
 
+    def test_candidate_id_filter_sched_e_efile(self):
+        filters = [
+            ('candidate_id', ScheduleEEfile.candidate_id, ['S01', 'S02']),
+        ]
+        factories.EFilingsFactory(file_number=123)
+        for label, column, values in filters:
+            [
+                factories.ScheduleEEfileFactory(**{column.key: value})
+                for value in values
+            ]
+            results = self._results(api.url_for(ScheduleEEfileView, **{label: values[0]}))
+            assert len(results) == 1
+            assert results[0][column.key] == values[0]
+        
+
     def test_schedule_e_sort_args_descending(self):
         [
             factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
