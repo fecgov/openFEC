@@ -8,13 +8,7 @@ from webservices import schemas
 from sqlalchemy.orm import aliased, contains_eager
 from webservices.common import models
 from webservices.common import views
-from webservices.common import counts
 from webservices.common.views import ItemizedResource
-from webservices.common.models import (
-    EFilings,
-    db
-)
-
 
 @doc(
     tags=['independent expenditures'],
@@ -56,6 +50,9 @@ class ScheduleEView(ItemizedResource):
         (('min_date', 'max_date'), models.ScheduleE.expenditure_date),
         (('min_amount', 'max_amount'), models.ScheduleE.expenditure_amount),
         (('min_image_number', 'max_image_number'), models.ScheduleE.image_number),
+        (('min_dissemination_date', 'max_dissemination_date'), models.ScheduleE.dissemination_date),
+        (('min_filing_date', 'max_filing_date'), models.ScheduleE.filing_date),
+
     ]
     query_options = [
         sa.orm.joinedload(models.ScheduleE.candidate),

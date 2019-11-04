@@ -1548,17 +1548,17 @@ The first value in the chain is the original filing.  The ordering in the chain 
 amendments were filed up to the amendment being viewed.
 '''
 
-AMENDMENT_INDICATOR = '''
+AMENDMENT_INDICATOR = 'Amendent types:\n\
     -N   new\n\
     -A   amendment\n\
     -T   terminated\n\
     -C   consolidated\n\
     -M   multi-candidate\n\
     -S   secondary\n\n\
-    Null might be new or amendment. If amendment indicator is null and the filings is the first or \
-    first in a chain treat it as if it was a new. If it is not the first or first in a chain then \
-    treat the filing as an amendment.\n\
-'''
+NULL might be new or amendment. If amendment indicator is null and the filings is the first or \
+first in a chain treat it as if it was a new. If it is not the first or first in a chain then \
+treat the filing as an amendment.\n\
+'
 
 AMENDED_BY = '''
 If this report has been amended, this field gives the file_number of the report that should be used. For example,
