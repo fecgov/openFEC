@@ -43,7 +43,7 @@ jobs:
 
       - restore_cache:
           keys:
-          - v2-fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements-ci.txt" }}-{{ checksum "package.json" }}
+          - v2-fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
           - v2-fec-api-dependencies-
 
@@ -67,13 +67,13 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            pip install -r requirements.txt -r requirements-dev.txt -r requirements-ci.txt
+            pip install -r requirements.txt
 
       - save_cache:
           paths:
             - ./venv
             - ./node_modules
-          key: v2-fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements-ci.txt" }}-{{ checksum "package.json" }}
+          key: v2-fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "package.json" }}
 
       - run:
           name: Ensure database is available
