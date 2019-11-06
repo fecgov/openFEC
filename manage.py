@@ -126,7 +126,6 @@ def refresh_materialized(concurrent=True):
         'sched_a_by_size_merged': ['ofec_sched_a_aggregate_size_merged_mv'],
         'sched_a_by_state_recipient_totals': ['ofec_sched_a_aggregate_state_recipient_totals_mv'],
         'sched_e_by_candidate': ['ofec_sched_e_aggregate_candidate_mv'],
-        'totals_candidate_committee': ['ofec_totals_candidate_committees_mv'],
         'totals_combined': ['ofec_totals_combined_mv'],
         'totals_house_senate': ['ofec_totals_house_senate_mv'],
         'totals_ie': ['ofec_totals_ie_only_mv'],
