@@ -17,6 +17,7 @@ def get_graph():
         'candidate_fulltext',
         'candidate_history',
         'candidate_history_future',
+        'candidate_totals_detail',
         'committee_detail',
         'committee_fulltext',
         'committee_history',
@@ -40,7 +41,6 @@ def get_graph():
         'sched_a_by_size_merged',
         'sched_a_by_state_recipient_totals',
         'sched_e_by_candidate',
-        'totals_candidate_committee',
         'totals_combined',
         'totals_house_senate',
         'totals_ie',
@@ -110,12 +110,6 @@ def get_graph():
         ('filings', 'reports_pac_party'),
         ('filings', 'reports_presidential'),
         ('filings', 'reports_house_senate'),
-    ])
-
-    graph.add_edges_from([
-        ('candidate_election', 'totals_candidate_committee'),
-        ('filings', 'totals_candidate_committee'),
-        ('cand_cmte_linkage', 'totals_candidate_committee'),
     ])
 
     graph.add_edges_from([
