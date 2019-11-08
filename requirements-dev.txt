@@ -11,3 +11,5 @@ webtest==2.0.27
 pdbpp==0.9.1
 click==6.7
 
+# requirements.txt generation (pip-compile)
+pip-tools==4.2.0
