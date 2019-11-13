@@ -2,9 +2,8 @@ import datetime
 import sqlalchemy as sa
 
 from tests import factories
-from webservices import rest
 from tests.common import ApiBaseTest
-from webservices.rest import db,api
+from webservices.rest import db, api
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
 from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile, EFilings
@@ -27,7 +26,11 @@ class TestItemized(ApiBaseTest):
             self.assertEqual(len(results), 1)
             self.assertEqual(results[0].keys(), schema().fields.keys())
 
-    def test_sorting(self):
+
+class TestScheduleA(ApiBaseTest):
+    kwargs = {'two_year_transaction_period': 2016}
+
+    def test_schedule_a_sorting(self):
         receipts = [
             factories.ScheduleAFactory(
                 report_year=2016,
@@ -53,7 +56,7 @@ class TestItemized(ApiBaseTest):
             }
         )
 
-    def test_multiple_two_year_transaction_period_schedule_a(self):
+    def test_schedule_a_multiple_two_year_transaction_period(self):
         """
         testing schedule_a api can take multiple cycles now
         """
@@ -85,33 +88,7 @@ class TestItemized(ApiBaseTest):
         ))
         self.assertEqual(len(response['results']), 2)
 
-    def test_multiple_two_year_transaction_period_schedule_b(self):
-        """
-        testing schedule_b api can take multiple cyccles now
-        """
-        receipts = [
-            factories.ScheduleBFactory(
-                report_year=2014,
-                two_year_transaction_period=2014
-            ),
-            factories.ScheduleBFactory(
-                report_year=2016,
-                two_year_transaction_period=2016
-            ),
-            factories.ScheduleBFactory(
-                report_year=2018,
-                two_year_transaction_period=2018
-            ),
-        ]
-        response = self._response(
-            api.url_for(
-                ScheduleBView,
-                two_year_transaction_period=[2016, 2018],
-        ))
-        self.assertEqual(len(response['results']), 2)
-
-
-    def test_two_year_transaction_period_limits_results_per_cycle(self):
+    def test_schedule_a_two_year_transaction_period_limits_results_per_cycle(self):
         receipts = [
             factories.ScheduleAFactory(
                 report_year=2014,
@@ -129,12 +106,12 @@ class TestItemized(ApiBaseTest):
         )
         self.assertEqual(len(response['results']), 1)
 
-    def test_sorting_bad_column(self):
+    def test_schedule_a_sorting_bad_column(self):
         response = self.app.get(api.url_for(ScheduleAView, sort='bad_column'))
         self.assertEqual(response.status_code, 422)
         self.assertIn(b'Cannot sort on value', response.data)
 
-    def test_filter(self):
+    def test_schedule_a_filter(self):
         [
             factories.ScheduleAFactory(contributor_state='NY'),
             factories.ScheduleAFactory(contributor_state='CA'),
@@ -143,7 +120,7 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_state'], 'CA')
 
-    def test_filter_sched_a_zip(self):
+    def test_schedule_a_filter_zip(self):
         [
             factories.ScheduleAFactory(contributor_zip=96789),
             factories.ScheduleAFactory(contributor_zip=9678912),
@@ -160,11 +137,11 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleAView, contributor_zip=contributor_zips, **self.kwargs))
         self.assertEqual(len(results), 4)
 
-    def test_invalid_sched_a_zip(self):
+    def test_schedule_a_invalid_zip(self):
         response = self.app.get(api.url_for(ScheduleAView, contributor_zip='96%', cycle=2018))
         self.assertEqual(response.status_code, 400)
 
-    def test_sched_a_recipient_committee_type_filter(self):
+    def test_schedule_a_recipient_committee_type_filter(self):
         [
             factories.ScheduleAFactory(recipient_committee_type='S'),
             factories.ScheduleAFactory(recipient_committee_type='S'),
@@ -173,7 +150,7 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleAView, recipient_committee_type='S', **self.kwargs))
         self.assertEqual(len(results), 2)
 
-    def test_sched_a_recipient_org_type_filter(self):
+    def test_schedule_a_recipient_org_type_filter(self):
         [
             factories.ScheduleAFactory(recipient_committee_org_type='W'),
             factories.ScheduleAFactory(recipient_committee_org_type='W'),
@@ -182,7 +159,7 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleAView, recipient_committee_org_type='W', **self.kwargs))
         self.assertEqual(len(results), 2)
 
-    def test_sched_a_recipient_designation_filter(self):
+    def test_schedule_a_recipient_designation_filter(self):
         [
             factories.ScheduleAFactory(recipient_committee_designation='P'),
             factories.ScheduleAFactory(recipient_committee_designation='P'),
@@ -191,14 +168,14 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleAView, recipient_committee_designation='P', **self.kwargs))
         self.assertEqual(len(results), 2)
 
-    def test_filter_multi_start_with(self):
+    def test_schedule_a_filter_multi_start_with(self):
         [
             factories.ScheduleAFactory(contributor_zip=1296789)
         ]
         results = self._results(api.url_for(ScheduleAView, contributor_zip=96789, **self.kwargs))
         self.assertEqual(len(results), 0)
 
-    def test_filter_case_insensitive(self):
+    def test_schedule_a_filter_case_insensitive(self):
         [
             factories.ScheduleAFactory(contributor_city='NEW YORK'),
             factories.ScheduleAFactory(contributor_city='DES MOINES'),
@@ -207,7 +184,7 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_city'], 'NEW YORK')
 
-    def test_filter_fulltext(self):
+    def test_schedule_a_filter_fulltext(self):
         """
         Note: this is the only test for filter_fulltext.
         If this is removed, please add a test to test_filters.py
@@ -221,7 +198,7 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_name'], 'George Soros')
 
-    def test_filter_line_number(self):
+    def test_schedule_a_filter_line_number(self):
         [
             factories.ScheduleAFactory(line_number='16', filing_form='F3X'),
             factories.ScheduleAFactory(line_number='17', filing_form='F3X')
@@ -247,34 +224,7 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(response.status_code, 400)
         self.assertIn(b'Invalid line_number', response.data)
 
-    def test_sched_b_spender_committee_type_filter(self):
-        [
-            factories.ScheduleBFactory(spender_committee_type='S'),
-            factories.ScheduleBFactory(spender_committee_type='S'),
-            factories.ScheduleBFactory(spender_committee_type='P'),
-        ]
-        results = self._results(api.url_for(ScheduleBView, spender_committee_type='S', **self.kwargs))
-        self.assertEqual(len(results), 2)
-
-    def test_sched_b_spender_org_type_filter(self):
-        [
-            factories.ScheduleBFactory(spender_committee_org_type='W'),
-            factories.ScheduleBFactory(spender_committee_org_type='W'),
-            factories.ScheduleBFactory(spender_committee_org_type='C'),
-        ]
-        results = self._results(api.url_for(ScheduleBView, spender_committee_org_type='W', **self.kwargs))
-        self.assertEqual(len(results), 2)
-
-    def test_sched_b_spender_designation_filter(self):
-        [
-            factories.ScheduleBFactory(spender_committee_designation='P'),
-            factories.ScheduleBFactory(spender_committee_designation='P'),
-            factories.ScheduleBFactory(spender_committee_designation='A'),
-        ]
-        results = self._results(api.url_for(ScheduleBView, spender_committee_designation='P', **self.kwargs))
-        self.assertEqual(len(results), 2)
-
-    def test_filter_fulltext_employer(self):
+    def test_schedule_a_filter_fulltext_employer(self):
         employers = ['Acme Corporation', 'Vandelay Industries']
         filings = [
             factories.ScheduleAFactory(contributor_employer=employer)
@@ -284,7 +234,7 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_employer'], 'Vandelay Industries')
 
-    def test_filter_fulltext_employer_and(self):
+    def test_schedule_a_filter_fulltext_employer_and(self):
         employers = ['Test&Test', 'Test & Test', 'Test& Test', 'Test &Test']
         [
             factories.ScheduleAFactory(contributor_employer=employer)
@@ -299,7 +249,7 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleAView, contributor_employer='Test &Test', **self.kwargs))
         self.assertIn(results[0]['contributor_employer'], employers)
 
-    def test_filter_fulltext_occupation(self):
+    def test_schedule_a_filter_fulltext_occupation(self):
         occupations = ['Attorney at Law', 'Doctor of Philosophy']
         filings = [
             factories.ScheduleAFactory(contributor_occupation=occupation)
@@ -309,7 +259,7 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_occupation'], 'Doctor of Philosophy')
 
-    def test_pagination(self):
+    def test_schedule_a_pagination(self):
         filings = [
             factories.ScheduleAFactory()
             for _ in range(30)
@@ -327,7 +277,7 @@ class TestItemized(ApiBaseTest):
             [each.sub_id for each in filings[20:]],
         )
 
-    def test_pagination_with_null_sort_column_values(self):
+    def test_schedule_a_pagination_with_null_sort_column_values(self):
         filings = [
             factories.ScheduleAFactory(contribution_receipt_date=None)
             for _ in range(5)
@@ -372,7 +322,7 @@ class TestItemized(ApiBaseTest):
             if each.contribution_receipt_date else None for each in filings[25:]]
         )
 
-    def test_null_pagination_with_null_sort_column_values_descending(self):
+    def test_schedule_a_null_pagination_with_null_sort_column_values_descending(self):
         filings = [
             factories.ScheduleAFactory(contribution_receipt_date=None)
             #this range should ensure the page has a null transition
@@ -424,7 +374,7 @@ class TestItemized(ApiBaseTest):
             if each.contribution_receipt_date else None for each in filings[14:9:-1]]
         )
 
-    def test_null_pagination_with_null_sort_column_values_ascending(self):
+    def test_schedule_a_null_pagination_with_null_sort_column_values_ascending(self):
         filings = [
             factories.ScheduleAFactory(contribution_receipt_date=None)
             # this range should ensure the page has a null transition
@@ -476,7 +426,7 @@ class TestItemized(ApiBaseTest):
              filings[5:10:]]
         )
 
-    def test_pagination_with_null_sort_column_parameter(self):
+    def test_schedule_a_pagination_with_null_sort_column_parameter(self):
         response = self.app.get(
             api.url_for(
                 ScheduleAView,
@@ -486,7 +436,123 @@ class TestItemized(ApiBaseTest):
         )
         self.assertEqual(response.status_code, 422)
 
-    def test_pagination_with_sort_expression(self):
+    def test_schedule_a_pagination_bad_per_page(self):
+        response = self.app.get(api.url_for(ScheduleAView, two_year_transaction_period=2018, per_page=999))
+        self.assertEqual(response.status_code, 422)
+
+    def test_schedule_a_image_number(self):
+        image_number = '12345'
+        [
+            factories.ScheduleAFactory(),
+            factories.ScheduleAFactory(image_number=image_number),
+        ]
+        results = self._results(api.url_for(ScheduleAView, image_number=image_number, **self.kwargs))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['image_number'], image_number)
+
+    def test_schedule_a_image_number_range(self):
+        [
+            factories.ScheduleAFactory(image_number='1'),
+            factories.ScheduleAFactory(image_number='2'),
+            factories.ScheduleAFactory(image_number='3'),
+            factories.ScheduleAFactory(image_number='4'),
+        ]
+        results = self._results(api.url_for(ScheduleAView, min_image_number='2', two_year_transaction_period=2016))
+        self.assertTrue(all(each['image_number'] >= '2' for each in results))
+        results = self._results(api.url_for(ScheduleAView, max_image_number='3', two_year_transaction_period=2016))
+        self.assertTrue(all(each['image_number'] <= '3' for each in results))
+        results = self._results(api.url_for(ScheduleAView, min_image_number='2', max_image_number='3', two_year_transaction_period=2016))
+        self.assertTrue(all('2' <= each['image_number'] <= '3' for each in results))
+
+    def test_schedule_a_amount(self):
+        [
+            factories.ScheduleAFactory(contribution_receipt_amount=50),
+            factories.ScheduleAFactory(contribution_receipt_amount=100),
+            factories.ScheduleAFactory(contribution_receipt_amount=150),
+            factories.ScheduleAFactory(contribution_receipt_amount=200),
+        ]
+        results = self._results(api.url_for(ScheduleAView, min_amount=100, two_year_transaction_period=2016))
+        self.assertTrue(all(each['contribution_receipt_amount'] >= 100 for each in results))
+        results = self._results(api.url_for(ScheduleAView, max_amount=150, two_year_transaction_period=2016))
+        self.assertTrue(all(each['contribution_receipt_amount'] <= 150 for each in results))
+        results = self._results(api.url_for(ScheduleAView, min_amount=100, max_amount=150, two_year_transaction_period=2016))
+        self.assertTrue(all(100 <= each['contribution_receipt_amount'] <= 150 for each in results))
+
+    def test_schedule_a_efile_filters(self):
+        filters = [
+            ('image_number', ScheduleAEfile.image_number, ['123', '456']),
+            ('committee_id', ScheduleAEfile.committee_id, ['C01', 'C02']),
+            #may have to rethink this, currently on efile itemized resources the city isn't all caps
+            #but for processed it is, is that something we are forcing when when
+            #we build the tables?
+            ('contributor_city', ScheduleAEfile.contributor_city, ['KANSAS CITY', 'HONOLULU']),
+        ]
+        for label, column, values in filters:
+            [
+                factories.ScheduleAEfileFactory(**{column.key: value})
+                for value in values
+            ]
+            results = self._results(api.url_for(ScheduleAEfileView, **{label: values[0]}))
+            assert len(results) == 1
+            assert results[0][column.key] == values[0]
+
+
+class TestScheduleB(ApiBaseTest):
+    kwargs = {'two_year_transaction_period': 2016}
+
+    def test_schedule_b_multiple_two_year_transaction_period(self):
+        """
+        testing schedule_b api can take multiple cyccles now
+        """
+        disbursements = [
+            factories.ScheduleBFactory(
+                report_year=2014,
+                two_year_transaction_period=2014
+            ),
+            factories.ScheduleBFactory(
+                report_year=2016,
+                two_year_transaction_period=2016
+            ),
+            factories.ScheduleBFactory(
+                report_year=2018,
+                two_year_transaction_period=2018
+            ),
+        ]
+        response = self._response(
+            api.url_for(
+                ScheduleBView,
+                two_year_transaction_period=[2016, 2018],
+        ))
+        self.assertEqual(len(response['results']), 2)
+
+    def test_schedule_b_spender_committee_type_filter(self):
+        [
+            factories.ScheduleBFactory(spender_committee_type='S'),
+            factories.ScheduleBFactory(spender_committee_type='S'),
+            factories.ScheduleBFactory(spender_committee_type='P'),
+        ]
+        results = self._results(api.url_for(ScheduleBView, spender_committee_type='S', **self.kwargs))
+        self.assertEqual(len(results), 2)
+
+    def test_schedule_b_spender_org_type_filter(self):
+        [
+            factories.ScheduleBFactory(spender_committee_org_type='W'),
+            factories.ScheduleBFactory(spender_committee_org_type='W'),
+            factories.ScheduleBFactory(spender_committee_org_type='C'),
+        ]
+        results = self._results(api.url_for(ScheduleBView, spender_committee_org_type='W', **self.kwargs))
+        self.assertEqual(len(results), 2)
+
+    def test_schedule_b_spender_designation_filter(self):
+        [
+            factories.ScheduleBFactory(spender_committee_designation='P'),
+            factories.ScheduleBFactory(spender_committee_designation='P'),
+            factories.ScheduleBFactory(spender_committee_designation='A'),
+        ]
+        results = self._results(api.url_for(ScheduleBView, spender_committee_designation='P', **self.kwargs))
+        self.assertEqual(len(results), 2)
+
+    def test_schedule_b_pagination_with_sort_expression(self):
         # NOTE:  Schedule B is sorted by disbursement date with the expression
         # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
         # by default (in descending order), so we must account for that with the
@@ -508,7 +574,7 @@ class TestItemized(ApiBaseTest):
             [each.sub_id for each in filings[9::-1]],
         )
 
-    def test_pagination_with_null_sort_column_values_with_sort_expression(self):
+    def test_schedule_b_pagination_with_null_sort_column_values_with_sort_expression(self):
         # NOTE:  Schedule B is sorted by disbursement date with the expression
         # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
         # by default (in descending order), so we must account for that with the
@@ -555,7 +621,7 @@ class TestItemized(ApiBaseTest):
             [each.disbursement_date.strftime('%Y-%m-%d') if each.disbursement_date else None for each in filings[25:]]
         )
 
-    def test_null_pagination_with_null_sort_column_values_descending_with_sort_expression(self):
+    def test_schedule_b_null_pagination_with_null_sort_column_values_descending_with_sort_expression(self):
         # NOTE:  Schedule B is sorted by disbursement date with the expression
         # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
         # by default (in descending order), so we must account for that with the
@@ -611,7 +677,7 @@ class TestItemized(ApiBaseTest):
             if each.disbursement_date else None for each in filings[14:9:-1]]
         )
 
-    def test_null_pagination_with_null_sort_column_values_ascending_with_sort_expression(self):
+    def test_schedule_b_null_pagination_with_null_sort_column_values_ascending_with_sort_expression(self):
         # NOTE:  Schedule B is sorted by disbursement date with the expression
         # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
         # by default (in descending order), so we must account for that with the
@@ -667,7 +733,7 @@ class TestItemized(ApiBaseTest):
              filings[5:10:]]
         )
 
-    def test_pagination_with_null_sort_column_parameter_with_sort_expression(self):
+    def test_schedule_b_pagination_with_null_sort_column_parameter_with_sort_expression(self):
         # NOTE:  Schedule B is sorted by disbursement date with the expression
         # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
         # by default (in descending order), so we must account for that with the
@@ -681,49 +747,7 @@ class TestItemized(ApiBaseTest):
         )
         self.assertEqual(response.status_code, 422)
 
-    def test_pagination_bad_per_page(self):
-        response = self.app.get(api.url_for(ScheduleAView, two_year_transaction_period=2018, per_page=999))
-        self.assertEqual(response.status_code, 422)
-
-    def test_image_number(self):
-        image_number = '12345'
-        [
-            factories.ScheduleAFactory(),
-            factories.ScheduleAFactory(image_number=image_number),
-        ]
-        results = self._results(api.url_for(ScheduleAView, image_number=image_number, **self.kwargs))
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['image_number'], image_number)
-
-    def test_image_number_range(self):
-        [
-            factories.ScheduleAFactory(image_number='1'),
-            factories.ScheduleAFactory(image_number='2'),
-            factories.ScheduleAFactory(image_number='3'),
-            factories.ScheduleAFactory(image_number='4'),
-        ]
-        results = self._results(api.url_for(ScheduleAView, min_image_number='2', two_year_transaction_period=2016))
-        self.assertTrue(all(each['image_number'] >= '2' for each in results))
-        results = self._results(api.url_for(ScheduleAView, max_image_number='3', two_year_transaction_period=2016))
-        self.assertTrue(all(each['image_number'] <= '3' for each in results))
-        results = self._results(api.url_for(ScheduleAView, min_image_number='2', max_image_number='3', two_year_transaction_period=2016))
-        self.assertTrue(all('2' <= each['image_number'] <= '3' for each in results))
-
-    def test_amount_sched_a(self):
-        [
-            factories.ScheduleAFactory(contribution_receipt_amount=50),
-            factories.ScheduleAFactory(contribution_receipt_amount=100),
-            factories.ScheduleAFactory(contribution_receipt_amount=150),
-            factories.ScheduleAFactory(contribution_receipt_amount=200),
-        ]
-        results = self._results(api.url_for(ScheduleAView, min_amount=100, two_year_transaction_period=2016))
-        self.assertTrue(all(each['contribution_receipt_amount'] >= 100 for each in results))
-        results = self._results(api.url_for(ScheduleAView, max_amount=150, two_year_transaction_period=2016))
-        self.assertTrue(all(each['contribution_receipt_amount'] <= 150 for each in results))
-        results = self._results(api.url_for(ScheduleAView, min_amount=100, max_amount=150, two_year_transaction_period=2016))
-        self.assertTrue(all(100 <= each['contribution_receipt_amount'] <= 150 for each in results))
-
-    def test_amount_sched_b(self):
+    def test_schedule_b_amount(self):
         [
             factories.ScheduleBFactory(disbursement_amount=50),
             factories.ScheduleBFactory(disbursement_amount=100),
@@ -737,7 +761,7 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleBView, min_amount=100, max_amount=150))
         self.assertTrue(all(100 <= each['disbursement_amount'] <= 150 for each in results))
 
-    def test_sort_sched_b_ignores_nulls_last_parameter(self):
+    def test_schedule_b_sort_ignores_nulls_last_parameter(self):
         disbursements = [
             factories.ScheduleBFactory(disbursement_amount=50),
             factories.ScheduleBFactory(disbursement_amount=200, disbursement_date=datetime.date(2016, 3, 1)),
@@ -748,7 +772,65 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleBView, sort='-disbursement_date', sort_nulls_last=True, **self.kwargs))
         self.assertEqual([each['sub_id'] for each in results], sub_ids)
 
-    def test_amount_sched_e(self):
+    def test_schedule_b_efile_filters(self):
+        filters = [
+            ('image_number', ScheduleBEfile.image_number, ['123', '456']),
+            ('committee_id', ScheduleBEfile.committee_id, ['C01', 'C02']),
+            ('recipient_state', ScheduleBEfile.recipient_state, ['MISSOURI', 'NEW YORK']),
+        ]
+        for label, column, values in filters:
+            [
+                factories.ScheduleBEfileFactory(**{column.key: value})
+                for value in values
+            ]
+            results = self._results(api.url_for(ScheduleBEfileView, **{label: values[0]}))
+            assert len(results) == 1
+            assert results[0][column.key] == values[0]
+
+class TestScheduleE(ApiBaseTest):
+    kwargs = {'two_year_transaction_period': 2016}
+
+    def test_schedule_e_sort_args_ascending(self):
+        [
+            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
+                    committee_id='101', support_oppose_indicator='s'),
+            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
+                    committee_id='101', support_oppose_indicator='o'),
+        ]
+        results = self._results(api.url_for(ScheduleEView, sort='support_oppose_indicator'))
+        self.assertEqual(results[0]['support_oppose_indicator'], 'o')
+
+    def test_schedule_e_filter_dissemination_date_range(self):
+        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2023, 12, 30))
+        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2021, 8, 29))
+        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2019, 10, 25))
+        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2017, 6, 22))
+        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2015, 10, 15))
+
+        results = self._results(api.url_for(ScheduleEView,
+            min_dissemination_date=datetime.date.fromisoformat('2015-01-01')))
+        assert len(results) == 5
+
+        results = self._results(api.url_for(ScheduleEView,
+            max_dissemination_date=datetime.date.fromisoformat('2021-10-25')))
+        assert len(results) == 4
+
+    def test_schedule_e_filters_date_range(self):
+        factories.ScheduleEFactory(filing_date=datetime.datetime(2023, 12, 30))
+        factories.ScheduleEFactory(filing_date=datetime.datetime(2021, 8, 29))
+        factories.ScheduleEFactory(filing_date=datetime.datetime(2019, 10, 25))
+        factories.ScheduleEFactory(filing_date=datetime.datetime(2017, 6, 22))
+        factories.ScheduleEFactory(filing_date=datetime.datetime(2015, 10, 15))
+
+        results = self._results(api.url_for(ScheduleEView,
+            min_filing_date=datetime.date.fromisoformat('2015-01-01')))
+        assert len(results) == 5
+
+        results = self._results(api.url_for(ScheduleEView,
+            max_filing_date=datetime.date.fromisoformat('2021-10-25')))
+        assert len(results) == 4
+
+    def test_schedule_e_amount(self):
         [
             factories.ScheduleEFactory(expenditure_amount=50),
             factories.ScheduleEFactory(expenditure_amount=100),
@@ -762,7 +844,7 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleEView, min_amount=100, max_amount=150))
         self.assertTrue(all(100 <= each['expenditure_amount'] <= 150 for each in results))
 
-    def test_sort_sched_e(self):
+    def test_schedule_e_sort(self):
         expenditures = [
             factories.ScheduleEFactory(expenditure_amount=50),
             factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1)),
@@ -773,7 +855,7 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleEView, sort='-expenditure_date', sort_nulls_last=True))
         self.assertEqual([each['sub_id'] for each in results], sub_ids[::-1])
 
-    def test_filters_sched_e(self):
+    def test_schedule_e_filters(self):
         filters = [
             ('image_number', ScheduleE.image_number, ['123', '456']),
             ('committee_id', ScheduleE.committee_id, ['C01', 'C02']),
@@ -793,7 +875,7 @@ class TestItemized(ApiBaseTest):
             assert len(results) == 1
             assert results[0][column.key] == values[0]
 
-    def test_filter_fulltext_sched_e_pass(self):
+    def test_schedule_e_filter_fulltext_pass(self):
         """
         test names that expect to be returned
         """
@@ -809,7 +891,7 @@ class TestItemized(ApiBaseTest):
             print(result, '\n')
         self.assertEqual(len(results), len(payee_names))
 
-    def test_filter_fulltest_sched_e_fail(self):
+    def test_schedule_e_filter_fulltext_fail(self):
         """
         test names that expect no returns
         """
@@ -823,70 +905,17 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleEView, payee_name=payee_names))
         self.assertEquals(len(results), 0)
 
-    def test_filters_sched_e_dissemination_date_range(self):
-        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2023, 12, 30))
-        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2021, 8, 29))
-        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2019, 10, 25))
-        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2017, 6, 22))
-        factories.ScheduleEFactory(dissemination_date=datetime.datetime(2015, 10, 15))
-
-        results = self._results(api.url_for(ScheduleEView,
-            min_dissemination_date=datetime.date.fromisoformat('2015-01-01')))
-        assert len(results) == 5
-
-        results = self._results(api.url_for(ScheduleEView,
-            max_dissemination_date=datetime.date.fromisoformat('2021-10-25')))
-        assert len(results) == 4
-
-    def test_filters_sched_e_filing_date_range(self):
-        factories.ScheduleEFactory(filing_date=datetime.datetime(2023, 12, 30))
-        factories.ScheduleEFactory(filing_date=datetime.datetime(2021, 8, 29))
-        factories.ScheduleEFactory(filing_date=datetime.datetime(2019, 10, 25))
-        factories.ScheduleEFactory(filing_date=datetime.datetime(2017, 6, 22))
-        factories.ScheduleEFactory(filing_date=datetime.datetime(2015, 10, 15))
-
-        results = self._results(api.url_for(ScheduleEView,
-            min_filing_date=datetime.date.fromisoformat('2015-01-01')))
-        assert len(results) == 5
-
-        results = self._results(api.url_for(ScheduleEView,
-            max_filing_date=datetime.date.fromisoformat('2021-10-25')))
-        assert len(results) == 4
-
-    def test_filters_sched_a_efile(self):
-        filters = [
-            ('image_number', ScheduleAEfile.image_number, ['123', '456']),
-            ('committee_id', ScheduleAEfile.committee_id, ['C01', 'C02']),
-            #may have to rethink this, currently on efile itemized resources the city isn't all caps
-            #but for processed it is, is that something we are forcing when when
-            #we build the tables?
-            ('contributor_city', ScheduleAEfile.contributor_city, ['KANSAS CITY', 'HONOLULU']),
+    def test_schedule_e_sort_args_descending(self):
+        [
+            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
+                    committee_id='101', support_oppose_indicator='s'),
+            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
+                    committee_id='101', support_oppose_indicator='o'),
         ]
-        for label, column, values in filters:
-            [
-                factories.ScheduleAEfileFactory(**{column.key: value})
-                for value in values
-            ]
-            results = self._results(api.url_for(ScheduleAEfileView, **{label: values[0]}))
-            assert len(results) == 1
-            assert results[0][column.key] == values[0]
+        results = self._results(api.url_for(ScheduleEView, sort='-support_oppose_indicator'))
+        self.assertEqual(results[0]['support_oppose_indicator'], 's')
 
-    def test_filters_sched_b_efile(self):
-        filters = [
-            ('image_number', ScheduleBEfile.image_number, ['123', '456']),
-            ('committee_id', ScheduleBEfile.committee_id, ['C01', 'C02']),
-            ('recipient_state', ScheduleBEfile.recipient_state, ['MISSOURI', 'NEW YORK']),
-        ]
-        for label, column, values in filters:
-            [
-                factories.ScheduleBEfileFactory(**{column.key: value})
-                for value in values
-            ]
-            results = self._results(api.url_for(ScheduleBEfileView, **{label: values[0]}))
-            assert len(results) == 1
-            assert results[0][column.key] == values[0]
-
-    def test_filters_sched_e_efile(self):
+    def test_schedule_e_efile_filters(self):
         filters = [
             ('committee_id', ScheduleEEfile.committee_id, ['C01', 'C02']),
             ('support_oppose_indicator', ScheduleEEfile.support_oppose_indicator, ['S', 'O']),
@@ -907,7 +936,7 @@ class TestItemized(ApiBaseTest):
             assert len(results) == 1
             assert results[0][column.key] == values[0]
 
-    def test_candidate_id_filter_sched_e_efile(self):
+    def test_schedule_e_efile_candidate_id_filter(self):
         filters = [
             ('candidate_id', ScheduleEEfile.candidate_id, ['S01', 'S02']),
         ]
@@ -920,29 +949,8 @@ class TestItemized(ApiBaseTest):
             results = self._results(api.url_for(ScheduleEEfileView, **{label: values[0]}))
             assert len(results) == 1
             assert results[0][column.key] == values[0]
-        
 
-    def test_schedule_e_sort_args_descending(self):
-        [
-            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
-                    committee_id='101', support_oppose_indicator='s'),
-            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
-                    committee_id='101', support_oppose_indicator='o'),
-        ]
-        results = self._results(api.url_for(ScheduleEView, sort='-support_oppose_indicator'))
-        self.assertEqual(results[0]['support_oppose_indicator'], 's')
-
-    def test_schedule_e_sort_args_ascending(self):
-        [
-            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
-                    committee_id='101', support_oppose_indicator='s'),
-            factories.ScheduleEFactory(expenditure_amount=100, expenditure_date=datetime.date(2016, 1, 1),
-                    committee_id='101', support_oppose_indicator='o'),
-        ]
-        results = self._results(api.url_for(ScheduleEView, sort='support_oppose_indicator'))
-        self.assertEqual(results[0]['support_oppose_indicator'], 'o')
-
-    def test_schedule_efiling_dissemination_date_range(self):
+    def test_schedule_e_efile_dissemination_date_range(self):
 
         min_date = datetime.date(2018, 1, 1)
         max_date = datetime.date(2019, 12, 31)
@@ -961,13 +969,13 @@ class TestItemized(ApiBaseTest):
             )
         )
 
-    def test_filter_sched_e_cand_search(self):
+    def test_schedule_e_efile_filter_cand_search(self):
         [
             factories.ScheduleEEfileFactory(cand_fulltxt=sa.func.to_tsvector('C001, Rob, Senior')),
             factories.ScheduleEEfileFactory(cand_fulltxt=sa.func.to_tsvector('C002, Ted, Berry')),
             factories.ScheduleEEfileFactory(cand_fulltxt=sa.func.to_tsvector('C003, Rob, Junior')),
         ]
         factories.EFilingsFactory(file_number=123)
-        rest.db.session.flush()
+        db.session.flush()
         results = self._results(api.url_for(ScheduleEEfileView, candidate_search='Rob'))
         assert len(results) == 2
