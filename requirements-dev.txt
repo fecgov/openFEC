@@ -3,8 +3,6 @@
 git+https://github.com/18F/rdbms-subsetter
 
 # Testing
-pytest==3.7.4
-pytest-cov==2.5.1
 factory_boy==2.8.1
 nplusone==0.8.0
 webtest==2.0.27
@@ -13,3 +11,6 @@ click==6.7
 
 # requirements.txt generation (pip-compile)
 pip-tools==4.2.0
+#locust
+locustio>=0.7.3
+
