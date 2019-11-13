@@ -1,5 +1,4 @@
 from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.ext.hybrid import hybrid_property
 from webservices import docs, utils
 from webservices.common.models.dates import ReportType
 from webservices.common.models.dates import clean_report_type
@@ -28,7 +27,7 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     report_type_full = db.Column(db.String, doc=docs.REPORT_TYPE)
     beginning_image_number = db.Column(db.BigInteger, index=True, doc=docs.BEGINNING_IMAGE_NUMBER)
     ending_image_number = db.Column(db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
-    pages = db.Column(db.Integer, doc='Number of pages in the document')
+    pages = db.Column(db.Integer, doc=docs.PAGES)
     total_receipts = db.Column(db.Numeric(30, 2))
     total_individual_contributions = db.Column(db.Numeric(30, 2))
     net_donations = db.Column(db.Numeric(30, 2))
@@ -45,30 +44,30 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     treasurer_name = db.Column(db.String, doc=docs.TREASURER_NAME)
     file_number = db.Column(db.BigInteger)
     primary_general_indicator = db.Column(db.String, index=True)
-    report_type_full = db.Column(db.String, doc=docs.REPORT_TYPE)
     request_type = db.Column(db.String)
     amendment_indicator = db.Column(db.String, index=True, doc=docs.AMENDMENT_CHAIN)
     update_date = db.Column(db.Date)
     pdf_url = db.Column(db.String)
     fec_url = db.Column(db.String)
     means_filed = db.Column(db.String, doc=docs.MEANS_FILED)
-    is_amended = db.Column('is_amended', db.Boolean)
-    most_recent = db.Column('most_recent', db.Boolean)
-    html_url = db.Column(db.String, doc='HTML link to the filing.')
+    is_amended = db.Column(db.Boolean)
+    most_recent = db.Column(db.Boolean)
+    html_url = db.Column(db.String, doc=docs.HTML_URL)
     #If f2 filing, the state of the candidate, else the state of the committee
     state = db.Column(db.String, doc=docs.STATE)
     office = db.Column(db.String, doc=docs.OFFICE)
-    # Filter filings based off candidate office or committee type H, S and P only. all other 
+    # Filter filings based off candidate office or committee type H, S and P only. all other
     # committee types are ignored. Because from the fron-end we only filter
     # filings by candidate office only.
     # mapped office_cmte_tp db column with office
     office = db.Column('office_cmte_tp', db.String, index=True, doc=docs.OFFICE)
     party = db.Column(db.String, doc=docs.PARTY)
-    cmte_tp = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
+    committee_type = db.Column('cmte_tp', db.String, doc=docs.COMMITTEE_TYPE)
     amendment_chain = db.Column(ARRAY(db.Numeric))
     previous_file_number = db.Column(db.BigInteger)
     most_recent_file_number = db.Column(db.BigInteger)
     amendment_version = db.Column(db.Integer)
+    form_category = db.Column(db.String, index=True, doc=docs.FORM_CATEGORY)
 
     @property
     def document_description(self):
@@ -97,7 +96,7 @@ class EfilingsAmendments(db.Model):
             return 0
 
 class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.Model):
-    __table_args__ = {'schema' : 'real_efile'}
+    __table_args__ = {'schema': 'real_efile'}
     __tablename__ = 'reps'
 
     file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
@@ -147,7 +146,6 @@ class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.M
     def is_amended(self):
         return self.superceded or not self.most_recent
 
-
     @property
     def pdf_url(self):
         image_number = str(self.beginning_image_number)
@@ -159,4 +157,5 @@ class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.M
 
 
 # TODO: add index on committee id and filed_date
-    #  version -- this is the efiling version and I don't think we need this - let's document in API for now, see if there are objections
+    #  version -- this is the efiling version and I don't think we need this
+    # - let's document in API for now, see if there are objections

@@ -16,6 +16,8 @@ def _validate_natural(value):
             'Must be a natural number',
             status_code=422
         )
+
+
 Natural = functools.partial(fields.Int, validate=_validate_natural)
 
 per_page = Natural(
@@ -56,6 +58,7 @@ class District(fields.Str):
 
     def _deserialize(self, value, attr, data):
         return '{0:0>2}'.format(value)
+
 
 election_full = fields.Bool(missing=True, description=docs.ELECTION_FULL)
 
@@ -172,6 +175,7 @@ def make_seek_args(field=fields.Int, description=None):
             description=description or 'Index of last result from previous page',
         ),
     }
+
 
 names = {
     'q': fields.List(fields.Str, required=True, description='Name (candidate or committee) to search for'),
@@ -325,10 +329,11 @@ filings = {
         description=docs.MEANS_FILED,
     ),
     'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
-    'primary_general_indicator': fields.List(IStr, description='Primary, general or special election indicator'),
+    'primary_general_indicator': fields.List(IStr, description=docs.PRIMARY_GENERAL_INDICTOR),
     'amendment_indicator': fields.List(
         IStr(validate=validate.OneOf(['', 'N', 'A', 'T', 'C', 'M', 'S'])),
         description=docs.AMENDMENT_INDICATOR),
+    'form_category': fields.List(IStr, description=docs.FORM_CATEGORY),
 }
 
 efilings = {
@@ -873,11 +878,16 @@ schedule_e = {
     'last_support_oppose_indicator': fields.Str(missing=None,
         description=docs.LAST_SUPPOSE_OPPOSE_INDICATOR),
     'is_notice': fields.List(fields.Bool, description=docs.IS_NOTICE),
+    'min_dissemination_date': fields.Date(description=docs.DISSEMINATION_MIN_DATE),
+    'max_dissemination_date': fields.Date(description=docs.DISSEMINATION_MAX_DATE),
+    'min_filing_date': fields.Date(description=docs.FILED_DATE),
+    'max_filing_date': fields.Date(description=docs.FILED_DATE)
 }
 
 schedule_e_efile = {
     'candidate_search': fields.List(fields.Str, description=docs.CANDIDATE_FULL_SEARCH),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'payee_name': fields.List(fields.Str, description=docs.PAYEE_NAME),
     'image_number': fields.List(fields.Str, description=docs.IMAGE_NUMBER),
     'support_oppose_indicator': fields.List(

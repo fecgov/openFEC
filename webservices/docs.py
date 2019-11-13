@@ -1,64 +1,5 @@
 """Narrative API documentation."""
 
-BEGINNING_IMAGE_NUMBER = '''
-Unique identifier for the electronic or paper report. This number is used to construct
-PDF URLs to the original document.
-'''
-
-CANDIDATE_ID = '''
-A unique identifier assigned to each candidate registered with the FEC.
-If a person runs for several offices, that person will have separate candidate IDs for each office.
-'''
-
-CANDIDATE_INACTIVE = '''
-True indicates that a candidate is inactive.
-'''
-
-COMMITTEE_ID = '''
-A unique identifier assigned to each committee or filer registered with the FEC. In general \
-committee id's begin with the letter C which is followed by eight digits.
-'''
-
-CANDIDATE_CYCLE = '''
-Two-year election cycle in which a candidate runs for office.
-Calculated from FEC Form 2. The cycle begins with
-an odd year and is named for its ending, even year. This cycle follows
-the traditional house election cycle and subdivides the presidential
-and Senate elections into comparable two-year blocks. To see data for
-the entire four years of a presidential term or six years of a senatorial term,
-you will need the `election_full` flag.
-'''
-
-COMMITTEE_CYCLE = '''
-A two year election cycle that the committee was active- (after original registration
-date but before expiration date in FEC Form 1s) The cycle begins with
-an odd year and is named for its ending, even year.
-'''
-
-RECORD_CYCLE = '''
-Filter records to only those that were applicable to a given
-two-year period.The cycle begins with an odd year and is named
-for its ending, even year.
-'''
-
-RECORD_YEAR = '''
-Filter records to only those that were applicable to a given year.
-'''
-
-ELECTION_FULL = '''`True` indicates that full election period of a candidate.
-`False` indicates that two year election cycle.'''
-
-FULL_ELECTION = 'Parameter `full_election` is replaced by `election_full`. Please use `election_full` instead.'
-
-# committee uses a different definition for cycle because it is less straight forward
-CYCLE = '''
-Filter records to only those that are applicable to a given two-year
-period. This cycle follows the traditional House election cycle and
-subdivides the presidential and Senate elections into comparable
-two-year blocks. The cycle begins with an odd year and is named for its
-ending, even year.
-'''
-
 API_DESCRIPTION = '''
 This API allows you to explore the way candidates and committees fund their campaigns.
 
@@ -78,7 +19,6 @@ a request to get a key for 120 calls per minute to [APIinfo@fec.gov](mailto:apii
 ask questions and discuss the data in the [FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data).
 API changes will also be added to this group in advance of the change.
 
-
 The model definitions and schema are available at [/swagger](/swagger/). This is useful for
 making wrappers and exploring the data.
 
@@ -89,6 +29,11 @@ lists for commercial purposes or to solicit donations.
 [View our source code](https://github.com/fecgov/openFEC). We welcome issues and pull requests!
 '''
 
+PAGES = '''
+Number of pages in the document
+'''
+
+#======== candidate start ===========
 CANDIDATE_TAG = '''
 Candidate endpoints give you access to information about the people running for office.
 This information is organized by candidate_id. If you're unfamiliar with candidate IDs,
@@ -103,14 +48,38 @@ The candidate endpoints primarily use data from FEC registration
 [Form 2](http://www.fec.gov/pdf/forms/fecfrm2.pdf), for committee information.
 '''
 
+CANDIDATE_ID = '''
+A unique identifier assigned to each candidate registered with the FEC.
+If a person runs for several offices, that person will have separate candidate IDs for each office.
+'''
+
+CANDIDATE_INACTIVE = '''
+True indicates that a candidate is inactive.
+'''
+
+CANDIDATE_CYCLE = '''
+Two-year election cycle in which a candidate runs for office.
+Calculated from FEC Form 2. The cycle begins with
+an odd year and is named for its ending, even year. This cycle follows
+the traditional house election cycle and subdivides the presidential
+and Senate elections into comparable two-year blocks. To see data for
+the entire four years of a presidential term or six years of a senatorial term,
+you will need the `election_full` flag.
+'''
+
+# committee uses a different definition for cycle because it is less straight forward
+CYCLE = '''
+Filter records to only those that are applicable to a given two-year
+period. This cycle follows the traditional House election cycle and
+subdivides the presidential and Senate elections into comparable
+two-year blocks. The cycle begins with an odd year and is named for its
+ending, even year.
+'''
+
 NAME_SEARCH = '''
 Search for candidates or committees by name. If you're looking for information on a
 particular person or group, using a name to find the `candidate_id` or `committee_id` on
 this endpoint can be a helpful first step.
-'''
-
-LEGAL_SEARCH = '''
-Search for legal documents.
 '''
 
 CANDIDATE_LIST = '''
@@ -152,6 +121,71 @@ This endpoint is useful for finding detailed information about a particular cand
 
 '''
 
+CANDIDATE_NAME = 'Name of candidate running for office'
+
+OFFICE_FULL = 'Federal office candidate runs for: House, Senate or presidential'
+
+OFFICE = 'Federal office candidate runs for: H, S or P'
+
+STATE = 'US state or territory where a candidate runs for office'
+
+YEAR = 'See records pertaining to a particular election year. The list of election years \
+is based on a candidate filing a statement of candidacy (F2) for that year.'
+
+DISTRICT = 'Two-digit US House distirict of the office the candidate is running for. \
+Presidential, Senate and House at-large candidates will have District 00.'
+
+CANDIDATE_STATUS = 'One-letter code explaining if the candidate is:\n\
+        - C present candidate\n\
+        - F future candidate\n\
+        - N not yet a candidate\n\
+        - P prior candidate\n\
+'
+
+LAST_F2_DATE = 'The day the FEC received the candidate\'s most recent Form 2'
+
+FIRST_CANDIDATE_FILE_DATE = 'The day the FEC received the candidate\'s first filing. \
+This is a F2 candidate registration.'
+
+LAST_CANDIDATE_FILE_DATE = 'The day the FEC received the candidate\'s most recent filing'
+
+INCUMBENT_CHALLENGE = "One-letter code ('I', 'C', 'O') explaining if the candidate is an incumbent, a challenger, \
+or if the seat is open."
+
+INCUMBENT_CHALLENGE_FULL = 'Explains if the candidate is an incumbent, a challenger, or if the seat is open.'
+
+ACTIVE_THROUGH = 'Last year a candidate was active. This field is specific to the candidate_id so \
+if the same person runs for another office, there may be a different record for them.'
+
+HAS_RAISED_FUNDS = 'A boolean that describes if a candidate\'s committee has ever received any receipts \
+for their campaign for this particular office. (Candidates have separate candidate IDs for each office.)'
+
+FEDERAL_FUNDS_FLAG = 'A boolean the describes if a presidential candidate has accepted federal funds. \
+The flag will be false for House and Senate candidates.'
+
+CANDIDATE_ELECTION_YEARS = 'Years in which a candidate ran for office.'
+
+CANDIDATE_ELECTION_YEAR = 'Year a candidate runs for federal office.'
+
+ROUNDED_ELECTION_YEARS = 'Rounded election years in which a candidate ran for office'
+
+FEC_CYCLES_IN_ELECTION = 'FEC cycles are included in candidate election years.'
+
+LAST_CANDIDATE_ELECTION_YEAR = 'The last year of the cycle for this election.'
+
+F2_CANDIDATE_CITY = 'City of candidate\'s address, as reported on their Form 2.'
+
+F2_CANDIDATE_STATE = 'State of candidate\'s address, as reported on their Form 2.'
+
+F2_CANDIDATE_STREET_1 = 'Street of candidate\'s address, as reported on their Form 2.'
+
+F2_CANDIDATE_STREET_2 = 'Additional street information of candidate\'s address, as reported on their Form 2.'
+
+F2_CANDIDATE_ZIP = 'Zip code of candidate\'s address, as reported on their Form 2.'
+
+#======== candidate end ===========
+
+#======== committee start ===========
 COMMITTEE_TAG = '''
 Committees are entities that spend and raise money in an election. Their characteristics and
 relationships with candidates can change over time.
@@ -177,6 +211,15 @@ Corporations, unions, and other organizations making internal communications*
 The committee endpoints primarily use data from FEC registration Form 1 and Form 2.
 '''
 
+COMMITTEE_ID = '''
+A unique identifier assigned to each committee or filer registered with the FEC. In general \
+committee id's begin with the letter C which is followed by eight digits.
+'''
+
+COMMITTEE_NAME = 'The name of the committee. If a committee changes its name, \
+    the most recent name will be shown. Committee names are not unique. Use committee_id \
+    for looking up records.'
+
 COMMITTEE_LIST = '''
 Fetch basic information about committees and filers. Use parameters to filter for
 particular characteristics.
@@ -193,6 +236,284 @@ Explore a filer's characteristics over time. This can be particularly useful if 
 committees change treasurers, designation, or `committee_type`.
 '''
 
+COMMITTEE_CYCLE = '''
+A two year election cycle that the committee was active- (after original registration
+date but before expiration date in FEC Form 1s) The cycle begins with
+an odd year and is named for its ending, even year.
+'''
+
+COMMITTEE_CYCLES_HAS_FINANCIAL = '''
+A two year election cycle that the committee was active- (after original registration
+date but before expiration date in FEC Form 1s), and the commitee files the financial reports
+('F3', 'F3X', 'F3P', 'F3L', 'F4', 'F5', 'F7', 'F13') during this cycle.
+'''
+
+COMMITTEE_LAST_CYCLE_HAS_FINANCIAL = '''
+The latest two year election cycle that the committee files the financial reports
+('F3', 'F3X', 'F3P', 'F3L', 'F4', 'F5', 'F7', 'F13').
+'''
+
+COMMITTEE_CYCLES_HAS_ACTIVITY = '''
+A two year election cycle that the committee was active- (after original registration
+date but before expiration date in FEC Form 1), and the committee has filling activity during the cycle
+'''
+
+COMMITTEE_LAST_CYCLE_HAS_ACTIVITY = '''
+The latest two year election cycle that the committee has filings
+'''
+
+RECORD_CYCLE = '''
+Filter records to only those that were applicable to a given
+two-year period.The cycle begins with an odd year and is named
+for its ending, even year.
+'''
+
+RECORD_YEAR = '''
+Filter records to only those that were applicable to a given year.
+'''
+
+ELECTION_FULL = '''`True` indicates that full election period of a candidate.
+`False` indicates that two year election cycle.'''
+
+FULL_ELECTION = 'Parameter `full_election` is replaced by `election_full`. Please use `election_full` instead.'
+
+COMMITTEE_STREET_1 = '''
+Street address of committee as reported on the Form 1
+'''
+
+COMMITTEE_STREET_2 = '''
+Second line of street address of committee as reported on the Form 1
+'''
+
+COMMITTEE_CITY = '''
+City of committee as reported on the Form 1
+'''
+
+COMMITTEE_STATE = '''
+State of the committee\'s address as filed on the Form 1
+'''
+
+COMMITTEE_STATE_FULL = '''
+State of committee as reported on the Form 1
+'''
+
+COMMITTEE_ZIP = '''
+Zip code of committee as reported on the Form 1
+'''
+
+COMMITTEE_EMAIL = '''
+Email as reported on the Form 1
+'''
+COMMITTEE_FAX = '''
+Fax as reported on the Form 1
+'''
+COMMITTEE_WEBSITE = '''
+Website url as reported on the Form 1
+'''
+
+COMMITTEE_YEAR = 'A year that the committee was active— (after original registration date \
+    or filing but before expiration date)'
+
+FILING_FREQUENCY = 'The one-letter \n\
+    code of the filing frequency:\n\
+         - A Administratively terminated\n\
+         - D Debt\n\
+         - M Monthly filer\n\
+         - Q Quarterly filer\n\
+         - T Terminated\n\
+         - W Waived\n\
+'
+DESIGNATION = 'The one-letter designation code of the organization:\n\
+         - A authorized by a candidate\n\
+         - J joint fundraising committee\n\
+         - P principal campaign committee of a candidate\n\
+         - U unauthorized\n\
+         - B lobbyist/registrant PAC\n\
+         - D leadership PAC\n\
+'
+ORGANIZATION_TYPE = 'The one-letter code for the kind for organization:\n\
+        - C corporation\n\
+        - L labor organization\n\
+        - M membership organization\n\
+        - T trade association\n\
+        - V cooperative\n\
+        - W corporation without capital stock\n\
+'
+COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
+        - C communication cost\n\
+        - D delegate\n\
+        - E electioneering communication\n\
+        - H House\n\
+        - I independent expenditor (person or group)\n\
+        - N PAC - nonqualified\n\
+        - O independent expenditure-only (super PACs)\n\
+        - P presidential\n\
+        - Q PAC - qualified\n\
+        - S Senate\n\
+        - U single candidate independent expenditure\n\
+        - V PAC with non-contribution account, nonqualified\n\
+        - W PAC with non-contribution account, qualified\n\
+        - X party, nonqualified\n\
+        - Y party, qualified\n\
+        - Z national party non-federal account\n\
+'
+COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS = COMMITTEE_TYPE + '\
+        - all All Committee Types\n\
+        - all_candidates All Candidate Committee Types (H, S, P)\n\
+        - all_pacs All PAC Committee Types (N, O, Q, V, W)\n\
+'
+PAC_PARTY_TYPE = 'The one-letter type code of a PAC/Party organization:\n\
+        - N PAC - nonqualified\n\
+        - O independent expenditure-only (super PACs)\n\
+        - Q PAC - qualified\n\
+        - V PAC with non-contribution account, nonqualified account, qualified\n\
+        - X party, nonqualified\n\
+        - Y party, qualified\n\
+'
+
+LEADERSHIP_PAC_INDICATE = '''
+Indicates if the committee is a leadership PAC
+'''
+
+LOBBIST_REGISTRANT_PAC_INDICATE = '''
+Indicates if the committee is a lobbyist registrant PAC
+'''
+
+PARTY_TYPE = '''
+Code for the type of party the committee is, only if applicable
+'''
+
+PARTY_TYPE_FULL = '''
+Description of the type of party the committee is, only if applicable
+'''
+
+TREASURER_NAME = 'Name of the Committee\'s treasurer. If multiple treasurers for the \
+committee, the most recent treasurer will be shown.'
+
+TREASURER_CITY = '''
+City of committee treasurer as reported on the Form 1
+'''
+
+TREASURER_NAME_1 = '''
+Name 1 of committee treasurer as reported on the Form 1
+'''
+
+TREASURER_NAME_2 = '''
+Name 2 of committee treasurer as reported on the Form 1
+'''
+
+TREASURER_NAME_MIDDLE = '''
+Middle name of committee treasurer as reported on the Form 1
+'''
+
+TREASURER_NAME_PREFIX = '''
+Name Prefix of committee treasurer as reported on the Form 1
+'''
+
+TREASURER_NAME_SUFFIX = '''
+Name suffix of committee treasurer as reported on the Form 1
+'''
+
+TREASURER_PHONE = '''
+Phone of committee treasurer as reported on the Form 1
+'''
+
+TREASURER_STATE = '''
+State of committee treasurer as reported on the Form 1
+'''
+
+TREASURER_STREET_1 = '''
+Street of committee treasurer as reported on the Form 1
+'''
+
+TREASURER_STREET_2 = '''
+Second line of the street of committee treasurer as reported on the Form 1
+'''
+
+TREASURER_NAME_TITLE = '''
+Name title of committee treasurer as reported on the Form 1
+'''
+
+TREASURER_ZIP = '''
+Zip code of committee treasurer as reported on the Form 1
+'''
+
+CUSTODIAN_CITY = '''
+City of committee custodian as reported on the Form 1
+'''
+
+CUSTODIAN_NAME1 = '''
+Name 1 of committee custodian as reported on the Form 1
+'''
+
+CUSTODIAN_NAME2 = '''
+Name 2 of committee custodian as reported on the Form 1
+'''
+
+CUSTODIAN_MIDDLE_NAME = '''
+Middle name of committee custodian as reported on the Form 1
+'''
+
+CUSTODIAN_NAME_FULL = '''
+Full name of committee custodian as reported on the Form 1
+'''
+
+CUSTODIAN_PHONE = '''
+Phone number of committee custodian as reported on the Form 1
+'''
+
+CUSTODIAN_NAME_PREFIX = '''
+Name prefix of committee custodian as reported on the Form 1
+'''
+
+CUSTODIAN_STATE = '''
+State of committee custodian as reported on the Form 1
+'''
+
+CUSTODIAN_STREET_1 = '''
+Street address of the committee custodian as reported on the Form 1
+'''
+
+CUSTODIAN_STREET_2 = '''
+Second line of the street address of the committee custodian as reported on the Form 1
+'''
+
+CUSTODIAN_NAME_SUFFIX = '''
+Suffix name of the committee custodian as reported on the Form 1
+'''
+
+CUSTODIAN_NAME_TITLE = '''
+Name title of the committee custodian as reported on the Form 1
+'''
+
+CUSTODIAN_ZIP = '''
+Zip code of the committee custodian as reported on the Form 1
+'''
+
+FIRST_FILE_DATE = 'The day the FEC received the committee\'s first filing. \
+This is usually a Form 1 committee registration.'
+
+LAST_FILE_DATE = 'The day the FEC received the committee\'s most recent filing'
+
+LAST_F1_DATE = 'The day the FEC received the committee\'s most recent Form 1'
+
+MEANS_FILED = 'The method used to file with the FEC, either electronic or on paper.'
+
+MIN_FIRST_FILE_DATE = 'Filter for committees whose first filing was received on or after this date.'
+
+MAX_FIRST_FILE_DATE = 'Filter for committees whose first filing was received on or before this date.'
+
+MIN_LAST_F1_DATE = 'Filter for committees whose latest Form 1 was received on or after this date.'
+
+MAX_LAST_F1_DATE = 'Filter for committees whose latest Form 1 was received on or before this date.'
+
+AFFILIATED_COMMITTEE_NAME = '''
+Affiliated committee or connected organization
+'''
+#======== committee end ===========
+
+
+#======== election start ===========
 ELECTION_SEARCH = '''
 List elections by cycle, office, state, and district.
 '''
@@ -223,6 +544,57 @@ information.
 
 '''
 
+ELECTION_DATES = '''
+FEC election dates since 1995.
+'''
+
+ELECTION_STATE = '''
+State or territory of the office sought.
+'''
+
+ELECTION_DISTRICT = '''
+House district of the office sought, if applicable.
+'''
+
+ELECTION_PARTY = '''
+Party, if applicable.
+'''
+
+OFFICE_SOUGHT = '''
+House, Senate or presidential office.
+'''
+
+MIN_ELECTION_DATE = '''
+The minimum date of election.
+'''
+
+MAX_ELECTION_DATE = '''
+The maximum date of election.
+'''
+
+ELECTION_TYPE_ID = '''
+Election type id
+'''
+
+MIN_CREATE_DATE = '''
+The minimum date this record was added to the system.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MAX_CREATE_DATE = '''
+The maximum date this record was added to the system.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MIN_UPDATE_DATE = '''
+The minimum date this record was last updated.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MAX_UPDATE_DATE = '''
+The maximum date this record was last updated.(MM/DD/YYYY or YYYY-MM-DD)
+'''
+#======== election end ===========
+
+
+#======== financial start ===========
 FINANCIAL_TAG = '''
 Fetch key information about a committee's Form 3, Form 3X, or Form 3P financial reports.
 
@@ -263,6 +635,11 @@ look at the summary and detailed summary pages of FEC Form 3, Form 3X, and Form 
 '''
 
 REPORTS += WIP_TAG
+
+BEGINNING_IMAGE_NUMBER = '''
+Unique identifier for the electronic or paper report. This number is used to construct
+PDF URLs to the original document.
+'''
 
 REPORT_YEAR = '''
 Year that the record applies to. Sometimes records are amended in subsequent
@@ -365,7 +742,8 @@ Line number with description
     -17A Itemized individual contributions from Form 3P\n\
     -18 Itemized individual contributions from Form 3P\n\
 
-Of those transactions,[under $200, and having "earmark" in the memo text OR transactions having the codes 11A, 12, 17, 17A, or 18], we then want to exclude earmarks.
+Of those transactions,[under $200, and having "earmark" in the memo text OR transactions \
+having the codes 11A, 12, 17, 17A, or 18], we then want to exclude earmarks.
 
 '''
 
@@ -439,8 +817,9 @@ pagination: {\n\
 
 To fetch the next page of sorted results, append `last_index=230906248` and
 `last_disbursement_date=2014-07-04` to the URL.  We strongly advise paging through
-these results by using the sort indices (defaults to sort by disbursement date, e.g. `last_disbursement_date`), otherwise
-some resources may be unintentionally filtered out.  This resource uses keyset pagination to improve query performance
+these results by using the sort indices (defaults to sort by disbursement date, e.g.
+`last_disbursement_date`), otherwise some resources may be unintentionally filtered out.
+This resource uses keyset pagination to improve query performance
 and these indices are required to properly page through this large dataset.
 
 Note: because the Schedule B data includes many records, counts for
@@ -635,7 +1014,6 @@ SEARCH_TAG = '''
 Search for candidates, committees by name.
 '''
 
-
 FILINGS_TAG = '''
 Search for financial reports and other FEC documents.
 '''
@@ -645,6 +1023,18 @@ All official records and reports filed by or delivered to the FEC.
 
 Note: because the filings data includes many records, counts for large
 result sets are approximate; you will want to page through the records until no records are returned.
+'''
+
+FORM_CATEGORY = '''
+The forms filed are categorized based on the nature of the filing:\n\
+    - REPORT F3, F3X, F3P, F3L, F4, F5, F7, F13\n\
+    - NOTICE F5, F24, F6, F9, F10, F11\n\
+    - STATEMENT F1, F2\n\
+    - OTHER F1M, F8, F99, F12, FRQ\n\
+'''
+
+PRIMARY_GENERAL_INDICTOR = '''
+Primary, general or special election indicator.
 '''
 
 DOC_TYPE = '''
@@ -732,54 +1122,6 @@ that creates the calendar.
 
 '''
 
-ELECTION_DATES = '''
-FEC election dates since 1995.
-'''
-
-ELECTION_STATE = '''
-State or territory of the office sought.
-'''
-
-ELECTION_DISTRICT = '''
-House district of the office sought, if applicable.
-'''
-
-ELECTION_PARTY = '''
-Party, if applicable.
-'''
-
-OFFICE_SOUGHT = '''
-House, Senate or presidential office.
-'''
-
-MIN_ELECTION_DATE = '''
-The minimum date of election.
-'''
-
-MAX_ELECTION_DATE = '''
-The maximum date of election.
-'''
-
-ELECTION_TYPE_ID = '''
-Election type id
-'''
-
-MIN_CREATE_DATE = '''
-The minimum date this record was added to the system.(MM/DD/YYYY or YYYY-MM-DD)
-'''
-
-MAX_CREATE_DATE = '''
-The maximum date this record was added to the system.(MM/DD/YYYY or YYYY-MM-DD)
-'''
-
-MIN_UPDATE_DATE = '''
-The minimum date this record was last updated.(MM/DD/YYYY or YYYY-MM-DD)
-'''
-
-MAX_UPDATE_DATE = '''
-The maximum date this record was last updated.(MM/DD/YYYY or YYYY-MM-DD)
-'''
-
 MIN_PRIMARY_GENERAL_DATE = '''
 The minimum date of primary or general election.(MM/DD/YYYY or YYYY-MM-DD)
 '''
@@ -858,7 +1200,6 @@ assistance and guidance to the committees to properly file their reports, and fo
 appropriate action to ensure compliance with the Federal Election Campaign Act (FECA).
 '''
 
-
 # fields and filters
 
 # shared
@@ -867,7 +1208,10 @@ reseting systems and other factors, refer to receipt_date for the day that the F
 the paper or electronic document. Keep in mind that paper filings take more time to process \
 and there can be a lag between load_date and receipt_date. This field can be helpful to \
 identify paper records that have been processed recently.'
-PARTY = 'Three-letter code for the party affiliated with a candidate or committee. For example, DEM for Democratic Party and REP for Republican Party.'
+
+PARTY = 'Three-letter code for the party affiliated with a candidate or committee. \
+For example, DEM for Democratic Party and REP for Republican Party.'
+
 PARTY_FULL = 'Party affiliated with a candidate or committee'
 FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 would appear as F1:\n\
     - F1   Statement of Organization\n\
@@ -966,157 +1310,8 @@ STATE_GENERIC = 'US state or territory'
 
 ZIP_CODE = 'Zip code'
 
-#candidates
-CANDIDATE_NAME = 'Name of candidate running for office'
-
-OFFICE_FULL = 'Federal office candidate runs for: House, Senate or presidential'
-
-OFFICE = 'Federal office candidate runs for: H, S or P'
-
-STATE = 'US state or territory where a candidate runs for office'
-
-YEAR = 'See records pertaining to a particular election year. The list of election years \
-is based on a candidate filing a statement of candidacy (F2) for that year.'
-
-DISTRICT = 'Two-digit US House distirict of the office the candidate is running for. \
-Presidential, Senate and House at-large candidates will have District 00.'
-
-CANDIDATE_STATUS = 'One-letter code explaining if the candidate is:\n\
-        - C present candidate\n\
-        - F future candidate\n\
-        - N not yet a candidate\n\
-        - P prior candidate\n\
-'
-
-LAST_F2_DATE = 'The day the FEC received the candidate\'s most recent Form 2'
-
-FIRST_CANDIDATE_FILE_DATE = 'The day the FEC received the candidate\'s first filing. \
-This is a F2 candidate registration.'
-
-LAST_CANDIDATE_FILE_DATE = 'The day the FEC received the candidate\'s most recent filing'
-
-INCUMBENT_CHALLENGE = "One-letter code ('I', 'C', 'O') explaining if the candidate is an incumbent, a challenger, \
-or if the seat is open."
-
-INCUMBENT_CHALLENGE_FULL = 'Explains if the candidate is an incumbent, a challenger, or if the seat is open.'
-
-ACTIVE_THROUGH = 'Last year a candidate was active. This field is specific to the candidate_id so \
-if the same person runs for another office, there may be a different record for them.'
-
-HAS_RAISED_FUNDS = 'A boolean that describes if a candidate\'s committee has ever received any receipts \
-for their campaign for this particular office. (Candidates have separate candidate IDs for each office.)'
-
-FEDERAL_FUNDS_FLAG = 'A boolean the describes if a presidential candidate has accepted federal funds. \
-The flag will be false for House and Senate candidates.'
-
-CANDIDATE_ELECTION_YEARS = 'Years in which a candidate ran for office.'
-
-CANDIDATE_ELECTION_YEAR = 'Year a candidate runs for federal office.'
-
-ROUNDED_ELECTION_YEARS = 'Rounded election years in which a candidate ran for office'
-
-FEC_CYCLES_IN_ELECTION = 'FEC cycles are included in candidate election years.'
-
-LAST_CANDIDATE_ELECTION_YEAR = 'The last year of the cycle for this election.'
-
-F2_CANDIDATE_CITY = 'City of candidate\'s address, as reported on their Form 2.'
-
-F2_CANDIDATE_STATE = 'State of candidate\'s address, as reported on their Form 2.'
-
-F2_CANDIDATE_STREET_1 = 'Street of candidate\'s address, as reported on their Form 2.'
-
-F2_CANDIDATE_STREET_2 = 'Additional street information of candidate\'s address, as reported on their Form 2.'
-
-F2_CANDIDATE_ZIP = 'Zip code of candidate\'s address, as reported on their Form 2.'
-
-
-# committees
-COMMITTEE_NAME = 'The name of the committee. If a committee changes its name, \
-    the most recent name will be shown. Committee names are not unique. Use committee_id \
-    for looking up records.'
-
-COMMITTEE_YEAR = 'A year that the committee was active— (after original registration date \
-    or filing but before expiration date)'
-FILING_FREQUENCY = 'The one-letter \n\
-    code of the filing frequency:\n\
-         - A Administratively terminated\n\
-         - D Debt\n\
-         - M Monthly filer\n\
-         - Q Quarterly filer\n\
-         - T Terminated\n\
-         - W Waived\n\
-'
-DESIGNATION = 'The one-letter designation code of the organization:\n\
-         - A authorized by a candidate\n\
-         - J joint fundraising committee\n\
-         - P principal campaign committee of a candidate\n\
-         - U unauthorized\n\
-         - B lobbyist/registrant PAC\n\
-         - D leadership PAC\n\
-'
-ORGANIZATION_TYPE = 'The one-letter code for the kind for organization:\n\
-        - C corporation\n\
-        - L labor organization\n\
-        - M membership organization\n\
-        - T trade association\n\
-        - V cooperative\n\
-        - W corporation without capital stock\n\
-'
-COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
-        - C communication cost\n\
-        - D delegate\n\
-        - E electioneering communication\n\
-        - H House\n\
-        - I independent expenditor (person or group)\n\
-        - N PAC - nonqualified\n\
-        - O independent expenditure-only (super PACs)\n\
-        - P presidential\n\
-        - Q PAC - qualified\n\
-        - S Senate\n\
-        - U single candidate independent expenditure\n\
-        - V PAC with non-contribution account, nonqualified\n\
-        - W PAC with non-contribution account, qualified\n\
-        - X party, nonqualified\n\
-        - Y party, qualified\n\
-        - Z national party non-federal account\n\
-'
-COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS = COMMITTEE_TYPE + '\
-        - all All Committee Types\n\
-        - all_candidates All Candidate Committee Types (H, S, P)\n\
-        - all_pacs All PAC Committee Types (N, O, Q, V, W)\n\
-'
-PAC_PARTY_TYPE = 'The one-letter type code of a PAC/Party organization:\n\
-        - N PAC - nonqualified\n\
-        - O independent expenditure-only (super PACs)\n\
-        - Q PAC - qualified\n\
-        - V PAC with non-contribution account, nonqualified account, qualified\n\
-        - X party, nonqualified\n\
-        - Y party, qualified\n\
-'
-
-TREASURER_NAME = 'Name of the Committee\'s treasurer. If multiple treasurers for the \
-committee, the most recent treasurer will be shown.'
-
-COMMITTEE_STATE = 'State of the committee\'s address as filed on the Form 1'
-
-FIRST_FILE_DATE = 'The day the FEC received the committee\'s first filing. \
-This is usually a Form 1 committee registration.'
-
-LAST_FILE_DATE = 'The day the FEC received the committee\'s most recent filing'
-
-LAST_F1_DATE = 'The day the FEC received the committee\'s most recent Form 1'
-
-MEANS_FILED = 'The method used to file with the FEC, either electronic or on paper.'
-
-MIN_FIRST_FILE_DATE = 'Filter for committees whose first filing was received on or after this date.'
-
-MAX_FIRST_FILE_DATE = 'Filter for committees whose first filing was received on or before this date.'
-
-MIN_LAST_F1_DATE = 'Filter for committees whose latest Form 1 was received on or after this date.'
-
-MAX_LAST_F1_DATE = 'Filter for committees whose latest Form 1 was received on or before this date.'
-
 CANDIDATE_MIN_FIRST_FILE_DATE = 'Selects all candidates whose first filing was received by the FEC after this date.'
+
 CANDIDATE_MAX_FIRST_FILE_DATE = 'Selects all candidates whose first filing was received by the FEC before this date.'
 
 # schedules
@@ -1251,13 +1446,15 @@ CONTRIBUTION_REFUNDS = 'Total contribution refunds'
 REFUNDED_OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS = 'Other committee refunds'
 
 #loans
-LOAN_SOURCE = "Source of the loan (i.e., bank loan, brokerage account, credit card, home equity line of credit," \
-              "other line of credit, or personal funds of the candidate"
-
+LOAN_SOURCE = 'Source of the loan (i.e., bank loan, brokerage account, credit card, home equity line of credit, \
+              other line of credit, or personal funds of the candidate'
 
 # presidential
 # receipts
-FEDERAL_FUNDS = 'Federal funds: Public funding of presidential elections means that qualified presidential candidates receive federal government funds to pay for the valid expenses of their political campaigns in both the primary and general elections.'
+FEDERAL_FUNDS = 'Federal funds: Public funding of presidential elections means that qualified presidential candidates \
+                receive federal government funds to pay for the valid expenses of their political campaigns \
+                in both the primary and general elections.'
+
 TRANSFERS_FROM_AFFILIATED_COMMITTEE = 'Transfers from affiliated committees'
 LOANS_RECEIVED_FROM_CANDIDATE = 'Loans made by candidate'
 OTHER_LOANS_RECEIVED = 'Other loans'
@@ -1351,17 +1548,17 @@ The first value in the chain is the original filing.  The ordering in the chain 
 amendments were filed up to the amendment being viewed.
 '''
 
-AMENDMENT_INDICATOR = '''
+AMENDMENT_INDICATOR = 'Amendent types:\n\
     -N   new\n\
     -A   amendment\n\
     -T   terminated\n\
     -C   consolidated\n\
     -M   multi-candidate\n\
     -S   secondary\n\n\
-    Null might be new or amendment. If amendment indicator is null and the filings is the first or \
-    first in a chain treat it as if it was a new. If it is not the first or first in a chain then \
-    treat the filing as an amendment.\n\
-'''
+NULL might be new or amendment. If amendment indicator is null and the filings is the first or \
+first in a chain treat it as if it was a new. If it is not the first or first in a chain then \
+treat the filing as an amendment.\n\
+'
 
 AMENDED_BY = '''
 If this report has been amended, this field gives the file_number of the report that should be used. For example,
@@ -1443,95 +1640,6 @@ This is [the sql](https://github.com/fecgov/openFEC/blob/develop/data/migrations
 that creates these calculations.
 '''
 
-# Audit api
-AUDIT = '''
-The agency’s monitoring process may detect potential violations through a review of a committee’s reports or through a
-Commission audit. By law, all enforcement cases must remain confidential until they’re closed.
-
-The Commission is required by law to audit Presidential campaigns that accept public funds. In addition, the Commission
-audits a committee when it appears not to have met the threshold requirements for substantial compliance \
-with the Federal Election Campaign Act. The audit determines whether the committee complied with limitations, \
-prohibitions and disclosure requirements.
-
-These endpoints contain Final Audit Reports approved by the Commission since inception.
-'''
-
-#endpoint: audit-case
-AUDIT_CASE = '''
-This endpoint contains Final Audit Reports approved by the Commission since inception.
-The search can be based on information about the audited committee (Name, FEC ID Number, Type, \n\
-Election Cycle) or the issues covered in the report.
-'''
-
-
-#endpoint: audit-primary-category
-AUDIT_PRIMARY_CATEGORY = '''
-This lists the options for the primary categories available in the /audit-search/ endpoint.
-'''
-
-#endpoint: audit-category
-AUDIT_CATEGORY = '''
-This lists the options for the categories and subcategories available in the /audit-search/ endpoint.
-'''
-
-AUDIT_ID = '''
-The audit issue. Each subcategory has an unique ID
-'''
-
-AUDIT_CASE_ID = '''
-Primary/foreign key for audit tables
-'''
-
-PRIMARY_CATEGORY_ID = '''
-Audit category ID (table PK)
-'''
-
-PRIMARY_CATEGORY_NAME = 'Primary Audit Category\n\
-    - No Findings or Issues/Not a Committee\n\
-    - Net Outstanding Campaign/Convention Expenditures/Obligations\n\
-    - Payments/Disgorgements\n\
-    - Allocation Issues\n\
-    - Prohibited Contributions\n\
-    - Disclosure\n\
-    - Recordkeeping\n\
-    - Repayment to US Treasury\n\
-    - Other\n\
-    - Misstatement of Financial Activity\n\
-    - Excessive Contributions\n\
-    - Failure to File Reports/Schedules/Notices\n\
-    - Loans\n\
-    - Referred Findings Not Listed\n\
-'
-
-SUB_CATEGORY_ID = '''
-The finding id of an audit. Finding are a category of broader issues. Each category has an unique ID.
-'''
-
-SUB_CATEGORY_NAME = '''
-The audit issue. Each subcategory has an unique ID.
-'''
-
-AUDIT_TIER = '''
-1 specifies a primary category and 2 specifies a subcategory
-'''
-
-COMMITTEE_DESCRIPTION = 'Type of committee:\n\
-        - H or S - Congressional\n\
-        - P - Presidential\n\
-        - X or Y or Z - Party\n\
-        - N or Q - PAC\n\
-        - I - Independent expenditure\n\
-        - O - Super PAC \n\
-'
-
-FAR_RELEASE_DATE = '''
-Final audit report release date
-'''
-
-LINK_TO_REPORT = '''
-URL for retrieving the PDF document
-'''
-
 SUB_ID = '''
 A unique identifier of the transactional report.
 '''
@@ -1555,23 +1663,10 @@ Forms without coverage date - \n\
     year from the receipt date.\n\
 '''
 
-FORM_TYPE = '''
-Indicates the type of form that was filed.\n\
-ex: F1, F2, F3P, F3X etc...
-'''
-
 OPERATIONS_LOG = '''
 The Operations log contains details of each report loaded into the database. It is primarily
 used as status check to determine when all of the data processes, from initial entry through
 review are complete.
-'''
-
-LEGAL = '''
-Explore relevant statutes, regulations and Commission actions.
-'''
-
-LEGAL_SEARCH = '''
-Search legal documents by type, or across all document types using keywords, parameter values and ranges.
 '''
 
 MIN_RECEIPT_DATE = '''
@@ -1647,9 +1742,6 @@ Name of the entity that received the payment.
 IS_NOTICE = '''
 Record filed as 24- or 48-hour notice.
 '''
-filing_form = '''
-The form type filed by the canidate of committee
-'''
 CALCULATED_CANDIDATE_SHARE = '''
 "If an electioneering cost targets several candidates, the total cost is
 divided by the number of candidates. If it only mentions one candidate
@@ -1692,3 +1784,106 @@ DISSEMINATION_MIN_DATE = 'Selects all items distributed by this committee after 
 CANDIDATE_FULL_SEARCH = '''
 Search for candidates by candiate id or candidate first or last name
 '''
+# ======== financial end =========
+
+
+# ======== legal start =========
+LEGAL_SEARCH = '''
+Search for legal documents.
+'''
+
+LEGAL = '''
+Explore relevant statutes, regulations and Commission actions.
+'''
+
+LEGAL_SEARCH = '''
+Search legal documents by type, or across all document types using keywords, parameter values and ranges.
+'''
+# ======== legal end =========
+
+
+# ======== audit start =========
+AUDIT = '''
+The agency’s monitoring process may detect potential violations through a review of a committee’s reports or through a
+Commission audit. By law, all enforcement cases must remain confidential until they’re closed.
+
+The Commission is required by law to audit Presidential campaigns that accept public funds. In addition, the Commission
+audits a committee when it appears not to have met the threshold requirements for substantial compliance \
+with the Federal Election Campaign Act. The audit determines whether the committee complied with limitations, \
+prohibitions and disclosure requirements.
+
+These endpoints contain Final Audit Reports approved by the Commission since inception.
+'''
+
+AUDIT_CASE = '''
+This endpoint contains Final Audit Reports approved by the Commission since inception.
+The search can be based on information about the audited committee (Name, FEC ID Number, Type, \n\
+Election Cycle) or the issues covered in the report.
+'''
+
+AUDIT_PRIMARY_CATEGORY = '''
+This lists the options for the primary categories available in the /audit-search/ endpoint.
+'''
+
+AUDIT_CATEGORY = '''
+This lists the options for the categories and subcategories available in the /audit-search/ endpoint.
+'''
+
+AUDIT_ID = '''
+The audit issue. Each subcategory has an unique ID
+'''
+
+AUDIT_CASE_ID = '''
+Primary/foreign key for audit tables
+'''
+
+PRIMARY_CATEGORY_ID = '''
+Audit category ID (table PK)
+'''
+
+PRIMARY_CATEGORY_NAME = 'Primary Audit Category\n\
+    - No Findings or Issues/Not a Committee\n\
+    - Net Outstanding Campaign/Convention Expenditures/Obligations\n\
+    - Payments/Disgorgements\n\
+    - Allocation Issues\n\
+    - Prohibited Contributions\n\
+    - Disclosure\n\
+    - Recordkeeping\n\
+    - Repayment to US Treasury\n\
+    - Other\n\
+    - Misstatement of Financial Activity\n\
+    - Excessive Contributions\n\
+    - Failure to File Reports/Schedules/Notices\n\
+    - Loans\n\
+    - Referred Findings Not Listed\n\
+'
+
+SUB_CATEGORY_ID = '''
+The finding id of an audit. Finding are a category of broader issues. Each category has an unique ID.
+'''
+
+SUB_CATEGORY_NAME = '''
+The audit issue. Each subcategory has an unique ID.
+'''
+
+AUDIT_TIER = '''
+1 specifies a primary category and 2 specifies a subcategory
+'''
+
+COMMITTEE_DESCRIPTION = 'Type of committee:\n\
+        - H or S - Congressional\n\
+        - P - Presidential\n\
+        - X or Y or Z - Party\n\
+        - N or Q - PAC\n\
+        - I - Independent expenditure\n\
+        - O - Super PAC \n\
+'
+
+FAR_RELEASE_DATE = '''
+Final audit report release date
+'''
+
+LINK_TO_REPORT = '''
+URL for retrieving the PDF document
+'''
+# ======== audit end =========
