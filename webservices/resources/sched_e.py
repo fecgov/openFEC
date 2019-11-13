@@ -103,6 +103,8 @@ class ScheduleEEfileView(views.ApiResource):
     model = models.ScheduleEEfile
     schema = schemas.ItemizedScheduleEfilingsSchema
     page_schema = schemas.ScheduleEEfilePageSchema
+    # Use exact count for this endpoint only because the estimate is way off
+    use_estimated_counts = False
 
     filter_multi_fields = [
         ('image_number', models.ScheduleEEfile.image_number),
@@ -141,20 +143,6 @@ class ScheduleEEfileView(views.ApiResource):
                     'office_total_ytd',
                 ]),
             ),
-        )
-
-    def get(self, *args, **kwargs):
-        query = self.build_query(*args, **kwargs)
-        # Use exact count for this endpoint only because the estimate is way off
-        count = query.count()
-        multi = False
-        if isinstance(kwargs['sort'], (list, tuple)):
-            multi = True
-
-        return utils.fetch_page(
-            query, kwargs,
-            count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
-            index_column=self.index_column, cap=self.cap, multi=multi,
         )
 
     def build_query(self, **kwargs):

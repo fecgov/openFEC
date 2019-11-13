@@ -9,6 +9,7 @@ from webservices.common import counts
 from webservices.common import models
 from webservices.utils import use_kwargs
 
+
 class ApiResource(utils.Resource):
 
     args = {}
@@ -25,12 +26,17 @@ class ApiResource(utils.Resource):
     join_columns = {}
     aliases = {}
     cap = 100
+    use_estimated_counts = True
 
     @use_kwargs(Ref('args'))
     @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
-        count = counts.count_estimate(query, models.db.session)
+        count = (
+            counts.count_estimate(query, models.db.session)
+            if self.use_estimated_counts
+            else query.count()
+        )
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
