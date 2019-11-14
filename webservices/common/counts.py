@@ -18,9 +18,8 @@ def get_count(query, session, estimate=True, threshold=500000):
     Calculate either the estimated count or exact count.
     Indicate whether the count is an estimate.
     """
-
     if estimate:
-        rows = session.execute(explain(query)).fetchall()
+        rows = get_query_plan(query, session)
         count = extract_analyze_count(rows)
         if count < threshold:
             estimate = False
@@ -28,6 +27,10 @@ def get_count(query, session, estimate=True, threshold=500000):
     else:
         count = query.count()
     return count, estimate
+
+
+def get_query_plan(query, session):
+    return session.execute(explain(query)).fetchall()
 
 
 def extract_analyze_count(rows):
