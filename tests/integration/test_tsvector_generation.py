@@ -10,6 +10,7 @@ import manage
 from tests import common
 from webservices.rest import api
 from webservices.resources.sched_a import ScheduleAView
+from webservices.resources.sched_a import ScheduleAEfileView
 from webservices.resources.sched_b import ScheduleBView
 from webservices import rest, __API_VERSION__
 from webservices.rest import db
@@ -387,3 +388,33 @@ class TriggerTestCase(common.BaseTestCase):
         assert(names.issubset(contbr_employer_list))
         connection.close()
 
+    def real_efile_sa7(self):
+        """
+        Test tsvector trigger for real_efile.sa7
+        --contributor_name_text
+        --contributor_employer_text
+        --contributor_occupation_text
+        """
+        connection = db.engine.connect()
+        data = {
+            'repid': {111111111111, 222222222222, 333333333333},
+            'tran_id': {'4', '5', '6'},
+            'fname': {'Oscar', 'The', 'Mr.'},
+            'mname': {'The', '', ''},
+            'name': {'Grouch', 'Count', 'Rogers'},
+            'indemp': {'The Street', 'The Street', 'The Neighborhood'},
+            'indocc': {'Lead Grouch', 'Vampire/Educator', 'Neighbor'}
+        }
+        insert = "INSERT INTO real_efile_sa7 " + \
+            "(repid, tran_id, fname, mname, name, indemp, indocc) " + \
+            "VALUES (%(repid)s, %(tran_id)s, %(fname)s, %(mname)s, %(name)s, %(indemp)s, %(indocc)s)"
+        connection.executemany(insert, data)
+        manage.refresh_materialized(concurrent=False)
+        results = self._results(api.url_for(ScheduleAEfileView, contributor_employer='Neighborhood'))
+        employer_set = {r['contributor_employer'] for r in results}
+        assert({'The Neighborhood'}.issubset(employer_set))
+        name_set = {r['contributor_name'] for r in results}
+        assert({'Mr.'}.issubset(name_set))
+        occupation_set = {r['contributor_occupation'] for r in results}
+        assert({'Educator'}.issubset(occupation_set))
+        connection.close()
