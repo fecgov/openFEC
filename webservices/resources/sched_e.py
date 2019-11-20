@@ -54,6 +54,9 @@ class ScheduleEView(ItemizedResource):
         (('min_filing_date', 'max_filing_date'), models.ScheduleE.filing_date),
 
     ]
+    filter_match_fields = [
+        ('most_recent', models.ScheduleE.most_recent),
+    ]
     query_options = [
         sa.orm.joinedload(models.ScheduleE.candidate),
         sa.orm.joinedload(models.ScheduleE.committee),
