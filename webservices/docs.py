@@ -1173,6 +1173,11 @@ to a primary election to federal office._
 
 ELECTIONEERING_AGGREGATE = 'Electioneering costs aggregated by candidate'
 
+ELECTIONEERING_TOTAL_BY_CANDIDATE = '''
+Total electioneering communications by candidate by cycle
+or candidate election year
+'''
+
 COMMUNICATION_COST = '''
 52 U.S.C. 30118 allows "communications by a corporation to its stockholders and
 executive or administrative personnel and their families or by a labor organization
