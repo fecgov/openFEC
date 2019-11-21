@@ -1171,7 +1171,9 @@ _The communication is distributed within 60 days prior to a general election or 
 to a primary election to federal office._
 '''
 
-ELECTIONEERING_AGGREGATE = 'Electioneering costs aggregated by candidate'
+ELECTIONEERING_AGGREGATE_BY_CANDIDATE = 'Electioneering costs aggregated by candidate'
+
+ELECTIONEERING_AGGREGATE = 'Electioneering costs aggregates'
 
 ELECTIONEERING_TOTAL_BY_CANDIDATE = '''
 Total electioneering communications by candidate by cycle

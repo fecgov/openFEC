@@ -85,9 +85,9 @@ class ScheduleBByPurpose(BaseDisbursementAggregate):
 class BaseSpendingAggregate(BaseAggregate):
     __abstract__ = True
     committee_id = db.Column('cmte_id', db.String, primary_key=True, doc=docs.COMMITTEE_ID)
-    committee = utils.related_committee('committee_id')
+    committee = utils.related_committee_history('committee_id', cycle_label='cycle')
     candidate_id = db.Column('cand_id', db.String, primary_key=True, doc=docs.CANDIDATE_ID)
-    candidate = utils.related_candidate('candidate_id')
+    candidate = utils.related_candidate_history('candidate_id', cycle_label='cycle')
 
 
 class ScheduleEByCandidate(BaseSpendingAggregate):

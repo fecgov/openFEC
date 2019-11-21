@@ -375,10 +375,16 @@ api.add_resource(
     '/communication_costs/by_candidate/',
     '/committee/<string:committee_id>/communication_costs/by_candidate/',
 )
+
 api.add_resource(
     aggregates.ElectioneeringByCandidateView,
     '/electioneering/by_candidate/',
     '/committee/<string:committee_id>/electioneering/by_candidate/',
+)
+
+api.add_resource(
+    aggregates.ECAggregatesView,
+    '/electioneering/aggregates/',
 )
 
 api.add_resource(
@@ -454,6 +460,7 @@ apidoc.register(sched_d.ScheduleDView, blueprint='v1')
 apidoc.register(sched_d.ScheduleDViewBySubId, blueprint='v1')
 apidoc.register(costs.CommunicationCostView, blueprint='v1')
 apidoc.register(costs.ElectioneeringView, blueprint='v1')
+apidoc.register(aggregates.ECAggregatesView, blueprint='v1')
 apidoc.register(aggregates.ScheduleABySizeView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByStateView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByZipView, blueprint='v1')

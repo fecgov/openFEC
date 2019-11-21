@@ -238,7 +238,7 @@ class CandidateAggregateResource(AggregateResource):
         )
         if election_full:
             query = self.aggregate_cycles(query, cycle_column)
-        return self.join_entity_names(query)
+        return join_cand_cmte_names(query)
 
     def aggregate_cycles(self, query, cycle_column):
         election_duration = utils.get_election_duration(sa.func.left(self.model.candidate_id, 1))
@@ -262,28 +262,6 @@ class CandidateAggregateResource(AggregateResource):
             self.model.committee_id,
             cycle_column,
             *self.group_columns
-        )
-
-    def join_entity_names(self, query):
-        query = query.subquery()
-        return models.db.session.query(
-            query,
-            models.CandidateHistory.candidate_id.label('candidate_id'),
-            models.CommitteeHistory.committee_id.label('committee_id'),
-            models.CandidateHistory.name.label('candidate_name'),
-            models.CommitteeHistory.name.label('committee_name'),
-        ).outerjoin(
-            models.CandidateHistory,
-            sa.and_(
-                query.c.cand_id == models.CandidateHistory.candidate_id,
-                query.c.cycle == models.CandidateHistory.two_year_period,
-            ),
-        ).outerjoin(
-            models.CommitteeHistory,
-            sa.and_(
-                query.c.cmte_id == models.CommitteeHistory.committee_id,
-                query.c.cycle == models.CommitteeHistory.cycle,
-            ),
         )
 
 
@@ -330,7 +308,7 @@ class CommunicationCostByCandidateView(CandidateAggregateResource):
 
 @doc(
     tags=['electioneering'],
-    description=docs.ELECTIONEERING_AGGREGATE,
+    description=docs.ELECTIONEERING_AGGREGATE_BY_CANDIDATE,
 )
 class ElectioneeringByCandidateView(CandidateAggregateResource):
 
@@ -341,3 +319,63 @@ class ElectioneeringByCandidateView(CandidateAggregateResource):
     filter_multi_fields = [
         ('candidate_id', models.ElectioneeringByCandidate.candidate_id),
     ]
+
+
+@doc(
+    tags=['electioneering'],
+    description=docs.ELECTIONEERING_AGGREGATE,
+)
+class ECAggregatesView(AggregateResource):
+
+    @property
+    def sort_args(self):
+        return args.make_sort_args(
+            validator=args.IndexValidator(
+                self.model,
+                extra=['candidate', 'committee'],
+            ),
+        )
+
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+        cycle_column = self.model.cycle
+
+        query = query.filter(
+            cycle_column.in_(kwargs['cycle'])
+            if kwargs.get('cycle')
+            else True
+        )
+        return join_cand_cmte_names(query)
+
+    model = models.ElectioneeringByCandidate
+    schema = schemas.ECAggregatesSchema
+    page_schema = schemas.ECAggregatesPageSchema
+    query_args = utils.extend(args.EC_aggregates)
+
+    filter_multi_fields = [
+        ('candidate_id', models.ElectioneeringByCandidate.candidate_id),
+        ('committee_id', models.ElectioneeringByCandidate.committee_id),
+    ]
+
+def join_cand_cmte_names(query):
+    query = query.subquery()
+    return models.db.session.query(
+        query,
+        models.CandidateHistory.candidate_id.label('candidate_id'),
+        models.CommitteeHistory.committee_id.label('committee_id'),
+        models.CandidateHistory.name.label('candidate_name'),
+        models.CommitteeHistory.name.label('committee_name'),
+    ).outerjoin(
+        models.CandidateHistory,
+        sa.and_(
+            query.c.cand_id == models.CandidateHistory.candidate_id,
+            query.c.cycle == models.CandidateHistory.two_year_period,
+        ),
+    ).outerjoin(
+        models.CommitteeHistory,
+        sa.and_(
+            query.c.cmte_id == models.CommitteeHistory.committee_id,
+            query.c.cycle == models.CommitteeHistory.cycle,
+        ),
+    )
+    return query
