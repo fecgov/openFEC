@@ -393,6 +393,11 @@ api.add_resource(
 )
 
 api.add_resource(
+    spending_by_others.IETotalsByCandidateView,
+    '/schedules/schedule_e/totals/by_candidate/',
+)
+
+api.add_resource(
     filings.FilingsView,
     '/committee/<committee_id>/filings/',
     '/candidate/<candidate_id>/filings/',
@@ -512,6 +517,7 @@ apidoc.register(legal.UniversalSearch, blueprint='v1')
 apidoc.register(candidate_aggregates.AggregateByOfficeView, blueprint='v1')
 apidoc.register(candidate_aggregates.AggregateByOfficeByPartyView, blueprint='v1')
 apidoc.register(spending_by_others.ECTotalsByCandidateView, blueprint='v1')
+apidoc.register(spending_by_others.IETotalsByCandidateView, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)
