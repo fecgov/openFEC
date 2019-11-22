@@ -52,6 +52,7 @@ from webservices.resources import legal
 from webservices.resources import large_aggregates
 from webservices.resources import audit
 from webservices.resources import operations_log
+from webservices.resources import spending_by_others
 from webservices.env import env
 from webservices.tasks.response_exception import ResponseException
 from webservices.tasks.error_code import ErrorCode
@@ -381,6 +382,11 @@ api.add_resource(
 )
 
 api.add_resource(
+    spending_by_others.ECTotalsByCandidateView,
+    '/electioneering/totals/by_candidate/',
+)
+
+api.add_resource(
     filings.FilingsView,
     '/committee/<committee_id>/filings/',
     '/candidate/<candidate_id>/filings/',
@@ -498,6 +504,7 @@ apidoc.register(operations_log.OperationsLogView, blueprint='v1')
 apidoc.register(legal.UniversalSearch, blueprint='v1')
 apidoc.register(candidate_aggregates.AggregateByOfficeView, blueprint='v1')
 apidoc.register(candidate_aggregates.AggregateByOfficeByPartyView, blueprint='v1')
+apidoc.register(spending_by_others.ECTotalsByCandidateView, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)

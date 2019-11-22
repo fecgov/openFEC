@@ -774,6 +774,12 @@ electioneering_by_candidate = {
     ),
 }
 
+electioneering_totals_by_candidate = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'election_full': election_full,
+}
+
 elections_list = {
     'state': fields.List(IStr, description=docs.STATE),
     'district': fields.List(District, description=docs.DISTRICT),
