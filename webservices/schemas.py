@@ -731,6 +731,22 @@ ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=pagi
 register_schema(ElectioneeringSchema)
 register_schema(ElectioneeringPageSchema)
 
+ECAggregatesSchema = make_schema(
+    models.ElectioneeringByCandidate,
+    fields={
+        'committee_id': ma.fields.Str(),
+        'candidate_id': ma.fields.Str(),
+        'committee_name': ma.fields.Str(),
+        'candidate_name': ma.fields.Str(),
+        'cycle': ma.fields.Int(),
+        'count': ma.fields.Int(),
+        'total': ma.fields.Decimal(places=2),
+    },
+)
+ECAggregatesPageSchema = make_page_schema(ECAggregatesSchema)
+register_schema(ECAggregatesSchema)
+register_schema(ECAggregatesPageSchema)
+
 BaseFilingsSchema = make_schema(
     models.Filings,
     fields={
