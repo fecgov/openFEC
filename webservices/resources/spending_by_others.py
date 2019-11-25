@@ -50,7 +50,7 @@ class ECTotalsByCandidateView(ApiResource):
     def args(self):
         return utils.extend(
             args.paging,
-            args.electioneering_totals_by_candidate,
+            args.schedule_e_totals_by_candidate_other_costs_EC,
             args.make_sort_args(),
         )
 
@@ -78,9 +78,12 @@ class ECTotalsByCandidateView(ApiResource):
 
         return query
 
+
+
+    
 @doc(
     tags=['independent expenditures'],
-    description=docs.SCHEDULE_E_TOTALS_BY_CANDIDATE,
+    description=docs.SCHEDULE_E_INDEPENDENT_EXPENDITURES_TOTALS_BY_CANDIDATE,
 )
 class IETotalsByCandidateView(ApiResource):
 
@@ -91,7 +94,51 @@ class IETotalsByCandidateView(ApiResource):
     def args(self):
         return utils.extend(
             args.paging,
-            args.schedule_e_totals_by_candidate,
+            args.schedule_e_totals_by_candidate_other_costs_IE_and_CC,
+            args.make_sort_args(),
+        )
+
+    def build_query(self, **kwargs):
+        cycle_column, candidate = get_candidate_list(kwargs)
+
+        query = db.session.query(
+            ScheduleEByCandidate.candidate_id,
+            ScheduleEByCandidate.support_oppose_indicator,
+            cycle_column,
+            sa.func.sum(ScheduleEByCandidate.total).label('total'),
+        ).join(
+            ScheduleEByCandidate,
+            sa.and_(
+                ScheduleEByCandidate.candidate_id == candidate.c.candidate_id,
+                ScheduleEByCandidate.cycle == candidate.c.two_year_period
+            )
+        ).filter(
+            (
+                cycle_column.in_(kwargs['cycle'])
+                if kwargs.get('cycle')
+                else True
+            )
+        ).group_by(
+            ScheduleEByCandidate.candidate_id, cycle_column, ScheduleEByCandidate.support_oppose_indicator,
+        ).order_by(ScheduleEByCandidate.candidate_id, cycle_column, ScheduleEByCandidate.support_oppose_indicator,)
+
+        return query
+
+
+@doc(
+    tags=['communication cost'],
+    description=docs.SCHEDULE_E_COMMUNICATIONS_COSTS_TOTALS_BY_CANDIDATE,
+)
+class CCTotalsByCandidateView(ApiResource):
+
+    schema = schemas.CCTotalsByCandidateSchema
+    page_schema = schemas.CCTotalsByCandidatePageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.schedule_e_totals_by_candidate_other_costs_IE_and_CC,
             args.make_sort_args(),
         )
 

@@ -774,12 +774,6 @@ electioneering_by_candidate = {
     ),
 }
 
-electioneering_totals_by_candidate = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'election_full': election_full,
-}
-
 EC_aggregates = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
@@ -1004,9 +998,28 @@ totals_by_office_by_party = {
     'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
 }
 
-schedule_e_totals_by_candidate = {
+"""
+These keys/values correspond to "other expenses" and form the basis for
+electioneering_costs (EC), communications_costs (CC), and independent_expenditures (IE)
+"""
+schedule_e_totals_by_candidate_other_costs_EC = {
+    
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'election_full': election_full,
+}
+
+"""
+These key/values extend the schedule_e_totals_by_candidate_other_costs to include the 
+support_oppose_indicator for EC and IE
+"""
+schedule_e_totals_by_candidate_other_costs_IE_and_CC = {
+    
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'election_full': election_full,
+    'support_oppose_indicator': fields.List(
+        IStr(validate=validate.OneOf(['S', 'O'])),
+        description=docs.SUPPORT_OPPOSE,),
 }
 
