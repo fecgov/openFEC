@@ -886,8 +886,10 @@ schedule_e = {
     'is_notice': fields.List(fields.Bool, description=docs.IS_NOTICE),
     'min_dissemination_date': fields.Date(description=docs.DISSEMINATION_MIN_DATE),
     'max_dissemination_date': fields.Date(description=docs.DISSEMINATION_MAX_DATE),
-    'min_filing_date': fields.Date(description=docs.FILED_DATE),
-    'max_filing_date': fields.Date(description=docs.FILED_DATE)
+    'min_filing_date': fields.Date(description=docs.MIN_FILED_DATE),
+    'max_filing_date': fields.Date(description=docs.MAX_FILED_DATE),
+    'most_recent': fields.Bool(description=docs.MOST_RECENT),
+
 }
 
 schedule_e_efile = {

@@ -1311,6 +1311,14 @@ RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
 
 FILED_DATE = 'Timestamp of electronic or paper record that FEC received'
 
+MIN_FILED_DATE = '''
+Selects all filings received after this date
+'''
+
+MAX_FILED_DATE = '''
+Selects all filings received before this date
+'''
+
 STATE_GENERIC = 'US state or territory'
 
 ZIP_CODE = 'Zip code'

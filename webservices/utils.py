@@ -428,7 +428,7 @@ def get_elasticsearch_connection():
     return es
 
 def print_literal_query_string(query):
-    print(str(query.statement.compile(dialect=postgresql.dialect())))
+    print(str(query.statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True})))
 
 def create_eregs_link(part, section):
     url_part_section = part

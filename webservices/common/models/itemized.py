@@ -590,6 +590,7 @@ class ScheduleE(PdfMixin, BaseItemized):
     expenditure_description = db.Column('exp_desc', db.String)
     expenditure_date = db.Column('exp_dt', db.Date)
     dissemination_date = db.Column('dissem_dt', db.Date)
+    most_recent = db.Column('most_recent', db.Boolean, doc=docs.MOST_RECENT)
     filing_date = db.Column('filing_date', db.Date)
     expenditure_amount = db.Column('exp_amt', db.Float)
     office_total_ytd = db.Column('cal_ytd_ofc_sought', db.Float)
