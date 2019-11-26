@@ -20,7 +20,7 @@ gevent==1.4.0
 webargs==5.3.1
 ujson==1.33
 requests==2.21.0
-elasticsearch==5.5.1
+elasticsearch==5.5.3
 elasticsearch-dsl==5.4.0
 git+https://github.com/18F/slate.git
 
@@ -37,3 +37,8 @@ smart_open==1.7.1
 celery==4.3.0 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
 celery-once==3.0.0
 redis==3.2.0
+
+# testing and build in circle
+pytest==3.7.4
+pytest-cov==2.5.1
+codecov==2.0.9

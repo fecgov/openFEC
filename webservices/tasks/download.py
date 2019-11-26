@@ -34,7 +34,7 @@ def call_resource(path, qs):
         kwargs.pop(field, None)
 
     query, model, schema = unpack(resource.build_query(**kwargs), 3)
-    count = counts.count_estimate(query, db.session)
+    count, _ = counts.get_count(query, db.session, resource.use_estimated_counts)
     return {
         'path': path,
         'qs': qs,
@@ -48,12 +48,14 @@ def call_resource(path, qs):
         'kwargs': kwargs,
     }
 
+
 def parse_kwargs(resource, qs):
     annotation = resolve_annotations(resource.get, 'args', parent=resource)
     fields = utils.extend(*[option['args'] for option in annotation.options])
     with task_utils.get_app().test_request_context(b'?' + qs):
         kwargs = flaskparser.parser.parse(fields)
     return fields, kwargs
+
 
 def query_with_labels(query, schema, sort_columns=False):
     """Create a new query that labels columns according to the SQLAlchemy
@@ -145,6 +147,7 @@ def export_query(path, qs):
         logger.info('Bundled: {0}'.format(qs))
     except:
         logger.exception('Download failed: {0}'.format(qs))
+
 
 @app.task
 def clear_bucket():

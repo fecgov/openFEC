@@ -13,12 +13,24 @@ from sqlalchemy.sql.expression import Executable, ClauseElement, _literal_as_tex
 count_pattern = re.compile(r'rows=(\d+)')
 
 
-def count_estimate(query, session, threshold=500000):
-    rows = session.execute(explain(query)).fetchall()
-    estimated_count = extract_analyze_count(rows)
-    if estimated_count < threshold:
-        return query.count()
-    return estimated_count
+def get_count(query, session, estimate=True, threshold=500000):
+    """
+    Calculate either the estimated count or exact count.
+    Indicate whether the count is an estimate.
+    """
+    if estimate:
+        rows = get_query_plan(query, session)
+        count = extract_analyze_count(rows)
+        if count < threshold:
+            estimate = False
+            count = query.count()
+    else:
+        count = query.count()
+    return count, estimate
+
+
+def get_query_plan(query, session):
+    return session.execute(explain(query)).fetchall()
 
 
 def extract_analyze_count(rows):

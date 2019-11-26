@@ -1,5 +1,4 @@
-import unittest
-from sqlalchemy.dialects import postgresql
+from unittest import TestCase
 from flask import request
 from webargs import flaskparser
 
@@ -10,13 +9,9 @@ from webservices import args
 from webservices import rest
 from webservices import sorting
 from webservices.resources import candidate_aggregates
-from webservices.resources import audit
 from webservices.resources import elections
 from webservices.rest import db
 from webservices import utils
-
-from sqlalchemy.dialects import postgresql
-
 from webservices.common import models
 
 
@@ -147,14 +142,14 @@ class TestSort(ApiBaseTest):
         self.assertEqual(query.all()[0].total_disbursements, 0.0)
 
 
-class TestArgs(unittest.TestCase):
+class TestArgs(TestCase):
 
     def test_currency(self):
         with rest.app.test_request_context('?dollars=$24.50'):
             parsed = flaskparser.parser.parse({'dollars': args.Currency()}, request)
             self.assertEqual(parsed, {'dollars': 24.50})
 
-class TestEnvVarSplit(unittest.TestCase):
+class TestEnvVarSplit(TestCase):
 
     def test_env_var_split(self):
         test_cases = [
