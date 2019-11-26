@@ -1003,3 +1003,10 @@ totals_by_office_by_party = {
     'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
     'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
 }
+
+schedule_e_totals_by_candidate = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'election_full': election_full,
+}
+

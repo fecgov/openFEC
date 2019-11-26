@@ -920,6 +920,10 @@ Schedule E receipts aggregated by recipient candidate. To avoid double
 counting, memoed items are not included.
 '''
 
+SCHEDULE_E_TOTALS_BY_CANDIDATE = '''
+Total independent expenditure on supported or opposed candidates by cycle or candidate election year. 
+'''
+
 SCHEDULE_F_TAG = '''
 Schedule F, it shows all special expenditures a national or state party committee
 makes in connection with the general election campaigns of federal candidates.
@@ -1173,10 +1177,10 @@ to a primary election to federal office._
 
 ELECTIONEERING_AGGREGATE_BY_CANDIDATE = 'Electioneering costs aggregated by candidate'
 
-ELECTIONEERING_AGGREGATE = 'Electioneering costs aggregates'
+ELECTIONEERING_AGGREGATE = 'Electioneering communications costs aggregates'
 
 ELECTIONEERING_TOTAL_BY_CANDIDATE = '''
-Total electioneering communications by candidate by cycle
+Total electioneering communications spent on candidates by cycle
 or candidate election year
 '''
 
