@@ -399,7 +399,7 @@ api.add_resource(
 
 api.add_resource(
     spending_by_others.CCTotalsByCandidateView,
-    '/communication_costs/by_candidate/totals/',
+    '/communication_costs/totals/by_candidate/',
 )
     
 api.add_resource(

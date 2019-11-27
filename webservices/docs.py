@@ -924,7 +924,7 @@ SCHEDULE_E_INDEPENDENT_EXPENDITURES_TOTALS_BY_CANDIDATE = '''
 Total independent expenditure on supported or opposed candidates by cycle or candidate election year. 
 '''
 
-SCHEDULE_E_COMMUNICATIONS_COSTS_TOTALS_BY_CANDIDATE = '''
+COMMUNICATIONS_COSTS_TOTALS_BY_CANDIDATE = '''
 Total communications costs aggregated across committees on supported or opposed candidates by cycle or candidate election year. 
 '''
 

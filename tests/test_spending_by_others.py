@@ -5,6 +5,7 @@ from webservices.rest import db, api
 from webservices.resources.spending_by_others import (
     ECTotalsByCandidateView,
     IETotalsByCandidateView,
+    CCTotalsByCandidateView
 )
 from webservices.resources.aggregates import (
     ECAggregatesView,
@@ -70,6 +71,8 @@ class TestElectioneeringAggregates(ApiBaseTest):
         results = self._results(api.url_for(ECAggregatesView, cycle=2000))
         self.assertEqual(len(results), 2)
 
+
+# test endpoint: /schedules/schedule_e/totals/by_candidate/ under tag:independent expenditures
 class TestTotalIndependentExpenditure(ApiBaseTest):
 
     def test_fields(self):
@@ -129,3 +132,63 @@ class TestTotalIndependentExpenditure(ApiBaseTest):
         assert results[0]['total'] == 800
         assert results[1]['total'] == 600
 
+
+# test /communication_costs/by_candidate/total/ under tag: communication cost
+class TestTotalCommunicationsCosts(ApiBaseTest):
+
+    def test_fields(self):
+
+        factories.CandidateHistoryFactory(
+            candidate_id='P01',
+            two_year_period=2014,
+            candidate_election_year=2016
+        ),
+        factories.CandidateHistoryFactory(
+            candidate_id='P01',
+            two_year_period=2016,
+            candidate_election_year=2016
+        ),
+
+        factories.CommunicationCostByCandidateFactory(
+            candidate_id='P01',
+            total=100,
+            cycle=2012,
+            committee_id='C01',
+            support_oppose_indicator='S'
+        ),
+        factories.CommunicationCostByCandidateFactory(
+            candidate_id='P01',
+            total=200,
+            cycle=2014,
+            committee_id='C02',
+            support_oppose_indicator='S'
+        ),
+        factories.CommunicationCostByCandidateFactory(
+            candidate_id='P01',
+            total=300,
+            cycle=2014,
+            committee_id='C02',
+            support_oppose_indicator='O'
+        ),
+        factories.CommunicationCostByCandidateFactory(
+            candidate_id='P01',
+            total=400,
+            cycle=2016,
+            committee_id='C03',
+            support_oppose_indicator='S'
+        ),
+        factories.CommunicationCostByCandidateFactory(
+            candidate_id='P01',
+            total=500,
+            cycle=2016,
+            committee_id='C03',
+            support_oppose_indicator='O'
+        ),
+
+        results = self._results(api.url_for(CCTotalsByCandidateView, cycle='2016', candidate_id='P01', election_full=False))
+        assert len(results) == 2
+
+        results = self._results(api.url_for(CCTotalsByCandidateView, cycle='2016', candidate_id='P01', election_full=True))
+        assert len(results) == 2
+        assert results[0]['total'] == 800
+        assert results[1]['total'] == 600
