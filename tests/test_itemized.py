@@ -979,3 +979,13 @@ class TestScheduleE(ApiBaseTest):
         db.session.flush()
         results = self._results(api.url_for(ScheduleEEfileView, candidate_search='Rob'))
         assert len(results) == 2
+
+    def test_filter_sched_e_most_recent(self):
+        [
+            factories.ScheduleEFactory(committee_id='C001', filing_form='F24', most_recent=True),
+            factories.ScheduleEFactory(committee_id='C002', filing_form='F5', most_recent=False),
+            factories.ScheduleEFactory(committee_id='C003', filing_form='F24', most_recent=True),
+            factories.ScheduleEFactory(committee_id='C004', filing_form='F3X', most_recent=True),
+        ]
+        results = self._results(api.url_for(ScheduleEView, most_recent=True, **self.kwargs))
+        self.assertEqual(len(results), 3)

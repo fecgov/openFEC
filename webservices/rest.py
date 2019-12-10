@@ -52,6 +52,7 @@ from webservices.resources import legal
 from webservices.resources import large_aggregates
 from webservices.resources import audit
 from webservices.resources import operations_log
+from webservices.resources import spending_by_others
 from webservices.env import env
 from webservices.tasks.response_exception import ResponseException
 from webservices.tasks.error_code import ErrorCode
@@ -374,12 +375,33 @@ api.add_resource(
     '/communication_costs/by_candidate/',
     '/committee/<string:committee_id>/communication_costs/by_candidate/',
 )
+
 api.add_resource(
     aggregates.ElectioneeringByCandidateView,
     '/electioneering/by_candidate/',
     '/committee/<string:committee_id>/electioneering/by_candidate/',
 )
 
+api.add_resource(
+    aggregates.ECAggregatesView,
+    '/electioneering/aggregates/',
+)
+
+api.add_resource(
+    spending_by_others.ECTotalsByCandidateView,
+    '/electioneering/totals/by_candidate/',
+)
+
+api.add_resource(
+    spending_by_others.IETotalsByCandidateView,
+    '/schedules/schedule_e/totals/by_candidate/',
+)
+
+api.add_resource(
+    spending_by_others.CCTotalsByCandidateView,
+    '/communication_costs/totals/by_candidate/',
+)
+    
 api.add_resource(
     filings.FilingsView,
     '/committee/<committee_id>/filings/',
@@ -448,6 +470,7 @@ apidoc.register(sched_d.ScheduleDView, blueprint='v1')
 apidoc.register(sched_d.ScheduleDViewBySubId, blueprint='v1')
 apidoc.register(costs.CommunicationCostView, blueprint='v1')
 apidoc.register(costs.ElectioneeringView, blueprint='v1')
+apidoc.register(aggregates.ECAggregatesView, blueprint='v1')
 apidoc.register(aggregates.ScheduleABySizeView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByStateView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByZipView, blueprint='v1')
@@ -498,6 +521,9 @@ apidoc.register(operations_log.OperationsLogView, blueprint='v1')
 apidoc.register(legal.UniversalSearch, blueprint='v1')
 apidoc.register(candidate_aggregates.AggregateByOfficeView, blueprint='v1')
 apidoc.register(candidate_aggregates.AggregateByOfficeByPartyView, blueprint='v1')
+apidoc.register(spending_by_others.ECTotalsByCandidateView, blueprint='v1')
+apidoc.register(spending_by_others.IETotalsByCandidateView, blueprint='v1')
+apidoc.register(spending_by_others.CCTotalsByCandidateView, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)

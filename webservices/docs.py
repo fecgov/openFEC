@@ -920,6 +920,14 @@ Schedule E receipts aggregated by recipient candidate. To avoid double
 counting, memoed items are not included.
 '''
 
+SCHEDULE_E_INDEPENDENT_EXPENDITURES_TOTALS_BY_CANDIDATE = '''
+Total independent expenditure on supported or opposed candidates by cycle or candidate election year. 
+'''
+
+COMMUNICATIONS_COSTS_TOTALS_BY_CANDIDATE = '''
+Total communications costs aggregated across committees on supported or opposed candidates by cycle or candidate election year. 
+'''
+
 SCHEDULE_F_TAG = '''
 Schedule F, it shows all special expenditures a national or state party committee
 makes in connection with the general election campaigns of federal candidates.
@@ -1171,7 +1179,14 @@ _The communication is distributed within 60 days prior to a general election or 
 to a primary election to federal office._
 '''
 
-ELECTIONEERING_AGGREGATE = 'Electioneering costs aggregated by candidate'
+ELECTIONEERING_AGGREGATE_BY_CANDIDATE = 'Electioneering costs aggregated by candidate'
+
+ELECTIONEERING_AGGREGATE = 'Electioneering communications costs aggregates'
+
+ELECTIONEERING_TOTAL_BY_CANDIDATE = '''
+Total electioneering communications spent on candidates by cycle
+or candidate election year
+'''
 
 COMMUNICATION_COST = '''
 52 U.S.C. 30118 allows "communications by a corporation to its stockholders and
@@ -1305,6 +1320,14 @@ BASE_REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. ' + BASE_
 RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
 
 FILED_DATE = 'Timestamp of electronic or paper record that FEC received'
+
+MIN_FILED_DATE = '''
+Selects all filings received after this date
+'''
+
+MAX_FILED_DATE = '''
+Selects all filings received before this date
+'''
 
 STATE_GENERIC = 'US state or territory'
 

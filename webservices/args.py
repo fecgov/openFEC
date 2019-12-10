@@ -774,6 +774,12 @@ electioneering_by_candidate = {
     ),
 }
 
+EC_aggregates = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+}
+
 elections_list = {
     'state': fields.List(IStr, description=docs.STATE),
     'district': fields.List(District, description=docs.DISTRICT),
@@ -880,8 +886,10 @@ schedule_e = {
     'is_notice': fields.List(fields.Bool, description=docs.IS_NOTICE),
     'min_dissemination_date': fields.Date(description=docs.DISSEMINATION_MIN_DATE),
     'max_dissemination_date': fields.Date(description=docs.DISSEMINATION_MAX_DATE),
-    'min_filing_date': fields.Date(description=docs.FILED_DATE),
-    'max_filing_date': fields.Date(description=docs.FILED_DATE)
+    'min_filing_date': fields.Date(description=docs.MIN_FILED_DATE),
+    'max_filing_date': fields.Date(description=docs.MAX_FILED_DATE),
+    'most_recent': fields.Bool(description=docs.MOST_RECENT),
+
 }
 
 schedule_e_efile = {
@@ -988,4 +996,25 @@ totals_by_office_by_party = {
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
     'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
+}
+
+totals_by_candidate_other_costs_EC = {
+    
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'election_full': election_full,
+}
+
+schedule_e_totals_by_candidate_other_costs_IE = {
+    
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'election_full': election_full,
+}
+
+totals_by_candidate_other_costs_CC = {
+    
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'election_full': election_full,
 }
