@@ -151,16 +151,14 @@ def limit_remote_addr():
     if FEC_API_WHITELIST_IPS in true_values:
         try:
             *_, source_ip, api_data_route, cf_route = request.access_route
+            print('$$$$ request.access_route', request.access_route)
+            print('$$$$ X-Api-User-Id', request.headers.get('X-Api-User-Id'))
+            print ('$$$$ X-Api-Roles', request.headers.get('X-Api-Roles'))
+            print('$$$$ source_ip', source_ip)
+            print('$$$$ api_data_route', api_data_route)
         except ValueError:  # Not enough routes
             abort(403)
         else:
-            '''
-            check and block access to server side calls,
-            if the source ip is not with in the cloud.gov
-            outbound ip ranges.
-            '''
-            if source_ip not in OUTBOUND_IPS:
-                abort(403)
             if api_data_route not in TRUSTED_PROXY_IPS:
                 abort(403)
             if source_ip in BLOCKED_IPS:
