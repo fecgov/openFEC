@@ -15,11 +15,11 @@ from webservices import exceptions
     tags=['disbursements'],
     description=docs.SCHEDULE_H,
 )
-class ScheduleHView(ItemizedResource):
+class ScheduleH4View(ItemizedResource):
 
-    model = models.ScheduleH
-    schema = schemas.ScheduleHSchema
-    page_schema = schemas.ScheduleHPageSchema
+    model = models.ScheduleH4
+    schema = schemas.ScheduleH4Schema
+    page_schema = schemas.ScheduleH4PageSchema
 
     @property
     def year_column(self):
@@ -30,35 +30,35 @@ class ScheduleHView(ItemizedResource):
         return self.model.sub_id
 
     filter_multi_fields = [
-        ('image_number', models.ScheduleH.image_number),
-        ('committee_id', models.ScheduleH.committee_id),
-        ('recipient_city', models.ScheduleH.recipient_city),
-        ('recipient_state', models.ScheduleH.recipient_state),
-        ('recipient_committee_id', models.ScheduleH.recipient_committee_id),
+        ('image_number', models.ScheduleH4.image_number),
+        ('committee_id', models.ScheduleH4.committee_id),
+        ('recipient_city', models.ScheduleH4.recipient_city),
+        ('recipient_state', models.ScheduleH4.recipient_state),
+        ('recipient_committee_id', models.ScheduleH4.recipient_committee_id),
         ('disbursement_purpose_category',
-         models.ScheduleH.disbursement_purpose_category),
-        ('spender_committee_type', models.ScheduleH.spender_committee_type),
-        ('spender_committee_org_type', models.ScheduleH.spender_committee_org_type),
-        ('spender_committee_designation', models.ScheduleH.spender_committee_designation),
+         models.ScheduleH4.disbursement_purpose_category),
+        ('spender_committee_type', models.ScheduleH4.spender_committee_type),
+        ('spender_committee_org_type', models.ScheduleH4.spender_committee_org_type),
+        ('spender_committee_designation', models.ScheduleH4.spender_committee_designation),
         ('two_year_transaction_period',
-         models.ScheduleH.two_year_transaction_period),
+         models.ScheduleH4.two_year_transaction_period),
     ]
     filter_fulltext_fields = [
-        ('recipient_name', models.ScheduleH.recipient_name_text),
+        ('recipient_name', models.ScheduleH4.recipient_name_text),
         ('disbursement_description',
-         models.ScheduleH.disbursement_description_text),
+         models.ScheduleH4.disbursement_description_text),
     ]
     filter_range_fields = [
-        (('min_date', 'max_date'), models.ScheduleH.disbursement_date),
-        (('min_amount', 'max_amount'), models.ScheduleH.disbursement_amount),
+        (('min_date', 'max_date'), models.ScheduleH4.disbursement_date),
+        (('min_amount', 'max_amount'), models.ScheduleH4.disbursement_amount),
         (('min_image_number', 'max_image_number'),
-         models.ScheduleH.image_number),
+         models.ScheduleH4.image_number),
     ]
 
     @property
     def args(self):
         return utils.extend(
-            args.itemized, args.schedule_h, args.make_seek_args(),
+            args.itemized, args.schedule_h4, args.make_seek_args(),
             args.make_sort_args(
                 default='-disbursement_date',
                 validator=args.OptionValidator(
@@ -67,10 +67,10 @@ class ScheduleHView(ItemizedResource):
             ))
 
     def build_query(self, **kwargs):
-        query = super(ScheduleHView, self).build_query(**kwargs)
-        query = query.options(sa.orm.joinedload(models.ScheduleH.committee))
+        query = super(ScheduleH4View, self).build_query(**kwargs)
+        query = query.options(sa.orm.joinedload(models.ScheduleH4.committee))
         query = query.options(
-            sa.orm.joinedload(models.ScheduleH.recipient_committee))
+            sa.orm.joinedload(models.ScheduleH4.recipient_committee))
         #might be worth looking to factoring these out into the filter script
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
