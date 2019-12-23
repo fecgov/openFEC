@@ -686,6 +686,38 @@ ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging_schemas
 register_schema(ScheduleBSchema)
 register_schema(ScheduleBPageSchema)
 
+ScheduleHSchema = make_schema(
+    models.ScheduleH,
+    fields={
+        'memoed_subtotal': ma.fields.Boolean(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'recipient_committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'image_number': ma.fields.Str(),
+        'original_sub_id': ma.fields.Str(),
+        'sub_id': ma.fields.Str(),
+    },
+    options={
+        'exclude': (
+            'recipient_name_text',
+            'disbursement_description_text',
+            'recipient_street_1',
+            'recipient_street_2',
+            'sort_expressions',
+        ),
+        'relationships': [
+            Relationship(
+                models.ScheduleH.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+                1
+            ),
+        ],
+    }
+)
+ScheduleHPageSchema = make_page_schema(ScheduleHSchema, page_type=paging_schemas.SeekPageSchema)
+register_schema(ScheduleHSchema)
+register_schema(ScheduleHPageSchema)
+
 ScheduleESchema = make_schema(
     models.ScheduleE,
     fields={
