@@ -13,7 +13,7 @@ from webservices import exceptions
 
 @doc(
     tags=['disbursements'],
-    description=docs.SCHEDULE_H,
+    description=docs.SCHEDULE_H4,
 )
 class ScheduleH4View(ItemizedResource):
 
@@ -32,24 +32,22 @@ class ScheduleH4View(ItemizedResource):
     filter_multi_fields = [
         ('image_number', models.ScheduleH4.image_number),
         ('committee_id', models.ScheduleH4.committee_id),
-        ('recipient_city', models.ScheduleH4.recipient_city),
-        ('recipient_state', models.ScheduleH4.recipient_state),
-        ('recipient_committee_id', models.ScheduleH4.recipient_committee_id),
-        ('disbursement_purpose_category',
-         models.ScheduleH4.disbursement_purpose_category),
-        ('spender_committee_type', models.ScheduleH4.spender_committee_type),
-        ('spender_committee_org_type', models.ScheduleH4.spender_committee_org_type),
-        ('spender_committee_designation', models.ScheduleH4.spender_committee_designation),
-        ('two_year_transaction_period',
-         models.ScheduleH4.two_year_transaction_period),
+        ('payee_city', models.ScheduleH4.payee_city),
+        ('payee_state', models.ScheduleH4.payee_state),
+        ('conduit_committee_id', models.ScheduleH4.conduit_committee_id),
+        ('event_purpose_category_type', models.ScheduleH4.event_purpose_category_type),
+        # ('spender_committee_type', models.ScheduleH4.spender_committee_type),
+        # ('spender_committee_org_type', models.ScheduleH4.spender_committee_org_type),
+        # ('spender_committee_designation', models.ScheduleH4.spender_committee_designation),
+        # ('two_year_transaction_period',
+        #  models.ScheduleH4.two_year_transaction_period),
     ]
     filter_fulltext_fields = [
-        ('recipient_name', models.ScheduleH4.recipient_name_text),
-        ('disbursement_description',
-         models.ScheduleH4.disbursement_description_text),
+        # ('payee_name', models.ScheduleH4.payee_name_text),
+        ('disbursement_description', models.ScheduleH4.disbursement_type_full),
     ]
     filter_range_fields = [
-        (('min_date', 'max_date'), models.ScheduleH4.disbursement_date),
+        (('min_date', 'max_date'), models.ScheduleH4.event_purpose_date),
         (('min_amount', 'max_amount'), models.ScheduleH4.disbursement_amount),
         (('min_image_number', 'max_image_number'),
          models.ScheduleH4.image_number),
@@ -60,17 +58,17 @@ class ScheduleH4View(ItemizedResource):
         return utils.extend(
             args.itemized, args.schedule_h4, args.make_seek_args(),
             args.make_sort_args(
-                default='-disbursement_date',
+                default='-event_purpose_date',
                 validator=args.OptionValidator(
-                    ['disbursement_date', 'disbursement_amount']),
+                    ['event_purpose_date', 'disbursement_amount']),
                 show_nulls_last_arg=False,
             ))
 
     def build_query(self, **kwargs):
         query = super(ScheduleH4View, self).build_query(**kwargs)
-        query = query.options(sa.orm.joinedload(models.ScheduleH4.committee))
-        query = query.options(
-            sa.orm.joinedload(models.ScheduleH4.recipient_committee))
+        # query = query.options(sa.orm.joinedload(models.ScheduleH4.committee))
+        # query = query.options(
+        #     sa.orm.joinedload(models.ScheduleH4.recipient_committee))
         #might be worth looking to factoring these out into the filter script
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))

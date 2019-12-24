@@ -201,9 +201,7 @@ def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=10
         # to account for an alternative way to sort and page by null values.
         if paginator.sort_column[3]:
             null_sort_by = paginator.sort_column[6]
-
         if not sort_index and kwargs['sort_null_only'] and paginator.sort_column[1] == sa.asc:
-            print('In fetch_seek_page method')
             sort_index = None
             query = query.filter(null_sort_by == None)
             paginator.cursor = query

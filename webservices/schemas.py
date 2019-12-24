@@ -686,8 +686,8 @@ ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging_schemas
 register_schema(ScheduleBSchema)
 register_schema(ScheduleBPageSchema)
 
-ScheduleHSchema = make_schema(
-    models.ScheduleH,
+ScheduleH4Schema = make_schema(
+    models.ScheduleH4,
     fields={
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
@@ -706,7 +706,7 @@ ScheduleHSchema = make_schema(
         ),
         'relationships': [
             Relationship(
-                models.ScheduleH.committee,
+                models.ScheduleH4.committee,
                 models.CommitteeHistory.name,
                 'committee_name',
                 1
@@ -714,9 +714,9 @@ ScheduleHSchema = make_schema(
         ],
     }
 )
-ScheduleHPageSchema = make_page_schema(ScheduleHSchema, page_type=paging_schemas.SeekPageSchema)
-register_schema(ScheduleHSchema)
-register_schema(ScheduleHPageSchema)
+ScheduleH4PageSchema = make_page_schema(ScheduleH4Schema, page_type=paging_schemas.SeekPageSchema)
+register_schema(ScheduleH4Schema)
+register_schema(ScheduleH4PageSchema)
 
 ScheduleESchema = make_schema(
     models.ScheduleE,

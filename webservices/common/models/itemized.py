@@ -832,20 +832,10 @@ class ScheduleH4(BaseItemized):
     __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'fec_fitem_sched_h4'
 
-    # override the entry from the BaseItemized using either one of the following two
-    # committee = utils.related_committee_history('committee_id', cycle_label='two_year_transaction_period', use_modulus=False)
-    # committee = db.relationship(
-    #     'CommitteeHistory',
-    #     primaryjoin='''and_(
-    #         foreign(ScheduleH4.committee_id) == CommitteeHistory.committee_id,
-    #         ScheduleH4.two_year_transaction_period == CommitteeHistory.cycle,
-    #     )'''
-    # )
-
     # Recipient info
+    committee_id = db.Column('filer_cmte_id', db.String) #override from BaseItemized
     entity_type = db.Column('entity_tp', db.String)
     entity_type_desc = db.Column('entity_tp_desc', db.String)
-    filer_committee_id = db.Column('filer_cmte_id', db.String)
     payee_name = db.Column('pye_nm', db.String)
     payee_street_1 = db.Column('pye_st1', db.String)
     payee_street_2 = db.Column('pye_st2', db.String)
@@ -855,12 +845,12 @@ class ScheduleH4(BaseItemized):
     filer_committee_name = db.Column('filer_cmte_nm', db.String)
 
     # Primary transaction info
-    event_purpose_category_type = db.Column('evt_purpose_category_tp', db.String)
-    event_purpose_category_type_description = db.Column('evt_purpose_category_tp_desc', db.String)
+    #event_purpose_category_type = db.Column('evt_purpose_category_tp', db.String)
+    #event_purpose_category_type_description = db.Column('evt_purpose_category_tp_desc', db.String)
     event_purpose_name = db.Column('evt_purpose_nm', db.String)
     event_purpose_description = db.Column('evt_purpose_desc', db.String)
-    event_purpose_category_tp = db.Column('evt_purpose_category_tp', db.String)
-    event_purpose_category_tp_desc = db.Column('evt_purpose_category_tp_desc', db.String)
+    event_purpose_category_type = db.Column('evt_purpose_category_tp', db.String)
+    event_purpose_category_type_full = db.Column('evt_purpose_category_tp_desc', db.String)
     memo_code = db.Column('memo_cd', db.String)
     memo_code_description = db.Column('memo_cd_desc', db.String)
     memo_text = db.Column('memo_text', db.String)
@@ -888,7 +878,6 @@ class ScheduleH4(BaseItemized):
     original_sub_id = db.Column('orig_sub_id', db.Integer)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_id = db.Column('back_ref_sched_id', db.String)
-    line_number = db.Column('line_num', db.String)
 
     # Payee info
     payee_last_name = db.Column('payee_l_nm', db.String)
@@ -925,10 +914,6 @@ class ScheduleH4(BaseItemized):
     disbursement_type = db.Column('disb_tp', db.String)
     disbursement_type_full = db.Column('disb_tp_desc', db.String)
     published_committee_reference_parity_check = db.Column('pub_comm_ref_pty_chk', db.String)
-    transaction_id = db.Column('tran_id', db.String)
-    image_number = db.Column('image_num', db.String)
-    file_number = db.Column('file_num', db.Numeric(7,0))
-    link_id = db.Column('link_id', db.Numeric(19,0))
     filing_form = db.Column('filing_form', db.String)
     report_type = db.Column('rpt_tp', db.String)
     report_year = db.Column('rpt_yr', db.Numeric(4,0))
@@ -937,13 +922,13 @@ class ScheduleH4(BaseItemized):
     @hybrid_property
     def sort_expressions(self):
         return {
-            'disbursement_date': {
+            'event_purpose_date': {
                 'expression': sa.func.coalesce(
-                    self.disbursement_date,
+                    self.event_purpose_date,
                     sa.cast('9999-12-31', sa.Date)
                 ),
                 'field': ma.fields.Date,
                 'type': 'date',
-                'null_sort': self.disbursement_date,
+                'null_sort': self.event_purpose_date,
             },
         }

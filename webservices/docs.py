@@ -1005,6 +1005,10 @@ SCHEDULE_A_STATE_CANDIDATE_TOTAL_TAG = '''
 Schedule A receipts aggregated over all contribution states for a candidate.
 '''
 
+SCHEDULE_H4 = '''
+TODO: create text
+'''
+
 TOTAL_CANDIDATE_TAG = '''
 Aggregated candidate receipts and disbursements grouped by cycle.
 '''
