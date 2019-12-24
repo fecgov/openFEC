@@ -1018,3 +1018,7 @@ totals_by_candidate_other_costs_CC = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'election_full': election_full,
 }
+
+schedule_h4 = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+}
