@@ -832,6 +832,14 @@ class ScheduleH4(BaseItemized):
     __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'fec_fitem_sched_h4'
 
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleH4.committee_id) == CommitteeHistory.committee_id,
+            ScheduleH4.cycle == CommitteeHistory.cycle,
+        )'''
+    )
+    
     # Recipient info
     committee_id = db.Column('filer_cmte_id', db.String) #override from BaseItemized
     entity_type = db.Column('entity_tp', db.String)

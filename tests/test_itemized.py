@@ -6,10 +6,11 @@ from tests.common import ApiBaseTest
 from webservices.rest import db, api
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
-from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile, EFilings
+from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile, ScheduleH4, EFilings
 from webservices.resources.sched_a import ScheduleAView, ScheduleAEfileView
 from webservices.resources.sched_b import ScheduleBView, ScheduleBEfileView
 from webservices.resources.sched_e import ScheduleEView, ScheduleEEfileView
+from webservices.resources.sched_h4 import ScheduleH4View
 
 class TestItemized(ApiBaseTest):
     kwargs = {'two_year_transaction_period': 2016}
@@ -887,8 +888,6 @@ class TestScheduleE(ApiBaseTest):
             for payee in payee_names
         ]
         results = self._results(api.url_for(ScheduleEView, payee_name='test'))
-        for result in results:
-            print(result, '\n')
         self.assertEqual(len(results), len(payee_names))
 
     def test_schedule_e_filter_fulltext_fail(self):
@@ -989,3 +988,36 @@ class TestScheduleE(ApiBaseTest):
         ]
         results = self._results(api.url_for(ScheduleEView, most_recent=True, **self.kwargs))
         self.assertEqual(len(results), 3)
+
+
+class TestScheduleH4(ApiBaseTest):
+
+    def test_schedule_h4_basic_accessibility(self):
+        """
+        testing schedule_h4 api_for very basic accessibility
+        """
+        factories.ScheduleH4Factory(report_year=2016, cycle=2016)
+        results = self._results(api.url_for(ScheduleH4View, cycle=2016))
+        self.assertEqual(len(results), 1)
+        self.assertIn('cycle', results[0].keys())
+        self.assertEqual(results[0]['cycle'], 2016)
+
+    def test_schedule_h4_image_number(self):
+        factories.ScheduleH4Factory(report_year=2016, cycle=2016, image_number='111')
+        results = self._results(api.url_for(ScheduleH4View, cycle=2016, image_number='112'))
+        self.assertEqual(len(results), 0)
+        results = self._results(api.url_for(ScheduleH4View, cycle=2016, image_number='111'))
+        self.assertEqual(len(results), 1)
+
+    def test_schedule_h4_filters(self):
+        [
+            factories.ScheduleH4Factory(committee_id='C001', cycle=2016),
+            factories.ScheduleH4Factory(committee_id='C002', cycle=2016),
+            factories.ScheduleH4Factory(committee_id='C003', cycle=2016),
+            factories.ScheduleH4Factory(committee_id='C004', cycle=2018),
+        ]
+        results = self._results(api.url_for(ScheduleH4View, cycle=2016))
+        self.assertEqual(len(results), 3)
+        results = self._results(api.url_for(ScheduleH4View, committee_id='C001'))
+        self.assertEqual(len(results), 1)
+

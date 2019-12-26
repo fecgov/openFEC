@@ -689,19 +689,15 @@ register_schema(ScheduleBPageSchema)
 ScheduleH4Schema = make_schema(
     models.ScheduleH4,
     fields={
-        'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
-        'recipient_committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
     options={
         'exclude': (
-            'recipient_name_text',
-            'disbursement_description_text',
-            'recipient_street_1',
-            'recipient_street_2',
+            'payee_street_1',
+            'payee_street_2',
             'sort_expressions',
         ),
         'relationships': [

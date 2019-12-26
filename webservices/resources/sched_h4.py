@@ -23,7 +23,7 @@ class ScheduleH4View(ItemizedResource):
 
     @property
     def year_column(self):
-        return self.model.two_year_transaction_period
+        return self.model.cycle
 
     @property
     def index_column(self):
@@ -32,26 +32,9 @@ class ScheduleH4View(ItemizedResource):
     filter_multi_fields = [
         ('image_number', models.ScheduleH4.image_number),
         ('committee_id', models.ScheduleH4.committee_id),
-        ('payee_city', models.ScheduleH4.payee_city),
-        ('payee_state', models.ScheduleH4.payee_state),
-        ('conduit_committee_id', models.ScheduleH4.conduit_committee_id),
-        ('event_purpose_category_type', models.ScheduleH4.event_purpose_category_type),
-        # ('spender_committee_type', models.ScheduleH4.spender_committee_type),
-        # ('spender_committee_org_type', models.ScheduleH4.spender_committee_org_type),
-        # ('spender_committee_designation', models.ScheduleH4.spender_committee_designation),
-        # ('two_year_transaction_period',
-        #  models.ScheduleH4.two_year_transaction_period),
+        ('cycle', models.ScheduleH4.cycle),
     ]
-    filter_fulltext_fields = [
-        # ('payee_name', models.ScheduleH4.payee_name_text),
-        ('disbursement_description', models.ScheduleH4.disbursement_type_full),
-    ]
-    filter_range_fields = [
-        (('min_date', 'max_date'), models.ScheduleH4.event_purpose_date),
-        (('min_amount', 'max_amount'), models.ScheduleH4.disbursement_amount),
-        (('min_image_number', 'max_image_number'),
-         models.ScheduleH4.image_number),
-    ]
+
 
     @property
     def args(self):
@@ -66,10 +49,7 @@ class ScheduleH4View(ItemizedResource):
 
     def build_query(self, **kwargs):
         query = super(ScheduleH4View, self).build_query(**kwargs)
-        # query = query.options(sa.orm.joinedload(models.ScheduleH4.committee))
-        # query = query.options(
-        #     sa.orm.joinedload(models.ScheduleH4.recipient_committee))
-        #might be worth looking to factoring these out into the filter script
+        query = query.options(sa.orm.joinedload(models.ScheduleH4.committee))
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         if kwargs.get('line_number'):
