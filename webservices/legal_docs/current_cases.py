@@ -1,7 +1,6 @@
 import logging
 import re
 from collections import defaultdict
-from urllib.parse import urlencode
 
 from webservices.env import env
 from webservices.rest import db
@@ -399,14 +398,7 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
         for index, match in enumerate(matches):
             section = match.group('section')
             orig_title, new_title, new_section = reclassify_statutory_citation_without_title(section)
-            url = 'https://api.fdsys.gov/link?' +\
-                urlencode([
-                    ('collection', 'uscode'),
-                    ('year', 'mostrecent'),
-                    ('link-type', 'html'),
-                    ('title', new_title),
-                    ('section', new_section)
-                ])
+            url = 'https://www.govinfo.gov/link/uscode/{0}/{1}'.format(new_title, new_section)
             if index == len(matches) - 1:
                 match_text = statutory_citation[match.start():]
             else:

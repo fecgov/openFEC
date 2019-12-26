@@ -1,6 +1,5 @@
 import unittest
 import unittest.mock as mock
-import urllib
 
 from webservices.legal_docs import load_legal_docs, reclassify_statutory_citation
 
@@ -48,16 +47,8 @@ class TestGetCitations(unittest.TestCase):
         assert us_code[3]['text'] == '99 U.S.C. 31999(a)(i)'
         assert us_code[4]['text'] == '99 U.S.C. 31999'
 
-        parsed_url = urllib.parse.urlparse(us_code[0]['url'])
-        query = urllib.parse.parse_qs(parsed_url.query)
-
-        assert query == dict([
-            ('collection', ['uscode']),
-            ('link-type', ['html']),
-            ('year', ['mostrecent']),
-            ('title', ['99']),
-            ('section', ['31999']),
-        ])
+        url = us_code[0]['url']
+        assert url == 'https://www.govinfo.gov/link/uscode/99/31999'
 
     def test_get_citations_regulation(self):
         citation_text = [
