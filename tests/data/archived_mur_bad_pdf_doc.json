@@ -6,7 +6,7 @@
   "mur_type": "archived",
   "citations":
     {"us_code": [{"text": "2 U.S.C. 104",
-                  "url": "http://api.fdsys.gov/link?collection=uscode&link-type=html&title=2&year=mostrecent&section=104"}],
+                  "url": "https://www.govinfo.gov/link/uscode/2/104"}],
     "regulations": [{"text": "11 C.F.R. 104.5",
                      "url": "/regulations/104-5/CURRENT"},
                     {"text": "11 C.F.R. 114",

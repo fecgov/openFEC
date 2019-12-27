@@ -9,7 +9,6 @@ from datetime import datetime
 from os.path import getsize
 import csv
 import logging
-from urllib.parse import urlencode
 
 import requests
 
@@ -167,8 +166,7 @@ def get_title_52_statutes():
                     heading = section.find(tag_name.format('heading')).text.strip()
                     section_no = re.match('/us/usc/t52/s([0-9]+)',
                              section.attrib['identifier']).group(1)
-                    pdf_url = 'http://api.fdsys.gov/link?collection=uscode&' +\
-                              'title=52&year=mostrecent&section=%s'\
+                    pdf_url = 'https://www.govinfo.gov/link/uscode/52/%s'\
                               % section_no
                     doc = {
                         "doc_id": section.attrib['identifier'],
@@ -207,8 +205,7 @@ def get_title_26_statutes():
                     heading = section.find(tag_name.format('heading')).text.strip()
                     section_no = re.match('/us/usc/t26/s([0-9]+)',
                              section.attrib['identifier']).group(1)
-                    pdf_url = 'http://api.fdsys.gov/link?collection=uscode&' +\
-                              'title=26&year=mostrecent&section=%s'\
+                    pdf_url = 'https://www.govinfo.gov/link/uscode/26/%s'\
                               % section_no
                     doc = {
                         "doc_id": section.attrib['identifier'],
@@ -329,9 +326,7 @@ def get_citations(citation_texts):
             title, section = reclassify_statutory_citation.reclassify_statutory_citation(
                 us_code_match.group('title'), us_code_match.group('section'))
             citation_text = '%s U.S.C. %s%s' % (title, section, us_code_match.group('paragraphs'))
-            url = 'http://api.fdsys.gov/link?' +\
-                  urlencode([('collection', 'uscode'), ('link-type', 'html'), ('title', title),
-                    ('year', 'mostrecent'), ('section', section)])
+            url = 'https://www.govinfo.gov/link/uscode/{0}/{1}'.format(title, section)
             us_codes.append({"text": citation_text, "url": url})
         elif regulation_match:
             url = utils.create_eregs_link(regulation_match.group('part'), regulation_match.group('section'))
