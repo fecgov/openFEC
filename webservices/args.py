@@ -585,64 +585,6 @@ schedule_b_by_recipient_id = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
 
-# start --- These 9 args will be DEPRECATED soon.
-schedule_a_by_size_committee_id = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'size': fields.List(fields.Int(validate=validate.OneOf([0, 200, 500, 1000, 2000])), description=docs.SIZE),
-}
-
-schedule_a_by_state_committee_id = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
-    'hide_null': fields.Bool(missing=False, description=docs.MISSING_STATE),
-}
-
-schedule_a_by_zip_committee_id = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'zip': fields.List(fields.Str, description=docs.CONTRIBUTOR_ZIP),
-    'state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
-}
-
-schedule_a_by_employer_committee_id = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'employer': fields.List(IStr, description=docs.EMPLOYER),
-}
-
-schedule_a_by_occupation_committee_id = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'occupation': fields.List(IStr, description=docs.OCCUPATION),
-}
-
-schedule_b_by_purpose_committee_id = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'purpose': fields.List(fields.Str, description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
-}
-
-schedule_b_by_recipient_committee_id = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'recipient_name': fields.List(fields.Str, description=docs.RECIPIENT_NAME),
-}
-
-schedule_b_by_recipient_id_committee_id = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'recipient_id': fields.List(IStr, description=docs.RECIPIENT_ID),
-}
-
-schedule_e_by_candidate_committee_id = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'office': fields.Str(
-        validate=validate.OneOf(['house', 'senate', 'president']),
-        description=docs.OFFICE,
-    ),
-    'support_oppose': IStr(
-        missing=None,
-        validate=validate.OneOf(['S', 'O']),
-        description=docs.SUPPORT_OPPOSE,
-    ),
-}
-# end --- This 9 args will be DEPRECATED soon.
-
 schedule_b = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'disbursement_description': fields.List(fields.Str, description=docs.DISBURSEMENT_DESCRIPTION),
