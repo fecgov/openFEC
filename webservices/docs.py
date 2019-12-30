@@ -1555,7 +1555,7 @@ EFILING_TAG = '''
 Efiling endpoints provide real-time campaign finance data for electronic filers.
 
 These endpoints are perfect for watching filings roll in when you want to know the latest information. Efiling endpoints
-only contain the most recent two years worth of data and don't contain the processed and coded data that
+only contain the most recent four months worth of data and don't contain the processed and coded data that
 you can find on the other endpoints. Those endpoints are better for in-depth analysis.
 
 Senate candidates and committees are required to file by paper. Other committees who raise and spend less than $50,000
