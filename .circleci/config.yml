@@ -58,7 +58,6 @@ jobs:
             nvm install 8.9.1
             nvm use 8.9.1
             nvm alias default 8.9.1
-            npm install -g npm swagger-tools
             npm install
             npm run build
 

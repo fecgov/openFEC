@@ -268,8 +268,7 @@ class TestLoadCurrentCases(BaseTestCase):
                     {'text': '431',
                     'title': '2',
                     'type': 'statute',
-                    'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52'
-                    '&section=30101'},
+                    'url': 'https://www.govinfo.gov/link/uscode/52/30101'},
                     {'text': '456',
                     'title': '11',
                     'type': 'regulation',

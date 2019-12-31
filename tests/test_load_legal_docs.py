@@ -127,8 +127,7 @@ class IndexStatutesTest(unittest.TestCase):
             get_es_with_doc({'name': 'title',
             'chapter': '1', 'title': '26', 'no': '123',
             'text': '   title  content ', 'doc_id': '/us/usc/t26/s123',
-            'url': 'http://api.fdsys.gov/link?collection=uscode&title=26&' +
-                    'year=mostrecent&section=123',
+            'url': 'https://www.govinfo.gov/link/uscode/26/123',
             'sort1': 26, 'sort2': 123}))
     @patch('webservices.legal_docs.load_legal_docs.requests.get', mock_xml(
         """<?xml version="1.0" encoding="UTF-8"?>
@@ -147,8 +146,7 @@ class IndexStatutesTest(unittest.TestCase):
             get_es_with_doc({'subchapter': 'I',
             'doc_id': '/us/usc/t52/s123', 'chapter': '1',
             'text': '   title  content ',
-            'url': 'http://api.fdsys.gov/link?collection=uscode&title=52&' +
-                   'year=mostrecent&section=123',
+            'url': 'https://www.govinfo.gov/link/uscode/52/123',
             'title': '52', 'name': 'title', 'no': '123',
             'sort1': 52, 'sort2': 123}))
     @patch('webservices.legal_docs.load_legal_docs.requests.get', mock_xml(

@@ -628,7 +628,7 @@ LEGAL_SEARCH_RESPONSE = {
                                 "citations": [
                                     {
                                         "text": "30102(b)(3)", "type": "statute", "title": "52",
-                                        "url": "https://api.fdsys.gov/link-type=html&title=52&section=30102"},
+                                        "url": "https://www.govinfo.gov/link/uscode/52/30102"},
                                     {
                                         "text": "102.15", "type": "regulation", "title": "11",
                                         "url": "/regulations/102-15/CURRENT"}
@@ -641,7 +641,7 @@ LEGAL_SEARCH_RESPONSE = {
                                 "citations": [
                                     {
                                         "text": "30102(b)(3)", "type": "statute", "title": "52",
-                                        "url": "https://api.fdsys.gov/link?link-type=html&title=52&section=30102"},
+                                        "url": "https://www.govinfo.gov/link/uscode/52/30102"},
                                     {
                                         "text": "102.15", "type": "regulation", "title": "11",
                                         "url": "/regulations/102-15/CURRENT"}
