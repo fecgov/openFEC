@@ -31,7 +31,7 @@ marshmallow-sqlalchemy==0.15.0
 git+https://github.com/fecgov/marshmallow-pagination@master
 
 # Data export
-smart_open==1.7.1
+smart_open==1.8.0
 
 # Task queue
 celery==4.3.0 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
