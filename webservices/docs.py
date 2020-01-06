@@ -686,78 +686,16 @@ Parameter `full_election` is replaced by `election_full`. Please use `election_f
 '''
 
 SCHEDULE_A_TAG = '''
-Schedule A records describe itemized receipts reported by a committee. This is where
-you can look for individual contributors. If you are interested in
-individual donors, `/schedules/schedule_a` will be the endpoint you use.
-
-Once a person gives more than a total of $200, the donations of that person must be
-reported by committees that file F3, F3X and F3P forms.
-
-Contributions $200 and under are not required to be itemized, but you can find the total
-amount of these small donations by looking up the "unitemized" field in the `/reports`
-or `/totals` endpoints.
-
-When comparing the totals from reports to line items. the totals will not match unless you
-only look at items where `"is_individual":true` since the same transaction is in the data
-multiple ways to explain the way it may move though different committees as an earmark.
-See the `is_individual` sql function within the migrations for more details.
-
-For the Schedule A aggregates, such as by_occupation and by_state, include only unique individual
-contributions. See below for full methodology.
-
-__Methodology for determining unique, individual contributions__
-
-For receipts over $200 use FEC code line_number to identify individuals.
-
-The line numbers that specify individuals that are automatically included:
-
-Line number with description
-    - 10 Contribution to Independent Expenditure-Only Committees (Super PACs),\n\
-         Political Committees with non-contribution accounts (Hybrid PACs)\n\
-         and nonfederal party "soft money" accounts (1991-2002)\n\
-         from a person (individual, partnership, limited liability company,\n\
-         corporation, labor organization, or any other organization or\n\
-         group of persons)
-    - 15 Contribution to political committees (other than Super PACs\n\
-         and Hybrid PACs) from an individual, partnership or\n\
-         limited liability company
-    - 15E Earmarked contributions to political committees\n\
-          (other than Super PACs and Hybrid PACs) from an individual,\n\
-          partnership or limited liability company
-    - 15J Memo - Recipient committee's percentage of contribution\n\
-          from an individual, partnership or limited liability\n\
-          company given to joint fundraising committee
-    - 18J | Memo - Recipient committee's percentage of contribution\n\
-          from a registered committee given to joint fundraising committee\n\
-    - 30, 30T, 31, 31T, 32 Individual party codes\n\
-
-For receipts under $200:
-We check the following codes and see if there is "earmark" (or a variation) in the `memo_text`
-description of the contribution.
-
-Line number with description
-    -11AI The itemized individual contributions from F3 schedule A\n\
-    -12 Nonfederal other receipt - Levin Account (Line 2)\n\
-    -17 Itemized individual contributions from Form 3P\n\
-    -17A Itemized individual contributions from Form 3P\n\
-    -18 Itemized individual contributions from Form 3P\n\
-
-Of those transactions,[under $200, and having "earmark" in the memo text OR transactions \
-having the codes 11A, 12, 17, 17A, or 18], we then want to exclude earmarks.
+This collection of endpoints includes Schedule A records reported by a committee. Schedule A records describe itemized receipts, including contributions from individuals. If you are interested in contributions from individuals, use the /schedules/schedule_a/ endpoint. For a more complete description of all Schedule A records see the [receipts section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/) section of our “about the data” page. 
 
 '''
 
-SCHEDULE_A = SCHEDULE_A_TAG + '''
-All receipt data is divided in two-year periods, called `two_year_transaction_period`, which
-is derived from the `report_year` submitted of the corresponding form. If no value is supplied, the results
-will default to the most recent two-year period that is named after the ending,
-even-numbered year.
+SCHEDULE_A = '''
+This description is for both ​`/schedules​/schedule_a​/` and ​ `/schedules​/schedule_a​/{sub_id}​/`. 
 
-Due to the large quantity of Schedule A filings, this endpoint is not paginated by
-page number. Instead, you can request the next page of results by adding the values in
-the `last_indexes` object from `pagination` to the URL of your last request. For
-example, when sorting by `contribution_receipt_date`, you might receive a page of
-results with the following pagination information:
+This endpoint provides itemized receipts. Schedule A records describe itemized receipts, including contributions from individuals. If you are interested in contributions from an individual, use the `/schedules/schedule_a/` endpoint. For a more complete description of all Schedule A records see the [receipts section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/) of our “about the data” page. 
+
+​The `/schedules​/schedule_a​/` endpoint is not paginated by page number. This endpoint uses keyset pagination to improve query performance and these indices are required to properly page through this large dataset. To request the next page, you should append the values found in the `last_indexes` object from pagination to the URL of your last request as additional parameters. For example, when sorting by `contribution_receipt_date`, you might receive a page of results with the following pagination information:
 
 ```
 pagination: {\n\
@@ -771,14 +709,12 @@ pagination: {\n\
 }\n\
 ```
 
-To fetch the next page of sorted results, append `last_index=230880619` and
-`last_contribution_receipt_date=2014-01-01` to the URL.  We strongly advise paging through
-these results by using sort indices (defaults to sort by contribution date), otherwise some resources may be
-unintentionally filtered out.  This resource uses keyset pagination to improve query performance and these indices
-are required to properly page through this large dataset.
+To fetch the next page of sorted results, append `last_index=230880619` and `last_contribution_receipt_date=2014-01-01` to the URL. We strongly advise paging through these results using sort indices. The default sort is ascending by `contribution_receipt_date`. If you do not page using sort indices, some transactions may be unintentionally filtered out. 
 
-Note: because the Schedule A data includes many records, counts for
-large result sets are approximate; you will want to page through the records until no records are returned.
+Calls to ​`/schedules​/schedule_a​/` may return many records. For large result sets, the record counts found in the pagination object are approximate; you will need to page through the records until no records are returned. 
+
+​The `/schedules​/schedule_a​/{sub_id}​/` endpoint returns a single transaction, but it does include a pagination object class. Please ignore the information in that object class.
+
 '''
 
 SUB_ID = '''
@@ -939,7 +875,8 @@ these limits are detailed in Chapter 7 of the FEC Campaign Guide for Political P
 '''
 
 SCHEDULE_A_BY_SIZE = '''
-This endpoint aggregates Schedule A donations based on size:
+This endpoint provides individual contributions received by a committee, aggregated by size:
+
 ```
  - $200 and under\n\
  - $200.01 - $499.99\n\
@@ -947,34 +884,23 @@ This endpoint aggregates Schedule A donations based on size:
  - $1000 - $1999.99\n\
  - $2000 +\n\
 ```
-In cases where the donations are $200 or less, the results include small donations
-that are reported on Schedule A, but filers are not required to itemize those small
-donations, so we also add unitemized contributions. Unitemized contributions come
-from the summary section of the forms. It represents the total money brought in from
-donors that are not reported on Schedule A and have given $200 or less.
+
+The $200.00 and under category includes contributions of $200 or less combined with unitemized individual contributions.
 '''
 
 SCHEDULE_A_BY_STATE = '''
-Schedule A individual receipts aggregated by contributor state.
-This is an aggregate of only individual contributions. To avoid double counting,
-memoed items are not included. Transactions $200 and under do not have to be
-itemized, if those contributions are not itemized, they will not be included in the
-state totals.
+This endpoint provides itemized individual contributions received by a committee, aggregated by the contributor’s state. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_BY_ZIP = '''
-Schedule A receipts aggregated by contributor zip code. To avoid double
-counting, memoed items are not included.
+This endpoint provides itemized individual contributions received by a committee, aggregated by the contributor’s ZIP code. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) section of our “about the data” page. Unitemized individual contributions are not included.
 '''
-
 SCHEDULE_A_BY_EMPLOYER = '''
-Schedule A receipts aggregated by contributor employer name. To avoid double
-counting, memoed items are not included.
+This endpoint provides itemized individual contributions received by a committee, aggregated by the contributor’s employer name. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_BY_OCCUPATION = '''
-Schedule A receipts aggregated by contributor occupation. To avoid double
-counting, memoed items are not included.'
+This endpoint provides itemized individual contributions received by a committee, aggregated by the contributor’s occupation. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
 '''
 
 SIZE = '''
@@ -994,24 +920,24 @@ Number of records making up the total.
 '''
 
 SCHEDULE_A_SIZE_CANDIDATE_TAG = '''
-Schedule A receipts aggregated by contribution size for a candidate.
+This endpoint provides itemized individual contributions received by a committee, aggregated by size of contribution and candidate. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_STATE_CANDIDATE_TAG = '''
-Schedule A receipts aggregated by contribution state for a candidate.
+This endpoint provides itemized individual contributions received by a committee, aggregated by contributor’s state and candidate. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_STATE_CANDIDATE_TOTAL_TAG = '''
-Schedule A receipts aggregated over all contribution states for a candidate.
+Itemized individual contributions aggregated by contributor’s state, candidate, committee type and cycle. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
+
 '''
 
 TOTAL_CANDIDATE_TAG = '''
 Aggregated candidate receipts and disbursements grouped by cycle.
 '''
 
-STATE_AGGREGATE_RECIPIENT_TOTALS = SCHEDULE_A_BY_STATE + '''
-These receipts are then added together by committee type for the total amount
-of each type, grouped by state and cycle.
+STATE_AGGREGATE_RECIPIENT_TOTALS = '''
+This endpoint provides itemized individual contributions received by a committee, aggregated by contributor’s state, committee type and cycle. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
 '''
 
 API_KEY_DESCRIPTION = '''
@@ -1552,16 +1478,8 @@ This ID is not a permanent, persistent ID.'
 
 # efiling
 EFILING_TAG = '''
-Efiling endpoints provide real-time campaign finance data for electronic filers.
-
-These endpoints are perfect for watching filings roll in when you want to know the latest information. Efiling endpoints
-only contain the most recent four months worth of data and don't contain the processed and coded data that
-you can find on the other endpoints. Those endpoints are better for in-depth analysis.
-
-Senate candidates and committees are required to file by paper. Other committees who raise and spend less than $50,000
-in a calendar can choose whether to file electronically or by paper.
+Efiling endpoints provide real-time campaign finance data received from electronic filers. Efiling endpoints only contain the most recent four months of data and don't contain the processed and coded data that you can find on other endpoints.
 '''
-EFILING_TAG += WIP_TAG
 
 EFILE_FILES = 'Basic information about electronic files coming into the FEC, posted as they are received.'
 FILE_NUMBER = 'Filing ID number'
