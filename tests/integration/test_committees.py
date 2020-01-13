@@ -3,7 +3,6 @@ import pytest
 import json
 
 import manage
-from datetime import datetime
 from tests.common import BaseTestCase
 from webservices import rest, __API_VERSION__
 from webservices.rest import db
@@ -94,7 +93,7 @@ class CommitteeTestCase(BaseTestCase):
         },
     ]
 
-    def test_nulls_in_array_column(self):
+    def test_nulls_in_committee_history(self):
         self.insert_cmte_valid(self.committee_data)
         self.insert_cand_cmte_linkage(self.cand_cmte_linkage)
         self.insert_f_rpt_or_form_sub(self.f_rpt_or_form_sub_data)
@@ -105,11 +104,15 @@ class CommitteeTestCase(BaseTestCase):
         }
 
         committee_api = self._results(rest.api.url_for(CommitteeHistoryView, **params_cmte))
-        self.assertEqual(len(committee_api), 1)
-        # assert (committee_api[0]['cycles_has_activity'])
-        self.assertEqual(committee_api[0]['committee_id'], 'C001')
+        self.check_nulls_in_array_column(committee_api, array_column='cycles')
+        self.check_nulls_in_array_column(committee_api, array_column='cycles_has_activity')
+        self.check_nulls_in_array_column(committee_api, array_column='cycles_has_financial')
 
-        for each in committee_api[0]['cycles_has_activity']:
+    def check_nulls_in_array_column(self, api_result, array_column):
+        self.assertEqual(len(api_result), 1)
+        self.assertEqual(api_result[0]['committee_id'], 'C001')
+
+        for each in api_result[0][array_column]:
             has_null = 1 if each is None else 0
 
         self.assertEqual(has_null, 0)
