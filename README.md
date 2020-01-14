@@ -91,8 +91,6 @@ npm install
 npm run build
 ```
 
-*Note: `swagger-tools` is required for testing the API documentation via the automated tests and must be installed globally as shown above.*
-
 ##### Git hooks
 This repo includes optional post-merge and post-checkout hooks to ensure that
 dependencies are up to date. If enabled, these hooks will update Python
