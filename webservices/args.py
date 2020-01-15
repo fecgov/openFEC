@@ -857,6 +857,8 @@ schedule_e_efile = {
     'most_recent': fields.Bool(description=docs.MOST_RECENT),
     'min_filed_date': fields.Date(description=docs.FILED_DATE),
     'max_filed_date': fields.Date(description=docs.FILED_DATE),
+    'filing_form': fields.List(IStr, description=docs.FORM_TYPE),
+    'is_notice': fields.Bool(description=docs.IS_NOTICE),
 }
 
 rad_analyst = {
