@@ -1,4 +1,4 @@
-apispec==0.39.0
+apispec==1.0.0
 prance[osv]>=0.11
 cfenv==0.5.2
 invoke==0.15.0
@@ -25,7 +25,7 @@ elasticsearch-dsl==5.4.0
 git+https://github.com/18F/slate.git
 
 # Marshalling
-flask-apispec==0.7.0
+flask-apispec==0.8.0
 marshmallow==2.16.3
 marshmallow-sqlalchemy==0.15.0
 git+https://github.com/fecgov/marshmallow-pagination@master
