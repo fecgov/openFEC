@@ -659,6 +659,8 @@ class ScheduleE(PdfMixin, BaseItemized):
 class ScheduleEEfile(BaseRawItemized):
     __tablename__ = 'real_efile_se_f57_vw'
 
+    filing_form = db.Column('filing_form', db.String)
+    is_notice = db.Column(db.Boolean, index=True)
     file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
     related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
     committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
