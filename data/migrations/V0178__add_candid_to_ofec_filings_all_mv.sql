@@ -212,7 +212,7 @@ CREATE INDEX idx_ofec_filings_all_mv_tmp_form_category
     (form_category)
     ;
    
--- Since the twin view has not been used anywhere, so we can drop it here;
+-- Because the data type of candidate_id has been changed, so the twin view has to be dropped and recreated
 DROP VIEW public.ofec_filings_all_vw;
 
 CREATE OR REPLACE VIEW public.ofec_filings_all_vw AS 
