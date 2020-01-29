@@ -913,10 +913,11 @@ class TestScheduleE(ApiBaseTest):
                     committee_id='101', support_oppose_indicator='o'),
         ]
         results = self._results(api.url_for(ScheduleEView, sort='-support_oppose_indicator'))
-        self.assertEqual(results[0]['support_oppose_indicator'], 's')
+        self.assertEqual(results[0]['support_oppose_indicator'], 's')  
 
     def test_schedule_e_efile_filters(self):
         filters = [
+            ('image_number', ScheduleEEfile.image_number, ['456', '789']),
             ('committee_id', ScheduleEEfile.committee_id, ['C01', 'C02']),
             ('support_oppose_indicator', ScheduleEEfile.support_oppose_indicator, ['S', 'O']),
             ('most_recent', ScheduleEEfile.most_recent, [True, False]),
@@ -924,7 +925,8 @@ class TestScheduleE(ApiBaseTest):
             ('candidate_party', ScheduleEEfile.candidate_party, ['DEM', 'REP']),
             ('candidate_office_state', ScheduleEEfile.candidate_office_state, ['AZ', 'AK']),
             ('candidate_office_district', ScheduleEEfile.candidate_office_district, ['00', '01']),
-
+            ('filing_form', ScheduleEEfile.filing_form, ['F3X', 'F5']),
+            ('is_notice', ScheduleE.is_notice, [True, False]),
         ]
         factories.EFilingsFactory(file_number=123)
         for label, column, values in filters:

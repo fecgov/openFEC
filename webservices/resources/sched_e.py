@@ -118,6 +118,7 @@ class ScheduleEEfileView(views.ApiResource):
         ('candidate_office', models.ScheduleEEfile.candidate_office),
         ('candidate_office_state', models.ScheduleEEfile.candidate_office_state),
         ('candidate_office_district', models.ScheduleEEfile.candidate_office_district),
+        ('filing_form', models.ScheduleEEfile.filing_form),
     ]
 
     filter_range_fields = [
@@ -131,6 +132,7 @@ class ScheduleEEfileView(views.ApiResource):
 
     filter_match_fields = [
         ('most_recent', models.ScheduleEEfile.most_recent),
+        ('is_notice', models.ScheduleEEfile.is_notice),
     ]
 
     @property
