@@ -470,8 +470,8 @@ apidoc.register(sched_f.ScheduleFView, blueprint='v1')
 apidoc.register(sched_f.ScheduleFViewBySubId, blueprint='v1')
 apidoc.register(sched_d.ScheduleDView, blueprint='v1')
 apidoc.register(sched_d.ScheduleDViewBySubId, blueprint='v1')
-# following line is to publish endpoint, currently commented as endpoint requierments are refined
-#apidoc.register(sched_h4.ScheduleH4View, blueprint='v1')
+# Publish endpoint for testing
+apidoc.register(sched_h4.ScheduleH4View, blueprint='v1')
 apidoc.register(costs.CommunicationCostView, blueprint='v1')
 apidoc.register(costs.ElectioneeringView, blueprint='v1')
 apidoc.register(aggregates.ECAggregatesView, blueprint='v1')
