@@ -143,7 +143,8 @@ def _detect_space(repo, branch=None, yes=False):
 DEPLOY_RULES = (
     ('prod', _detect_prod),
     ('stage', lambda _, branch: branch.startswith('release')),
-    ('dev', lambda _, branch: branch == 'develop'),
+    # temp deploy of this branch to dev
+    ('dev', lambda _, branch: branch == 'test/4112-schedule-h-endpoint'),
 )
 
 
