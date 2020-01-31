@@ -932,6 +932,10 @@ Itemized individual contributions aggregated by contributor’s state, candidate
 
 '''
 
+SCHEDULE_H4 = '''
+TODO: create text
+'''
+
 TOTAL_CANDIDATE_TAG = '''
 Aggregated candidate receipts and disbursements grouped by cycle.
 '''

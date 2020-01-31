@@ -36,6 +36,7 @@ from webservices.resources import sched_c
 from webservices.resources import sched_d
 from webservices.resources import sched_e
 from webservices.resources import sched_f
+from webservices.resources import sched_h4
 from webservices.resources import download
 from webservices.resources import aggregates
 from webservices.resources import candidate_aggregates
@@ -310,6 +311,7 @@ api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
 api.add_resource(sched_e.ScheduleEEfileView, '/schedules/schedule_e/efile/')
 api.add_resource(sched_f.ScheduleFView, '/schedules/schedule_f/', '/schedules/schedule_f/<string:sub_id>/')
 api.add_resource(sched_f.ScheduleFViewBySubId, '/schedules/schedule_f/<string:sub_id>/')
+api.add_resource(sched_h4.ScheduleH4View, '/schedules/schedule_h4/')
 api.add_resource(costs.CommunicationCostView, '/communication-costs/')
 api.add_resource(costs.ElectioneeringView, '/electioneering/')
 api.add_resource(elections.ElectionView, '/elections/')
@@ -442,6 +444,9 @@ apidoc.register(sched_f.ScheduleFView, blueprint='v1')
 apidoc.register(sched_f.ScheduleFViewBySubId, blueprint='v1')
 apidoc.register(sched_d.ScheduleDView, blueprint='v1')
 apidoc.register(sched_d.ScheduleDViewBySubId, blueprint='v1')
+# following line is a feature flag to publish endpoint to dev
+if bool(env.get_credential('FEC_FEATURE_SCHEDULE_H4', '')):
+    apidoc.register(sched_h4.ScheduleH4View, blueprint='v1')
 apidoc.register(costs.CommunicationCostView, blueprint='v1')
 apidoc.register(costs.ElectioneeringView, blueprint='v1')
 apidoc.register(aggregates.ECAggregatesView, blueprint='v1')

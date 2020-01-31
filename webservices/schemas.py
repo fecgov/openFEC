@@ -686,6 +686,34 @@ ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging_schemas
 register_schema(ScheduleBSchema)
 register_schema(ScheduleBPageSchema)
 
+ScheduleH4Schema = make_schema(
+    models.ScheduleH4,
+    fields={
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'image_number': ma.fields.Str(),
+        'original_sub_id': ma.fields.Str(),
+        'sub_id': ma.fields.Str(),
+    },
+    options={
+        'exclude': (
+            'payee_street_1',
+            'payee_street_2',
+            'sort_expressions',
+        ),
+        'relationships': [
+            Relationship(
+                models.ScheduleH4.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+                1
+            ),
+        ],
+    }
+)
+ScheduleH4PageSchema = make_page_schema(ScheduleH4Schema, page_type=paging_schemas.SeekPageSchema)
+register_schema(ScheduleH4Schema)
+register_schema(ScheduleH4PageSchema)
+
 ScheduleESchema = make_schema(
     models.ScheduleE,
     fields={

@@ -962,3 +962,11 @@ totals_by_candidate_other_costs_CC = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'election_full': election_full,
 }
+
+schedule_h4 = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'last_event_purpose_date': fields.Date(missing=None, description=docs.LAST_DISBURSEMENT_DATE),
+    
+}
+
