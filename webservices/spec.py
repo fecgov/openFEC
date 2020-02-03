@@ -96,6 +96,10 @@ spec = APISpec(
             'description': format_docstring(docs.ELECTIONEERING),
         },
         {
+            'name': 'presidential',
+            'description': format_docstring(docs.PRESIDENTIAL),
+        },
+        {
             'name': 'filer resources',
             'description': format_docstring(docs.FILER_RESOURCES),
         },

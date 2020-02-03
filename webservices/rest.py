@@ -52,6 +52,7 @@ from webservices.resources import legal
 from webservices.resources import large_aggregates
 from webservices.resources import audit
 from webservices.resources import operations_log
+from webservices.resources import presidential
 from webservices.resources import spending_by_others
 from webservices.env import env
 from webservices.tasks.response_exception import ResponseException
@@ -407,6 +408,11 @@ api.add_resource(legal.UniversalSearch, '/legal/search/')
 api.add_resource(legal.GetLegalCitation, '/legal/citation/<citation_type>/<citation>')
 api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
 api.add_resource(operations_log.OperationsLogView, '/operations-log/')
+api.add_resource(presidential.PresidentialByCandidateView, '/presidential/contributions/by_candidate/')
+api.add_resource(presidential.PresidentialSummaryView, '/presidential/financial_summary/')
+api.add_resource(presidential.PresidentialBySizeView, '/presidential/contributions/by_size/')
+api.add_resource(presidential.PresidentialByStateView, '/presidential/contributions/by_state/')
+api.add_resource(presidential.PresidentialCoverageView, '/presidential/coverage_end_date/')
 
 app.config.update({
     'APISPEC_SWAGGER_URL': None,
@@ -491,6 +497,13 @@ apidoc.register(candidate_aggregates.AggregateByOfficeByPartyView, blueprint='v1
 apidoc.register(spending_by_others.ECTotalsByCandidateView, blueprint='v1')
 apidoc.register(spending_by_others.IETotalsByCandidateView, blueprint='v1')
 apidoc.register(spending_by_others.CCTotalsByCandidateView, blueprint='v1')
+# feature flag to publish endpoint
+if bool(env.get_credential('FEC_FEATURE_PRESIDENTIAL', '')):
+    apidoc.register(presidential.PresidentialByCandidateView, blueprint='v1')
+    apidoc.register(presidential.PresidentialSummaryView, blueprint='v1')
+    apidoc.register(presidential.PresidentialBySizeView, blueprint='v1')
+    apidoc.register(presidential.PresidentialByStateView, blueprint='v1')
+    apidoc.register(presidential.PresidentialCoverageView, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)
