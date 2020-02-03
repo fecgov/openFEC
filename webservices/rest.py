@@ -498,6 +498,7 @@ apidoc.register(spending_by_others.ECTotalsByCandidateView, blueprint='v1')
 apidoc.register(spending_by_others.IETotalsByCandidateView, blueprint='v1')
 apidoc.register(spending_by_others.CCTotalsByCandidateView, blueprint='v1')
 # feature flag to publish endpoint
+# when turning this on, uncomment from spec.py
 if bool(env.get_credential('FEC_FEATURE_PRESIDENTIAL', '')):
     apidoc.register(presidential.PresidentialByCandidateView, blueprint='v1')
     apidoc.register(presidential.PresidentialSummaryView, blueprint='v1')
