@@ -967,10 +967,15 @@ schedule_h4 = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'last_event_purpose_date': fields.Date(missing=None, description=docs.LAST_DISBURSEMENT_DATE),
-    
+
 }
 
 presidential = {
     'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+}
+
+presidential_by_candidate = {
+    'election_year': fields.Int(description=docs.ELECTION_YEAR),
+    'contributor_state': fields.Str(description=docs.CONTRIBUTOR_STATE),
 }
