@@ -970,3 +970,7 @@ schedule_h4 = {
     
 }
 
+presidential = {
+    'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+}

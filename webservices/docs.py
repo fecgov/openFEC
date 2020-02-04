@@ -1832,3 +1832,10 @@ LINK_TO_REPORT = '''
 URL for retrieving the PDF document
 '''
 # ======== audit end =========
+
+# ======== presidential start =========
+
+PRESIDENTIAL = """
+TODO: Add Text
+"""
+# ======== presidential end =========
