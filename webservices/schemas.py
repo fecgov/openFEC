@@ -1265,7 +1265,7 @@ augment_schemas(CCTotalsByCandidateSchema)
 
 PresidentialByCandidateSchema = make_schema(
     models.PresidentialByCandidate,
-    options={'exclude': ('idx', 'name_txt')},
+    options={'exclude': ('idx',)},
 )
 PresidentialByCandidatePageSchema = make_page_schema(PresidentialByCandidateSchema)
 register_schema(PresidentialByCandidateSchema)

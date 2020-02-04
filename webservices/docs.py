@@ -1836,6 +1836,7 @@ URL for retrieving the PDF document
 # ======== presidential start =========
 
 PRESIDENTIAL = """
-TODO: Add Text
+Data to support presidential map. \n
+See https://www.fec.gov/campaign-finance-data/presidential-map-help/
 """
 # ======== presidential end =========
