@@ -2,7 +2,10 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices.rest import api
-from webservices.resources.presidential import PresidentialByCandidateView
+from webservices.resources.presidential import(
+    PresidentialByCandidateView,
+    PresidentialByStateView,
+)
 
 
 class PresidentialByCandidate(ApiBaseTest):
@@ -56,3 +59,81 @@ class PresidentialByCandidate(ApiBaseTest):
             ['C002', 'C003', 'C001', 'C004']
         )
 
+class PresidentialByState(ApiBaseTest):
+    """ Test /presidential/contributions/by_state/"""
+
+    def test_without_filter(self):
+        """ Check results without filter"""
+        factories.PresidentialByStateFactory(candidate_id='C001', election_year=2016)
+        factories.PresidentialByStateFactory(candidate_id='C002', election_year=2016)
+        factories.PresidentialByStateFactory(candidate_id='C001', election_year=2020)
+        factories.PresidentialByStateFactory(candidate_id='C002', election_year=2020)
+
+        results = self._results(api.url_for(PresidentialByStateView))
+        self.assertEqual(len(results), 4)
+
+    def test_filters_election_year(self):
+        factories.PresidentialByStateFactory(candidate_id='C001', election_year=2016, contribution_receipt_amount=100)
+        factories.PresidentialByStateFactory(candidate_id='C002', election_year=2016, contribution_receipt_amount=200)
+        factories.PresidentialByStateFactory(candidate_id='C001', election_year=2020, contribution_receipt_amount=300)
+        factories.PresidentialByStateFactory(candidate_id='C002', election_year=2020, contribution_receipt_amount=400)
+        factories.PresidentialByStateFactory(candidate_id='C002', election_year=2020, contribution_receipt_amount=500)
+        factories.PresidentialByStateFactory(candidate_id='C002', election_year=2020, contribution_receipt_amount=600)
+
+        filter_fields = (
+            ('election_year', [2020]),
+        )
+
+        # checking one example from each field
+        orig_response = self._response(api.url_for(PresidentialByStateView))
+        original_count = orig_response['pagination']['count']
+
+        for field, example in filter_fields:
+            page = api.url_for(PresidentialByStateView, **{field: example})
+            # returns at least one result
+            results = self._results(page)
+            self.assertGreater(len(results), 0)
+            # doesn't return all results
+            response = self._response(page)
+            print("field=" + field)
+            print("original_count=" + str(original_count))
+            print("count=" + str(response['pagination']['count']))
+            self.assertGreater(original_count, response['pagination']['count'])
+
+    def test_filters_candidate_id(self):
+        """ always return 51 rows(51 states) for each candidate_id/"""
+        factories.PresidentialByStateFactory(candidate_id='C001', election_year=2016)
+        factories.PresidentialByStateFactory(candidate_id='C002', election_year=2016)
+        factories.PresidentialByStateFactory(candidate_id='C001', election_year=2020)
+        factories.PresidentialByStateFactory(candidate_id='C002', election_year=2020)
+        factories.PresidentialByStateFactory(candidate_id='C002', election_year=2020)
+        factories.PresidentialByStateFactory(candidate_id='C002', election_year=2020)
+
+        filter_fields = (
+            ('candidate_id', ['C001', 'C002']),
+        )
+
+        # checking one example from each field
+        orig_response = self._response(api.url_for(PresidentialByStateView))
+        original_count = orig_response['pagination']['count']
+
+        for field, example in filter_fields:
+            page = api.url_for(PresidentialByStateView, **{field: example})
+            # returns at least one result
+            results = self._results(page)
+            self.assertGreater(len(results), 0)
+            # doesn't return all results, but return same records
+            response = self._response(page)
+            self.assertEqual(original_count, response['pagination']['count'])
+
+    def test_sort(self):
+        factories.PresidentialByStateFactory(candidate_id='C003', contribution_receipt_amount=333),
+        factories.PresidentialByStateFactory(candidate_id='C001', contribution_receipt_amount=222)
+        factories.PresidentialByStateFactory(candidate_id='C004', contribution_receipt_amount=111)
+        factories.PresidentialByStateFactory(candidate_id='C002', contribution_receipt_amount=444)
+
+        results = self._results(api.url_for(PresidentialByStateView))
+        self.assertEqual(
+            [each['candidate_id'] for each in results],
+            ['C002', 'C003', 'C001', 'C004']
+        )

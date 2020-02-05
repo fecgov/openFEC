@@ -136,7 +136,10 @@ class PresidentialByStateView(ApiResource):
         return utils.extend(
             args.paging,
             args.presidential,
-            args.make_sort_args(),
+            args.make_sort_args(
+                default='-contribution_receipt_amount',
+                validator=args.OptionValidator(['contribution_receipt_amount'])
+            ),
         )
 
     @property
