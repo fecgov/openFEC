@@ -1836,9 +1836,9 @@ URL for retrieving the PDF document
 # ======== presidential start =========
 
 PRESIDENTIAL = """
-Data to support presidential map.
+Data supporting fec.gov's presidential map.
 
-See https://www.fec.gov/campaign-finance-data/presidential-map-help/
+For more information about the presidential map data that is available to download on fec.gov, please visit: https://www.fec.gov/campaign-finance-data/presidential-map-help/
 """
 
 PRESIDENTIAL_BY_CANDIDATE = """
