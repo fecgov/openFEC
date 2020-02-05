@@ -976,6 +976,6 @@ presidential = {
 }
 
 presidential_by_candidate = {
-    'election_year': fields.Int(description=docs.ELECTION_YEAR),
-    'contributor_state': fields.Str(description=docs.CONTRIBUTOR_STATE),
+    'election_year': fields.List(fields.Int(description=docs.ELECTION_YEAR)),
+    'contributor_state': fields.List(fields.Str(description=docs.CONTRIBUTOR_STATE)),
 }

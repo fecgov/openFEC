@@ -23,10 +23,12 @@ class PresidentialByCandidate(ApiBaseTest):
         factories.PresidentialByCandidateFactory(candidate_id='C002', election_year=2016, contributor_state='NY')
         factories.PresidentialByCandidateFactory(candidate_id='C001', election_year=2020, contributor_state='US')
         factories.PresidentialByCandidateFactory(candidate_id='C002', election_year=2020, contributor_state='NY')
+        factories.PresidentialByCandidateFactory(candidate_id='C002', election_year=2020, contributor_state='VA')
+        factories.PresidentialByCandidateFactory(candidate_id='C002', election_year=2020, contributor_state='CA')
 
         filter_fields = (
-            ('election_year', 2020),
-            ('contributor_state', 'US'),
+            ('election_year', [2020]),
+            ('contributor_state', ['US', 'CA']),
         )
 
         # checking one example from each field

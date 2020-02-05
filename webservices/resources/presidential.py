@@ -18,7 +18,7 @@ class PresidentialByCandidateView(ApiResource):
     schema = schemas.PresidentialByCandidateSchema
     page_schema = schemas.PresidentialByCandidatePageSchema
 
-    filter_match_fields = [
+    filter_multi_fields = [
         ('contributor_state', model.contributor_state),
         ('election_year', model.election_year),
     ]
