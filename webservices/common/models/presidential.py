@@ -61,7 +61,7 @@ class PresidentialBySize(db.Model):
 class PresidentialByState(db.Model):
 
     __table_args__ = {'schema': 'public'}
-    __tablename__ = 'ofec_presidential_by_state_vw_jl'
+    __tablename__ = 'ofec_presidential_by_state_vw'
 
     # TODO: Update docstrings
     idx = db.Column(db.Integer, primary_key=True)
