@@ -489,3 +489,8 @@ class CommitteeTotalsPerCycleFactory(BaseTotalsFactory):
     class Meta:
         model = models.CommitteeTotalsPerCycle
     idx = factory.Sequence(lambda n: n)
+
+class PresidentialByCandidateFactory(BaseFactory):
+    class Meta:
+        model = models.PresidentialByCandidate
+    idx = factory.Sequence(lambda n: n)

@@ -1836,6 +1836,20 @@ URL for retrieving the PDF document
 # ======== presidential start =========
 
 PRESIDENTIAL = """
-TODO: Add Text
+Data supporting fec.gov's presidential map.
+
+For more information about the presidential map data that is available to download on fec.gov, please visit: https://www.fec.gov/campaign-finance-data/presidential-map-help/
+"""
+
+PRESIDENTIAL_BY_CANDIDATE = """
+Net receipts per candidate.
+
+Filter with `contributor_state='US'` for national totals
+
+Totals for all candidates have `candidate_last_name` `'All candidates'` and `candidate_id` `'P00000001'`
+Totals for all democrats have `candidate_last_name` `'Democrats'` and `candidate_id` `'P00000002'`
+Totals for all republicans have `candidate_last_name` `'Republicans'` and `candidate_id` `'P00000003'`
+
+See https://www.fec.gov/campaign-finance-data/presidential-map-help/
 """
 # ======== presidential end =========

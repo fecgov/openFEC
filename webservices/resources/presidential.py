@@ -10,7 +10,7 @@ from webservices.common.views import ApiResource
 
 @doc(
     tags=['presidential'],
-    description=docs.PRESIDENTIAL,
+    description=docs.PRESIDENTIAL_BY_CANDIDATE,
 )
 class PresidentialByCandidateView(ApiResource):
 
@@ -18,29 +18,20 @@ class PresidentialByCandidateView(ApiResource):
     schema = schemas.PresidentialByCandidateSchema
     page_schema = schemas.PresidentialByCandidatePageSchema
 
-    filter_fulltext_fields = [
-        ('name', model.name_txt),
-        ('title', model.title),
-    ]
-
     filter_multi_fields = [
-        ('analyst_id', model.analyst_id),
-        ('analyst_short_id', model.analyst_short_id),
-        ('email', model.email),
-        ('telephone_ext', model.telephone_ext),
-        ('committee_id', model.committee_id),
-    ]
-
-    filter_range_fields = [
-        (('min_assignment_update_date', 'max_assignment_update_date'), model.assignment_update_date),
+        ('contributor_state', model.contributor_state),
+        ('election_year', model.election_year),
     ]
 
     @property
     def args(self):
         return utils.extend(
             args.paging,
-            args.presidential,  # TODO: Add contributor_state
-            args.make_sort_args(),
+            args.presidential_by_candidate,
+            args.make_sort_args(
+                default='-net_receipts',
+                validator=args.OptionValidator(['net_receipts'])
+            ),
         )
 
     @property
