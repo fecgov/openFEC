@@ -1295,7 +1295,7 @@ register_schema(PresidentialBySizePageSchema)
 
 PresidentialByStateSchema = make_schema(
     models.PresidentialByState,
-    options={'exclude': ('idx', 'name_txt')},
+    options={'exclude': ('idx',)},
 )
 PresidentialByStatePageSchema = make_page_schema(PresidentialByStateSchema)
 register_schema(PresidentialByStateSchema)

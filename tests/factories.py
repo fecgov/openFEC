@@ -494,3 +494,8 @@ class PresidentialByCandidateFactory(BaseFactory):
     class Meta:
         model = models.PresidentialByCandidate
     idx = factory.Sequence(lambda n: n)
+
+class PresidentialByStateFactory(BaseFactory):
+    class Meta:
+        model = models.PresidentialByState
+    idx = factory.Sequence(lambda n: n)
