@@ -1275,7 +1275,7 @@ register_schema(PresidentialByCandidatePageSchema)
 
 PresidentialSummarySchema = make_schema(
     models.PresidentialSummary,
-    options={'exclude': ('idx', 'name_txt')},
+    options={'exclude': ('idx',)},
 )
 PresidentialSummaryPageSchema = make_page_schema(PresidentialSummarySchema)
 register_schema(PresidentialSummarySchema)
