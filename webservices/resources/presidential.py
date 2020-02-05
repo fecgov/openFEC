@@ -10,7 +10,7 @@ from webservices.common.views import ApiResource
 
 @doc(
     tags=['presidential'],
-    description=docs.PRESIDENTIAL,
+    description=docs.PRESIDENTIAL_BY_CANDIDATE,
 )
 class PresidentialByCandidateView(ApiResource):
 
