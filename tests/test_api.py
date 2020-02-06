@@ -40,7 +40,7 @@ class OverallTest(ApiBaseTest):
 
     def test_full_text_no_results(self):
         results = self._results(api.url_for(CandidateList, q='asdfasdf'))
-        self.assertEquals(results, [])
+        self.assertEqual(results, [])
 
     def test_cycle_filter(self):
         factories.CandidateFactory(cycles=[1986, 1988])
@@ -58,22 +58,22 @@ class OverallTest(ApiBaseTest):
     def test_per_page_defaults_to_20(self):
         [factories.CandidateFactory() for _ in range(40)]
         results = self._results(api.url_for(CandidateList))
-        self.assertEquals(len(results), 20)
+        self.assertEqual(len(results), 20)
 
     def test_per_page_param(self):
         [factories.CandidateFactory() for _ in range(20)]
         results = self._results(api.url_for(CandidateList, per_page=5))
-        self.assertEquals(len(results), 5)
+        self.assertEqual(len(results), 5)
 
     def test_invalid_per_page_param(self):
         results = self.app.get(api.url_for(CandidateList, per_page=-10))
-        self.assertEquals(results.status_code, 422)
+        self.assertEqual(results.status_code, 422)
         results = self.app.get(api.url_for(CandidateList, per_page=101))
-        self.assertEquals(results.status_code, 422)
+        self.assertEqual(results.status_code, 422)
         results = self.app.get(api.url_for(CandidateList, per_page=34.2))
-        self.assertEquals(results.status_code, 422)
+        self.assertEqual(results.status_code, 422)
         results = self.app.get(api.url_for(CandidateList, per_page='dynamic-wombats'))
-        self.assertEquals(results.status_code, 422)
+        self.assertEqual(results.status_code, 422)
 
     def test_page_param(self):
         [factories.CandidateFactory() for _ in range(20)]

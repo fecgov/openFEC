@@ -108,8 +108,8 @@ class CommitteeFormatTest(ApiBaseTest):
             party_full='Republican Party',
         )
         response = self._results(api.url_for(CommitteeList, party='REP'))
-        self.assertEquals(response[0]['party'], 'REP')
-        self.assertEquals(response[0]['party_full'], 'Republican Party')
+        self.assertEqual(response[0]['party'], 'REP')
+        self.assertEqual(response[0]['party_full'], 'Republican Party')
 
     def test_filters_generic(self):
         self._check_filter('designation', ['B', 'P'])
@@ -248,7 +248,7 @@ class CommitteeFormatTest(ApiBaseTest):
             committee_id=committee.committee_id,
         )
         results = self._results(api.url_for(CandidateView, committee_id=committee.committee_id))
-        self.assertEquals(1, len(results))
+        self.assertEqual(1, len(results))
 
     def test_committee_sort(self):
         committees = [

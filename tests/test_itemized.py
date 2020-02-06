@@ -902,7 +902,7 @@ class TestScheduleE(ApiBaseTest):
             for payee in payee_names
         ]
         results = self._results(api.url_for(ScheduleEView, payee_name=payee_names))
-        self.assertEquals(len(results), 0)
+        self.assertEqual(len(results), 0)
 
     def test_schedule_e_sort_args_descending(self):
         [
@@ -912,7 +912,7 @@ class TestScheduleE(ApiBaseTest):
                     committee_id='101', support_oppose_indicator='o'),
         ]
         results = self._results(api.url_for(ScheduleEView, sort='-support_oppose_indicator'))
-        self.assertEqual(results[0]['support_oppose_indicator'], 's')  
+        self.assertEqual(results[0]['support_oppose_indicator'], 's')
 
     def test_schedule_e_efile_filters(self):
         filters = [
