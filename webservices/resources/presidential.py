@@ -126,21 +126,9 @@ class PresidentialByStateView(ApiResource):
     schema = schemas.PresidentialByStateSchema
     page_schema = schemas.PresidentialByStatePageSchema
 
-    filter_fulltext_fields = [
-        ('name', model.name_txt),
-        ('title', model.title),
-    ]
-
     filter_multi_fields = [
-        ('analyst_id', model.analyst_id),
-        ('analyst_short_id', model.analyst_short_id),
-        ('email', model.email),
-        ('telephone_ext', model.telephone_ext),
-        ('committee_id', model.committee_id),
-    ]
-
-    filter_range_fields = [
-        (('min_assignment_update_date', 'max_assignment_update_date'), model.assignment_update_date),
+        ('election_year', model.election_year),
+        ('candidate_id', model.candidate_id),
     ]
 
     @property
@@ -148,7 +136,10 @@ class PresidentialByStateView(ApiResource):
         return utils.extend(
             args.paging,
             args.presidential,
-            args.make_sort_args(),
+            args.make_sort_args(
+                default='-contribution_receipt_amount',
+                validator=args.OptionValidator(['contribution_receipt_amount'])
+            ),
         )
 
     @property
