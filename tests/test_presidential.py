@@ -96,9 +96,6 @@ class PresidentialByState(ApiBaseTest):
             self.assertGreater(len(results), 0)
             # doesn't return all results
             response = self._response(page)
-            print("field=" + field)
-            print("original_count=" + str(original_count))
-            print("count=" + str(response['pagination']['count']))
             self.assertGreater(original_count, response['pagination']['count'])
 
     def test_filters_candidate_id(self):
@@ -176,9 +173,6 @@ class PresidentialSummary(ApiBaseTest):
             self.assertGreater(len(results), 0)
             # doesn't return all results
             response = self._response(page)
-            print("field=" + field)
-            print("original_count=" + str(original_count))
-            print("count=" + str(response['pagination']['count']))
             self.assertGreater(original_count, response['pagination']['count'])
 
     def test_sort(self):
