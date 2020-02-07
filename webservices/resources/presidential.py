@@ -139,21 +139,9 @@ class PresidentialCoverageView(ApiResource):
     schema = schemas.PresidentialCoverageSchema
     page_schema = schemas.PresidentialCoveragePageSchema
 
-    filter_fulltext_fields = [
-        ('name', model.name_txt),
-        ('title', model.title),
-    ]
-
     filter_multi_fields = [
-        ('analyst_id', model.analyst_id),
-        ('analyst_short_id', model.analyst_short_id),
-        ('email', model.email),
-        ('telephone_ext', model.telephone_ext),
-        ('committee_id', model.committee_id),
-    ]
-
-    filter_range_fields = [
-        (('min_assignment_update_date', 'max_assignment_update_date'), model.assignment_update_date),
+        ('election_year', model.election_year),
+        ('candidate_id', model.candidate_id),
     ]
 
     @property
@@ -161,7 +149,10 @@ class PresidentialCoverageView(ApiResource):
         return utils.extend(
             args.paging,
             args.presidential,
-            args.make_sort_args(),
+            args.make_sort_args(
+                default='candidate_id',
+                validator=args.OptionValidator(['candidate_id'])
+            ),
         )
 
     @property
