@@ -1285,7 +1285,7 @@ register_schema(PresidentialSummaryPageSchema)
 
 PresidentialBySizeSchema = make_schema(
     models.PresidentialBySize,
-    options={'exclude': ('idx', 'name_txt')},
+    options={'exclude': ('idx',)},
 )
 PresidentialBySizePageSchema = make_page_schema(PresidentialBySizeSchema)
 register_schema(PresidentialBySizeSchema)
@@ -1305,7 +1305,7 @@ register_schema(PresidentialByStatePageSchema)
 
 PresidentialCoverageSchema = make_schema(
     models.PresidentialCoverage,
-    options={'exclude': ('idx', 'name_txt')},
+    options={'exclude': ('idx',)},
 )
 PresidentialCoveragePageSchema = make_page_schema(PresidentialCoverageSchema)
 register_schema(PresidentialCoverageSchema)

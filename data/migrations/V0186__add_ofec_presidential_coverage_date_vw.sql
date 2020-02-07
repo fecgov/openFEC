@@ -16,7 +16,7 @@ FROM (
     SELECT
     cand_id AS candidate_id,
     max(cand_nm) AS candidate_name,
-    to_char(max(cvg_end_dt), 'mm/dd/yyyy') as coverage_end_date,
+    to_char(max(cvg_end_dt), 'mm/dd/yyyy'):: timestamp without time zone as coverage_end_date,
     2020 as election_year
     FROM disclosure.pres_nml_form_3p_20d
     GROUP BY candidate_id
@@ -25,7 +25,7 @@ FROM (
     SELECT
     cand_id AS candidate_id,
     max(cand_nm) AS candidate_name,
-    to_char(max(cvg_end_dt), 'mm/dd/yyyy') as coverage_end_date,
+    to_char(max(cvg_end_dt), 'mm/dd/yyyy'):: timestamp without time zone as coverage_end_date,
     2016 as election_year
     FROM disclosure.pres_nml_form_3p_16
     GROUP BY candidate_id) AS combined
