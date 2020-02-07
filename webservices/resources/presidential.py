@@ -87,29 +87,21 @@ class PresidentialBySizeView(ApiResource):
     schema = schemas.PresidentialBySizeSchema
     page_schema = schemas.PresidentialBySizePageSchema
 
-    filter_fulltext_fields = [
-        ('name', model.name_txt),
-        ('title', model.title),
-    ]
-
     filter_multi_fields = [
-        ('analyst_id', model.analyst_id),
-        ('analyst_short_id', model.analyst_short_id),
-        ('email', model.email),
-        ('telephone_ext', model.telephone_ext),
-        ('committee_id', model.committee_id),
-    ]
-
-    filter_range_fields = [
-        (('min_assignment_update_date', 'max_assignment_update_date'), model.assignment_update_date),
+        ('election_year', model.election_year),
+        ('candidate_id', model.candidate_id),
+        ('size', model.size),
     ]
 
     @property
     def args(self):
         return utils.extend(
             args.paging,
-            args.presidential,
-            args.make_sort_args(),
+            args.presidential_by_size,
+            args.make_sort_args(
+                default='size',
+                validator=args.OptionValidator(['size'])
+            ),
         )
 
     @property
