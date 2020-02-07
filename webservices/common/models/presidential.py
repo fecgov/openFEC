@@ -59,7 +59,7 @@ class PresidentialSummary(db.Model):
 class PresidentialBySize(db.Model):
 
     __table_args__ = {'schema': 'public'}
-    __tablename__ = 'ofec_presidential_by_size_vw_jl'
+    __tablename__ = 'ofec_presidential_by_size_vw'
 
     idx = db.Column(db.Integer, primary_key=True)
     candidate_id = db.Column(db.String(0), doc=docs.CANDIDATE_ID)

@@ -208,7 +208,6 @@ class PresidentialBySize(ApiBaseTest):
             # doesn't return all results
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
-            self.assertGreater(original_count, response['pagination']['count'])
 
     def test_filters_candidate_id(self):
         """ always return 51 rows(51 states) for each candidate_id/"""
