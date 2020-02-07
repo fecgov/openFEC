@@ -31,7 +31,7 @@ CREATE OR REPLACE VIEW public.ofec_presidential_by_size_vw AS
       cand_id as candidate_id,
       contb_range_id as size_range_id,
       size_range(contb_range_id) AS size,      
-      ROUND(contb_receipt_amt) AS contribution_receipt_amount,
+      contb_receipt_amt AS contribution_receipt_amount,
       2020 AS election_year
     FROM
       disclosure.pres_ca_cm_sched_link_sum_20d
@@ -40,7 +40,7 @@ CREATE OR REPLACE VIEW public.ofec_presidential_by_size_vw AS
       cand_id as candidate_id,
       contb_range_id as size_range_id,
       size_range(contb_range_id) AS size,      
-      ROUND(contb_receipt_amt) AS contribution_receipt_amount,
+      contb_receipt_amt AS contribution_receipt_amount,
       2016 AS election_year
     FROM
       disclosure.pres_ca_cm_sched_link_sum_16
