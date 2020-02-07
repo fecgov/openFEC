@@ -28,7 +28,6 @@ class PresidentialSummary(db.Model):
     committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
     committee_type = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
     committee_designation = db.Column(db.String, doc=docs.DESIGNATION)
-    candidate_active = db.Column(db.String, doc='Candidate is actively seeking office')
     candidate_party_affiliation = db.Column(db.String, doc=docs.PARTY)
     candidate_id = db.Column(db.String, doc=docs.CANDIDATE_ID)
     candidate_name = db.Column(db.String, doc=docs.CANDIDATE_NAME)
