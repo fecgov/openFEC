@@ -509,3 +509,8 @@ class PresidentialCoverageFactory(BaseFactory):
     class Meta:
         model = models.PresidentialCoverage
     idx = factory.Sequence(lambda n: n)
+
+class PresidentialBySizeFactory(BaseFactory):
+    class Meta:
+        model = models.PresidentialBySize
+    idx = factory.Sequence(lambda n: n)
