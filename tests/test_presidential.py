@@ -170,7 +170,11 @@ class PresidentialSummary(ApiBaseTest):
 
         for field, example in filter_fields:
             page = api.url_for(PresidentialSummaryView, **{field: example})
+<<<<<<< HEAD
 =======
+=======
+
+>>>>>>> Add endpoint PresidentialBySize
 
 class PresidentialBySize(ApiBaseTest):
     """ Test /presidential/contributions/by_size/"""
@@ -203,6 +207,9 @@ class PresidentialBySize(ApiBaseTest):
 
         for field, example in filter_fields:
             page = api.url_for(PresidentialBySizeView, **{field: example})
+<<<<<<< HEAD
+>>>>>>> Add endpoint PresidentialBySize
+=======
 >>>>>>> Add endpoint PresidentialBySize
             # returns at least one result
             results = self._results(page)
@@ -213,13 +220,14 @@ class PresidentialBySize(ApiBaseTest):
             self.assertGreater(original_count, response['pagination']['count'])
 
     def test_sort(self):
-        factories.PresidentialSummaryFactory(candidate_id='C003', net_receipts=333),
-        factories.PresidentialSummaryFactory(candidate_id='C001', net_receipts=222)
-        factories.PresidentialSummaryFactory(candidate_id='C004', net_receipts=111)
-        factories.PresidentialSummaryFactory(candidate_id='C002', net_receipts=444)
+        factories.PresidentialBySizeFactory(candidate_id='C003', size=100, contribution_receipt_amount=333),
+        factories.PresidentialBySizeFactory(candidate_id='C001', size=300, contribution_receipt_amount=222)
+        factories.PresidentialBySizeFactory(candidate_id='C004', size=500, contribution_receipt_amount=111)
+        factories.PresidentialBySizeFactory(candidate_id='C002', size=800, contribution_receipt_amount=444)
 
-        results = self._results(api.url_for(PresidentialSummaryView))
+        results = self._results(api.url_for(PresidentialBySizeView))
         self.assertEqual(
+<<<<<<< HEAD
             [each['candidate_id'] for each in results],
             ['C002', 'C003', 'C001', 'C004']
 =======
@@ -262,6 +270,10 @@ class PresidentialBySize(ApiBaseTest):
 
         results = self._results(api.url_for(PresidentialBySizeView))
         self.assertEqual(
+            [each['size'] for each in results],
+            [100, 300, 500, 800]
+>>>>>>> Add endpoint PresidentialBySize
+=======
             [each['size'] for each in results],
             [100, 300, 500, 800]
 >>>>>>> Add endpoint PresidentialBySize
