@@ -208,6 +208,33 @@ class PresidentialBySize(ApiBaseTest):
             # doesn't return all results
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
+            self.assertGreater(original_count, response['pagination']['count'])
+
+    def test_filters_candidate_id(self):
+        """ always return 51 rows(51 states) for each candidate_id/"""
+        factories.PresidentialBySizeFactory(candidate_id='C001', election_year=2016)
+        factories.PresidentialBySizeFactory(candidate_id='C002', election_year=2016)
+        factories.PresidentialBySizeFactory(candidate_id='C001', election_year=2020)
+        factories.PresidentialBySizeFactory(candidate_id='C002', election_year=2020)
+        factories.PresidentialBySizeFactory(candidate_id='C002', election_year=2020)
+        factories.PresidentialBySizeFactory(candidate_id='C002', election_year=2020)
+
+        filter_fields = (
+            ('candidate_id', ['C001', 'C002']),
+        )
+
+        # checking one example from each field
+        orig_response = self._response(api.url_for(PresidentialBySizeView))
+        original_count = orig_response['pagination']['count']
+
+        for field, example in filter_fields:
+            page = api.url_for(PresidentialBySizeView, **{field: example})
+            # returns at least one result
+            results = self._results(page)
+            self.assertGreater(len(results), 0)
+            # doesn't return all results, but return same records
+            response = self._response(page)
+            self.assertEqual(original_count, response['pagination']['count'])
 
     def test_sort(self):
         factories.PresidentialBySizeFactory(candidate_id='C003', size=100, contribution_receipt_amount=333),
