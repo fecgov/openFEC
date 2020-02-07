@@ -903,6 +903,14 @@ SCHEDULE_A_BY_OCCUPATION = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated by the contributor’s occupation. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
 '''
 
+CONTRIBUTION_RECEIPTS = '''
+Contributions received
+'''
+
+SIZE_RANGE_ID = '''
+The total all contributions range id.
+'''
+
 SIZE = '''
 The total all contributions in the following ranges:
 ```
