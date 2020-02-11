@@ -266,6 +266,14 @@ class ScheduleAEfileFactory(BaseFactory):
     file_number = factory.Sequence(lambda n: n)
     related_line_number = factory.Sequence(lambda n: n)
 
+    
+class ScheduleH4Factory(BaseFactory):
+    class Meta:
+        model = models.ScheduleH4
+    sub_id = factory.Sequence(lambda n: n)
+    report_year = 2016
+    cycle = 2016
+    
 
 class FilingsFactory(BaseFactory):
     sub_id = factory.Sequence(lambda n: n)

@@ -36,6 +36,7 @@ from webservices.resources import sched_c
 from webservices.resources import sched_d
 from webservices.resources import sched_e
 from webservices.resources import sched_f
+from webservices.resources import sched_h4
 from webservices.resources import download
 from webservices.resources import aggregates
 from webservices.resources import candidate_aggregates
@@ -51,6 +52,7 @@ from webservices.resources import legal
 from webservices.resources import large_aggregates
 from webservices.resources import audit
 from webservices.resources import operations_log
+from webservices.resources import presidential
 from webservices.resources import spending_by_others
 from webservices.env import env
 from webservices.tasks.response_exception import ResponseException
@@ -310,6 +312,7 @@ api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
 api.add_resource(sched_e.ScheduleEEfileView, '/schedules/schedule_e/efile/')
 api.add_resource(sched_f.ScheduleFView, '/schedules/schedule_f/', '/schedules/schedule_f/<string:sub_id>/')
 api.add_resource(sched_f.ScheduleFViewBySubId, '/schedules/schedule_f/<string:sub_id>/')
+api.add_resource(sched_h4.ScheduleH4View, '/schedules/schedule_h4/')
 api.add_resource(costs.CommunicationCostView, '/communication-costs/')
 api.add_resource(costs.ElectioneeringView, '/electioneering/')
 api.add_resource(elections.ElectionView, '/elections/')
@@ -405,6 +408,11 @@ api.add_resource(legal.UniversalSearch, '/legal/search/')
 api.add_resource(legal.GetLegalCitation, '/legal/citation/<citation_type>/<citation>')
 api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
 api.add_resource(operations_log.OperationsLogView, '/operations-log/')
+api.add_resource(presidential.PresidentialByCandidateView, '/presidential/contributions/by_candidate/')
+api.add_resource(presidential.PresidentialSummaryView, '/presidential/financial_summary/')
+api.add_resource(presidential.PresidentialBySizeView, '/presidential/contributions/by_size/')
+api.add_resource(presidential.PresidentialByStateView, '/presidential/contributions/by_state/')
+api.add_resource(presidential.PresidentialCoverageView, '/presidential/coverage_end_date/')
 
 app.config.update({
     'APISPEC_SWAGGER_URL': None,
@@ -442,6 +450,9 @@ apidoc.register(sched_f.ScheduleFView, blueprint='v1')
 apidoc.register(sched_f.ScheduleFViewBySubId, blueprint='v1')
 apidoc.register(sched_d.ScheduleDView, blueprint='v1')
 apidoc.register(sched_d.ScheduleDViewBySubId, blueprint='v1')
+# following line is a feature flag to publish endpoint to dev
+if bool(env.get_credential('FEC_FEATURE_SCHEDULE_H4', '')):
+    apidoc.register(sched_h4.ScheduleH4View, blueprint='v1')
 apidoc.register(costs.CommunicationCostView, blueprint='v1')
 apidoc.register(costs.ElectioneeringView, blueprint='v1')
 apidoc.register(aggregates.ECAggregatesView, blueprint='v1')
@@ -486,6 +497,14 @@ apidoc.register(candidate_aggregates.AggregateByOfficeByPartyView, blueprint='v1
 apidoc.register(spending_by_others.ECTotalsByCandidateView, blueprint='v1')
 apidoc.register(spending_by_others.IETotalsByCandidateView, blueprint='v1')
 apidoc.register(spending_by_others.CCTotalsByCandidateView, blueprint='v1')
+# feature flag to publish endpoint
+# when turning this on, uncomment from spec.py
+if bool(env.get_credential('FEC_FEATURE_PRESIDENTIAL', '')):
+    apidoc.register(presidential.PresidentialByCandidateView, blueprint='v1')
+    apidoc.register(presidential.PresidentialSummaryView, blueprint='v1')
+    apidoc.register(presidential.PresidentialBySizeView, blueprint='v1')
+    apidoc.register(presidential.PresidentialByStateView, blueprint='v1')
+    apidoc.register(presidential.PresidentialCoverageView, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)
