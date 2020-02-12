@@ -53,6 +53,8 @@ class PresidentialSummary(db.Model):
     offsets_to_operating_expenditures = db.Column(db.Numeric(30, 2), doc='TODO')
     total_contribution_refunds = db.Column(db.Numeric(30, 2), doc='TODO')
     debts_owed_by_committee = db.Column(db.Numeric(30, 2), doc='TODO')
+    federal_funds = db.Column(db.Numeric(30, 2), doc='TODO')
+    cash_on_hand_end = db.Column(db.Numeric(30, 2), doc='TODO')
 
 
 class PresidentialBySize(db.Model):
