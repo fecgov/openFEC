@@ -919,7 +919,6 @@ class TestScheduleE(ApiBaseTest):
             ('image_number', ScheduleEEfile.image_number, ['456', '789']),
             ('committee_id', ScheduleEEfile.committee_id, ['C01', 'C02']),
             ('support_oppose_indicator', ScheduleEEfile.support_oppose_indicator, ['S', 'O']),
-            ('most_recent', ScheduleEEfile.most_recent, [True, False]),
             ('candidate_office', ScheduleEEfile.candidate_office, ['H', 'S', 'P']),
             ('candidate_party', ScheduleEEfile.candidate_party, ['DEM', 'REP']),
             ('candidate_office_state', ScheduleEEfile.candidate_office_state, ['AZ', 'AK']),
@@ -987,9 +986,27 @@ class TestScheduleE(ApiBaseTest):
             factories.ScheduleEFactory(committee_id='C002', filing_form='F5', most_recent=False),
             factories.ScheduleEFactory(committee_id='C003', filing_form='F24', most_recent=True),
             factories.ScheduleEFactory(committee_id='C004', filing_form='F3X', most_recent=True),
+            factories.ScheduleEFactory(committee_id='C005', filing_form='F3X'),
+            factories.ScheduleEFactory(committee_id='C006', filing_form='F3X'),
         ]
         results = self._results(api.url_for(ScheduleEView, most_recent=True, **self.kwargs))
-        self.assertEqual(len(results), 3)
+        # Most recent should include null values
+        self.assertEqual(len(results), 5)
+
+    def test_filter_sched_e_efile_most_recent(self):
+        [
+            factories.ScheduleEEfileFactory(committee_id='C001', filing_form='F24', most_recent=True),
+            factories.ScheduleEEfileFactory(committee_id='C002', filing_form='F5', most_recent=False),
+            factories.ScheduleEEfileFactory(committee_id='C003', filing_form='F24', most_recent=True),
+            factories.ScheduleEEfileFactory(committee_id='C004', filing_form='F3X', most_recent=True),
+            factories.ScheduleEEfileFactory(committee_id='C005', filing_form='F3X'),
+            factories.ScheduleEEfileFactory(committee_id='C006', filing_form='F3X'),
+        ]
+        factories.EFilingsFactory(file_number=123)
+        db.session.flush()
+        results = self._results(api.url_for(ScheduleEEfileView, most_recent=True, **self.kwargs))
+        # Most recent should include null values
+        self.assertEqual(len(results), 5)
 
 
 class TestScheduleH4(ApiBaseTest):

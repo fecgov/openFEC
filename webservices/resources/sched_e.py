@@ -5,6 +5,7 @@ from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
+from webservices import filters
 from sqlalchemy.orm import aliased, contains_eager
 from webservices.common import models
 from webservices.common import views
@@ -54,9 +55,7 @@ class ScheduleEView(ItemizedResource):
         (('min_filing_date', 'max_filing_date'), models.ScheduleE.filing_date),
 
     ]
-    filter_match_fields = [
-        ('most_recent', models.ScheduleE.most_recent),
-    ]
+
     query_options = [
         sa.orm.joinedload(models.ScheduleE.candidate),
         sa.orm.joinedload(models.ScheduleE.committee),
@@ -97,6 +96,13 @@ class ScheduleEView(ItemizedResource):
             query = query.filter(models.CandidateHistory.district == kwargs['district'])
         return query
 
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+        if kwargs.get('most_recent'):
+            query = query.filter(sa.or_(self.model.most_recent == kwargs.get('most_recent'),
+                                        self.model.most_recent == None))  # noqa
+        return query
+
 
 @doc(
     tags=['independent expenditures'],
@@ -131,7 +137,6 @@ class ScheduleEEfileView(views.ApiResource):
     ]
 
     filter_match_fields = [
-        ('most_recent', models.ScheduleEEfile.most_recent),
         ('is_notice', models.ScheduleEEfile.is_notice),
     ]
 
@@ -167,4 +172,7 @@ class ScheduleEEfileView(views.ApiResource):
             query = query.filter(filing_alias.filed_date >= kwargs['min_filed_date'])
         if kwargs.get('max_filed_date') is not None:
             query = query.filter(filing_alias.filed_date <= kwargs['max_filed_date'])
+        if kwargs.get('most_recent'):
+            query = query.filter(sa.or_(self.model.most_recent == kwargs.get('most_recent'),
+                                        self.model.most_recent == None))  # noqa
         return query
