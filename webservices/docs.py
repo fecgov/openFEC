@@ -654,6 +654,10 @@ MOST_RECENT = '''
 Report is either new or is the most-recently filed amendment
 '''
 
+MOST_RECENT_IE = '''
+The report associated with the transaction is either new or is the most-recently filed amendment. Undetermined version (`null`) is always included.
+'''
+
 HTML_URL = '''
 HTML link to the filing.
 '''
