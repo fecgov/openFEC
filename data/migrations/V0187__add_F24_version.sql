@@ -68,10 +68,20 @@ SELECT row_number() OVER () AS idx,
     is_amended(amendments.mst_rct_file_num::integer, amendments.file_num::integer, filing_history.form_tp::text) AS is_amended,
     CASE
         WHEN upper(filing_history.form_tp::text) IN ('FRQ', 'F99') THEN true
-        WHEN upper(filing_history.form_tp::text) IN ('F1'::text, 'F1M'::text, 'F2'::text) AND filing_history.file_num = v1.mst_rct_file_num THEN true
+        WHEN upper(filing_history.form_tp::text) IN ('F1', 'F1M', 'F2') THEN
+            CASE 
+                WHEN filing_history.file_num = v1.mst_rct_file_num THEN true
+                WHEN filing_history.file_num != v1.mst_rct_file_num THEN false
+                ELSE NULL
+            END
         WHEN upper(filing_history.form_tp::text) = 'F5'::text AND filing_history.rpt_tp::text IN ('24'::text, '48'::text) THEN NULL
         WHEN upper(filing_history.form_tp::text) = 'F6'::text THEN NULL
-        WHEN upper(filing_history.form_tp::text) = 'F24' AND filing_history.file_num = amendments.mst_rct_file_num THEN true
+        WHEN upper(filing_history.form_tp::text) = 'F24' THEN 
+            CASE 
+                WHEN filing_history.file_num = amendments.mst_rct_file_num THEN true
+                WHEN filing_history.file_num != amendments.mst_rct_file_num THEN false
+                ELSE NULL
+            END
         WHEN vs.orig_sub_id IS NOT NULL THEN true
         WHEN vs.orig_sub_id IS NULL THEN false
         ELSE NULL
