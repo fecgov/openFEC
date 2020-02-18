@@ -98,7 +98,7 @@ class ScheduleEView(ItemizedResource):
 
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
-        if kwargs.get('most_recent'):
+        if 'most_recent' in kwargs:
             query = query.filter(sa.or_(self.model.most_recent == kwargs.get('most_recent'),
                                         self.model.most_recent == None))  # noqa
         return query
@@ -172,7 +172,7 @@ class ScheduleEEfileView(views.ApiResource):
             query = query.filter(filing_alias.filed_date >= kwargs['min_filed_date'])
         if kwargs.get('max_filed_date') is not None:
             query = query.filter(filing_alias.filed_date <= kwargs['max_filed_date'])
-        if kwargs.get('most_recent'):
+        if 'most_recent' in kwargs:
             query = query.filter(sa.or_(self.model.most_recent == kwargs.get('most_recent'),
                                         self.model.most_recent == None))  # noqa
         return query
