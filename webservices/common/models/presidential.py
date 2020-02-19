@@ -44,6 +44,7 @@ class PresidentialSummary(db.Model):
     disbursements_less_offsets = db.Column(db.Numeric(30, 2), doc='TODO')
     operating_expenditures = db.Column(db.Numeric(30, 2), doc='TODO')
     transfers_to_other_authorized_committees = db.Column(db.Numeric(30, 2), doc='TODO')
+    transfers_from_affiliated_committees = db.Column(db.Numeric(30, 2), doc='TODO')
     fundraising_disbursements = db.Column(db.Numeric(30, 2), doc='TODO')
     exempt_legal_accounting_disbursement = db.Column(db.Numeric(30, 2), doc='TODO')
     total_loan_repayments_made = db.Column(db.Numeric(30, 2), doc='TODO')
