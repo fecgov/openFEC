@@ -500,23 +500,17 @@ class PresidentialByStateFactory(BaseFactory):
         model = models.PresidentialByState
     idx = factory.Sequence(lambda n: n)
 
-<<<<<<< HEAD
 class PresidentialSummaryFactory(BaseFactory):
     class Meta:
         model = models.PresidentialSummary
-=======
-class PresidentialBySizeFactory(BaseFactory):
-    class Meta:
-        model = models.PresidentialBySize
->>>>>>> Add endpoint PresidentialBySize
-    idx = factory.Sequence(lambda n: n)
-
-class PresidentialBySizeFactory(BaseFactory):
-    class Meta:
-        model = models.PresidentialBySize
     idx = factory.Sequence(lambda n: n)
 
 class PresidentialCoverageFactory(BaseFactory):
     class Meta:
         model = models.PresidentialCoverage
+    idx = factory.Sequence(lambda n: n)
+
+class PresidentialBySizeFactory(BaseFactory):
+    class Meta:
+        model = models.PresidentialBySize
     idx = factory.Sequence(lambda n: n)

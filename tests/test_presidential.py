@@ -1,3 +1,4 @@
+import datetime
 from tests import factories
 from tests.common import ApiBaseTest
 
@@ -7,6 +8,7 @@ from webservices.resources.presidential import(
     PresidentialByStateView,
     PresidentialSummaryView,
     PresidentialBySizeView,
+    PresidentialCoverageView,
 )
 
 
@@ -245,3 +247,83 @@ class PresidentialBySize(ApiBaseTest):
         self.assertEqual(
             [each['candidate_id'] for each in results],
             ['C002', 'C003', 'C001', 'C004']
+        )
+
+class PresidentialCoverage(ApiBaseTest):
+    """ Test /presidential/coverage_end_date/"""
+
+    def test_without_filter(self):
+        """ Check results without filter"""
+        factories.PresidentialCoverageFactory(
+            candidate_id='C001',
+            election_year=2016,
+            coverage_end_date=datetime.date(2016, 12, 31),
+        )
+        factories.PresidentialCoverageFactory(
+            candidate_id='C002',
+            election_year=2016,
+            coverage_end_date=datetime.date(2016, 12, 31),
+        )
+        factories.PresidentialCoverageFactory(
+            candidate_id='C001',
+            election_year=2020,
+            coverage_end_date=datetime.date(2018, 12, 31),
+        )
+        factories.PresidentialCoverageFactory(
+            candidate_id='C002',
+            election_year=2020,
+            coverage_end_date=datetime.date(2018, 12, 31),
+        )
+
+        results = self._results(api.url_for(PresidentialCoverageView))
+        self.assertEqual(len(results), 4)
+
+    def test_filters(self):
+        factories.PresidentialCoverageFactory(
+            candidate_id='C001',
+            election_year=2016,
+            coverage_end_date=datetime.date(2016, 12, 31),
+        )
+        factories.PresidentialCoverageFactory(
+            candidate_id='C002',
+            election_year=2016,
+            coverage_end_date=datetime.date(2016, 12, 31),
+        )
+        factories.PresidentialCoverageFactory(
+            candidate_id='C001',
+            election_year=2020,
+            coverage_end_date=datetime.date(2018, 12, 31),
+        )
+        factories.PresidentialCoverageFactory(
+            candidate_id='C002',
+            election_year=2020,
+            coverage_end_date=datetime.date(2018, 12, 31),
+        )
+        factories.PresidentialCoverageFactory(
+            candidate_id='C003',
+            election_year=2020,
+            coverage_end_date=datetime.date(2018, 12, 31),
+        )
+        factories.PresidentialCoverageFactory(
+            candidate_id='C004',
+            election_year=2020,
+            coverage_end_date=datetime.date(2018, 12, 31),
+        )
+
+        filter_fields = (
+            ('election_year', [2020]),
+            ('candidate_id', ['C001', 'C002']),
+        )
+
+        # checking one example from each field
+        orig_response = self._response(api.url_for(PresidentialCoverageView))
+        original_count = orig_response['pagination']['count']
+
+        for field, example in filter_fields:
+            page = api.url_for(PresidentialCoverageView, **{field: example})
+            # returns at least one result
+            results = self._results(page)
+            self.assertGreater(len(results), 0)
+            # doesn't return all results
+            response = self._response(page)
+            self.assertGreater(original_count, response['pagination']['count'])
