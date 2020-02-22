@@ -4,6 +4,7 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 
 from webservices import docs
 from webservices import __API_VERSION__
+from webservices.env import env
 
 def format_docstring(docstring):
     if not docstring or not docstring.strip():
@@ -20,6 +21,87 @@ def format_docstring(docstring):
 
     return ' '.join(formatted).strip()
 
+TAGS = [
+    {
+        'name': 'candidate',
+        'description': format_docstring(docs.CANDIDATE_TAG),
+    },
+    {
+        'name': 'committee',
+        'description': format_docstring(docs.COMMITTEE_TAG),
+    },
+    {
+        'name': 'dates',
+        'description': format_docstring(docs.DATES_TAG),
+    },
+    {
+        'name': 'financial',
+        'description': format_docstring(docs.FINANCIAL_TAG),
+    },
+    {
+        'name': 'search',
+        'description': format_docstring(docs.SEARCH_TAG),
+    },
+    {
+        'name': 'filings',
+        'description': format_docstring(docs.FILINGS),
+    },
+    {
+        'name': 'receipts',
+        'description': format_docstring(docs.SCHEDULE_A_TAG),
+    },
+    {
+        'name': 'disbursements',
+        'description': format_docstring(docs.SCHEDULE_B_TAG),
+    },
+    {
+        'name': 'loans',
+        'description': format_docstring(docs.SCHEDULE_C_TAG),
+    },
+    {
+        'name': 'debts',
+        'description': format_docstring(docs.SCHEDULE_D_TAG),
+    },
+    {
+        'name': 'independent expenditures',
+        'description': format_docstring(docs.SCHEDULE_E_TAG),
+    },
+    {
+        'name': 'party-coordinated expenditures',
+        'description': format_docstring(docs.SCHEDULE_F_TAG),
+    },
+    {
+        'name': 'communication cost',
+        'description': format_docstring(docs.COMMUNICATION_TAG),
+    },
+    {
+        'name': 'electioneering',
+        'description': format_docstring(docs.ELECTIONEERING),
+    },
+    {
+        'name': 'filer resources',
+        'description': format_docstring(docs.FILER_RESOURCES),
+    },
+    {
+        'name': 'efiling',
+        'description': format_docstring(docs.EFILING_TAG),
+    },
+    {
+        'name': 'audit',
+        'description': format_docstring(docs.AUDIT),
+    },
+    {
+        'name': 'legal',
+        'description': format_docstring(docs.LEGAL),
+    }
+]
+
+if bool(env.get_credential('FEC_FEATURE_PRESIDENTIAL', '')):
+    # Insert after 'electioneering'
+    TAGS.insert(14, {
+        'name': 'presidential',
+        'description': format_docstring(docs.PRESIDENTIAL),
+    })
 
 spec = APISpec(
     title='OpenFEC',
@@ -36,84 +118,5 @@ spec = APISpec(
         },
     },
     security=[{'apiKey': []}],
-    tags=[
-        {
-            'name': 'candidate',
-            'description': format_docstring(docs.CANDIDATE_TAG),
-        },
-        {
-            'name': 'committee',
-            'description': format_docstring(docs.COMMITTEE_TAG),
-        },
-        {
-            'name': 'dates',
-            'description': format_docstring(docs.DATES_TAG),
-        },
-        {
-            'name': 'financial',
-            'description': format_docstring(docs.FINANCIAL_TAG),
-        },
-        {
-            'name': 'search',
-            'description': format_docstring(docs.SEARCH_TAG),
-        },
-        {
-            'name': 'filings',
-            'description': format_docstring(docs.FILINGS),
-        },
-        {
-            'name': 'receipts',
-            'description': format_docstring(docs.SCHEDULE_A_TAG),
-        },
-        {
-            'name': 'disbursements',
-            'description': format_docstring(docs.SCHEDULE_B_TAG),
-        },
-        {
-            'name': 'loans',
-            'description': format_docstring(docs.SCHEDULE_C_TAG),
-
-        },
-        {
-            'name': 'debts',
-            'description': format_docstring(docs.SCHEDULE_D_TAG),
-
-        },
-        {
-            'name': 'independent expenditures',
-            'description': format_docstring(docs.SCHEDULE_E_TAG),
-        },
-        {
-            'name': 'party-coordinated expenditures',
-            'description': format_docstring(docs.SCHEDULE_F_TAG),
-        },
-        {
-            'name': 'communication cost',
-            'description': format_docstring(docs.COMMUNICATION_TAG),
-        },
-        {
-            'name': 'electioneering',
-            'description': format_docstring(docs.ELECTIONEERING),
-        },
-        {
-            'name': 'presidential',
-            'description': format_docstring(docs.PRESIDENTIAL),
-        },
-        {
-            'name': 'filer resources',
-            'description': format_docstring(docs.FILER_RESOURCES),
-        },
-        {
-            'name': 'efiling',
-            'description': format_docstring(docs.EFILING_TAG),
-        },
-        {
-            'name': 'audit',
-            'description': format_docstring(docs.AUDIT),
-        },
-        {
-            'name': 'legal',
-            'description': format_docstring(docs.LEGAL),
-        }
-    ]
+    tags=TAGS,
 )
