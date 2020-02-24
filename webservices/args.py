@@ -830,7 +830,7 @@ schedule_e = {
     'max_dissemination_date': fields.Date(description=docs.DISSEMINATION_MAX_DATE),
     'min_filing_date': fields.Date(description=docs.MIN_FILED_DATE),
     'max_filing_date': fields.Date(description=docs.MAX_FILED_DATE),
-    'most_recent': fields.Bool(description=docs.MOST_RECENT),
+    'most_recent': fields.Bool(description=docs.MOST_RECENT_IE),
 
 }
 
@@ -854,7 +854,7 @@ schedule_e_efile = {
     'candidate_office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
     'candidate_office_state': fields.List(IStr, description=docs.STATE),
     'candidate_office_district': fields.List(IStr, description=docs.DISTRICT),
-    'most_recent': fields.Bool(description=docs.MOST_RECENT),
+    'most_recent': fields.Bool(description=docs.MOST_RECENT_IE),
     'min_filed_date': fields.Date(description=docs.FILED_DATE),
     'max_filed_date': fields.Date(description=docs.FILED_DATE),
     'filing_form': fields.List(IStr, description=docs.FORM_TYPE),
@@ -967,10 +967,21 @@ schedule_h4 = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'last_event_purpose_date': fields.Date(missing=None, description=docs.LAST_DISBURSEMENT_DATE),
-    
+
 }
 
 presidential = {
     'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+}
+
+presidential_by_candidate = {
+    'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
+    'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
+}
+
+presidential_by_size = {
+    'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'size': fields.List(fields.Int(validate=validate.OneOf([0, 200, 500, 1000, 2000])), description=docs.SIZE),
 }

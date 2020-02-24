@@ -654,6 +654,10 @@ MOST_RECENT = '''
 Report is either new or is the most-recently filed amendment
 '''
 
+MOST_RECENT_IE = '''
+The report associated with the transaction is either new or is the most-recently filed amendment. Undetermined version (`null`) is always included.
+'''
+
 HTML_URL = '''
 HTML link to the filing.
 '''
@@ -901,6 +905,14 @@ This endpoint provides itemized individual contributions received by a committee
 
 SCHEDULE_A_BY_OCCUPATION = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated by the contributor’s occupation. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
+'''
+
+CONTRIBUTION_RECEIPTS = '''
+Contributions received
+'''
+
+SIZE_RANGE_ID = '''
+The total all contributions range id.
 '''
 
 SIZE = '''
@@ -1836,6 +1848,20 @@ URL for retrieving the PDF document
 # ======== presidential start =========
 
 PRESIDENTIAL = """
-TODO: Add Text
+Data supporting fec.gov's presidential map.
+
+For more information about the presidential map data that is available to download on fec.gov, please visit: https://www.fec.gov/campaign-finance-data/presidential-map-help/
+"""
+
+PRESIDENTIAL_BY_CANDIDATE = """
+Net receipts per candidate.
+
+Filter with `contributor_state='US'` for national totals
+
+Totals for all candidates have `candidate_last_name` `'All candidates'` and `candidate_id` `'P00000001'`
+Totals for all democrats have `candidate_last_name` `'Democrats'` and `candidate_id` `'P00000002'`
+Totals for all republicans have `candidate_last_name` `'Republicans'` and `candidate_id` `'P00000003'`
+
+See https://www.fec.gov/campaign-finance-data/presidential-map-help/
 """
 # ======== presidential end =========

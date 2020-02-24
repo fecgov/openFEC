@@ -1265,7 +1265,7 @@ augment_schemas(CCTotalsByCandidateSchema)
 
 PresidentialByCandidateSchema = make_schema(
     models.PresidentialByCandidate,
-    options={'exclude': ('idx', 'name_txt')},
+    options={'exclude': ('idx',)},
 )
 PresidentialByCandidatePageSchema = make_page_schema(PresidentialByCandidateSchema)
 register_schema(PresidentialByCandidateSchema)
@@ -1275,7 +1275,7 @@ register_schema(PresidentialByCandidatePageSchema)
 
 PresidentialSummarySchema = make_schema(
     models.PresidentialSummary,
-    options={'exclude': ('idx', 'name_txt')},
+    options={'exclude': ('idx',)},
 )
 PresidentialSummaryPageSchema = make_page_schema(PresidentialSummarySchema)
 register_schema(PresidentialSummarySchema)
@@ -1285,7 +1285,7 @@ register_schema(PresidentialSummaryPageSchema)
 
 PresidentialBySizeSchema = make_schema(
     models.PresidentialBySize,
-    options={'exclude': ('idx', 'name_txt')},
+    options={'exclude': ('idx',)},
 )
 PresidentialBySizePageSchema = make_page_schema(PresidentialBySizeSchema)
 register_schema(PresidentialBySizeSchema)
@@ -1295,7 +1295,7 @@ register_schema(PresidentialBySizePageSchema)
 
 PresidentialByStateSchema = make_schema(
     models.PresidentialByState,
-    options={'exclude': ('idx', 'name_txt')},
+    options={'exclude': ('idx',)},
 )
 PresidentialByStatePageSchema = make_page_schema(PresidentialByStateSchema)
 register_schema(PresidentialByStateSchema)
@@ -1305,7 +1305,7 @@ register_schema(PresidentialByStatePageSchema)
 
 PresidentialCoverageSchema = make_schema(
     models.PresidentialCoverage,
-    options={'exclude': ('idx', 'name_txt')},
+    options={'exclude': ('idx',)},
 )
 PresidentialCoveragePageSchema = make_page_schema(PresidentialCoverageSchema)
 register_schema(PresidentialCoverageSchema)
