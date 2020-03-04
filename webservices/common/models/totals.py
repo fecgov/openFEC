@@ -91,56 +91,6 @@ class CandidateCommitteeTotals(db.Model):
     last_debts_owed_to_committee = db.Column(db.Numeric(30, 2))
 
 
-class CommitteeTotalsPacPartyBase(CommitteeTotals):
-    __abstract__ = True
-
-    all_loans_received = db.Column(db.Numeric(30, 2))
-    allocated_federal_election_levin_share = db.Column(db.Numeric(30, 2))
-    coordinated_expenditures_by_party_committee = db.Column(db.Numeric(30, 2))
-    fed_candidate_committee_contributions = db.Column(db.Numeric(30, 2))
-    fed_candidate_contribution_refunds = db.Column(db.Numeric(30, 2))
-    fed_disbursements = db.Column(db.Numeric(30, 2))
-    fed_election_activity = db.Column(db.Numeric(30, 2))
-    fed_operating_expenditures = db.Column(db.Numeric(30, 2))
-    fed_receipts = db.Column(db.Numeric(30, 2))
-    independent_expenditures = db.Column(db.Numeric(30, 2))
-    loan_repayments_made = db.Column(db.Numeric(30, 2))
-    loan_repayments_received = db.Column(db.Numeric(30, 2))
-    loans_made = db.Column(db.Numeric(30, 2))
-    non_allocated_fed_election_activity = db.Column(db.Numeric(30, 2))
-    total_transfers = db.Column(db.Numeric(30,2))
-    other_fed_operating_expenditures = db.Column(db.Numeric(30, 2))
-    other_fed_receipts = db.Column(db.Numeric(30, 2))
-    shared_fed_activity = db.Column(db.Numeric(30, 2))
-    shared_fed_activity_nonfed = db.Column(db.Numeric(30, 2))
-    shared_fed_operating_expenditures = db.Column(db.Numeric(30, 2))
-    shared_nonfed_operating_expenditures = db.Column(db.Numeric(30, 2))
-    transfers_from_affiliated_party = db.Column(db.Numeric(30, 2))
-    transfers_from_nonfed_account = db.Column(db.Numeric(30, 2))
-    transfers_from_nonfed_levin = db.Column(db.Numeric(30, 2))
-    transfers_to_affiliated_committee = db.Column(db.Numeric(30, 2))
-    cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
-    # For Form 4
-    federal_funds = db.Column(db.Numeric(30, 2))
-    loans_and_loan_repayments_received = db.Column(db.Numeric(30, 2))
-    loans_and_loan_repayments_made = db.Column(db.Numeric(30, 2))
-    exp_subject_limits = db.Column(db.Numeric(30, 2))
-    exp_prior_years_subject_limits = db.Column(db.Numeric(30, 2))
-    total_exp_subject_limits = db.Column(db.Numeric(30, 2))
-    refunds_relating_convention_exp = db.Column(db.Numeric(30, 2))
-    itemized_refunds_relating_convention_exp = db.Column(db.Numeric(30, 2))
-    unitemized_refunds_relating_convention_exp = db.Column(db.Numeric(30, 2))
-    other_refunds = db.Column(db.Numeric(30, 2))
-    itemized_other_refunds = db.Column(db.Numeric(30, 2))
-    unitemized_other_refunds = db.Column(db.Numeric(30, 2))
-    itemized_other_income = db.Column(db.Numeric(30, 2))
-    unitemized_other_income = db.Column(db.Numeric(30, 2))
-    convention_exp = db.Column(db.Numeric(30, 2))
-    itemized_convention_exp = db.Column(db.Numeric(30, 2))
-    unitemized_convention_exp = db.Column(db.Numeric(30, 2))
-    itemized_other_disb = db.Column(db.Numeric(30, 2))
-    unitemized_other_disb = db.Column(db.Numeric(30, 2))
-
 class CommitteeTotalsPresidential(CommitteeTotals):
     __tablename__ = 'ofec_totals_presidential_mv'
 
@@ -210,8 +160,56 @@ class CandidateCommitteeTotalsHouseSenate(CandidateCommitteeTotals):
     net_contributions = db.Column(db.Numeric(30, 2))
 
 
-class CommitteeTotalsPacParty(CommitteeTotalsPacPartyBase):
-    __tablename__ = 'ofec_totals_pacs_parties_vw'
+class CommitteeTotalsPacParty(CommitteeTotals):
+    __tablename__ = 'ofec_totals_pac_party_vw'
+
+    idx = db.Column('sub_id', db.Integer)
+    all_loans_received = db.Column(db.Numeric(30, 2))
+    allocated_federal_election_levin_share = db.Column(db.Numeric(30, 2))
+    coordinated_expenditures_by_party_committee = db.Column(db.Numeric(30, 2))
+    fed_candidate_committee_contributions = db.Column(db.Numeric(30, 2))
+    fed_candidate_contribution_refunds = db.Column(db.Numeric(30, 2))
+    fed_disbursements = db.Column(db.Numeric(30, 2))
+    fed_election_activity = db.Column(db.Numeric(30, 2))
+    fed_operating_expenditures = db.Column(db.Numeric(30, 2))
+    fed_receipts = db.Column(db.Numeric(30, 2))
+    independent_expenditures = db.Column(db.Numeric(30, 2))
+    loan_repayments_made = db.Column(db.Numeric(30, 2))
+    loan_repayments_received = db.Column(db.Numeric(30, 2))
+    loans_made = db.Column(db.Numeric(30, 2))
+    non_allocated_fed_election_activity = db.Column(db.Numeric(30, 2))
+    total_transfers = db.Column(db.Numeric(30, 2))
+    other_fed_operating_expenditures = db.Column(db.Numeric(30, 2))
+    other_fed_receipts = db.Column(db.Numeric(30, 2))
+    shared_fed_activity = db.Column(db.Numeric(30, 2))
+    shared_fed_activity_nonfed = db.Column(db.Numeric(30, 2))
+    shared_fed_operating_expenditures = db.Column(db.Numeric(30, 2))
+    shared_nonfed_operating_expenditures = db.Column(db.Numeric(30, 2))
+    transfers_from_affiliated_party = db.Column(db.Numeric(30, 2))
+    transfers_from_nonfed_account = db.Column(db.Numeric(30, 2))
+    transfers_from_nonfed_levin = db.Column(db.Numeric(30, 2))
+    transfers_to_affiliated_committee = db.Column(db.Numeric(30, 2))
+    cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
+    # For Form 4
+    federal_funds = db.Column(db.Numeric(30, 2))
+    loans_and_loan_repayments_received = db.Column(db.Numeric(30, 2))
+    loans_and_loan_repayments_made = db.Column(db.Numeric(30, 2))
+    exp_subject_limits = db.Column(db.Numeric(30, 2))
+    exp_prior_years_subject_limits = db.Column(db.Numeric(30, 2))
+    total_exp_subject_limits = db.Column(db.Numeric(30, 2))
+    refunds_relating_convention_exp = db.Column(db.Numeric(30, 2))
+    itemized_refunds_relating_convention_exp = db.Column(db.Numeric(30, 2))
+    unitemized_refunds_relating_convention_exp = db.Column(db.Numeric(30, 2))
+    other_refunds = db.Column(db.Numeric(30, 2))
+    itemized_other_refunds = db.Column(db.Numeric(30, 2))
+    unitemized_other_refunds = db.Column(db.Numeric(30, 2))
+    itemized_other_income = db.Column(db.Numeric(30, 2))
+    unitemized_other_income = db.Column(db.Numeric(30, 2))
+    convention_exp = db.Column(db.Numeric(30, 2))
+    itemized_convention_exp = db.Column(db.Numeric(30, 2))
+    unitemized_convention_exp = db.Column(db.Numeric(30, 2))
+    itemized_other_disb = db.Column(db.Numeric(30, 2))
+    unitemized_other_disb = db.Column(db.Numeric(30, 2))
 
 
 class CommitteeTotalsHouseSenate(CommitteeTotals):
