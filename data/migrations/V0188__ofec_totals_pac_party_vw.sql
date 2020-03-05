@@ -86,7 +86,7 @@ SELECT max(ofec_totals_combined_vw.sub_id) AS sub_id,
     sum(COALESCE(ofec_totals_combined_vw.unitemized_refunds_relating_convention_exp, 0.0)) AS unitemized_refunds_relating_convention_exp
 FROM ofec_totals_combined_vw
 WHERE ofec_totals_combined_vw.committee_type IN ('N', '0', 'Q', 'V', 'W', 'X', 'Y') 
-	AND ofec_totals_combined_vw.form_type IN ('F3X', 'F13', 'F4', 'F3')
+	AND ofec_totals_combined_vw.form_type IN ('F3X', 'F13', 'F4', 'F3','F3P')
 GROUP BY ofec_totals_combined_vw.committee_id, ofec_totals_combined_vw.cycle;
 
 ALTER TABLE public.ofec_totals_pac_party_vw OWNER TO fec;
