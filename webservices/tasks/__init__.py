@@ -35,6 +35,10 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
             'schedule': crontab(minute=0, hour=4, day_of_week='sun'),
         },
 
+        'rebuild_guidance_documents_search_sitemap': {
+            'task': 'webservices.tasks.guidance_document_sitemap_generator.build_sitemap',
+            'schedule': crontab(minute='*/1'),
+        },
     }
 
 def redis_url():
@@ -59,6 +63,7 @@ app.conf.update(
     broker_url=redis_url(),
     imports=(
         'webservices.tasks.refresh',
+        'webservices.tasks.guidance_document_sitemap_generator',
         'webservices.tasks.download',
         'webservices.tasks.legal_docs',
     ),
