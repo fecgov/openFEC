@@ -1,6 +1,6 @@
 # Python CircleCI 2.0 configuration file
 # Check https://circleci.com/docs/2.0/language-python/ for more details
-version: 2
+version: 2.1
 jobs:
   build:
     docker:
