@@ -21,6 +21,7 @@ def format_docstring(docstring):
 
     return ' '.join(formatted).strip()
 
+
 TAGS = [
     {
         'name': 'candidate',

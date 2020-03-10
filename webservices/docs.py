@@ -1850,18 +1850,104 @@ URL for retrieving the PDF document
 PRESIDENTIAL = """
 Data supporting fec.gov's presidential map.
 
-For more information about the presidential map data that is available to download on fec.gov, please visit: https://www.fec.gov/campaign-finance-data/presidential-map-help/
+For more information about the presidential map data available to download from fec.gov,\n\
+please visit: https://www.fec.gov/campaign-finance-data/presidential-map-help/
 """
 
 PRESIDENTIAL_BY_CANDIDATE = """
 Net receipts per candidate.
 
 Filter with `contributor_state='US'` for national totals
-
-Totals for all candidates have `candidate_last_name` `'All candidates'` and `candidate_id` `'P00000001'`
-Totals for all democrats have `candidate_last_name` `'Democrats'` and `candidate_id` `'P00000002'`
-Totals for all republicans have `candidate_last_name` `'Republicans'` and `candidate_id` `'P00000003'`
-
-See https://www.fec.gov/campaign-finance-data/presidential-map-help/
 """
+
+PRESIDENTIAL_BY_STATE = """
+Contribution receipts by state per candidate.
+
+Filter by candidate_id and/or election_year
+"""
+
+PRESIDENTIAL_BY_SIZE = """
+Contribution receipts by size per candidate.
+
+Filter by candidate_id, election_year and/or size
+"""
+
+PRESIDENTIAL_BY_COVERAGE = """
+Coverage end date per candidate.
+
+Filter by candidate_id and/or election_year
+"""
+
+PRESIDENTIAL_BY_SUMMERY = """
+Financial summary per candidate.
+
+Filter by candidate_id and/or election_year
+"""
+
+CANDIDATE_ID_PRESIDENTIAL = CANDIDATE_ID + """\
+  -P00000001    All candidates\n\
+  -P00000002    Democrasts\n\
+  -P00000003    Republicans\n\
+"""
+
+CANDIDATE_LAST_NAME = """
+Candidate last name
+"""
+
+ROUND_CONTRIBUTIONS = """
+Net receipts, in millions
+"""
+
+INDIVIDUAL_CONTRIBUTIONS_LESS_REFUNDS = """
+individual contributions less refunds
+"""
+
+PAC_CONTRIBUTIONS_LESS_REFUNDS = """
+pac contributions less refunds
+"""
+
+PARTY_CONTRIBUTIONS_LESS_REFUNDS = """
+party contributions less refunds
+"""
+
+CANDIDATE_CONTRIBUTION_LESS_REPAYMENTS = """
+candidate contributions less repayments
+"""
+
+DISBURSEMENTS_LESS_OFFSETS = """
+disbursements less offsets
+"""
+
+TRANSACTION_TO_OTHER_AUTHORIZED_COMMITTEES = """
+transfers to other authorized committees
+"""
+
+TRANSACTION_FROM_AFFILIATED_COMMITTEES = """
+transfers from affiliated committees
+"""
+
+FUNDRAISING_DISBURSEMENTS = """
+fundraising disbursements
+"""
+
+EXEMPT_LEGAL_ACCOUNTING_DISBURSEMENT = """
+exempt legal accounting disbursement
+"""
+
+TOTAL_LOAN_REPAYMENTS_MADE = """
+total loan repayments made
+"""
+
+REPAYMENTS_OTHER_LOANS_MADE_BY_CANDIDATE = """
+repayments loans made by candidate
+"""
+
+REPAYMENTS_OTHER_LOANS = """
+repayments other loans
+"""
+
+TOTAL_CONTRIBUTION_REFUNDS = """
+total contribution refunds
+"""
+
 # ======== presidential end =========

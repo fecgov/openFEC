@@ -40,7 +40,7 @@ class PresidentialByCandidateView(ApiResource):
 
 @doc(
     tags=['presidential'],
-    description=docs.PRESIDENTIAL,
+    description=docs.PRESIDENTIAL_BY_SUMMERY,
 )
 class PresidentialSummaryView(ApiResource):
 
@@ -70,7 +70,7 @@ class PresidentialSummaryView(ApiResource):
 
 @doc(
     tags=['presidential'],
-    description=docs.PRESIDENTIAL,
+    description=docs.PRESIDENTIAL_BY_SIZE,
 )
 class PresidentialBySizeView(ApiResource):
 
@@ -101,7 +101,7 @@ class PresidentialBySizeView(ApiResource):
 
 @doc(
     tags=['presidential'],
-    description=docs.PRESIDENTIAL,
+    description=docs.PRESIDENTIAL_BY_STATE,
 )
 class PresidentialByStateView(ApiResource):
 
@@ -131,7 +131,7 @@ class PresidentialByStateView(ApiResource):
 
 @doc(
     tags=['presidential'],
-    description=docs.PRESIDENTIAL,
+    description=docs.PRESIDENTIAL_BY_COVERAGE,
 )
 class PresidentialCoverageView(ApiResource):
 

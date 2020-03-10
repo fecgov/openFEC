@@ -972,7 +972,18 @@ schedule_h4 = {
 
 presidential = {
     'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID_PRESIDENTIAL),
+}
+
+presidential_by_candidate = {
+    'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
+    'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
+}
+
+presidential_by_size = {
+    'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID_PRESIDENTIAL),
+    'size': fields.List(fields.Int(validate=validate.OneOf([0, 200, 500, 1000, 2000])), description=docs.SIZE),
 }
 
 presidential_by_candidate = {
