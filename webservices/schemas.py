@@ -750,6 +750,22 @@ CommunicationCostPageSchema = make_page_schema(CommunicationCostSchema, page_typ
 register_schema(CommunicationCostSchema)
 register_schema(CommunicationCostPageSchema)
 
+CCAggregatesSchema = make_schema(
+    models.CommunicationCostByCandidate,
+    fields={
+        'committee_id': ma.fields.Str(),
+        'candidate_id': ma.fields.Str(),
+        'committee_name': ma.fields.Str(),
+        'candidate_name': ma.fields.Str(),
+        'cycle': ma.fields.Int(),
+        'count': ma.fields.Int(),
+        'total': ma.fields.Decimal(places=2),
+    },
+)
+CCAggregatesPageSchema = make_page_schema(CCAggregatesSchema)
+register_schema(CCAggregatesSchema)
+register_schema(CCAggregatesPageSchema)
+
 ElectioneeringSchema = make_schema(
     models.Electioneering,
     fields={'election_type': ma.fields.Str()},
