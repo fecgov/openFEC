@@ -110,7 +110,10 @@ WITH linkage AS (
         SELECT DISTINCT ON (cand_id, fec_election_yr)
             cand_id,
             fec_election_yr,
-            election_year,
+            -- this calculation is not really necessary since this is already a rounded field, 
+            -- but since somehow in the original vw it had been defined as numeric, 
+            -- need to trick the engine to think it is a numeric field instead of numeric (4, 0)
+            election_year+election_year%2 as election_year,
             coverage_start_date,
             candidate_contribution,
             contribution_refunds,
@@ -332,7 +335,7 @@ GRANT SELECT ON TABLE public.ofec_candidate_totals_detail_mv_tmp TO fec_read;
 
 
 -- indexes
-CREATE UNIQUE INDEX idx_ofec_candidate_totals_detail_mv_tmp_cand_id_cycle_elect_full
+CREATE UNIQUE INDEX idx_ofec_candidate_totals_detail_mv_tmp_cand_id_cycle_elect_ful
     ON public.ofec_candidate_totals_detail_mv_tmp USING btree
     (candidate_id, cycle, election_full);
 CREATE INDEX idx_ofec_candidate_totals_detail_mv_tmp_cand_id
