@@ -4,8 +4,8 @@ This is a follow up ticket of of #4256 and #4182
 see (issue #4226 and its PR #4167) and (issue #4282 and its PR #4283)
 
 Candidate totals for H6MD08549 is inconsistent between 
-/candidate/{candidate_id}/totals/: data source public.ofec_candidate_totals_mv
-/candidates/totals/: data source public.ofec_candidate_totals_detail_mv
+/candidate/{candidate_id}/totals/: data source public.ofec_candidate_totals_detail_mv
+/candidates/totals/: data source public.ofec_candidate_totals_mv
 
 For a candidate, although one candidate election cycle can have more then one cycle (fec_election_yr), depends on the H, S or P
 one fec_election_yr should only belongs to one candidate_election_yr (or sometimes none)
