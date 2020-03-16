@@ -356,6 +356,11 @@ api.add_resource(
 )
 
 api.add_resource(
+    aggregates.CCAggregatesView,
+    '/communication_costs/aggregates/',
+)
+
+api.add_resource(
     aggregates.ElectioneeringByCandidateView,
     '/electioneering/by_candidate/',
     '/committee/<string:committee_id>/electioneering/by_candidate/',
@@ -454,6 +459,7 @@ apidoc.register(sched_d.ScheduleDViewBySubId, blueprint='v1')
 if bool(env.get_credential('FEC_FEATURE_SCHEDULE_H4', '')):
     apidoc.register(sched_h4.ScheduleH4View, blueprint='v1')
 apidoc.register(costs.CommunicationCostView, blueprint='v1')
+apidoc.register(aggregates.CCAggregatesView, blueprint='v1')
 apidoc.register(costs.ElectioneeringView, blueprint='v1')
 apidoc.register(aggregates.ECAggregatesView, blueprint='v1')
 apidoc.register(aggregates.ScheduleABySizeView, blueprint='v1')
