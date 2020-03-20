@@ -307,6 +307,46 @@ class CommunicationCostByCandidateView(CandidateAggregateResource):
 
 
 @doc(
+    tags=['communication cost'],
+    description=docs.COMMUNICATION_COST_AGGREGATE,
+)
+class CCAggregatesView(AggregateResource):
+
+    @property
+    def sort_args(self):
+        return args.make_sort_args(
+            validator=args.IndexValidator(
+                self.model,
+                extra=['candidate', 'committee'],
+            ),
+        )
+
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+        cycle_column = self.model.cycle
+
+        query = query.filter(
+            cycle_column.in_(kwargs['cycle'])
+            if kwargs.get('cycle')
+            else True
+        )
+        return join_cand_cmte_names(query)
+
+    model = models.CommunicationCostByCandidate
+    schema = schemas.CCAggregatesSchema
+    page_schema = schemas.CCAggregatesPageSchema
+    query_args = utils.extend(args.CC_aggregates)
+
+    filter_multi_fields = [
+        ('candidate_id', model.candidate_id),
+        ('committee_id', model.committee_id),
+    ]
+    filter_match_fields = [
+        ('support_oppose_indicator', model.support_oppose_indicator),
+    ]
+
+
+@doc(
     tags=['electioneering'],
     description=docs.ELECTIONEERING_AGGREGATE_BY_CANDIDATE,
 )
@@ -353,8 +393,8 @@ class ECAggregatesView(AggregateResource):
     query_args = utils.extend(args.EC_aggregates)
 
     filter_multi_fields = [
-        ('candidate_id', models.ElectioneeringByCandidate.candidate_id),
-        ('committee_id', models.ElectioneeringByCandidate.committee_id),
+        ('candidate_id', model.candidate_id),
+        ('committee_id', model.committee_id),
     ]
 
 def join_cand_cmte_names(query):

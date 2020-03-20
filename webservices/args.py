@@ -696,6 +696,17 @@ communication_cost = {
     ),
 }
 
+CC_aggregates = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'support_oppose_indicator': IStr(
+        missing=None,
+        validate=validate.OneOf(['S', 'O']),
+        description=docs.SUPPORT_OPPOSE,
+    ),
+}
+
 electioneering = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),

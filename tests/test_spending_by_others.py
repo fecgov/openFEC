@@ -8,10 +8,8 @@ from webservices.resources.spending_by_others import (
     CCTotalsByCandidateView
 )
 from webservices.resources.aggregates import (
+    CCAggregatesView,
     ECAggregatesView,
-)
-from webservices.schemas import (
-    ECAggregatesSchema,
 )
 
 # test endpoint: /electioneering/totals/by_candidate/ under tag:electioneering
@@ -185,10 +183,41 @@ class TestTotalCommunicationsCosts(ApiBaseTest):
             support_oppose_indicator='O'
         ),
 
-        results = self._results(api.url_for(CCTotalsByCandidateView, cycle='2016', candidate_id='P01', election_full=False))
+        results = self._results(api.url_for(
+            CCTotalsByCandidateView,
+            cycle='2016',
+            candidate_id='P01',
+            election_full=False
+        ))
         assert len(results) == 2
 
-        results = self._results(api.url_for(CCTotalsByCandidateView, cycle='2016', candidate_id='P01', election_full=True))
+        results = self._results(api.url_for(
+            CCTotalsByCandidateView,
+            cycle='2016',
+            candidate_id='P01',
+            election_full=True
+        ))
         assert len(results) == 2
         assert results[0]['total'] == 800
         assert results[1]['total'] == 600
+
+# test endpoint: /communication_costs/aggregates/ under tag:communication costs
+class TestCommunicationCostAggregates(ApiBaseTest):
+    def test_CCAggregatesView_base(self):
+        factories.CommunicationCostByCandidateFactory(),
+        results = self._results(api.url_for(CCAggregatesView,))
+        assert len(results) == 1
+
+    def test_filters_committee_candidate_id_cycle(self):
+        factories.CommunicationCostByCandidateFactory(committee_id='P001', candidate_id='C001', cycle=2000)
+        factories.CommunicationCostByCandidateFactory(committee_id='P001', candidate_id='C002', cycle=2000)
+        factories.CommunicationCostByCandidateFactory(committee_id='P002', candidate_id='C001', cycle=2004)
+        db.session.flush()
+        results = self._results(api.url_for(CCAggregatesView, committee_id='P001'))
+        self.assertEqual(len(results), 2)
+
+        results = self._results(api.url_for(CCAggregatesView, candidate_id='C001'))
+        self.assertEqual(len(results), 2)
+
+        results = self._results(api.url_for(CCAggregatesView, cycle=2000))
+        self.assertEqual(len(results), 2)
