@@ -31,7 +31,7 @@ REQUIRED_CREDS = (
     'FEC_SLACK_TOKEN',
 )
 
-REQUIRED_SERVICES = ('redis32', 's3', 'elasticsearch24')
+REQUIRED_SERVICES = ('redis32', 's3', 'elasticsearch56')
 
 REQUIRED_TABLES = (
     tuple(db.Model.metadata.tables.keys()) +
