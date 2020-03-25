@@ -138,8 +138,8 @@ class PresidentialByState(ApiBaseTest):
         factories.PresidentialByStateFactory(candidate_id='C002', election_year=2016)
         factories.PresidentialByStateFactory(candidate_id='C001', election_year=2020)
         factories.PresidentialByStateFactory(candidate_id='C002', election_year=2020)
-        factories.PresidentialByStateFactory(candidate_id='C002', election_year=2020)
-        factories.PresidentialByStateFactory(candidate_id='C002', election_year=2020)
+        factories.PresidentialByStateFactory(candidate_id='C003', election_year=2020)
+        factories.PresidentialByStateFactory(candidate_id='C004', election_year=2020)
 
         filter_fields = (('candidate_id', ['C001', 'C002']),)
 
@@ -154,7 +154,7 @@ class PresidentialByState(ApiBaseTest):
             self.assertGreater(len(results), 0)
             # doesn't return all results, but return same records
             response = self._response(page)
-            self.assertEqual(original_count, response['pagination']['count'])
+            self.assertGreater(original_count, response['pagination']['count'])
 
     def test_sort(self):
         factories.PresidentialByStateFactory(
@@ -189,27 +189,31 @@ class PresidentialSummary(ApiBaseTest):
         results = self._results(api.url_for(PresidentialSummaryView))
         self.assertEqual(len(results), 4)
 
-    # Fixing these in another commit
+    def test_filters(self):
+        factories.PresidentialSummaryFactory(candidate_id='C001', election_year=2016, net_receipts=100)
+        factories.PresidentialSummaryFactory(candidate_id='C002', election_year=2016, net_receipts=200)
+        factories.PresidentialSummaryFactory(candidate_id='C001', election_year=2020, net_receipts=300)
+        factories.PresidentialSummaryFactory(candidate_id='C002', election_year=2020, net_receipts=400)
+        factories.PresidentialSummaryFactory(candidate_id='C003', election_year=2020, net_receipts=500)
+        factories.PresidentialSummaryFactory(candidate_id='C004', election_year=2020, net_receipts=600)
 
-    # def test_filters(self):
-    #     factories.PresidentialSummaryFactory(candidate_id='C001', election_year=2016, net_receipts=100)
-    #     factories.PresidentialSummaryFactory(candidate_id='C002', election_year=2016, net_receipts=200)
-    #     factories.PresidentialSummaryFactory(candidate_id='C001', election_year=2020, net_receipts=300)
-    #     factories.PresidentialSummaryFactory(candidate_id='C002', election_year=2020, net_receipts=400)
-    #     factories.PresidentialSummaryFactory(candidate_id='C003', election_year=2020, net_receipts=500)
-    #     factories.PresidentialSummaryFactory(candidate_id='C004', election_year=2020, net_receipts=600)
+        filter_fields = (
+            ('election_year', [2020]),
+            ('candidate_id', ['C001', 'C002']),
+        )
 
-    #     filter_fields = (
-    #         ('election_year', [2020]),
-    #         ('candidate_id', ['C001', 'C002']),
-    #     )
+        # checking one example from each field
+        orig_response = self._response(api.url_for(PresidentialSummaryView))
+        original_count = orig_response['pagination']['count']
 
-    #     # checking one example from each field
-    #     orig_response = self._response(api.url_for(PresidentialSummaryView))
-    #     original_count = orig_response['pagination']['count']
-
-    #     for field, example in filter_fields:
-    #         page = api.url_for(PresidentialSummaryView, **{field: example})
+        for field, example in filter_fields:
+            page = api.url_for(PresidentialSummaryView, **{field: example})
+            # returns at least one result
+            results = self._results(page)
+            self.assertGreater(len(results), 0)
+            # doesn't return all results, but return same records
+            response = self._response(page)
+            self.assertGreater(original_count, response['pagination']['count'])
 
 
 class PresidentialBySize(ApiBaseTest):
@@ -266,8 +270,8 @@ class PresidentialBySize(ApiBaseTest):
         factories.PresidentialBySizeFactory(candidate_id='C002', election_year=2016)
         factories.PresidentialBySizeFactory(candidate_id='C001', election_year=2020)
         factories.PresidentialBySizeFactory(candidate_id='C002', election_year=2020)
-        factories.PresidentialBySizeFactory(candidate_id='C002', election_year=2020)
-        factories.PresidentialBySizeFactory(candidate_id='C002', election_year=2020)
+        factories.PresidentialBySizeFactory(candidate_id='C003', election_year=2020)
+        factories.PresidentialBySizeFactory(candidate_id='C004', election_year=2020)
 
         filter_fields = (('candidate_id', ['C001', 'C002']),)
 
@@ -282,7 +286,7 @@ class PresidentialBySize(ApiBaseTest):
             self.assertGreater(len(results), 0)
             # doesn't return all results, but return same records
             response = self._response(page)
-            self.assertEqual(original_count, response['pagination']['count'])
+            self.assertGreater(original_count, response['pagination']['count'])
 
     def test_sort(self):
         factories.PresidentialSummaryFactory(candidate_id='C003', net_receipts=333)
