@@ -7,7 +7,7 @@ import copy
 import manage
 from tests.common import BaseTestCase
 from webservices import rest, __API_VERSION__
-from webservices.resources.filings import FilingsView, FilingsList, EFilingsView
+from webservices.resources.filings import FilingsView, FilingsList
 
 
 @pytest.mark.usefixtures("migrate_db")
@@ -25,7 +25,7 @@ class TestAmendmentChain(BaseTestCase):
         'most_recent': True,
         'report_type': None,
         'form_type': 'F1',
-        'begin_image_num': '20180131001'
+        'begin_image_num': '20180131001',
     }
     STOCK_SECOND_F1 = {
         'committee_id': 'C006',
@@ -39,7 +39,7 @@ class TestAmendmentChain(BaseTestCase):
         'most_recent': True,
         'report_type': None,
         'form_type': 'F1',
-        'begin_image_num': '20180228002'
+        'begin_image_num': '20180228002',
     }
 
     def setUp(self):
@@ -79,7 +79,9 @@ class TestAmendmentChain(BaseTestCase):
         # FilingsList view
         # /filings/ endpoint
 
-        results = self._results(rest.api.url_for(FilingsList, committee_id=expected_filing['committee_id']))
+        results = self._results(
+            rest.api.url_for(FilingsList, committee_id=expected_filing['committee_id'])
+        )
         assert len(results) == 1
         list_result = results[0]
 
@@ -88,7 +90,9 @@ class TestAmendmentChain(BaseTestCase):
         # FilingsView view
         # /committee/<committee_id>/filings/ and /candidate/<candidate_id>/filings/
 
-        results = self._results(rest.api.url_for(FilingsView, committee_id=expected_filing['committee_id']))
+        results = self._results(
+            rest.api.url_for(FilingsView, committee_id=expected_filing['committee_id'])
+        )
         assert len(results) == 1
         view_result = results[0]
 
@@ -105,7 +109,13 @@ class TestAmendmentChain(BaseTestCase):
 
         # /filings/ endpoint
 
-        results = self._results(rest.api.url_for(FilingsList, committee_id=expected_filing['committee_id'], most_recent=True))
+        results = self._results(
+            rest.api.url_for(
+                FilingsList,
+                committee_id=expected_filing['committee_id'],
+                most_recent=True,
+            )
+        )
         assert len(results) == 1
         list_result = results[0]
 
@@ -114,7 +124,13 @@ class TestAmendmentChain(BaseTestCase):
         # FilingsView view
         # /committee/<committee_id>/filings/ and /candidate/<candidate_id>/filings/
 
-        results = self._results(rest.api.url_for(FilingsView, committee_id=expected_filing['committee_id'], most_recent=True))
+        results = self._results(
+            rest.api.url_for(
+                FilingsView,
+                committee_id=expected_filing['committee_id'],
+                most_recent=True,
+            )
+        )
         assert len(results) == 1
         view_result = results[0]
 
@@ -133,7 +149,7 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent': False,
             'report_type': 'Q2',
             'form_type': 'F3',
-            'begin_image_num': '20180715001'
+            'begin_image_num': '20180715001',
         }
         form_3_q2_amend_1 = {
             'committee_id': 'C006',
@@ -147,7 +163,7 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent': False,
             'report_type': 'Q2',
             'form_type': 'F3',
-            'begin_image_num': '20180815001'
+            'begin_image_num': '20180815001',
         }
         form_3_q3_new = {
             'committee_id': 'C006',
@@ -161,7 +177,7 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent': False,
             'report_type': 'Q3',
             'form_type': 'F3',
-            'begin_image_num': '20181015001'
+            'begin_image_num': '20181015001',
         }
         form_3_q3_amend_1 = {
             'committee_id': 'C006',
@@ -175,7 +191,7 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent': True,
             'report_type': 'Q3',
             'form_type': 'F3',
-            'begin_image_num': '20181115001'
+            'begin_image_num': '20181115001',
         }
         form_3_q2_amend_2 = {
             'committee_id': 'C006',
@@ -189,7 +205,7 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent': True,
             'report_type': 'Q2',
             'form_type': 'F3',
-            'begin_image_num': '20181215001'
+            'begin_image_num': '20181215001',
         }
         self.create_filing(1, form_3_q2_new)
         self.create_filing(2, form_3_q2_amend_1)
@@ -203,14 +219,26 @@ class TestAmendmentChain(BaseTestCase):
         # Refresh downstream `ofec_amendments_mv` and `ofec_filings_all_mv`
         manage.refresh_materialized(concurrent=False)
 
-        q2_results = self._results(rest.api.url_for(FilingsList, committee_id=form_3_q2_new['committee_id'], report_type='Q2'))
+        q2_results = self._results(
+            rest.api.url_for(
+                FilingsList,
+                committee_id=form_3_q2_new['committee_id'],
+                report_type='Q2',
+            )
+        )
 
         for result in q2_results:
             for filing in (form_3_q2_new, form_3_q2_amend_1, form_3_q2_amend_2):
                 if result['file_number'] == filing['file_number']:
                     self.assert_filings_equal(result, filing)
 
-        q3_results = self._results(rest.api.url_for(FilingsList, committee_id=form_3_q3_new['committee_id'], report_type='Q3'))
+        q3_results = self._results(
+            rest.api.url_for(
+                FilingsList,
+                committee_id=form_3_q3_new['committee_id'],
+                report_type='Q3',
+            )
+        )
 
         for result in q3_results:
             for filing in (form_3_q3_new, form_3_q3_amend_1):
@@ -230,7 +258,7 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent': False,
             'report_type': None,
             'form_type': 'F1',
-            'begin_image_num': '20180131004'
+            'begin_image_num': '20180131004',
         }
         second_f1 = {
             'committee_id': 'C006',
@@ -244,7 +272,7 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent': False,
             'report_type': None,
             'form_type': 'F1',
-            'begin_image_num': '20180228001'
+            'begin_image_num': '20180228001',
         }
         third_f1 = {
             'committee_id': 'C006',
@@ -258,10 +286,12 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent': True,
             'report_type': None,
             'form_type': 'F1',
-            'begin_image_num': '20180328001'
+            'begin_image_num': '20180328001',
         }
         unusual_entry_for_second_f1 = copy.deepcopy(second_f1)
-        unusual_entry_for_second_f1['previous_file_number'] = unusual_entry_for_second_f1['file_number']
+        unusual_entry_for_second_f1[
+            'previous_file_number'
+        ] = unusual_entry_for_second_f1['file_number']
 
         self.create_filing(1, first_f1)
         self.create_filing(2, unusual_entry_for_second_f1)
@@ -270,14 +300,18 @@ class TestAmendmentChain(BaseTestCase):
         # Refresh downstream `ofec_amendments_mv` and `ofec_filings_all_mv`
         manage.refresh_materialized(concurrent=False)
 
-        results = self._results(rest.api.url_for(FilingsList, committee_id=first_f1['committee_id']))
+        results = self._results(
+            rest.api.url_for(FilingsList, committee_id=first_f1['committee_id'])
+        )
 
         for result in sorted(results, key=lambda x: x['file_number']):
             for filing in (first_f1, unusual_entry_for_second_f1, third_f1):
                 if result['file_number'] == filing['file_number']:
                     self.assert_filings_equal(result, filing)
                     # Note: we're leaving data-entered previous_file_number alone
-                    assert result['previous_file_number'] == filing['previous_file_number']
+                    assert (
+                        result['previous_file_number'] == filing['previous_file_number']
+                    )
 
     def test_negative_filing_chain(self):
         # Make sure no negative numbers appear in amendment chain
@@ -293,7 +327,7 @@ class TestAmendmentChain(BaseTestCase):
             'most_recent': True,
             'report_type': None,
             'form_type': 'F1',
-            'begin_image_num': '20180131005'
+            'begin_image_num': '20180131005',
         }
 
         non_negative_f1 = copy.deepcopy(self.STOCK_FIRST_F1)
@@ -304,40 +338,68 @@ class TestAmendmentChain(BaseTestCase):
         # Refresh downstream `ofec_amendments_mv` and `ofec_filings_all_mv`
         manage.refresh_materialized(concurrent=False)
 
-        results = self._results(rest.api.url_for(FilingsList, committee_id=non_negative_f1['committee_id'], most_recent=True))
+        results = self._results(
+            rest.api.url_for(
+                FilingsList,
+                committee_id=non_negative_f1['committee_id'],
+                most_recent=True,
+            )
+        )
         assert len(results) == 1
 
         result = results[0]
         self.assert_filings_equal(result, negative_f1)
 
-
     def insert_vsum(self, sub_id, expected_filing):
         self.connection.execute(
-            "INSERT INTO disclosure.v_sum_and_det_sum_report (orig_sub_id, form_tp_cd,cmte_id, file_num) "
-            "VALUES (%s, %s, %s, %s)", sub_id, expected_filing['form_type'], expected_filing['committee_id'], expected_filing['file_number']
+            "INSERT INTO disclosure.v_sum_and_det_sum_report \
+            (orig_sub_id, form_tp_cd,cmte_id, file_num) "
+            "VALUES (%s, %s, %s, %s)",
+            sub_id,
+            expected_filing['form_type'],
+            expected_filing['committee_id'],
+            expected_filing['file_number'],
         )
 
     def create_filing(self, sub_id, expected_filing):
         self.connection.execute(
-            "INSERT INTO disclosure.f_rpt_or_form_sub (sub_id, cand_cmte_id, form_tp, rpt_yr, rpt_tp, amndt_ind, receipt_dt, file_num, prev_file_num, begin_image_num) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", sub_id, expected_filing['committee_id'], expected_filing['form_type'], expected_filing['report_year'], expected_filing['report_type'], expected_filing['amendment_indicator'], int(expected_filing['receipt_date'].strftime("%Y%m%d")), expected_filing['file_number'], expected_filing['previous_file_number'], expected_filing['begin_image_num']
+            "INSERT INTO disclosure.f_rpt_or_form_sub \
+            (sub_id, cand_cmte_id, form_tp, rpt_yr, rpt_tp, amndt_ind, \
+            receipt_dt, file_num, prev_file_num, begin_image_num) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            sub_id,
+            expected_filing['committee_id'],
+            expected_filing['form_type'],
+            expected_filing['report_year'],
+            expected_filing['report_type'],
+            expected_filing['amendment_indicator'],
+            int(expected_filing['receipt_date'].strftime("%Y%m%d")),
+            expected_filing['file_number'],
+            expected_filing['previous_file_number'],
+            expected_filing['begin_image_num'],
         )
 
     def assert_filings_equal(self, api_result, expected_filing):
         assert api_result['committee_id'] == expected_filing['committee_id']
         assert api_result['report_year'] == expected_filing['report_year']
-        assert api_result['amendment_indicator'] == expected_filing['amendment_indicator']
-        assert api_result['receipt_date'][:10] == expected_filing['receipt_date']. isoformat()
+        assert (
+            api_result['amendment_indicator'] == expected_filing['amendment_indicator']
+        )
+        assert (
+            api_result['receipt_date'][:10]
+            == expected_filing['receipt_date'].isoformat()
+        )
         assert api_result['file_number'] == expected_filing['file_number']
         assert api_result['amendment_chain'] == expected_filing['amendment_chain']
-        assert api_result['most_recent_file_number'] == expected_filing['most_recent_file_number']
+        assert (
+            api_result['most_recent_file_number']
+            == expected_filing['most_recent_file_number']
+        )
         assert api_result['most_recent'] == expected_filing['most_recent']
         assert api_result['report_type'] == expected_filing['report_type']
         assert api_result['form_type'] == expected_filing['form_type']
 
     def clear_test_data(self):
-        tables = [
-            ('disclosure', 'f_rpt_or_form_sub')
-        ]
+        tables = [('disclosure', 'f_rpt_or_form_sub')]
         for table in tables:
             self.connection.execute("DELETE FROM {0}.{1}".format(table[0], table[1]))

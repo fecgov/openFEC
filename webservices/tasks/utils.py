@@ -1,14 +1,9 @@
-
-
 import json
 import logging
-import re
-
 import boto
+import boto3
 
 from boto.s3.key import Key
-
-import boto3
 
 from webservices.env import env
 

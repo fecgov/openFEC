@@ -25,7 +25,6 @@ TOTALS_MODELS = [
 
 @pytest.mark.usefixtures("migrate_db")
 class IntegrationTestCase(common.BaseTestCase):
-
     def test_committee_year_filter(self):
         self._check_entity_model(models.Committee, 'committee_id')
         self._check_entity_model(models.CommitteeDetail, 'committee_id')
@@ -50,23 +49,25 @@ class IntegrationTestCase(common.BaseTestCase):
 
     def _check_entity_model(self, model, key):
         subquery = model.query.with_entities(
-            getattr(model, key),
-            sa.func.unnest(model.cycles).label('cycle'),
+            getattr(model, key), sa.func.unnest(model.cycles).label('cycle'),
         ).subquery()
-        count = db.session.query(
-            getattr(subquery.columns, key)
-        ).group_by(
-            getattr(subquery.columns, key)
-        ).having(
-            sa.func.max(subquery.columns.cycle) < manage.SQL_CONFIG['START_YEAR']
-        ).count()
+        count = (
+            db.session.query(getattr(subquery.columns, key))
+            .group_by(getattr(subquery.columns, key))
+            .having(
+                sa.func.max(subquery.columns.cycle) < manage.SQL_CONFIG['START_YEAR']
+            )
+            .count()
+        )
         self.assertEqual(count, 0)
 
     def test_committee_counts(self):
         counts = [
             models.Committee.query.count(),
             models.CommitteeDetail.query.count(),
-            models.CommitteeHistory.query.distinct(models.CommitteeHistory.committee_id).count(),
+            models.CommitteeHistory.query.distinct(
+                models.CommitteeHistory.committee_id
+            ).count(),
             models.CommitteeSearch.query.count(),
         ]
         assert len(set(counts)) == 1
@@ -75,7 +76,9 @@ class IntegrationTestCase(common.BaseTestCase):
         counts = [
             models.Candidate.query.count(),
             models.CandidateDetail.query.count(),
-            models.CandidateHistory.query.distinct(models.CandidateHistory.candidate_id).count(),
+            models.CandidateHistory.query.distinct(
+                models.CandidateHistory.candidate_id
+            ).count(),
             models.CandidateSearch.query.count(),
         ]
         assert len(set(counts)) == 1
@@ -83,11 +86,13 @@ class IntegrationTestCase(common.BaseTestCase):
     def test_unverified_filers_excluded_in_candidates(self):
         candidate_history_count = models.CandidateHistory.query.count()
 
-        unverified_candidates = models.UnverifiedFiler.query.filter(sa.or_(
-            models.UnverifiedFiler.candidate_committee_id.like('H%'),
-            models.UnverifiedFiler.candidate_committee_id.like('S%'),
-            models.UnverifiedFiler.candidate_committee_id.like('P%')
-        )).all()
+        unverified_candidates = models.UnverifiedFiler.query.filter(
+            sa.or_(
+                models.UnverifiedFiler.candidate_committee_id.like('H%'),
+                models.UnverifiedFiler.candidate_committee_id.like('S%'),
+                models.UnverifiedFiler.candidate_committee_id.like('P%'),
+            )
+        ).all()
 
         unverified_candidate_ids = [
             c.candidate_committee_id for c in unverified_candidates
@@ -97,10 +102,7 @@ class IntegrationTestCase(common.BaseTestCase):
             ~models.CandidateHistory.candidate_id.in_(unverified_candidate_ids)
         ).count()
 
-        self.assertEqual(
-            candidate_history_count,
-            candidate_history_verified_count
-        )
+        self.assertEqual(candidate_history_count, candidate_history_verified_count)
 
     def test_unverified_filers_excluded_in_committees(self):
         committee_history_count = models.CommitteeHistory.query.count()
@@ -122,20 +124,33 @@ class IntegrationTestCase(common.BaseTestCase):
     def test_last_day_of_month(self):
         connection = db.engine.connect()
         fixtures = [
-            (datetime.datetime(1999, 3, 21, 10, 20, 30), datetime.datetime(1999, 3, 31, 0, 0, 0)),
-            (datetime.datetime(2007, 4, 21, 10, 20, 30), datetime.datetime(2007, 4, 30, 0, 0, 0)),
-            (datetime.datetime(2017, 2, 21, 10, 20, 30), datetime.datetime(2017, 2, 28, 0, 0, 0)),
+            (
+                datetime.datetime(1999, 3, 21, 10, 20, 30),
+                datetime.datetime(1999, 3, 31, 0, 0, 0),
+            ),
+            (
+                datetime.datetime(2007, 4, 21, 10, 20, 30),
+                datetime.datetime(2007, 4, 30, 0, 0, 0),
+            ),
+            (
+                datetime.datetime(2017, 2, 21, 10, 20, 30),
+                datetime.datetime(2017, 2, 28, 0, 0, 0),
+            ),
         ]
         for fixture in fixtures:
             test_value, expected = fixture
-            returned_date = connection.execute("SELECT last_day_of_month(%s)", test_value).scalar()
+            returned_date = connection.execute(
+                "SELECT last_day_of_month(%s)", test_value
+            ).scalar()
 
             assert returned_date == expected
 
     def test_filter_individual_sched_a(self):
         individuals = [
             factories.ScheduleAFactory(receipt_type='15J', filing_form='F3X'),
-            factories.ScheduleAFactory(line_number='12', contribution_receipt_amount=150, filing_form='F3X'),
+            factories.ScheduleAFactory(
+                line_number='12', contribution_receipt_amount=150, filing_form='F3X'
+            ),
         ]
         earmarks = [
             factories.ScheduleAFactory(filing_form='F3X'),
@@ -144,7 +159,7 @@ class IntegrationTestCase(common.BaseTestCase):
                 contribution_receipt_amount=150,
                 memo_text='earmark',
                 memo_code='X',
-                filing_form='F3X'
+                filing_form='F3X',
             ),
         ]
 

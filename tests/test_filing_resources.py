@@ -6,7 +6,6 @@ from webservices.resources.rad_analyst import RadAnalystView
 
 
 class TestFilerResources(ApiBaseTest):
-
     def test_committee_id_fetch(self):
         """ Check Analyst is returned with a specified committee id"""
         committee_id = 'C8675309'
@@ -25,12 +24,21 @@ class TestFilerResources(ApiBaseTest):
 
     def test_filters(self):
         [
-            factories.RadAnalystFactory(telephone_ext=123, committee_id='C0001', title='xyz 111'),
-            factories.RadAnalystFactory(telephone_ext=456, committee_id='C0002', title='abc',
-                                        email='test2@fec.gov'),
-            factories.RadAnalystFactory(analyst_id=789, committee_id='C0003',
-                                        email='test1@fec.gov'),
-            factories.RadAnalystFactory(analyst_id=1011, analyst_short_id=11, committee_id='C0004'),
+            factories.RadAnalystFactory(
+                telephone_ext=123, committee_id='C0001', title='xyz 111'
+            ),
+            factories.RadAnalystFactory(
+                telephone_ext=456,
+                committee_id='C0002',
+                title='abc',
+                email='test2@fec.gov',
+            ),
+            factories.RadAnalystFactory(
+                analyst_id=789, committee_id='C0003', email='test1@fec.gov'
+            ),
+            factories.RadAnalystFactory(
+                analyst_id=1011, analyst_short_id=11, committee_id='C0004'
+            ),
         ]
 
         filter_fields = (
@@ -63,25 +71,36 @@ class TestFilerResources(ApiBaseTest):
         ]
         results = self._results(api.url_for(RadAnalystView, sort='last_name'))
         self.assertEqual(
-            [each['last_name'] for each in results],
-            ['Old', 'Someone-Else', 'Young']
+            [each['last_name'] for each in results], ['Old', 'Someone-Else', 'Young']
         )
 
     def test_assignment_date_filters(self):
         [
-            factories.RadAnalystFactory(assignment_update_date='2015-01-01', committee_id='C0007'),
-            factories.RadAnalystFactory(assignment_update_date='2015-02-01', committee_id='C0008'),
-            factories.RadAnalystFactory(assignment_update_date='2015-03-01', committee_id='C0009'),
-            factories.RadAnalystFactory(assignment_update_date='2015-04-01', committee_id='C0010'),
+            factories.RadAnalystFactory(
+                assignment_update_date='2015-01-01', committee_id='C0007'
+            ),
+            factories.RadAnalystFactory(
+                assignment_update_date='2015-02-01', committee_id='C0008'
+            ),
+            factories.RadAnalystFactory(
+                assignment_update_date='2015-03-01', committee_id='C0009'
+            ),
+            factories.RadAnalystFactory(
+                assignment_update_date='2015-04-01', committee_id='C0010'
+            ),
         ]
         results = self._results(
-            api.url_for(RadAnalystView, min_assignment_update_date='2015-02-01'))
+            api.url_for(RadAnalystView, min_assignment_update_date='2015-02-01')
+        )
         self.assertTrue(
-            all(each['assignment_update_date'] >= '2015-02-01' for each in results))
+            all(each['assignment_update_date'] >= '2015-02-01' for each in results)
+        )
         results = self._results(
-            api.url_for(RadAnalystView, max_assignment_update_date='2015-02-03'))
+            api.url_for(RadAnalystView, max_assignment_update_date='2015-02-03')
+        )
         self.assertTrue(
-            all(each['assignment_update_date'] <= '2015-02-03' for each in results))
+            all(each['assignment_update_date'] <= '2015-02-03' for each in results)
+        )
         results = self._results(
             api.url_for(
                 RadAnalystView,

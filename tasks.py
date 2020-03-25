@@ -4,7 +4,6 @@ import subprocess
 import git
 
 from invoke import task, exceptions
-from webservices.env import env
 from jdbc_utils import get_jdbc_credentials, to_jdbc_url, remove_credentials
 
 
@@ -25,11 +24,11 @@ EXCLUDE_TABLES = [
 ]
 
 # Include records used in integration tests
-# FORCE_INCLUDE = [
-#     ('dimcand', 10025229),  # Nancy Pelosi
-#     ('dimcand', 10012694),  # John Boehner
-#     ('dimcmte', 10031117),  # Raul Grijalva (committee)
-# ]
+FORCE_INCLUDE = [
+    ('dimcand', 10025229),  # Nancy Pelosi
+    ('dimcand', 10012694),  # John Boehner
+    ('dimcmte', 10031117),  # Raul Grijalva (committee)
+]
 
 
 @task
@@ -175,7 +174,9 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
 
     # Log in if necessary
     if login == 'True':
-        login_command = 'cf auth "$FEC_CF_USERNAME_{0}" "$FEC_CF_PASSWORD_{0}"'.format(space.upper())
+        login_command = 'cf auth "$FEC_CF_USERNAME_{0}" "$FEC_CF_PASSWORD_{0}"'.format(
+            space.upper()
+        )
         ctx.run(login_command, echo=True)
 
     # Target space
@@ -192,7 +193,9 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
 
         if not all((jdbc_url, migration_user, migration_password)):
             print(
-                "\nUnable to retrieve or parse {0}. Make sure the environmental variable is set and properly formatted.\n".format(
+                "\nUnable to retrieve or parse {0}. \
+                Make sure the environmental variable is set and properly \
+                formatted.\n".format(
                     migration_env_var
                 )
             )
@@ -219,7 +222,7 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
         ctx.run('cf {cmd} {app} -f manifests/manifest_{file}_{space}.yml'.format(
             cmd=cmd,
             app=app,
-            file=app.replace('-','_'),
+            file=app.replace('-', '_'),
             space=space
         ), echo=True)
 
@@ -253,7 +256,9 @@ def create_sample_db(ctx):
 
 @task
 def run_migrations(ctx, jdbc_url, migration_user=None, migration_password=None):
-    command = 'flyway migrate -q -url="{0}" -locations=filesystem:data/migrations'.format(jdbc_url)
+    command = 'flyway migrate -q -url="{0}" -locations=filesystem:data/migrations'.format(
+        jdbc_url
+    )
     if migration_user:
         command += ' -user="{}"'.format(migration_user)
     if migration_password:

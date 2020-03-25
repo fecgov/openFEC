@@ -1,8 +1,5 @@
 import json
 
-
-
-
 election_types = {
     'GR': 'General runoff',
     'SG': 'Special election general',
@@ -58,9 +55,3 @@ f3x_col_a = []
 f3x_col_b = []
 f3x_description = []
 dumper(f3x_col_a, f3x_col_b, f3x_description, dumped)
-
-
-
-
-
-

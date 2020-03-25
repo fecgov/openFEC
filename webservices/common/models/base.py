@@ -27,15 +27,15 @@ class RoutingSession(SignallingSession):
     def use_follower(self):
         # Check for read operations and configured followers.
         use_follower = (
-            not self._flushing and
-            len(self.followers) > 0
+            not self._flushing
+            and len(self.followers) > 0
         )
 
         # Optionally restrict traffic to followers for only supported tasks.
         if use_follower and self.restrict_follower_traffic_to_tasks:
             use_follower = (
-                celery.current_task and
-                celery.current_task.name in self.follower_tasks
+                celery.current_task
+                and celery.current_task.name in self.follower_tasks
             )
 
         return use_follower
@@ -53,6 +53,7 @@ class RoutingSQLAlchemy(SQLAlchemyBase):
 
     def create_session(self, options):
         return orm.sessionmaker(class_=RoutingSession, db=self, **options)
+
 
 db = RoutingSQLAlchemy()
 

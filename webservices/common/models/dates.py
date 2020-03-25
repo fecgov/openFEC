@@ -2,7 +2,7 @@ import re
 
 from webservices import decoders, docs
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
-from .base import db, BaseModel
+from .base import db
 
 class DisclosureMixin(object):
     __table_args__ = {"schema": "disclosure"}

@@ -145,7 +145,7 @@ def export_query(path, qs):
         logger.info('Download resource: {0}'.format(qs))
         make_bundle(resource)
         logger.info('Bundled: {0}'.format(qs))
-    except:
+    except Exception:
         logger.exception('Download failed: {0}'.format(qs))
 
 

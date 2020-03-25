@@ -1,6 +1,5 @@
 import re
 import functools
-import json
 
 from collections import namedtuple
 
@@ -11,12 +10,9 @@ from marshmallow_pagination import schemas as paging_schemas
 from webservices import utils, decoders
 from webservices.spec import spec
 from webservices.common import models
-from webservices.common.models import db
 from webservices import __API_VERSION__
 from webservices.calendar import format_start_date, format_end_date
-from marshmallow import pre_dump, post_dump
-from sqlalchemy import func
-import sqlalchemy as sa
+from marshmallow import post_dump
 
 
 spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
@@ -199,6 +195,7 @@ class EFilingF3XSchema(BaseEfileSchema):
         line_list['cash_on_hand_beginning_period'] = line_list.pop('coh_bop')
         return line_list
 
+
 schema_map = {}
 schema_map["BaseF3XFiling"] = EFilingF3XSchema
 schema_map["BaseF3Filing"] = EFilingF3Schema
@@ -325,6 +322,7 @@ class CommitteeSearchListSchema(ApiSchema):
         many=True,
     )
 
+
 register_schema(CandidateSearchSchema)
 register_schema(CandidateSearchListSchema)
 register_schema(CommitteeSearchSchema)
@@ -353,6 +351,7 @@ class AuditCommitteeSearchListSchema(ApiSchema):
         ref='#/definitions/AuditCommitteeSearch',
         many=True,
     )
+
 
 register_schema(AuditCandidateSearchSchema)
 register_schema(AuditCandidateSearchListSchema)
@@ -418,6 +417,7 @@ augment_models(
 class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'],
         schemas['CandidateTotalSchema'], schemas['CandidateFlagsSchema']):
     pass
+
 
 augment_schemas(CandidateHistoryTotalSchema)
 
@@ -812,6 +812,7 @@ class FilingsSchema(BaseFilingsSchema):
         if not obj.get('fec_url'):
             obj.pop('fec_url')
 
+
 augment_schemas(FilingsSchema)
 
 EfilingsAmendmentsSchema = make_schema(
@@ -972,7 +973,6 @@ CalendarDateSchema = make_schema(
 CalendarDatePageSchema = make_page_schema(CalendarDateSchema)
 augment_schemas(CalendarDateSchema)
 
-
 class ElectionSearchSchema(ma.Schema):
     state = ma.fields.Str()
     office = ma.fields.Str()
@@ -981,16 +981,18 @@ class ElectionSearchSchema(ma.Schema):
     cycle = ma.fields.Int(attribute='two_year_period')
     incumbent_id = ma.fields.Str(attribute='cand_id')
     incumbent_name = ma.fields.Str(attribute='cand_name')
-augment_schemas(ElectionSearchSchema)
 
+
+augment_schemas(ElectionSearchSchema)
 
 class ElectionSummarySchema(ApiSchema):
     count = ma.fields.Int()
     receipts = ma.fields.Decimal(places=2)
     disbursements = ma.fields.Decimal(places=2)
     independent_expenditures = ma.fields.Decimal(places=2)
-register_schema(ElectionSummarySchema)
 
+
+register_schema(ElectionSummarySchema)
 
 class ElectionSchema(ma.Schema):
     candidate_id = ma.fields.Str()
@@ -1005,6 +1007,8 @@ class ElectionSchema(ma.Schema):
     cash_on_hand_end_period = ma.fields.Decimal(places=2)
     candidate_election_year = ma.fields.Int()
     coverage_end_date = ma.fields.Date()
+
+
 augment_schemas(ElectionSchema)
 
 ElectionPageSchema = make_page_schema(ElectionSchema)
@@ -1016,6 +1020,7 @@ class ScheduleABySizeCandidateSchema(ma.Schema):
     total = ma.fields.Decimal(places=2)
     size = ma.fields.Int()
     count = ma.fields.Int()
+
 
 class ScheduleAByStateCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
@@ -1039,6 +1044,7 @@ class TotalsCommitteeSchema(schemas['CommitteeHistorySchema']):
     cash_on_hand_end_period = ma.fields.Decimal(places=2)
     debts_owed_by_committee = ma.fields.Decimal(places=2)
     independent_expenditures = ma.fields.Decimal(places=2)
+
 
 augment_schemas(
     ScheduleABySizeCandidateSchema,
@@ -1244,6 +1250,8 @@ class TotalByOfficeSchema(ma.Schema):
     election_year = ma.fields.Int()
     total_receipts = ma.fields.Decimal(places=2)
     total_disbursements = ma.fields.Decimal(places=2)
+
+
 augment_schemas(TotalByOfficeSchema)
 
 class TotalByOfficeByPartySchema(ma.Schema):
@@ -1252,12 +1260,16 @@ class TotalByOfficeByPartySchema(ma.Schema):
     election_year = ma.fields.Int()
     total_receipts = ma.fields.Decimal(places=2)
     total_disbursements = ma.fields.Decimal(places=2)
+
+
 augment_schemas(TotalByOfficeByPartySchema)
 
 class ECTotalsByCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
     total = ma.fields.Decimal(places=2)
+
+
 augment_schemas(ECTotalsByCandidateSchema)
 
 class IETotalsByCandidateSchema(ma.Schema):
@@ -1265,6 +1277,8 @@ class IETotalsByCandidateSchema(ma.Schema):
     cycle = ma.fields.Int()
     support_oppose_indicator = ma.fields.Str()
     total = ma.fields.Decimal(places=2)
+
+
 augment_schemas(IETotalsByCandidateSchema)
 
 class CCTotalsByCandidateSchema(ma.Schema):
@@ -1272,6 +1286,8 @@ class CCTotalsByCandidateSchema(ma.Schema):
     cycle = ma.fields.Int()
     support_oppose_indicator = ma.fields.Str()
     total = ma.fields.Decimal(places=2)
+
+
 augment_schemas(CCTotalsByCandidateSchema)
 
 # Presidential endpoints

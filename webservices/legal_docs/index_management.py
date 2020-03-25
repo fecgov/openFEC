@@ -12,413 +12,184 @@ logger = logging.getLogger(__name__)
 CASE_DOCUMENT_MAPPINGS = {
     "type": "nested",
     "properties": {
-        "category": {
-            "type": "string",
-            "index": "not_analyzed"
-        },
-        "description": {
-            "type": "string"
-        },
-        "document_date": {
-            "type": "date",
-            "format": "dateOptionalTime"
-        },
-        "document_id": {
-            "type": "long",
-            "index": "no"
-        },
-        "length": {
-            "type": "long",
-            "index": "no"
-        },
-        "text": {
-            "type": "string"
-        },
-        "url": {
-            "type": "string",
-            "index": "no"
-        }
-    }
+        "category": {"type": "string", "index": "not_analyzed"},
+        "description": {"type": "string"},
+        "document_date": {"type": "date", "format": "dateOptionalTime"},
+        "document_id": {"type": "long", "index": "no"},
+        "length": {"type": "long", "index": "no"},
+        "text": {"type": "string"},
+        "url": {"type": "string", "index": "no"},
+    },
 }
 
 MUR_ADR_MAPPINGS = {
     "properties": {
-        "no": {
-            "type": "string",
-            "index": "not_analyzed"
-        },
-        "doc_id": {
-            "type": "string",
-            "index": "no"
-        },
-        "name": {
-            "type": "string",
-            "analyzer": "english"
-        },
-        "election_cycles": {
-            "type": "long"
-        },
-        "open_date": {
-            "type": "date",
-            "format": "dateOptionalTime"
-        },
-        "close_date": {
-            "type": "date",
-            "format": "dateOptionalTime"
-        },
-        "url": {
-            "type": "string",
-            "index": "no"
-        },
-        "subjects": {
-            "type": "string"
-        },
+        "no": {"type": "string", "index": "not_analyzed"},
+        "doc_id": {"type": "string", "index": "no"},
+        "name": {"type": "string", "analyzer": "english"},
+        "election_cycles": {"type": "long"},
+        "open_date": {"type": "date", "format": "dateOptionalTime"},
+        "close_date": {"type": "date", "format": "dateOptionalTime"},
+        "url": {"type": "string", "index": "no"},
+        "subjects": {"type": "string"},
         "commission_votes": {
             "properties": {
-                "text": {
-                    "type": "string"
-                },
-                "vote_date": {
-                    "type": "date",
-                    "format": "dateOptionalTime"
-                }
+                "text": {"type": "string"},
+                "vote_date": {"type": "date", "format": "dateOptionalTime"},
             }
         },
         "dispositions": {
             "properties": {
                 "citations": {
                     "properties": {
-                        "text": {
-                            "type": "string"
-                        },
-                        "title": {
-                            "type": "string"
-                        },
-                        "type": {
-                            "type": "string"
-                        },
-                        "url": {
-                            "type": "string"
-                        }
+                        "text": {"type": "string"},
+                        "title": {"type": "string"},
+                        "type": {"type": "string"},
+                        "url": {"type": "string"},
                     }
                 },
-                "disposition": {
-                    "type": "string",
-                    "index": "not_analyzed"
-                },
-                "penalty": {
-                    "type": "double"
-                },
-                "respondent": {
-                    "type": "string"
-                }
+                "disposition": {"type": "string", "index": "not_analyzed"},
+                "penalty": {"type": "double"},
+                "respondent": {"type": "string"},
             }
         },
         "documents": CASE_DOCUMENT_MAPPINGS,
         "participants": {
             "properties": {
-                "citations": {
-                    "type": "object"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "role": {
-                    "type": "string"
-                }
+                "citations": {"type": "object"},
+                "name": {"type": "string"},
+                "role": {"type": "string"},
             }
         },
-        "respondents": {
-            "type": "string"
-        }
+        "respondents": {"type": "string"},
     }
 }
 
 MUR_MAPPINGS = copy.deepcopy(MUR_ADR_MAPPINGS)
 
-MUR_MAPPINGS["properties"]["mur_type"] = {
-    "type": "string"
-}
+MUR_MAPPINGS["properties"]["mur_type"] = {"type": "string"}
 
 MAPPINGS = {
     "_default_": {
         "properties": {
-            "sort1": {
-                "type": "integer",
-                "include_in_all": False
-            },
-            "sort2": {
-                "type": "integer",
-                "include_in_all": False
-            },
+            "sort1": {"type": "integer", "include_in_all": False},
+            "sort2": {"type": "integer", "include_in_all": False},
         }
     },
     "citations": {
         "properties": {
-            "citation_type": {
-                "type": "string",
-                "index": "not_analyzed"
-            },
-            "citation_text": {
-                "type": "string",
-                "index": "not_analyzed"
-            }
+            "citation_type": {"type": "string", "index": "not_analyzed"},
+            "citation_text": {"type": "string", "index": "not_analyzed"},
         }
     },
     "murs": MUR_MAPPINGS,
     "adrs": MUR_ADR_MAPPINGS,
     "admin_fines": {
         "properties": {
-            "no": {
-                "type": "string",
-                "index": "not_analyzed"
-            },
-            "doc_id": {
-                "type": "string",
-                "index": "no"
-            },
-            "name": {
-                "type": "string",
-                "analyzer": "english"
-            },
-            "url": {
-                "type": "string",
-                "index": "no"
-            },
-            "committee_id": {
-                "type": "string",
-                "index": "not_analyzed"
-            },
-            "report_year": {
-                "type": "string"
-            },
-            "report_type": {
-                "type": "string",
-                "index": "no"
-            },
+            "no": {"type": "string", "index": "not_analyzed"},
+            "doc_id": {"type": "string", "index": "no"},
+            "name": {"type": "string", "analyzer": "english"},
+            "url": {"type": "string", "index": "no"},
+            "committee_id": {"type": "string", "index": "not_analyzed"},
+            "report_year": {"type": "string"},
+            "report_type": {"type": "string", "index": "no"},
             "reason_to_believe_action_date": {
                 "type": "date",
-                "format": "dateOptionalTime"
+                "format": "dateOptionalTime",
             },
-            "reason_to_believe_fine_amount": {
-                "type": "long"
-            },
-            "challenge_receipt_date": {
-                "type": "date",
-                "format": "dateOptionalTime"
-            },
-            "challenge_outcome": {
-                "type": "string",
-                "index": "no"
-            },
-            "final_determination_date": {
-                "type": "date",
-                "format": "dateOptionalTime"
-            },
-            "final_determination_amount": {
-                "type": "long"
-            },
-            "check_amount": {
-                "type": "long",
-                "index": "no"
-            },
-            "treasury_referral_date": {
-                "type": "date",
-                "format": "dateOptionalTime"
-            },
-            "treasury_referral_amount": {
-                "type": "long",
-                "index": "no"
-            },
+            "reason_to_believe_fine_amount": {"type": "long"},
+            "challenge_receipt_date": {"type": "date", "format": "dateOptionalTime"},
+            "challenge_outcome": {"type": "string", "index": "no"},
+            "final_determination_date": {"type": "date", "format": "dateOptionalTime"},
+            "final_determination_amount": {"type": "long"},
+            "check_amount": {"type": "long", "index": "no"},
+            "treasury_referral_date": {"type": "date", "format": "dateOptionalTime"},
+            "treasury_referral_amount": {"type": "long", "index": "no"},
             "petition_court_filing_date": {
                 "type": "date",
-                "format": "dateOptionalTime"
+                "format": "dateOptionalTime",
             },
             "petition_court_decision_date": {
                 "type": "date",
-                "format": "dateOptionalTime"
+                "format": "dateOptionalTime",
             },
             "commission_votes": {
                 "properties": {
-                    "text": {
-                        "type": "string"
-                    },
-                    "vote_date": {
-                        "type": "date",
-                        "format": "dateOptionalTime"
-                    }
+                    "text": {"type": "string"},
+                    "vote_date": {"type": "date", "format": "dateOptionalTime"},
                 }
             },
-            "documents": CASE_DOCUMENT_MAPPINGS
+            "documents": CASE_DOCUMENT_MAPPINGS,
         }
     },
     "statutes": {
         "properties": {
-            "doc_id": {
-                "type": "string",
-                "index": "no"
-            },
-            "name": {
-                "type": "string",
-                "analyzer": "english"
-            },
-            "text": {
-                "type": "string",
-                "analyzer": "english"
-            },
-            "no": {
-                "type": "string",
-                "index": "not_analyzed"
-            },
-            "title": {
-                "type": "string"
-            },
-            "chapter": {
-                "type": "string"
-            },
-            "subchapter": {
-                "type": "string"
-            },
-            "url": {
-                "type": "string",
-                "index": "no"
-            }
+            "doc_id": {"type": "string", "index": "no"},
+            "name": {"type": "string", "analyzer": "english"},
+            "text": {"type": "string", "analyzer": "english"},
+            "no": {"type": "string", "index": "not_analyzed"},
+            "title": {"type": "string"},
+            "chapter": {"type": "string"},
+            "subchapter": {"type": "string"},
+            "url": {"type": "string", "index": "no"},
         }
     },
     "regulations": {
         "properties": {
-            "doc_id": {
-                "type": "string",
-                "index": "no"
-            },
-            "name": {
-                "type": "string",
-                "analyzer": "english"
-            },
-            "text": {
-                "type": "string",
-                "analyzer": "english"
-            },
-            "no": {
-                "type": "string",
-                "index": "not_analyzed"
-            },
-            "url": {
-                "type": "string",
-                "index": "no"
-            }
+            "doc_id": {"type": "string", "index": "no"},
+            "name": {"type": "string", "analyzer": "english"},
+            "text": {"type": "string", "analyzer": "english"},
+            "no": {"type": "string", "index": "not_analyzed"},
+            "url": {"type": "string", "index": "no"},
         }
     },
     "advisory_opinions": {
         "properties": {
-            "no": {
-                "type": "string",
-                "index": "not_analyzed"
-            },
-            "name": {
-                "type": "string",
-                "analyzer": "english"
-            },
-            "summary": {
-                "type": "string",
-                "analyzer": "english"
-            },
-            "issue_date": {
-                "type": "date",
-                "format": "dateOptionalTime"
-            },
-            "is_pending": {
-                "type": "boolean"
-            },
-            "status": {
-                "type": "string"
-            },
+            "no": {"type": "string", "index": "not_analyzed"},
+            "name": {"type": "string", "analyzer": "english"},
+            "summary": {"type": "string", "analyzer": "english"},
+            "issue_date": {"type": "date", "format": "dateOptionalTime"},
+            "is_pending": {"type": "boolean"},
+            "status": {"type": "string"},
             "ao_citations": {
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "no": {
-                        "type": "string"
-                    }
-                }
+                "properties": {"name": {"type": "string"}, "no": {"type": "string"}}
             },
             "aos_cited_by": {
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "no": {
-                        "type": "string"
-                    }
-                }
+                "properties": {"name": {"type": "string"}, "no": {"type": "string"}}
             },
             "statutory_citations": {
                 "type": "nested",
                 "properties": {
-                    "section": {
-                        "type": "string"
-                    },
-                    "title": {
-                        "type": "long"
-                    }
-                }
+                    "section": {"type": "string"},
+                    "title": {"type": "long"},
+                },
             },
             "regulatory_citations": {
                 "type": "nested",
                 "properties": {
-                    "part": {
-                        "type": "long"
-                    },
-                    "section": {
-                        "type": "long"
-                    },
-                    "title": {
-                        "type": "long"
-                    }
-                }
+                    "part": {"type": "long"},
+                    "section": {"type": "long"},
+                    "title": {"type": "long"},
+                },
             },
-            "requestor_names": {
-                "type": "string"
-            },
-            "requestor_types": {
-                "type": "string",
-                "index": "not_analyzed"
-            },
+            "requestor_names": {"type": "string"},
+            "requestor_types": {"type": "string", "index": "not_analyzed"},
             "documents": {
                 "type": "nested",
                 "properties": {
-                    "document_id": {
-                        "type": "long",
-                        "index": "no"
-                    },
-                    "category": {
-                        "type": "string",
-                        "index": "not_analyzed"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "date": {
-                        "type": "date",
-                        "format": "dateOptionalTime"
-                    },
-                    "text": {
-                        "type": "string"
-                    },
-                    "url": {
-                        "type": "string",
-                        "index": "no"
-                    }
-                }
-            }
+                    "document_id": {"type": "long", "index": "no"},
+                    "category": {"type": "string", "index": "not_analyzed"},
+                    "description": {"type": "string"},
+                    "date": {"type": "date", "format": "dateOptionalTime"},
+                    "text": {"type": "string"},
+                    "url": {"type": "string", "index": "no"},
+                },
+            },
         }
-    }
+    },
 }
 
-ANALYZER_SETTINGS = {
-    "analysis": {"analyzer": {"default": {"type": "english"}}}
-}
+ANALYZER_SETTINGS = {"analysis": {"analyzer": {"default": {"type": "english"}}}}
 
 BACKUP_REPOSITORY_NAME = "legal_s3_repository"
 
@@ -446,14 +217,14 @@ def create_docs_index():
         pass
 
     logger.info("Create index 'docs'")
-    es.indices.create('docs', {
-        "mappings": MAPPINGS,
-        "settings": ANALYZER_SETTINGS,
-        "aliases": {
-            'docs_index': {},
-            'docs_search': {}
-        }
-    })
+    es.indices.create(
+        'docs',
+        {
+            "mappings": MAPPINGS,
+            "settings": ANALYZER_SETTINGS,
+            "aliases": {'docs_index': {}, 'docs_search': {}},
+        },
+    )
 
 
 def create_archived_murs_index():
@@ -474,15 +245,17 @@ def create_archived_murs_index():
     except elasticsearch.exceptions.NotFoundError:
         pass
 
-    logger.info("Create index 'archived_murs' with aliases 'docs_search' and 'archived_murs_index'")
-    es.indices.create('archived_murs', {
-        "mappings": MAPPINGS,
-        "settings": ANALYZER_SETTINGS,
-        "aliases": {
-            'archived_murs_index': {},
-            'docs_search': {}
-        }
-    })
+    logger.info(
+        "Create index 'archived_murs' with aliases 'docs_search' and 'archived_murs_index'"
+    )
+    es.indices.create(
+        'archived_murs',
+        {
+            "mappings": MAPPINGS,
+            "settings": ANALYZER_SETTINGS,
+            "aliases": {'archived_murs_index': {}, 'docs_search': {}},
+        },
+    )
 
 
 def delete_all_indices():
@@ -514,20 +287,23 @@ def create_staging_index():
     try:
         logger.info("Delete index 'docs_staging'")
         es.indices.delete('docs_staging')
-    except:
+    except Exception:
         pass
 
     logger.info("Create index 'docs_staging'")
-    es.indices.create('docs_staging', {
-        "mappings": MAPPINGS,
-        "settings": ANALYZER_SETTINGS,
-    })
+    es.indices.create(
+        'docs_staging', {"mappings": MAPPINGS, "settings": ANALYZER_SETTINGS, }
+    )
 
     logger.info("Move alias 'docs_index' to point to 'docs_staging'")
-    es.indices.update_aliases(body={"actions": [
-        {"remove": {"index": 'docs', "alias": 'docs_index'}},
-        {"add": {"index": 'docs_staging', "alias": 'docs_index'}}
-    ]})
+    es.indices.update_aliases(
+        body={
+            "actions": [
+                {"remove": {"index": 'docs', "alias": 'docs_index'}},
+                {"add": {"index": 'docs_staging', "alias": 'docs_index'}},
+            ]
+        }
+    )
 
 
 def restore_from_staging_index():
@@ -542,28 +318,22 @@ def restore_from_staging_index():
     es = utils.get_elasticsearch_connection()
 
     logger.info("Move alias 'docs_search' to point to 'docs_staging'")
-    es.indices.update_aliases(body={"actions": [
-        {"remove": {"index": 'docs', "alias": 'docs_search'}},
-        {"add": {"index": 'docs_staging', "alias": 'docs_search'}}
-    ]})
+    es.indices.update_aliases(
+        body={
+            "actions": [
+                {"remove": {"index": 'docs', "alias": 'docs_search'}},
+                {"add": {"index": 'docs_staging', "alias": 'docs_search'}},
+            ]
+        }
+    )
 
     logger.info("Delete and re-create index 'docs'")
     es.indices.delete('docs')
-    es.indices.create('docs', {
-        "mappings": MAPPINGS,
-        "settings": ANALYZER_SETTINGS
-    })
+    es.indices.create('docs', {"mappings": MAPPINGS, "settings": ANALYZER_SETTINGS})
 
     logger.info("Reindex all documents from index 'docs_staging' to index 'docs'")
 
-    body = {
-      "source": {
-        "index": "docs_staging",
-      },
-      "dest": {
-        "index": "docs"
-      }
-    }
+    body = {"source": {"index": "docs_staging", }, "dest": {"index": "docs"}}
     es.reindex(body=body, wait_for_completion=True, request_timeout=1500)
 
     move_aliases_to_docs_index()
@@ -578,12 +348,16 @@ def move_aliases_to_docs_index():
     es = utils.get_elasticsearch_connection()
 
     logger.info("Move aliases 'docs_index' and 'docs_search' to point to 'docs'")
-    es.indices.update_aliases(body={"actions": [
-        {"remove": {"index": 'docs_staging', "alias": 'docs_index'}},
-        {"remove": {"index": 'docs_staging', "alias": 'docs_search'}},
-        {"add": {"index": 'docs', "alias": 'docs_index'}},
-        {"add": {"index": 'docs', "alias": 'docs_search'}}
-    ]})
+    es.indices.update_aliases(
+        body={
+            "actions": [
+                {"remove": {"index": 'docs_staging', "alias": 'docs_index'}},
+                {"remove": {"index": 'docs_staging', "alias": 'docs_search'}},
+                {"add": {"index": 'docs', "alias": 'docs_index'}},
+                {"add": {"index": 'docs', "alias": 'docs_search'}},
+            ]
+        }
+    )
     logger.info("Delete index 'docs_staging'")
     es.indices.delete('docs_staging')
 
@@ -598,19 +372,13 @@ def move_archived_murs():
     es = utils.get_elasticsearch_connection()
 
     body = {
-          "source": {
+        "source": {
             "index": "docs",
             "type": "murs",
-            "query": {
-              "match": {
-                "mur_type": "archived"
-              }
-            }
-          },
-          "dest": {
-            "index": "archived_murs"
-          }
-        }
+            "query": {"match": {"mur_type": "archived"}},
+        },
+        "dest": {"index": "archived_murs"},
+    }
 
     logger.info("Copy archived MURs from 'docs' index to 'archived_murs' index")
     es.reindex(body=body, wait_for_completion=True, request_timeout=1500)
@@ -649,9 +417,7 @@ def create_elasticsearch_backup(repository_name=None, snapshot_name="auto_backup
         datetime.datetime.today().strftime('%Y%m%d'), snapshot_name
     )
     logger.info("Creating snapshot {0}".format(snapshot_name))
-    result = es.snapshot.create(
-        repository=repository_name, snapshot=snapshot_name
-    )
+    result = es.snapshot.create(repository=repository_name, snapshot=snapshot_name)
     if result.get('accepted'):
         logger.info("Successfully created snapshot: {0}".format(snapshot_name))
     else:
@@ -675,7 +441,9 @@ def restore_elasticsearch_backup(repository_name=None, snapshot_name=None):
     snapshot_name = snapshot_name or most_recent_snapshot_name
 
     if es.indices.exists('docs'):
-        logger.info('Found docs index. Creating staging index for zero-downtime restore')
+        logger.info(
+            'Found docs index. Creating staging index for zero-downtime restore'
+        )
         create_staging_index()
 
     delete_all_indices()
@@ -707,8 +475,8 @@ def get_most_recent_snapshot(repository_name=None):
 
     repository_name = repository_name or BACKUP_REPOSITORY_NAME
     logger.info("Retreiving most recent snapshot")
-    snapshot_list = es.snapshot.get(
-        repository=repository_name, snapshot="*"
-    ).get('snapshots')
+    snapshot_list = es.snapshot.get(repository=repository_name, snapshot="*").get(
+        'snapshots'
+    )
 
     return snapshot_list.pop().get('snapshot')

@@ -16,8 +16,10 @@ TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
 rest.app.config['NPLUSONE_RAISE'] = True
 NPlusOne(rest.app)
 
+
 def _setup_extensions():
     rest.db.engine.execute('create extension if not exists btree_gin;')
+
 
 def _reset_schema():
     rest.db.engine.execute('drop schema if exists public cascade;')
@@ -35,7 +37,6 @@ def _reset_schema():
 
 
 class BaseTestCase(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         rest.app.config['TESTING'] = True
@@ -62,25 +63,32 @@ class BaseTestCase(unittest.TestCase):
 
 
 class ApiBaseTest(BaseTestCase):
-
     @classmethod
     def setUpClass(cls):
         super(ApiBaseTest, cls).setUpClass()
         _reset_schema()
         with open(os.devnull, 'w') as null:
             subprocess.check_call(
-                ['psql', '-f', 'data/migrations/V0039__states_and_zips_data.sql', TEST_CONN],
-                stdout=null
+                [
+                    'psql',
+                    '-f',
+                    'data/migrations/V0039__states_and_zips_data.sql',
+                    TEST_CONN,
+                ],
+                stdout=null,
             )
 
-        whitelist = [models.CandidateCommitteeTotalsPresidential, models.CandidateCommitteeTotalsHouseSenate]
+        whitelist = [
+            models.CandidateCommitteeTotalsPresidential,
+            models.CandidateCommitteeTotalsHouseSenate,
+        ]
         rest.db.metadata.create_all(
             rest.db.engine,
             tables=[
-                each.__table__ for each in rest.db.Model._decl_class_registry.values()
+                each.__table__
+                for each in rest.db.Model._decl_class_registry.values()
                 if hasattr(each, '__table__') and each not in whitelist
-            ]
-
+            ],
         )
 
     def setUp(self):
@@ -106,9 +114,11 @@ class ApiBaseTest(BaseTestCase):
         response = self._response(qry)
         return response['results']
 
+
 def assert_dicts_subset(first, second):
     expected = {key: first.get(key) for key in second}
     assert expected == second
+
 
 def get_test_jdbc_url():
     """

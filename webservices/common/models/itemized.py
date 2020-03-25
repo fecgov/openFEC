@@ -71,8 +71,11 @@ class ScheduleA(BaseItemized):
     __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'fec_fitem_sched_a'
 
-    # override the entry from the BaseItemized using either one of the following two
-    # committee = utils.related_committee_history('committee_id', cycle_label='two_year_transaction_period', use_modulus=False)
+    """
+    override the entry from the BaseItemized using either one of the following two
+    committee = utils.related_committee_history('committee_id',
+    cycle_label='two_year_transaction_period', use_modulus=False)
+    """
     committee = db.relationship(
         'CommitteeHistory',
         primaryjoin='''and_(
@@ -255,8 +258,11 @@ class ScheduleB(BaseItemized):
     __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'fec_fitem_sched_b'
 
-    # override the entry from the BaseItemized using either one of the following two
-    # committee = utils.related_committee_history('committee_id', cycle_label='two_year_transaction_period', use_modulus=False)
+    """
+    override the entry from the BaseItemized using either one of the following two
+    committee = utils.related_committee_history('committee_id',
+    cycle_label='two_year_transaction_period', use_modulus=False)
+    """
     committee = db.relationship(
         'CommitteeHistory',
         primaryjoin='''and_(
@@ -841,9 +847,9 @@ class ScheduleH4(BaseItemized):
             ScheduleH4.cycle == CommitteeHistory.cycle,
         )'''
     )
-    
+
     # Recipient info
-    committee_id = db.Column('filer_cmte_id', db.String) #override from BaseItemized
+    committee_id = db.Column('filer_cmte_id', db.String)  # override from BaseItemized
     entity_type = db.Column('entity_tp', db.String)
     entity_type_desc = db.Column('entity_tp_desc', db.String)
     payee_name = db.Column('pye_nm', db.String)
@@ -855,8 +861,8 @@ class ScheduleH4(BaseItemized):
     filer_committee_name = db.Column('filer_cmte_nm', db.String)
 
     # Primary transaction info
-    #event_purpose_category_type = db.Column('evt_purpose_category_tp', db.String)
-    #event_purpose_category_type_description = db.Column('evt_purpose_category_tp_desc', db.String)
+    # event_purpose_category_type = db.Column('evt_purpose_category_tp', db.String)
+    # event_purpose_category_type_description = db.Column('evt_purpose_category_tp_desc', db.String)
     event_purpose_name = db.Column('evt_purpose_nm', db.String)
     event_purpose_description = db.Column('evt_purpose_desc', db.String)
     event_purpose_category_type = db.Column('evt_purpose_category_tp', db.String)
@@ -909,15 +915,14 @@ class ScheduleH4(BaseItemized):
     conduit_committee_state = db.Column('conduit_cmte_st', db.String)
     conduit_committee_zip = db.Column('conduit_cmte_zip', db.Integer)
 
-
     # TODO: determine place for these:
-    federal_share = db.Column('fed_share', db.Numeric(14,2))
-    nonfederal_share = db.Column('nonfed_share', db.Numeric(14,2))
+    federal_share = db.Column('fed_share', db.Numeric(14, 2))
+    nonfederal_share = db.Column('nonfed_share', db.Numeric(14, 2))
     administrative_voter_drive_activity_indicator = db.Column('admin_voter_drive_acty_ind', db.String)
     fundraising_activity_indicator = db.Column('fndrsg_acty_ind', db.String)
     exempt_activity_indicator = db.Column('exempt_acty_ind', db.String)
     direct_candidate_support_activity_indicator = db.Column('direct_cand_supp_acty_ind', db.String)
-    event_amount_year_to_date = db.Column('evt_amt_ytd', db.Numeric(14,2))
+    event_amount_year_to_date = db.Column('evt_amt_ytd', db.Numeric(14, 2))
     additional_description = db.Column('add_desc', db.String)
     administrative_activity_inidcator = db.Column('admin_acty_ind', db.String)
     general_voter_drive_activity_indicator = db.Column('gen_voter_drive_acty_ind', db.String)
@@ -926,8 +931,8 @@ class ScheduleH4(BaseItemized):
     published_committee_reference_parity_check = db.Column('pub_comm_ref_pty_chk', db.String)
     filing_form = db.Column('filing_form', db.String)
     report_type = db.Column('rpt_tp', db.String)
-    report_year = db.Column('rpt_yr', db.Numeric(4,0))
-    cycle = db.Column('election_cycle', db.Numeric(4,0))
+    report_year = db.Column('rpt_yr', db.Numeric(4, 0))
+    cycle = db.Column('election_cycle', db.Numeric(4, 0))
 
     @hybrid_property
     def sort_expressions(self):
