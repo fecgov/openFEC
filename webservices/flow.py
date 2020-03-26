@@ -44,7 +44,6 @@ def get_graph():
         'totals_combined',
         'totals_house_senate',
         'totals_ie',
-        # 'totals_pac_party',
         'totals_presidential',
     ]
     graph.add_nodes_from(MATERIALIZED_VIEWS)
@@ -79,7 +78,6 @@ def get_graph():
     graph.add_edges_from([
         ('totals_combined', 'totals_house_senate'),
         ('totals_combined', 'totals_presidential'),
-        # ('totals_combined', 'totals_pac_party'),
         ('totals_combined', 'totals_ie'),
     ])
 
@@ -88,8 +86,7 @@ def get_graph():
         ('totals_combined', 'committee_fulltext'),
     ])
 
-    # graph.add_edge('committee_detail', 'totals_pac_party')
-
+    
     graph.add_edges_from([
         ('candidate_detail', 'candidate_fulltext'),
         ('totals_combined', 'candidate_fulltext'),
