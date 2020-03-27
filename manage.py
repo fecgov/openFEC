@@ -129,7 +129,6 @@ def refresh_materialized(concurrent=True):
         'totals_combined': ['ofec_totals_combined_mv'],
         'totals_house_senate': ['ofec_totals_house_senate_mv'],
         'totals_ie': ['ofec_totals_ie_only_mv'],
-        'totals_pac_party': ['ofec_totals_pacs_parties_mv'],
         'totals_presidential': ['ofec_totals_presidential_mv'],
     }
 
