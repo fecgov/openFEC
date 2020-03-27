@@ -3,6 +3,7 @@ from sqlalchemy.dialects.postgresql import TSVECTOR
 from .base import db
 from webservices import docs
 
+
 class CommunicationCost(db.Model):
     __tablename__ = 'ofec_communication_cost_mv'
 
@@ -30,7 +31,7 @@ class CommunicationCost(db.Model):
     purpose = db.Column('communication_class_desc', db.String, index=True)
     support_oppose_indicator = db.Column('s_o_ind', db.String, index=True)
 
-    #new columns added from ware house transition
+    # new columns added from ware house transition
     action_code = db.Column('action_cd', db.String)
     action_code_full = db.Column('action_cd_desc', db.String)
     primary_general_indicator = db.Column('s_o_rpt_pgi', db.String)
@@ -79,10 +80,10 @@ class Electioneering(db.Model):
     receipt_date = db.Column('receipt_dt', db.Date)
     election_type_raw = db.Column('election_tp', db.String)
     pdf_url = db.Column(db.String)
-
     purpose_description_text = db.Column(TSVECTOR)
     payee_name = db.Column('payee_nm', db.String, doc=docs.PAYEE_NAME)
     payee_state = db.Column('payee_st', db.String)
+
     @property
     def election_type(self):
         return self.election_type_raw[:1]

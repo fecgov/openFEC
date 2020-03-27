@@ -1,5 +1,6 @@
 import networkx as nx
 
+
 def get_graph():
     """Build a `DiGraph` that captures dependencies between database migration
     tasks. Each node represents a migration script, and each edge represents

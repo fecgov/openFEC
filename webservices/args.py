@@ -1,14 +1,13 @@
 import functools
-
-from marshmallow.compat import text_type
-
 import sqlalchemy as sa
 
+from marshmallow.compat import text_type
 from webargs import fields, validate
 
 from webservices import docs
 from webservices import exceptions
 from webservices.common.models import db
+
 
 def _validate_natural(value):
     if value < 0:
@@ -25,6 +24,7 @@ per_page = Natural(
     description='The number of results returned per page. Defaults to 20.',
 )
 
+
 class Currency(fields.Decimal):
 
     def __init__(self, places=2, **kwargs):
@@ -40,6 +40,7 @@ class IStr(fields.Str):
 
     def _deserialize(self, value, attr, data):
         return super()._deserialize(value, attr, data).upper()
+
 
 class District(fields.Str):
 
@@ -73,6 +74,7 @@ paging = {
     'page': Natural(missing=1, description='For paginating through results, starting at page 1'),
     'per_page': per_page,
 }
+
 
 class OptionValidator(object):
     """Ensure that value is one of acceptable options.
@@ -134,6 +136,7 @@ class IndicesValidator(IndexValidator):
                     status_code=422,
                 )
 
+
 def make_sort_args(default=None, validator=None, default_hide_null=False,
         default_nulls_only=False, default_sort_nulls_last=False, show_nulls_last_arg=True):
     args = {
@@ -166,6 +169,7 @@ def make_multi_sort_args(default=None, validator=None, default_hide_null=False,
     args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True,
         description='Provide a field to sort by. Use - for descending order.',)
     return args
+
 
 def make_seek_args(field=fields.Int, description=None):
     return {
@@ -536,7 +540,7 @@ schedule_a = {
 
 schedule_a_e_file = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    #'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
+    # 'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
     'contributor_name': fields.List(fields.Str, description=docs.CONTRIBUTOR_NAME),
     'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
     'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
@@ -632,9 +636,9 @@ schedule_b = {
 
 schedule_b_efile = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    #'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here
+    # 'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here
     # if the contributor is registered with the FEC.'),
-    #'recipient_name': fields.List(fields.Str, description='Name of recipient'),
+    # 'recipient_name': fields.List(fields.Str, description='Name of recipient'),
     'disbursement_description': fields.List(fields.Str, description='Description of disbursement'),
     'image_number': fields.List(
         fields.Str,
@@ -679,7 +683,7 @@ schedule_c = {
     'max_incurred_date': fields.Date(missing=None, description=docs.MAX_INCURRED_DATE),
 }
 
-#These arguments will evolve with updated filtering needs
+# These arguments will evolve with updated filtering needs
 schedule_d = {
     'min_payment_period': fields.Float(),
     'max_payment_period': fields.Float(),

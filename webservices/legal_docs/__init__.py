@@ -31,6 +31,7 @@ logger.setLevel('ERROR')
 logger = logging.getLogger('botocore')
 logger.setLevel('WARN')
 
+
 def load_current_legal_docs():
     index_statutes()
     index_regulations()
@@ -39,17 +40,19 @@ def load_current_legal_docs():
     load_adrs()
     load_admin_fines()
 
+
 def initialize_current_legal_docs():
     """
-    Creates the Elasticsearch index and loads all the different types of legal documents.
+    Create the Elasticsearch index and loads all the different types of legal documents.
     This would lead to a brief outage while the docs are reloaded.
     """
     create_docs_index()
     load_current_legal_docs()
 
+
 def refresh_current_legal_docs_zero_downtime():
     """
-    Creates a staging index and loads all the different types of legal documents into it.
+    Create a staging index and loads all the different types of legal documents into it.
     When done, moves the staging index to the production index with no downtime.
     This is typically used when there is a schema change.
     """

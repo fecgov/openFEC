@@ -4,20 +4,25 @@ from webservices import decoders, docs
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 from .base import db
 
+
 class DisclosureMixin(object):
     __table_args__ = {"schema": "disclosure"}
+
 
 class StagingMixin(object):
     __table_args__ = {"schema": "staging"}
 
+
 class FecAppMixin(object):
     __table_args__ = {"schema": "fecapp"}
+
 
 class ReportType(db.Model, StagingMixin):
     __tablename__ = 'ref_rpt_tp'
 
     report_type = db.Column('rpt_tp_cd', db.String, index=True, primary_key=True, doc=docs.REPORT_TYPE)
     report_type_full = db.Column('rpt_tp_desc', db.String, index=True, doc=docs.REPORT_TYPE)
+
 
 class DateMixin(object):
     trc_report_due_date_id = db.Column(db.BigInteger, primary_key=True)
@@ -39,6 +44,8 @@ class ReportDate(db.Model, DateMixin, FecAppMixin):
 
 
 REPORT_TYPE_CLEAN = re.compile(r'{[^)]*}')
+
+
 def clean_report_type(report_type):
     return REPORT_TYPE_CLEAN.sub('', report_type).strip()
 
@@ -79,7 +86,6 @@ class ElectionClassDate(db.Model):
     open_seat_flag = db.Column('open_seat_flg', db.String, doc=docs.OPEN_SEAT_FLAG)
     create_date = db.Column(db.Date, doc=docs.CREATE_DATE)
     election_type_id = db.Column(db.String, doc=docs.ELECTION_TYPE)
-    #? double check this
     cycle_start_date = db.Column('cycle_start_dt', db.Date)
     cycle_end_date = db.Column('cycle_end_dt', db.Date)
     election_date = db.Column('election_dt', db.Date, doc=docs.ELECTION_DATE)
@@ -100,6 +106,5 @@ class CalendarDate(db.Model):
     end_date = db.Column(db.DateTime, index=True, doc=docs.END_DATE)
     all_day = db.Column(db.Boolean)
     url = db.Column(db.String, doc=docs.EVENT_URL)
-
     summary_text = db.Column(TSVECTOR)
     description_text = db.Column(TSVECTOR)

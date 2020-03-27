@@ -77,7 +77,7 @@ class BaseEfileSchema(BaseSchema):
     def extract_summary_rows(self, obj):
         if obj.get('summary_lines'):
             for key, value in obj.get('summary_lines').items():
-                #may be a way to pull these out using pandas?
+                # may be a way to pull these out using pandas?
                 if key == 'nan':
                     continue
                 obj[key] = value
@@ -157,7 +157,7 @@ class EFilingF3Schema(BaseEfileSchema):
     def parse_summary_rows(self, obj):
         descriptions = decoders.f3_description
         line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b, descriptions)
-        #final bit of data cleaning before json marshalling
+        # final bit of data cleaning before json marshalling
         # If values are None, fall back to 0 to prevent errors
         coh_cop_i = line_list.get('coh_cop_i') if line_list.get('coh_cop_i') else 0
         coh_cop_ii = line_list.get('coh_cop_ii') if line_list.get('coh_cop_ii') else 0
@@ -473,7 +473,7 @@ make_totals_schema = functools.partial(
     fields={
         'pdf_url': ma.fields.Str(),
         'report_form': ma.fields.Str(),
-        #'committee_type': ma.fields.Str(attribute='committee.committee_type'),
+        # 'committee_type': ma.fields.Str(attribute='committee.committee_type'),
         'last_cash_on_hand_end_period': ma.fields.Decimal(places=2),
         'last_beginning_image_number': ma.fields.Str(),
         'transaction_coverage_date': ma.fields.Date(
@@ -973,6 +973,7 @@ CalendarDateSchema = make_schema(
 CalendarDatePageSchema = make_page_schema(CalendarDateSchema)
 augment_schemas(CalendarDateSchema)
 
+
 class ElectionSearchSchema(ma.Schema):
     state = ma.fields.Str()
     office = ma.fields.Str()
@@ -985,6 +986,7 @@ class ElectionSearchSchema(ma.Schema):
 
 augment_schemas(ElectionSearchSchema)
 
+
 class ElectionSummarySchema(ApiSchema):
     count = ma.fields.Int()
     receipts = ma.fields.Decimal(places=2)
@@ -993,6 +995,7 @@ class ElectionSummarySchema(ApiSchema):
 
 
 register_schema(ElectionSummarySchema)
+
 
 class ElectionSchema(ma.Schema):
     candidate_id = ma.fields.Str()
@@ -1013,6 +1016,7 @@ augment_schemas(ElectionSchema)
 
 ElectionPageSchema = make_page_schema(ElectionSchema)
 register_schema(ElectionPageSchema)
+
 
 class ScheduleABySizeCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
@@ -1245,6 +1249,7 @@ OperationsLogPageSchema = make_page_schema(OperationsLogSchema)
 register_schema(OperationsLogSchema)
 register_schema(OperationsLogPageSchema)
 
+
 class TotalByOfficeSchema(ma.Schema):
     office = ma.fields.Str()
     election_year = ma.fields.Int()
@@ -1253,6 +1258,7 @@ class TotalByOfficeSchema(ma.Schema):
 
 
 augment_schemas(TotalByOfficeSchema)
+
 
 class TotalByOfficeByPartySchema(ma.Schema):
     office = ma.fields.Str()
@@ -1264,6 +1270,7 @@ class TotalByOfficeByPartySchema(ma.Schema):
 
 augment_schemas(TotalByOfficeByPartySchema)
 
+
 class ECTotalsByCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
@@ -1271,6 +1278,7 @@ class ECTotalsByCandidateSchema(ma.Schema):
 
 
 augment_schemas(ECTotalsByCandidateSchema)
+
 
 class IETotalsByCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
@@ -1280,6 +1288,7 @@ class IETotalsByCandidateSchema(ma.Schema):
 
 
 augment_schemas(IETotalsByCandidateSchema)
+
 
 class CCTotalsByCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()

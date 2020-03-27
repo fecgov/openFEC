@@ -396,6 +396,7 @@ class ECAggregatesView(AggregateResource):
         ('committee_id', model.committee_id),
     ]
 
+
 def join_cand_cmte_names(query):
     query = query.subquery()
     return models.db.session.query(

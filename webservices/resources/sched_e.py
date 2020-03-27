@@ -10,6 +10,7 @@ from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
 
+
 @doc(
     tags=['independent expenditures'],
     description=docs.SCHEDULE_E,
@@ -23,9 +24,11 @@ class ScheduleEView(ItemizedResource):
     @property
     def year_column(self):
         return self.model.report_year
+
     @property
     def index_column(self):
         return self.model.sub_id
+
     @property
     def amount_column(self):
         return self.model.expenditure_amount

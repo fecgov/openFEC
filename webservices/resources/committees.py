@@ -193,7 +193,7 @@ class CommitteeHistoryView(ApiResource):
         if candidate_id:
             # use for
             # '/candidate/<candidate_id>/committees/history/',
-            #'/candidate/<candidate_id>/committees/history/<int:cycle>/',
+            # '/candidate/<candidate_id>/committees/history/<int:cycle>/',
             query = query.join(
                 models.CandidateCommitteeLink,
                 sa.and_(

@@ -37,6 +37,7 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
 
     }
 
+
 def redis_url():
     """
     Retrieve the URL needed to connect to a Redis instance, depending on environment.
@@ -78,10 +79,12 @@ app.conf.ONCE = {
 
 context = {}
 
+
 @signals.task_prerun.connect
 def push_context(task_id, task, *args, **kwargs):
     context[task_id] = utils.get_app().app_context()
     context[task_id].push()
+
 
 @signals.task_postrun.connect
 def pop_context(task_id, task, *args, **kwargs):

@@ -102,9 +102,11 @@ def query_with_labels(query, schema, sort_columns=False):
 
     return query
 
+
 def unpack(values, size):
     values = values if isinstance(values, tuple) else (values, )
     return values + (None, ) * (size - len(values))
+
 
 def get_s3_name(path, qs):
     """
@@ -134,6 +136,7 @@ def make_bundle(resource):
             format='csv',
             header=True
         )
+
 
 @app.task(base=QueueOnce, once={'graceful': True})
 def export_query(path, qs):

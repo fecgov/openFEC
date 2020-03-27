@@ -27,6 +27,7 @@ form_types = {
     'F6': '48-hour notice of contribution/loans received',
 }
 
+
 def dumper(f3p_col_a, f3p_col_b, f3p_description, dumped):
     for row in dumped:
         description, col_a, col_b = row

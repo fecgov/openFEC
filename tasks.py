@@ -226,6 +226,7 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
             space=space
         ), echo=True)
 
+
 @task
 def create_sample_db(ctx):
     """

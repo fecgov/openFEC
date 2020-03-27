@@ -12,8 +12,11 @@ from webservices.resources.aggregates import (
     ECAggregatesView,
 )
 
-# test endpoint: /electioneering/totals/by_candidate/ under tag:electioneering
+
 class TestTotalElectioneering(ApiBaseTest):
+    """
+    test endpoint: /electioneering/totals/by_candidate/ under tag:electioneering
+    """
     def test_fields(self):
 
         factories.CandidateHistoryFactory(

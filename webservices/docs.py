@@ -33,7 +33,7 @@ PAGES = '''
 Number of pages in the document
 '''
 
-#======== candidate start ===========
+# ======== candidate start ===========
 CANDIDATE_TAG = '''
 Candidate endpoints give you access to information about the people running for office.
 This information is organized by candidate_id. If you're unfamiliar with candidate IDs,
@@ -183,9 +183,9 @@ F2_CANDIDATE_STREET_2 = 'Additional street information of candidate\'s address, 
 
 F2_CANDIDATE_ZIP = 'Zip code of candidate\'s address, as reported on their Form 2.'
 
-#======== candidate end ===========
+# ======== candidate end ===========
 
-#======== committee start ===========
+# ======== committee start ===========
 COMMITTEE_TAG = '''
 Committees are entities that spend and raise money in an election. Their characteristics and
 relationships with candidates can change over time.
@@ -510,10 +510,10 @@ MAX_LAST_F1_DATE = 'Filter for committees whose latest Form 1 was received on or
 AFFILIATED_COMMITTEE_NAME = '''
 Affiliated committee or connected organization
 '''
-#======== committee end ===========
+# ======== committee end ===========
 
 
-#======== election start ===========
+# ======== election start ===========
 ELECTION_SEARCH = '''
 List elections by cycle, office, state, and district.
 '''
@@ -591,10 +591,10 @@ The minimum date this record was last updated.(MM/DD/YYYY or YYYY-MM-DD)
 MAX_UPDATE_DATE = '''
 The maximum date this record was last updated.(MM/DD/YYYY or YYYY-MM-DD)
 '''
-#======== election end ===========
+# ======== election end ===========
 
 
-#======== financial start ===========
+# ======== financial start ===========
 FINANCIAL_TAG = '''
 Fetch key information about a committee's Form 3, Form 3X, or Form 3P financial reports.
 
@@ -1390,7 +1390,7 @@ CREATE_DATE = 'Date the record was created'
 UPDATE_DATE = 'Date the record was updated'
 ELECTION_DATE = 'Date of election'
 ELECTION_YEAR = 'Year of election'
-#? TODO: add more categories
+# ? TODO: add more categories
 ELECTION_TYPE = 'Election type \n\
 Convention, Primary,\n\
 General, Special,\n\
@@ -1411,6 +1411,7 @@ ENDING_IMAGE_NUMBER = 'Image number is an unique identifier for each page the el
 report. The last image number corresponds to the image number for the last page of the document.'
 
 # Reports and Totals
+
 
 def add_period(var):
     return var + ' total for the reporting period'
@@ -1471,7 +1472,7 @@ REFUNDED_POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS = 'Political party refunds'
 CONTRIBUTION_REFUNDS = 'Total contribution refunds'
 REFUNDED_OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS = 'Other committee refunds'
 
-#loans
+# loans
 LOAN_SOURCE = 'Source of the loan (i.e., bank loan, brokerage account, credit card, home equity line of credit, \
               other line of credit, or personal funds of the candidate'
 
