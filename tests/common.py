@@ -104,7 +104,7 @@ class ApiBaseTest(BaseTestCase):
 
     def _response(self, qry):
         response = self.app.get(qry)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         result = json.loads(codecs.decode(response.data))
         self.assertNotEqual(result, [], "Empty response!")
         self.assertEqual(result['api_version'], __API_VERSION__)

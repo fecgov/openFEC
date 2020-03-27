@@ -56,8 +56,8 @@ def get_text(node):
 
 def index_regulations():
     """
-        Indexes the regulations relevant to the FEC in Elasticsearch.
-        The regulations are accessed from FEC_EREGS_API.
+    Indexes the regulations relevant to the FEC in Elasticsearch.
+    The regulations are accessed from FEC_EREGS_API.
     """
     eregs_api = env.get_credential('FEC_EREGS_API', '')
     if not eregs_api:
@@ -307,9 +307,9 @@ def get_subject_tree(html, tree=None):
     # get next token
     root = re.match("([^<]+)(?:<br>)?(.*)", html, re.S)
     list_item = re.match("<li>(.*?)</li>(.*)", html, re.S)
-    unordered_list = re.match("<ul\s+class='no-top-margin'>(.*)", html, re.S)  # noqa
+    unordered_list = re.match(r"<ul\s+class='no-top-margin'>(.*)", html, re.S)
     end_list = re.match("</ul>(.*)", html, re.S)
-    empty = re.match("\s*<br>\s*", html)  # noqa
+    empty = re.match(r"\s*<br>\s*", html)
 
     if empty:
         pass
@@ -332,11 +332,11 @@ def get_subject_tree(html, tree=None):
     elif list_item or root:
         # shift
         subject = (
-            re.sub('\s+', ' ', (list_item or root).group(1))
+            re.sub(r'\s+', ' ', (list_item or root).group(1))
             .strip()
             .lower()
             .capitalize()
-        )  # noqa
+        )
         tree.append({'text': subject})
     else:
         print(html)
@@ -360,13 +360,13 @@ def get_citations(citation_texts):
 
     for citation_text in citation_texts:
         us_code_match = re.match(
-            "(?P<title>[0-9]+) U\.S\.C\. (?P<section>[0-9a-z-]+)(?P<paragraphs>.*)",
+            r"(?P<title>[0-9]+) U\.S\.C\. (?P<section>[0-9a-z-]+)(?P<paragraphs>.*)",
             citation_text,
-        )  # noqa
+        )
         regulation_match = re.match(
-            "(?P<title>[0-9]+) C\.F\.R\. (?P<part>[0-9]+)(?:\.(?P<section>[0-9]+))?",
+            r"(?P<title>[0-9]+) C\.F\.R\. (?P<part>[0-9]+)(?:\.(?P<section>[0-9]+))?",
             citation_text,
-        )  # noqa
+        )
 
         if us_code_match:
             (
@@ -475,12 +475,12 @@ def process_murs(raw_mur_tr_element_list):
             citations_td,
         ) = re.findall(
             "<td[^>]*>(.*?)</td>", raw_mur_tr_element, re.S
-        )  # noqa
+        )
         mur_no = re.search(
-            "/disclosure_data/mur/([0-9]+)(?:_[A-H])*\.pdf", mur_no_td
+            r"/disclosure_data/mur/([0-9]+)(?:_[A-H])*\.pdf", mur_no_td
         ).group(
             1
-        )  # noqa
+        )
 
         logger.info(
             "Loading archived MUR %s: %s of %s",
@@ -499,7 +499,7 @@ def process_murs(raw_mur_tr_element_list):
         complainants = []
         respondents = []
         for party in parties:
-            match = re.match("\(([RC])\) - (.*)", party)  # noqa
+            match = re.match(r"\(([RC])\) - (.*)", party)
             name = match.group(2).strip().title()
             if match.group(1) == 'C':
                 complainants.append(name)
@@ -541,21 +541,21 @@ def load_archived_murs(
         raw_mur_tr_element_list = list(
             itertools.dropwhile(
                 lambda x: re.search(
-                    '/disclosure_data/mur/([0-9]+)(?:_[A-Z])*\.pdf', x, re.M
+                    r'/disclosure_data/mur/([0-9]+)(?:_[A-Z])*\.pdf', x, re.M
                 ).group(1)
                 != from_mur_no,
                 raw_mur_tr_element_list,
             )
-        )  # noqa
+        )
     elif specific_mur_no is not None:
         raw_mur_tr_element_list = list(
             filter(
                 lambda x: re.search(
-                    '/disclosure_data/mur/([0-9]+)(?:_[A-Z])*\.pdf', x, re.M
+                    r'/disclosure_data/mur/([0-9]+)(?:_[A-Z])*\.pdf', x, re.M
                 ).group(1)
                 == specific_mur_no,
                 raw_mur_tr_element_list,
             )
-        )  # noqa
+        )
     process_murs(raw_mur_tr_element_list)
     logger.info("%d archived MURs loaded", len(raw_mur_tr_element_list))

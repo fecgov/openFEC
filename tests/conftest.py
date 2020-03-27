@@ -1,5 +1,5 @@
 import manage
-from tests.common import get_test_jdbc_url
+from tests import common
 from webservices import rest
 
 import pytest
@@ -9,9 +9,12 @@ import logging
 
 @pytest.fixture(scope="session")
 def migrate_db(request):
-    reset_schema()
-    run_migrations()
-    manage.refresh_materialized(concurrent=False)
+    with rest.app.app_context():
+        rest.app.config['TESTING'] = True
+        rest.app.config['SQLALCHEMY_DATABASE_URI'] = common.TEST_CONN
+        reset_schema()
+        run_migrations()
+        manage.refresh_materialized(concurrent=False)
 
 
 def run_migrations():
@@ -20,7 +23,7 @@ def run_migrations():
             'flyway',
             'migrate',
             '-n',
-            '-url={0}'.format(get_test_jdbc_url()),
+            '-url={0}'.format(common.get_test_jdbc_url()),
             '-locations=filesystem:data/migrations',
         ],
     )

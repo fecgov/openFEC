@@ -50,7 +50,7 @@ class TestOperationsLog(ApiBaseTest):
                 OperationsLogView, candidate_committee_id='01', report_year=2012
             )
         )
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_unverified_reports(self):
 

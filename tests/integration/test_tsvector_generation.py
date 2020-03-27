@@ -26,7 +26,7 @@ class TriggerTestCase(common.BaseTestCase):
 
     def _response(self, qry):
         response = self.app.get(qry)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         result = json.loads(codecs.decode(response.data))
         self.assertNotEqual(result, [], "Empty response!")
         self.assertEqual(result['api_version'], __API_VERSION__)
@@ -77,7 +77,7 @@ class TriggerTestCase(common.BaseTestCase):
             results = connection.execute(select).fetchall()
             recipient_nm_list = [name[2] for name in results]
             # the only result not returned is the "bad" last element
-            self.assertEquals(
+            self.assertEqual(
                 set(names[key]) - set(recipient_nm_list), {names[key][-1]}
             )
         connection.close()
@@ -123,7 +123,7 @@ class TriggerTestCase(common.BaseTestCase):
             results = connection.execute(select).fetchall()
             contbr_nm_list = [name[3] for name in results]
             # the only result not returned is the "bad" last element
-            self.assertEquals(set(names[key]) - set(contbr_nm_list), {names[key][-1]})
+            self.assertEqual(set(names[key]) - set(contbr_nm_list), {names[key][-1]})
         connection.close()
 
     def test_schedule_a_contributor_employer_text(self):
@@ -167,7 +167,7 @@ class TriggerTestCase(common.BaseTestCase):
             results = connection.execute(select).fetchall()
             contbr_employer_list = [name[16] for name in results]
             # the only result not returned is the "bad" last element
-            self.assertEquals(
+            self.assertEqual(
                 set(names[key]) - set(contbr_employer_list), {names[key][-1]}
             )
         connection.close()
@@ -213,7 +213,7 @@ class TriggerTestCase(common.BaseTestCase):
             results = connection.execute(select).fetchall()
             contbr_occupation_list = [name[17] for name in results]
             # the only result not returned is the "bad" last element
-            self.assertEquals(
+            self.assertEqual(
                 set(names[key]) - set(contbr_occupation_list), {names[key][-1]}
             )
         connection.close()
