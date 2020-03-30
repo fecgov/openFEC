@@ -49,13 +49,13 @@ def reset_schema():
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--skip-linting",
+        "--no-linting",
         action="store_true",
         default=False,
         help="Skip linting checks",
     )
     parser.addoption(
-        "--only-linting",
+        "--linting",
         action="store_true",
         default=False,
         help="Only run linting checks",
@@ -63,9 +63,9 @@ def pytest_addoption(parser):
 
 
 def pytest_collection_modifyitems(session, config, items):
-    if config.getoption("--skip-linting"):
+    if config.getoption("--no-linting"):
         items[:] = [item for item in items if not item.get_closest_marker('flake8')]
-    if config.getoption("--only-linting"):
+    if config.getoption("--linting"):
         items[:] = [item for item in items if item.get_closest_marker('flake8')]
 
 
