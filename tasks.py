@@ -193,9 +193,9 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
 
         if not all((jdbc_url, migration_user, migration_password)):
             print(
-                "\nUnable to retrieve or parse {0}. \
-                Make sure the environmental variable is set and properly \
-                formatted.\n".format(
+                "\nUnable to retrieve or parse {0}. "
+                "Make sure the environmental variable is set and properly "
+                "formatted.\n".format(
                     migration_env_var
                 )
             )
