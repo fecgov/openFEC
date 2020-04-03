@@ -50,7 +50,8 @@ class RoutingSession(SignallingSession):
 
     def get_bind(self, mapper=None, clause=None):
         if self.use_follower:
-            if self.route_schedule_a:
+            # Celery worker doesn't have request context
+            if request and self.route_schedule_a:
                 if '/schedule_a/' not in request.path:
                     # Route all non-schedule A traffic to replica 1
                     return self.followers[0]
