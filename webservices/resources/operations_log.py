@@ -1,4 +1,3 @@
-
 from flask_apispec import doc
 from webservices import args
 from webservices import docs
@@ -6,6 +5,7 @@ from webservices import utils
 from webservices import schemas
 from webservices.common import models
 from webservices.common.views import ApiResource
+
 
 @doc(tags=['filings'], description=docs.OPERATIONS_LOG)
 class OperationsLogView(ApiResource):
@@ -25,8 +25,17 @@ class OperationsLogView(ApiResource):
 
     filter_range_fields = [
         (('min_receipt_date', 'max_receipt_date'), models.OperationsLog.receipt_date),
-        (('min_coverage_end_date', 'max_coverage_end_date'), models.OperationsLog.coverage_end_date),
-        (('min_transaction_data_complete_date', 'max_transaction_data_complete_date'), models.OperationsLog.transaction_data_complete_date),
+        (
+            ('min_coverage_end_date', 'max_coverage_end_date'),
+            models.OperationsLog.coverage_end_date,
+        ),
+        (
+            (
+                'min_transaction_data_complete_date',
+                'max_transaction_data_complete_date',
+            ),
+            models.OperationsLog.transaction_data_complete_date,
+        ),
     ]
 
     @property
@@ -35,9 +44,7 @@ class OperationsLogView(ApiResource):
         return utils.extend(
             args.paging,
             args.operations_log,
-            args.make_multi_sort_args(
-                default=default_sort,
-            ),
+            args.make_multi_sort_args(default=default_sort,),
         )
 
     def build_query(self, *args, **kwargs):

@@ -3,31 +3,23 @@ import functools
 import json
 import logging
 import unicodedata
-
 import requests
 import six
 import sqlalchemy as sa
+import flask_restful as restful
 
 from collections import defaultdict
-
 from datetime import date
-
-
 from sqlalchemy.orm import foreign
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.dialects import postgresql
-
-
-from webservices.env import env
 from elasticsearch import Elasticsearch
-
-import flask_restful as restful
 from marshmallow_pagination import paginators
-
 from webargs import fields
 from flask_apispec import use_kwargs as use_kwargs_original
 from flask_apispec.views import MethodResourceMeta
 
+from webservices.env import env
 from webservices import docs
 from webservices import sorting
 from webservices import decoders
@@ -36,22 +28,23 @@ from webservices import exceptions
 
 logger = logging.getLogger(__name__)
 
-use_kwargs = functools.partial(use_kwargs_original, locations=('query', ))
+use_kwargs = functools.partial(use_kwargs_original, locations=('query',))
 
 
 class Resource(six.with_metaclass(MethodResourceMeta, restful.Resource)):
     pass
 
+
 API_KEY_ARG = fields.Str(
-    required=True,
-    missing='DEMO_KEY',
-    description=docs.API_KEY_DESCRIPTION,
+    required=True, missing='DEMO_KEY', description=docs.API_KEY_DESCRIPTION,
 )
 if env.get_credential('PRODUCTION'):
     Resource = use_kwargs({'api_key': API_KEY_ARG})(Resource)
 
 fec_url_map = {'9': 'http://docquery.fec.gov/dcdev/posted/{0}.fec'}
-fec_url_map = defaultdict(lambda : 'http://docquery.fec.gov/paper/posted/{0}.fec', fec_url_map)
+fec_url_map = defaultdict(
+    lambda: 'http://docquery.fec.gov/paper/posted/{0}.fec', fec_url_map
+)
 
 
 def check_cap(kwargs, cap):
@@ -63,37 +56,67 @@ def check_cap(kwargs, cap):
             )
 
 
-def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear=False, count=None, cap=100, index_column=None, multi=False):
+def fetch_page(
+    query,
+    kwargs,
+    model=None,
+    aliases=None,
+    join_columns=None,
+    clear=False,
+    count=None,
+    cap=100,
+    index_column=None,
+    multi=False,
+):
     check_cap(kwargs, cap)
-    sort, hide_null, nulls_last = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_nulls_last')
+    sort, hide_null, nulls_last = (
+        kwargs.get('sort'),
+        kwargs.get('sort_hide_null'),
+        kwargs.get('sort_nulls_last'),
+    )
     if sort and multi:
         query, _ = sorting.multi_sort(
-            query, sort, model=model, aliases=aliases, join_columns=join_columns,
-            clear=clear, hide_null=hide_null, index_column=index_column, nulls_last=nulls_last
+            query,
+            sort,
+            model=model,
+            aliases=aliases,
+            join_columns=join_columns,
+            clear=clear,
+            hide_null=hide_null,
+            index_column=index_column,
+            nulls_last=nulls_last,
         )
     elif sort:
         query, _ = sorting.sort(
-            query, sort, model=model, aliases=aliases, join_columns=join_columns,
-            clear=clear, hide_null=hide_null, index_column=index_column, nulls_last=nulls_last
+            query,
+            sort,
+            model=model,
+            aliases=aliases,
+            join_columns=join_columns,
+            clear=clear,
+            hide_null=hide_null,
+            index_column=index_column,
+            nulls_last=nulls_last,
         )
     paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
 
-class SeekCoalescePaginator(paginators.SeekPaginator):
 
+class SeekCoalescePaginator(paginators.SeekPaginator):
     def __init__(self, cursor, per_page, index_column, sort_column=None, count=None):
         self.max_column_map = {
             "date": date.max,
             "float": float("inf"),
-            "int": float("inf")
+            "int": float("inf"),
         }
         self.min_column_map = {
             "date": date.min,
             "float": float("inf"),
-            "int": float("inf")
+            "int": float("inf"),
         }
-        super(SeekCoalescePaginator, self).__init__(cursor, per_page, index_column, sort_column, count)
-
+        super(SeekCoalescePaginator, self).__init__(
+            cursor, per_page, index_column, sort_column, count
+        )
 
     def _fetch(self, last_index, sort_index=None, limit=None, eager=True):
         cursor = self.cursor
@@ -112,10 +135,8 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             else:
                 comparator = self.max_column_map.get(self.sort_column[5])
 
-
             if 'coalesce' not in str(left_index):
                 left_index = sa.func.coalesce(left_index, comparator)
-
 
             lhs += (left_index,)
             rhs += (sort_index,)
@@ -139,12 +160,8 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         page. Optionally include sort values, if any.
         """
         from webservices.common.models import db
-        ret = {
-            'last_index': str(paginators.convert_value(
-                result,
-                self.index_column
-            ))
-        }
+
+        ret = {'last_index': str(paginators.convert_value(result, self.index_column))}
 
         if self.sort_column:
             key = 'last_{0}'.format(self.sort_column[2])
@@ -154,10 +171,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             # override the value serialization with the sort expression
             # information.
             if not self.sort_column[3]:
-                ret[key] = paginators.convert_value(
-                    result,
-                    self.sort_column[0]
-                )
+                ret[key] = paginators.convert_value(result, self.sort_column[0])
             else:
                 # Create a new query based on the result returned and replace
                 # the SELECT portion with just the sort expression criteria.
@@ -166,8 +180,11 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
                 # single row matching the result.
                 # NOTE:  This ensures we maintain existing clauses such as the
                 # check constraint needed for partitioned tables.
-                sort_column_query = self.cursor.with_entities(self.sort_column[0]).filter(
-                    getattr(result.__class__, self.index_column.key) == getattr(result, self.index_column.key)
+                sort_column_query = self.cursor.with_entities(
+                    self.sort_column[0]
+                ).filter(
+                    getattr(result.__class__, self.index_column.key)
+                    == getattr(result, self.index_column.key)
                 )
 
                 # Execute the new query to retrieve the value of the sort
@@ -179,9 +196,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
                 # Serialize the value using the mapped marshmallow field
                 # defined with the sort expression.
                 ret[key] = self.sort_column[4]()._serialize(
-                    expression_value,
-                    None,
-                    None
+                    expression_value, None, None
                 )
 
             if ret[key] is None:
@@ -191,8 +206,12 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         return ret
 
 
-def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=100, eager=True):
-    paginator = fetch_seek_paginator(query, kwargs, index_column, clear=clear, count=count, cap=cap)
+def fetch_seek_page(
+    query, kwargs, index_column, clear=False, count=None, cap=100, eager=True
+):
+    paginator = fetch_seek_paginator(
+        query, kwargs, index_column, clear=clear, count=count, cap=cap
+    )
     if paginator.sort_column is not None:
         sort_index = kwargs['last_{0}'.format(paginator.sort_column[2])]
         null_sort_by = paginator.sort_column[0]
@@ -201,33 +220,43 @@ def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=10
         # to account for an alternative way to sort and page by null values.
         if paginator.sort_column[3]:
             null_sort_by = paginator.sort_column[6]
-        if not sort_index and kwargs['sort_null_only'] and paginator.sort_column[1] == sa.asc:
+        if (
+            not sort_index
+            and kwargs['sort_null_only']
+            and paginator.sort_column[1] == sa.asc
+        ):
             sort_index = None
-            query = query.filter(null_sort_by == None)
+            query = query.filter(null_sort_by == None)  # noqa
             paginator.cursor = query
     else:
         sort_index = None
 
-    return paginator.get_page(last_index=kwargs['last_index'], sort_index=sort_index, eager=eager)
+    return paginator.get_page(
+        last_index=kwargs['last_index'], sort_index=sort_index, eager=eager
+    )
 
 
 def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
     model = index_column.parent.class_
-    sort, hide_null, nulls_last = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_nulls_last')
+    sort, hide_null, nulls_last = (
+        kwargs.get('sort'),
+        kwargs.get('sort_hide_null'),
+        kwargs.get('sort_nulls_last'),
+    )
     if sort:
         query, sort_column = sorting.sort(
-            query, sort,
-            model=model, clear=clear, hide_null=hide_null, nulls_last=nulls_last
+            query,
+            sort,
+            model=model,
+            clear=clear,
+            hide_null=hide_null,
+            nulls_last=nulls_last,
         )
     else:
         sort_column = None
     return SeekCoalescePaginator(
-        query,
-        kwargs['per_page'],
-        index_column,
-        sort_column=sort_column,
-        count=count,
+        query, kwargs['per_page'], index_column, sort_column=sort_column, count=count,
     )
 
 
@@ -258,10 +287,7 @@ def parse_fulltext(text):
     ascii (the encode and decode are chained).
     '''
     text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
-    return ' & '.join([
-        part + ':*'
-        for part in re.sub(r'\W', ' ', text).split()
-    ])
+    return ' & '.join([part + ':*' for part in re.sub(r'\W', ' ', text).split()])
 
 
 office_args_required = ['office', 'cycle']
@@ -269,20 +295,20 @@ office_args_map = {
     'house': ['state', 'district'],
     'senate': ['state'],
 }
+
+
 def check_election_arguments(kwargs):
     for arg in office_args_required:
         if kwargs.get(arg) is None:
             raise exceptions.ApiError(
-                'Required parameter "{0}" not found.'.format(arg),
-                status_code=422,
+                'Required parameter "{0}" not found.'.format(arg), status_code=422,
             )
     conditional_args = office_args_map.get(kwargs['office'], [])
     for arg in conditional_args:
         if kwargs.get(arg) is None:
             raise exceptions.ApiError(
                 'Must include argument "{0}" with office type "{1}"'.format(
-                    arg,
-                    kwargs['office'],
+                    arg, kwargs['office'],
                 ),
                 status_code=422,
             )
@@ -290,15 +316,24 @@ def check_election_arguments(kwargs):
 
 def get_model(name):
     from webservices.common.models import db
+
     return db.Model._decl_class_registry.get(name)
 
 
-def related(related_model, id_label, related_id_label=None, cycle_label=None,
-            related_cycle_label=None, use_modulus=True):
+def related(
+    related_model,
+    id_label,
+    related_id_label=None,
+    cycle_label=None,
+    related_cycle_label=None,
+    use_modulus=True,
+):
     from webservices.common.models import db
+
     related_model = get_model(related_model)
     related_id_label = related_id_label or id_label
     related_cycle_label = related_cycle_label or cycle_label
+
     @declared_attr
     def related(cls):
         id_column = getattr(cls, id_label)
@@ -310,10 +345,8 @@ def related(related_model, id_label, related_id_label=None, cycle_label=None,
                 cycle_column = cycle_column + cycle_column % 2
             related_cycle_column = getattr(related_model, related_cycle_label)
             filters.append(cycle_column == related_cycle_column)
-        return db.relationship(
-            related_model,
-            primaryjoin=sa.and_(*filters),
-        )
+        return db.relationship(related_model, primaryjoin=sa.and_(*filters),)
+
     return related
 
 
@@ -321,25 +354,19 @@ related_committee = functools.partial(related, 'CommitteeDetail', 'committee_id'
 related_candidate = functools.partial(related, 'CandidateDetail', 'candidate_id')
 
 related_committee_history = functools.partial(
-    related,
-    'CommitteeHistory',
-    'committee_id',
-    related_cycle_label='cycle',
+    related, 'CommitteeHistory', 'committee_id', related_cycle_label='cycle',
 )
 related_candidate_history = functools.partial(
-    related,
-    'CandidateHistory',
-    'candidate_id',
-    related_cycle_label='two_year_period',
+    related, 'CandidateHistory', 'candidate_id', related_cycle_label='two_year_period',
 )
 related_efile_summary = functools.partial(
-    related,
-    'EFilings',
-    'file_number',
-    related_id_label='file_number',
+    related, 'EFilings', 'file_number', related_id_label='file_number',
 )
 
-def document_description(report_year, report_type=None, document_type=None, form_type=None):
+
+def document_description(
+    report_year, report_type=None, document_type=None, form_type=None
+):
     if report_type:
         clean = re.sub(r'\{[^)]*\}', '', report_type)
     elif document_type:
@@ -357,11 +384,11 @@ def document_description(report_year, report_type=None, document_type=None, form
 def make_report_pdf_url(image_number):
     if image_number:
         return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
-            str(image_number)[-3:],
-            image_number,
+            str(image_number)[-3:], image_number,
         )
     else:
         return None
+
 
 def make_schedule_pdf_url(image_number):
     if image_number:
@@ -373,7 +400,10 @@ def make_csv_url(file_num):
     if file_num > -1 and file_num < 100:
         return 'http://docquery.fec.gov/csv/000/{0}.csv'.format(file_number)
     elif file_num >= 100:
-        return 'http://docquery.fec.gov/csv/{0}/{1}.csv'.format(file_number[-3:], file_number)
+        return 'http://docquery.fec.gov/csv/{0}/{1}.csv'.format(
+            file_number[-3:], file_number
+        )
+
 
 def make_fec_url(image_number, file_num):
     image_number = str(image_number)
@@ -386,6 +416,7 @@ def make_fec_url(image_number, file_num):
     elif len(image_number) == 11:
         indicator = image_number[2]
     return fec_url_map[indicator].format(file_num)
+
 
 def get_index_column(model):
     column = model.__mapper__.primary_key[0]
@@ -403,13 +434,8 @@ def cycle_param(**kwargs):
 
 
 def get_election_duration(column):
-    return sa.case(
-        [
-            (column == 'S', 6),
-            (column == 'P', 4),
-        ],
-        else_=2,
-    )
+    return sa.case([(column == 'S', 6), (column == 'P', 4), ], else_=2,)
+
 
 def get_current_cycle():
     year = date.today().year
@@ -425,8 +451,16 @@ def get_elasticsearch_connection():
     es = Elasticsearch(url, timeout=30, max_retries=10, retry_on_timeout=True)
     return es
 
+
 def print_literal_query_string(query):
-    print(str(query.statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True})))
+    print(
+        str(
+            query.statement.compile(
+                dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}
+            )
+        )
+    )
+
 
 def create_eregs_link(part, section):
     url_part_section = part
@@ -434,17 +468,24 @@ def create_eregs_link(part, section):
         url_part_section += '-' + section
     return '/regulations/{}/CURRENT'.format(url_part_section)
 
+
 def post_to_slack(message, channel):
     response = requests.post(
         env.get_credential('SLACK_HOOK'),
-        data=json.dumps({
-            'text': message, 'channel': channel, 'link_names': 1,
-            'username': 'Ms. Robot', 'icon_emoji': ':robot_face:',
-        }),
+        data=json.dumps(
+            {
+                'text': message,
+                'channel': channel,
+                'link_names': 1,
+                'username': 'Ms. Robot',
+                'icon_emoji': ':robot_face:',
+            }
+        ),
         headers={'Content-Type': 'application/json'},
     )
     if response.status_code != 200:
         logger.error('SLACK ERROR- Message failed to send:{0}'.format(message))
+
 
 def split_env_var(env_var):
     """ Remove whitespace and split to a list based of comma delimiter"""

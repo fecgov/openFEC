@@ -1,10 +1,10 @@
 from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 
-
 from webservices import docs
 from webservices import __API_VERSION__
 from webservices.env import env
+
 
 def format_docstring(docstring):
     if not docstring or not docstring.strip():

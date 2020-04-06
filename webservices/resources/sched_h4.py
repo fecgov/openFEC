@@ -6,7 +6,6 @@ from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
-from webservices.common import views
 from webservices.common.views import ItemizedResource
 from webservices import exceptions
 
@@ -34,7 +33,6 @@ class ScheduleH4View(ItemizedResource):
         ('committee_id', models.ScheduleH4.committee_id),
         ('cycle', models.ScheduleH4.cycle),
     ]
-
 
     @property
     def args(self):

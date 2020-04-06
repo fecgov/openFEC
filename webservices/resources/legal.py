@@ -22,11 +22,8 @@ INNER_HITS = {
     "_source": False,
     "highlight": {
         "require_field_match": False,
-        "fields": {
-            "documents.text": {},
-            "documents.description": {}
-        }
-    }
+        "fields": {"documents.text": {}, "documents.description": {}},
+    },
 }
 
 ALL_DOCUMENT_TYPES = [
@@ -42,38 +39,62 @@ ALL_DOCUMENT_TYPES = [
 class GetLegalCitation(utils.Resource):
     @property
     def args(self):
-        return {"citation_type": fields.Str(required=True, description="Citation type (regulation or statute)"),
-        "citation": fields.Str(required=True, description='Citation to search for.')}
+        return {
+            "citation_type": fields.Str(
+                required=True, description="Citation type (regulation or statute)"
+            ),
+            "citation": fields.Str(
+                required=True, description='Citation to search for.'
+            ),
+        }
 
     def get(self, citation_type, citation, **kwargs):
         citation = '*%s*' % citation
-        query = Search().using(es) \
-            .query('bool', must=[Q("term", _type='citations'),
-            Q('match', citation_type=citation_type)],
-            should=[Q('wildcard', citation_text=citation),
-            Q('wildcard', formerly=citation)],
-            minimum_should_match=1) \
-            .extra(size=10) \
+        query = (
+            Search()
+            .using(es)
+            .query(
+                'bool',
+                must=[
+                    Q("term", _type='citations'),
+                    Q('match', citation_type=citation_type),
+                ],
+                should=[
+                    Q('wildcard', citation_text=citation),
+                    Q('wildcard', formerly=citation),
+                ],
+                minimum_should_match=1,
+            )
+            .extra(size=10)
             .index('docs_search')
+        )
 
         es_results = query.execute()
 
         results = {"citations": [hit.to_dict() for hit in es_results]}
         return results
 
+
 class GetLegalDocument(utils.Resource):
     @property
     def args(self):
-        return {"no": fields.Str(required=True, description='Document number to fetch.'),
-                "doc_type": fields.Str(required=True, description='Document type to fetch.')}
+        return {
+            "no": fields.Str(required=True, description='Document number to fetch.'),
+            "doc_type": fields.Str(
+                required=True, description='Document type to fetch.'
+            ),
+        }
 
     def get(self, doc_type, no, **kwargs):
-        es_results = Search().using(es) \
-            .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)]) \
-            .source(exclude='documents.text') \
-            .extra(size=200) \
-            .index('docs_search') \
+        es_results = (
+            Search()
+            .using(es)
+            .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)])
+            .source(exclude='documents.text')
+            .extra(size=200)
+            .index('docs_search')
             .execute()
+        )
 
         results = {"docs": [hit.to_dict() for hit in es_results]}
 
@@ -82,10 +103,11 @@ class GetLegalDocument(utils.Resource):
         else:
             return abort(404)
 
+
 @doc(
     description=docs.LEGAL_SEARCH,
     tags=['legal'],
-    responses=responses.LEGAL_SEARCH_RESPONSE
+    responses=responses.LEGAL_SEARCH_RESPONSE,
 )
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
@@ -116,7 +138,9 @@ class UniversalSearch(utils.Resource):
 
         for type_ in doc_types:
             try:
-                query = query_builders.get(type_)(q, type_, from_hit, hits_returned, **kwargs)
+                query = query_builders.get(type_)(
+                    q, type_, from_hit, hits_returned, **kwargs
+                )
                 formatted_hits, count = execute_query(query)
             except TypeError as te:
                 logger.error(te.args)
@@ -134,22 +158,29 @@ class UniversalSearch(utils.Resource):
         results['total_all'] = total_count
         return results
 
+
 def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q('term', _type=type_)]
 
     if q:
         must_query.append(Q('query_string', query=q))
 
-    query = Search().using(es) \
-        .query(Q('bool', must=must_query)) \
-        .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
-        .highlight_options(require_field_match=False) \
-        .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
-        .extra(size=hits_returned, from_=from_hit) \
-        .index('docs_search') \
+    query = (
+        Search()
+        .using(es)
+        .query(Q('bool', must=must_query))
+        .highlight(
+            'text', 'name', 'no', 'summary', 'documents.text', 'documents.description'
+        )
+        .highlight_options(require_field_match=False)
+        .source(exclude=['text', 'documents.text', 'sort1', 'sort2'])
+        .extra(size=hits_returned, from_=from_hit)
+        .index('docs_search')
         .sort("sort1", "sort2")
+    )
 
     return query
+
 
 def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     query = generic_query_builder(q, type_, from_hit, hits_returned, **kwargs)
@@ -158,7 +189,9 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     if kwargs.get('case_no'):
         must_clauses.append(Q('terms', no=kwargs.get('case_no')))
     if kwargs.get('case_document_category'):
-        must_clauses = [Q('terms', documents__category=kwargs.get('case_document_category'))]
+        must_clauses = [
+            Q('terms', documents__category=kwargs.get('case_document_category'))
+        ]
 
     query = query.query('bool', must=must_clauses)
 
@@ -172,12 +205,15 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     # Only pass query string to document list below
     query = generic_query_builder(None, type_, from_hit, hits_returned, **kwargs)
 
-    should_query = [get_ao_document_query(q, **kwargs),
-                Q('query_string', query=q, fields=['no', 'name', 'summary'])]
+    should_query = [
+        get_ao_document_query(q, **kwargs),
+        Q('query_string', query=q, fields=['no', 'name', 'summary']),
+    ]
 
     query = query.query('bool', should=should_query, minimum_should_match=1)
 
     return apply_ao_specific_query_params(query, **kwargs)
+
 
 def apply_mur_adr_specific_query_params(query, **kwargs):
     must_clauses = []
@@ -185,10 +221,14 @@ def apply_mur_adr_specific_query_params(query, **kwargs):
     if kwargs.get('case_respondents'):
         must_clauses.append(Q('match', respondents=kwargs.get('case_respondents')))
     if kwargs.get('case_dispositions'):
-        must_clauses.append(Q('term', disposition__data__disposition=kwargs.get('case_dispositions')))
+        must_clauses.append(
+            Q('term', disposition__data__disposition=kwargs.get('case_dispositions'))
+        )
 
     if kwargs.get('case_election_cycles'):
-        must_clauses.append(Q('term', election_cycles=kwargs.get('case_election_cycles')))
+        must_clauses.append(
+            Q('term', election_cycles=kwargs.get('case_election_cycles'))
+        )
 
     # gte/lte: greater than or equal to/less than or equal to
     date_range = {}
@@ -238,9 +278,13 @@ def apply_af_specific_query_params(query, **kwargs):
         must_clauses.append(Q("range", final_determination_date=date_range))
 
     if kwargs.get('af_rtb_fine_amount'):
-        must_clauses.append(Q('term', reason_to_believe_fine_amount=kwargs.get('af_rtb_fine_amount')))
+        must_clauses.append(
+            Q('term', reason_to_believe_fine_amount=kwargs.get('af_rtb_fine_amount'))
+        )
     if kwargs.get('af_fd_fine_amount'):
-        must_clauses.append(Q('term', final_determination_amount=kwargs.get('af_fd_fine_amount')))
+        must_clauses.append(
+            Q('term', final_determination_amount=kwargs.get('af_fd_fine_amount'))
+        )
 
     query = query.query('bool', must=must_clauses)
 
@@ -248,13 +292,15 @@ def apply_af_specific_query_params(query, **kwargs):
 
 
 def get_ao_document_query(q, **kwargs):
-    categories = {'F': 'Final Opinion',
-                  'V': 'Votes',
-                  'D': 'Draft Documents',
-                  'R': 'AO Request, Supplemental Material, and Extensions of Time',
-                  'W': 'Withdrawal of Request',
-                  'C': 'Comments and Ex parte Communications',
-                  'S': 'Commissioner Statements'}
+    categories = {
+        'F': 'Final Opinion',
+        'V': 'Votes',
+        'D': 'Draft Documents',
+        'R': 'AO Request, Supplemental Material, and Extensions of Time',
+        'W': 'Withdrawal of Request',
+        'C': 'Comments and Ex parte Communications',
+        'S': 'Commissioner Statements',
+    }
 
     if kwargs.get('ao_category'):
         ao_category = [categories[c] for c in kwargs.get('ao_category')]
@@ -265,7 +311,13 @@ def get_ao_document_query(q, **kwargs):
     if q:
         combined_query.append(Q('query_string', query=q, fields=['documents.text']))
 
-    return Q("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool', must=combined_query))
+    return Q(
+        "nested",
+        path="documents",
+        inner_hits=INNER_HITS,
+        query=Q('bool', must=combined_query),
+    )
+
 
 def apply_ao_specific_query_params(query, **kwargs):
     must_clauses = []
@@ -287,20 +339,70 @@ def apply_ao_specific_query_params(query, **kwargs):
     citation_queries = []
     if kwargs.get('ao_regulatory_citation'):
         for citation in kwargs.get('ao_regulatory_citation'):
-            exact_match = re.match(r"(?P<title>\d+)\s+C\.?F\.?R\.?\s+§*\s*(?P<part>\d+)\.(?P<section>\d+)", citation)
-            if(exact_match):
-                citation_queries.append(Q("nested", path="regulatory_citations", query=Q("bool",
-                    must=[Q("term", regulatory_citations__title=int(exact_match.group('title'))),
-                        Q("term", regulatory_citations__part=int(exact_match.group('part'))),
-                        Q("term", regulatory_citations__section=int(exact_match.group('section')))])))
+            exact_match = re.match(
+                r"(?P<title>\d+)\s+C\.?F\.?R\.?\s+§*\s*(?P<part>\d+)\.(?P<section>\d+)",
+                citation,
+            )
+            if exact_match:
+                citation_queries.append(
+                    Q(
+                        "nested",
+                        path="regulatory_citations",
+                        query=Q(
+                            "bool",
+                            must=[
+                                Q(
+                                    "term",
+                                    regulatory_citations__title=int(
+                                        exact_match.group('title')
+                                    ),
+                                ),
+                                Q(
+                                    "term",
+                                    regulatory_citations__part=int(
+                                        exact_match.group('part')
+                                    ),
+                                ),
+                                Q(
+                                    "term",
+                                    regulatory_citations__section=int(
+                                        exact_match.group('section')
+                                    ),
+                                ),
+                            ],
+                        ),
+                    )
+                )
 
     if kwargs.get('ao_statutory_citation'):
         for citation in kwargs.get('ao_statutory_citation'):
-            exact_match = re.match(r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<section>\d+).*\.?", citation)
-            if(exact_match):
-                citation_queries.append(Q("nested", path="statutory_citations", query=Q("bool",
-                    must=[Q("term", statutory_citations__title=int(exact_match.group('title'))),
-                    Q("term", statutory_citations__section=int(exact_match.group('section')))])))
+            exact_match = re.match(
+                r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<section>\d+).*\.?", citation
+            )
+            if exact_match:
+                citation_queries.append(
+                    Q(
+                        "nested",
+                        path="statutory_citations",
+                        query=Q(
+                            "bool",
+                            must=[
+                                Q(
+                                    "term",
+                                    statutory_citations__title=int(
+                                        exact_match.group('title')
+                                    ),
+                                ),
+                                Q(
+                                    "term",
+                                    statutory_citations__section=int(
+                                        exact_match.group('section')
+                                    ),
+                                ),
+                            ],
+                        ),
+                    )
+                )
 
     if kwargs.get('ao_citation_require_all'):
         must_clauses.append(Q('bool', must=citation_queries))
@@ -308,23 +410,32 @@ def apply_ao_specific_query_params(query, **kwargs):
         must_clauses.append(Q('bool', should=citation_queries, minimum_should_match=1))
 
     if kwargs.get('ao_requestor_type'):
-        requestor_types = {1: 'Federal candidate/candidate committee/officeholder',
-                      2: 'Publicly funded candidates/committees',
-                      3: 'Party committee, national',
-                      4: 'Party committee, state or local',
-                      5: 'Nonconnected political committee',
-                      6: 'Separate segregated fund',
-                      7: 'Labor Organization',
-                      8: 'Trade Association',
-                      9: 'Membership Organization, Cooperative, Corporation W/O Capital Stock',
-                     10: 'Corporation (including LLCs electing corporate status)',
-                     11: 'Partnership (including LLCs electing partnership status)',
-                     12: 'Governmental entity',
-                     13: 'Research/Public Interest/Educational Institution',
-                     14: 'Law Firm',
-                     15: 'Individual',
-                     16: 'Other'}
-        must_clauses.append(Q("terms", requestor_types=[requestor_types[r] for r in kwargs.get('ao_requestor_type')]))
+        requestor_types = {
+            1: 'Federal candidate/candidate committee/officeholder',
+            2: 'Publicly funded candidates/committees',
+            3: 'Party committee, national',
+            4: 'Party committee, state or local',
+            5: 'Nonconnected political committee',
+            6: 'Separate segregated fund',
+            7: 'Labor Organization',
+            8: 'Trade Association',
+            9: 'Membership Organization, Cooperative, Corporation W/O Capital Stock',
+            10: 'Corporation (including LLCs electing corporate status)',
+            11: 'Partnership (including LLCs electing partnership status)',
+            12: 'Governmental entity',
+            13: 'Research/Public Interest/Educational Institution',
+            14: 'Law Firm',
+            15: 'Individual',
+            16: 'Other',
+        }
+        must_clauses.append(
+            Q(
+                "terms",
+                requestor_types=[
+                    requestor_types[r] for r in kwargs.get('ao_requestor_type')
+                ],
+            )
+        )
 
     date_range = {}
     if kwargs.get('ao_min_issue_date'):
@@ -343,13 +454,24 @@ def apply_ao_specific_query_params(query, **kwargs):
         must_clauses.append(Q("range", request_date=date_range))
 
     if kwargs.get('ao_entity_name'):
-        must_clauses.append(Q('bool', should=[Q('match', commenter_names=' '.join(kwargs.get('ao_entity_name'))),
-          Q('match', representative_names=' '.join(kwargs.get('ao_entity_name')))],
-            minimum_should_match=1))
+        must_clauses.append(
+            Q(
+                'bool',
+                should=[
+                    Q('match', commenter_names=' '.join(kwargs.get('ao_entity_name'))),
+                    Q(
+                        'match',
+                        representative_names=' '.join(kwargs.get('ao_entity_name')),
+                    ),
+                ],
+                minimum_should_match=1,
+            )
+        )
 
     query = query.query('bool', must=must_clauses)
 
     return query
+
 
 def execute_query(query):
     es_results = query.execute()
@@ -370,6 +492,7 @@ def execute_query(query):
                     offset = inner_hit.meta['nested']['offset']
                     highlights = inner_hit.meta.highlight.to_dict().values()
                     formatted_hit['document_highlights'][offset] = [
-                        hl for hl_list in highlights for hl in hl_list]
+                        hl for hl_list in highlights for hl in hl_list
+                    ]
 
     return formatted_hits, es_results.hits.total

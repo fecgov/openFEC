@@ -19,8 +19,7 @@ class OverallTest(ApiBaseTest):
     def test_full_text_search(self):
         candidate = factories.CandidateFactory(name='Josiah Bartlet')
         factories.CandidateSearchFactory(
-            id=candidate.candidate_id,
-            fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
+            id=candidate.candidate_id, fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
         )
         rest.db.session.flush()
         results = self._results(api.url_for(CandidateList, q='bartlet'))
@@ -30,8 +29,7 @@ class OverallTest(ApiBaseTest):
     def test_full_text_search_with_whitespace(self):
         candidate = factories.CandidateFactory(name='Josiah Bartlet')
         factories.CandidateSearchFactory(
-            id=candidate.candidate_id,
-            fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
+            id=candidate.candidate_id, fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
         )
         rest.db.session.flush()
         results = self._results(api.url_for(CandidateList, q='bartlet josiah'))
@@ -40,7 +38,7 @@ class OverallTest(ApiBaseTest):
 
     def test_full_text_no_results(self):
         results = self._results(api.url_for(CandidateList, q='asdfasdf'))
-        self.assertEquals(results, [])
+        self.assertEqual(results, [])
 
     def test_cycle_filter(self):
         factories.CandidateFactory(cycles=[1986, 1988])
@@ -58,26 +56,28 @@ class OverallTest(ApiBaseTest):
     def test_per_page_defaults_to_20(self):
         [factories.CandidateFactory() for _ in range(40)]
         results = self._results(api.url_for(CandidateList))
-        self.assertEquals(len(results), 20)
+        self.assertEqual(len(results), 20)
 
     def test_per_page_param(self):
         [factories.CandidateFactory() for _ in range(20)]
         results = self._results(api.url_for(CandidateList, per_page=5))
-        self.assertEquals(len(results), 5)
+        self.assertEqual(len(results), 5)
 
     def test_invalid_per_page_param(self):
         results = self.app.get(api.url_for(CandidateList, per_page=-10))
-        self.assertEquals(results.status_code, 422)
+        self.assertEqual(results.status_code, 422)
         results = self.app.get(api.url_for(CandidateList, per_page=101))
-        self.assertEquals(results.status_code, 422)
+        self.assertEqual(results.status_code, 422)
         results = self.app.get(api.url_for(CandidateList, per_page=34.2))
-        self.assertEquals(results.status_code, 422)
+        self.assertEqual(results.status_code, 422)
         results = self.app.get(api.url_for(CandidateList, per_page='dynamic-wombats'))
-        self.assertEquals(results.status_code, 422)
+        self.assertEqual(results.status_code, 422)
 
     def test_page_param(self):
         [factories.CandidateFactory() for _ in range(20)]
-        page_one_and_two = self._results(api.url_for(CandidateList, per_page=10, page=1))
+        page_one_and_two = self._results(
+            api.url_for(CandidateList, per_page=10, page=1)
+        )
         page_two = self._results(api.url_for(CandidateList, per_page=5, page=2))
         self.assertEqual(page_two[0], page_one_and_two[5])
         for itm in page_two:
@@ -103,8 +103,7 @@ class OverallTest(ApiBaseTest):
 
     def test_typeahead_candidate_search_id(self):
         row = factories.CandidateSearchFactory(
-            name='Bartlet',
-            fulltxt=sa.func.to_tsvector('Bartlet P0123'),
+            name='Bartlet', fulltxt=sa.func.to_tsvector('Bartlet P0123'),
         )
         decoy = factories.CandidateSearchFactory()  # noqa
         rest.db.session.flush()

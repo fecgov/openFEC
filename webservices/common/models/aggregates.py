@@ -9,8 +9,7 @@ class BaseAggregate(BaseModel):
     committee = utils.related_committee_history('committee_id', cycle_label='cycle')
     committee_id = db.Column('cmte_id', db.String, primary_key=True, doc=docs.COMMITTEE_ID)
     cycle = db.Column(db.Integer, primary_key=True, doc=docs.RECORD_CYCLE)
-    #? not sure how to document this
-    total = db.Column(db.Numeric(30, 2), index=True,)
+    total = db.Column(db.Numeric(30, 2), index=True, doc='Sum of transactions')
     count = db.Column(db.Integer, index=True, doc=docs.COUNT)
 
 
@@ -99,6 +98,7 @@ class ScheduleEByCandidate(BaseSpendingAggregate):
 class CommunicationCostByCandidate(BaseSpendingAggregate):
     __tablename__ = 'ofec_communication_cost_aggregate_candidate_mv'
     support_oppose_indicator = db.Column(db.String, primary_key=True, doc=docs.SUPPORT_OPPOSE_INDICATOR)
+
 
 class ElectioneeringByCandidate(BaseSpendingAggregate):
     __tablename__ = 'ofec_electioneering_aggregate_candidate_mv'
