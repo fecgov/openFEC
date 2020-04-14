@@ -418,7 +418,7 @@ def validate_statute_citation(title, section):
     """
     try:
         section_lookup = int(section[:3])
-    except:
+    except Exception:
         return False
 
     if title == '2':
@@ -477,7 +477,7 @@ def validate_regulation_citation(title, part):
     """
     try:
         part = int(part)
-    except:
+    except Exception:
         return False
 
     if title == '11':

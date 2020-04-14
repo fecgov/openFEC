@@ -8,7 +8,6 @@ from webservices.resources.costs import CommunicationCostView, ElectioneeringVie
 
 
 class TestCommunicationCost(ApiBaseTest):
-
     def test_fields(self):
         factories.CommunicationCostFactory()
         results = self._results(api.url_for(CommunicationCostView))
@@ -26,12 +25,14 @@ class TestCommunicationCost(ApiBaseTest):
                 factories.CommunicationCostFactory(**{column.key: value})
                 for value in values
             ]
-            results = self._results(api.url_for(CommunicationCostView, **{label: values[0]}))
+            results = self._results(
+                api.url_for(CommunicationCostView, **{label: values[0]})
+            )
             assert len(results) == 1
             assert results[0][column.key] == values[0]
 
-class TestElectioneering(ApiBaseTest):
 
+class TestElectioneering(ApiBaseTest):
     def test_fields(self):
         factories.ElectioneeringFactory()
         results = self._results(api.url_for(ElectioneeringView))
@@ -45,11 +46,10 @@ class TestElectioneering(ApiBaseTest):
             ('candidate_id', Electioneering.candidate_id, ['S01', 'S02']),
         ]
         for label, column, values in filters:
-            [
-                factories.ElectioneeringFactory(**{column.key: value})
-                for value in values
-            ]
-            results = self._results(api.url_for(ElectioneeringView, **{label: values[0]}))
+            [factories.ElectioneeringFactory(**{column.key: value}) for value in values]
+            results = self._results(
+                api.url_for(ElectioneeringView, **{label: values[0]})
+            )
             assert len(results) == 1
             assert results[0][column.key] == values[0]
 

@@ -11,15 +11,25 @@ from webservices.rest import db, api
 from webservices.tasks import download as tasks
 from webservices.resources import download as resource
 from webservices.resources import (
-    aggregates, candidates, candidate_aggregates, committees, costs, filings,
-    reports, sched_a, sched_b, sched_d, sched_e, sched_f
+    aggregates,
+    candidates,
+    candidate_aggregates,
+    committees,
+    costs,
+    filings,
+    reports,
+    sched_a,
+    sched_b,
+    sched_d,
+    sched_e,
+    sched_f,
 )
 
 from tests import factories
 from tests.common import ApiBaseTest
 
-class TestDownloadTask(ApiBaseTest):
 
+class TestDownloadTask(ApiBaseTest):
     def test_get_filename(self):
         path = '/v1/candidates/'
         qs = '?office=H&sort=name'
@@ -58,18 +68,13 @@ class TestDownloadTask(ApiBaseTest):
     def test_views(self, make_bundle):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
-        factories.CommitteeHistoryFactory(
-            committee_id=committee_id,
-            committee_type='H'
+        factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='H')
+        filing = factories.FilingsFactory(committee_id=committee_id)  # noqa
+        efiling = factories.EFilingsFactory(  # noqa
+            committee_id=committee_id, receipt_date=datetime.datetime(2012, 1, 1)
         )
-        filing = factories.FilingsFactory(committee_id=committee_id)
-        efiling = factories.EFilingsFactory(
-            committee_id=committee_id,
-            receipt_date=datetime.datetime(2012, 1, 1)
-        )
-        basef3pfiling = factories.BaseF3PFilingFactory(
-            committee_id=committee_id,
-            receipt_date=datetime.date(2012, 1, 1)
+        basef3pfiling = factories.BaseF3PFilingFactory(  # noqa
+            committee_id=committee_id, receipt_date=datetime.date(2012, 1, 1)
         )
 
         db.session.commit()
@@ -104,16 +109,16 @@ class TestDownloadTask(ApiBaseTest):
             sched_d.ScheduleDView,
             sched_e.ScheduleEView,
             sched_e.ScheduleEEfileView,
-            sched_f.ScheduleFView
+            sched_f.ScheduleFView,
         }
 
         for view in RESOURCE_WHITELIST:
             if view.endpoint in ['reportsview']:
-                url = api.url_for(
-                    view,
-                    committee_type=committee.committee_type
-                )
-            elif view.endpoint in ['filingsview', 'committeereportsview',]:
+                url = api.url_for(view, committee_type=committee.committee_type)
+            elif view.endpoint in [
+                'filingsview',
+                'committeereportsview',
+            ]:
                 url = api.url_for(view, committee_id=committee.committee_id)
             else:
                 url = api.url_for(view)
@@ -121,30 +126,42 @@ class TestDownloadTask(ApiBaseTest):
 
 
 class TestDownloadResource(ApiBaseTest):
-
     @mock.patch('webservices.resources.download.get_cached_file')
     @mock.patch('webservices.resources.download.download.export_query')
     def test_download(self, export, get_cached):
         get_cached.return_value = None
-        res = self.client.post_json(api.url_for(resource.DownloadView, path='candidates', office='S'))
+        res = self.client.post_json(
+            api.url_for(resource.DownloadView, path='candidates', office='S')
+        )
         assert res.json == {'status': 'queued'}
-        get_cached.assert_called_once_with('/v1/candidates/', b'office=S', filename=None)
+        get_cached.assert_called_once_with(
+            '/v1/candidates/', b'office=S', filename=None
+        )
         export.delay.assert_called_once_with(
-            '/v1/candidates/',
-            base64.b64encode(b'office=S').decode('UTF-8')
+            '/v1/candidates/', base64.b64encode(b'office=S').decode('UTF-8')
         )
 
     @mock.patch('webservices.resources.download.get_cached_file')
     @mock.patch('webservices.resources.download.download.export_query')
     def test_download_cached(self, export, get_cached):
         get_cached.return_value = '/download'
-        res = self.client.post_json(api.url_for(resource.DownloadView, path='candidates', office='S'))
+        res = self.client.post_json(
+            api.url_for(resource.DownloadView, path='candidates', office='S')
+        )
         assert res.json == {'status': 'complete', 'url': '/download'}
         assert not export.delay.called
 
     def test_download_forbidden(self):
         with pytest.raises(ApiError):
-            self.client.post_json(api.url_for(resource.DownloadView, path='elections/search', office='house', state='VA', cycle=2018))
+            self.client.post_json(
+                api.url_for(
+                    resource.DownloadView,
+                    path='elections/search',
+                    office='house',
+                    state='VA',
+                    cycle=2018,
+                )
+            )
 
     @mock.patch('webservices.resources.download.MAX_RECORDS', 2)
     @mock.patch('webservices.resources.download.get_cached_file')
@@ -154,8 +171,7 @@ class TestDownloadResource(ApiBaseTest):
         [factories.CandidateFactory() for _ in range(5)]
         db.session.commit()
         res = self.client.post_json(
-            api.url_for(resource.DownloadView, path='candidates'),
-            expect_errors=True,
+            api.url_for(resource.DownloadView, path='candidates'), expect_errors=True,
         )
         assert res.status_code == 403
         assert not export.delay.called
@@ -173,8 +189,10 @@ class TestDownloadResource(ApiBaseTest):
     @mock.patch('webservices.tasks.utils.get_object')
     def test_get_cached_not_exists(self, get_object):
         mock_object = mock.Mock()
+
         def get_metadata():
             raise ClientError({'Error': {}}, 'test')
+
         mock_metadata = mock.PropertyMock(side_effect=get_metadata)
         type(mock_object).metadata = mock_metadata
         get_object.return_value = mock_object

@@ -1,6 +1,7 @@
 from .base import db
 from webservices import docs
 
+
 class OperationsLog(db.Model):
     __tablename__ = 'fec_operations_log_vw'
 
