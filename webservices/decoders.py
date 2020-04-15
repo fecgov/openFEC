@@ -1,5 +1,8 @@
 import json
 
+
+
+
 election_types = {
     'GR': 'General runoff',
     'SG': 'Special election general',
@@ -26,7 +29,6 @@ form_types = {
     'F99': 'Miscellaneous document',
     'F6': '48-hour notice of contribution/loans received',
 }
-
 
 def dumper(f3p_col_a, f3p_col_b, f3p_description, dumped):
     for row in dumped:
@@ -56,3 +58,9 @@ f3x_col_a = []
 f3x_col_b = []
 f3x_description = []
 dumper(f3x_col_a, f3x_col_b, f3x_description, dumped)
+
+
+
+
+
+

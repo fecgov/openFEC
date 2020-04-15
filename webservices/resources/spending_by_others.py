@@ -13,28 +13,22 @@ from webservices.common.models import (
     db,
 )
 
-
 def get_candidate_list(kwargs):
     """
     This function is to get all candidates from candidate_history
 
     """
-    candidate = (
-        db.session.query(
-            CandidateHistory.candidate_id.label('candidate_id'),
-            CandidateHistory.two_year_period.label('two_year_period'),
-            CandidateHistory.candidate_election_year.label('candidate_election_year'),
+    candidate = db.session.query(
+        CandidateHistory.candidate_id.label('candidate_id'),
+        CandidateHistory.two_year_period.label('two_year_period'),
+        CandidateHistory.candidate_election_year.label('candidate_election_year'),
+    ).filter(
+        (
+            CandidateHistory.candidate_id.in_(kwargs.get('candidate_id'))
+            if kwargs.get('candidate_id')
+            else True
         )
-        .filter(
-            (
-                CandidateHistory.candidate_id.in_(kwargs.get('candidate_id'))
-                if kwargs.get('candidate_id')
-                else True
-            )
-        )
-        .distinct()
-        .subquery()
-    )
+    ).distinct().subquery()
 
     cycle_column = (
         candidate.c.candidate_election_year + candidate.c.candidate_election_year % 2
@@ -44,9 +38,9 @@ def get_candidate_list(kwargs):
 
     return cycle_column, candidate
 
-
 @doc(
-    tags=['electioneering'], description=docs.ELECTIONEERING_TOTAL_BY_CANDIDATE,
+    tags=['electioneering'],
+    description=docs.ELECTIONEERING_TOTAL_BY_CANDIDATE,
 )
 class ECTotalsByCandidateView(ApiResource):
 
@@ -56,35 +50,38 @@ class ECTotalsByCandidateView(ApiResource):
     @property
     def args(self):
         return utils.extend(
-            args.paging, args.totals_by_candidate_other_costs_EC, args.make_sort_args(),
+            args.paging,
+            args.totals_by_candidate_other_costs_EC,
+            args.make_sort_args(),
         )
 
     def build_query(self, **kwargs):
 
         cycle_column, candidate = get_candidate_list(kwargs)
 
-        query = (
-            db.session.query(
-                ElectioneeringByCandidate.candidate_id,
-                cycle_column,
-                sa.func.sum(ElectioneeringByCandidate.total).label('total'),
+        query = db.session.query(
+            ElectioneeringByCandidate.candidate_id,
+            cycle_column,
+            sa.func.sum(ElectioneeringByCandidate.total).label('total')
+        ).join(
+            ElectioneeringByCandidate,
+            sa.and_(
+                ElectioneeringByCandidate.candidate_id == candidate.c.candidate_id,
+                ElectioneeringByCandidate.cycle == candidate.c.two_year_period
             )
-            .join(
-                ElectioneeringByCandidate,
-                sa.and_(
-                    ElectioneeringByCandidate.candidate_id == candidate.c.candidate_id,
-                    ElectioneeringByCandidate.cycle == candidate.c.two_year_period,
-                ),
+        ).filter(
+            (
+                cycle_column.in_(kwargs['cycle'])
+                if kwargs.get('cycle')
+                else True
             )
-            .filter(
-                (cycle_column.in_(kwargs['cycle']) if kwargs.get('cycle') else True)
-            )
-            .group_by(ElectioneeringByCandidate.candidate_id, cycle_column,)
-        )
+        ).group_by(ElectioneeringByCandidate.candidate_id, cycle_column,)
 
         return query
 
 
+
+    
 @doc(
     tags=['independent expenditures'],
     description=docs.SCHEDULE_E_INDEPENDENT_EXPENDITURES_TOTALS_BY_CANDIDATE,
@@ -105,34 +102,26 @@ class IETotalsByCandidateView(ApiResource):
     def build_query(self, **kwargs):
         cycle_column, candidate = get_candidate_list(kwargs)
 
-        query = (
-            db.session.query(
-                ScheduleEByCandidate.candidate_id,
-                ScheduleEByCandidate.support_oppose_indicator,
-                cycle_column,
-                sa.func.sum(ScheduleEByCandidate.total).label('total'),
+        query = db.session.query(
+            ScheduleEByCandidate.candidate_id,
+            ScheduleEByCandidate.support_oppose_indicator,
+            cycle_column,
+            sa.func.sum(ScheduleEByCandidate.total).label('total'),
+        ).join(
+            ScheduleEByCandidate,
+            sa.and_(
+                ScheduleEByCandidate.candidate_id == candidate.c.candidate_id,
+                ScheduleEByCandidate.cycle == candidate.c.two_year_period
             )
-            .join(
-                ScheduleEByCandidate,
-                sa.and_(
-                    ScheduleEByCandidate.candidate_id == candidate.c.candidate_id,
-                    ScheduleEByCandidate.cycle == candidate.c.two_year_period,
-                ),
+        ).filter(
+            (
+                cycle_column.in_(kwargs['cycle'])
+                if kwargs.get('cycle')
+                else True
             )
-            .filter(
-                (cycle_column.in_(kwargs['cycle']) if kwargs.get('cycle') else True)
-            )
-            .group_by(
-                ScheduleEByCandidate.candidate_id,
-                cycle_column,
-                ScheduleEByCandidate.support_oppose_indicator,
-            )
-            .order_by(
-                ScheduleEByCandidate.candidate_id,
-                cycle_column,
-                ScheduleEByCandidate.support_oppose_indicator,
-            )
-        )
+        ).group_by(
+            ScheduleEByCandidate.candidate_id, cycle_column, ScheduleEByCandidate.support_oppose_indicator,
+        ).order_by(ScheduleEByCandidate.candidate_id, cycle_column, ScheduleEByCandidate.support_oppose_indicator,)
 
         return query
 
@@ -149,40 +138,33 @@ class CCTotalsByCandidateView(ApiResource):
     @property
     def args(self):
         return utils.extend(
-            args.paging, args.totals_by_candidate_other_costs_CC, args.make_sort_args(),
+            args.paging,
+            args.totals_by_candidate_other_costs_CC,
+            args.make_sort_args(),
         )
 
     def build_query(self, **kwargs):
         cycle_column, candidate = get_candidate_list(kwargs)
 
-        query = (
-            db.session.query(
-                CommunicationCostByCandidate.candidate_id,
-                CommunicationCostByCandidate.support_oppose_indicator,
-                cycle_column,
-                sa.func.sum(CommunicationCostByCandidate.total).label('total'),
+        query = db.session.query(
+            CommunicationCostByCandidate.candidate_id,
+            CommunicationCostByCandidate.support_oppose_indicator,
+            cycle_column,
+            sa.func.sum(CommunicationCostByCandidate.total).label('total'),
+        ).join(
+            CommunicationCostByCandidate,
+            sa.and_(
+                CommunicationCostByCandidate.candidate_id == candidate.c.candidate_id,
+                CommunicationCostByCandidate.cycle == candidate.c.two_year_period
             )
-            .join(
-                CommunicationCostByCandidate,
-                sa.and_(
-                    CommunicationCostByCandidate.candidate_id
-                    == candidate.c.candidate_id,
-                    CommunicationCostByCandidate.cycle == candidate.c.two_year_period,
-                ),
+        ).filter(
+            (
+                cycle_column.in_(kwargs['cycle'])
+                if kwargs.get('cycle')
+                else True
             )
-            .filter(
-                (cycle_column.in_(kwargs['cycle']) if kwargs.get('cycle') else True)
-            )
-            .group_by(
-                CommunicationCostByCandidate.candidate_id,
-                cycle_column,
-                CommunicationCostByCandidate.support_oppose_indicator,
-            )
-            .order_by(
-                CommunicationCostByCandidate.candidate_id,
-                cycle_column,
-                CommunicationCostByCandidate.support_oppose_indicator,
-            )
-        )
+        ).group_by(
+            CommunicationCostByCandidate.candidate_id, cycle_column, CommunicationCostByCandidate.support_oppose_indicator,
+        ).order_by(CommunicationCostByCandidate.candidate_id, cycle_column, CommunicationCostByCandidate.support_oppose_indicator,)
 
         return query

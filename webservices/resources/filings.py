@@ -53,11 +53,8 @@ class BaseFilings(views.ApiResource):
 
     @property
     def args(self):
-        """
-        Place the sort argument in a list.
-        The api will return a 422 status code if it's not in a list
-        (list is needed because multisort is used)
-        """
+        #Place the sort argument in a list, as the api will return a 422 status code if it's not in a list
+        #list is needed because multisort is used
         default_sort = ['-receipt_date']
         return utils.extend(
             args.paging,
@@ -70,7 +67,7 @@ class BaseFilings(views.ApiResource):
 
     def build_query(self, **kwargs):
         if 'RFAI' in kwargs.get('form_type', []):
-            # Add FRQ types if RFAI was requested
+            #Adds FRQ types if RFAI was requested
             kwargs.get('form_type').append('FRQ')
         query = super().build_query(**kwargs)
         return query

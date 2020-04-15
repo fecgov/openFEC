@@ -1,13 +1,14 @@
 import functools
-import sqlalchemy as sa
 
 from marshmallow.compat import text_type
+
+import sqlalchemy as sa
+
 from webargs import fields, validate
 
 from webservices import docs
 from webservices import exceptions
 from webservices.common.models import db
-
 
 def _validate_natural(value):
     if value < 0:
@@ -24,7 +25,6 @@ per_page = Natural(
     description='The number of results returned per page. Defaults to 20.',
 )
 
-
 class Currency(fields.Decimal):
 
     def __init__(self, places=2, **kwargs):
@@ -40,7 +40,6 @@ class IStr(fields.Str):
 
     def _deserialize(self, value, attr, data):
         return super()._deserialize(value, attr, data).upper()
-
 
 class District(fields.Str):
 
@@ -74,7 +73,6 @@ paging = {
     'page': Natural(missing=1, description='For paginating through results, starting at page 1'),
     'per_page': per_page,
 }
-
 
 class OptionValidator(object):
     """Ensure that value is one of acceptable options.
@@ -136,7 +134,6 @@ class IndicesValidator(IndexValidator):
                     status_code=422,
                 )
 
-
 def make_sort_args(default=None, validator=None, default_hide_null=False,
         default_nulls_only=False, default_sort_nulls_last=False, show_nulls_last_arg=True):
     args = {
@@ -169,7 +166,6 @@ def make_multi_sort_args(default=None, validator=None, default_hide_null=False,
     args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True,
         description='Provide a field to sort by. Use - for descending order.',)
     return args
-
 
 def make_seek_args(field=fields.Int, description=None):
     return {
@@ -494,24 +490,9 @@ schedule_a = {
     'contributor_zip': fields.List(IStr, description=docs.CONTRIBUTOR_ZIP),
     'contributor_employer': fields.List(fields.Str, description=docs.CONTRIBUTOR_EMPLOYER),
     'contributor_occupation': fields.List(fields.Str, description=docs.CONTRIBUTOR_OCCUPATION),
-    'last_contribution_receipt_date': fields.Date(
-        missing=None,
-        description='When sorting by `contribution_receipt_date`, this is populated with the \
-        `contribution_receipt_date` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'
-    ),
-    'last_contribution_receipt_amount': fields.Float(
-        missing=None,
-        description='When sorting by `contribution_receipt_amount`, this is populated with the \
-        `contribution_receipt_amount` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'
-    ),
-    'last_contributor_aggregate_ytd': fields.Float(
-        missing=None,
-        description='When sorting by `contributor_aggregate_ytd`, this is populated with the \
-        `contributor_aggregate_ytd` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'
-    ),
+    'last_contribution_receipt_date': fields.Date(missing=None, description='When sorting by `contribution_receipt_date`, this is populated with the `contribution_receipt_date` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
+    'last_contribution_receipt_amount': fields.Float(missing=None, description='When sorting by `contribution_receipt_amount`, this is populated with the `contribution_receipt_amount` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
+    'last_contributor_aggregate_ytd': fields.Float(missing=None, description='When sorting by `contributor_aggregate_ytd`, this is populated with the `contributor_aggregate_ytd` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
     'is_individual': fields.Bool(missing=None, description=docs.IS_INDIVIDUAL),
     'contributor_type': fields.List(
         fields.Str(validate=validate.OneOf(['individual', 'committee'])),
@@ -540,7 +521,7 @@ schedule_a = {
 
 schedule_a_e_file = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    # 'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
+    #'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
     'contributor_name': fields.List(fields.Str, description=docs.CONTRIBUTOR_NAME),
     'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
     'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
@@ -636,9 +617,9 @@ schedule_b = {
 
 schedule_b_efile = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    # 'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here
+    #'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here
     # if the contributor is registered with the FEC.'),
-    # 'recipient_name': fields.List(fields.Str, description='Name of recipient'),
+    #'recipient_name': fields.List(fields.Str, description='Name of recipient'),
     'disbursement_description': fields.List(fields.Str, description='Description of disbursement'),
     'image_number': fields.List(
         fields.Str,
@@ -646,18 +627,8 @@ schedule_b_efile = {
     ),
     'recipient_city': fields.List(IStr, description='City of recipient'),
     'recipient_state': fields.List(IStr, description='State of recipient'),
-    'max_date': fields.Date(
-        missing=None,
-        description='When sorting by `disbursement_date`, this is populated with the \
-        `disbursement_date` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'
-    ),
-    'min_date': fields.Date(
-        missing=None,
-        description='When sorting by `disbursement_date`, this is populated with the \
-        `disbursement_date` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'
-    ),
+    'max_date': fields.Date(missing=None, description='When sorting by `disbursement_date`, this is populated with the `disbursement_date` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
+    'min_date': fields.Date(missing=None, description='When sorting by `disbursement_date`, this is populated with the `disbursement_date` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
     'min_amount': Currency(description='Filter for all amounts less than a value.'),
     'max_amount': Currency(description='Filter for all amounts less than a value.'),
 }
@@ -683,7 +654,7 @@ schedule_c = {
     'max_incurred_date': fields.Date(missing=None, description=docs.MAX_INCURRED_DATE),
 }
 
-# These arguments will evolve with updated filtering needs
+#These arguments will evolve with updated filtering needs
 schedule_d = {
     'min_payment_period': fields.Float(),
     'max_payment_period': fields.Float(),
@@ -983,21 +954,21 @@ totals_by_office_by_party = {
 }
 
 totals_by_candidate_other_costs_EC = {
-
+    
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'election_full': election_full,
 }
 
 schedule_e_totals_by_candidate_other_costs_IE = {
-
+    
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'election_full': election_full,
 }
 
 totals_by_candidate_other_costs_CC = {
-
+    
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'election_full': election_full,
@@ -1029,4 +1000,10 @@ presidential_by_size = {
 presidential_by_candidate = {
     'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
     'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
+}
+
+presidential_by_size = {
+    'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'size': fields.List(fields.Int(validate=validate.OneOf([0, 200, 500, 1000, 2000])), description=docs.SIZE),
 }

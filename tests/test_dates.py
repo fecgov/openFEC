@@ -13,14 +13,11 @@ from tests.common import ApiBaseTest
 from webservices.rest import api
 from webservices.common.models import db
 from webservices.resources.dates import ElectionDatesView
-from webservices.resources.dates import (
-    ReportingDatesView,
-    CalendarDatesView,
-    CalendarDatesExport,
-)
+from webservices.resources.dates import ReportingDatesView, CalendarDatesView, CalendarDatesExport
 
 
 class TestReportingDates(ApiBaseTest):
+
     def test_reporting_dates_filters(self):
         factories.ReportTypeFactory(report_type='YE', report_type_full='Year End')
         factories.ReportDateFactory(due_date=datetime.datetime(2014, 1, 2))
@@ -46,16 +43,18 @@ class TestReportingDates(ApiBaseTest):
     def test_clean_report_type(self):
         factories.ReportTypeFactory(
             report_type='Q1',
-            report_type_full='April Quarterly {One of 4 valid Report Codes on Form 5, RptCode}',
+            report_type_full='April Quarterly {One of 4 valid Report Codes on Form 5, RptCode}'
         )
         report_date = factories.ReportDateFactory(
-            report_type='Q1', due_date=datetime.datetime(2015, 1, 2),
+            report_type='Q1',
+            due_date=datetime.datetime(2015, 1, 2),
         )
         db.session.flush()
         assert report_date.report_type_full == 'April Quarterly'
 
 
 class TestElectionDates(ApiBaseTest):
+
     def test_election_type(self):
         election_date = factories.ElectionDateFactory(election_type_id='PR')
         assert election_date.election_type_full == 'Primary runoff'
@@ -74,6 +73,7 @@ class TestElectionDates(ApiBaseTest):
 
 
 class TestCalendarDates(ApiBaseTest):
+
     def test_filters(self):
         factories.CalendarDateFactory(start_date=datetime.datetime(2016, 1, 2))
         factories.CalendarDateFactory(location='Mississippi, CA')
@@ -82,9 +82,7 @@ class TestCalendarDates(ApiBaseTest):
         # factories.CalendarDateFactory(state=['CA'])
         factories.CalendarDateFactory(calendar_category_id=7)
         factories.CalendarDateFactory(description='a really interesting event')
-        factories.CalendarDateFactory(
-            summary='Meeting that will solve all the problems'
-        )
+        factories.CalendarDateFactory(summary='Meeting that will solve all the problems')
         factories.CalendarDateFactory(end_date=datetime.datetime(2015, 1, 2))
 
         filter_fields = [
@@ -92,7 +90,7 @@ class TestCalendarDates(ApiBaseTest):
             ('calendar_category_id', 7),
             ('min_end_date', '2014-01-01'),
             # this is not passing or working :/
-            # ('state', 'CA'),
+            #('state', 'CA'),
             ('description', 'interesting event'),
             ('summary', 'solve all the problems'),
             ('event_id', 123),
@@ -112,6 +110,7 @@ class TestCalendarDates(ApiBaseTest):
 
 
 class TestCalendarExport(ApiBaseTest):
+
     def setUp(self):
         super().setUp()
         self.year = datetime.date.today().year
@@ -124,7 +123,7 @@ class TestCalendarExport(ApiBaseTest):
             factories.CalendarDateFactory(
                 category='Roundtables',
                 start_date=datetime.datetime(self.year, 10, 31, 2),
-                end_date=datetime.datetime(self.year, 10, 31, 3),
+                end_date=datetime.datetime(self.year, 10, 31, 3)
             ),
         ]
 
@@ -134,9 +133,7 @@ class TestCalendarExport(ApiBaseTest):
         reader = csv.DictReader(sio)
         rows = list(reader)
         assert len(rows) == len(self.dates)
-        assert set(rows[0].keys()) == set(
-            ['summary', 'description', 'location', 'start_date', 'end_date', 'category']
-        )
+        assert set(rows[0].keys()) == set(['summary', 'description', 'location', 'start_date', 'end_date', 'category'])
 
     def test_ics_export(self):
         resp = self.app.get(api.url_for(CalendarDatesExport, renderer='ics'))
@@ -146,6 +143,4 @@ class TestCalendarExport(ApiBaseTest):
         assert str(components[0]['CATEGORIES']) == 'election'
         timezone = pytz.timezone('US/Eastern')
         assert components[0]['DTSTART'].dt == datetime.date(self.year, 10, 1)
-        assert components[1]['DTSTART'].dt == timezone.localize(
-            datetime.datetime(self.year, 10, 31, 2)
-        )
+        assert components[1]['DTSTART'].dt == timezone.localize(datetime.datetime(self.year, 10, 31, 2))

@@ -26,7 +26,6 @@ class ZipsDistricts(db.Model):
     state_abbrevation = db.Column(db.String)
     active = db.Column(db.String)
 
-
 class StateElectionOfficeInfo(db.Model):
     __table_args__ = {'schema': 'fecapp'}
     __tablename__ = 'trc_st_elect_office'

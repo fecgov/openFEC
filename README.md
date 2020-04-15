@@ -266,18 +266,6 @@ Running the tests:
 pytest
 ```
 
-Running only the pep8 linting:
-
-```
-pytest --linting
-```
-
-Running the tests without pep8 linting:
-
-```
-pytest --no-linting
-```
-
 #### The test data subset
 If you add new tables to the data, you'll need to generate a new subset for testing.
 

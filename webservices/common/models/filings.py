@@ -5,7 +5,6 @@ from webservices.common.models.dates import clean_report_type
 from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin, FecFileNumberMixin
 from .base import db
 
-
 class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     __tablename__ = 'ofec_filings_all_mv'
 
@@ -54,7 +53,7 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     is_amended = db.Column(db.Boolean)
     most_recent = db.Column(db.Boolean)
     html_url = db.Column(db.String, doc=docs.HTML_URL)
-    # If f2 filing, the state of the candidate, else the state of the committee
+    #If f2 filing, the state of the candidate, else the state of the committee
     state = db.Column(db.String, doc=docs.STATE)
     office = db.Column(db.String, doc=docs.OFFICE)
     # Filter filings based off candidate office or committee type H, S and P only. all other
@@ -79,7 +78,6 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
             self.form_type,
         )
 
-
 class EfilingsAmendments(db.Model):
     __tablename__ = 'efiling_amendment_chain_vw'
     file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
@@ -96,7 +94,6 @@ class EfilingsAmendments(db.Model):
             return self.longest_chain[index + 1]
         else:
             return 0
-
 
 class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.Model):
     __table_args__ = {'schema': 'real_efile'}

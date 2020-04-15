@@ -38,7 +38,6 @@ class PresidentialByCandidateView(ApiResource):
     def index_column(self):
         return self.model.idx
 
-
 @doc(
     tags=['presidential'],
     description=docs.PRESIDENTIAL_BY_SUMMERY,
@@ -68,7 +67,6 @@ class PresidentialSummaryView(ApiResource):
     @property
     def index_column(self):
         return self.model.idx
-
 
 @doc(
     tags=['presidential'],
@@ -101,7 +99,6 @@ class PresidentialBySizeView(ApiResource):
     def index_column(self):
         return self.model.idx
 
-
 @doc(
     tags=['presidential'],
     description=docs.PRESIDENTIAL_BY_STATE,
@@ -131,7 +128,6 @@ class PresidentialByStateView(ApiResource):
     @property
     def index_column(self):
         return self.model.idx
-
 
 @doc(
     tags=['presidential'],

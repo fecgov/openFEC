@@ -56,7 +56,6 @@ class ScheduleCView(ApiResource):
             )
         )
 
-
 @doc(
     tags=['loans'],
     description=docs.SCHEDULE_C,
@@ -77,11 +76,9 @@ class ScheduleCViewBySubId(ApiResource):
 
     @property
     def args(self):
-        """
-        needed to attach a page, trivial since length is one,
-        but can't build this view without a pageschema
-        """
         return utils.extend(
+            #needed to attach a page, trivial since length is one, but can't build this view without a pageschema
             args.paging,
-            args.make_sort_args(),
+            args.make_sort_args(
+            ),
         )

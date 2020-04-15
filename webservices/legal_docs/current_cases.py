@@ -168,14 +168,11 @@ CASE_NO_REGEX = re.compile(r'(?P<serial>\d+)')
 def load_current_murs(specific_mur_no=None):
     load_cases('MUR', specific_mur_no)
 
-
 def load_adrs(specific_adr_no=None):
     load_cases('ADR', specific_adr_no)
 
-
 def load_admin_fines(specific_af_no=None):
     load_cases('AF', specific_af_no)
-
 
 def get_es_type(case_type):
     case_type = case_type.upper()
@@ -185,7 +182,6 @@ def get_es_type(case_type):
         return 'adrs'
     else:
         return 'murs'
-
 
 def get_full_name(case_type):
     case_type = case_type.upper()
@@ -223,7 +219,6 @@ def load_cases(case_type, case_no=None):
                     logger.info('Successfully deleted {} {} from ES'.format(case_type, case['no']))
     else:
         logger.error("Invalid case_type: must be 'MUR', 'ADR', or 'AF'.")
-
 
 def get_cases(case_type, case_no=None):
     """
@@ -279,7 +274,6 @@ def get_single_case(case_type, case_no):
         else:
             logger.info("Not a valid {0} number.".format(case_type))
             return None
-
 
 def get_af_specific_fields(case_id):
     case = {}

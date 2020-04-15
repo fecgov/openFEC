@@ -124,7 +124,7 @@ def check_endpoints(server, api_key):
         if r.status_code == 200:
             print("{}: ok".format(endp))
         else:
-            print("******{}: not working. Status: {}".format(endp, r.status_code))
+            print("******{}: not working. Status: {}".format(endp,r.status_code))
 
 
 if __name__ == "__main__":

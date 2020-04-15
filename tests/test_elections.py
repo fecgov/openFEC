@@ -1,58 +1,33 @@
 import datetime
+import functools
+from webservices import filters
 from tests import factories
 from tests.common import ApiBaseTest, assert_dicts_subset
 
 from webservices.rest import db, api
-from webservices.resources.elections import (
-    ElectionsListView,
-    ElectionView,
-    ElectionSummary,
-    StateElectionOfficeInfoView,
-)
-
-
+from webservices.common import models
+from webservices.resources.elections import ElectionsListView, ElectionView, ElectionSummary, StateElectionOfficeInfoView
+from webservices.common.models.elections import StateElectionOfficeInfo
+from webservices.schemas import StateElectionOfficeInfoSchema
 class TestElectionSearch(ApiBaseTest):
+
     def setUp(self):
         super().setUp()
-        factories.ElectionsListFactory(
-            office='P', state='US', district='00', incumbent_id='P12345'
-        )
-        factories.ElectionsListFactory(
-            office='S', state='NJ', district='00', incumbent_id='SNJ123'
-        )
-        factories.ElectionsListFactory(
-            office='H', state='NJ', district='09', incumbent_id='HNJ123'
-        )
-        factories.ElectionsListFactory(
-            office='S', state='VA', district='00', incumbent_id='SVA123'
-        )
-        factories.ElectionsListFactory(
-            office='H', state='VA', district='04', incumbent_id='HVA121'
-        )
-        factories.ElectionsListFactory(
-            office='H', state='VA', district='05', incumbent_id='HVA123'
-        )
-        factories.ElectionsListFactory(
-            office='H', state='VA', district='06', incumbent_id='HVA124'
-        )
-        factories.ElectionsListFactory(
-            office='S', state='GA', district='00', incumbent_id='SGA123'
-        )
+        factories.ElectionsListFactory(office='P', state='US', district='00', incumbent_id='P12345')
+        factories.ElectionsListFactory(office='S', state='NJ', district='00', incumbent_id='SNJ123')
+        factories.ElectionsListFactory(office='H', state='NJ', district='09', incumbent_id='HNJ123')
+        factories.ElectionsListFactory(office='S', state='VA', district='00', incumbent_id='SVA123')
+        factories.ElectionsListFactory(office='H', state='VA', district='04', incumbent_id='HVA121')
+        factories.ElectionsListFactory(office='H', state='VA', district='05', incumbent_id='HVA123')
+        factories.ElectionsListFactory(office='H', state='VA', district='06', incumbent_id='HVA124')
+        factories.ElectionsListFactory(office='S', state='GA', district='00', incumbent_id='SGA123')
 
     def test_search_district(self):
-        results = self._results(
-            api.url_for(ElectionsListView, state='NJ', district='09')
-        )
+        results = self._results(api.url_for(ElectionsListView, state='NJ', district='09'))
         self.assertEqual(len(results), 3)
-        assert_dicts_subset(
-            results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'}
-        )
-        assert_dicts_subset(
-            results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': '00'}
-        )
-        assert_dicts_subset(
-            results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09'}
-        )
+        assert_dicts_subset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'})
+        assert_dicts_subset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': '00'})
+        assert_dicts_subset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09'})
 
     def test_search_district_padding(self):
         results_padded = self._results(api.url_for(ElectionsListView, district='09'))
@@ -66,21 +41,13 @@ class TestElectionSearch(ApiBaseTest):
         self.assertTrue(all([each['office'] == 'S' for each in results]))
 
     def test_search_zip(self):
-        factories.ZipsDistrictsFactory(
-            district='05', zip_code='22902', state_abbrevation='VA'
-        )
+        factories.ZipsDistrictsFactory(district='05', zip_code='22902', state_abbrevation='VA')
 
         results = self._results(api.url_for(ElectionsListView, zip='22902'))
         assert len(results) == 3
-        assert_dicts_subset(
-            results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'}
-        )
-        assert_dicts_subset(
-            results[1], {'cycle': 2012, 'office': 'S', 'state': 'VA', 'district': '00'}
-        )
-        assert_dicts_subset(
-            results[2], {'cycle': 2012, 'office': 'H', 'state': 'VA', 'district': '05'}
-        )
+        assert_dicts_subset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'})
+        assert_dicts_subset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'VA', 'district': '00'})
+        assert_dicts_subset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'VA', 'district': '05'})
 
     def test_counts(self):
         response = self._response(api.url_for(ElectionsListView))
@@ -100,11 +67,12 @@ class TestElectionSearch(ApiBaseTest):
         results = self._results(api.url_for(ElectionsListView))
         self.assertTrue(
             [each['state'] for each in results],
-            ['GA', 'NJ', 'NJ', 'US', 'VA', 'VA', 'VA', 'VA'],
+            ['GA', 'NJ', 'NJ', 'US', 'VA', 'VA', 'VA', 'VA']
         )
 
 
 class TestElections(ApiBaseTest):
+
     def setUp(self):
         super().setUp()
         self.candidate = factories.CandidateDetailFactory()
@@ -133,9 +101,7 @@ class TestElections(ApiBaseTest):
             factories.CommitteeHistoryFactory(cycle=2012, designation='A'),
         ]
         [
-            factories.CandidateElectionFactory(
-                candidate_id=self.candidate.candidate_id, cand_election_year=year
-            )
+            factories.CandidateElectionFactory(candidate_id=self.candidate.candidate_id, cand_election_year=year)
             for year in [2010, 2012]
         ]
         [
@@ -149,28 +115,28 @@ class TestElections(ApiBaseTest):
                 committee_id=self.committees[0].committee_id,
                 committee_designation='A',
                 fec_election_year=2012,
-                election_yr_to_be_included=2012,
+                election_yr_to_be_included = 2012,
             ),
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=self.candidate.candidate_id,
                 committee_id=self.committees[1].committee_id,
                 committee_designation='P',
                 fec_election_year=2012,
-                election_yr_to_be_included=2012,
+                election_yr_to_be_included = 2012,
             ),
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=self.candidate.candidate_id,
                 committee_id=self.committees[1].committee_id,
                 committee_designation='P',
                 fec_election_year=2010,
-                election_yr_to_be_included=2012,
+                election_yr_to_be_included = 2012,
             ),
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=self.candidate.candidate_id,
                 committee_id=self.committees[1].committee_id,
                 committee_designation='P',
                 fec_election_year=2010,
-            ),
+            )
         ]
         self.totals = [
             factories.TotalsHouseSenateFactory(
@@ -201,6 +167,7 @@ class TestElections(ApiBaseTest):
 
         self.president_candidate = factories.CandidateDetailFactory()
         self.president_candidates = [
+
             factories.CandidateHistoryFactory(
                 candidate_id=self.president_candidate.candidate_id,
                 state='NY',
@@ -223,10 +190,7 @@ class TestElections(ApiBaseTest):
             factories.CommitteeHistoryFactory(cycle=2020, designation='J'),
         ]
         [
-            factories.CandidateElectionFactory(
-                candidate_id=self.president_candidate.candidate_id,
-                cand_election_year=year,
-            )
+            factories.CandidateElectionFactory(candidate_id=self.president_candidate.candidate_id, cand_election_year=year)
             for year in [2016, 2020]
         ]
         [
@@ -241,15 +205,16 @@ class TestElections(ApiBaseTest):
                 committee_designation='P',
                 fec_election_year=2020,
                 cand_election_year=2020,
-                election_yr_to_be_included=2020,
+                election_yr_to_be_included = 2020,
             ),
+
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=self.president_candidate.candidate_id,
                 committee_id=self.president_committees[0].committee_id,
                 committee_designation='P',
                 fec_election_year=2018,
                 cand_election_year=2020,
-                election_yr_to_be_included=2020,
+                election_yr_to_be_included = 2020,
             ),
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=self.president_candidate.candidate_id,
@@ -257,8 +222,8 @@ class TestElections(ApiBaseTest):
                 committee_designation='P',
                 fec_election_year=2018,
                 cand_election_year=2020,
-                election_yr_to_be_included=2020,
-            ),
+                election_yr_to_be_included = 2020,
+            )
         ]
 
         self.presidential_totals = [
@@ -290,46 +255,26 @@ class TestElections(ApiBaseTest):
 
     def test_missing_params(self):
         response = self.app.get(api.url_for(ElectionView))
-        self.assertEqual(response.status_code, 422)
+        self.assertEquals(response.status_code, 422)
 
     def test_conditional_missing_params(self):
-        response = self.app.get(
-            api.url_for(ElectionView, office='president', cycle=2012)
-        )
-        self.assertEqual(response.status_code, 200)
+        response = self.app.get(api.url_for(ElectionView, office='president', cycle=2012))
+        self.assertEquals(response.status_code, 200)
         response = self.app.get(api.url_for(ElectionView, office='senate', cycle=2012))
-        self.assertEqual(response.status_code, 422)
-        response = self.app.get(
-            api.url_for(ElectionView, office='senate', cycle=2012, state='NY')
-        )
-        self.assertEqual(response.status_code, 200)
-        response = self.app.get(
-            api.url_for(ElectionView, office='house', cycle=2012, state='NY')
-        )
-        self.assertEqual(response.status_code, 422)
-        response = self.app.get(
-            api.url_for(
-                ElectionView, office='house', cycle=2012, state='NY', district='01'
-            )
-        )
-        self.assertEqual(response.status_code, 200)
+        self.assertEquals(response.status_code, 422)
+        response = self.app.get(api.url_for(ElectionView, office='senate', cycle=2012, state='NY'))
+        self.assertEquals(response.status_code, 200)
+        response = self.app.get(api.url_for(ElectionView, office='house', cycle=2012, state='NY'))
+        self.assertEquals(response.status_code, 422)
+        response = self.app.get(api.url_for(ElectionView, office='house', cycle=2012, state='NY', district='01'))
+        self.assertEquals(response.status_code, 200)
 
     def test_empty_query(self):
-        results = self._results(
-            api.url_for(ElectionView, office='senate', cycle=2012, state='ZZ')
-        )
+        results = self._results(api.url_for(ElectionView, office='senate', cycle=2012, state='ZZ'))
         assert len(results) == 0
 
     def test_elections(self):
-        results = self._results(
-            api.url_for(
-                ElectionView,
-                office='senate',
-                cycle=2012,
-                state='NY',
-                election_full=False,
-            )
-        )
+        results = self._results(api.url_for(ElectionView, office='senate', cycle=2012, state='NY', election_full=False))
         self.assertEqual(len(results), 1)
         totals = [each for each in self.totals if each.cycle == 2012]
         expected = {
@@ -339,23 +284,16 @@ class TestElections(ApiBaseTest):
             'party_full': self.candidate.party_full,
             'total_receipts': sum(each.receipts for each in totals),
             'total_disbursements': sum(each.disbursements for each in totals),
-            'cash_on_hand_end_period': sum(
-                each.last_cash_on_hand_end_period for each in totals
-            ),
+            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in totals),
         }
         assert_dicts_subset(results[0], expected)
-        assert set(each.committee_id for each in self.committees) == set(
-            results[0]['committee_ids']
-        )
+        assert set(each.committee_id for each in self.committees) == set(results[0]['committee_ids'])
 
     def test_elections_full(self):
         results = self._results(
             api.url_for(
                 ElectionView,
-                office='senate',
-                cycle=2012,
-                state='NY',
-                election_full='true',
+                office='senate', cycle=2012, state='NY', election_full='true',
             )
         )
         totals = self.totals
@@ -367,34 +305,30 @@ class TestElections(ApiBaseTest):
             'party_full': self.candidate.party_full,
             'total_receipts': sum(each.receipts for each in totals),
             'total_disbursements': sum(each.disbursements for each in totals),
-            'cash_on_hand_end_period': sum(
-                each.last_cash_on_hand_end_period for each in cash_on_hand_totals
-            ),
+            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in cash_on_hand_totals),
         }
         assert len(results) == 1
         assert_dicts_subset(results[0], expected)
         assert set(results[0]['committee_ids']) == set(
-            each.committee_id for each in self.committees if each.designation != 'J'
-        )
+            each.committee_id for each in self.committees
+            if each.designation != 'J')
 
     def test_elections_year_null(self):
         results = self._results(
             api.url_for(
                 ElectionView,
-                office='senate',
-                cycle=2010,
-                state='NY',
-                election_full='true',
+                office='senate', cycle=2010, state='NY', election_full='true',
             )
         )
-        totals = self.totals  # noqa
-        cash_on_hand_totals = self.totals[:2]  # noqa
+        totals = self.totals
+        cash_on_hand_totals = self.totals[:2]
         assert len(results) == 0
 
     def test_president_elections_full(self):
         results = self._results(
             api.url_for(
-                ElectionView, office='president', cycle=2020, election_full='true',
+                ElectionView,
+                office='president', cycle=2020, election_full='true',
             )
         )
         totals = self.presidential_totals
@@ -406,9 +340,7 @@ class TestElections(ApiBaseTest):
             'party_full': self.president_candidate.party_full,
             'total_receipts': sum(each.receipts for each in totals),
             'total_disbursements': sum(each.disbursements for each in totals),
-            'cash_on_hand_end_period': sum(
-                each.last_cash_on_hand_end_period for each in cash_on_hand_totals
-            ),
+            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in cash_on_hand_totals),
         }
         assert len(results) == 1
         assert_dicts_subset(results[0], expected)
@@ -420,10 +352,7 @@ class TestElections(ApiBaseTest):
         results = self._results(
             api.url_for(
                 ElectionView,
-                office='senate',
-                cycle=2012,
-                state='NY',
-                election_full='true',
+                office='senate', cycle=2012, state='NY', election_full='true',
             )
         )
         # Joint Fundraising Committees raise money for multiple
@@ -441,38 +370,23 @@ class TestElections(ApiBaseTest):
             'incumbent_challenge_full': self.candidate.incumbent_challenge_full,
             'party_full': self.candidate.party_full,
             'total_receipts': sum(each.receipts for each in totals_without_jfc),
-            'total_disbursements': sum(
-                each.disbursements for each in totals_without_jfc
-            ),
-            'cash_on_hand_end_period': sum(
-                each.last_cash_on_hand_end_period for each in cash_on_hand_without_jfc
-            ),
+            'total_disbursements': sum(each.disbursements for each in totals_without_jfc),
+            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in cash_on_hand_without_jfc),
         }
         assert len(results) == 1
         assert_dicts_subset(results[0], expected)
         assert set(results[0]['committee_ids']) == set(
-            each.committee_id for each in self.committees if each.designation != 'J'
-        )
-
+            each.committee_id for each in self.committees
+            if each.designation != 'J')
     def test_election_summary(self):
-        results = self._response(
-            api.url_for(
-                ElectionSummary,
-                office='senate',
-                cycle=2012,
-                state='NY',
-                election_full=False,
-            )
-        )
+        results = self._response(api.url_for(ElectionSummary, office='senate', cycle=2012, state='NY', election_full=False))
         totals = [each for each in self.totals if each.cycle == 2012]
         self.assertEqual(results['count'], 1)
         self.assertEqual(results['receipts'], sum(each.receipts for each in totals))
-        self.assertEqual(
-            results['disbursements'], sum(each.disbursements for each in totals)
-        )
-
+        self.assertEqual(results['disbursements'], sum(each.disbursements for each in totals))
 
 class TestPRElections(ApiBaseTest):
+
     def setUp(self):
         super().setUp()
         self.candidate = factories.CandidateDetailFactory()
@@ -503,9 +417,7 @@ class TestPRElections(ApiBaseTest):
             factories.CommitteeHistoryFactory(cycle=2020, designation='A'),
         ]
         [
-            factories.CandidateElectionFactory(
-                candidate_id=self.candidate.candidate_id, cand_election_year=year
-            )
+            factories.CandidateElectionFactory(candidate_id=self.candidate.candidate_id, cand_election_year=year)
             for year in [2016, 2020]
         ]
         [
@@ -564,16 +476,7 @@ class TestPRElections(ApiBaseTest):
         db.session.flush()
 
     def test_elections_2_year(self):
-        results = self._results(
-            api.url_for(
-                ElectionView,
-                office='house',
-                district='00',
-                cycle=2020,
-                state='PR',
-                election_full=False,
-            )
-        )
+        results = self._results(api.url_for(ElectionView, office='house', district='00',cycle=2020, state='PR', election_full=False))
         self.assertEqual(len(results), 1)
         totals = [each for each in self.totals if each.cycle == 2020]
         expected = {
@@ -583,24 +486,16 @@ class TestPRElections(ApiBaseTest):
             'party_full': self.candidate.party_full,
             'total_receipts': sum(each.receipts for each in totals),
             'total_disbursements': sum(each.disbursements for each in totals),
-            'cash_on_hand_end_period': sum(
-                each.last_cash_on_hand_end_period for each in totals
-            ),
+            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in totals),
         }
         assert_dicts_subset(results[0], expected)
-        assert set(each.committee_id for each in self.committees) == set(
-            results[0]['committee_ids']
-        )
+        assert set(each.committee_id for each in self.committees) == set(results[0]['committee_ids'])
 
     def test_elections_full(self):
         results = self._results(
             api.url_for(
                 ElectionView,
-                office='house',
-                district='00',
-                cycle=2020,
-                state='PR',
-                election_full='true',
+                office='house', district='00', cycle=2020, state='PR', election_full='true',
             )
         )
         totals = self.totals
@@ -612,27 +507,20 @@ class TestPRElections(ApiBaseTest):
             'party_full': self.candidate.party_full,
             'total_receipts': sum(each.receipts for each in totals),
             'total_disbursements': sum(each.disbursements for each in totals),
-            'cash_on_hand_end_period': max(
-                each.last_cash_on_hand_end_period for each in cash_on_hand_totals
-            ),
+            'cash_on_hand_end_period': max(each.last_cash_on_hand_end_period for each in cash_on_hand_totals),
         }
         assert len(results) == 1
         assert_dicts_subset(results[0], expected)
 
 
 class TestStateElectionOffices(ApiBaseTest):
+
     def test_filter_match(self):
         # Filter for a single string value
         [
-            factories.StateElectionOfficesFactory(
-                state='TX', office_type='STATE CAMPAIGN FINANCE'
-            ),
-            factories.StateElectionOfficesFactory(
-                state='AK', office_type='STATE CAMPAIGN FINANCE'
-            ),
-            factories.StateElectionOfficesFactory(
-                state='WA', office_type='STATE CAMPAIGN FINANCE'
-            ),
+            factories.StateElectionOfficesFactory(state='TX', office_type='STATE CAMPAIGN FINANCE'),
+            factories.StateElectionOfficesFactory(state='AK', office_type='STATE CAMPAIGN FINANCE'),
+            factories.StateElectionOfficesFactory(state='WA', office_type='STATE CAMPAIGN FINANCE'),
         ]
         results = self._results(api.url_for(StateElectionOfficeInfoView, state='TX'))
 

@@ -17,9 +17,9 @@ two years restriction removed from schedule_a. For details, refer:
 https://github.com/fecgov/openFEC/issues/3595
 """
 
-
 @doc(
-    tags=['receipts'], description=docs.SCHEDULE_A,
+    tags=['receipts'],
+    description=docs.SCHEDULE_A,
 )
 class ScheduleAView(ItemizedResource):
 
@@ -30,15 +30,12 @@ class ScheduleAView(ItemizedResource):
     @property
     def year_column(self):
         return self.model.two_year_transaction_period
-
     @property
     def index_column(self):
         return self.model.sub_id
-
     @property
     def amount_column(self):
         return self.model.contribution_receipt_amount
-
     filter_multi_fields = [
         ('image_number', models.ScheduleA.image_number),
         ('committee_id', models.ScheduleA.committee_id),
@@ -47,10 +44,7 @@ class ScheduleAView(ItemizedResource):
         ('contributor_state', models.ScheduleA.contributor_state),
         ('recipient_committee_type', models.ScheduleA.recipient_committee_type),
         ('recipient_committee_org_type', models.ScheduleA.recipient_committee_org_type),
-        (
-            'recipient_committee_designation',
-            models.ScheduleA.recipient_committee_designation,
-        ),
+        ('recipient_committee_designation', models.ScheduleA.recipient_committee_designation),
         ('two_year_transaction_period', models.ScheduleA.two_year_transaction_period),
     ]
     filter_match_fields = [
@@ -82,15 +76,13 @@ class ScheduleAView(ItemizedResource):
             args.make_seek_args(),
             args.make_sort_args(
                 default='contribution_receipt_date',
-                validator=args.OptionValidator(
-                    [
-                        'contribution_receipt_date',
-                        'contribution_receipt_amount',
-                        'contributor_aggregate_ytd',
-                    ]
-                ),
+                validator=args.OptionValidator([
+                    'contribution_receipt_date',
+                    'contribution_receipt_amount',
+                    'contributor_aggregate_ytd',
+               ]),
                 show_nulls_last_arg=False,
-            ),
+            )
         )
 
     def build_query(self, **kwargs):
@@ -104,16 +96,11 @@ class ScheduleAView(ItemizedResource):
             'contributor_occupation',
             'image_number',
         ]
-        two_year_transaction_periods = set(
-            kwargs.get('two_year_transaction_period', [])
-        )
+        two_year_transaction_periods = set(kwargs.get('two_year_transaction_period', []))
         if len(two_year_transaction_periods) != 1:
             if not any(kwargs.get(field) for field in secondary_index_options):
                 raise exceptions.ApiError(
-                    "Please choose a single `two_year_transaction_period` or \
-                    add one of the following filters to your query: `{}`".format(
-                        "`, `".join(secondary_index_options)
-                    ),
+                    "Please choose a single `two_year_transaction_period` or add one of the following filters to your query: `{}`".format("`, `".join(secondary_index_options)),
                     status_code=400,
                 )
         query = super().build_query(**kwargs)
@@ -121,7 +108,7 @@ class ScheduleAView(ItemizedResource):
         zip_list = []
         if kwargs.get('contributor_zip'):
             for value in kwargs['contributor_zip']:
-                if re.search('[^a-zA-Z0-9-\s]', value):  # noqa
+                if re.search('[^a-zA-Z0-9-\s]', value):
                     raise exceptions.ApiError(
                         'Invalid zip code. It can not have special character',
                         status_code=400,
@@ -129,9 +116,7 @@ class ScheduleAView(ItemizedResource):
                 else:
                     zip_list.append(value[:5])
             contributor_zip_list = {'contributor_zip': zip_list}
-            query = filters.filter_multi_start_with(
-                query, contributor_zip_list, self.filter_multi_start_with_fields
-            )
+            query = filters.filter_multi_start_with(query, contributor_zip_list, self.filter_multi_start_with_fields)
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         if kwargs.get('line_number'):
@@ -142,13 +127,14 @@ class ScheduleAView(ItemizedResource):
                 query = query.filter_by(line_number=line_no)
             else:
                 raise exceptions.ApiError(
-                    exceptions.LINE_NUMBER_ERROR, status_code=400,
+                    exceptions.LINE_NUMBER_ERROR,
+                    status_code=400,
                 )
         return query
 
-
 @doc(
-    tags=['receipts'], description=docs.EFILING_TAG,
+    tags=['receipts'],
+    description=docs.EFILING_TAG,
 )
 class ScheduleAEfileView(views.ApiResource):
     model = models.ScheduleAEfile
@@ -164,10 +150,7 @@ class ScheduleAEfileView(views.ApiResource):
 
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleAEfile.contribution_receipt_date),
-        (
-            ('min_amount', 'max_amount'),
-            models.ScheduleAEfile.contribution_receipt_amount,
-        ),
+        (('min_amount', 'max_amount'), models.ScheduleAEfile.contribution_receipt_amount),
         (('min_image_number', 'max_image_number'), models.ScheduleAEfile.image_number),
     ]
 
@@ -185,12 +168,10 @@ class ScheduleAEfileView(views.ApiResource):
             args.itemized,
             args.make_sort_args(
                 default='-contribution_receipt_date',
-                validator=args.OptionValidator(
-                    [
-                        'contribution_receipt_date',
-                        'contribution_receipt_amount',
-                        'contributor_aggregate_ytd',
-                    ]
-                ),
+                validator=args.OptionValidator([
+                    'contribution_receipt_date',
+                    'contribution_receipt_amount',
+                    'contributor_aggregate_ytd',
+                ]),
             ),
         )
