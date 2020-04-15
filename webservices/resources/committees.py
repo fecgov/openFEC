@@ -4,9 +4,11 @@ from flask_apispec import doc
 from webservices import args
 from webservices import docs
 from webservices import utils
+from webservices import filters
 from webservices import schemas
 from webservices import exceptions
 from webservices.common import models
+from webservices.common.models import db
 from webservices.common.views import ApiResource
 
 
@@ -193,7 +195,7 @@ class CommitteeHistoryView(ApiResource):
         if candidate_id:
             # use for
             # '/candidate/<candidate_id>/committees/history/',
-            # '/candidate/<candidate_id>/committees/history/<int:cycle>/',
+            #'/candidate/<candidate_id>/committees/history/<int:cycle>/',
             query = query.join(
                 models.CandidateCommitteeLink,
                 sa.and_(

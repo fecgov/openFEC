@@ -1,19 +1,16 @@
 import re
 
-
 def get_jdbc_credentials(dbi_url):
     """Extract username and password from connection string"""
-    DB_URL_REGEX = re.compile(
-        r'postgresql://(?P<username>[^:]*):?(?P<password>\S*)@(?P<host_port>\S*)$'
-    )
+    DB_URL_REGEX = re.compile(r'postgresql://(?P<username>[^:]*):?(?P<password>\S*)@(?P<host_port>\S*)$')
     match = DB_URL_REGEX.match(dbi_url)
     if match:
-        jdbc_url = 'jdbc:postgresql://{}'.format(match.group('host_port'))
+        jdbc_url = 'jdbc:postgresql://{}'.format(
+            match.group('host_port'))
         username = match.group('username')
         password = match.group('password')
         return jdbc_url, username, password
     return None, None, None
-
 
 def to_jdbc_url(dbi_url):
     """Reformat PostgreSQL uri to JDBC uri"""
@@ -45,13 +42,12 @@ def remove_credentials(error):
         '3D000': 'invalid_catalog_name',
         '42000': 'syntax_error_or_access_rule_violation',
         '42501': 'insufficient_privilege',
-        '42601': 'syntax_error',
+        '42601': 'syntax_error'
     }
     match = re.search(r'.*(SQL State  : )+(?P<error>[a-zA-Z0-9]{0,5})', error)
     if match:
         error_code = match.group('error')
         return 'PostgreSQL error code {}: {}'.format(
-            error_code, login_related_error_codes.get(error_code, error)
-        )
+            error_code, login_related_error_codes.get(error_code, error))
     else:
         return error

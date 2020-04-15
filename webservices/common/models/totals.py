@@ -3,7 +3,6 @@ from sqlalchemy.ext.declarative import declared_attr
 
 from webservices import docs
 
-
 class CommitteeTotals(BaseModel):
     __abstract__ = True
 
@@ -36,7 +35,7 @@ class CommitteeTotals(BaseModel):
     last_debts_owed_by_committee = db.Column(db.Numeric(30, 2))
     last_debts_owed_to_committee = db.Column(db.Numeric(30, 2))
 
-    # Add additional fields and filters to /totals/{committee-type} endpoint#2631
+    #Add additional fields and filters to /totals/{committee-type} endpoint#2631
     committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
     committee_type = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
     committee_designation = db.Column(db.String, doc=docs.DESIGNATION)
@@ -59,9 +58,9 @@ class CommitteeTotals(BaseModel):
 
 class CandidateCommitteeTotals(db.Model):
     __abstract__ = True
-    # making this it's own model hieararchy until can figure out
-    # how to maybe use existing classes while removing primary
-    # key stuff on cycle
+    #making this it's own model hieararchy until can figure out
+    #how to maybe use existing classes while removing primary
+    #key stuff on cycle
     candidate_id = db.Column(db.String, primary_key=True, doc=docs.CANDIDATE_ID)
     cycle = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CYCLE)
     candidate_election_year = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CYCLE)
@@ -249,7 +248,6 @@ class CommitteeTotalsIEOnly(BaseModel):
         lazy='joined',
     )
 
-
 class ScheduleAByStateRecipientTotals(BaseModel):
     __tablename__ = 'ofec_sched_a_aggregate_state_recipient_totals_mv'
 
@@ -260,7 +258,6 @@ class ScheduleAByStateRecipientTotals(BaseModel):
     state_full = db.Column(db.String, index=True, doc=docs.STATE_GENERIC)
     committee_type = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE)
     committee_type_full = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE)
-
 
 class CommitteeTotalsCombined(CommitteeTotals):
     __tablename__ = 'ofec_totals_combined_vw'
@@ -284,7 +281,6 @@ class CommitteeTotalsCombined(CommitteeTotals):
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
     net_operating_expenditures = db.Column('last_net_operating_expenditures', db.Numeric(30, 2))
     net_contributions = db.Column('last_net_contributions', db.Numeric(30, 2))
-
 
 class CommitteeTotalsPerCycle(CommitteeTotals):
     __tablename__ = 'ofec_committee_totals_per_cycle_vw'

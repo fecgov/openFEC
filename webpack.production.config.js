@@ -1,7 +1,7 @@
 const path = require("path");
-const webpack = require('webpack')
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
+var webpack = require('webpack')
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
   entry: {
@@ -68,17 +68,15 @@ module.exports = {
     ]
   },
 
-    optimization: {
-	minimize: true,
-	minimizer: [new TerserPlugin({
-	    terserOptions: {
-		output: false,
-	    },
-	})],
-    },
-
-    
   plugins: [
+    new UglifyJsPlugin({
+      sourceMap: true,
+      uglifyOptions: {
+        output: {
+          comments: false
+        }
+      }
+    }),
     new ExtractTextPlugin({
       filename: "main.css",
       allChunks: true

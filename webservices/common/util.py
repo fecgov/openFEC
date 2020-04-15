@@ -44,5 +44,5 @@ def get_class_by_tablename(tablename):
     """
     from webservices.common.models import db
     for c in db.Model._decl_class_registry.values():
-        if hasattr(c, '_sa_class_manager') and c._sa_class_manager.mapper.persist_selectable == tablename:
+        if hasattr(c, '_sa_class_manager') and c._sa_class_manager.mapper.mapped_table == tablename:
             return c

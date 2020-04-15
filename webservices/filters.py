@@ -33,7 +33,7 @@ def filter_match(query, kwargs, fields):
         if kwargs.get(key) is not None:
             if is_exclude_arg(kwargs[key]):
                 query = query.filter(sa.or_(column != parse_exclude_arg(kwargs[key]),
-                                            column == None))  # noqa
+                                            column == None))
             else:
                 query = query.filter(column == kwargs[key])
     return query
@@ -47,7 +47,7 @@ def filter_multi(query, kwargs, fields):
             include_list = build_include_list(kwargs.get(key))
             if exclude_list:
                 query = query.filter(sa.or_(column.notin_(exclude_list),
-                                            column == None))  # noqa
+                                            column == None))
             if include_list:
                 query = query.filter(column.in_(include_list))
     return query

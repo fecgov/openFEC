@@ -171,13 +171,12 @@ class AuditCandidateNameSearch(utils.Resource):
         ).limit(20)
         return {'results': query.all()}
 
-
+# endpoint audit/search/name/committees
 @doc(
     tags=['audit'],
     description=docs.NAME_SEARCH,
 )
 class AuditCommitteeNameSearch(utils.Resource):
-    """endpoint audit/search/name/committees"""
 
     filter_fulltext_fields = [
         ('q', models.AuditCommitteeSearch.fulltxt),

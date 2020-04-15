@@ -21,7 +21,7 @@ class CommitteeTestCase(BaseTestCase):
 
     def _response(self, qry):
         response = self.app.get(qry)
-        self.assertEqual(response.status_code, 200)
+        self.assertEquals(response.status_code, 200)
         result = json.loads(codecs.decode(response.data))
         self.assertNotEqual(result, [], "Empty response!")
         self.assertEqual(result['api_version'], __API_VERSION__)
@@ -68,28 +68,28 @@ class CommitteeTestCase(BaseTestCase):
             'receipt_dt': 20160610,
             'form_tp': 'F1',
             'rpt_yr': 2015,
-            'sub_id': 1001,
+            'sub_id': 1001
         },
         {
             'cand_cmte_id': 'C001',
             'receipt_dt': 20170310,
             'form_tp': 'F3',
             'rpt_yr': 2017,
-            'sub_id': 1002,
+            'sub_id': 1002
         },
         {
             'cand_cmte_id': 'C001',
             'receipt_dt': 20170510,
             'form_tp': 'F3',
             'rpt_yr': None,
-            'sub_id': 1003,
+            'sub_id': 1003
         },
         {
             'cand_cmte_id': 'C001',
             'receipt_dt': 20190310,
             'form_tp': 'F3',
             'rpt_yr': 2019,
-            'sub_id': 1004,
+            'sub_id': 1004
         },
     ]
 
@@ -103,16 +103,10 @@ class CommitteeTestCase(BaseTestCase):
             'committee_id': 'C001',
         }
 
-        committee_api = self._results(
-            rest.api.url_for(CommitteeHistoryView, **params_cmte)
-        )
+        committee_api = self._results(rest.api.url_for(CommitteeHistoryView, **params_cmte))
         self.check_nulls_in_array_column(committee_api, array_column='cycles')
-        self.check_nulls_in_array_column(
-            committee_api, array_column='cycles_has_activity'
-        )
-        self.check_nulls_in_array_column(
-            committee_api, array_column='cycles_has_financial'
-        )
+        self.check_nulls_in_array_column(committee_api, array_column='cycles_has_activity')
+        self.check_nulls_in_array_column(committee_api, array_column='cycles_has_financial')
 
     def check_nulls_in_array_column(self, api_result, array_column):
         self.assertEqual(len(api_result), 1)
@@ -152,6 +146,10 @@ class CommitteeTestCase(BaseTestCase):
         self.connection.execute(sql_insert, f_rpt_or_form_sub_data)
 
     def clear_test_data(self):
-        tables = ["cmte_valid_fec_yr", "cand_cmte_linkage", "f_rpt_or_form_sub"]
+        tables = [
+            "cmte_valid_fec_yr",
+            "cand_cmte_linkage",
+            "f_rpt_or_form_sub"
+        ]
         for table in tables:
             self.connection.execute("DELETE FROM disclosure.{}".format(table))

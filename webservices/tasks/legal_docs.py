@@ -38,13 +38,11 @@ RECENTLY_MODIFIED_CASES = """
     ORDER BY case_serial
 """
 
-
 @app.task(once={'graceful': True}, base=QueueOnce)
 def refresh():
     with db.engine.connect() as conn:
         refresh_aos(conn)
         refresh_cases(conn)
-
 
 @app.task(once={'graceful': True}, base=QueueOnce)
 def reload_all_aos_when_change():
@@ -66,7 +64,6 @@ def reload_all_aos_when_change():
                 'No modified AOs found for the day - Reload of all AOs skipped in {0} space'.format(get_app_name())
             utils.post_to_slack(slack_message, '#bots')
 
-
 @app.task(once={'graceful': True}, base=QueueOnce)
 def reload_all_aos():
     logger.info("Weekly (%s) reload of all AOs starting", datetime.date.today().strftime("%A"))
@@ -74,7 +71,6 @@ def reload_all_aos():
     logger.info("Weekly (%s) reload of all AOs completed", datetime.date.today().strftime("%A"))
     slack_message = 'Weekly reload of all AOs completed in {0} space'.format(get_app_name())
     utils.post_to_slack(slack_message, '#bots')
-
 
 @app.task(once={'graceful': True}, base=QueueOnce)
 def create_es_backup():
@@ -89,7 +85,6 @@ def create_es_backup():
         slack_message = '*ERROR* elasticsearch backup failed for {0}. Check logs.'.format(get_app_name())
         utils.post_to_slack(slack_message, '#bots')
 
-
 def refresh_aos(conn):
     row = conn.execute(RECENTLY_MODIFIED_STARTING_AO).first()
     if row:
@@ -97,7 +92,6 @@ def refresh_aos(conn):
         load_advisory_opinions(row["ao_no"])
     else:
         logger.info("No modified AOs found")
-
 
 def refresh_cases(conn):
     logger.info('Checking for modified cases')

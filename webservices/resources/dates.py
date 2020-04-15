@@ -89,7 +89,6 @@ class CalendarDatesExport(CalendarDatesView):
             mimetype=mimetype,
         )
 
-
 @doc(
     tags=['dates'],
     description=docs.ELECTION_DATES,
@@ -128,7 +127,6 @@ class ElectionDatesView(ApiResource):
     def build_query(self, *args, **kwargs):
         query = super().build_query(*args, **kwargs)
         return query.filter_by(election_status_id=1)
-
 
 @doc(
     tags=['dates'],

@@ -3,6 +3,9 @@
 git+https://github.com/18F/rdbms-subsetter
 
 # Testing
+factory_boy==2.8.1
+nplusone==0.8.0
+webtest==2.0.27
 pdbpp==0.9.1
 click==6.7
 

@@ -9,26 +9,15 @@ from webservices.resources.reports import get_match_filters
 
 
 class TestFilterMatch(ApiBaseTest):
+
     def setUp(self):
         super(TestFilterMatch, self).setUp()
         self.dates = [
-            factories.CalendarDateFactory(
-                event_id=123,
-                calendar_category_id=1,
-                summary='July Quarterly Report Due',
-            ),
-            factories.CalendarDateFactory(
-                event_id=321, calendar_category_id=1, summary='TX Primary Runoff'
-            ),
-            factories.CalendarDateFactory(
-                event_id=111, calendar_category_id=2, summary='EC Reporting Period'
-            ),
-            factories.CalendarDateFactory(
-                event_id=222, calendar_category_id=2, summary='IE Reporting Period'
-            ),
-            factories.CalendarDateFactory(
-                event_id=333, calendar_category_id=3, summary='Executive Session'
-            ),
+            factories.CalendarDateFactory(event_id=123, calendar_category_id=1, summary='July Quarterly Report Due'),
+            factories.CalendarDateFactory(event_id=321, calendar_category_id=1, summary='TX Primary Runoff'),
+            factories.CalendarDateFactory(event_id=111, calendar_category_id=2, summary='EC Reporting Period'),
+            factories.CalendarDateFactory(event_id=222, calendar_category_id=2, summary='IE Reporting Period'),
+            factories.CalendarDateFactory(event_id=333, calendar_category_id=3, summary='Executive Session'),
             factories.CalendarDateFactory(calendar_category_id=3, summary='Missing ID'),
         ]
         self.reports = [
@@ -42,73 +31,54 @@ class TestFilterMatch(ApiBaseTest):
         query_dates = filters.filter_match(
             models.CalendarDate.query,
             {'event_id': 123},
-            CalendarDatesView.filter_match_fields,
+            CalendarDatesView.filter_match_fields
         )
         self.assertEqual(
             set(query_dates.all()),
-            set(each for each in self.dates if each.event_id == 123),
-        )
+            set(each for each in self.dates if each.event_id == 123))
 
         # Filter for a single string value
         query_reports = filters.filter_match(
             models.CommitteeReportsHouseSenate.query,
             {'filer_type': 'e-file'},
-            get_match_filters(),
+            get_match_filters()
         )
         self.assertEqual(
             set(query_reports.all()),
-            set(each for each in self.reports if each.means_filed == 'e-file'),
-        )
+            set(each for each in self.reports if each.means_filed == 'e-file'))
 
     def test_filter_match_exclude(self):
         # Exclude a single integer value
         query_dates = filters.filter_match(
             models.CalendarDate.query,
             {'event_id': -321},
-            CalendarDatesView.filter_match_fields,
+            CalendarDatesView.filter_match_fields
         )
         self.assertEqual(
             set(query_dates.all()),
-            set(
-                each
-                for each in self.dates
-                if each.event_id != 321 or each.event_id is None
-            ),
-        )
+            set(each for each in self.dates if each.event_id != 321 or each.event_id is None))
 
         # Exclude a single string value
         query_reports = filters.filter_match(
             models.CommitteeReportsHouseSenate.query,
             {'filer_type': '-paper'},
-            get_match_filters(),
+            get_match_filters()
         )
         self.assertEqual(
             set(query_reports.all()),
-            set(each for each in self.reports if each.means_filed != 'paper'),
-        )
+            set(each for each in self.reports if each.means_filed != 'paper'))
 
 
 class TestFilterMulti(ApiBaseTest):
+
     def setUp(self):
         super(TestFilterMulti, self).setUp()
         self.dates = [
-            factories.CalendarDateFactory(
-                event_id=123,
-                calendar_category_id=1,
-                summary='July Quarterly Report Due',
-            ),
-            factories.CalendarDateFactory(
-                event_id=321, calendar_category_id=1, summary='TX Primary Runoff'
-            ),
-            factories.CalendarDateFactory(
-                event_id=111, calendar_category_id=2, summary='EC Reporting Period'
-            ),
-            factories.CalendarDateFactory(
-                event_id=222, calendar_category_id=2, summary='IE Reporting Period'
-            ),
-            factories.CalendarDateFactory(
-                event_id=333, calendar_category_id=3, summary='Executive Session'
-            ),
+            factories.CalendarDateFactory(event_id=123, calendar_category_id=1, summary='July Quarterly Report Due'),
+            factories.CalendarDateFactory(event_id=321, calendar_category_id=1, summary='TX Primary Runoff'),
+            factories.CalendarDateFactory(event_id=111, calendar_category_id=2, summary='EC Reporting Period'),
+            factories.CalendarDateFactory(event_id=222, calendar_category_id=2, summary='IE Reporting Period'),
+            factories.CalendarDateFactory(event_id=333, calendar_category_id=3, summary='Executive Session'),
             factories.CalendarDateFactory(calendar_category_id=3, summary='Missing ID'),
         ]
         self.committees = [
@@ -124,85 +94,67 @@ class TestFilterMulti(ApiBaseTest):
         query_dates = filters.filter_multi(
             models.CalendarDate.query,
             {'calendar_category_id': [1, 3]},
-            CalendarDatesView.filter_multi_fields,
+            CalendarDatesView.filter_multi_fields
         )
         self.assertEqual(
             set(query_dates.all()),
-            set(each for each in self.dates if each.calendar_category_id in [1, 3]),
-        )
+            set(each for each in self.dates if each.calendar_category_id in [1,3]))
 
         # Filter for multiple string values
         query_committees = filters.filter_multi(
             models.Committee.query,
             {'designation': ['P', 'U']},
-            CommitteeList.filter_multi_fields,
+            CommitteeList.filter_multi_fields
         )
         self.assertEqual(
             set(query_committees.all()),
-            set(each for each in self.committees if each.designation in ['P', 'U']),
-        )
+            set(each for each in self.committees if each.designation in ['P','U']))
 
     def test_filter_multi_exclude(self):
         # Exclude multiple integer values
         query_dates = filters.filter_multi(
             models.CalendarDate.query,
             {'calendar_category_id': [-1, -3]},
-            CalendarDatesView.filter_multi_fields,
+            CalendarDatesView.filter_multi_fields
         )
         self.assertEqual(
             set(query_dates.all()),
-            set(each for each in self.dates if each.calendar_category_id not in [1, 3]),
-        )
+            set(each for each in self.dates if each.calendar_category_id not in [1,3]))
 
         # Exclude multiple string values
         query_committees = filters.filter_multi(
             models.Committee.query,
             {'designation': ['-P', '-U']},
-            CommitteeList.filter_multi_fields,
+            CommitteeList.filter_multi_fields
         )
         self.assertEqual(
             set(query_committees.all()),
-            set(
-                each
-                for each in self.committees
-                if each.designation not in ['P', 'U'] or each.designation is None
-            ),
-        )
+            set(each for each in self.committees if each.designation not in ['P','U'] or each.designation is None))
 
     def test_filter_multi_combo(self):
         # Exclude/include multiple integer values
         query_dates = filters.filter_multi(
             models.CalendarDate.query,
             {'calendar_category_id': [-1, 3]},
-            CalendarDatesView.filter_multi_fields,
+            CalendarDatesView.filter_multi_fields
         )
         self.assertEqual(
             set(query_dates.all()),
-            set(
-                each
-                for each in self.dates
-                if each.calendar_category_id not in [1]
-                and each.calendar_category_id in [3]
-            ),
-        )
+            set(each for each in self.dates if each.calendar_category_id not in [1] and each.calendar_category_id in [3]))
 
         # Exclude/include multiple string values
         query_committees = filters.filter_multi(
             models.Committee.query,
             {'designation': ['-P', 'U']},
-            CommitteeList.filter_multi_fields,
+            CommitteeList.filter_multi_fields
         )
         self.assertEqual(
             set(query_committees.all()),
-            set(
-                each
-                for each in self.committees
-                if each.designation not in ['P'] and each.designation in ['U']
-            ),
-        )
+            set(each for each in self.committees if each.designation not in ['P'] and each.designation in ['U']))
 
 
 class TestFilterOther(ApiBaseTest):
+
     def setUp(self):
         super(TestFilterOther, self).setUp()
         self.receipts = [
@@ -213,23 +165,11 @@ class TestFilterOther(ApiBaseTest):
             factories.ScheduleAFactory(entity_type='PAC'),
         ]
         self.dates = [
-            factories.CalendarDateFactory(
-                event_id=123,
-                calendar_category_id=1,
-                summary='July Quarterly Report Due',
-            ),
-            factories.CalendarDateFactory(
-                event_id=321, calendar_category_id=1, summary='TX Primary Runoff'
-            ),
-            factories.CalendarDateFactory(
-                event_id=111, calendar_category_id=2, summary='EC Reporting Period'
-            ),
-            factories.CalendarDateFactory(
-                event_id=222, calendar_category_id=2, summary='IE Reporting Period'
-            ),
-            factories.CalendarDateFactory(
-                event_id=333, calendar_category_id=3, summary='Executive Session'
-            ),
+            factories.CalendarDateFactory(event_id=123, calendar_category_id=1, summary='July Quarterly Report Due'),
+            factories.CalendarDateFactory(event_id=321, calendar_category_id=1, summary='TX Primary Runoff'),
+            factories.CalendarDateFactory(event_id=111, calendar_category_id=2, summary='EC Reporting Period'),
+            factories.CalendarDateFactory(event_id=222, calendar_category_id=2, summary='IE Reporting Period'),
+            factories.CalendarDateFactory(event_id=333, calendar_category_id=3, summary='Executive Session'),
         ]
 
     def test_filter_contributor_type_individual(self):
@@ -240,7 +180,7 @@ class TestFilterOther(ApiBaseTest):
         )
         self.assertEqual(
             set(query.all()),
-            set(each for each in self.receipts if each.entity_type == 'IND'),
+            set(each for each in self.receipts if each.entity_type == 'IND')
         )
 
     def test_filter_contributor_type_committee(self):
@@ -251,7 +191,7 @@ class TestFilterOther(ApiBaseTest):
         )
         self.assertEqual(
             set(query.all()),
-            set(each for each in self.receipts if each.entity_type != 'IND'),
+            set(each for each in self.receipts if each.entity_type != 'IND')
         )
 
     def test_filter_contributor_type_none(self):
@@ -268,13 +208,8 @@ class TestFilterOther(ApiBaseTest):
         query_dates = filters.filter_fulltext(
             models.CalendarDate.query,
             {'summary': ['Report', '-IE']},
-            CalendarDatesView.filter_fulltext_fields,
+            CalendarDatesView.filter_fulltext_fields
         )
         self.assertEqual(
             set(query_dates.all()),
-            set(
-                each
-                for each in self.dates
-                if 'Report' in each.summary and 'IE' not in each.summary
-            ),
-        )
+            set(each for each in self.dates if 'Report' in each.summary and 'IE' not in each.summary))
