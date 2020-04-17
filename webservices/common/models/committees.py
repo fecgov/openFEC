@@ -68,6 +68,7 @@ class CommitteeHistory(BaseCommittee):
     last_cycle_has_financial = db.Column(db.Integer, doc=docs.COMMITTEE_LAST_CYCLE_HAS_FINANCIAL)
     cycles_has_activity = db.Column(ARRAY(db.Integer), doc=docs.COMMITTEE_CYCLES_HAS_ACTIVITY)
     last_cycle_has_activity = db.Column(db.Integer, doc=docs.COMMITTEE_LAST_CYCLE_HAS_ACTIVITY)
+    is_active = db.Column(db.Boolean, doc=docs.IS_COMMITTEE_ACTIVE)
 
 
 class CommitteeDetail(BaseConcreteCommittee):

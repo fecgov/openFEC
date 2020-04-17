@@ -510,6 +510,10 @@ MAX_LAST_F1_DATE = 'Filter for committees whose latest Form 1 was received on or
 AFFILIATED_COMMITTEE_NAME = '''
 Affiliated committee or connected organization
 '''
+
+IS_COMMITTEE_ACTIVE = '''
+True indicates that a committee is active.
+'''
 # ======== committee end ===========
 
 

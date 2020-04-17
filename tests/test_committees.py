@@ -382,26 +382,31 @@ class TestCommitteeHistory(ApiBaseTest):
                 committee_id=self.committees[0].committee_id,
                 cycle=2010,
                 designation='P',
+                is_active=True,
             ),
             factories.CommitteeHistoryFactory(
                 committee_id=self.committees[1].committee_id,
                 cycle=2012,
                 designation='P',
+                is_active=True,
             ),
             factories.CommitteeHistoryFactory(
                 committee_id=self.committees[2].committee_id,
                 cycle=2014,
                 designation='P',
+                is_active=True,
             ),
             factories.CommitteeHistoryFactory(
                 committee_id=self.committees[3].committee_id,
                 cycle=2014,
                 designation='A',
+                is_active=False,
             ),
             factories.CommitteeHistoryFactory(
                 committee_id=self.committees[4].committee_id,
                 cycle=2014,
                 designation='J',
+                is_active=False,
             ),
         ]
 
@@ -457,6 +462,29 @@ class TestCommitteeHistory(ApiBaseTest):
                 prev_election_year=2012,
             ),
         ]
+
+    def test_is_active(self):
+        results = self._results(
+            api.url_for(
+                CommitteeHistoryView,
+                committee_id=self.committees[4].committee_id,
+                cycle=2014,
+                election_full=False,
+                is_active=False,
+            )
+        )
+        assert len(results) == 1
+
+        results = self._results(
+            api.url_for(
+                CommitteeHistoryView,
+                committee_id=self.committees[2].committee_id,
+                cycle=2014,
+                election_full=False,
+                is_active=True,
+            )
+        )
+        assert len(results) == 1
 
     def test_candidate_cycle(self):
         results = self._results(
