@@ -7,6 +7,7 @@ from form F3X line number 16.
 FULL_ELECTION_ERROR = """Parameter 'full_election' is replaced by 'election_full'. Please use 'election_full' instead.
 """
 
+
 class ApiError(Exception):
     status_code = 400
 

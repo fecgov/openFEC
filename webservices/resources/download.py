@@ -19,6 +19,7 @@ client = boto3.client('s3')
 MAX_RECORDS = 500000
 URL_EXPIRY = 7 * 24 * 60 * 60
 
+
 class DownloadView(utils.Resource):
 
     @use_kwargs_original({'filename': fields.Str(missing=None)})
@@ -44,6 +45,7 @@ class DownloadView(utils.Resource):
         )
         return {'status': 'queued'}
 
+
 def get_cached_file(path, qs, filename=None):
     key = download.get_s3_name(path, qs)
     obj = task_utils.get_object(key)
@@ -52,6 +54,7 @@ def get_cached_file(path, qs, filename=None):
         return get_download_url(obj, filename=filename)
     except ClientError:
         return None
+
 
 def get_download_url(obj, filename=None):
     params = {

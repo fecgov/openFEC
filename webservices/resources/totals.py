@@ -16,27 +16,49 @@ committee_type_map = {
     'ie-only': 'I',
     'pac-party': None,
     'pac': 'O',
-    'party': 'X'
+    'party': 'X',
 }
 
 totals_schema_map = {
     'P': (models.CommitteeTotalsPerCycle, schemas.CommitteeTotalsPerCyclePageSchema),
-    'H': (models.CommitteeTotalsHouseSenate, schemas.CommitteeTotalsHouseSenatePageSchema),
-    'S': (models.CommitteeTotalsHouseSenate, schemas.CommitteeTotalsHouseSenatePageSchema),
+    'H': (
+        models.CommitteeTotalsHouseSenate,
+        schemas.CommitteeTotalsHouseSenatePageSchema,
+    ),
+    'S': (
+        models.CommitteeTotalsHouseSenate,
+        schemas.CommitteeTotalsHouseSenatePageSchema,
+    ),
     'I': (models.CommitteeTotalsIEOnly, schemas.CommitteeTotalsIEOnlyPageSchema),
 }
-default_schemas = (models.CommitteeTotalsPacParty, schemas.CommitteeTotalsPacPartyPageSchema)
+default_schemas = (
+    models.CommitteeTotalsPacParty,
+    schemas.CommitteeTotalsPacPartyPageSchema,
+)
 
 candidate_totals_schema_map = {
-    'P': (models.CandidateCommitteeTotalsPresidential, schemas.CandidateCommitteeTotalsPresidentialPageSchema),
-    'H': (models.CandidateCommitteeTotalsHouseSenate, schemas.CandidateCommitteeTotalsHouseSenatePageSchema),
-    'S': (models.CandidateCommitteeTotalsHouseSenate, schemas.CandidateCommitteeTotalsHouseSenatePageSchema),
+    'P': (
+        models.CandidateCommitteeTotalsPresidential,
+        schemas.CandidateCommitteeTotalsPresidentialPageSchema,
+    ),
+    'H': (
+        models.CandidateCommitteeTotalsHouseSenate,
+        schemas.CandidateCommitteeTotalsHouseSenatePageSchema,
+    ),
+    'S': (
+        models.CandidateCommitteeTotalsHouseSenate,
+        schemas.CandidateCommitteeTotalsHouseSenatePageSchema,
+    ),
 }
 pac_cmte_list = {'N', 'O', 'Q', 'V', 'W'}
 
 party_cmte_list = {'X', 'Y'}
 
-default_candidate_schemas = (models.CandidateCommitteeTotalsHouseSenate, schemas.CandidateCommitteeTotalsHouseSenatePageSchema)
+default_candidate_schemas = (
+    models.CandidateCommitteeTotalsHouseSenate,
+    schemas.CandidateCommitteeTotalsHouseSenatePageSchema,
+)
+
 
 @doc(
     tags=['financial'],
@@ -44,21 +66,25 @@ default_candidate_schemas = (models.CandidateCommitteeTotalsHouseSenate, schemas
     params={
         'committee_type': {
             'description': 'House, Senate, presidential, independent expenditure only',
-            'enum': ['presidential', 'pac', 'party', 'pac-party', 'house-senate', 'ie-only'],
+            'enum': [
+                'presidential',
+                'pac',
+                'party',
+                'pac-party',
+                'house-senate',
+                'ie-only',
+            ],
         },
     },
 )
 class TotalsView(utils.Resource):
-
     @use_kwargs(args.paging)
     @use_kwargs(args.totals_all)
     @use_kwargs(args.make_sort_args(default='-cycle'))
     @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
         query, totals_class, totals_schema = self.build_query(
-            committee_id=committee_id,
-            committee_type=committee_type,
-            **kwargs
+            committee_id=committee_id, committee_type=committee_type, **kwargs
         )
         page = utils.fetch_page(query, kwargs, model=totals_class)
         return totals_schema().dump(page).data
@@ -66,9 +92,7 @@ class TotalsView(utils.Resource):
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
         totals_class, totals_schema = totals_schema_map.get(
             self._resolve_committee_type(
-                committee_id=committee_id,
-                committee_type=committee_type,
-                **kwargs
+                committee_id=committee_id, committee_type=committee_type, **kwargs
             ),
             default_schemas,
         )
@@ -87,7 +111,9 @@ class TotalsView(utils.Resource):
             )
         if committee_type == 'pac-party':
             query = query.filter(
-                models.CommitteeTotalsPacParty.committee_type.in_(pac_cmte_list.union(party_cmte_list))
+                models.CommitteeTotalsPacParty.committee_type.in_(
+                    pac_cmte_list.union(party_cmte_list)
+                )
             )
         return query, totals_class, totals_schema
 
@@ -102,6 +128,7 @@ class TotalsView(utils.Resource):
         elif committee_type is not None:
             return committee_type_map.get(committee_type)
 
+
 @doc(
     tags=['financial'],
     description=docs.TOTALS,
@@ -109,21 +136,25 @@ class TotalsView(utils.Resource):
         'committee_id': {'description': docs.COMMITTEE_ID},
         'committee_type': {
             'description': 'House, Senate, presidential, independent expenditure only',
-            'enum': ['presidential', 'pac-party', 'pac', 'party', 'house-senate', 'ie-only'],
+            'enum': [
+                'presidential',
+                'pac-party',
+                'pac',
+                'party',
+                'house-senate',
+                'ie-only',
+            ],
         },
     },
 )
 class TotalsCommitteeView(ApiResource):
-
     @use_kwargs(args.paging)
     @use_kwargs(args.totals)
     @use_kwargs(args.make_sort_args(default='-cycle'))
     @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
         query, totals_class, totals_schema = self.build_query(
-            committee_id=committee_id,
-            committee_type=committee_type,
-            **kwargs
+            committee_id=committee_id, committee_type=committee_type, **kwargs
         )
         page = utils.fetch_page(query, kwargs, model=totals_class)
         return totals_schema().dump(page).data
@@ -131,9 +162,7 @@ class TotalsCommitteeView(ApiResource):
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
         totals_class, totals_schema = totals_schema_map.get(
             self._resolve_committee_type(
-                committee_id=committee_id,
-                committee_type=committee_type,
-                **kwargs
+                committee_id=committee_id, committee_type=committee_type, **kwargs
             ),
             default_schemas,
         )
@@ -154,12 +183,11 @@ class TotalsCommitteeView(ApiResource):
             committee = query.first_or_404()
             return committee.committee_type
 
+
 @doc(
     tags=['candidate'],
     description=docs.TOTALS,
-    params={
-        'candidate_id': {'description': docs.CANDIDATE_ID},
-    },
+    params={'candidate_id': {'description': docs.CANDIDATE_ID}, },
 )
 class CandidateTotalsView(utils.Resource):
     @use_kwargs(args.paging)
@@ -169,8 +197,7 @@ class CandidateTotalsView(utils.Resource):
     @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
     def get(self, candidate_id, **kwargs):
         query, totals_class, totals_schema = self.build_query(
-            candidate_id=candidate_id,
-            **kwargs
+            candidate_id=candidate_id, **kwargs
         )
         if kwargs['sort']:
             validator = args.IndexValidator(totals_class)
@@ -180,10 +207,7 @@ class CandidateTotalsView(utils.Resource):
 
     def build_query(self, candidate_id=None, **kwargs):
         totals_class, totals_schema = candidate_totals_schema_map.get(
-            self._resolve_committee_type(
-                candidate_id=candidate_id,
-                **kwargs
-            ),
+            self._resolve_committee_type(candidate_id=candidate_id, **kwargs),
             default_schemas,
         )
         query = totals_class.query
@@ -192,8 +216,7 @@ class CandidateTotalsView(utils.Resource):
         if 'full_election' in kwargs.keys():
             # full_election is replaced by election_full.
             raise exceptions.ApiError(
-                exceptions.FULL_ELECTION_ERROR,
-                status_code=400,
+                exceptions.FULL_ELECTION_ERROR, status_code=400,
             )
 
         if kwargs.get('election_full') is None:
@@ -207,7 +230,9 @@ class CandidateTotalsView(utils.Resource):
             if kwargs.get('cycle'):
                 if kwargs.get('election_full'):
                     # if election_full = true, filter by candidate_election_year = cycle
-                    query = query.filter(totals_class.candidate_election_year.in_(kwargs['cycle']))
+                    query = query.filter(
+                        totals_class.candidate_election_year.in_(kwargs['cycle'])
+                    )
                 else:
                     # if election_full = false, filter by cycle = cycle
                     query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
@@ -217,10 +242,8 @@ class CandidateTotalsView(utils.Resource):
         if candidate_id is not None:
             return candidate_id[0]
 
-@doc(
-    tags=['receipts'],
-    description=(docs.STATE_AGGREGATE_RECIPIENT_TOTALS)
-)
+
+@doc(tags=['receipts'], description=(docs.STATE_AGGREGATE_RECIPIENT_TOTALS))
 class ScheduleAByStateRecipientTotalsView(ApiResource):
     model = models.ScheduleAByStateRecipientTotals
     schema = schemas.ScheduleAByStateRecipientTotalsSchema
@@ -239,13 +262,10 @@ class ScheduleAByStateRecipientTotalsView(ApiResource):
             args.paging,
             args.make_sort_args(
                 default='cycle',
-                validator=args.OptionValidator([
-                    'cycle',
-                    'state',
-                    'committee_type',
-                    'total'
-                ]),
-            )
+                validator=args.OptionValidator(
+                    ['cycle', 'state', 'committee_type', 'total']
+                ),
+            ),
         )
 
     @property

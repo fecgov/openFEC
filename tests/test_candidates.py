@@ -34,13 +34,19 @@ fields = dict(
 
 class CandidateFormatTest(ApiBaseTest):
     """Test/Document expected formats"""
+
     def test_candidate(self):
         """Compare results to expected fields."""
         candidate = factories.CandidateDetailFactory(**fields)
         response = self._response(
             api.url_for(CandidateView, candidate_id=candidate.candidate_id)
         )
-        assert response['pagination'] == {'count': 1, 'page': 1, 'pages': 1, 'per_page': 20}
+        assert response['pagination'] == {
+            'count': 1,
+            'page': 1,
+            'pages': 1,
+            'per_page': 20,
+        }
         # we are showing the full history rather than one result
         assert len(response['results']) == 1
 
@@ -94,7 +100,7 @@ class CandidateFormatTest(ApiBaseTest):
 
     def test_fields(self):
         candidate = factories.CandidateDetailFactory()
-        flags = factories.CandidateFlagsFactory(candidate_id=candidate.candidate_id)
+        factories.CandidateFlagsFactory(candidate_id=candidate.candidate_id)
         response = self._results(
             api.url_for(CandidateView, candidate_id=candidate.candidate_id)
         )
@@ -103,8 +109,7 @@ class CandidateFormatTest(ApiBaseTest):
 
     def test_extra_fields(self):
         candidate = factories.CandidateDetailFactory(
-            address_street_1='PO Box 8102',
-            address_zip='60680',
+            address_street_1='PO Box 8102', address_zip='60680',
         )
         response = self._results(
             api.url_for(CandidateView, candidate_id=candidate.candidate_id)
@@ -115,9 +120,13 @@ class CandidateFormatTest(ApiBaseTest):
 
     def test_fulltext_match(self):
         danielle = factories.CandidateFactory(name='Danielle')
-        factories.CandidateSearchFactory(id=danielle.candidate_id, fulltxt=sa.func.to_tsvector('Danielle'))
+        factories.CandidateSearchFactory(
+            id=danielle.candidate_id, fulltxt=sa.func.to_tsvector('Danielle')
+        )
         dana = factories.CandidateFactory(name='Dana')
-        factories.CandidateSearchFactory(id=dana.candidate_id, fulltxt=sa.func.to_tsvector('Dana'))
+        factories.CandidateSearchFactory(
+            id=dana.candidate_id, fulltxt=sa.func.to_tsvector('Dana')
+        )
         rest.db.session.flush()
         results = self._results(api.url_for(CandidateList, q='danielle'))
         self.assertEqual(len(results), 1)
@@ -174,9 +183,13 @@ class CandidateFormatTest(ApiBaseTest):
         ]
         candidate_ids = [each.candidate_id for each in candidates]
         results = self._results(api.url_for(CandidateList, sort='candidate_status'))
-        self.assertEqual([each['candidate_id'] for each in results], candidate_ids[::-1])
+        self.assertEqual(
+            [each['candidate_id'] for each in results], candidate_ids[::-1]
+        )
         results = self._results(api.url_for(CandidateSearch, sort='candidate_status'))
-        self.assertEqual([each['candidate_id'] for each in results], candidate_ids[::-1])
+        self.assertEqual(
+            [each['candidate_id'] for each in results], candidate_ids[::-1]
+        )
         results = self._results(api.url_for(CandidateList, sort='-candidate_status'))
         self.assertEqual([each['candidate_id'] for each in results], candidate_ids)
         results = self._results(api.url_for(CandidateSearch, sort='-candidate_status'))
@@ -193,13 +206,19 @@ class CandidateFormatTest(ApiBaseTest):
             factories.CandidateFactory(candidate_id='3', candidate_status='C'),
         ]
         candidate_ids = [each.candidate_id for each in candidates]
-        results = self._results(api.url_for(CandidateList, sort='candidate_status', sort_nulls_last=True))
-        self.assertEqual([each['candidate_id'] for each in results], candidate_ids[::-1])
-        results = self._results(api.url_for(CandidateList, sort='-candidate_status', sort_nulls_last=True))
+        results = self._results(
+            api.url_for(CandidateList, sort='candidate_status', sort_nulls_last=True)
+        )
+        self.assertEqual(
+            [each['candidate_id'] for each in results], candidate_ids[::-1]
+        )
+        results = self._results(
+            api.url_for(CandidateList, sort='-candidate_status', sort_nulls_last=True)
+        )
         self.assertEqual([each['candidate_id'] for each in results], ['2', '3', '1'])
 
-class TestCandidateHistory(ApiBaseTest):
 
+class TestCandidateHistory(ApiBaseTest):
     def setUp(self):
         super().setUp()
         self.committee = factories.CommitteeDetailFactory()
@@ -239,7 +258,9 @@ class TestCandidateHistory(ApiBaseTest):
 
     def test_history(self):
         history_2012 = factories.CandidateHistoryFactory(two_year_period=2012)
-        history_2008 = factories.CandidateHistoryFactory(two_year_period=2008, candidate_id=history_2012.candidate_id)
+        history_2008 = factories.CandidateHistoryFactory(
+            two_year_period=2008, candidate_id=history_2012.candidate_id
+        )
         results = self._results(
             api.url_for(CandidateHistoryView, candidate_id=history_2012.candidate_id)
         )
@@ -282,8 +303,13 @@ class TestCandidateHistory(ApiBaseTest):
         )
         assert len(results_false) == 1
         assert results_false[0]['candidate_id'] == first_two_year_period.candidate_id
-        assert results_false[0]['two_year_period'] == first_two_year_period.two_year_period
-        assert results_false[0]['candidate_election_year'] == first_two_year_period.candidate_election_year
+        assert (
+            results_false[0]['two_year_period'] == first_two_year_period.two_year_period
+        )
+        assert (
+            results_false[0]['candidate_election_year']
+            == first_two_year_period.candidate_election_year
+        )
 
         # test election_full='true'
         results_true = self._results(
@@ -296,18 +322,30 @@ class TestCandidateHistory(ApiBaseTest):
         )
         assert len(results_true) == 2
         assert results_true[0]['candidate_id'] == second_two_year_period.candidate_id
-        assert results_true[0]['two_year_period'] == second_two_year_period.two_year_period
-        assert results_true[0]['candidate_election_year'] == second_two_year_period.candidate_election_year
+        assert (
+            results_true[0]['two_year_period'] == second_two_year_period.two_year_period
+        )
+        assert (
+            results_true[0]['candidate_election_year']
+            == second_two_year_period.candidate_election_year
+        )
         # Default sort is two_year_period descending
         assert results_true[1]['candidate_id'] == first_two_year_period.candidate_id
-        assert results_true[1]['two_year_period'] == first_two_year_period.two_year_period
-        assert results_true[1]['candidate_election_year'] == first_two_year_period.candidate_election_year
+        assert (
+            results_true[1]['two_year_period'] == first_two_year_period.two_year_period
+        )
+        assert (
+            results_true[1]['candidate_election_year']
+            == first_two_year_period.candidate_election_year
+        )
 
     def test_committee_cycle(self):
         results = self._results(
             api.url_for(
                 CandidateHistoryView,
-                committee_id=self.committee.committee_id, cycle=2012, election_full=False
+                committee_id=self.committee.committee_id,
+                cycle=2012,
+                election_full=False,
             )
         )
         assert len(results) == 1

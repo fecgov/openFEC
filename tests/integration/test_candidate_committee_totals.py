@@ -9,6 +9,7 @@ from webservices import rest, __API_VERSION__
 from webservices.rest import db
 from webservices.resources.totals import CandidateTotalsView, TotalsCommitteeView
 
+
 @pytest.mark.usefixtures("migrate_db")
 class TotalTestCase(common.BaseTestCase):
     def setUp(self):
@@ -21,7 +22,7 @@ class TotalTestCase(common.BaseTestCase):
 
     def _response(self, qry):
         response = self.app.get(qry)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         result = json.loads(codecs.decode(response.data))
         self.assertNotEqual(result, [], "Empty response!")
         self.assertEqual(result['api_version'], __API_VERSION__)
@@ -105,7 +106,7 @@ class TotalTestCase(common.BaseTestCase):
         'ttl_disb': 30,
         'form_type': 'F3P',
         'sub_id': 1,
-        'rpt_year': 2019
+        'rpt_year': 2019,
     }
     STOCK_FILING_F3X_Q2 = {
         'committee_id': 'C001',
@@ -115,7 +116,7 @@ class TotalTestCase(common.BaseTestCase):
         'ttl_disb': 50,
         'form_type': 'F3X',
         'sub_id': 2,
-        'rpt_year': 2019
+        'rpt_year': 2019,
     }
     STOCK_FILING_F3_Q1 = {
         'committee_id': 'C002',
@@ -125,7 +126,7 @@ class TotalTestCase(common.BaseTestCase):
         'ttl_disb': 5,
         'form_type': 'F3',
         'sub_id': 3,
-        'rpt_year': 2019
+        'rpt_year': 2019,
     }
 
     def test_candidate_committee_wrong_form_totals(self):
@@ -146,7 +147,7 @@ class TotalTestCase(common.BaseTestCase):
         committee_totals_api = self._results(
             rest.api.url_for(TotalsCommitteeView, **params_cmte)
         )
-        assert (len(committee_totals_api) == 1)
+        assert len(committee_totals_api) == 1
         assert committee_totals_api[0]['receipts'] == 300
         assert committee_totals_api[0]['disbursements'] == 80
 
@@ -157,7 +158,7 @@ class TotalTestCase(common.BaseTestCase):
         candidate_totals_api = self._results(
             rest.api.url_for(CandidateTotalsView, **params_cand)
         )
-        assert (len(candidate_totals_api) == 1)
+        assert len(candidate_totals_api) == 1
         assert candidate_totals_api[0]['receipts'] == 311
         assert candidate_totals_api[0]['disbursements'] == 85
 
@@ -173,7 +174,7 @@ class TotalTestCase(common.BaseTestCase):
         candidate_totals_api = self._results(
             rest.api.url_for(CandidateTotalsView, **params_cand)
         )
-        assert (len(candidate_totals_api) == 0)
+        assert len(candidate_totals_api) == 0
 
     def create_cmte_valid(self, committee_data):
         sql_insert = (
@@ -196,7 +197,7 @@ class TotalTestCase(common.BaseTestCase):
             filing['file_number'],
             filing['ttl_receipts'],
             filing['ttl_disb'],
-            filing['rpt_year']
+            filing['rpt_year'],
         )
 
     def create_cand_cmte_linkage(self, linkage_data):
