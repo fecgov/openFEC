@@ -53,7 +53,7 @@ class ScheduleFView(ApiResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
         if kwargs.get('sub_id'):
-            query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
+            query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         return query
 
 

@@ -8,7 +8,6 @@ from webservices import utils
 from webservices import filters
 from webservices import schemas
 from webservices import exceptions
-from webservices.common import counts
 from webservices.common import models
 from webservices.common.views import ApiResource
 
@@ -396,6 +395,7 @@ class ECAggregatesView(AggregateResource):
         ('candidate_id', model.candidate_id),
         ('committee_id', model.committee_id),
     ]
+
 
 def join_cand_cmte_names(query):
     query = query.subquery()

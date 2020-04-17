@@ -8,6 +8,7 @@ from webservices.rest import api
 from webservices.schemas import ScheduleCSchema
 from webservices.resources.sched_c import ScheduleCView, ScheduleCViewBySubId
 
+
 class TestScheduleCView(ApiBaseTest):
     def test_fields(self):
         [
@@ -20,66 +21,56 @@ class TestScheduleCView(ApiBaseTest):
     def test_sort_incurred_date(self):
         [
             factories.ScheduleCFactory(
-                incurred_date=datetime.date(2019, 1, 1),
-                payment_to_date=10.55,
+                incurred_date=datetime.date(2019, 1, 1), payment_to_date=10.55,
             ),
             factories.ScheduleCFactory(
-                incurred_date=datetime.date(2019, 12, 2),
-                payment_to_date=20.55,
+                incurred_date=datetime.date(2019, 12, 2), payment_to_date=20.55,
             ),
         ]
         response1 = self._response(api.url_for(ScheduleCView, sort='-incurred_date',))
         self.assertEqual(
-            [each['payment_to_date'] for each in response1['results']],
-            [20.55, 10.55]
+            [each['payment_to_date'] for each in response1['results']], [20.55, 10.55]
         )
 
         response2 = self._response(api.url_for(ScheduleCView, sort='incurred_date',))
         self.assertEqual(
-            [each['payment_to_date'] for each in response2['results']],
-            [10.55, 20.55]
+            [each['payment_to_date'] for each in response2['results']], [10.55, 20.55]
         )
 
     def test_sort_payment_to_date(self):
         [
-            factories.ScheduleCFactory(
-                payment_to_date=10.55,
-            ),
-            factories.ScheduleCFactory(
-                payment_to_date=20.55,
-            ),
+            factories.ScheduleCFactory(payment_to_date=10.55,),
+            factories.ScheduleCFactory(payment_to_date=20.55,),
         ]
         response1 = self._response(api.url_for(ScheduleCView, sort='-payment_to_date',))
         self.assertEqual(
-            [each['payment_to_date'] for each in response1['results']],
-            [20.55, 10.55]
+            [each['payment_to_date'] for each in response1['results']], [20.55, 10.55]
         )
 
         response2 = self._response(api.url_for(ScheduleCView, sort='payment_to_date',))
         self.assertEqual(
-            [each['payment_to_date'] for each in response2['results']],
-            [10.55, 20.55]
+            [each['payment_to_date'] for each in response2['results']], [10.55, 20.55]
         )
 
     def test_sort_original_loan_amount(self):
         [
-            factories.ScheduleCFactory(
-                original_loan_amount=10.55,
-            ),
-            factories.ScheduleCFactory(
-                original_loan_amount=20.55,
-            ),
+            factories.ScheduleCFactory(original_loan_amount=10.55,),
+            factories.ScheduleCFactory(original_loan_amount=20.55,),
         ]
-        response1 = self._response(api.url_for(ScheduleCView, sort='-original_loan_amount',))
+        response1 = self._response(
+            api.url_for(ScheduleCView, sort='-original_loan_amount',)
+        )
         self.assertEqual(
             [each['original_loan_amount'] for each in response1['results']],
-            [20.55, 10.55]
+            [20.55, 10.55],
         )
 
-        response2 = self._response(api.url_for(ScheduleCView, sort='original_loan_amount',))
+        response2 = self._response(
+            api.url_for(ScheduleCView, sort='original_loan_amount',)
+        )
         self.assertEqual(
             [each['original_loan_amount'] for each in response2['results']],
-            [10.55, 20.55]
+            [10.55, 20.55],
         )
 
     def test_sort_bad_column(self):
@@ -118,7 +109,9 @@ class TestScheduleCView(ApiBaseTest):
         self.assertTrue(all(each['payment_to_date'] >= 100 for each in results))
         results = self._results(api.url_for(ScheduleCView, max_payment_to_date=150))
         self.assertTrue(all(each['payment_to_date'] <= 150 for each in results))
-        results = self._results(api.url_for(ScheduleCView, min_payment_to_date=100, max_payment_to_date=200))
+        results = self._results(
+            api.url_for(ScheduleCView, min_payment_to_date=100, max_payment_to_date=200)
+        )
         self.assertTrue(all(100 <= each['payment_to_date'] <= 200 for each in results))
 
     def test_filter_original_loan_amount(self):
@@ -132,8 +125,12 @@ class TestScheduleCView(ApiBaseTest):
         self.assertTrue(all(each['original_loan_amount'] >= 100 for each in results))
         results = self._results(api.url_for(ScheduleCView, max_amount=150))
         self.assertTrue(all(each['original_loan_amount'] <= 150 for each in results))
-        results = self._results(api.url_for(ScheduleCView, min_amount=100, max_amount=200))
-        self.assertTrue(all(100 <= each['original_loan_amount'] <= 200 for each in results))
+        results = self._results(
+            api.url_for(ScheduleCView, min_amount=100, max_amount=200)
+        )
+        self.assertTrue(
+            all(100 <= each['original_loan_amount'] <= 200 for each in results)
+        )
 
     def test_filter_incurred_date(self):
         [
@@ -144,14 +141,31 @@ class TestScheduleCView(ApiBaseTest):
         ]
         min_date = datetime.date(2015, 1, 1)
         results = self._results(api.url_for(ScheduleCView, min_incurred_date=min_date))
-        self.assertTrue(all(each for each in results if each['incurred_date'] >= min_date.isoformat()))
-        max_date = datetime.date(2018, 1, 1)
-        results = self._results(api.url_for(ScheduleCView, max_incurred_date=max_date))
-        self.assertTrue(all(each for each in results if each['incurred_date'] <= max_date.isoformat()))
-        results = self._results(api.url_for(ScheduleCView, min_incurred_date=min_date, max_incurred_date=max_date))
         self.assertTrue(
             all(
-                each for each in results
+                each
+                for each in results
+                if each['incurred_date'] >= min_date.isoformat()
+            )
+        )
+        max_date = datetime.date(2018, 1, 1)
+        results = self._results(api.url_for(ScheduleCView, max_incurred_date=max_date))
+        self.assertTrue(
+            all(
+                each
+                for each in results
+                if each['incurred_date'] <= max_date.isoformat()
+            )
+        )
+        results = self._results(
+            api.url_for(
+                ScheduleCView, min_incurred_date=min_date, max_incurred_date=max_date
+            )
+        )
+        self.assertTrue(
+            all(
+                each
+                for each in results
                 if min_date.isoformat() <= each['incurred_date'] <= max_date.isoformat()
             )
         )
@@ -177,8 +191,11 @@ class TestScheduleCView(ApiBaseTest):
         self.assertTrue(all(each['image_number'] >= '2' for each in results))
         results = self._results(api.url_for(ScheduleCView, max_image_number='3'))
         self.assertTrue(all(each['image_number'] <= '3' for each in results))
-        results = self._results(api.url_for(ScheduleCView, min_image_number='2', max_image_number='3'))
+        results = self._results(
+            api.url_for(ScheduleCView, min_image_number='2', max_image_number='3')
+        )
         self.assertTrue(all('2' <= each['image_number'] <= '3' for each in results))
+
 
 class TestScheduleCViewBySubId(ApiBaseTest):
     def test_fields(self):
