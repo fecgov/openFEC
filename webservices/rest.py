@@ -143,6 +143,8 @@ TRAFFIC_WHITELIST_API_KEY_IDS = env.get_credential('TRAFFIC_WHITELIST_API_KEY_ID
 # Settings to restrict traffic to certain API keys - only work with API umbrella
 RESTRICT_DOWNLOADS = env.get_credential('RESTRICT_DOWNLOADS', False)
 RESTRICT_API_TRAFFIC = env.get_credential('RESTRICT_API_TRAFFIC', False)
+RESTRICT_API_MESSAGE = "We apologize for the inconvenience, but we are temporarily " \
+    "blocking API traffic. Please contact apiinfo@fec.gov if this is an urgent issue."
 
 @app.before_request
 def limit_remote_addr():
@@ -172,12 +174,8 @@ def limit_remote_addr():
             elif RESTRICT_API_TRAFFIC in true_values and '/v1/' in request.url:
                 request_api_key_id = request.headers.get('X-Api-User-Id')
                 if request_api_key_id not in TRAFFIC_WHITELIST_API_KEY_IDS:
-                    abort(
-                        503,  # Service unavailable
-                        "We apologize for the inconvenience, but we are temporarily "
-                        "blocking API traffic. "
-                        "Please contact apiinfo@fec.gov if this is an urgent issue.",
-                    )
+                    # Service unavailable
+                    abort(503, RESTRICT_API_MESSAGE)
 
 
 def get_cache_header(url):
