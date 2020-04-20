@@ -27,7 +27,6 @@ def get_graph():
         'electioneering',
         'electioneering_by_candidate',
         'elections_list',
-        'filing_amendments_all',
         'filing_amendments_house_senate',
         'filing_amendments_pac_party',
         'filing_amendments_presidential',
@@ -68,7 +67,6 @@ def get_graph():
         ('filing_amendments_presidential', 'filings'),
         ('filing_amendments_house_senate', 'filings'),
         ('filing_amendments_pac_party', 'filings'),
-        ('filing_amendments_all', 'filings'),
     ])
 
     graph.add_edges_from([
@@ -87,7 +85,6 @@ def get_graph():
         ('totals_combined', 'committee_fulltext'),
     ])
 
-    
     graph.add_edges_from([
         ('candidate_detail', 'candidate_fulltext'),
         ('totals_combined', 'candidate_fulltext'),
