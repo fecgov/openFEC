@@ -111,7 +111,6 @@ def refresh_materialized(concurrent=True):
         'electioneering': ['ofec_electioneering_mv'],
         'electioneering_by_candidate': ['ofec_electioneering_aggregate_candidate_mv'],
         'elections_list': ['ofec_elections_list_mv'],
-        'filing_amendments_all': ['ofec_amendments_mv'],
         'filing_amendments_house_senate': [
             'ofec_house_senate_electronic_amendments_mv',
             'ofec_house_senate_paper_amendments_mv',
