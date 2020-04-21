@@ -17,4 +17,4 @@ routes:
   - route: fec-prod-api.app.cloud.gov
 applications:
   - name: api
-    instances: 8
+    instances: 10
