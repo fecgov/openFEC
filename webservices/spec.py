@@ -117,7 +117,23 @@ spec = APISpec(
             'name': 'api_key',
             'in': 'query',
         },
+        'ApiKeyQueryAuth': {
+            'type': 'apiKey',
+            'name': 'api_key',
+            'in': 'query',
+        },
+        'ApiKeyHeaderAuth': {
+            'type': 'apiKey',
+            'name': 'X-Api-Key',
+            'in': 'header',
+        }
     },
-    security=[{'apiKey': []}],
+    security=[
+        {
+            'apiKey': [],
+            'ApiKeyQueryAuth': [],
+            'ApiKeyHeaderAuth': []
+        }
+    ],
     tags=TAGS,
 )
