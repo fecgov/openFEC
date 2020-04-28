@@ -102,9 +102,11 @@ def query_with_labels(query, schema, sort_columns=False):
 
     return query
 
+
 def unpack(values, size):
     values = values if isinstance(values, tuple) else (values, )
     return values + (None, ) * (size - len(values))
+
 
 def get_s3_name(path, qs):
     """
@@ -135,6 +137,7 @@ def make_bundle(resource):
             header=True
         )
 
+
 @app.task(base=QueueOnce, once={'graceful': True})
 def export_query(path, qs):
     qs = base64.b64decode(qs.encode('UTF-8'))
@@ -145,7 +148,7 @@ def export_query(path, qs):
         logger.info('Download resource: {0}'.format(qs))
         make_bundle(resource)
         logger.info('Bundled: {0}'.format(qs))
-    except:
+    except Exception:
         logger.exception('Download failed: {0}'.format(qs))
 
 

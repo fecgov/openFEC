@@ -5,11 +5,11 @@ from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
-from webservices import filters
 from sqlalchemy.orm import aliased, contains_eager
 from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
+
 
 @doc(
     tags=['independent expenditures'],
@@ -24,9 +24,11 @@ class ScheduleEView(ItemizedResource):
     @property
     def year_column(self):
         return self.model.report_year
+
     @property
     def index_column(self):
         return self.model.sub_id
+
     @property
     def amount_column(self):
         return self.model.expenditure_amount
@@ -162,11 +164,11 @@ class ScheduleEEfileView(views.ApiResource):
         query = query.options(contains_eager(self.model.filing, alias=filing_alias))
 
         if kwargs.get('spender_name'):
-                spender_filter = [
-                    filing_alias.committee_name.like('%' + value.upper() + '%')
-                    for value in kwargs.get('spender_name')
-                ]
-                query = query.filter(sa.or_(*spender_filter))
+            spender_filter = [
+                filing_alias.committee_name.like('%' + value.upper() + '%')
+                for value in kwargs.get('spender_name')
+            ]
+            query = query.filter(sa.or_(*spender_filter))
 
         if kwargs.get('min_filed_date') is not None:
             query = query.filter(filing_alias.filed_date >= kwargs['min_filed_date'])

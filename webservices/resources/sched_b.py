@@ -75,7 +75,7 @@ class ScheduleBView(ItemizedResource):
         query = query.options(sa.orm.joinedload(models.ScheduleB.committee))
         query = query.options(
             sa.orm.joinedload(models.ScheduleB.recipient_committee))
-        #might be worth looking to factoring these out into the filter script
+        # might be worth looking to factoring these out into the filter script
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         if kwargs.get('line_number'):

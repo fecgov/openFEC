@@ -119,7 +119,6 @@ poor_performance_a = [
     {
         "sort_nulls_large": True,
         "contributor_name": "tom+lewis",
-        "contributor_name": "thomas+lewis",
         "two_year_transaction_period": 2016,
         "min_date": "01%2F01%2F2015",
         "max_date": "12%2F31%2F2016",

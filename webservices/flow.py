@@ -1,5 +1,6 @@
 import networkx as nx
 
+
 def get_graph():
     """Build a `DiGraph` that captures dependencies between database migration
     tasks. Each node represents a migration script, and each edge represents
@@ -26,7 +27,6 @@ def get_graph():
         'electioneering',
         'electioneering_by_candidate',
         'elections_list',
-        'filing_amendments_all',
         'filing_amendments_house_senate',
         'filing_amendments_pac_party',
         'filing_amendments_presidential',
@@ -44,7 +44,6 @@ def get_graph():
         'totals_combined',
         'totals_house_senate',
         'totals_ie',
-        'totals_pac_party',
         'totals_presidential',
     ]
     graph.add_nodes_from(MATERIALIZED_VIEWS)
@@ -68,7 +67,6 @@ def get_graph():
         ('filing_amendments_presidential', 'filings'),
         ('filing_amendments_house_senate', 'filings'),
         ('filing_amendments_pac_party', 'filings'),
-        ('filing_amendments_all', 'filings'),
     ])
 
     graph.add_edges_from([
@@ -79,7 +77,6 @@ def get_graph():
     graph.add_edges_from([
         ('totals_combined', 'totals_house_senate'),
         ('totals_combined', 'totals_presidential'),
-        ('totals_combined', 'totals_pac_party'),
         ('totals_combined', 'totals_ie'),
     ])
 
@@ -87,8 +84,6 @@ def get_graph():
         ('committee_detail', 'committee_fulltext'),
         ('totals_combined', 'committee_fulltext'),
     ])
-
-    graph.add_edge('committee_detail', 'totals_pac_party')
 
     graph.add_edges_from([
         ('candidate_detail', 'candidate_fulltext'),

@@ -15,8 +15,6 @@ from webservices.resources.candidates import CandidateView
 
 
 class CommitteeFormatTest(ApiBaseTest):
-
-
     def test_committee_list_fields(self):
         committee = factories.CommitteeFactory(
             first_file_date=datetime.date.fromisoformat('1982-12-31'),
@@ -24,21 +22,27 @@ class CommitteeFormatTest(ApiBaseTest):
             treasurer_name='Robert J. Lipshutz',
             party='DEM',
         )
-        response = self._response(api.url_for(CommitteeView, committee_id=committee.committee_id))
+        response = self._response(
+            api.url_for(CommitteeView, committee_id=committee.committee_id)
+        )
         result = response['results'][0]
         # main fields
         # original registration date doesn't make sense in this example, need to look into this more
-        self.assertEqual(result['first_file_date'], datetime.date.fromisoformat('1982-12-31').isoformat())
+        self.assertEqual(
+            result['first_file_date'],
+            datetime.date.fromisoformat('1982-12-31').isoformat(),
+        )
         self.assertEqual(result['committee_type'], committee.committee_type)
         self.assertEqual(result['treasurer_name'], committee.treasurer_name)
         self.assertEqual(result['party'], committee.party)
 
     def test_fulltext_search(self):
-        committee = factories.CommitteeFactory(name='Americans for a Better Tomorrow, Tomorrow')
+        committee = factories.CommitteeFactory(
+            name='Americans for a Better Tomorrow, Tomorrow'
+        )
         decoy_committee = factories.CommitteeFactory()
         factories.CommitteeSearchFactory(
-            id=committee.committee_id,
-            fulltxt=sa.func.to_tsvector(committee.name),
+            id=committee.committee_id, fulltxt=sa.func.to_tsvector(committee.name),
         )
         queries = [
             'america',
@@ -50,27 +54,36 @@ class CommitteeFormatTest(ApiBaseTest):
             results = self._results(api.url_for(CommitteeList, q=query))
             self.assertEqual(len(results), 1)
             self.assertEqual(results[0]['committee_id'], committee.committee_id)
-            self.assertNotEqual(results[0]['committee_id'], decoy_committee.committee_id)
+            self.assertNotEqual(
+                results[0]['committee_id'], decoy_committee.committee_id
+            )
 
     def test_filter_by_candidate_id(self):
         candidate_id = 'ID0'
-        candidate_committees = [factories.CommitteeFactory(candidate_ids=[candidate_id]) for _ in range(2)]
+        candidate_committees = [
+            factories.CommitteeFactory(candidate_ids=[candidate_id]) for _ in range(2)
+        ]
         other_committees = [factories.CommitteeFactory() for _ in range(3)]  # noqa
         response = self._response(api.url_for(CommitteeList, candidate_id=candidate_id))
-        self.assertEqual(
-            len(response['results']),
-            len(candidate_committees)
-        )
+        self.assertEqual(len(response['results']), len(candidate_committees))
 
     def test_filter_by_candidate_ids(self):
         candidate_ids = ['ID0', 'ID1']
-        candidate1_committees = [factories.CommitteeFactory(candidate_ids=[candidate_ids[0]]) for _ in range(2)]
-        candidate2_committees = [factories.CommitteeFactory(candidate_ids=[candidate_ids[1]]) for _ in range(2)]
+        candidate1_committees = [
+            factories.CommitteeFactory(candidate_ids=[candidate_ids[0]])
+            for _ in range(2)
+        ]
+        candidate2_committees = [
+            factories.CommitteeFactory(candidate_ids=[candidate_ids[1]])
+            for _ in range(2)
+        ]
         other_committees = [factories.CommitteeFactory() for _ in range(3)]  # noqa
-        response = self._response(api.url_for(CommitteeList, candidate_id=candidate_ids))
+        response = self._response(
+            api.url_for(CommitteeList, candidate_id=candidate_ids)
+        )
         self.assertEqual(
             len(response['results']),
-            len(candidate1_committees) + len(candidate2_committees)
+            len(candidate1_committees) + len(candidate2_committees),
         )
 
     def test_committee_detail_fields(self):
@@ -83,10 +96,14 @@ class CommitteeFormatTest(ApiBaseTest):
             street_1='1795 Peachtree Road',
             zip='30309',
         )
-        response = self._response(api.url_for(CommitteeView, committee_id=committee.committee_id))
+        response = self._response(
+            api.url_for(CommitteeView, committee_id=committee.committee_id)
+        )
         result = response['results'][0]
         # main fields
-        self.assertEqual(result['first_file_date'], committee.first_file_date.isoformat())
+        self.assertEqual(
+            result['first_file_date'], committee.first_file_date.isoformat()
+        )
         self.assertEqual(result['committee_type'], committee.committee_type)
         self.assertEqual(result['treasurer_name'], committee.treasurer_name)
         self.assertEqual(result['party'], committee.party)
@@ -104,12 +121,11 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_party(self):
         factories.CommitteeFactory(
-            party='REP',
-            party_full='Republican Party',
+            party='REP', party_full='Republican Party',
         )
         response = self._results(api.url_for(CommitteeList, party='REP'))
-        self.assertEquals(response[0]['party'], 'REP')
-        self.assertEquals(response[0]['party_full'], 'Republican Party')
+        self.assertEqual(response[0]['party'], 'REP')
+        self.assertEqual(response[0]['party_full'], 'Republican Party')
 
     def test_filters_generic(self):
         self._check_filter('designation', ['B', 'P'])
@@ -176,12 +192,17 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_year_filter_skips_null_first_file_date(self):
         # Build fixtures
-        dates = [datetime.date.fromisoformat('2012-01-01'), datetime.date.fromisoformat('2015-01-01')]
+        dates = [
+            datetime.date.fromisoformat('2012-01-01'),
+            datetime.date.fromisoformat('2015-01-01'),
+        ]
         [
             factories.CommitteeFactory(first_file_date=None, last_file_date=None),
             factories.CommitteeFactory(first_file_date=dates[0], last_file_date=None),
             factories.CommitteeFactory(first_file_date=None, last_file_date=dates[1]),
-            factories.CommitteeFactory(first_file_date=dates[0], last_file_date=dates[1]),
+            factories.CommitteeFactory(
+                first_file_date=dates[0], last_file_date=dates[1]
+            ),
         ]
 
         # Check committee list results
@@ -201,7 +222,9 @@ class CommitteeFormatTest(ApiBaseTest):
             )
             for committee in committees
         ]
-        results = self._results(api.url_for(CommitteeView, candidate_id=candidate.candidate_id))
+        results = self._results(
+            api.url_for(CommitteeView, candidate_id=candidate.candidate_id)
+        )
 
         self.assertEqual(
             set((each['committee_id'] for each in results)),
@@ -222,7 +245,9 @@ class CommitteeFormatTest(ApiBaseTest):
                 committee_id=committee.committee_id,
             ),
         ]
-        response = self._response(api.url_for(CommitteeView, candidate_id=candidate.candidate_id))
+        response = self._response(
+            api.url_for(CommitteeView, candidate_id=candidate.candidate_id)
+        )
         self.assertEqual(response['pagination']['count'], 1)
         self.assertEqual(len(response['results']), 1)
 
@@ -231,11 +256,12 @@ class CommitteeFormatTest(ApiBaseTest):
         candidate = factories.CandidateFactory()
         db.session.flush()
         factories.CandidateCommitteeLinkFactory(
-            candidate_id=candidate.candidate_id,
-            committee_id=committee.committee_id,
+            candidate_id=candidate.candidate_id, committee_id=committee.committee_id,
         )
         results = self._results(
-            api.url_for(CommitteeView, candidate_id=candidate.candidate_id, designation='P')
+            api.url_for(
+                CommitteeView, candidate_id=candidate.candidate_id, designation='P'
+            )
         )
         self.assertEqual(1, len(results))
 
@@ -244,11 +270,12 @@ class CommitteeFormatTest(ApiBaseTest):
         candidate = factories.CandidateFactory()
         db.session.flush()
         factories.CandidateCommitteeLinkFactory(
-            candidate_id=candidate.candidate_id,
-            committee_id=committee.committee_id,
+            candidate_id=candidate.candidate_id, committee_id=committee.committee_id,
         )
-        results = self._results(api.url_for(CandidateView, committee_id=committee.committee_id))
-        self.assertEquals(1, len(results))
+        results = self._results(
+            api.url_for(CandidateView, committee_id=committee.committee_id)
+        )
+        self.assertEqual(1, len(results))
 
     def test_committee_sort(self):
         committees = [
@@ -259,7 +286,9 @@ class CommitteeFormatTest(ApiBaseTest):
         results = self._results(api.url_for(CommitteeList, sort='designation'))
         self.assertEqual([each['committee_id'] for each in results], committee_ids)
         results = self._results(api.url_for(CommitteeList, sort='-designation'))
-        self.assertEqual([each['committee_id'] for each in results], committee_ids[::-1])
+        self.assertEqual(
+            [each['committee_id'] for each in results], committee_ids[::-1]
+        )
 
     def test_committee_sort_default(self):
         committees = [
@@ -268,12 +297,18 @@ class CommitteeFormatTest(ApiBaseTest):
         ]
         committee_ids = [each.committee_id for each in committees]
         results = self._results(api.url_for(CommitteeList))
-        self.assertEqual([each['committee_id'] for each in results], committee_ids[::-1])
+        self.assertEqual(
+            [each['committee_id'] for each in results], committee_ids[::-1]
+        )
 
     def test_treasurer_filter(self):
         committees = [
-            factories.CommitteeFactory(treasurer_text=sa.func.to_tsvector('uncle pennybags')),
-            factories.CommitteeFactory(treasurer_text=sa.func.to_tsvector('eve moneypenny')),
+            factories.CommitteeFactory(
+                treasurer_text=sa.func.to_tsvector('uncle pennybags')
+            ),
+            factories.CommitteeFactory(
+                treasurer_text=sa.func.to_tsvector('eve moneypenny')
+            ),
         ]
         results = self._results(api.url_for(CommitteeList, treasurer_name='moneypenny'))
         assert len(results) == 1
@@ -281,19 +316,45 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_date_filters(self):
         [
-            factories.CommitteeFactory(first_file_date=datetime.date.fromisoformat('2015-01-01')),
-            factories.CommitteeFactory(first_file_date=datetime.date.fromisoformat('2015-02-01')),
-            factories.CommitteeFactory(first_file_date=datetime.date.fromisoformat('2015-03-01')),
-            factories.CommitteeFactory(first_file_date=datetime.date.fromisoformat('2015-04-01')),
+            factories.CommitteeFactory(
+                first_file_date=datetime.date.fromisoformat('2015-01-01')
+            ),
+            factories.CommitteeFactory(
+                first_file_date=datetime.date.fromisoformat('2015-02-01')
+            ),
+            factories.CommitteeFactory(
+                first_file_date=datetime.date.fromisoformat('2015-03-01')
+            ),
+            factories.CommitteeFactory(
+                first_file_date=datetime.date.fromisoformat('2015-04-01')
+            ),
         ]
         results = self._results(
-            api.url_for(CommitteeList, min_first_file_date=datetime.date.fromisoformat('2015-02-01')))
+            api.url_for(
+                CommitteeList,
+                min_first_file_date=datetime.date.fromisoformat('2015-02-01'),
+            )
+        )
         self.assertTrue(
-            all(each['first_file_date'] >= datetime.date.fromisoformat('2015-02-01').isoformat() for each in results))
+            all(
+                each['first_file_date']
+                >= datetime.date.fromisoformat('2015-02-01').isoformat()
+                for each in results
+            )
+        )
         results = self._results(
-            api.url_for(CommitteeList, max_first_file_date=datetime.date.fromisoformat('2015-02-03')))
+            api.url_for(
+                CommitteeList,
+                max_first_file_date=datetime.date.fromisoformat('2015-02-03'),
+            )
+        )
         self.assertTrue(
-            all(each['first_file_date'] <= datetime.date.fromisoformat('2015-02-03').isoformat() for each in results))
+            all(
+                each['first_file_date']
+                <= datetime.date.fromisoformat('2015-02-03').isoformat()
+                for each in results
+            )
+        )
         results = self._results(
             api.url_for(
                 CommitteeList,
@@ -303,13 +364,15 @@ class CommitteeFormatTest(ApiBaseTest):
         )
         self.assertTrue(
             all(
-                datetime.date.fromisoformat('2015-02-01').isoformat() <= each['first_file_date'] <= datetime.date.fromisoformat('2015-03-01').isoformat()
+                datetime.date.fromisoformat('2015-02-01').isoformat()
+                <= each['first_file_date']
+                <= datetime.date.fromisoformat('2015-03-01').isoformat()
                 for each in results
             )
         )
 
-class TestCommitteeHistory(ApiBaseTest):
 
+class TestCommitteeHistory(ApiBaseTest):
     def setUp(self):
         super().setUp()
         self.candidate = factories.CandidateDetailFactory()
@@ -318,27 +381,32 @@ class TestCommitteeHistory(ApiBaseTest):
             factories.CommitteeHistoryFactory(
                 committee_id=self.committees[0].committee_id,
                 cycle=2010,
-                designation='P'
+                designation='P',
+                is_active=True,
             ),
             factories.CommitteeHistoryFactory(
                 committee_id=self.committees[1].committee_id,
                 cycle=2012,
-                designation='P'
+                designation='P',
+                is_active=True,
             ),
             factories.CommitteeHistoryFactory(
                 committee_id=self.committees[2].committee_id,
                 cycle=2014,
-                designation='P'
+                designation='P',
+                is_active=True,
             ),
             factories.CommitteeHistoryFactory(
                 committee_id=self.committees[3].committee_id,
                 cycle=2014,
-                designation='A'
+                designation='A',
+                is_active=False,
             ),
             factories.CommitteeHistoryFactory(
                 committee_id=self.committees[4].committee_id,
                 cycle=2014,
-                designation='J'
+                designation='J',
+                is_active=False,
             ),
         ]
 
@@ -392,14 +460,39 @@ class TestCommitteeHistory(ApiBaseTest):
                 candidate_id=self.candidate.candidate_id,
                 cand_election_year=2016,
                 prev_election_year=2012,
-            )
+            ),
         ]
+
+    def test_is_active(self):
+        results = self._results(
+            api.url_for(
+                CommitteeHistoryView,
+                committee_id=self.committees[4].committee_id,
+                cycle=2014,
+                election_full=False,
+                is_active=False,
+            )
+        )
+        assert len(results) == 1
+
+        results = self._results(
+            api.url_for(
+                CommitteeHistoryView,
+                committee_id=self.committees[2].committee_id,
+                cycle=2014,
+                election_full=False,
+                is_active=True,
+            )
+        )
+        assert len(results) == 1
 
     def test_candidate_cycle(self):
         results = self._results(
             api.url_for(
                 CommitteeHistoryView,
-                candidate_id=self.candidate.candidate_id, cycle=2012, election_full=False
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                election_full=False,
             )
         )
         assert len(results) == 1
@@ -412,7 +505,7 @@ class TestCommitteeHistory(ApiBaseTest):
                 CommitteeHistoryView,
                 candidate_id=self.candidate.candidate_id,
                 cycle=2012,
-                election_full=True
+                election_full=True,
             )
         )
         assert len(results) == 2
@@ -427,7 +520,7 @@ class TestCommitteeHistory(ApiBaseTest):
             api.url_for(
                 CommitteeHistoryView,
                 candidate_id=self.candidate.candidate_id,
-                designation=['P', 'A']
+                designation=['P', 'A'],
             )
         )
         assert len(results) == 4

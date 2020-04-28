@@ -33,7 +33,7 @@ PAGES = '''
 Number of pages in the document
 '''
 
-#======== candidate start ===========
+# ======== candidate start ===========
 CANDIDATE_TAG = '''
 Candidate endpoints give you access to information about the people running for office.
 This information is organized by candidate_id. If you're unfamiliar with candidate IDs,
@@ -183,9 +183,9 @@ F2_CANDIDATE_STREET_2 = 'Additional street information of candidate\'s address, 
 
 F2_CANDIDATE_ZIP = 'Zip code of candidate\'s address, as reported on their Form 2.'
 
-#======== candidate end ===========
+# ======== candidate end ===========
 
-#======== committee start ===========
+# ======== committee start ===========
 COMMITTEE_TAG = '''
 Committees are entities that spend and raise money in an election. Their characteristics and
 relationships with candidates can change over time.
@@ -510,10 +510,14 @@ MAX_LAST_F1_DATE = 'Filter for committees whose latest Form 1 was received on or
 AFFILIATED_COMMITTEE_NAME = '''
 Affiliated committee or connected organization
 '''
-#======== committee end ===========
+
+IS_COMMITTEE_ACTIVE = '''
+True indicates that a committee is active.
+'''
+# ======== committee end ===========
 
 
-#======== election start ===========
+# ======== election start ===========
 ELECTION_SEARCH = '''
 List elections by cycle, office, state, and district.
 '''
@@ -591,10 +595,10 @@ The minimum date this record was last updated.(MM/DD/YYYY or YYYY-MM-DD)
 MAX_UPDATE_DATE = '''
 The maximum date this record was last updated.(MM/DD/YYYY or YYYY-MM-DD)
 '''
-#======== election end ===========
+# ======== election end ===========
 
 
-#======== financial start ===========
+# ======== financial start ===========
 FINANCIAL_TAG = '''
 Fetch key information about a committee's Form 3, Form 3X, or Form 3P financial reports.
 
@@ -655,7 +659,8 @@ Report is either new or is the most-recently filed amendment
 '''
 
 MOST_RECENT_IE = '''
-The report associated with the transaction is either new or is the most-recently filed amendment. Undetermined version (`null`) is always included.
+The report associated with the transaction is either new or is the most-recently \
+filed amendment. Undetermined version (`null`) is always included.
 '''
 
 HTML_URL = '''
@@ -690,16 +695,35 @@ Parameter `full_election` is replaced by `election_full`. Please use `election_f
 '''
 
 SCHEDULE_A_TAG = '''
-This collection of endpoints includes Schedule A records reported by a committee. Schedule A records describe itemized receipts, including contributions from individuals. If you are interested in contributions from individuals, use the /schedules/schedule_a/ endpoint. For a more complete description of all Schedule A records see the [receipts section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/) section of our “about the data” page. 
+This collection of endpoints includes Schedule A records reported by a committee. \
+Schedule A records describe itemized receipts, including contributions from individuals. \
+If you are interested in contributions from individuals, use the /schedules/schedule_a/ endpoint. \
+For a more complete description of all Schedule A records see the [receipts section] \
+(https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) \
+of our “about the data” page. If you are interested in our “is_individual” methodology see the \
+[methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/ \
+methodology/) section of our “about the data” page.
 
 '''
 
 SCHEDULE_A = '''
-This description is for both ​`/schedules​/schedule_a​/` and ​ `/schedules​/schedule_a​/{sub_id}​/`. 
+This description is for both ​`/schedules​/schedule_a​/` and ​ `/schedules​/schedule_a​/{sub_id}​/`.
 
-This endpoint provides itemized receipts. Schedule A records describe itemized receipts, including contributions from individuals. If you are interested in contributions from an individual, use the `/schedules/schedule_a/` endpoint. For a more complete description of all Schedule A records see the [receipts section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/) of our “about the data” page. 
+This endpoint provides itemized receipts. Schedule A records describe itemized receipts, \
+including contributions from individuals. If you are interested in contributions from an \
+individual, use the `/schedules/schedule_a/` endpoint. For a more complete description of all \
+Schedule A records see the [receipts section] (https://www.fec.gov/campaign-finance-data/ \
+about-campaign-finance-data/about-receipts-data/) of our “about the data” page. If you are \
+interested in our “is_individual” methodology see the [methodology section] \
+(https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/) of our \
+“about the data” page.
 
-​The `/schedules​/schedule_a​/` endpoint is not paginated by page number. This endpoint uses keyset pagination to improve query performance and these indices are required to properly page through this large dataset. To request the next page, you should append the values found in the `last_indexes` object from pagination to the URL of your last request as additional parameters. For example, when sorting by `contribution_receipt_date`, you might receive a page of results with the following pagination information:
+​The `/schedules​/schedule_a​/` endpoint is not paginated by page number. This endpoint uses keyset \
+pagination to improve query performance and these indices are required to properly page through \
+this large dataset. To request the next page, you should append the values found in the \
+`last_indexes` object from pagination to the URL of your last request as additional parameters. \
+For example, when sorting by `contribution_receipt_date`, you might receive a page of results \
+with the following pagination information:
 
 ```
 pagination: {\n\
@@ -713,11 +737,17 @@ pagination: {\n\
 }\n\
 ```
 
-To fetch the next page of sorted results, append `last_index=230880619` and `last_contribution_receipt_date=2014-01-01` to the URL. We strongly advise paging through these results using sort indices. The default sort is ascending by `contribution_receipt_date`. If you do not page using sort indices, some transactions may be unintentionally filtered out. 
+To fetch the next page of sorted results, append `last_index=230880619` and \
+`last_contribution_receipt_date=2014-01-01` to the URL. We strongly advise paging through \
+these results using sort indices. The default sort is ascending by `contribution_receipt_date`. \
+If you do not page using sort indices, some transactions may be unintentionally filtered out.
 
-Calls to ​`/schedules​/schedule_a​/` may return many records. For large result sets, the record counts found in the pagination object are approximate; you will need to page through the records until no records are returned. 
+Calls to ​`/schedules​/schedule_a​/` may return many records. For large result sets, the record \
+counts found in the pagination object are approximate; you will need to page through the records \
+until no records are returned.
 
-​The `/schedules​/schedule_a​/{sub_id}​/` endpoint returns a single transaction, but it does include a pagination object class. Please ignore the information in that object class.
+​The `/schedules​/schedule_a​/{sub_id}​/` endpoint returns a single transaction, but it does \
+include a pagination object class. Please ignore the information in that object class.
 
 '''
 
@@ -861,11 +891,12 @@ counting, memoed items are not included.
 '''
 
 SCHEDULE_E_INDEPENDENT_EXPENDITURES_TOTALS_BY_CANDIDATE = '''
-Total independent expenditure on supported or opposed candidates by cycle or candidate election year. 
+Total independent expenditure on supported or opposed candidates by cycle or candidate election year.
 '''
 
 COMMUNICATIONS_COSTS_TOTALS_BY_CANDIDATE = '''
-Total communications costs aggregated across committees on supported or opposed candidates by cycle or candidate election year. 
+Total communications costs aggregated across committees on supported or opposed candidates \
+by cycle or candidate election year.
 '''
 
 SCHEDULE_F_TAG = '''
@@ -893,18 +924,35 @@ The $200.00 and under category includes contributions of $200 or less combined w
 '''
 
 SCHEDULE_A_BY_STATE = '''
-This endpoint provides itemized individual contributions received by a committee, aggregated by the contributor’s state. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
+This endpoint provides itemized individual contributions received by a committee, aggregated by \
+the contributor’s state. If you are interested in our “is_individual” methodology see the \
+[methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/ \
+about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not \
+included.
 '''
 
 SCHEDULE_A_BY_ZIP = '''
-This endpoint provides itemized individual contributions received by a committee, aggregated by the contributor’s ZIP code. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) section of our “about the data” page. Unitemized individual contributions are not included.
+This endpoint provides itemized individual contributions received by a committee, aggregated by \
+the contributor’s ZIP code. If you are interested in our “is_individual” methodology see the \
+[methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/ \
+about-receipts-data/) section of our “about the data” page. Unitemized individual contributions \
+are not included.
 '''
+
 SCHEDULE_A_BY_EMPLOYER = '''
-This endpoint provides itemized individual contributions received by a committee, aggregated by the contributor’s employer name. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
+This endpoint provides itemized individual contributions received by a committee, aggregated by \
+the contributor’s employer name. If you are interested in our “is_individual” methodology see the \
+[methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/ \
+about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not \
+included.
 '''
 
 SCHEDULE_A_BY_OCCUPATION = '''
-This endpoint provides itemized individual contributions received by a committee, aggregated by the contributor’s occupation. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
+This endpoint provides itemized individual contributions received by a committee, aggregated by \
+the contributor’s occupation. If you are interested in our “is_individual” methodology see the \
+[methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/ \
+about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not \
+included.
 '''
 
 CONTRIBUTION_RECEIPTS = '''
@@ -932,15 +980,26 @@ Number of records making up the total.
 '''
 
 SCHEDULE_A_SIZE_CANDIDATE_TAG = '''
-This endpoint provides itemized individual contributions received by a committee, aggregated by size of contribution and candidate. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
+This endpoint provides itemized individual contributions received by a committee, aggregated by \
+size of contribution and candidate. If you are interested in our “is_individual” methodology \
+see the [methodology section] (https://www.fec.gov/campaign-finance-data/ \
+about-campaign-finance-data/about-receipts-data/) of our “about the data” page. \
+Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_STATE_CANDIDATE_TAG = '''
-This endpoint provides itemized individual contributions received by a committee, aggregated by contributor’s state and candidate. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
+This endpoint provides itemized individual contributions received by a committee, aggregated \
+by contributor’s state and candidate. If you are interested in our “is_individual” methodology \
+see the [methodology section] (https://www.fec.gov/campaign-finance-data/ \
+about-campaign-finance-data/about-receipts-data/) of our “about the data” page. \
+Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_STATE_CANDIDATE_TOTAL_TAG = '''
-Itemized individual contributions aggregated by contributor’s state, candidate, committee type and cycle. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
+Itemized individual contributions aggregated by contributor’s state, candidate, committee type \
+and cycle. If you are interested in our “is_individual” methodology see the [methodology section] \
+(https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of \
+our “about the data” page. Unitemized individual contributions are not included.
 
 '''
 
@@ -953,7 +1012,11 @@ Aggregated candidate receipts and disbursements grouped by cycle.
 '''
 
 STATE_AGGREGATE_RECIPIENT_TOTALS = '''
-This endpoint provides itemized individual contributions received by a committee, aggregated by contributor’s state, committee type and cycle. If you are interested in our “is_individual” methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not included.
+This endpoint provides itemized individual contributions received by a committee, aggregated by \
+contributor’s state, committee type and cycle. If you are interested in our “is_individual” \
+methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/ \
+about-campaign-finance-data/about-receipts-data/) of our “about the data” page. \
+Unitemized individual contributions are not included.
 '''
 
 API_KEY_DESCRIPTION = '''
@@ -1175,7 +1238,8 @@ FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 
     - F1M  Notification of Multicandidate Status\n\
     - F2   Statement of Candidacy\n\
     - F3   Report of Receipts and Disbursements for an Authorized Committee\n\
-    - F3P  Report of Receipts and Disbursements by an Authorized Committee of a Candidate for The Office of President or Vice President\n\
+    - F3P  Report of Receipts and Disbursements by an Authorized Committee of a Candidate for \
+    The Office of President or Vice President\n\
     - F3L  Report of Contributions Bundled by Lobbyists/Registrants and Lobbyist/Registrant PACs\n\
     - F3X  Report of Receipts and Disbursements for other than an Authorized Committee\n\
     - F4   Report of Receipts and Disbursements for a Committee or Organization Supporting a Nomination Convention\n\
@@ -1330,7 +1394,7 @@ CREATE_DATE = 'Date the record was created'
 UPDATE_DATE = 'Date the record was updated'
 ELECTION_DATE = 'Date of election'
 ELECTION_YEAR = 'Year of election'
-#? TODO: add more categories
+# ? TODO: add more categories
 ELECTION_TYPE = 'Election type \n\
 Convention, Primary,\n\
 General, Special,\n\
@@ -1352,12 +1416,14 @@ report. The last image number corresponds to the image number for the last page 
 
 # Reports and Totals
 
+
 def add_period(var):
     return var + ' total for the reporting period'
 
 
 def add_ytd(var):
     return var + ' total for the year to date'
+
 
 # shared
 CASH_ON_HAND_BEGIN_PERIOD = 'Balance for the committee at the start of the two-year period'
@@ -1410,7 +1476,7 @@ REFUNDED_POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS = 'Political party refunds'
 CONTRIBUTION_REFUNDS = 'Total contribution refunds'
 REFUNDED_OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS = 'Other committee refunds'
 
-#loans
+# loans
 LOAN_SOURCE = 'Source of the loan (i.e., bank loan, brokerage account, credit card, home equity line of credit, \
               other line of credit, or personal funds of the candidate'
 
@@ -1494,7 +1560,9 @@ This ID is not a permanent, persistent ID.'
 
 # efiling
 EFILING_TAG = '''
-Efiling endpoints provide real-time campaign finance data received from electronic filers. Efiling endpoints only contain the most recent four months of data and don't contain the processed and coded data that you can find on other endpoints.
+Efiling endpoints provide real-time campaign finance data received from electronic filers. \
+Efiling endpoints only contain the most recent four months of data and don't contain \
+the processed and coded data that you can find on other endpoints.
 '''
 
 EFILE_FILES = 'Basic information about electronic files coming into the FEC, posted as they are received.'
@@ -1722,7 +1790,7 @@ The identifier for each electioneering record.
 TOTAL_BY_OFFICE_TAG = ''' Aggregated candidate receipts and disbursements grouped by office by cycle.
 '''
 
-TOTAL_BY_OFFICE_BY_PARTY_TAG= ''' Aggregated candidate receipts and disbursements grouped by office by party by cycle.
+TOTAL_BY_OFFICE_BY_PARTY_TAG = ''' Aggregated candidate receipts and disbursements grouped by office by party by cycle.
 '''
 
 ACTIVE_CANDIDATE = ''' Candidates who are actively seeking office. If no value is specified, all candidates

@@ -70,7 +70,7 @@ def sqla_conn_string():
     return sqla_conn_string
 
 
-#app.debug = True
+# app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -145,6 +145,7 @@ RESTRICT_DOWNLOADS = env.get_credential('RESTRICT_DOWNLOADS', False)
 RESTRICT_API_TRAFFIC = env.get_credential('RESTRICT_API_TRAFFIC', False)
 RESTRICT_API_MESSAGE = "We apologize for the inconvenience, but we are temporarily " \
     "blocking API traffic. Please contact apiinfo@fec.gov if this is an urgent issue."
+
 
 @app.before_request
 def limit_remote_addr():
@@ -269,10 +270,12 @@ def handle_exception(exception):
     raise exceptions.ApiError('Could not process the request',
         status_code=http.client.NOT_FOUND)
 
+
 @app.errorhandler(404)
 def page_not_found(exception):
     wrapped = ResponseException(str(exception), exception.code, type(exception))
     return wrapped.wrappedException, wrapped.status
+
 
 @app.errorhandler(403)
 def forbidden(exception):
