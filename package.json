@@ -11,7 +11,9 @@
     "develop": "webpack-dev-server --config webpack.config.js --mode development",
     "format": "prettier --write 'src/**/*.js'",
     "lint": "eslint ./src/**/*.js",
-    "format:lint": "npm run format && npm run lint"
+    "format:lint": "npm run format && npm run lint",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "dependencies": {
     "@braintree/sanitize-url": "^2.1.0",
@@ -20,7 +22,8 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "swagger-tools": "^0.10.4",
-    "swagger-ui-dist": "3.22.0"
+    "swagger-ui-dist": "3.22.0",
+    "snyk": "^1.316.1"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -53,5 +56,6 @@
   "engines": {
     "node": "10.16.0",
     "npm": "6.13.7"
-  }
+  },
+  "snyk": true
 }
