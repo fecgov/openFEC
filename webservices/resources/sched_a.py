@@ -93,14 +93,6 @@ class ScheduleAView(ItemizedResource):
         )
 
     def build_query(self, **kwargs):
-        if kwargs.get("last_index"):
-            if not any(kwargs.get("last_{}".format(option)) for option in self.sort_options):
-                raise exceptions.ApiError(
-                    "Please add one of the following filters to your query: `last_{}`".format(
-                        "`, `".join(self.sort_options)
-                    ),
-                    status_code=400,
-                )
         secondary_index_options = [
             'committee_id',
             'contributor_id',

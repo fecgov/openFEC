@@ -58,6 +58,7 @@ class ScheduleBView(ItemizedResource):
         (('min_image_number', 'max_image_number'),
          models.ScheduleB.image_number),
     ]
+    sort_options = ['disbursement_date', 'disbursement_amount']
 
     @property
     def args(self):
@@ -65,8 +66,7 @@ class ScheduleBView(ItemizedResource):
             args.itemized, args.schedule_b, args.make_seek_args(),
             args.make_sort_args(
                 default='-disbursement_date',
-                validator=args.OptionValidator(
-                    ['disbursement_date', 'disbursement_amount']),
+                validator=args.OptionValidator(self.sort_options),
                 show_nulls_last_arg=False,
             ))
 

@@ -488,6 +488,7 @@ class TestScheduleA(ApiBaseTest):
             api.url_for(
                 ScheduleAView,
                 last_index=page1[-1]['sub_id'],
+                last_contribution_receipt_date=page1[-1]['contribution_receipt_date'],
                 sort_null_only=True,
                 sort='contribution_receipt_date',
                 **self.kwargs

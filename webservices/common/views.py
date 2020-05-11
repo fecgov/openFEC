@@ -65,6 +65,18 @@ class ItemizedResource(ApiResource):
         to avoid slow queries when one or more relevant committees has many
         records.
         """
+        if kwargs.get("last_index"):
+            if not any(kwargs.get("last_{}".format(option)) for option in self.sort_options):
+                print(kwargs)
+                for option in self.sort_options:
+                    print("last_{}".format(option))
+                    print(kwargs.get("last_{}".format(option)))
+                raise exceptions.ApiError(
+                    "Please add one of the following filters to your query: `last_{}`".format(
+                        "`, `".join(self.sort_options)
+                    ),
+                    status_code=400,
+                )
         committee_ids = kwargs.get('committee_id', [])
         if len(committee_ids) > 10:
             raise exceptions.ApiError(
