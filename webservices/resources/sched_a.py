@@ -73,6 +73,11 @@ class ScheduleAView(ItemizedResource):
         sa.orm.joinedload(models.ScheduleA.committee),
         sa.orm.joinedload(models.ScheduleA.contributor),
     ]
+    sort_options = [
+        'contribution_receipt_date',
+        'contribution_receipt_amount',
+        'contributor_aggregate_ytd',
+    ]
 
     @property
     def args(self):
@@ -82,18 +87,20 @@ class ScheduleAView(ItemizedResource):
             args.make_seek_args(),
             args.make_sort_args(
                 default='contribution_receipt_date',
-                validator=args.OptionValidator(
-                    [
-                        'contribution_receipt_date',
-                        'contribution_receipt_amount',
-                        'contributor_aggregate_ytd',
-                    ]
-                ),
+                validator=args.OptionValidator(self.sort_options),
                 show_nulls_last_arg=False,
             ),
         )
 
     def build_query(self, **kwargs):
+        if kwargs.get("last_index"):
+            if not any(kwargs.get("last_{}".format(option)) for option in self.sort_options):
+                raise exceptions.ApiError(
+                    "Please add one of the following filters to your query: `last_{}`".format(
+                        "`, `".join(self.sort_options)
+                    ),
+                    status_code=400,
+                )
         secondary_index_options = [
             'committee_id',
             'contributor_id',
