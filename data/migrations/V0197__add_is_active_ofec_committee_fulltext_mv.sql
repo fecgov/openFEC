@@ -2,9 +2,8 @@
 This migration file is for #4296
 1) Add is_active column to ofec_committee_fulltext_mv
 */
-
 -- ----------
--- ofec_committee_detail_mv
+-- ofec_committee_fulltext_mv
 -- ----------
 DROP MATERIALIZED VIEW IF EXISTS public.ofec_committee_fulltext_mv_tmp;
 
@@ -32,7 +31,8 @@ WITH pacronyms AS (
     COALESCE(totals.receipts, 0::numeric) AS receipts,
     COALESCE(totals.disbursements, 0::numeric) AS disbursements,
     COALESCE(totals.independent_expenditures, 0::numeric) AS independent_expenditures,
-    COALESCE(totals.receipts, 0::numeric) + COALESCE(totals.disbursements, 0::numeric) + COALESCE(totals.independent_expenditures, 0::numeric) AS total_activity
+    COALESCE(totals.receipts, 0::numeric) + COALESCE(totals.disbursements, 0::numeric) + COALESCE(totals.independent_expenditures, 0::numeric) AS total_activity,
+    cd.is_active
    FROM ofec_committee_detail_vw cd
      LEFT JOIN pacronyms pac USING (committee_id)
      LEFT JOIN totals USING (committee_id)
