@@ -66,16 +66,18 @@ class ItemizedResource(ApiResource):
         records.
         """
         if kwargs.get("last_index"):
-            if not any(kwargs.get("last_{}".format(option)) for option in self.sort_options):
-                print(kwargs)
-                for option in self.sort_options:
-                    print("last_{}".format(option))
-                    print(kwargs.get("last_{}".format(option)))
+            if all(
+                kwargs.get("last_{}".format(option)) is None
+                for option in self.sort_options
+            ) and not kwargs.get("sort_null_only"):
                 raise exceptions.ApiError(
-                    "Please add one of the following filters to your query: `last_{}`".format(
+                    "When paginating through results, both values from the \
+                    previous page's `last_index` object are needed. For more information, \
+                    see https://api.open.fec.gov/developers/. Please add one of the following \
+                    filters to your query: `sort_null_only`=True, `last_{}`".format(
                         "`, `".join(self.sort_options)
                     ),
-                    status_code=400,
+                    status_code=422,
                 )
         committee_ids = kwargs.get('committee_id', [])
         if len(committee_ids) > 10:
