@@ -304,7 +304,7 @@ class CandidateSearchSchema(BaseSearchSchema):
 
 
 class CommitteeSearchSchema(BaseSearchSchema):
-    pass
+    is_active = ma.fields.Boolean()
 
 
 class CandidateSearchListSchema(ApiSchema):
@@ -317,7 +317,7 @@ class CandidateSearchListSchema(ApiSchema):
 
 class CommitteeSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
-        CandidateSearchSchema,
+        CommitteeSearchSchema,
         ref='#/definitions/CommitteeSearch',
         many=True,
     )

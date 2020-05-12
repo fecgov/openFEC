@@ -42,7 +42,9 @@ class CommitteeFormatTest(ApiBaseTest):
         )
         decoy_committee = factories.CommitteeFactory()
         factories.CommitteeSearchFactory(
-            id=committee.committee_id, fulltxt=sa.func.to_tsvector(committee.name),
+            id=committee.committee_id,
+            fulltxt=sa.func.to_tsvector(committee.name),
+            is_active=True,
         )
         queries = [
             'america',
