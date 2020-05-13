@@ -15,6 +15,7 @@ class CommitteeSearch(BaseModel):
     disbursements = db.Column(db.Numeric(30, 2))
     independent_expenditures = db.Column(db.Numeric(30, 2))
     total_activity = db.Column(db.Numeric(30, 2))
+    is_active = db.Column(db.Boolean, doc=docs.IS_COMMITTEE_ACTIVE)
 
 
 class BaseCommittee(BaseModel):
