@@ -72,10 +72,10 @@ class ItemizedResource(ApiResource):
             ) and not kwargs.get("sort_null_only"):
                 raise exceptions.ApiError(
                     "When paginating through results, both values from the \
-                    previous page's `last_index` object are needed. For more information, \
+                    previous page's `last_indexes` object are needed. For more information, \
                     see https://api.open.fec.gov/developers/. Please add one of the following \
-                    filters to your query: `sort_null_only`=True, `last_{}`".format(
-                        "`, `".join(self.sort_options)
+                    filters to your query: `sort_null_only`=True, {}".format(
+                        ", ".join("`last_" + option + "`" for option in self.sort_options)
                     ),
                     status_code=422,
                 )
