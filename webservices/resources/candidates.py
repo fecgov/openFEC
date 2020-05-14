@@ -181,12 +181,12 @@ class CandidateView(ApiResource):
         query = super().build_query(**kwargs)
 
         if candidate_id is not None:
-            query = query.filter_by(candidate_id=candidate_id)
+            query = query.filter_by(candidate_id=candidate_id.upper())
 
         if committee_id is not None:
             query = (
                 query.join(models.CandidateCommitteeLink)
-                .filter(models.CandidateCommitteeLink.committee_id == committee_id)
+                .filter(models.CandidateCommitteeLink.committee_id == committee_id.upper())
                 .distinct()
             )
 
@@ -249,7 +249,7 @@ class CandidateHistoryView(ApiResource):
             # use for
             # '/candidate/<string:candidate_id>/history/',
             # '/candidate/<string:candidate_id>/history/<int:cycle>/',
-            query = query.filter(models.CandidateHistory.candidate_id == candidate_id)
+            query = query.filter(models.CandidateHistory.candidate_id == candidate_id.upper())
 
         if committee_id:
             # use for
@@ -261,7 +261,7 @@ class CandidateHistoryView(ApiResource):
                     models.CandidateCommitteeLink.candidate_id
                     == models.CandidateHistory.candidate_id,
                 )
-                .filter(models.CandidateCommitteeLink.committee_id == committee_id)
+                .filter(models.CandidateCommitteeLink.committee_id == committee_id.upper())
                 .distinct()
             )
         if cycle:

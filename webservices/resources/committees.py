@@ -133,13 +133,13 @@ class CommitteeView(ApiResource):
         query = super().build_query(**kwargs)
 
         if committee_id is not None:
-            query = query.filter_by(committee_id=committee_id)
+            query = query.filter_by(committee_id=committee_id.upper())
 
         if candidate_id is not None:
             query = query.join(
                 models.CandidateCommitteeLink
             ).filter(
-                models.CandidateCommitteeLink.candidate_id == candidate_id
+                models.CandidateCommitteeLink.candidate_id == candidate_id.upper()
             ).distinct()
 
         if kwargs.get('year'):
@@ -188,7 +188,7 @@ class CommitteeHistoryView(ApiResource):
             # use for
             # '/committee/<string:committee_id>/history/',
             # '/committee/<string:committee_id>/history/<int:cycle>/',
-            query = query.filter(models.CommitteeHistory.committee_id == committee_id)
+            query = query.filter(models.CommitteeHistory.committee_id == committee_id.upper())
 
         if candidate_id:
             # use for
@@ -201,7 +201,7 @@ class CommitteeHistoryView(ApiResource):
                     models.CandidateCommitteeLink.fec_election_year == models.CommitteeHistory.cycle,
                 ),
             ).filter(
-                models.CandidateCommitteeLink.candidate_id == candidate_id,
+                models.CandidateCommitteeLink.candidate_id == candidate_id.upper(),
             )
         if cycle:
             # use for

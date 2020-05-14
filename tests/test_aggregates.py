@@ -727,7 +727,7 @@ class TestCandidateAggregates(ApiBaseTest):
         results = self._results(
             api.url_for(
                 ScheduleAByStateCandidateTotalsView,
-                candidate_id=self.candidate.candidate_id,
+                candidate_id=self.candidate.candidate_id.lower(),
                 cycle=2012,
             )
         )
