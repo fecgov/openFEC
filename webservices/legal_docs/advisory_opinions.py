@@ -274,10 +274,14 @@ def fix_citations(ao_no, citation_type, citations):
 
     CITATION_EXCLUDE_LOOKUP = {
         '2017-03': {'ao': ['2010-11', '2011-12', '2015-16']},
+        '2019-11': {'statute': [(52, '301')]},
     }
 
     CITATION_INCLUDE_LOOKUP = {
         '1999-40': {'regulation': [(11, 110, 3)]},
+        '2019-14': {'regulation': [(11, 102, 1), (11, 102, 6), (11, 104, 1), (11, 300, 10)]},
+        '2019-11': {'regulation': [(11, 110, 11)]},
+        '2018-15': {'regulation': [(11, 112, 1), (11, 112, 5), (11, 113, 1), (11, 113, 2)]},
     }
 
     exclude_list = CITATION_EXCLUDE_LOOKUP.get(ao_no, {}).get(citation_type)
