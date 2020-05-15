@@ -527,3 +527,59 @@ class TestCommitteeHistory(ApiBaseTest):
         )
         assert len(results) == 4
         assert 'J' not in [committee.get('designation') for committee in results]
+
+    def test_case_insensitivity(self):
+        lower_candidate = factories.CandidateDetailFactory(candidate_id="H01")
+        lower_committee_1 = factories.CommitteeDetailFactory(committee_id="ID01")
+        [
+            factories.CommitteeHistoryFactory(
+                committee_id=lower_committee_1.committee_id,
+                cycle=2014,
+                designation='J',
+                is_active=False,
+            ),
+        ]
+        db.session.flush()
+        [
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=lower_candidate.candidate_id,
+                committee_id=lower_committee_1.committee_id,
+                fec_election_year=2014,
+                committee_type='P',
+                committee_designation='J',
+            ),
+        ]
+        [
+            factories.CandidateElectionFactory(
+                candidate_id=lower_candidate.candidate_id,
+                cand_election_year=2012,
+                prev_election_year=2008,
+            ),
+            factories.CandidateElectionFactory(
+                candidate_id=lower_candidate.candidate_id,
+                cand_election_year=2016,
+                prev_election_year=2012,
+            ),
+        ]
+
+        results = self._results(
+            api.url_for(
+                CommitteeHistoryView,
+                committee_id="id01",
+                cycle=2014,
+                election_full=False,
+                is_active=False,
+            )
+        )
+        assert len(results) == 1
+
+        results = self._results(
+            api.url_for(
+                CommitteeHistoryView,
+                candidate_id="h01",
+                cycle=2014,
+                election_full=False,
+                is_active=False,
+            )
+        )
+        assert len(results) == 1

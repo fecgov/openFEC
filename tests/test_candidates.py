@@ -159,7 +159,7 @@ class CandidateFormatTest(ApiBaseTest):
             ('state', 'CA'),
             ('party', 'DEM'),
             ('cycle', '2006'),
-            ('candidate_id', ['BARTLET', 'RITCHIE']),
+            ('candidate_id', ['BARTLET', 'ritchie']),
             ('is_active_candidate', False),
         )
 
@@ -350,4 +350,27 @@ class TestCandidateHistory(ApiBaseTest):
         )
         assert len(results) == 1
         assert results[0]['two_year_period'] == 2012
+        assert results[0]['candidate_id'] == self.candidates[1].candidate_id
+
+    def test_case_insensitivity(self):
+        results = self._results(
+            api.url_for(
+                CandidateHistoryView,
+                committee_id=self.committee.committee_id.lower(),
+                cycle=2012,
+                election_full=False,
+            )
+        )
+        assert len(results) == 1
+        assert results[0]['candidate_id'] == self.candidates[1].candidate_id
+
+        results = self._results(
+            api.url_for(
+                CandidateHistoryView,
+                candidate_id=self.candidates[1].candidate_id.lower(),
+                cycle=2012,
+                election_full=False,
+            )
+        )
+        assert len(results) == 1
         assert results[0]['candidate_id'] == self.candidates[1].candidate_id

@@ -315,6 +315,23 @@ class TestReports(ApiBaseTest):
         ]:
             self.assertEqual(result[key], getattr(report, key))
 
+    def test_case_insensitivity(self):
+        committee = factories.CommitteeFactory()
+        committee_id = committee.committee_id
+        factories.CommitteeHistoryFactory(
+            committee_id=committee_id,
+        )
+        factories.ReportsIEOnlyFactory(
+            committee_id=committee_id,
+            independent_contributions_period=200,
+            independent_expenditures_period=100,
+        )
+        results = self._results(
+            api.url_for(CommitteeReportsView, committee_id=committee_id.lower(),)
+        )
+        for result in results:
+            self.assertEqual(result["committee_id"], committee_id)
+
     def _check_reports(self, committee_type, factory, schema):
         committee = factories.CommitteeFactory(committee_type=committee_type)
         factories.CommitteeHistoryFactory(

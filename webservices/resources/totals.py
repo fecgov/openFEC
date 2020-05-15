@@ -154,7 +154,7 @@ class TotalsCommitteeView(ApiResource):
     @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
         query, totals_class, totals_schema = self.build_query(
-            committee_id=committee_id, committee_type=committee_type, **kwargs
+            committee_id=committee_id.upper(), committee_type=committee_type, **kwargs
         )
         page = utils.fetch_page(query, kwargs, model=totals_class)
         return totals_schema().dump(page).data
@@ -162,13 +162,13 @@ class TotalsCommitteeView(ApiResource):
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
         totals_class, totals_schema = totals_schema_map.get(
             self._resolve_committee_type(
-                committee_id=committee_id, committee_type=committee_type, **kwargs
+                committee_id=committee_id.upper(), committee_type=committee_type, **kwargs
             ),
             default_schemas,
         )
         query = totals_class.query
         if committee_id is not None:
-            query = query.filter(totals_class.committee_id == committee_id)
+            query = query.filter(totals_class.committee_id == committee_id.upper())
         if kwargs.get('cycle'):
             query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
 
@@ -197,7 +197,7 @@ class CandidateTotalsView(utils.Resource):
     @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
     def get(self, candidate_id, **kwargs):
         query, totals_class, totals_schema = self.build_query(
-            candidate_id=candidate_id, **kwargs
+            candidate_id=candidate_id.upper(), **kwargs
         )
         if kwargs['sort']:
             validator = args.IndexValidator(totals_class)
@@ -207,11 +207,11 @@ class CandidateTotalsView(utils.Resource):
 
     def build_query(self, candidate_id=None, **kwargs):
         totals_class, totals_schema = candidate_totals_schema_map.get(
-            self._resolve_committee_type(candidate_id=candidate_id, **kwargs),
+            self._resolve_committee_type(candidate_id=candidate_id.upper(), **kwargs),
             default_schemas,
         )
         query = totals_class.query
-        query = query.filter(totals_class.candidate_id == candidate_id)
+        query = query.filter(totals_class.candidate_id == candidate_id.upper())
 
         if 'full_election' in kwargs.keys():
             # full_election is replaced by election_full.
