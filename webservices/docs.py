@@ -27,6 +27,12 @@ lists for commercial purposes or to solicit donations.
 [Learn more here](https://www.fec.gov/updates/sale-or-use-contributor-information/).
 
 [View our source code](https://github.com/fecgov/openFEC). We welcome issues and pull requests!
+
+
+<p><br></p>
+<h2 class="title" id="signup_head">Sign up for an API key</h2>
+<div id="apidatagov_signup">Loading signup form...</div>
+
 '''
 
 PAGES = '''

@@ -2,7 +2,6 @@
 <html>
 <head>
   <title>OpenFEC API Documentation</title>
-
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ swagger_static('dist/main.css') }}" >
     <link rel="icon" type="image/png" href="{{ swagger_static('favicon.ico') }}" />
@@ -30,7 +29,70 @@
 </head>
 
 <body>
-    <div id="swagger-ui"></div>
+
+<div id="swagger-ui"></div>
+ <script type="text/javascript">
+   /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+   var apiUmbrellaSignupOptions = {
+     // Pick a short, unique name to identify your site, like 'gsa-auctions'
+     // in this example.
+     registrationSource: 'fec-api',
+
+     // Enter the API key you signed up for and specially configured for this
+     // API key signup embed form.
+     apiKey: "{{ api_key_signup_key }}",
+     // document.write(apiKey.toLocaleString( ));
+     // Provide a URL or e-mail address to be used for customer support.
+     //
+     // The format for e-mail addresses can be given as either
+     // 'example@example.com' or 'mailto:example@example.com'.
+     contactUrl: 'APIinfo@fec.gov',
+
+     // Provide the name of your developer site. This will appear in the
+     // subject of the welcome e-mail as "Your {{siteName}} API key".
+     siteName: 'openFEC',
+
+     // Provide a sender name for who the welcome email appears from. The
+     // actual address will be "noreply@api.data.gov", but this will
+     // change the name of the displayed sender in this fashion:
+     // "{{emailFromName}} <noreply@api.data.gov>".
+     emailFromName: 'openFEC',
+
+     // Provide an example URL you want to show to users after they signup.
+     // This can be any API endpoint on your server, and you can use the
+     // special {{api_key_signup_key}} variable to automatically substitute in the API
+     // key the user just signed up for.
+     // exampleApiUrl: 'https://api.open.fec.gov/v1/legal/search/?api_key_signup_key={{api_key_signup_key}}',
+
+     // OPTIONAL: Provide extra content to display on the signup confirmation
+     // page. This will be displayed below the user's API key and the example
+     // API URL are shown. HTML is allowed. Defaults to ""
+     // signupConfirmationMessage: '',
+
+     // OPTIONAL: Set to true to verify the user's e-mail address by only
+     // sending them their API key via e-mail, and not displaying it on the
+     // signup confirmation web page. Defaults to false.
+     verifyEmail: true,
+
+     // OPTIONAL: Set to false to disable sending a welcome e-mail to the
+     // user after signing up. Defaults to true.
+     sendWelcomeEmail: true,
+
+     // OPTIONAL: Provide an extra input field to ask for the user's website.
+     // Defaults to false.
+     // websiteInput: true,
+
+     // OPTIONAL: Provide an extra checkbox asking the user to agree to terms
+     // and conditions before signing up. Defaults to false.
+     // termsCheckbox: true,
+
+     // OPTIONAL: If the terms & conditions checkbox is enabled, link to this
+     // URL for your API's terms & conditions. Defaults to "".
+     // termsUrl: "https://agency.gov/api-terms/",
+   };
+ </script>
+ <noscript>Please enable JavaScript to signup for an <a href="http://api.data.gov/">api.data.gov</a> API key.</noscript>
+
     <script src="{{ swagger_static('dist/swagger-layout.js') }}"> </script>
     <script>
       window.onload = function() {
@@ -38,6 +100,14 @@
           "{{ specs_url }}",
           document.getElementById("swagger-ui")
         );
+        
+         var apiUmbrella = document.createElement('script'); 
+         apiUmbrella.type = 'text/javascript'; 
+         apiUmbrella.async = true;
+         apiUmbrella.src = 'https://api.data.gov/static/javascripts/signup_embed.js';
+         (document.getElementsByTagName('head')[0] || 
+          document.getElementsByTagName('body')[0])
+         .appendChild(apiUmbrella);
       };
     </script>
 
@@ -54,6 +124,9 @@
         ga('send', 'pageview');
     </script>
     <script id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=FEC"></script>
-  {% endif %}
-  </body>
+{% endif %}
+
+
+</body>
+
 </html>
