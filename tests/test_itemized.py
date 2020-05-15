@@ -314,7 +314,10 @@ class TestScheduleA(ApiBaseTest):
         self.assertEqual(results[0]['contributor_occupation'], 'Doctor of Philosophy')
 
     def test_schedule_a_pagination(self):
-        filings = [factories.ScheduleAFactory() for _ in range(30)]
+        filings = [
+            factories.ScheduleAFactory(contribution_receipt_date=datetime.date(2016, 1, 1))
+            for _ in range(30)
+        ]
         page1 = self._results(api.url_for(ScheduleAView, **self.kwargs))
         self.assertEqual(len(page1), 20)
         self.assertEqual(
@@ -322,7 +325,12 @@ class TestScheduleA(ApiBaseTest):
             [each.sub_id for each in filings[:20]],
         )
         page2 = self._results(
-            api.url_for(ScheduleAView, last_index=page1[-1]['sub_id'], **self.kwargs)
+            api.url_for(
+                ScheduleAView,
+                last_index=page1[-1]['sub_id'],
+                last_contribution_receipt_date=page1[-1]['contribution_receipt_date'],
+                **self.kwargs
+            )
         )
         self.assertEqual(len(page2), 10)
         self.assertEqual(
@@ -330,10 +338,70 @@ class TestScheduleA(ApiBaseTest):
             [each.sub_id for each in filings[20:]],
         )
 
-    def test_schedule_a_pagination_with_null_sort_column_values(self):
+    def test_schedule_a_pagination_with_null_sort_column_values_hidden(self):
+        # First 5 results [0:4] have missing receipt date
         filings = [
             factories.ScheduleAFactory(contribution_receipt_date=None) for _ in range(5)
         ]
+        # Results [5:30] have date
+        filings = filings + [
+            factories.ScheduleAFactory(
+                contribution_receipt_date=datetime.date(2016, 1, 1)
+            )
+            for _ in range(25)
+        ]
+        page1 = self._results(
+            api.url_for(
+                ScheduleAView,
+                sort='contribution_receipt_date',
+                sort_hide_null=True,
+                **self.kwargs)
+        )
+        self.assertEqual(len(page1), 20)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page1],
+            [each.sub_id for each in filings[5:25]],
+        )
+        self.assertEqual(
+            [each['contribution_receipt_date'] for each in page1],
+            [
+                each.contribution_receipt_date.strftime('%Y-%m-%d')
+                if each.contribution_receipt_date
+                else None
+                for each in filings[5:25]
+            ],
+        )
+        page2 = self._results(
+            api.url_for(
+                ScheduleAView,
+                last_index=page1[-1]['sub_id'],
+                last_contribution_receipt_date=page1[-1]['contribution_receipt_date'],
+                sort='contribution_receipt_date',
+                sort_hide_null=True,
+                **self.kwargs
+            )
+        )
+        self.assertEqual(len(page2), 5)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page2],
+            [each.sub_id for each in filings[25:]],
+        )
+        self.assertEqual(
+            [each['contribution_receipt_date'] for each in page2],
+            [
+                each.contribution_receipt_date.strftime('%Y-%m-%d')
+                if each.contribution_receipt_date
+                else None
+                for each in filings[25:]
+            ],
+        )
+
+    def test_schedule_a_pagination_with_null_sort_column_values_showing(self):
+        # First 5 results [0:4] have missing receipt date
+        filings = [
+            factories.ScheduleAFactory(contribution_receipt_date=None) for _ in range(5)
+        ]
+        # Results [5:30] have date
         filings = filings + [
             factories.ScheduleAFactory(
                 contribution_receipt_date=datetime.date(2016, 1, 1)
@@ -357,7 +425,8 @@ class TestScheduleA(ApiBaseTest):
                 for each in filings[5:25]
             ],
         )
-        page2 = self._results(
+
+        page2_missing_last_contribution_receipt_date = self.app.get(
             api.url_for(
                 ScheduleAView,
                 last_index=page1[-1]['sub_id'],
@@ -365,10 +434,24 @@ class TestScheduleA(ApiBaseTest):
                 **self.kwargs
             )
         )
-        self.assertEqual(len(page2), 5)
+        self.assertEqual(page2_missing_last_contribution_receipt_date.status_code, 422)
+
+        page2 = self._results(
+            api.url_for(
+                ScheduleAView,
+                last_index=page1[-1]['sub_id'],
+                last_contribution_receipt_date=page1[-1]['contribution_receipt_date'],
+                sort='contribution_receipt_date',
+                **self.kwargs
+            )
+        )
+        self.assertEqual(len(page2), 10)
+        last_date_results = filings[25:]
+        null_date_results = filings[:5]
+        last_date_results.extend(null_date_results)
         self.assertEqual(
             [int(each['sub_id']) for each in page2],
-            [each.sub_id for each in filings[25:]],
+            [each.sub_id for each in last_date_results],
         )
         self.assertEqual(
             [each['contribution_receipt_date'] for each in page2],
@@ -376,7 +459,7 @@ class TestScheduleA(ApiBaseTest):
                 each.contribution_receipt_date.strftime('%Y-%m-%d')
                 if each.contribution_receipt_date
                 else None
-                for each in filings[25:]
+                for each in last_date_results
             ],
         )
 
@@ -484,6 +567,17 @@ class TestScheduleA(ApiBaseTest):
                 for each in top_reversed_from_middle
             ],
         )
+
+        page2_missing_sort_null_only = self.app.get(
+            api.url_for(
+                ScheduleAView,
+                last_index=page1[-1]['sub_id'],
+                sort='contribution_receipt_date',
+                **self.kwargs
+            )
+        )
+        self.assertEqual(page2_missing_sort_null_only.status_code, 422)
+
         page2 = self._results(
             api.url_for(
                 ScheduleAView,
@@ -686,8 +780,21 @@ class TestScheduleB(ApiBaseTest):
             [int(each['sub_id']) for each in page1],
             [each.sub_id for each in filings[:-21:-1]],
         )
+        page2_missing_sort_null_only = self.app.get(
+            api.url_for(
+                ScheduleBView,
+                last_index=page1[-1]['sub_id'],
+                **self.kwargs
+            )
+        )
+        self.assertEqual(page2_missing_sort_null_only.status_code, 422)
         page2 = self._results(
-            api.url_for(ScheduleBView, last_index=page1[-1]['sub_id'], **self.kwargs)
+            api.url_for(
+                ScheduleBView,
+                last_index=page1[-1]['sub_id'],
+                sort_null_only=True,
+                **self.kwargs
+            )
         )
         self.assertEqual(len(page2), 10)
         self.assertEqual(
@@ -724,7 +831,7 @@ class TestScheduleB(ApiBaseTest):
                 for each in filings[5:25]
             ],
         )
-        page2 = self._results(
+        page2_missing_last_disbursement_date = self.app.get(
             api.url_for(
                 ScheduleBView,
                 last_index=page1[-1]['sub_id'],
@@ -732,10 +839,24 @@ class TestScheduleB(ApiBaseTest):
                 **self.kwargs
             )
         )
-        self.assertEqual(len(page2), 5)
+        self.assertEqual(page2_missing_last_disbursement_date.status_code, 422)
+
+        page2 = self._results(
+            api.url_for(
+                ScheduleBView,
+                last_index=page1[-1]['sub_id'],
+                last_disbursement_date=page1[-1]['disbursement_date'],
+                sort='disbursement_date',
+                **self.kwargs
+            )
+        )
+        self.assertEqual(len(page2), 10)
+        last_date_results = filings[25:]
+        null_date_results = filings[:5]
+        last_date_results.extend(null_date_results)
         self.assertEqual(
             [int(each['sub_id']) for each in page2],
-            [each.sub_id for each in filings[25:]],
+            [each.sub_id for each in last_date_results],
         )
         self.assertEqual(
             [each['disbursement_date'] for each in page2],
@@ -743,7 +864,7 @@ class TestScheduleB(ApiBaseTest):
                 each.disbursement_date.strftime('%Y-%m-%d')
                 if each.disbursement_date
                 else None
-                for each in filings[25:]
+                for each in last_date_results
             ],
         )
 

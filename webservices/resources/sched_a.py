@@ -73,6 +73,11 @@ class ScheduleAView(ItemizedResource):
         sa.orm.joinedload(models.ScheduleA.committee),
         sa.orm.joinedload(models.ScheduleA.contributor),
     ]
+    sort_options = [
+        'contribution_receipt_date',
+        'contribution_receipt_amount',
+        'contributor_aggregate_ytd',
+    ]
 
     @property
     def args(self):
@@ -82,13 +87,7 @@ class ScheduleAView(ItemizedResource):
             args.make_seek_args(),
             args.make_sort_args(
                 default='contribution_receipt_date',
-                validator=args.OptionValidator(
-                    [
-                        'contribution_receipt_date',
-                        'contribution_receipt_amount',
-                        'contributor_aggregate_ytd',
-                    ]
-                ),
+                validator=args.OptionValidator(self.sort_options),
                 show_nulls_last_arg=False,
             ),
         )
