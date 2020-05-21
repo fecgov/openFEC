@@ -78,6 +78,14 @@ class ScheduleAView(ItemizedResource):
         'contribution_receipt_amount',
         'contributor_aggregate_ytd',
     ]
+    filters_with_max_count = [
+        'committee_id',
+        'contributor_name',
+        'contributor_zip',
+        'contributor_city',
+        'contributor_employer',
+        'contributor_occupation',
+    ]
 
     @property
     def args(self):

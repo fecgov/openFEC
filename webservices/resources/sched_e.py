@@ -63,6 +63,10 @@ class ScheduleEView(ItemizedResource):
         'office_total_ytd',
         'support_oppose_indicator'
     ]
+    filters_with_max_count = [
+        'committee_id',
+        'candidate_id',
+    ]
 
     query_options = [
         sa.orm.joinedload(models.ScheduleE.candidate),
