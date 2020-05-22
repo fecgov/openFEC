@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
   <title>OpenFEC API Documentation</title>
@@ -29,8 +30,8 @@
 </head>
 
 <body>
-
 <div id="swagger-ui"></div>
+
  <script type="text/javascript">
    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
    var apiUmbrellaSignupOptions = {
@@ -46,7 +47,7 @@
      //
      // The format for e-mail addresses can be given as either
      // 'example@example.com' or 'mailto:example@example.com'.
-     contactUrl: 'APIinfo@fec.gov',
+     contactUrl: 'mailto:APIinfo@fec.gov',
 
      // Provide the name of your developer site. This will appear in the
      // subject of the welcome e-mail as "Your {{siteName}} API key".
@@ -56,13 +57,13 @@
      // actual address will be "noreply@api.data.gov", but this will
      // change the name of the displayed sender in this fashion:
      // "{{emailFromName}} <noreply@api.data.gov>".
-     emailFromName: 'openFEC',
+     emailFromName: 'FEC',
 
      // Provide an example URL you want to show to users after they signup.
      // This can be any API endpoint on your server, and you can use the
-     // special {{api_key_signup_key}} variable to automatically substitute in the API
+     // special {{api_key}} variable to automatically substitute in the API
      // key the user just signed up for.
-     // exampleApiUrl: 'https://api.open.fec.gov/v1/legal/search/?api_key_signup_key={{api_key_signup_key}}',
+     exampleApiUrl: 'https://api.open.fec.gov/v1/legal/search/?api_key={{api_key}}',
 
      // OPTIONAL: Provide extra content to display on the signup confirmation
      // page. This will be displayed below the user's API key and the example
@@ -93,7 +94,11 @@
  </script>
  <noscript>Please enable JavaScript to signup for an <a href="http://api.data.gov/">api.data.gov</a> API key.</noscript>
 
-    <script src="{{ swagger_static('dist/swagger-layout.js') }}"> </script>
+    <script src="{{ swagger_static('dist/swagger-layout.js') }}">
+</script>
+
+{% if api_key_signup_feature_flag %}
+
     <script>
       window.onload = function() {
         SwaggerLayout(
@@ -109,7 +114,18 @@
           document.getElementsByTagName('body')[0])
          .appendChild(apiUmbrella);
       };
-    </script>
+</script>
+{% else %}
+    <script>
+      window.onload = function() {
+        SwaggerLayout(
+          "{{ specs_url }}",
+          document.getElementById("swagger-ui")
+        );
+      };
+</script>
+{% endif %}
+
 
   {% if PRODUCTION %}
     <script>
@@ -125,7 +141,6 @@
     </script>
     <script id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=FEC"></script>
 {% endif %}
-
 
 </body>
 
