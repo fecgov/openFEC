@@ -33,6 +33,7 @@ class ScheduleH4View(ItemizedResource):
         ('committee_id', models.ScheduleH4.committee_id),
         ('cycle', models.ScheduleH4.cycle),
     ]
+    sort_options = ['event_purpose_date', 'disbursement_amount']
 
     @property
     def args(self):
@@ -40,8 +41,7 @@ class ScheduleH4View(ItemizedResource):
             args.itemized, args.schedule_h4, args.make_seek_args(),
             args.make_sort_args(
                 default='-event_purpose_date',
-                validator=args.OptionValidator(
-                    ['event_purpose_date', 'disbursement_amount']),
+                validator=args.OptionValidator(self.sort_options),
                 show_nulls_last_arg=False,
             ))
 

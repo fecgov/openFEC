@@ -199,7 +199,7 @@ class CommitteeReportsView(views.ApiResource):
     @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
         query, reports_class, reports_schema = self.build_query(
-            committee_id=committee_id, committee_type=committee_type, **kwargs
+            committee_id=committee_id.upper(), committee_type=committee_type, **kwargs
         )
         if kwargs['sort']:
             validator = args.IndicesValidator(reports_class)
@@ -210,7 +210,7 @@ class CommitteeReportsView(views.ApiResource):
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
         reports_class, reports_schema = reports_schema_map.get(
             self._resolve_committee_type(
-                committee_id=committee_id, committee_type=committee_type, **kwargs
+                committee_id=committee_id.upper(), committee_type=committee_type, **kwargs
             ),
             default_schemas,
         )
@@ -229,7 +229,7 @@ class CommitteeReportsView(views.ApiResource):
                 sa.orm.joinedload(reports_class.committee)
             )
         if committee_id is not None:
-            query = query.filter_by(committee_id=committee_id)
+            query = query.filter_by(committee_id=committee_id.upper())
 
         query = filters.filter_range(query, kwargs, get_range_filters())
         query = filters.filter_match(query, kwargs, get_match_filters())
@@ -238,7 +238,7 @@ class CommitteeReportsView(views.ApiResource):
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
         if committee_id is not None:
-            query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
+            query = models.CommitteeHistory.query.filter_by(committee_id=committee_id.upper())
 
             if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))

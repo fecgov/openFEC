@@ -85,7 +85,7 @@ class TestTotals(ApiBaseTest):
         fields = utils.extend(fields, transaction_coverage_fields)
 
         results = self._results(
-            api.url_for(TotalsCommitteeView, committee_id=committee_id)
+            api.url_for(TotalsCommitteeView, committee_id=committee_id.lower())
         )
         self.assertEqual(results[0], fields)
 

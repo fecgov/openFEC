@@ -57,6 +57,12 @@ class ScheduleEView(ItemizedResource):
         (('min_filing_date', 'max_filing_date'), models.ScheduleE.filing_date),
 
     ]
+    sort_options = [
+        'expenditure_date',
+        'expenditure_amount',
+        'office_total_ytd',
+        'support_oppose_indicator'
+    ]
 
     query_options = [
         sa.orm.joinedload(models.ScheduleE.candidate),
@@ -71,12 +77,7 @@ class ScheduleEView(ItemizedResource):
             args.make_seek_args(),
             args.make_sort_args(
                 default='-expenditure_date',
-                validator=args.OptionValidator([
-                    'expenditure_date',
-                    'expenditure_amount',
-                    'office_total_ytd',
-                    'support_oppose_indicator'
-                ]),
+                validator=args.OptionValidator(self.sort_options),
             ),
         )
 
