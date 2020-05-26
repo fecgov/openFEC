@@ -43,7 +43,7 @@ redis==3.2.0
 pytest==5.2.0
 pytest-cov==2.5.1
 codecov==2.0.17
-pytest-flake8==1.0.4
+pytest-flake8==1.0.6
 nplusone==0.8.0
 webtest==2.0.34
 factory_boy==2.8.1
