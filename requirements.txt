@@ -20,7 +20,7 @@ gunicorn==19.10.0
 gevent==1.4.0
 webargs==5.5.3
 ujson==1.33
-requests==2.21.0
+requests==2.22.0
 elasticsearch==5.5.3
 elasticsearch-dsl==5.4.0
 git+https://github.com/18F/slate.git
