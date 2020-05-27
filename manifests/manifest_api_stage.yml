@@ -16,4 +16,4 @@ routes:
   - route: fec-stage-api.app.cloud.gov
 applications:
   - name: api
-    instances: 1
+    instances: 10

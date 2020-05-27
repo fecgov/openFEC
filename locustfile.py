@@ -19,7 +19,7 @@ from locust_log_queries import log_queries
 resource.setrlimit(resource.RLIMIT_NOFILE, (9999, 999999))
 
 API_KEY = os.environ["FEC_API_KEY"]
-#DOWNLOAD_KEY = os.environ["FEC_DOWNLOAD_API_KEY"]
+DOWNLOAD_KEY = os.environ["FEC_DOWNLOAD_API_KEY"]
 
 
 class Tasks(locust.TaskSet):
@@ -28,7 +28,10 @@ class Tasks(locust.TaskSet):
     def load_big_queries(self, term=None):
         endpoint = random.choice(list(log_queries.keys()))
         params = random.choice(log_queries[endpoint])
-        params["api_key"] = API_KEY
+        if "download" in endpoint:
+            params["api_key"] = DOWNLOAD_KEY
+        else:
+            params["api_key"] = API_KEY
         self.client.get(endpoint, name="load_big_queries", params=params)
 
 

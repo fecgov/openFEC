@@ -141,7 +141,7 @@ def _detect_space(repo, branch=None, yes=False):
 
 DEPLOY_RULES = (
     ('prod', _detect_prod),
-    ('stage', lambda _, branch: branch.startswith('release')),
+    ('stage', lambda _, branch: branch == 'feature/4327-add-queries'),
     ('dev', lambda _, branch: branch == 'develop'),
 )
 
