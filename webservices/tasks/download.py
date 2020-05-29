@@ -34,7 +34,7 @@ def call_resource(path, qs):
         kwargs.pop(field, None)
 
     query, model, schema = unpack(resource.build_query(**kwargs), 3)
-    count, _ = counts.get_count(query, db.session, resource.use_estimated_counts)
+    count, _ = counts.get_count(query, db.session, model, resource.use_estimated_counts, resource.use_pk_for_count)
     return {
         'path': path,
         'qs': qs,

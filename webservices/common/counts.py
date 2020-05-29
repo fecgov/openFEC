@@ -13,15 +13,16 @@ from sqlalchemy.sql.expression import Executable, ClauseElement, _literal_as_tex
 count_pattern = re.compile(r'rows=(\d+)')
 
 
-def get_count(query, session, model, estimate=True, threshold=500000):
+def get_count(query, session, model, estimate=True, use_pk_for_count=False, threshold=500000):
     """
     Calculate either the estimated count or exact count.
     Indicate whether the count is an estimate.
     """
-    # TODO: Move this to model.table_args? resource? I think table args can't be custom keys
+    if use_pk_for_count:
+        primary_key = model.__mapper__.primary_key[0]
+        query = query.with_entities(primary_key)
     if estimate:
-        # with_entities
-        rows = get_query_plan(query.with_entities(model.committee_id), session)
+        rows = get_query_plan(query, session)
         count = extract_analyze_count(rows)
         if count < threshold:
             estimate = False
@@ -32,7 +33,6 @@ def get_count(query, session, model, estimate=True, threshold=500000):
 
 
 def get_query_plan(query, session):
-    print(query)
     return session.execute(explain(query)).fetchall()
 
 
