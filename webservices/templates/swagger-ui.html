@@ -42,7 +42,6 @@
      // Enter the API key you signed up for and specially configured for this
      // API key signup embed form.
      apiKey: "{{ api_key_signup_key }}",
-     // document.write(apiKey.toLocaleString( ));
      // Provide a URL or e-mail address to be used for customer support.
      //
      // The format for e-mail addresses can be given as either
@@ -63,7 +62,7 @@
      // This can be any API endpoint on your server, and you can use the
      // special {{api_key}} variable to automatically substitute in the API
      // key the user just signed up for.
-     exampleApiUrl: 'https://api.open.fec.gov/v1/legal/search/?api_key={{api_key}}',
+     exampleApiUrl: 'https://api.open.fec.gov/v1/legal/search/?api_key={{ '{{api_key}}' }}',
 
      // OPTIONAL: Provide extra content to display on the signup confirmation
      // page. This will be displayed below the user's API key and the example
@@ -78,18 +77,6 @@
      // OPTIONAL: Set to false to disable sending a welcome e-mail to the
      // user after signing up. Defaults to true.
      sendWelcomeEmail: true,
-
-     // OPTIONAL: Provide an extra input field to ask for the user's website.
-     // Defaults to false.
-     // websiteInput: true,
-
-     // OPTIONAL: Provide an extra checkbox asking the user to agree to terms
-     // and conditions before signing up. Defaults to false.
-     // termsCheckbox: true,
-
-     // OPTIONAL: If the terms & conditions checkbox is enabled, link to this
-     // URL for your API's terms & conditions. Defaults to "".
-     // termsUrl: "https://agency.gov/api-terms/",
    };
  </script>
  <noscript>Please enable JavaScript to signup for an <a href="http://api.data.gov/">api.data.gov</a> API key.</noscript>
