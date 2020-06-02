@@ -8,7 +8,7 @@ env:
   WEB_CONCURRENCY: 4
 services:
   - fec-api-search56
-  - fec-redis
+  - fec-redis-beta-2
   - fec-creds-dev
   - fec-s3-dev
 routes:
