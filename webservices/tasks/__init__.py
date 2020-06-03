@@ -4,7 +4,7 @@ from celery.schedules import crontab
 
 from webservices.env import env
 from webservices.tasks import utils
-
+import ssl
 
 # Feature and dev are sharing the same RDS box so we only want dev to update
 schedule = {}
@@ -58,6 +58,12 @@ def redis_url():
 app = celery.Celery('openfec')
 app.conf.update(
     broker_url=redis_url(),
+    broker_use_ssl={
+        'ssl_cert_reqs': ssl.CERT_NONE,
+    },
+    redis_backend_use_ssl={
+        'ssl_cert_reqs': ssl.CERT_NONE,
+    },
     imports=(
         'webservices.tasks.refresh',
         'webservices.tasks.download',
@@ -72,7 +78,7 @@ app.conf.update(
 app.conf.ONCE = {
     'backend': 'celery_once.backends.Redis',
     'settings': {
-        'url': redis_url(),
+        'url': redis_url() + "?ssl=true",
         'default_timeout': 60 * 60
     }
 }
