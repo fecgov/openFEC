@@ -9,7 +9,6 @@ from .load_legal_docs import (  # noqa
     delete_murs_from_s3,
     index_regulations,
     index_statutes,
-    load_archived_murs
 )
 from .index_management import (  # noqa
     create_docs_index,
