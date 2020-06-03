@@ -47,7 +47,7 @@ def redis_url():
 
     # Is the app running in a cloud.gov environment
     if env.space is not None:
-        redis_env = env.get_service(label='redis32')
+        redis_env = env.get_service(label='redis')
         redis_url = redis_env.credentials.get('uri')
 
         return redis_url
