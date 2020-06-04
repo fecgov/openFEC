@@ -23,7 +23,6 @@ ujson==1.33
 requests==2.21.0
 elasticsearch==5.5.3
 elasticsearch-dsl==5.4.0
-git+https://github.com/18F/slate.git
 
 # Marshalling
 flask-apispec==0.7.0
