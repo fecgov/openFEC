@@ -78,7 +78,18 @@ def filter_fulltext(query, kwargs, fields):
                     column.match(utils.parse_fulltext(value))
                     for value in include_list
                 ]
-                query = query.filter(sa.or_(*filters))
+                temp_query = query  # save this for multi below
+                # First filter is an AND
+                query = query.filter(sa.and_(filters[0]))
+                # Additional filters are UNION
+                if len(filters) > 1:
+                    # don't actually filter the query or it just builds up
+                    sub_queries = [
+                        temp_query.filter(sa.and_(query_filter))
+                        for query_filter in filters[1:]
+                    ]
+                    query = query.union_all(*sub_queries)
+
     return query
 
 
