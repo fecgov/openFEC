@@ -69,10 +69,6 @@ class ScheduleAView(ItemizedResource):
     filter_multi_start_with_fields = [
         ('contributor_zip', models.ScheduleA.contributor_zip),
     ]
-    query_options = [
-        sa.orm.joinedload(models.ScheduleA.committee),
-        sa.orm.joinedload(models.ScheduleA.contributor),
-    ]
     sort_options = [
         'contribution_receipt_date',
         'contribution_receipt_amount',
@@ -115,7 +111,10 @@ class ScheduleAView(ItemizedResource):
                     ),
                     status_code=400,
                 )
-        query = super().build_query(**kwargs)
+        # Do these left joins first for better performance
+        query = self.model.query.\
+            outerjoin(models.ScheduleA.committee, aliased=True).\
+            outerjoin(models.ScheduleA.contributor, aliased=True)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
         zip_list = []
         if kwargs.get('contributor_zip'):
@@ -143,6 +142,16 @@ class ScheduleAView(ItemizedResource):
                 raise exceptions.ApiError(
                     exceptions.LINE_NUMBER_ERROR, status_code=400,
                 )
+        # TODO: Can we inherit from super() here?
+        query = filters.filter_match(query, kwargs, self.filter_match_fields)
+        query = filters.filter_multi(query, kwargs, self.filter_multi_fields)
+        query = filters.filter_range(query, kwargs, self.filter_range_fields)
+        query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
+        from sqlalchemy.dialects import postgresql
+
+        print(str(query.statement.compile(
+            dialect=postgresql.dialect(),
+            compile_kwargs={"literal_binds": True})))
         return query
 
 
