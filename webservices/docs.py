@@ -1933,7 +1933,7 @@ PRESIDENTIAL = """
 Data supporting fec.gov's presidential map.
 
 For more information about the presidential map data available to download from fec.gov,\n\
-please visit: https://www.fec.gov/campaign-finance-data/presidential-map-help/
+please visit: https://www.fec.gov/campaign-finance-data/presidential-map-data/
 """
 
 PRESIDENTIAL_BY_CANDIDATE = """
