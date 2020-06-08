@@ -59,6 +59,11 @@ class ScheduleBView(ItemizedResource):
          models.ScheduleB.image_number),
     ]
     sort_options = ['disbursement_date', 'disbursement_amount']
+    filters_with_max_count = [
+        'committee_id',
+        'recipient_name',
+        'recipient_city',
+    ]
 
     @property
     def args(self):
