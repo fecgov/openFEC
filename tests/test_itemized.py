@@ -690,6 +690,22 @@ class TestScheduleA(ApiBaseTest):
             all(100 <= each['contribution_receipt_amount'] <= 150 for each in results)
         )
 
+    def test_schedule_a_max_filter_count(self):
+        max_count = 10
+        filters_with_max_count = [
+            ('committee_id', [str(number) for number in range(max_count + 1)]),
+            ('contributor_name', [str(number) for number in range(max_count + 1)]),
+            ('contributor_zip', [str(number) for number in range(max_count + 1)]),
+            ('contributor_city', [str(number) for number in range(max_count + 1)]),
+            ('contributor_employer', [str(number) for number in range(max_count + 1)]),
+            ('contributor_occupation', [str(number) for number in range(max_count + 1)]),
+        ]
+        for label, values in filters_with_max_count:
+            response = self.app.get(
+                api.url_for(ScheduleAView, **{label: values})
+            )
+            self.assertEqual(response.status_code, 422)
+
     def test_schedule_a_efile_filters(self):
         filters = [
             ('image_number', ScheduleAEfile.image_number, ['123', '456']),

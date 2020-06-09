@@ -78,6 +78,14 @@ class ScheduleAView(ItemizedResource):
         'contribution_receipt_amount',
         'contributor_aggregate_ytd',
     ]
+    filters_with_max_count = [
+        'committee_id',
+        'contributor_name',
+        'contributor_zip',
+        'contributor_city',
+        'contributor_employer',
+        'contributor_occupation',
+    ]
 
     @property
     def args(self):
@@ -109,8 +117,8 @@ class ScheduleAView(ItemizedResource):
         if len(two_year_transaction_periods) != 1:
             if not any(kwargs.get(field) for field in secondary_index_options):
                 raise exceptions.ApiError(
-                    "Please choose a single `two_year_transaction_period` or \
-                    add one of the following filters to your query: `{}`".format(
+                    "Please choose a single `two_year_transaction_period` or "
+                    "add one of the following filters to your query: `{}`".format(
                         "`, `".join(secondary_index_options)
                     ),
                     status_code=400,

@@ -20,7 +20,7 @@ gunicorn==19.10.0
 gevent==1.4.0
 webargs==5.5.3
 ujson==1.33
-requests==2.21.0
+requests==2.22.0
 elasticsearch==5.5.3
 elasticsearch-dsl==5.4.0
 
@@ -42,7 +42,7 @@ redis==3.2.0
 pytest==5.2.0
 pytest-cov==2.5.1
 codecov==2.0.17
-pytest-flake8==1.0.4
+pytest-flake8==1.0.6
 nplusone==0.8.0
 webtest==2.0.34
 factory_boy==2.8.1

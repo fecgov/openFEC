@@ -236,10 +236,10 @@ def add_secure_headers(response):
     content_security_policy = {
         "default-src": "'self' *.fec.gov *.app.cloud.gov",
         "img-src": "'self' data:",
-        "script-src": "'self' 'unsafe-inline'",
-        "style-src": "'self' https://fonts.googleapis.com 'unsafe-inline'",
-        "font-src": "'self' https://fonts.gstatic.com data:",
-        "connect-src": "*.fec.gov *.cloud.gov",
+        "script-src": "'self' https://api.data.gov 'unsafe-inline'",
+        "style-src": "'self' https://fonts.googleapis.com https://api.data.gov 'unsafe-inline'",
+        "font-src": "'self' https://fonts.gstatic.com data: https://api.data.gov",
+        "connect-src": "*.fec.gov *.cloud.gov https://api.data.gov",
         "object-src": "'none'",
         "report-uri": "/report-csp-violation/",
     }
@@ -563,6 +563,8 @@ def api_ui():
         'swagger-ui.html',
         specs_url=url_for('docs.api_spec'),
         PRODUCTION=env.get_credential('PRODUCTION'),
+        api_key_signup_key=env.get_credential('API_UMBRELLA_SIGNUP_KEY'),
+        api_key_signup_feature_flag=bool(env.get_credential('API_UMBRELLA_SIGNUP_KEY_FEATURE_FLAG', '')),
     )
 
 

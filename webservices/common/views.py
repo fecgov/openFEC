@@ -58,6 +58,8 @@ class ItemizedResource(ApiResource):
 
     year_column = None
     index_column = None
+    filters_with_max_count = []
+    max_count = 10
 
     def get(self, **kwargs):
         """Get itemized resources. If multiple values are passed for `committee_id`,
@@ -79,13 +81,19 @@ class ItemizedResource(ApiResource):
                     ),
                     status_code=422,
                 )
-        committee_ids = kwargs.get('committee_id', [])
-        if len(committee_ids) > 10:
+        over_limit_fields = [
+            field
+            for field in self.filters_with_max_count
+            if len(kwargs.get(field, [])) > self.max_count
+        ]
+        if over_limit_fields:
             raise exceptions.ApiError(
-                'Can only specify up to ten values for "committee_id".',
+                "Can only specify up to {0} values for `{1}`".format(
+                    self.max_count, "`, `".join(over_limit_fields)
+                ),
                 status_code=422,
             )
-        if len(committee_ids) > 1:
+        if len(kwargs.get("committee_id", [])) > 1:
             query, count = self.join_committee_queries(kwargs)
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
