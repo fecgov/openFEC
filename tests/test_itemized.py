@@ -727,6 +727,36 @@ class TestScheduleA(ApiBaseTest):
             assert len(results) == 1
             assert results[0][column.key] == values[0]
 
+    def test_schedule_a_load_date_filter(self):
+        [
+            factories.ScheduleAFactory(load_date=datetime.date(2020, 1, 2)),
+            factories.ScheduleAFactory(load_date=datetime.date(2020, 1, 3)),
+            factories.ScheduleAFactory(load_date=datetime.date(2020, 1, 1)),
+            factories.ScheduleAFactory(load_date=datetime.date(2019, 12, 31)),
+        ]
+
+        results = self._results(
+            api.url_for(ScheduleAView, min_load_date='2020-01-01', **self.kwargs)
+        )
+        self.assertTrue(
+            all(
+                datetime.datetime.strptime(each['load_date'][:10], '%Y-%m-%d').date()
+                >= datetime.date(2020, 1, 1)
+                for each in results
+            )
+        )
+
+        results = self._results(
+            api.url_for(ScheduleAView, max_load_date='2020-01-01', **self.kwargs)
+        )
+        self.assertTrue(
+            all(
+                datetime.datetime.strptime(each['load_date'][:10], '%Y-%m-%d').date()
+                <= datetime.date(2020, 1, 1)
+                for each in results
+            )
+        )
+
 
 class TestScheduleB(ApiBaseTest):
     kwargs = {'two_year_transaction_period': 2016}
