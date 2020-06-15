@@ -86,6 +86,7 @@ class ScheduleAView(ItemizedResource):
         'contributor_employer',
         'contributor_occupation',
     ]
+    use_union=True
 
     @property
     def args(self):
@@ -123,7 +124,11 @@ class ScheduleAView(ItemizedResource):
                     ),
                     status_code=400,
                 )
-        query = super().build_query(**kwargs)
+        query = self.model.query
+        query = filters.filter_match(query, kwargs, self.filter_match_fields)
+        query = filters.filter_multi(query, kwargs, self.filter_multi_fields)
+        query = filters.filter_range(query, kwargs, self.filter_range_fields)
+        query = query.options(*self.query_options)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
         zip_list = []
         if kwargs.get('contributor_zip'):
@@ -151,6 +156,13 @@ class ScheduleAView(ItemizedResource):
                 raise exceptions.ApiError(
                     exceptions.LINE_NUMBER_ERROR, status_code=400,
                 )
+        # When using UNION ALL logic, this needs to come last
+        query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields, self.use_union)
+        from sqlalchemy.dialects import postgresql
+
+        print(str(query.statement.compile(
+            dialect=postgresql.dialect(),
+            compile_kwargs={"literal_binds": True})))
         return query
 
 

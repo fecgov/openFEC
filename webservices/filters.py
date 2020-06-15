@@ -62,7 +62,7 @@ def filter_range(query, kwargs, fields):
     return query
 
 
-def filter_fulltext(query, kwargs, fields):
+def filter_fulltext(query, kwargs, fields, use_union=False):
     for key, column in fields:
         if kwargs.get(key):
             exclude_list = build_exclude_list(kwargs.get(key))
@@ -74,11 +74,28 @@ def filter_fulltext(query, kwargs, fields):
                 ]
                 query = query.filter(sa.and_(*filters))
             if include_list:
-                filters = [
-                    column.match(utils.parse_fulltext(value))
-                    for value in include_list
-                ]
-                query = query.filter(sa.or_(*filters))
+                if use_union:
+                    filters = [
+                        column.match(utils.parse_fulltext(value))
+                        for value in include_list
+                    ]
+                    temp_query = query  # save this for multi below
+                    # First filter is an AND
+                    query = query.filter(sa.and_(filters[0]))
+                    # Additional filters are UNION
+                    if len(filters) > 1:
+                        # don't actually filter the query or it just builds up
+                        sub_queries = [
+                            temp_query.filter(sa.and_(query_filter))
+                            for query_filter in filters[1:]
+                        ]
+                        query = query.union_all(*sub_queries)
+                else:
+                    filters = [
+                        column.match(utils.parse_fulltext(value))
+                        for value in include_list
+                    ]
+                    query = query.filter(sa.or_(*filters))
     return query
 
 
