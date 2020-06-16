@@ -158,11 +158,7 @@ class ScheduleAView(ItemizedResource):
                 )
         # When using UNION ALL logic, this needs to come last
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields, self.use_union)
-        from sqlalchemy.dialects import postgresql
 
-        print(str(query.statement.compile(
-            dialect=postgresql.dialect(),
-            compile_kwargs={"literal_binds": True})))
         return query
 
 

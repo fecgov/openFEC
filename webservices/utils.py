@@ -98,6 +98,12 @@ def fetch_page(
             index_column=index_column,
             nulls_last=nulls_last,
         )
+    # from sqlalchemy.dialects import postgresql
+
+    # print(str(query.statement.compile(
+    #     dialect=postgresql.dialect(),
+    #     compile_kwargs={"literal_binds": True})))
+
     paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
 
@@ -153,6 +159,11 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             cursor = cursor.filter(filter)
 
         query = cursor.order_by(direction(self.index_column)).limit(limit)
+        from sqlalchemy.dialects import postgresql
+
+        print(str(query.statement.compile(
+            dialect=postgresql.dialect(),
+            compile_kwargs={"literal_binds": True})))
         return query.all() if eager else query
 
     def _get_index_values(self, result):
