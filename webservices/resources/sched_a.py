@@ -62,13 +62,18 @@ class ScheduleAView(ItemizedResource):
         (('min_image_number', 'max_image_number'), models.ScheduleA.image_number),
         (('min_load_date', 'max_load_date'), models.ScheduleA.load_date),
     ]
-    filter_fulltext_fields = [
+    # filter_fulltext_fields = [
+    #     ('contributor_name', models.ScheduleA.contributor_name_text),
+    #     ('contributor_employer', models.ScheduleA.contributor_employer_text),
+    #     ('contributor_occupation', models.ScheduleA.contributor_occupation_text),
+    # ]
+    filter_multi_start_with_fields = [
+        ('contributor_zip', models.ScheduleA.contributor_zip),
+    ]
+    filter_union_fields = [
         ('contributor_name', models.ScheduleA.contributor_name_text),
         ('contributor_employer', models.ScheduleA.contributor_employer_text),
         ('contributor_occupation', models.ScheduleA.contributor_occupation_text),
-    ]
-    filter_multi_start_with_fields = [
-        ('contributor_zip', models.ScheduleA.contributor_zip),
     ]
     query_options = [
         sa.orm.joinedload(models.ScheduleA.committee),
@@ -152,6 +157,8 @@ class ScheduleAView(ItemizedResource):
                 raise exceptions.ApiError(
                     exceptions.LINE_NUMBER_ERROR, status_code=400,
                 )
+        # Union filters always need to come last
+        query = filters.filter_union(query, kwargs, self.filter_union_fields, self.model)
         return query
 
 

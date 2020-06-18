@@ -2,6 +2,7 @@ import sqlalchemy as sa
 
 from webservices import utils
 from webservices import exceptions
+from webservices import sorting
 from webservices.common import models
 
 
@@ -79,6 +80,50 @@ def filter_fulltext(query, kwargs, fields):
                     for value in include_list
                 ]
                 query = query.filter(sa.or_(*filters))
+    return query
+
+
+def filter_union(query, kwargs, fields, model):
+    # TODO: No support for exclude fields, probably ok
+    for key, column in fields:
+        if kwargs.get(key):
+            filters = [
+                column.match(utils.parse_fulltext(value))
+                for value in kwargs.get(key)
+            ]
+            # First filter is an AND
+            query = query.filter(sa.and_(filters[0]))
+            query, _ = sorting.sort(query, kwargs['sort'], model=model, hide_null=kwargs['sort_hide_null'])
+            from sqlalchemy.dialects import postgresql
+            # print("temp_query 1\n")
+            # print(str(temp_query.statement.compile(
+            #     dialect=postgresql.dialect(),
+            #     compile_kwargs={"literal_binds": True})))
+            # Additional filters are UNION
+            if len(filters) > 1:
+                # don't actually filter the query or it just builds up
+                sub_queries = []
+                for query_filter in filters[1:]:
+                    temp_query = query  # save this for multi below
+                    print("temp_query 2\n")
+                    print(str(temp_query.statement.compile(
+                        dialect=postgresql.dialect(),
+                        compile_kwargs={"literal_binds": True})))
+                    temp_query = temp_query.filter(sa.and_(query_filter))
+                    temp_query, _ = sorting.sort(temp_query, kwargs['sort'], model=model, hide_null=kwargs['sort_hide_null'])
+                    temp_query = temp_query.limit(kwargs.get('per_page'))
+                    sub_queries.append(temp_query)
+                query = query.limit(kwargs.get('per_page'))
+                query = query.union_all(*sub_queries)
+                print("dir(query)")
+                print(dir(query))
+                print("vars(query)")
+                print(vars(query))
+            from sqlalchemy.dialects import postgresql
+
+            print(str(query.statement.compile(
+                dialect=postgresql.dialect(),
+                compile_kwargs={"literal_binds": True})))
     return query
 
 
