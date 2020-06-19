@@ -138,12 +138,15 @@ class IndicesValidator(IndexValidator):
 
 
 def make_sort_args(default=None, validator=None, default_hide_null=False,
-        default_nulls_only=False, default_sort_nulls_last=False, show_nulls_last_arg=True):
+        default_nulls_only=False, default_sort_nulls_last=False, show_nulls_last_arg=True,
+        additional_description=''):
     args = {
         'sort': fields.Str(
             missing=default,
             validate=validator,
-            description='Provide a field to sort by. Use - for descending order.',
+            description='Provide a field to sort by. Use `-` for descending order.\n{}'.format(
+                additional_description
+            ),
         ),
         'sort_hide_null': fields.Bool(
             missing=default_hide_null,
