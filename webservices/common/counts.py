@@ -18,7 +18,7 @@ def get_count(query, session, model, estimate=True, use_pk_for_count=False, thre
     Calculate either the estimated count or exact count.
     Indicate whether the count is an estimate.
     """
-    if use_pk_for_count:
+    if use_pk_for_count and model:
         primary_key = model.__mapper__.primary_key[0]
         query = query.with_entities(primary_key)
     if estimate:
