@@ -36,7 +36,7 @@ def call_resource(path, qs):
     query, model, schema = unpack(resource.build_query(**kwargs), 3)
     if not model:
         model = resource.model
-    count, _ = counts.get_count(query, db.session, model, resource.use_estimated_counts, resource.use_pk_for_count)
+    count, _ = counts.get_count(query, model, resource.use_estimated_counts, resource.use_pk_for_count)
     return {
         'path': path,
         'qs': qs,

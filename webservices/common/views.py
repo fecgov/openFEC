@@ -33,7 +33,7 @@ class ApiResource(utils.Resource):
     @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
-        count, _ = counts.get_count(query, models.db.session, self.model, self.use_estimated_counts, self.use_pk_for_count)
+        count, _ = counts.get_count(query, self.model, self.use_estimated_counts, self.use_pk_for_count)
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
@@ -98,7 +98,7 @@ class ItemizedResource(ApiResource):
             query, count = self.join_committee_queries(kwargs)
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
-        count, _ = counts.get_count(query, models.db.session, self.model, self.use_estimated_counts, self.use_pk_for_count)
+        count, _ = counts.get_count(query, self.model, self.use_estimated_counts, self.use_pk_for_count)
         return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
 
     def join_committee_queries(self, kwargs):
@@ -125,5 +125,5 @@ class ItemizedResource(ApiResource):
         sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
         query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null)
         page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
-        count, _ = counts.get_count(query, models.db.session, self.model, self.use_estimated_counts, self.use_pk_for_count)
+        count, _ = counts.get_count(query, self.model, self.use_estimated_counts, self.use_pk_for_count)
         return page_query, count

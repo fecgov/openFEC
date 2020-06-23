@@ -8,12 +8,13 @@ import re
 
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import Executable, ClauseElement, _literal_as_text
+from webservices.common import models
 
 
 count_pattern = re.compile(r'rows=(\d+)')
 
 
-def get_count(query, session, model, estimate=True, use_pk_for_count=False, threshold=500000):
+def get_count(query, model, estimate=True, use_pk_for_count=False, threshold=500000):
     """
     Calculate either the estimated count or exact count.
     Indicate whether the count is an estimate.
@@ -22,7 +23,7 @@ def get_count(query, session, model, estimate=True, use_pk_for_count=False, thre
         primary_key = model.__mapper__.primary_key[0]
         query = query.with_entities(primary_key)
     if estimate:
-        rows = get_query_plan(query, session)
+        rows = get_query_plan(query)
         count = extract_analyze_count(rows)
         if count < threshold:
             estimate = False
@@ -32,8 +33,8 @@ def get_count(query, session, model, estimate=True, use_pk_for_count=False, thre
     return count, estimate
 
 
-def get_query_plan(query, session):
-    return session.execute(explain(query)).fetchall()
+def get_query_plan(query):
+    return models.db.session.execute(explain(query)).fetchall()
 
 
 def extract_analyze_count(rows):

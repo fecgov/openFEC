@@ -27,7 +27,7 @@ class TestCounts(ApiBaseTest):
         ]
         resource = sched_e.ScheduleEEfileView()
         count, estimate = counts.get_count(
-            query, db.session, models.ScheduleEEfile, resource.use_estimated_counts
+            query, models.ScheduleEEfile, resource.use_estimated_counts
         )
         # Always use exact count for Schedule E efile
         self.assertEqual(count, 5)
@@ -51,7 +51,7 @@ class TestCounts(ApiBaseTest):
         get_query_plan_mock.return_value = [
             ('Seq Scan on fec_fitem_sched_a  (cost=0.00..10.60 rows=200 width=1289)',)
         ]
-        count, estimate = counts.get_count(query, db.session, models.ScheduleA)
+        count, estimate = counts.get_count(query, models.ScheduleA)
         self.assertEqual(count, 2)
         self.assertEqual(estimate, False)
 
@@ -64,6 +64,6 @@ class TestCounts(ApiBaseTest):
             (cost=0.00..10.60 rows=2000000 width=1289)',
             )
         ]
-        count, estimate = counts.get_count(query, db.session, models.ScheduleA)
+        count, estimate = counts.get_count(query, models.ScheduleA)
         self.assertEqual(count, 2000000)
         self.assertEqual(estimate, True)
