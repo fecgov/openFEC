@@ -60,6 +60,7 @@ class ScheduleAView(ItemizedResource):
         (('min_date', 'max_date'), models.ScheduleA.contribution_receipt_date),
         (('min_amount', 'max_amount'), models.ScheduleA.contribution_receipt_amount),
         (('min_image_number', 'max_image_number'), models.ScheduleA.image_number),
+        (('min_load_date', 'max_load_date'), models.ScheduleA.load_date),
     ]
     filter_fulltext_fields = [
         ('contributor_name', models.ScheduleA.contributor_name_text),

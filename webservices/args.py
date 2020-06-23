@@ -535,7 +535,8 @@ schedule_a = {
         IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
         description=docs.DESIGNATION,
     ),
-
+    'min_load_date': fields.Date(description=docs.MIN_LOAD_DATE),
+    'max_load_date': fields.Date(description=docs.MAX_LOAD_DATE),
 }
 
 schedule_a_e_file = {

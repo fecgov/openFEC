@@ -1374,6 +1374,8 @@ IS_INDIVIDUAL = 'Restrict to non-earmarked individual contributions where memo c
 Filtering individuals is useful to make sure contributions are not double reported and in creating \
 breakdowns of the amount of money coming from individuals.'
 MISSING_STATE = 'Exclude values with missing state'
+MIN_LOAD_DATE = 'Minimum load date'
+MAX_LOAD_DATE = 'Maximum load date'
 
 # schedule B
 DISBURSEMENT_DESCRIPTION = 'Description of disbursement'
@@ -1933,7 +1935,7 @@ PRESIDENTIAL = """
 Data supporting fec.gov's presidential map.
 
 For more information about the presidential map data available to download from fec.gov,\n\
-please visit: https://www.fec.gov/campaign-finance-data/presidential-map-help/
+please visit: https://www.fec.gov/campaign-finance-data/presidential-map-data/
 """
 
 PRESIDENTIAL_BY_CANDIDATE = """
