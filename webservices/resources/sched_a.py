@@ -98,7 +98,8 @@ class ScheduleAView(ItemizedResource):
                 default='contribution_receipt_date',
                 validator=args.OptionValidator(self.sort_options),
                 show_nulls_last_arg=False,
-                additional_description='The `contributor_aggregate_ytd` option is deprecated.'
+                additional_description="The `contributor_aggregate_ytd` option is deprecated. \n"
+                " `contribution_receipt_date` default sorting ASC will change to DESC."
             ),
         )
 
