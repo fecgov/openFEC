@@ -130,7 +130,7 @@ class EFilingsView(views.ApiResource):
 
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
-        count, _ = counts.get_count(query, models.db.session)
+        count, _ = counts.get_count(self, query)
         return utils.fetch_page(query, kwargs, model=models.EFilings, count=count)
 
     @property

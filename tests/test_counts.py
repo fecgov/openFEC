@@ -5,7 +5,7 @@ from unittest import mock
 from tests import factories
 from tests.common import ApiBaseTest
 
-from webservices.resources import sched_e
+from webservices.resources import sched_a, sched_e
 from webservices.rest import db
 from webservices.common import models, counts
 
@@ -27,7 +27,7 @@ class TestCounts(ApiBaseTest):
         ]
         resource = sched_e.ScheduleEEfileView()
         count, estimate = counts.get_count(
-            query, db.session, resource.use_estimated_counts
+            resource, query
         )
         # Always use exact count for Schedule E efile
         self.assertEqual(count, 5)
@@ -51,7 +51,8 @@ class TestCounts(ApiBaseTest):
         get_query_plan_mock.return_value = [
             ('Seq Scan on fec_fitem_sched_a  (cost=0.00..10.60 rows=200 width=1289)',)
         ]
-        count, estimate = counts.get_count(query, db.session)
+        resource = sched_a.ScheduleAView()
+        count, estimate = counts.get_count(resource, query)
         self.assertEqual(count, 2)
         self.assertEqual(estimate, False)
 
@@ -64,6 +65,7 @@ class TestCounts(ApiBaseTest):
             (cost=0.00..10.60 rows=2000000 width=1289)',
             )
         ]
-        count, estimate = counts.get_count(query, db.session)
+        resource = sched_a.ScheduleAView()
+        count, estimate = counts.get_count(resource, query)
         self.assertEqual(count, 2000000)
         self.assertEqual(estimate, True)

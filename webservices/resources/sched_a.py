@@ -87,6 +87,8 @@ class ScheduleAView(ItemizedResource):
         'contributor_employer',
         'contributor_occupation',
     ]
+    use_pk_for_count=True
+
 
     @property
     def args(self):
