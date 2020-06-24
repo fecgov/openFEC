@@ -1,6 +1,6 @@
 ## Summary (required)
 
-- Resolves #Issue number
+- Resolves #issue_number
 
 _Include a summary of proposed changes._
 
