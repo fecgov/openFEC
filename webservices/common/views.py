@@ -8,7 +8,9 @@ from webservices import exceptions
 from webservices.common import counts
 from webservices.common import models
 from webservices.utils import use_kwargs
+from webservices.config import SQL_CONFIG
 
+ALL_TWO_YEAR_PERIODS = range(1976, SQL_CONFIG["END_YEAR_ITEMIZED"] + 2, 2)
 
 class ApiResource(utils.Resource):
 
@@ -95,6 +97,8 @@ class ItemizedResource(ApiResource):
                 ),
                 status_code=422,
             )
+        if not kwargs.get("two_year_transaction_period"):
+            kwargs["two_year_transaction_period"] = ALL_TWO_YEAR_PERIODS
         if len(kwargs.get("committee_id", [])) > 1:
             query, count = self.join_committee_queries(kwargs)
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
