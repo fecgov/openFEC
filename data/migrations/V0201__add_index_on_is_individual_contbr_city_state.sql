@@ -1,6 +1,6 @@
 /*
 This migration file supports issue #4369
-In order to add new index for performance (outage),  is_individual_contbr_city_state index added.
+In order to add new index for performance (outage), is_individual_contbr_city_state index added.
 */
 
 -- -----------------------------------------------
@@ -29,7 +29,7 @@ END$$;
 -- 1979_1980
 DO $$
 BEGIN
-    EXECUTE format('CREATE INDEX idx_sched_a_1979_1980_is_individual_contbr_city_state ON disclosure.fec_fitem_sched_a_1977_1978 USING btree (is_individual ASC NULLS LAST, contbr_city ASC NULLS LAST, contbr_st ASC NULLS LAST, sub_id ASC NULLS LAST);');
+    EXECUTE format('CREATE INDEX idx_sched_a_1979_1980_is_individual_contbr_city_state ON disclosure.fec_fitem_sched_a_1979_1980 USING btree (is_individual ASC NULLS LAST, contbr_city ASC NULLS LAST, contbr_st ASC NULLS LAST, sub_id ASC NULLS LAST);');
 EXCEPTION
     WHEN duplicate_table THEN
         null;
