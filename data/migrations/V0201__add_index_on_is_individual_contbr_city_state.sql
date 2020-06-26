@@ -29,7 +29,7 @@ END$$;
 -- 1979_1980
 DO $$
 BEGIN
-    EXECUTE format('CREATE INDEX idx_sched_a_1977_1978_is_individual_contbr_city_state ON disclosure.fec_fitem_sched_a_1977_1978 USING btree (is_individual ASC NULLS LAST, contbr_city ASC NULLS LAST, contbr_st ASC NULLS LAST, sub_id ASC NULLS LAST);');
+    EXECUTE format('CREATE INDEX idx_sched_a_1979_1980_is_individual_contbr_city_state ON disclosure.fec_fitem_sched_a_1977_1978 USING btree (is_individual ASC NULLS LAST, contbr_city ASC NULLS LAST, contbr_st ASC NULLS LAST, sub_id ASC NULLS LAST);');
 EXCEPTION
     WHEN duplicate_table THEN
         null;
