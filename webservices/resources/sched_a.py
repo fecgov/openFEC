@@ -70,6 +70,12 @@ class ScheduleAView(ItemizedResource):
     filter_multi_start_with_fields = [
         ('contributor_zip', models.ScheduleA.contributor_zip),
     ]
+    filter_union_fields = [
+        ('committee_id', models.ScheduleA.committee_id),
+        ('contributor_name', models.ScheduleA.contributor_name_text),
+        ('contributor_employer', models.ScheduleA.contributor_employer_text),
+        ('contributor_occupation', models.ScheduleA.contributor_occupation_text),
+    ]
     query_options = [
         sa.orm.joinedload(models.ScheduleA.committee),
         sa.orm.joinedload(models.ScheduleA.contributor),
@@ -87,7 +93,7 @@ class ScheduleAView(ItemizedResource):
         'contributor_employer',
         'contributor_occupation',
     ]
-    use_pk_for_count=True
+    use_pk_for_count = True
 
 
     @property
@@ -119,7 +125,7 @@ class ScheduleAView(ItemizedResource):
         two_year_transaction_periods = set(
             kwargs.get('two_year_transaction_period', [])
         )
-        if len(two_year_transaction_periods) != 1:
+        if len(two_year_transaction_periods) != 1 and kwargs.get("check_secondary_index", True):
             if not any(kwargs.get(field) for field in secondary_index_options):
                 raise exceptions.ApiError(
                     "Please choose a single `two_year_transaction_period` or "

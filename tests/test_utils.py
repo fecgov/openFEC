@@ -288,7 +288,6 @@ class TestSort(ApiBaseTest):
             model=None,
         )
 
-        # print(str(query.statement.compile(dialect=postgresql.dialect())))
         self.assertEqual(len(query.all()), len(candidates))
         query, columns = sorting.sort(
             electionView.build_query(office='senate', cycle=2016, state='MO'),

@@ -55,7 +55,9 @@ class ScheduleEView(ItemizedResource):
         (('min_image_number', 'max_image_number'), models.ScheduleE.image_number),
         (('min_dissemination_date', 'max_dissemination_date'), models.ScheduleE.dissemination_date),
         (('min_filing_date', 'max_filing_date'), models.ScheduleE.filing_date),
-
+    ]
+    filter_union_fields = [
+        ('committee_id', models.ScheduleA.committee_id),
     ]
     sort_options = [
         'expenditure_date',

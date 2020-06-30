@@ -477,7 +477,6 @@ class TriggerTestCase(common.BaseTestCase):
         results = self._results(
             api.url_for(ScheduleBView, contributor_employer='ést-lou')
         )
-        print('results = ', results)
         contbr_employer_list = {r['recipient_name'] for r in results}
         assert names.issubset(contbr_employer_list)
         results = self._results(

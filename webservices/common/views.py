@@ -62,7 +62,7 @@ class ItemizedResource(ApiResource):
     index_column = None
     filters_with_max_count = []
     max_count = 10
-    union_fields = ["committee_id"]
+    filter_union_fields = []
 
     def get(self, **kwargs):
         """Get itemized resources. If multiple values are passed for any 'union_fields',
@@ -96,37 +96,42 @@ class ItemizedResource(ApiResource):
                 ),
                 status_code=422,
             )
-        for field in self.union_fields:
-            if len(kwargs.get(field, [])) > 1:
-                query, count = self.join_union_queries(kwargs, field)
-                return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
+        union_fields_for_subqueries = [
+            (field, column)
+            for field, column in self.filter_union_fields
+            if len(kwargs.get(field, [])) > 1
+        ]
+        if union_fields_for_subqueries:
+            query = self.build_query(**kwargs)
+            count, _ = counts.get_count(self, query)
+            page_query = self.join_union_queries(query, kwargs, union_fields_for_subqueries)
+            return utils.fetch_seek_page(page_query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
         count, _ = counts.get_count(self, query)
         return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
 
-    def join_union_queries(self, kwargs, field):
+    def join_union_queries(self, query, kwargs, union_fields_for_subqueries):
         """Build and compose per-committee subqueries using `UNION ALL`.
         """
         queries = []
-        total = 0
-        for argument in kwargs.get(field, []):
-            query, count = self.build_union_query(kwargs, field, argument)
-            queries.append(query.subquery().select())
-            total += count
-        query = models.db.session.query(
-            self.model
-        ).select_entity_from(
-            sa.union_all(*queries)
-        )
+        kwargs_without_union_fields = kwargs.copy()
+        # generate a copy without union args
+        for field, column in union_fields_for_subqueries:
+            del kwargs_without_union_fields[field]
+        query = self.build_query(**kwargs_without_union_fields, check_secondary_index=False)
+        for field, column in union_fields_for_subqueries:
+            sub_queries = []
+            for argument_count, argument in enumerate(kwargs.get(field, [])):
+                temp_kwargs = utils.extend(kwargs, {field: [argument]})
+                sub_query = query
+                if field == "committee_id":
+                    sub_query = sub_query.filter(column == argument)
+                else:
+                    sub_query = sub_query.filter(column.match(utils.parse_fulltext(argument)))
+                sub_query = utils.fetch_seek_page(sub_query, temp_kwargs, self.index_column, count=-1, eager=False).results
+                if argument_count == 0:
+                    first_query = sub_query
+                sub_queries.append(sub_query.subquery().select())
+            query = first_query.union_all(*sub_queries)
         query = query.options(*self.query_options)
-        return query, total
-
-    def build_union_query(self, kwargs, field, argument):
-        """Build a subquery by specified `field` arguments.
-        """
-        query = self.build_query(_apply_options=False, **utils.extend(kwargs, {field: [argument]}))
-        sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
-        query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null)
-        page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
-        count, _ = counts.get_count(self, query)
-        return page_query, count
+        return query
