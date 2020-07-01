@@ -8,6 +8,9 @@ from webservices import exceptions
 from webservices.common import counts
 from webservices.common import models
 from webservices.utils import use_kwargs
+from webservices.config import SQL_CONFIG
+
+ALL_TWO_YEAR_PERIODS = range(1976, SQL_CONFIG["END_YEAR_ITEMIZED"] + 2, 2)
 
 
 class ApiResource(utils.Resource):
@@ -96,6 +99,12 @@ class ItemizedResource(ApiResource):
                 ),
                 status_code=422,
             )
+        if type(self).__name__ == "ScheduleEView":
+            if not kwargs.get("cycle"):
+                kwargs["cycle"] = ALL_TWO_YEAR_PERIODS
+        else:
+            if not kwargs.get("two_year_transaction_period"):
+                kwargs["two_year_transaction_period"] = ALL_TWO_YEAR_PERIODS
         union_fields_for_subqueries = [
             (field, column)
             for field, column in self.filter_union_fields
@@ -124,7 +133,8 @@ class ItemizedResource(ApiResource):
             for argument_count, argument in enumerate(kwargs.get(field, [])):
                 temp_kwargs = utils.extend(kwargs, {field: [argument]})
                 sub_query = query
-                if field == "committee_id":
+                # TODO: come up with a better way of determining filter
+                if field in ("committee_id", "cycle", "two_year_transaction_period"):
                     sub_query = sub_query.filter(column == argument)
                 else:
                     sub_query = sub_query.filter(column.match(utils.parse_fulltext(argument)))

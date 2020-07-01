@@ -58,6 +58,10 @@ class ScheduleBView(ItemizedResource):
         (('min_image_number', 'max_image_number'),
          models.ScheduleB.image_number),
     ]
+    filter_union_fields = [
+        ('committee_id', models.ScheduleA.committee_id),
+        ('two_year_transaction_period', models.ScheduleB.two_year_transaction_period),
+    ]
     sort_options = ['disbursement_date', 'disbursement_amount']
     filters_with_max_count = [
         'committee_id',
