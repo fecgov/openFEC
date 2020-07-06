@@ -164,7 +164,6 @@ class CandidateCommitteeTotalsHouseSenate(CandidateCommitteeTotals):
 class CommitteeTotalsPacParty(CommitteeTotals):
     __tablename__ = 'ofec_totals_pac_party_vw'
 
-    idx = db.Column('sub_id', db.Integer)
     all_loans_received = db.Column(db.Numeric(30, 2))
     allocated_federal_election_levin_share = db.Column(db.Numeric(30, 2))
     coordinated_expenditures_by_party_committee = db.Column(db.Numeric(30, 2))
