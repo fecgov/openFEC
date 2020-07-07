@@ -254,6 +254,7 @@ class ScheduleAEfile(BaseRawItemized):
         return name
 
 
+
 class ScheduleB(BaseItemized):
     __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'fec_fitem_sched_b'

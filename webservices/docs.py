@@ -712,12 +712,9 @@ SCHEDULE_A_TAG = '''
 This collection of endpoints includes Schedule A records reported by a committee. \
 Schedule A records describe itemized receipts, including contributions from individuals. \
 If you are interested in contributions from individuals, use the /schedules/schedule_a/ endpoint. \
-For a more complete description of all Schedule A records see the [receipts section] \
-(https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) \
-of our “about the data” page. If you are interested in our “is_individual” methodology see the \
-[methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/ \
-methodology/) section of our “about the data” page.
-
+For a more complete description of all Schedule A records visit [About receipts data] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/). \
+If you are interested in our "is_individual" methodology visit our [methodology page] \
+(https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/).
 '''
 
 SCHEDULE_A = '''
@@ -726,19 +723,20 @@ This description is for both ​`/schedules​/schedule_a​/` and ​ `/schedul
 This endpoint provides itemized receipts. Schedule A records describe itemized receipts, \
 including contributions from individuals. If you are interested in contributions from an \
 individual, use the `/schedules/schedule_a/` endpoint. For a more complete description of all \
-Schedule A records see the [receipts section] (https://www.fec.gov/campaign-finance-data/ \
-about-campaign-finance-data/about-receipts-data/) of our “about the data” page. If you are \
-interested in our “is_individual” methodology see the [methodology section] \
-(https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/) of our \
-“about the data” page.
+Schedule A records visit [About receipts data] \
+(https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/). \
+If you are interested in our "is_individual" methodology visit our [methodology page] \
+(https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/).
 
 ​The `/schedules​/schedule_a​/` endpoint is not paginated by page number. This endpoint uses keyset \
 pagination to improve query performance and these indices are required to properly page through \
 this large dataset. To request the next page, you should append the values found in the \
 `last_indexes` object from pagination to the URL of your last request as additional parameters. \
-For example, when sorting by `contribution_receipt_date`, you might receive a page of results \
-with the following pagination information:
 
+For example, when sorting by `contribution_receipt_date`, you might receive a page of results \
+with the two scenarios of following pagination information:
+
+case #1:
 ```
 pagination: {\n\
     pages: 2152643,\n\
@@ -750,15 +748,34 @@ pagination: {\n\
     }\n\
 }\n\
 ```
+<br/>
+case #2 (results which include contribution_receipt_date = NULL):
 
+```
+pagination: {\n\
+    pages: 2152644,\n\
+    per_page: 20,\n\
+    count: 43052850,\n\
+    last_indexes: {\n\
+        last_index: "230880639",\n\
+        sort_null_only: True\n\
+    }\n\
+}\n\
+```
 To fetch the next page of sorted results, append `last_index=230880619` and \
-`last_contribution_receipt_date=2014-01-01` to the URL. We strongly advise paging through \
-these results using sort indices. The default sort is ascending by `contribution_receipt_date`. \
+`last_contribution_receipt_date=2014-01-01` to the URL and \
+when reaching `contribution_receipt_date=NULL`, append `last_index=230880639` \
+and `sort_null_only=True`. We strongly advise paging through these results \
+using sort indices. The default sort is acending by `contribution_receipt_date` \
+(`deprecated`, will be descending). \
 If you do not page using sort indices, some transactions may be unintentionally filtered out.
 
 Calls to ​`/schedules​/schedule_a​/` may return many records. For large result sets, the record \
 counts found in the pagination object are approximate; you will need to page through the records \
 until no records are returned.
+
+To avoid throwing the "out of range" exception on the last page, one recommandation is \
+to use total count and `per_page` to control the traverse loop of results.
 
 ​The `/schedules​/schedule_a​/{sub_id}​/` endpoint returns a single transaction, but it does \
 include a pagination object class. Please ignore the information in that object class.
@@ -940,33 +957,29 @@ The $200.00 and under category includes contributions of $200 or less combined w
 SCHEDULE_A_BY_STATE = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated by \
 the contributor’s state. If you are interested in our “is_individual” methodology see the \
-[methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/ \
-about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not \
-included.
+[methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
+Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_BY_ZIP = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated by \
 the contributor’s ZIP code. If you are interested in our “is_individual” methodology see the \
-[methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/ \
-about-receipts-data/) section of our “about the data” page. Unitemized individual contributions \
-are not included.
+[methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
+Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_BY_EMPLOYER = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated by \
 the contributor’s employer name. If you are interested in our “is_individual” methodology see the \
-[methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/ \
-about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not \
-included.
+[methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
+Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_BY_OCCUPATION = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated by \
 the contributor’s occupation. If you are interested in our “is_individual” methodology see the \
-[methodology section] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/ \
-about-receipts-data/) of our “about the data” page. Unitemized individual contributions are not \
-included.
+[methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
+Unitemized individual contributions are not included.
 '''
 
 CONTRIBUTION_RECEIPTS = '''
@@ -995,25 +1008,23 @@ Number of records making up the total.
 
 SCHEDULE_A_SIZE_CANDIDATE_TAG = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated by \
-size of contribution and candidate. If you are interested in our “is_individual” methodology \
-see the [methodology section] (https://www.fec.gov/campaign-finance-data/ \
-about-campaign-finance-data/about-receipts-data/) of our “about the data” page. \
+size of contribution and candidate. If you are interested in our “is_individual” methodology see the \
+[methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
 Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_STATE_CANDIDATE_TAG = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated \
-by contributor’s state and candidate. If you are interested in our “is_individual” methodology \
-see the [methodology section] (https://www.fec.gov/campaign-finance-data/ \
-about-campaign-finance-data/about-receipts-data/) of our “about the data” page. \
+by contributor’s state and candidate. If you are interested in our “is_individual” methodology see the \
+[methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
 Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_STATE_CANDIDATE_TOTAL_TAG = '''
 Itemized individual contributions aggregated by contributor’s state, candidate, committee type \
-and cycle. If you are interested in our “is_individual” methodology see the [methodology section] \
-(https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/) of \
-our “about the data” page. Unitemized individual contributions are not included.
+and cycle. If you are interested in our “is_individual” methodology see the \
+[methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
+Unitemized individual contributions are not included.
 
 '''
 
@@ -1027,9 +1038,8 @@ Aggregated candidate receipts and disbursements grouped by cycle.
 
 STATE_AGGREGATE_RECIPIENT_TOTALS = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated by \
-contributor’s state, committee type and cycle. If you are interested in our “is_individual” \
-methodology see the [methodology section] (https://www.fec.gov/campaign-finance-data/ \
-about-campaign-finance-data/about-receipts-data/) of our “about the data” page. \
+contributor’s state, committee type and cycle. If you are interested in our “is_individual” methodology see the \
+[methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
 Unitemized individual contributions are not included.
 '''
 

@@ -7,6 +7,7 @@ from webservices import rest
 from webservices.rest import api
 from webservices.resources.search import CandidateNameSearch, CommitteeNameSearch
 from webservices.resources.candidates import CandidateList
+from webservices.common.views import ApiResource
 
 
 class OverallTest(ApiBaseTest):
@@ -126,3 +127,9 @@ class OverallTest(ApiBaseTest):
         observed = [each['id'] for each in results]
         assert expected == observed
         assert all('bartlet' in each['name'].lower() for each in results)
+
+    def test_has_primary_key_if_using_pk_for_count(self):
+        for view in ApiResource.__subclasses__():
+            if view.use_pk_for_count:
+                assert view.model is not None
+                assert len(view.model.__mapper__.primary_key) > 0
