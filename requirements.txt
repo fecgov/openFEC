@@ -41,7 +41,7 @@ redis==3.2.0
 # testing and build in circle
 pytest==5.2.0
 pytest-cov==2.5.1
-codecov==2.0.17
+codecov==2.1.7
 pytest-flake8==1.0.6
 nplusone==0.8.0
 webtest==2.0.34
