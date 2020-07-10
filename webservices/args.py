@@ -415,10 +415,9 @@ totals = {
     'designation': fields.Str(description=docs.DESIGNATION),
 }
 
-totals_all = {
+totals_by_committee_type = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'committee_type_full': fields.Str(description=docs.COMMITTEE_TYPE),
-    'committee_designation_full': fields.Str(description=docs.DESIGNATION),
+    'committee_designation': fields.List(fields.Str, description=docs.DESIGNATION),
     'committee_id': fields.Str(description=docs.COMMITTEE_ID),
 }
 
