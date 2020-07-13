@@ -138,8 +138,8 @@ TRUSTED_PROXY_IPS = utils.split_env_var(env.get_credential('TRUSTED_PROXY_IPS', 
 BLOCKED_IPS = env.get_credential('BLOCKED_IPS', '')
 FEC_API_USE_PROXY = env.get_credential('FEC_API_USE_PROXY', False)
 # Search these key_id's in the API umbrella admin interface to look up the API KEY
-DOWNLOAD_WHITELIST_API_KEY_ID = env.get_credential('DOWNLOAD_WHITELIST_API_KEY_ID')
-TRAFFIC_WHITELIST_API_KEY_IDS = env.get_credential('TRAFFIC_WHITELIST_API_KEY_IDS')
+FEC_API_DOWNLOAD_KEY_ID = env.get_credential('FEC_API_DOWNLOAD_KEY_ID')
+FEC_API_THROTTLE_BYPASS_API_KEY_IDS = env.get_credential('FEC_API_THROTTLE_BYPASS_API_KEY_IDS')
 # Settings to restrict traffic to certain API keys - only work with API umbrella
 RESTRICT_DOWNLOADS = env.get_credential('RESTRICT_DOWNLOADS', False)
 RESTRICT_API_TRAFFIC = env.get_credential('RESTRICT_API_TRAFFIC', False)
@@ -169,12 +169,12 @@ def limit_remote_addr():
             if RESTRICT_DOWNLOADS in true_values and '/download/' in request.url:
                 # 'X-Api-User-Id' header is passed through by the API umbrella
                 request_api_key_id = request.headers.get('X-Api-User-Id')
-                if request_api_key_id != DOWNLOAD_WHITELIST_API_KEY_ID:
+                if request_api_key_id != FEC_API_DOWNLOAD_KEY_ID:
                     abort(403)
             # We don't want to accidentally block downloads here, handled above
             elif RESTRICT_API_TRAFFIC in true_values and '/v1/' in request.url:
                 request_api_key_id = request.headers.get('X-Api-User-Id')
-                if request_api_key_id not in TRAFFIC_WHITELIST_API_KEY_IDS:
+                if request_api_key_id not in FEC_API_THROTTLE_BYPASS_API_KEY_IDS:
                     # Service unavailable
                     abort(503, RESTRICT_API_MESSAGE)
 
