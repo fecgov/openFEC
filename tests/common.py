@@ -78,7 +78,7 @@ class ApiBaseTest(BaseTestCase):
                 stdout=null,
             )
 
-        whitelist = [
+        tables_to_skip = [
             models.CandidateCommitteeTotalsPresidential,
             models.CandidateCommitteeTotalsHouseSenate,
         ]
@@ -87,7 +87,7 @@ class ApiBaseTest(BaseTestCase):
             tables=[
                 each.__table__
                 for each in rest.db.Model._decl_class_registry.values()
-                if hasattr(each, '__table__') and each not in whitelist
+                if hasattr(each, '__table__') and each not in tables_to_skip
             ],
         )
 
