@@ -22,7 +22,7 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
     """
     This fix is for doubled totals caused by linkage_mv #3816
 
-    Use linkage.election_yr_to_be_included instead od ofec_candidate_election_mv for election_full=true
+    Use linkage.election_yr_to_be_included instead of ofec_candidate_election_mv for election_full=true
 
     When election_full=true, aggregate is calculated on election_yr_to_be_included
     When election_full=false, aggregate is calculated on fec_election_yr
