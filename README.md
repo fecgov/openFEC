@@ -555,7 +555,7 @@ This section covers a few topics we think might help developers after setup.
 ### API umbrella
 The staging and production environments use the [API Umbrella](https://apiumbrella.io) for
 rate limiting, authentication, caching, and HTTPS termination and redirection. Both
-environments use the `FEC_API_WHITELIST_IPS` flag to reject requests that are not routed
+environments use the `FEC_API_USE_PROXY` flag to reject requests that are not routed
 through the API Umbrella.
 
 ### Caching

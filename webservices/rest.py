@@ -136,7 +136,7 @@ def handle_error(error):
 TRUSTED_PROXY_IPS = utils.split_env_var(env.get_credential('TRUSTED_PROXY_IPS', ''))
 # Save blocked IPs as a long string, ex. "1.1.1.1, 2.2.2.2, 3.3.3.3"
 BLOCKED_IPS = env.get_credential('BLOCKED_IPS', '')
-FEC_API_WHITELIST_IPS = env.get_credential('FEC_API_WHITELIST_IPS', False)
+FEC_API_USE_PROXY = env.get_credential('FEC_API_USE_PROXY', False)
 # Search these key_id's in the API umbrella admin interface to look up the API KEY
 DOWNLOAD_WHITELIST_API_KEY_ID = env.get_credential('DOWNLOAD_WHITELIST_API_KEY_ID')
 TRAFFIC_WHITELIST_API_KEY_IDS = env.get_credential('TRAFFIC_WHITELIST_API_KEY_IDS')
@@ -150,13 +150,13 @@ RESTRICT_API_MESSAGE = "We apologize for the inconvenience, but we are temporari
 @app.before_request
 def limit_remote_addr():
     """
-    If `FEC_API_WHITELIST_IPS` is set:
+    If `FEC_API_USE_PROXY` is set:
     - Reject all requests that are not routed through the API Umbrella
     - Block any flagged IPs
-    - If we're restricting downloads, only allow requests from whitelisted key
+    - If we're restricting downloads, only allow requests from specified key
     """
     true_values = (True, 'True', 'true', 't')
-    if FEC_API_WHITELIST_IPS in true_values:
+    if FEC_API_USE_PROXY in true_values:
         try:
             *_, source_ip, api_data_route, cf_route = request.access_route
         except ValueError:  # Not enough routes
