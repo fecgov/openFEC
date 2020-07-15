@@ -209,7 +209,7 @@ class CandidateAggregateResource(AggregateResource):
         return args.make_sort_args(
             validator=args.IndexValidator(
                 self.model,
-                extra=['candidate', 'committee'],
+                extra=['candidate_name', 'committee_name', 'candidate_id', 'committee_id'],
             ),
         )
 

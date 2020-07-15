@@ -372,6 +372,13 @@ class ScheduleEByCandidateFactory(BaseAggregateFactory):
     support_oppose_indicator = 'S'
 
 
+class ScheduleEByCandidateViewFactory(BaseAggregateFactory):
+    class Meta:
+        model = models.ScheduleEByCandidate
+
+    candidate_id = factory.Sequence(lambda n: str(n))
+
+
 class CommunicationCostByCandidateFactory(BaseAggregateFactory):
     class Meta:
         model = models.CommunicationCostByCandidate
