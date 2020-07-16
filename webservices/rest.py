@@ -150,7 +150,7 @@ RESTRICT_MESSAGE = "We apologize for the inconvenience, but we are temporarily "
 @app.before_request
 def limit_remote_addr():
     """
-    If `USE_PROXY` is set:
+    If `FEC_API_USE_PROXY` is set:
     - Reject all requests that are not routed through the API Umbrella
     - Block any flagged IPs
     - If we're restricting downloads, only allow requests from specified key
