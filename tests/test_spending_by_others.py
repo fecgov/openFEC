@@ -9,8 +9,118 @@ from webservices.resources.spending_by_others import (
 )
 from webservices.resources.aggregates import (
     CCAggregatesView,
+    CommunicationCostByCandidateView,
+    ElectioneeringByCandidateView,
     ECAggregatesView,
 )
+
+
+# test /electioneering/by_candidate/ under tag: electioneering
+class TestElectionerringByCandidate(ApiBaseTest):
+
+    def test_sort_by_candidate_name_descending(self):
+
+        factories.CandidateHistoryFactory(
+            candidate_id='S001',
+            name='WARNER, MARK',
+            two_year_period=2010,
+            office='S',
+            state='NY',
+        )
+        factories.CandidateHistoryFactory(
+            candidate_id='S002',
+            name='BALDWIN, ALISSA',
+            two_year_period=2010,
+            office='S',
+            state='NY',
+        )
+
+        factories.CandidateElectionFactory(
+            candidate_id='S001',
+            cand_election_year=2010)
+        factories.CandidateElectionFactory(
+            candidate_id='S002',
+            cand_election_year=2010)
+
+        factories.ElectioneeringByCandidateFactory(
+            total=50000,
+            count=10,
+            cycle=2010,
+            candidate_id='S001',
+        ),
+        factories.ElectioneeringByCandidateFactory(
+            total=10000,
+            count=5,
+            cycle=2010,
+            candidate_id='S002',
+        ),
+
+        response = self._results(api.url_for(ElectioneeringByCandidateView, cycle=2010,
+            office='senate', state='NY', sort='-candidate_name'))
+        self.assertEqual(len(response), 2)
+        self.assertEqual(response[0]['candidate_name'], 'WARNER, MARK')
+        self.assertEqual(response[1]['candidate_name'], 'BALDWIN, ALISSA')
+
+    def test_sort_by_candidate_id(self):
+
+        factories.CandidateHistoryFactory(
+            candidate_id='S001',
+            name='Robert Ritchie',
+            two_year_period=2012,
+            office='S',
+            state='NY',
+        )
+        factories.CandidateHistoryFactory(
+            candidate_id='S002',
+            name='FARLEY Ritchie',
+            two_year_period=2012,
+            office='S',
+            state='NY',
+        )
+        factories.CandidateHistoryFactory(
+            candidate_id='S003',
+            name='Robert Ritchie',
+            election_years=[2012],
+            two_year_period=2012,
+            office='S',
+            state='NY',
+        )
+
+        factories.CandidateElectionFactory(
+            candidate_id='S001',
+            cand_election_year=2012)
+        factories.CandidateElectionFactory(
+            candidate_id='S002',
+            cand_election_year=2012)
+        factories.CandidateElectionFactory(
+            candidate_id='S003',
+            cand_election_year=2012)
+
+        factories.ElectioneeringByCandidateFactory(
+            cycle=2012,
+            candidate_id='S001',
+            total=700,
+            count=5,
+        ),
+        factories.ElectioneeringByCandidateFactory(
+            cycle=2012,
+            candidate_id='S002',
+            total=500,
+            count=3,
+        ),
+        factories.ElectioneeringByCandidateFactory(
+            cycle=2012,
+            candidate_id='S003',
+            total=100,
+            count=1,
+        ),
+        response = self._results(
+            api.url_for(ElectioneeringByCandidateView, sort='-candidate_id',
+                office='senate', state='NY', cycle=2012))
+        self.assertEqual(len(response), 3)
+        self.assertEqual(response[0]['candidate_id'], 'S003')
+        self.assertEqual(response[1]['candidate_id'], 'S002')
+        self.assertEqual(response[2]['candidate_id'], 'S001')
 
 
 class TestTotalElectioneering(ApiBaseTest):
@@ -205,6 +315,122 @@ class TestTotalCommunicationsCosts(ApiBaseTest):
         assert len(results) == 2
         assert results[0]['total'] == 800
         assert results[1]['total'] == 600
+
+
+# test /communication_costs/by_candidate/ under tag: communication cost
+class TestCommunicationsCostsByCandidate(ApiBaseTest):
+
+    def test_sort_by_candidate_name_descending(self):
+
+        factories.CandidateHistoryFactory(
+            candidate_id='S001',
+            name='WARNER, MARK',
+            two_year_period=2010,
+            office='S',
+            state='NY',
+        )
+        factories.CandidateHistoryFactory(
+            candidate_id='S002',
+            name='BALDWIN, ALISSA',
+            two_year_period=2010,
+            office='S',
+            state='NY',
+        )
+
+        factories.CandidateElectionFactory(
+            candidate_id='S001',
+            cand_election_year=2010)
+        factories.CandidateElectionFactory(
+            candidate_id='S002',
+            cand_election_year=2010)
+
+        factories.CommunicationCostByCandidateFactory(
+            total=50000,
+            count=10,
+            cycle=2010,
+            candidate_id='S001',
+            support_oppose_indicator='S',
+        ),
+        factories.CommunicationCostByCandidateFactory(
+            total=10000,
+            count=5,
+            cycle=2010,
+            candidate_id='S002',
+            support_oppose_indicator='S',
+        ),
+
+        response = self._results(api.url_for(CommunicationCostByCandidateView, cycle=2010,
+            office='senate', state='NY', sort='-candidate_name'))
+        self.assertEqual(len(response), 2)
+        self.assertEqual(response[0]['candidate_name'], 'WARNER, MARK')
+        self.assertEqual(response[1]['candidate_name'], 'BALDWIN, ALISSA')
+
+    def test_sort_by_candidate_id(self):
+
+        factories.CandidateHistoryFactory(
+            candidate_id='S001',
+            name='Robert Ritchie',
+            two_year_period=2012,
+            office='S',
+            state='NY',
+        )
+        factories.CandidateHistoryFactory(
+            candidate_id='S002',
+            name='FARLEY Ritchie',
+            two_year_period=2012,
+            office='S',
+            state='NY',
+        )
+        factories.CandidateHistoryFactory(
+            candidate_id='S003',
+            name='Robert Ritchie',
+            election_years=[2012],
+            two_year_period=2012,
+            office='S',
+            state='NY',
+        )
+
+        factories.CandidateElectionFactory(
+            candidate_id='S001',
+            cand_election_year=2012)
+        factories.CandidateElectionFactory(
+            candidate_id='S002',
+            cand_election_year=2012)
+        factories.CandidateElectionFactory(
+            candidate_id='S003',
+            cand_election_year=2012)
+
+        factories.CommunicationCostByCandidateFactory(
+            cycle=2012,
+            candidate_id='S001',
+            support_oppose_indicator='O',
+            total=700,
+            count=5,
+        ),
+        factories.CommunicationCostByCandidateFactory(
+            cycle=2012,
+            candidate_id='S002',
+            support_oppose_indicator='O',
+            total=500,
+            count=3,
+        ),
+        factories.CommunicationCostByCandidateFactory(
+            cycle=2012,
+            candidate_id='S003',
+            support_oppose_indicator='S',
+            total=100,
+            count=1,
+        ),
+        response = self._results(
+            api.url_for(CommunicationCostByCandidateView, sort='-candidate_id',
+                office='senate', state='NY', cycle=2012))
+        self.assertEqual(len(response), 3)
+        self.assertEqual(response[0]['candidate_id'], 'S003')
+        self.assertEqual(response[0]['support_oppose_indicator'], 'S')
+        self.assertEqual(response[1]['candidate_id'], 'S002')
+        self.assertEqual(response[1]['support_oppose_indicator'], 'O')
+        self.assertEqual(response[2]['candidate_id'], 'S001')
+        self.assertEqual(response[2]['support_oppose_indicator'], 'O')
 
 
 # test endpoint: /communication_costs/aggregates/ under tag:communication costs
