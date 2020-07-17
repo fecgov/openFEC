@@ -418,4 +418,3 @@ def join_cand_cmte_names(query):
             query.c.cycle == models.CommitteeHistory.cycle,
         ),
     )
-    return query
