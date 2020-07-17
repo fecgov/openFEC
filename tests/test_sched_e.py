@@ -6,6 +6,7 @@ from webservices.schemas import ScheduleEByCandidateSchema
 from webservices.resources.aggregates import ScheduleEByCandidateView
 
 
+# test /schedules/schedule_e/by_candidate/ under tag: independent expenditures
 class TestScheduleEByCandidateView(ApiBaseTest):
     def test_fields(self):
         candidate_id = 'S001'
@@ -145,7 +146,7 @@ class TestScheduleEByCandidateView(ApiBaseTest):
             candidate_id='S005',
             support_oppose_indicator='S',
         ),
-        factories.ScheduleEByCandidateViewFactory(
+        factories.ScheduleEByCandidateFactory(
             total=10000,
             count=5,
             cycle=2010,
@@ -202,7 +203,7 @@ class TestScheduleEByCandidateView(ApiBaseTest):
             support_oppose_indicator='S',
             committee_id='C005',
         ),
-        factories.ScheduleEByCandidateViewFactory(
+        factories.ScheduleEByCandidateFactory(
             total=10000,
             count=5,
             cycle=2010,
@@ -260,7 +261,7 @@ class TestScheduleEByCandidateView(ApiBaseTest):
             support_oppose_indicator='S',
             committee_id='C005',
         ),
-        factories.ScheduleEByCandidateViewFactory(
+        factories.ScheduleEByCandidateFactory(
             total=10000,
             count=5,
             cycle=2010,
