@@ -425,11 +425,12 @@ class TriggerTestCase(common.BaseTestCase):
                 'contbr_employer': n,
                 'sub_id': 9999999959999999980 + i,
                 'filing_form': 'F3',
+                'two_year_transaction_period': 2020,
             }
             insert = (
                 "INSERT INTO disclosure.fec_fitem_sched_a "
-                + "(contbr_employer, sub_id, filing_form) "
-                + " VALUES (%(contbr_employer)s, %(sub_id)s, %(filing_form)s)"
+                + "(contbr_employer, sub_id, filing_form, two_year_transaction_period) "
+                + " VALUES (%(contbr_employer)s, %(sub_id)s, %(filing_form)s, %(two_year_transaction_period)s)"
             )
             connection.execute(insert, data)
         manage.refresh_materialized(concurrent=False)
@@ -466,11 +467,12 @@ class TriggerTestCase(common.BaseTestCase):
                 'recipient_nm': n,
                 'sub_id': 9999999999995699990 + i,
                 'filing_form': 'F3',
+                'two_year_transaction_period': 2020,
             }
             insert = (
                 "INSERT INTO disclosure.fec_fitem_sched_b "
-                + "(recipient_nm, sub_id, filing_form) "
-                + " VALUES (%(recipient_nm)s, %(sub_id)s, %(filing_form)s)"
+                + "(recipient_nm, sub_id, filing_form, two_year_transaction_period) "
+                + " VALUES (%(recipient_nm)s, %(sub_id)s, %(filing_form)s, %(two_year_transaction_period)s)"
             )
             connection.execute(insert, data)
         manage.refresh_materialized(concurrent=False)

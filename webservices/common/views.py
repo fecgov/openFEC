@@ -99,12 +99,8 @@ class ItemizedResource(ApiResource):
                 ),
                 status_code=422,
             )
-        if type(self).__name__ == "ScheduleEView":
-            if not kwargs.get("cycle"):
-                kwargs["cycle"] = ALL_TWO_YEAR_PERIODS
-        else:
-            if not kwargs.get("two_year_transaction_period"):
-                kwargs["two_year_transaction_period"] = ALL_TWO_YEAR_PERIODS
+        if type(self).__name__ in ("ScheduleAView", "ScheduleBView") and not kwargs.get("two_year_transaction_period"):
+            kwargs["two_year_transaction_period"] = ALL_TWO_YEAR_PERIODS
         union_fields_for_subqueries = [
             (field, column)
             for field, column in self.filter_union_fields
@@ -133,11 +129,10 @@ class ItemizedResource(ApiResource):
             for argument_count, argument in enumerate(kwargs.get(field, [])):
                 temp_kwargs = utils.extend(kwargs, {field: [argument]})
                 sub_query = query
-                # TODO: come up with a better way of determining filter
-                if field in ("committee_id", "cycle", "two_year_transaction_period"):
-                    sub_query = sub_query.filter(column == argument)
-                else:
+                if self.is_ts_vector_field(column):
                     sub_query = sub_query.filter(column.match(utils.parse_fulltext(argument)))
+                else:
+                    sub_query = sub_query.filter(column == argument)
                 sub_query = utils.fetch_seek_page(sub_query, temp_kwargs, self.index_column, count=-1, eager=False).results
                 if argument_count == 0:
                     first_query = sub_query
@@ -145,3 +140,6 @@ class ItemizedResource(ApiResource):
             query = first_query.union_all(*sub_queries)
         query = query.options(*self.query_options)
         return query
+
+    def is_ts_vector_field(self, column):
+        return str(column.type) == "TSVECTOR"

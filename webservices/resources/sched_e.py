@@ -58,7 +58,6 @@ class ScheduleEView(ItemizedResource):
     ]
     filter_union_fields = [
         ('committee_id', models.ScheduleA.committee_id),
-        ('cycle', sa.func.get_cycle(models.ScheduleE.report_year)),
     ]
     sort_options = [
         'expenditure_date',
