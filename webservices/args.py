@@ -508,12 +508,6 @@ schedule_a = {
         `contribution_receipt_amount` of the last result. However, you will need to pass the index \
         of that last result to `last_index` to get the next page.'
     ),
-    'last_contributor_aggregate_ytd': fields.Float(
-        missing=None,
-        description='When sorting by `contributor_aggregate_ytd`, this is populated with the \
-        `contributor_aggregate_ytd` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'
-    ),
     'is_individual': fields.Bool(missing=None, description=docs.IS_INDIVIDUAL),
     'contributor_type': fields.List(
         fields.Str(validate=validate.OneOf(['individual', 'committee'])),
