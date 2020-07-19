@@ -88,7 +88,9 @@ class OptionValidator(object):
     def __call__(self, value):
         if value.lstrip('-') not in self.values:
             raise exceptions.ApiError(
-                'Cannot sort on value "{0}"'.format(value),
+                'Cannot sort on value "{0}". Instead choose one of: "{1}"'.format(
+                    value, '", "'.join(self.values)
+                ),
                 status_code=422,
             )
 
