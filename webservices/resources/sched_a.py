@@ -72,9 +72,6 @@ class ScheduleAView(ItemizedResource):
     ]
     filter_union_fields = [
         ('committee_id', models.ScheduleA.committee_id),
-        ('contributor_name', models.ScheduleA.contributor_name_text),
-        ('contributor_employer', models.ScheduleA.contributor_employer_text),
-        ('contributor_occupation', models.ScheduleA.contributor_occupation_text),
         ('two_year_transaction_period', models.ScheduleA.two_year_transaction_period),
     ]
     query_options = [
