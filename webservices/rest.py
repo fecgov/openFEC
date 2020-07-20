@@ -133,30 +133,30 @@ def handle_error(error):
 
 
 # api.data.gov
-TRUSTED_PROXY_IPS = utils.split_env_var(env.get_credential('TRUSTED_PROXY_IPS', ''))
+TRUSTED_PROXY_IPS = utils.split_env_var(env.get_credential('FEC_API_TRUSTED_PROXY_IPS', ''))
 # Save blocked IPs as a long string, ex. "1.1.1.1, 2.2.2.2, 3.3.3.3"
-BLOCKED_IPS = env.get_credential('BLOCKED_IPS', '')
-FEC_API_WHITELIST_IPS = env.get_credential('FEC_API_WHITELIST_IPS', False)
+BLOCKED_IPS = env.get_credential('FEC_API_BLOCKED_IPS', '')
+USE_PROXY = env.get_credential('FEC_API_USE_PROXY', False)
 # Search these key_id's in the API umbrella admin interface to look up the API KEY
-DOWNLOAD_WHITELIST_API_KEY_ID = env.get_credential('DOWNLOAD_WHITELIST_API_KEY_ID')
-TRAFFIC_WHITELIST_API_KEY_IDS = env.get_credential('TRAFFIC_WHITELIST_API_KEY_IDS')
+DOWNLOAD_KEY_ID = env.get_credential('FEC_API_DOWNLOAD_KEY_ID')
+BYPASS_RESTRICTION_API_KEY_IDS = env.get_credential('FEC_API_BYPASS_RESTRICTION_API_KEY_IDS')
 # Settings to restrict traffic to certain API keys - only work with API umbrella
-RESTRICT_DOWNLOADS = env.get_credential('RESTRICT_DOWNLOADS', False)
-RESTRICT_API_TRAFFIC = env.get_credential('RESTRICT_API_TRAFFIC', False)
-RESTRICT_API_MESSAGE = "We apologize for the inconvenience, but we are temporarily " \
+RESTRICT_DOWNLOADS = env.get_credential('FEC_API_RESTRICT_DOWNLOADS', False)
+RESTRICT_TRAFFIC = env.get_credential('FEC_API_RESTRICT_TRAFFIC', False)
+RESTRICT_MESSAGE = "We apologize for the inconvenience, but we are temporarily " \
     "blocking API traffic. Please contact apiinfo@fec.gov if this is an urgent issue."
 
 
 @app.before_request
 def limit_remote_addr():
     """
-    If `FEC_API_WHITELIST_IPS` is set:
+    If `FEC_API_USE_PROXY` is set:
     - Reject all requests that are not routed through the API Umbrella
     - Block any flagged IPs
-    - If we're restricting downloads, only allow requests from whitelisted key
+    - If we're restricting downloads, only allow requests from specified key
     """
     true_values = (True, 'True', 'true', 't')
-    if FEC_API_WHITELIST_IPS in true_values:
+    if USE_PROXY in true_values:
         try:
             *_, source_ip, api_data_route, cf_route = request.access_route
         except ValueError:  # Not enough routes
@@ -169,12 +169,12 @@ def limit_remote_addr():
             if RESTRICT_DOWNLOADS in true_values and '/download/' in request.url:
                 # 'X-Api-User-Id' header is passed through by the API umbrella
                 request_api_key_id = request.headers.get('X-Api-User-Id')
-                if request_api_key_id != DOWNLOAD_WHITELIST_API_KEY_ID:
+                if request_api_key_id != DOWNLOAD_KEY_ID:
                     abort(403)
             # We don't want to accidentally block downloads here, handled above
-            elif RESTRICT_API_TRAFFIC in true_values and '/v1/' in request.url:
+            elif RESTRICT_TRAFFIC in true_values and '/v1/' in request.url:
                 request_api_key_id = request.headers.get('X-Api-User-Id')
-                if request_api_key_id not in TRAFFIC_WHITELIST_API_KEY_IDS:
+                if request_api_key_id not in BYPASS_RESTRICTION_API_KEY_IDS:
                     # Service unavailable
                     abort(503, RESTRICT_API_MESSAGE)
 

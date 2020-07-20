@@ -4,7 +4,8 @@ memory: 1G
 stack: cflinuxfs3
 buildpack: python_buildpack
 env:
-  FEC_API_WHITELIST_IPS: true
+  FEC_API_USE_PROXY: true
+  FEC_API_RESTRICT_DOWNLOADS: true
   APP_NAME: fec | api | stage
   WEB_CONCURRENCY: 4
 services:

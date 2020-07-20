@@ -7,7 +7,7 @@ applications:
   buildpack: python_buildpack
   health-check-type: process
   env:
-    FEC_API_WHITELIST_IPS: true
+    FEC_API_USE_PROXY: true
     APP_NAME: fec | api | prod
     PRODUCTION: True
     WEB_CONCURRENCY: 4

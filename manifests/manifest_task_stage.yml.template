@@ -6,7 +6,7 @@ applications:
   command: "(<put your command here> && echo SUCCESS || echo FAIL) && sleep infinity"
   buildpack: python_buildpack
   env:
-    FEC_API_WHITELIST_IPS: true
+    FEC_API_USE_PROXY: true
     APP_NAME: fec | api | stage
     PRODUCTION: True
     WEB_CONCURRENCY: 4
