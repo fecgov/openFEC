@@ -153,6 +153,11 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             cursor = cursor.filter(filter)
 
         query = cursor.order_by(direction(self.index_column)).limit(limit)
+        from sqlalchemy.dialects import postgresql
+
+        print(str(query.statement.compile(
+            dialect=postgresql.dialect(),
+            compile_kwargs={"literal_binds": True})))
         return query.all() if eager else query
 
     def _get_index_values(self, result):

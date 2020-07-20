@@ -87,8 +87,11 @@ class ScheduleAView(ItemizedResource):
         'contributor_employer',
         'contributor_occupation',
     ]
-    use_pk_for_count=True
-
+    use_pk_for_count = True
+    union_fields = [
+        "committee_id",
+        "two_year_transaction_period",
+    ]
 
     @property
     def args(self):
