@@ -217,6 +217,12 @@ class CandidateFormatTest(ApiBaseTest):
         )
         self.assertEqual([each['candidate_id'] for each in results], ['2', '3', '1'])
 
+    def test_page_validation(self):
+        response = self.app.get(
+            api.url_for(CandidateList, page=0)
+        )
+        self.assertEqual(response.status_code, 422)
+
 
 class TestCandidateHistory(ApiBaseTest):
     def setUp(self):
