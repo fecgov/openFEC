@@ -5,7 +5,6 @@ stack: cflinuxfs3
 buildpack: python_buildpack
 env:
   APP_NAME: fec | api | dev
-  WEB_CONCURRENCY: 4
 services:
   - fec-api-search56
   - fec-redis

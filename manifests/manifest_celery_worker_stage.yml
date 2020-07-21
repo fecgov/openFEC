@@ -7,7 +7,6 @@ env:
   FEC_API_USE_PROXY: true
   FEC_API_RESTRICT_DOWNLOADS: true
   APP_NAME: fec | api | stage
-  WEB_CONCURRENCY: 4
 services:
   - fec-api-search56
   - fec-redis
