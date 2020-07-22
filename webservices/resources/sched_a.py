@@ -77,7 +77,6 @@ class ScheduleAView(ItemizedResource):
     sort_options = [
         'contribution_receipt_date',
         'contribution_receipt_amount',
-        'contributor_aggregate_ytd',
     ]
     filters_with_max_count = [
         'committee_id',
@@ -201,7 +200,6 @@ class ScheduleAEfileView(views.ApiResource):
                     [
                         'contribution_receipt_date',
                         'contribution_receipt_amount',
-                        'contributor_aggregate_ytd',
                     ]
                 ),
             ),
