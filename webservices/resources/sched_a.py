@@ -86,8 +86,7 @@ class ScheduleAView(ItemizedResource):
         'contributor_employer',
         'contributor_occupation',
     ]
-    use_pk_for_count=True
-
+    use_pk_for_count = True
 
     @property
     def args(self):
@@ -96,11 +95,9 @@ class ScheduleAView(ItemizedResource):
             args.schedule_a,
             args.make_seek_args(),
             args.make_sort_args(
-                default='contribution_receipt_date',
+                default='-contribution_receipt_date',
                 validator=args.OptionValidator(self.sort_options),
                 show_nulls_last_arg=False,
-                additional_description="The `contributor_aggregate_ytd` option is deprecated. \n"
-                " `contribution_receipt_date` default sorting ASC will change to DESC."
             ),
         )
 

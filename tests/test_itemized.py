@@ -322,7 +322,7 @@ class TestScheduleA(ApiBaseTest):
         self.assertEqual(len(page1), 20)
         self.assertEqual(
             [int(each['sub_id']) for each in page1],
-            [each.sub_id for each in filings[:20]],
+            [each.sub_id for each in filings[29:9:-1]],
         )
         page2 = self._results(
             api.url_for(
@@ -335,7 +335,7 @@ class TestScheduleA(ApiBaseTest):
         self.assertEqual(len(page2), 10)
         self.assertEqual(
             [int(each['sub_id']) for each in page2],
-            [each.sub_id for each in filings[20:]],
+            [each.sub_id for each in filings[9::-1]],
         )
 
     def test_schedule_a_pagination_with_null_sort_column_values_hidden(self):
