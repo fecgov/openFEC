@@ -9,7 +9,6 @@ applications:
     FEC_API_USE_PROXY: true
     APP_NAME: fec | api | stage
     PRODUCTION: True
-    WEB_CONCURRENCY: 4
   no-route: true
   services:
   - fec-s3-stage
