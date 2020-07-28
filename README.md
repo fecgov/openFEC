@@ -555,7 +555,7 @@ This section covers a few topics we think might help developers after setup.
 ### API umbrella
 The staging and production environments use the [API Umbrella](https://apiumbrella.io) for
 rate limiting, authentication, caching, and HTTPS termination and redirection. Both
-environments use the `FEC_API_WHITELIST_IPS` flag to reject requests that are not routed
+environments use the `FEC_API_USE_PROXY` flag to reject requests that are not routed
 through the API Umbrella.
 
 ### Caching
@@ -643,7 +643,7 @@ Sorting fields include a compound index on on the filed to sort and a unique fie
 ### Database mirrors/replicas
 Database mirrors/replicas are supported by the API if the `SQLA_FOLLOWERS` is set to one or more valid connection strings.  By default, setting this environment variable will shift all `read` operations to any mirrors/replicas that are available (and randomly choose one to target per request if there are more than one).
 
-You can optionally choose to restrict traffic that goes to the mirrors/replicas to be the asynchronous tasks only by setting the `SQLA_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS` environment variable to something that will evaluate to `True` in Python (simply using `True` as the value is fine).  If you do this, you can also restrict which tasks are supported on the mirrors/replicas.  Supported tasks are configured by adding their fully qualified names to the `app.config['SQLALCHEMY_FOLLOWER_TASKS']` list in order to whitelist them.  By default, only the `download` task is enabled.
+You can optionally choose to restrict traffic that goes to the mirrors/replicas to be the asynchronous tasks only by setting the `SQLA_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS` environment variable to something that will evaluate to `True` in Python (simply using `True` as the value is fine).  If you do this, you can also restrict which tasks are supported on the mirrors/replicas.  Supported tasks are configured by adding their fully qualified names to the `app.config['SQLALCHEMY_FOLLOWER_TASKS']` list in order to allow them.  By default, only the `download` task is enabled.
 
 ### Database migration
 `flyway` is the tool used for database migration.

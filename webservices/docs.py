@@ -3,22 +3,25 @@ from webservices.env import env
 api_key_signup_feature_flag = bool(env.get_credential('API_UMBRELLA_SIGNUP_KEY_FEATURE_FLAG', ''))
 
 """Narrative API documentation."""
-
 API_DESCRIPTION = '''
-This API allows you to explore the way candidates and committees fund their campaigns.
+This application programming interface (API) allows you to explore the way
+candidates and committees fund their campaigns.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
 FEC data. [Bulk downloads](https://www.fec.gov/data/advanced/?tab=bulk-data) are available on the current
 site. Information is tied to the underlying forms by file ID and image ID. Data is updated
 nightly.
 
-There is a lot of data, but a good place to start is to use search to find
+There are a lot of data, and a good place to start is to use search to find
 interesting candidates and committees. Then, you can use their IDs to find report or line
 item details with the other endpoints. If you are interested in individual donors, check
 out contributor information in schedule_a.
 
-Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000
-calls an hour. Each call is limited to 100 results per page. You can email questions, comments or
+If you would like to use the FEC's API programatically, you can sign up for
+your own API key below. But, you can still try out our API without
+an API key by using the web interface below and making use of a DEMO_KEY.
+Signing up for an API key will enable you to place up to 1,000 calls an hour.
+Each call is limited to 100 results per page. You can email questions, comments or
 a request to get a key for 120 calls per minute to [APIinfo@fec.gov](mailto:apiinfo@fec.gov). You can also
 ask questions and discuss the data in the [FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data).
 API changes will also be added to this group in advance of the change.

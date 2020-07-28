@@ -7,6 +7,7 @@ from webservices import utils
 from webservices.rest import api
 from webservices.resources.totals import (
     TotalsCommitteeView,
+    TotalsByCommitteeTypeView,
     ScheduleAByStateRecipientTotalsView,
 )
 
@@ -49,6 +50,67 @@ shared_fields = {
 transaction_coverage_fields = {'transaction_coverage_date': None}
 
 
+# test for endpoint: /totals/{committee_type}
+class TestTotalsByCommitteeType(ApiBaseTest):
+    def test_pac_total_by_committee_type(self):
+        first_pac_total = {
+            'committee_id': 'C00001',
+            'committee_type': 'O',
+            'cycle': 2018,
+            'all_loans_received': 1,
+            'allocated_federal_election_levin_share': 2,
+        }
+        second_pac_total = {
+            'committee_id': 'C00002',
+            'committee_type': 'N',
+            'cycle': 2016,
+            'all_loans_received': 10,
+            'allocated_federal_election_levin_share': 20,
+        }
+        factories.TotalsPacFactory(**first_pac_total)
+        factories.TotalsPacFactory(**second_pac_total)
+
+        results = self._results(
+            api.url_for(TotalsByCommitteeTypeView, committee_type='pac')
+        )
+        assert len(results) == 2
+        assert results[0]['committee_id'] == 'C00001'
+        assert results[1]['committee_id'] == 'C00002'
+
+    def test_cycle_filter(self):
+        presidential_fields = {
+            'committee_id': 'C00001',
+            'cycle': 2016,
+            'candidate_contribution': 1,
+            'exempt_legal_accounting_disbursement': 2,
+            'federal_funds': 300,
+        }
+        factories.CommitteeTotalsPerCycleFactory(**presidential_fields)
+        results = self._results(
+            api.url_for(TotalsByCommitteeTypeView, cycle=2016, committee_type='presidential')
+        )
+        assert len(results) == 1
+        self.assertEqual(results[0]['cycle'], presidential_fields['cycle'])
+
+    def test_designation_filter(self):
+        party_fields = {
+            'committee_id': 'C00001',
+            'cycle': 2014,
+            'committee_name': 'REPUBLICAN COMMITTEE',
+            'committee_designation': 'U',
+            'committee_type': 'X',
+            'all_loans_received': 1,
+            'allocated_federal_election_levin_share': 2,
+        }
+        factories.TotalsPacFactory(**party_fields)
+        results = self._results(
+            api.url_for(TotalsByCommitteeTypeView, committee_designation='U', committee_type='party')
+        )
+        assert len(results) == 1
+        self.assertEqual(results[0]['committee_designation'], party_fields['committee_designation'])
+
+
+# test for endpoint: /committee/{committee_id}/totals/
 class TestTotals(ApiBaseTest):
     def test_Presidential_totals(self):
         committee_id = 'C8675309'

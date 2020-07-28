@@ -80,7 +80,7 @@ class TestDownloadTask(ApiBaseTest):
         db.session.commit()
 
         # these are the major downloadable resources, we may want to add more later
-        RESOURCE_WHITELIST = {
+        DOWNLOADABLE_RESOURCES = {
             aggregates.ScheduleABySizeView,
             aggregates.ScheduleAByStateView,
             aggregates.ScheduleAByZipView,
@@ -112,7 +112,7 @@ class TestDownloadTask(ApiBaseTest):
             sched_f.ScheduleFView,
         }
 
-        for view in RESOURCE_WHITELIST:
+        for view in DOWNLOADABLE_RESOURCES:
             if view.endpoint in ['reportsview']:
                 url = api.url_for(view, committee_type=committee.committee_type)
             elif view.endpoint in [

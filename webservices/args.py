@@ -10,9 +10,9 @@ from webservices.common.models import db
 
 
 def _validate_natural(value):
-    if value < 0:
+    if value <= 0:
         raise exceptions.ApiError(
-            'Must be a natural number',
+            'Must be greater than zero',
             status_code=422
         )
 
@@ -415,10 +415,9 @@ totals = {
     'designation': fields.Str(description=docs.DESIGNATION),
 }
 
-totals_all = {
+totals_by_committee_type = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'committee_type_full': fields.Str(description=docs.COMMITTEE_TYPE),
-    'committee_designation_full': fields.Str(description=docs.DESIGNATION),
+    'committee_designation': fields.List(fields.Str, description=docs.DESIGNATION),
     'committee_id': fields.Str(description=docs.COMMITTEE_ID),
 }
 
