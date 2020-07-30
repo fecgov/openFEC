@@ -316,7 +316,7 @@ class CCAggregatesView(AggregateResource):
         return args.make_sort_args(
             validator=args.IndexValidator(
                 self.model,
-                extra=['candidate', 'committee'],
+                extra=['candidate_name', 'committee_name'],
             ),
         )
 
@@ -371,7 +371,7 @@ class ECAggregatesView(AggregateResource):
         return args.make_sort_args(
             validator=args.IndexValidator(
                 self.model,
-                extra=['candidate', 'committee'],
+                extra=['candidate_name', 'committee_name'],
             ),
         )
 
