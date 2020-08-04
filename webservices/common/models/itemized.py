@@ -371,20 +371,6 @@ class ScheduleB(BaseItemized):
     spender_committee_org_type = db.Column('org_tp', db.String(1), index=True)
     spender_committee_designation = db.Column('cmte_dsgn', db.String(1), index=True)
 
-    @hybrid_property
-    def sort_expressions(self):
-        return {
-            'disbursement_date': {
-                'expression': sa.func.coalesce(
-                    self.disbursement_date,
-                    sa.cast('9999-12-31', sa.Date)
-                ),
-                'field': ma.fields.Date,
-                'type': 'date',
-                'null_sort': self.disbursement_date,
-            },
-        }
-
 
 class ScheduleBEfile(BaseRawItemized):
     __tablename__ = 'real_efile_sb4'
