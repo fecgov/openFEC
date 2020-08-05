@@ -143,7 +143,6 @@ DEPLOY_RULES = (
     ('prod', _detect_prod),
     ('stage', lambda _, branch: branch.startswith('release')),
     ('dev', lambda _, branch: branch == 'develop'),
-    ('dev', lambda _, branch: branch == 'feature/4511-add-TOS-and-AUP-to-api-key-signup'),
 )
 
 
