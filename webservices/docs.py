@@ -58,8 +58,8 @@ office. People become candidates when they (or agents working on their behalf)
 raise contributions or make expenditures that exceed $5,000.
 
 The candidate endpoints primarily use data from FEC registration
-[Form 1](http://www.fec.gov/pdf/forms/fecfrm1.pdf), for candidate information, and
-[Form 2](http://www.fec.gov/pdf/forms/fecfrm2.pdf), for committee information.
+[Form 1](https://www.fec.gov/resources/cms-content/documents/fecfrm1.pdf), for candidate information, and
+[Form 2](https://www.fec.gov/resources/cms-content/documents/fecfrm2.pdf), for committee information.
 '''
 
 CANDIDATE_ID = '''
@@ -73,7 +73,7 @@ True indicates that a candidate is inactive.
 
 CANDIDATE_CYCLE = '''
 Two-year election cycle in which a candidate runs for office.
-Calculated from FEC Form 2. The cycle begins with
+Calculated from Form 2. The cycle begins with
 an odd year and is named for its ending, even year. This cycle follows
 the traditional house election cycle and subdivides the presidential
 and Senate elections into comparable two-year blocks. To see data for
@@ -252,13 +252,13 @@ committees change treasurers, designation, or `committee_type`.
 
 COMMITTEE_CYCLE = '''
 A two year election cycle that the committee was active- (after original registration
-date but before expiration date in FEC Form 1s) The cycle begins with
+date but before expiration date in Form 1s) The cycle begins with
 an odd year and is named for its ending, even year.
 '''
 
 COMMITTEE_CYCLES_HAS_FINANCIAL = '''
 A two year election cycle that the committee was active- (after original registration
-date but before expiration date in FEC Form 1s), and the commitee files the financial reports
+date but before expiration date in Form 1s), and the commitee files the financial reports
 ('F3', 'F3X', 'F3P', 'F3L', 'F4', 'F5', 'F7', 'F13') during this cycle.
 '''
 
@@ -269,7 +269,7 @@ The latest two year election cycle that the committee files the financial report
 
 COMMITTEE_CYCLES_HAS_ACTIVITY = '''
 A two year election cycle that the committee was active- (after original registration
-date but before expiration date in FEC Form 1), and the committee has filling activity during the cycle
+date but before expiration date in Form 1), and the committee has filling activity during the cycle
 '''
 
 COMMITTEE_LAST_CYCLE_HAS_ACTIVITY = '''
@@ -638,7 +638,7 @@ label these fields while conveying clear meaning to ensure accessibility for all
 '''
 
 REPORTS = '''
-Each report represents the summary information from FEC Form 3, Form 3X and Form 3P.
+Each report represents the summary information from Form 3, Form 3X and Form 3P.
 These reports have key statistics that illuminate the financial status of a given committee.
 Things like cash on hand, debts owed by committee, total receipts, and total disbursements
 are especially helpful for understanding a committee's financial dealings.
@@ -649,7 +649,7 @@ have been amended, use `is_amended=true`.
 
 Several different reporting structures exist, depending on the type of organization that
 submits financial information. To see an example of these reporting requirements,
-look at the summary and detailed summary pages of FEC Form 3, Form 3X, and Form 3P.
+look at the summary and detailed summary pages of Form 3, Form 3X, and Form 3P.
 '''
 
 REPORTS += WIP_TAG
