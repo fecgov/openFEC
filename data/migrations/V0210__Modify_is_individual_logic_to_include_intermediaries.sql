@@ -52,6 +52,8 @@ begin
 	new.is_individual := is_individual(new.contb_receipt_amt, new.receipt_tp, new.line_num, new.memo_cd, new.memo_text, new.entity_tp);
 	new.line_number_label := expand_line_number(new.filing_form, new.line_num);
 
+  return new;
+  
 end
 $BODY$
   LANGUAGE plpgsql VOLATILE
