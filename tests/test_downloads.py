@@ -33,7 +33,8 @@ class TestDownloadTask(ApiBaseTest):
     def test_get_filename(self):
         path = '/v1/candidates/'
         qs = '?office=H&sort=name'
-        expected = hashlib.sha224((path + qs).encode('utf-8')).hexdigest() + '.csv'
+        prefix = 'user-downloads/'
+        expected = prefix + hashlib.sha224((path + qs).encode('utf-8')).hexdigest() + '.csv'
         assert tasks.get_s3_name(path, qs) == expected
 
     def test_download_url(self):
