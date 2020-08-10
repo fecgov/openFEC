@@ -18,7 +18,7 @@ begin
 
         is_coded_individual(receipt_type) or
 
-        (entity_tp <> 'IND' and coalesce(receipt_type, '') in ('24I', '24T')) or
+        (entity_tp = 'IND' and coalesce(receipt_type, '') in ('24I', '24T')) or
 
         is_inferred_individual(amount, line_number, memo_code, memo_text)
 
