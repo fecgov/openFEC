@@ -41,11 +41,11 @@ jobs:
             curl -s https://repo.maven.apache.org/maven2/org/flywaydb/flyway-commandline/5.2.4/flyway-commandline-5.2.4-linux-x64.tar.gz | tar zxv -C flyway
             echo 'export PATH=./flyway/flyway-5.2.4:$PATH' >> $BASH_ENV
 
-      - restore_cache:
-          keys:
-          - v2-fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "package.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - v2-fec-api-dependencies-
+      # - restore_cache:
+      #     key:
+      #     - v2-fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "package.json" }}
+      #     # fallback to using the latest cache if no exact match is found
+      #     - v2-fec-api-dependencies-
 
       - run:
           name: Install node dependencies
@@ -66,6 +66,7 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
+            pip install -U pip
             pip install -r requirements.txt
 
       - save_cache:
