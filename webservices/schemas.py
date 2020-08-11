@@ -670,7 +670,6 @@ ScheduleBSchema = make_schema(
             'disbursement_description_text',
             'recipient_street_1',
             'recipient_street_2',
-            'sort_expressions',
         ),
         'relationships': [
             Relationship(

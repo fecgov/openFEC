@@ -88,7 +88,9 @@ class OptionValidator(object):
     def __call__(self, value):
         if value.lstrip('-') not in self.values:
             raise exceptions.ApiError(
-                'Cannot sort on value "{0}"'.format(value),
+                'Cannot sort on value "{0}". Instead choose one of: "{1}"'.format(
+                    value, '", "'.join(self.values)
+                ),
                 status_code=422,
             )
 
@@ -506,12 +508,6 @@ schedule_a = {
         missing=None,
         description='When sorting by `contribution_receipt_amount`, this is populated with the \
         `contribution_receipt_amount` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'
-    ),
-    'last_contributor_aggregate_ytd': fields.Float(
-        missing=None,
-        description='When sorting by `contributor_aggregate_ytd`, this is populated with the \
-        `contributor_aggregate_ytd` of the last result. However, you will need to pass the index \
         of that last result to `last_index` to get the next page.'
     ),
     'is_individual': fields.Bool(missing=None, description=docs.IS_INDIVIDUAL),

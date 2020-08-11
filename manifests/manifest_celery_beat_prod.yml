@@ -8,7 +8,6 @@ env:
   FEC_API_RESTRICT_DOWNLOADS: true
   APP_NAME: fec | api | prod
   PRODUCTION: True
-  WEB_CONCURRENCY: 4
 services:
   - fec-api-search56
   - fec-redis
