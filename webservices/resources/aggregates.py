@@ -209,7 +209,7 @@ class CandidateAggregateResource(AggregateResource):
         return args.make_sort_args(
             validator=args.IndexValidator(
                 self.model,
-                extra=['candidate_name', 'committee_name', 'candidate_id', 'committee_id'],
+                extra=[CANDIDATE_NAME_LABEL, COMMITTEE_NAME_LABEL, 'candidate_id', 'committee_id'],
             ),
         )
 
@@ -316,7 +316,7 @@ class CCAggregatesView(AggregateResource):
         return args.make_sort_args(
             validator=args.IndexValidator(
                 self.model,
-                extra=['candidate_name', 'committee_name'],
+                extra=[CANDIDATE_NAME_LABEL, COMMITTEE_NAME_LABEL],
             ),
         )
 
@@ -371,7 +371,7 @@ class ECAggregatesView(AggregateResource):
         return args.make_sort_args(
             validator=args.IndexValidator(
                 self.model,
-                extra=['candidate_name', 'committee_name'],
+                extra=[CANDIDATE_NAME_LABEL, COMMITTEE_NAME_LABEL],
             ),
         )
 
@@ -397,14 +397,17 @@ class ECAggregatesView(AggregateResource):
     ]
 
 
+CANDIDATE_NAME_LABEL = 'candidate_name'
+COMMITTEE_NAME_LABEL = 'committee_name'
+
 def join_cand_cmte_names(query):
     query = query.subquery()
     return models.db.session.query(
         query,
         models.CandidateHistory.candidate_id.label('candidate_id'),
         models.CommitteeHistory.committee_id.label('committee_id'),
-        models.CandidateHistory.name.label('candidate_name'),
-        models.CommitteeHistory.name.label('committee_name'),
+        models.CandidateHistory.name.label(CANDIDATE_NAME_LABEL),
+        models.CommitteeHistory.name.label(COMMITTEE_NAME_LABEL),
     ).outerjoin(
         models.CandidateHistory,
         sa.and_(
