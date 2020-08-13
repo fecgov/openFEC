@@ -27,7 +27,7 @@ and [Acceptable Use policy](https://github.com/fecgov/FEC/blob/master/ACCEPTABLE
 
 Signing up for an API key will enable you to place up to 1,000 calls an hour. Each call \
 is limited to 100 results per page. You can email questions, comments or a request to get \
-a key for 120 calls per minute to <a href="mailto:APIinfo@fec.gov">APIinfo@fec.gov</a>. You \
+a key for 7,200 calls an hour (120 calls per minute) to <a href="mailto:APIinfo@fec.gov">APIinfo@fec.gov</a>. You \
 can also ask questions and discuss the data in a community led \
 [group](https://groups.google.com/forum/#!forum/fec-data).
 
