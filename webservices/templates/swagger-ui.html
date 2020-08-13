@@ -114,13 +114,11 @@
     <script src="{{ swagger_static('dist/swagger-layout.js') }}">
 </script>
 
-{% if api_key_signup_feature_flag %}
-
-    <script>
-      window.onload = function() {
-        SwaggerLayout(
-          "{{ specs_url }}",
-          document.getElementById("swagger-ui")
+<script>
+    window.onload = function() {
+	SwaggerLayout(
+	    "{{ specs_url }}",
+	    document.getElementById("swagger-ui")
         );
         
          var apiUmbrella = document.createElement('script'); 
@@ -132,16 +130,6 @@
          .appendChild(apiUmbrella);
       };
 </script>
-{% else %}
-    <script>
-      window.onload = function() {
-        SwaggerLayout(
-          "{{ specs_url }}",
-          document.getElementById("swagger-ui")
-        );
-      };
-</script>
-{% endif %}
 
 
   {% if PRODUCTION %}
