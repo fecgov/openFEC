@@ -18,10 +18,18 @@ item details with the other endpoints. If you are interested in individual donor
 out contributor information in the `/schedule_a/` endpoints.
 
 <b class="body" id="getting_started_head">Getting started with the openFEC API</b><br>
-If you would like to use the FEC's API programmatically, you can sign up for your own API key using our form. Alternatively, you can still try out our API without an API key by using the web interface and using DEMO_KEY. Note that when you use the openFEC API you are subject to the [Terms of Service](https://github.com/fecgov/FEC/blob/master/TERMS-OF-SERVICE.md) and [Acceptable Use policy](https://github.com/fecgov/FEC/blob/master/ACCEPTABLE-USE-POLICY.md).
 
+If you would like to use the FEC's API programmatically, you can sign up for your own API \
+key using our form. Alternatively, you can still try out our API without an API key by using \
+the web interface and using DEMO_KEY. Note that when you use the openFEC API you are \
+subject to the [Terms of Service](https://github.com/fecgov/FEC/blob/master/TERMS-OF-SERVICE.md) \
+and [Acceptable Use policy](https://github.com/fecgov/FEC/blob/master/ACCEPTABLE-USE-POLICY.md).
 
-Signing up for an API key will enable you to place up to 1,000 calls an hour. Each call is limited to 100 results per page. You can email questions, comments or a request to get a key for 7,600 calls per hour (120 calls per minute) to <a href="mailto:APIinfo@fec.gov">APIinfo@fec.gov</a>. You can also ask questions and discuss the data in a community led [group](https://groups.google.com/forum/#!forum/fec-data). Occasionally the FEC will decide to deprecate, including making breaking changes to an API endpoint, feature, or service. Please refer to our [deprecation policy](https://github.com/fecgov/openFEC/wiki/Deprecation-policy) for more information.
+Signing up for an API key will enable you to place up to 1,000 calls an hour. Each call \
+is limited to 100 results per page. You can email questions, comments or a request to get \
+a key for 7,200 calls an hour (120 calls per minute) to <a href="mailto:APIinfo@fec.gov">APIinfo@fec.gov</a>. You \
+can also ask questions and discuss the data in a community led \
+[group](https://groups.google.com/forum/#!forum/fec-data).
 
 The model definitions and schema are available at [/swagger](/swagger/). This is useful for
 making wrappers and exploring the data.
