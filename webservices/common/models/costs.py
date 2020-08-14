@@ -4,7 +4,7 @@ from .base import db
 from webservices import docs
 
 
-class CommunicationCost(db.Model):
+class CommunicationCostOffset(db.Model):
     __tablename__ = 'ofec_communication_cost_mv'
 
     sub_id = db.Column(db.Integer, primary_key=True)
@@ -47,8 +47,7 @@ class CommunicationCost(db.Model):
     file_number = db.Column('file_num', db.Integer)
     image_number = db.Column('image_num', db.String, index=True)
 
-
-class CommunicationCostOffset(db.Model):
+class CommunicationCost(db.Model):
     __tablename__ = 'ofec_communication_cost_mv'
     __table_args__ = {'extend_existing': True} 
 
@@ -91,7 +90,8 @@ class CommunicationCostOffset(db.Model):
     tran_id = db.Column(db.String)
     file_number = db.Column('file_num', db.Integer)
     image_number = db.Column('image_num', db.String, index=True)
-    
+
+
 class Electioneering(db.Model):
     __tablename__ = 'ofec_electioneering_mv'
 
