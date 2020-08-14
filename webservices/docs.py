@@ -1,6 +1,5 @@
 from webservices.env import env
 
-api_key_signup_feature_flag = bool(env.get_credential('API_UMBRELLA_SIGNUP_KEY_FEATURE_FLAG', ''))
 
 """Narrative API documentation."""
 API_DESCRIPTION = '''
@@ -39,17 +38,12 @@ lists for commercial purposes or to solicit donations.
 [Learn more here](https://www.fec.gov/updates/sale-or-use-contributor-information/).
 
 [Inspect our source code](https://github.com/fecgov/openFEC). We welcome issues and pull requests!
+
+<p><br></p>
+<h2 class="title" id="signup_head">Sign up for an API key</h2>
+<div id="apidatagov_signup">Loading signup form...</div>
 '''
 
-if api_key_signup_feature_flag:
-    API_DESCRIPTION += \
-        '''
-        
-        <p><br></p>
-        <h2 class="title" id="signup_head">Sign up for an API key</h2>
-        <div id="apidatagov_signup">Loading signup form...</div>
-
-        '''
 
 PAGES = '''
 Number of pages in the document

@@ -111,37 +111,25 @@
  </script>
  <noscript>Please enable JavaScript to signup for an <a href="http://api.data.gov/">api.data.gov</a> API key.</noscript>
 
-    <script src="{{ swagger_static('dist/swagger-layout.js') }}">
-</script>
+<script src="{{ swagger_static('dist/swagger-layout.js') }}"></script>
 
-{% if api_key_signup_feature_flag %}
-
-    <script>
-      window.onload = function() {
-        SwaggerLayout(
-          "{{ specs_url }}",
-          document.getElementById("swagger-ui")
-        );
-        
-         var apiUmbrella = document.createElement('script'); 
-         apiUmbrella.type = 'text/javascript'; 
-         apiUmbrella.async = true;
-         apiUmbrella.src = 'https://api.data.gov/static/javascripts/signup_embed.js';
-         (document.getElementsByTagName('head')[0] || 
-          document.getElementsByTagName('body')[0])
-         .appendChild(apiUmbrella);
-      };
+<script>
+    window.onload = function() {
+      SwaggerLayout(
+        "{{ specs_url }}",
+        document.getElementById("swagger-ui")
+      );
+      function addSignUpForm() {
+        var apiUmbrella = document.createElement('script');
+        apiUmbrella.type = 'text/javascript';
+        apiUmbrella.async = true;
+        apiUmbrella.src = 'https://api.data.gov/static/javascripts/signup_embed.js';
+        (document.getElementsByTagName('head')[0])
+        .appendChild(apiUmbrella);
+      }
+      window.setTimeout(addSignUpForm, 1000);
+    };
 </script>
-{% else %}
-    <script>
-      window.onload = function() {
-        SwaggerLayout(
-          "{{ specs_url }}",
-          document.getElementById("swagger-ui")
-        );
-      };
-</script>
-{% endif %}
 
 
   {% if PRODUCTION %}
@@ -158,7 +146,5 @@
     </script>
     <script id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=FEC"></script>
 {% endif %}
-
 </body>
-
 </html>
