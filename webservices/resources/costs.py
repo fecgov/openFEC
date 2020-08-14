@@ -63,7 +63,7 @@ class CommunicationCostViewOffset(ApiResource):
             args.itemized,
             args.communication_cost,
             args.make_sort_args(
-                validator=args.IndexValidator(models.CommunicationCost),
+                validator=args.IndexValidator(models.CommunicationCostOffset),
             ),
         )
 
@@ -72,15 +72,15 @@ class CommunicationCostViewOffset(ApiResource):
         return self.model.sub_id
 
     filter_multi_fields = [
-        ('image_number', models.CommunicationCost.image_number),
-        ('committee_id', models.CommunicationCost.committee_id),
-        ('candidate_id', models.CommunicationCost.candidate_id),
-        ('support_oppose_indicator', models.CommunicationCost.support_oppose_indicator),
+        ('image_number', models.CommunicationCostOffset.image_number),
+        ('committee_id', models.CommunicationCostOffset.committee_id),
+        ('candidate_id', models.CommunicationCostOffset.candidate_id),
+        ('support_oppose_indicator', models.CommunicationCostOffset.support_oppose_indicator),
     ]
     filter_range_fields = [
-        (('min_date', 'max_date'), models.CommunicationCost.transaction_date),
-        (('min_amount', 'max_amount'), models.CommunicationCost.transaction_amount),
-        (('min_image_number', 'max_image_number'), models.CommunicationCost.image_number),
+        (('min_date', 'max_date'), models.CommunicationCostOffset.transaction_date),
+        (('min_amount', 'max_amount'), models.CommunicationCostOffset.transaction_amount),
+        (('min_image_number', 'max_image_number'), models.CommunicationCostOffset.image_number),
     ]
 
 @doc(
