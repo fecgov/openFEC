@@ -564,7 +564,6 @@ def api_ui():
         specs_url=url_for('docs.api_spec'),
         PRODUCTION=env.get_credential('PRODUCTION'),
         api_key_signup_key=env.get_credential('API_UMBRELLA_SIGNUP_KEY'),
-        api_key_signup_feature_flag=bool(env.get_credential('API_UMBRELLA_SIGNUP_KEY_FEATURE_FLAG', '')),
     )
 
 
