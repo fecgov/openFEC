@@ -51,7 +51,7 @@ class CommunicationCostView(ApiResource):
     tags=['communication cost'],
     description=docs.COMMUNICATION_COST_OFFSET,
 )
-class CommunicationCostViewOffest(ApiResource):
+class CommunicationCostViewOffset(ApiResource):
 
     model = models.CommunicationCostOffset
     schema = schemas.CommunicationCostSchemaOffset

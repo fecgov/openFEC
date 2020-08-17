@@ -331,7 +331,7 @@ api.add_resource(sched_f.ScheduleFView, '/schedules/schedule_f/', '/schedules/sc
 api.add_resource(sched_f.ScheduleFViewBySubId, '/schedules/schedule_f/<string:sub_id>/')
 api.add_resource(sched_h4.ScheduleH4View, '/schedules/schedule_h4/')
 api.add_resource(costs.CommunicationCostView, '/communication-costs/')
-api.add_resource(costs.CommunicationCostViewOffest, '/communication_costs/')
+api.add_resource(costs.CommunicationCostViewOffset, '/communication_costs/')
 api.add_resource(costs.ElectioneeringView, '/electioneering/')
 api.add_resource(elections.ElectionView, '/elections/')
 api.add_resource(elections.ElectionsListView, '/elections/search/')

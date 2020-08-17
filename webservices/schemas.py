@@ -749,6 +749,16 @@ CommunicationCostPageSchema = make_page_schema(CommunicationCostSchema, page_typ
 register_schema(CommunicationCostSchema)
 register_schema(CommunicationCostPageSchema)
 
+
+CommunicationCostSchemaOffset = make_schema(
+    models.CommunicationCostOffset,
+)
+CommunicationCostPageSchemaOffset = make_page_schema(
+    CommunicationCostSchemaOffset, page_type=paging_schemas.OffsetPageSchema
+)
+register_schema(CommunicationCostSchemaOffset)
+register_schema(CommunicationCostPageSchemaOffset)
+
 CCAggregatesSchema = make_schema(
     models.CommunicationCostByCandidate,
     fields={
