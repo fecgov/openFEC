@@ -12,6 +12,10 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
+CANDIDATE_NAME_LABEL = 'candidate_name'
+COMMITTEE_NAME_LABEL = 'committee_name'
+
+
 class AggregateResource(ApiResource):
     query_args = {}
 
@@ -395,10 +399,7 @@ class ECAggregatesView(AggregateResource):
         ('candidate_id', model.candidate_id),
         ('committee_id', model.committee_id),
     ]
-
-
-CANDIDATE_NAME_LABEL = 'candidate_name'
-COMMITTEE_NAME_LABEL = 'committee_name'
+    
 
 def join_cand_cmte_names(query):
     query = query.subquery()
