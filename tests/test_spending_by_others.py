@@ -442,56 +442,56 @@ class TestCommunicationCostAggregates(ApiBaseTest):
 
     def test_filters_committee_candidate_id_cycle(self):
         factories.CandidateHistoryFactory(
-            candidate_id='C001', two_year_period=2000, candidate_election_year=2000, name='Apple Smith'
+            candidate_id='P001', two_year_period=2000, candidate_election_year=2000, name='Apple Smith'
         ),
         factories.CandidateHistoryFactory(
-            candidate_id='C002', two_year_period=2000, candidate_election_year=2000, name='Snapple Smith'
+            candidate_id='P002', two_year_period=2000, candidate_election_year=2000, name='Snapple Smith'
         ),
         factories.CandidateHistoryFactory(
-            candidate_id='C002', two_year_period=2004, candidate_election_year=2004, name='Zapple Smith'
+            candidate_id='P002', two_year_period=2004, candidate_election_year=2004, name='Zapple Smith'
         ),
 
         factories.CommitteeHistoryFactory(
-            committee_id='P001', cycle=2000, name='Acme Co'
+            committee_id='C001', cycle=2000, name='Acme Co'
         ),
         factories.CommitteeHistoryFactory(
-            committee_id='P002', cycle=2000, name='Tetris Corp'
+            committee_id='C002', cycle=2000, name='Tetris Corp'
         ),
         factories.CommitteeHistoryFactory(
-            committee_id='P002', cycle=2004, name='Winner PAC'
+            committee_id='C002', cycle=2004, name='Winner PAC'
         ),
 
         factories.CommunicationCostByCandidateFactory(
-            committee_id='P001', candidate_id='C001', cycle=2000
+            committee_id='C001', candidate_id='P001', cycle=2000
         )
         factories.CommunicationCostByCandidateFactory(
-            committee_id='P001', candidate_id='C002', cycle=2000
+            committee_id='C001', candidate_id='P002', cycle=2000
         )
         factories.CommunicationCostByCandidateFactory(
-            committee_id='P002', candidate_id='C001', cycle=2004
+            committee_id='C002', candidate_id='P001', cycle=2004
         )
         db.session.flush()
 
         # assert results filtered by committee_id sorted by candidate name in descending order
-        results = self._results(api.url_for(CCAggregatesView, committee_id='P001', sort='-candidate_name'))
+        results = self._results(api.url_for(CCAggregatesView, committee_id='C001', sort='-candidate_name'))
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0]['candidate_name'], 'Snapple Smith')
         self.assertEqual(results[1]['candidate_name'], 'Apple Smith')
 
         # assert results filtered by committee_id sorted by candidate name in ascending order
-        results = self._results(api.url_for(CCAggregatesView, committee_id='P001', sort='candidate_name'))
+        results = self._results(api.url_for(CCAggregatesView, committee_id='C001', sort='candidate_name'))
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0]['candidate_name'], 'Apple Smith')
         self.assertEqual(results[1]['candidate_name'], 'Snapple Smith')
 
         # assert results filtered by candidate_id sorted by committee name in descending order
-        results = self._results(api.url_for(CCAggregatesView, candidate_id='C001', sort='-committee_name'))
+        results = self._results(api.url_for(CCAggregatesView, candidate_id='P001', sort='-committee_name'))
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0]['committee_name'], 'Winner PAC')
         self.assertEqual(results[1]['committee_name'], 'Acme Co')
 
         # assert results filtered by candidate_id sorted by committee name in ascending order
-        results = self._results(api.url_for(CCAggregatesView, candidate_id='C001', sort='committee_name'))
+        results = self._results(api.url_for(CCAggregatesView, candidate_id='P001', sort='committee_name'))
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0]['committee_name'], 'Acme Co')
         self.assertEqual(results[1]['committee_name'], 'Winner PAC')
