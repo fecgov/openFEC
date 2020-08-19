@@ -48,6 +48,44 @@ class CommunicationCostView(ApiResource):
 
 
 @doc(
+    tags=['communication cost'],
+    description=docs.COMMUNICATION_COST_OFFSET,
+)
+class CommunicationCostViewOffset(ApiResource):
+
+    model = models.CommunicationCost
+    schema = schemas.CommunicationCostSchema
+    page_schema = schemas.CommunicationCostOffsetPageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.itemized,
+            args.communication_cost,
+            args.make_sort_args(
+                validator=args.IndexValidator(models.CommunicationCost),
+            ),
+        )
+
+    @property
+    def index_column(self):
+        return self.model.sub_id
+
+    filter_multi_fields = [
+        ('image_number', models.CommunicationCost.image_number),
+        ('committee_id', models.CommunicationCost.committee_id),
+        ('candidate_id', models.CommunicationCost.candidate_id),
+        ('support_oppose_indicator', models.CommunicationCost.support_oppose_indicator),
+    ]
+    filter_range_fields = [
+        (('min_date', 'max_date'), models.CommunicationCost.transaction_date),
+        (('min_amount', 'max_amount'), models.CommunicationCost.transaction_amount),
+        (('min_image_number', 'max_image_number'), models.CommunicationCost.image_number),
+    ]
+
+
+@doc(
     tags=['electioneering'],
     description=docs.ELECTIONEERING,
 )

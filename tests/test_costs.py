@@ -4,7 +4,7 @@ from tests.common import ApiBaseTest
 from webservices.rest import api
 from webservices.common.models import CommunicationCost, Electioneering
 from webservices.schemas import CommunicationCostSchema, ElectioneeringSchema
-from webservices.resources.costs import CommunicationCostView, ElectioneeringView
+from webservices.resources.costs import CommunicationCostView, ElectioneeringView, CommunicationCostViewOffset
 
 
 class TestCommunicationCost(ApiBaseTest):
@@ -30,6 +30,21 @@ class TestCommunicationCost(ApiBaseTest):
             )
             assert len(results) == 1
             assert results[0][column.key] == values[0]
+
+    def test_pagination_offset(self):
+        factories.CommunicationCostFactory()
+        response = self._response(api.url_for(CommunicationCostViewOffset))
+        self.assertEqual(
+            response['pagination'],
+            {
+                'count': 1, 'page': 1, 'per_page': 20, 'pages': 1
+            }
+        )
+        response = self._response(
+            api.url_for(CommunicationCostViewOffset, page=2)
+        )
+        # test that no page 2 exists
+        self.assertEqual(response['results'], [])
 
 
 class TestElectioneering(ApiBaseTest):
