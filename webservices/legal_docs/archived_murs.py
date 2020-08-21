@@ -1,31 +1,26 @@
+from sqlalchemy.sql import text
+from elasticsearch_dsl import Search
+import logging
+import re
+from webservices.rest import db
+from webservices import utils
+from .reclassify_statutory_citation import reclassify_statutory_citation
+
 # import these 3 libraries to display the JSON format of object "mur"
 import json
 import datetime
 from json import JSONEncoder
 
-from sqlalchemy.sql import text
-
-
-from elasticsearch_dsl import Search, Q
-
-import logging
-import re
-# from collections import defaultdict
-
-# from webservices.env import env
-from webservices.rest import db
-# from webservices.utils import extend, create_eregs_link, get_elasticsearch_connection
-# from webservices.tasks.utils import get_bucket
-from webservices import utils
-from .reclassify_statutory_citation import reclassify_statutory_citation
-
 logger = logging.getLogger(__name__)
 
-ALL_MURS = """
+# for debug
+# logger.setLevel(logging.DEBUG)
+
+ALL_ARCHIVED_MURS = """
     SELECT DISTINCT
         mur_id,
         mur_number as mur_no
-    FROM mur_arch.all_murs
+    FROM MUR_ARCH.ARCHIVED_MURS
     ORDER BY mur_id
 """
 
@@ -36,34 +31,34 @@ SINGLE_MUR = """
         mur_name,
         open_date,
         close_date
-    FROM mur_arch.all_murs
+    FROM MUR_ARCH.ARCHIVED_MURS
     WHERE mur_number = %s
 """
 
 MUR_COMPLAINANT = """
     SELECT
-        code,
-        name
-    FROM mur_arch.all_murs
-    WHERE mur_id = %s AND code = 'C'
-    ORDER BY name
+        complainant_respondent_code as code,
+        complainant_respondent_name as name
+    FROM MUR_ARCH.ARCHIVED_MURS
+    WHERE mur_id = %s AND complainant_respondent_code = 'C'
+    ORDER BY complainant_respondent_name
 """
 
 MUR_RESPONDENT = """
     SELECT
-        code,
-        name
-    FROM mur_arch.all_murs
-    WHERE mur_id = %s AND code = 'R'
-    ORDER BY name
+        complainant_respondent_code as code,
+        complainant_respondent_name as name
+    FROM MUR_ARCH.ARCHIVED_MURS
+    WHERE mur_id = %s AND complainant_respondent_code = 'R'
+    ORDER BY complainant_respondent_name
 """
 
 MUR_CITES = """
     SELECT
-        cite
-    FROM mur_arch.all_murs
-    WHERE mur_id = %s AND cite is not null
-    ORDER BY cite
+        citation as cite
+    FROM MUR_ARCH.ARCHIVED_MURS
+    WHERE mur_id = %s AND citation is not null
+    ORDER BY citation
 """
 
 MUR_SUBJECT_LV1 = """
@@ -110,6 +105,18 @@ MUR_DOCUMENTS = """
         url
     FROM MUR_ARCH.DOCUMENTS
     WHERE mur_id = %s
+    ORDER BY document_id
+"""
+
+INSERT_DOCUMENT = """
+    INSERT INTO MUR_ARCH.DOCUMENTS(
+        document_id,
+        mur_no,
+        pdf_text,
+        mur_id,
+        length,
+        url
+    ) VALUES (:document_id, :mur_no, :pdf_text, :mur_id, :length, :url)
 """
 
 
@@ -125,39 +132,30 @@ def load_archived_murs(mur_no=None):
     """
     Reads data for Archived MURs from a Postgres database (under schema:mur_arch),
     assembles a JSON document corresponding to the mur, and indexes this document
-    in Elasticsearch in the index `archived_murs` with a doc_type of `archived_murs`.
-    In addition, all documents attached to the case are uploaded to an
-    S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
+    in Elasticsearch in the index `archived_murs` with a doc_type of `murs`.
     """
     es = utils.get_elasticsearch_connection()
-    logger.info("Loading archived mur {0}(s)".format(mur_no))
+    logger.info("Loading archived mur{0}...".format(mur_no))
+
     mur_count = 0
-    print("load_archived_murs().......")
     for mur in get_murs(mur_no):
         if mur is not None:
             logger.info("Loading archived murs: {0}".format(mur["no"]))
-            print("Loading archived murs: {0}".format(mur["no"]))
             es.index("archived_murs", get_es_type(), mur, id=mur["doc_id"])
             mur_count += 1
-            logger.info("{0} archived mur(s) loaded".format(mur_count))
-            print("{0} archived mur(s) loaded".format(mur_count))
-        else:
-            logger.info("Found an unpublished case - deleting archived mur: {0} from ES".format(mur["no"]))
-            es.delete_by_query(index="docs_index", body={"query": {"term": {"no": mur["no"]}}},
-                doc_type=get_es_type())
-            logger.info("Successfully deleted archived mur(s) {} from ES".format(mur["no"]))
 
-        # display the JSON format of object "mur"
-        print("mur_json_data =" + json.dumps(mur, indent=4, cls=DateTimeEncoder))
+            logger.info("{0} Archived Mur(s) loaded".format(mur_count))
+        else:
+            logger.info("Invalid archived MUR")
+
+        # ==for dubug use, display the JSON format of object "mur"
+        logger.debug("mur_json_data =" + json.dumps(mur, indent=4, cls=DateTimeEncoder))
 
 
 def get_murs(mur_no=None):
-    """
-    """
-    print("get_murs().......")
     if mur_no is None:
         with db.engine.connect() as conn:
-            rs = conn.execute(ALL_MURS)
+            rs = conn.execute(ALL_ARCHIVED_MURS)
             for row in rs:
                 yield get_single_mur(row["mur_no"])
     else:
@@ -165,7 +163,6 @@ def get_murs(mur_no=None):
 
 
 def get_single_mur(mur_no):
-
     with db.engine.connect() as conn:
         rs = conn.execute(SINGLE_MUR, mur_no)
         row = rs.first()
@@ -178,12 +175,11 @@ def get_single_mur(mur_no):
                 "mur_type": "archived",
                 "mur_name": row["mur_name"],
                 "open_date": row["open_date"],
-                "close_date": row["close_date"]
+                "close_date": row["close_date"],
             }
             mur["complainants"] = get_complainants(mur_id)
             mur["respondents"] = get_respondents(mur_id)
             mur["citations"] = get_citations_arch_mur(mur_id)
-
             mur["subject"] = get_subjects(mur_id)
             mur["documents"] = get_documents(mur_id)
             return mur
@@ -212,6 +208,48 @@ def get_respondents(mur_id):
         for row in rs:
             respondents.append(row["name"])
     return respondents
+
+
+# citation sample data:
+# 1) us_code :
+#   ex1: original us_code: 2 U.S.C. 441a(a)(5)
+#        mapped us_code: 52 U.S.C. 30116(a)(5)
+#        url: https://www.govinfo.gov/link/uscode/52/30116
+
+#   ex2: 26 U.S.C. 9002(2)(A)
+#        url: https://www.govinfo.gov/link/uscode/26/9002
+
+# 2) regulation: 11 C.F.R. 9002.11(b)(3)
+#    url: /regulations/9002-11/CURRENT
+
+def get_citations_arch_mur(mur_id):
+    us_codes = []
+    regulations = []
+    with db.engine.connect() as conn:
+        rs = conn.execute(MUR_CITES, mur_id)
+        for row in rs:
+            if row["cite"]:
+                us_code_match = re.match(
+                    "(?P<title>[0-9]+) U\.S\.C\. (?P<section>[0-9a-z-]+)(?P<paragraphs>.*)", row["cite"])
+
+                regulation_match = re.match(
+                    "(?P<title>[0-9]+) C\.F\.R\. (?P<part>[0-9]+)(?:\.(?P<section>[0-9]+))?", row["cite"])
+
+                if us_code_match:
+                    us_code_title, us_code_section = reclassify_statutory_citation(
+                        us_code_match.group("title"), us_code_match.group("section"))
+                    citation_text = "%s U.S.C. %s%s" % (
+                        us_code_title, us_code_section, us_code_match.group("paragraphs"))
+                    url = "https://www.govinfo.gov/link/uscode/{0}/{1}".format(us_code_title, us_code_section)
+
+                    us_codes.append({"text": citation_text, "url": url})
+
+                elif regulation_match:
+                    url = utils.create_eregs_link(regulation_match.group("part"), regulation_match.group("section"))
+                    regulations.append({"text": row["cite"], "url": url})
+                else:
+                    raise Exception("Could not parse archived mur's citation.")
+        return {"us_code": us_codes, "regulations": regulations}
 
 
 def get_subjects(mur_id):
@@ -243,39 +281,6 @@ def get_subjects(mur_id):
     return subject_lv1
 
 
-# us_codes examples: 2 U.S.C. 431(1)(B) or 26 U.S.C. 9008(d)(1)
-# url:www.govinfo.gov/link/uscode/52/30101
-def get_citations_arch_mur(mur_id):
-    us_codes = []
-    regulations = []
-
-    with db.engine.connect() as conn:
-        rs = conn.execute(MUR_CITES, mur_id)
-        for row in rs:
-            if row["cite"]:
-                us_code_match = re.match(
-                    "(?P<title>[0-9]+) U\.S\.C\. (?P<section>[0-9a-z-]+)(?P<paragraphs>.*)", row["cite"])
-
-                regulation_match = re.match(
-                    "(?P<title>[0-9]+) C\.F\.R\. (?P<part>[0-9]+)(?:\.(?P<section>[0-9]+))?", row["cite"])
-
-                if us_code_match:
-                    us_code_title, us_code_section = reclassify_statutory_citation(
-                        us_code_match.group("title"), us_code_match.group("section"))
-                    citation_text = "%s U.S.C. %s%s" % (
-                        us_code_title, us_code_section, us_code_match.group("paragraphs"))
-                    url = "https://www.govinfo.gov/link/uscode/{0}/{1}".format(us_code_title, us_code_section)
-
-                    us_codes.append({"text": citation_text, "url": url})
-
-                elif regulation_match:
-                    url = utils.create_eregs_link(regulation_match.group("part"), regulation_match.group("section"))
-                    regulations.append({"text": row["cite"], "url": url})
-                else:
-                    raise Exception("Could not parse archived mur's citation.")
-        return {"us_code": us_codes, "regulations": regulations}
-
-
 def get_documents(mur_id):
     documents = []
     with db.engine.connect() as conn:
@@ -284,62 +289,95 @@ def get_documents(mur_id):
             documents.append({
                 "document_id": int(row["document_id"] or 1),
                 "length": int(row["length"] or 0),
-                "text": (row["pdf_text"].replace('"', '""')),
+                "text": row["pdf_text"],
                 "url": (row["url"] or "/files/legal/murs/{0}.pdf".format(mur_id))
             })
     return documents
 
 
 def extract_pdf_text(mur_no=None):
-    es = utils.get_elasticsearch_connection()
-
-    print ("extract_pdf_text()...")
-    es_results = (
-        Search()
-        .using(es)
-        .source(includes=["no", "documents.document_id", "documents.length", "documents.url", "documents.text"])
-        .extra(size=20)
-        .index("archived_murs")
-        .doc_type("murs")
-        .execute()
-    )
-    results = {"all_mur_docs": [hit.to_dict() for hit in es_results]}
-    print("results =" + json.dumps(results, indent=4, cls=DateTimeEncoder))
-
-    print("results.length=" + str(len(results['all_mur_docs'])))
-
-    INSERT_DOCUMENT = """
-        INSERT INTO MUR_ARCH.DOCUMENTS_TMP(
-            document_id,
-            mur_no,
-            pdf_text,
-            mur_id,
-            length,
-            url
-        ) VALUES (:document_id, :mur_no, :pdf_text, :mur_id, :length, :url)
     """
+    1)Reads "text" and "documents" object data for Archived MURs from Elasticsearch,
+    under index: `archived_murs` and doc_type of `murs`
+    2)Assembles a JSON document corresponding to the archived murs,
+    3)Insert the JSON document into Postgres database table: mur_arch.documents
+    4)Run this command carefully, backup mur_arch.documents table first
+    and empty it. the data will be inserted into table: mur_arch.documents
+    """
+    es = utils.get_elasticsearch_connection()
+    each_fetch_size = 1000
+    max_size = 5000
+    all_results = []
 
-    insert_data_docs = []
+    # get "text" and "documents" object data from Elasticsearch
+    for from_no in range(0, max_size, each_fetch_size):
+        es_results = (
+            Search()
+            .using(es)
+            .source(includes=[
+                "no",
+                "text",
+                "documents.document_id",
+                "documents.length",
+                "documents.url",
+                "documents.text"
+            ])
+            .extra(size=each_fetch_size, from_=from_no)
+            .index("archived_murs")
+            .doc_type("murs")
+            .sort("no")
+            .execute()
+        )
+
+        for rs in [hit.to_dict() for hit in es_results]:
+            all_results.append(rs)
+        logger.debug("all_results = " + json.dumps(all_results, indent=3, cls=DateTimeEncoder))
+
+    results = {"all_mur_docs": all_results}
+    logger.debug("all_mur_docs = " + json.dumps(results, indent=3, cls=DateTimeEncoder))
+
+    logger.info("Get {0} archived mur(s) from elasticserch index: \"archived_murs\"".format(
+        str(len(results['all_mur_docs']))))
+
     if results and results.get("all_mur_docs"):
         with db.engine.connect() as conn:
             for mur in results["all_mur_docs"]:
                 mur_no = mur["no"]
                 if mur.get("documents"):
+                    logger.info("Archived Mur{0} has documents.".format(mur_no))
                     for mur_doc in mur["documents"]:
                         if mur_doc:
                             insert_data_doc = ({
                                 "document_id": int(mur_doc["document_id"]),
                                 "mur_no": mur_no,
-                                "pdf_text": mur_doc["text"],
+                                "pdf_text": mur_doc.get("text"),
                                 "mur_id": int(mur_no),
-                                "length": int(mur_doc["length"] or 0),
-                                "url": mur_doc["url"],
+                                "length": (int(mur_doc["length"]) or len(mur_doc["text"]) or None),
+                                "url": (mur_doc["url"] or "/files/legal/murs/{0}.pdf".format(mur_no)),
                             })
-
                             conn.execute(text(INSERT_DOCUMENT), **insert_data_doc)
-
-                            insert_data_docs.append(insert_data_doc)
-
-                # elif mur["text"]: TO DO List
-            print("insert_data_docs =" + json.dumps(insert_data_docs, indent=4, cls=DateTimeEncoder))
-
+                            logger.info("Archived Mur{0} has been inserted into table successfully".format(mur_no))
+                elif mur.get("text"):
+                    logger.info("Archived Mur{0} has no documents, but has text.".format(mur_no))
+                    insert_data_doc = ({
+                        "document_id": 1,
+                        "mur_no": mur_no,
+                        "pdf_text": mur["text"],
+                        "mur_id": int(mur_no),
+                        "length": (len(mur["text"]) or None),
+                        "url": "/files/legal/murs/{0}.pdf".format(mur_no),
+                    })
+                    conn.execute(text(INSERT_DOCUMENT), **insert_data_doc)
+                    logger.info("Archived Mur{0} has been inserted into table successfully".format(mur_no))
+                else:
+                    logger.info("Archived Mur{0} has no documents.".format(mur_no))
+                    insert_data_doc = ({
+                        "document_id": None,
+                        "mur_no": mur_no,
+                        "pdf_text": None,
+                        "mur_id": int(mur_no),
+                        "length": None,
+                        "url": "/files/legal/murs/{0}.pdf".format(mur_no),
+                    })
+                    conn.execute(text(INSERT_DOCUMENT), **insert_data_doc)
+                    logger.info("Archived Mur{0} has been inserted into table successfully".format(mur_no))
