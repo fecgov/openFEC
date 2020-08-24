@@ -10,6 +10,10 @@ from webservices.tasks import utils
 schedule = {}
 if env.app.get('space_name', 'unknown-space').lower() != 'feature':
     schedule = {
+        'test': {
+            'task': 'webservices.tasks.broker_url.test',
+            'schedule': crontab(minute='*/1'),
+        },
         'refresh_materialized_views': {
             'task': 'webservices.tasks.refresh.refresh_materialized_views',
             'schedule': crontab(minute=0, hour=9),
@@ -59,6 +63,7 @@ app = celery.Celery('openfec')
 app.conf.update(
     broker_url=redis_url(),
     imports=(
+        'webservices.tasks.broker_url',
         'webservices.tasks.refresh',
         'webservices.tasks.download',
         'webservices.tasks.legal_docs',
