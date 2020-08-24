@@ -65,7 +65,7 @@ app.conf.update(
     ),
     beat_schedule=schedule,
     broker_connection_timeout=30,  # in seconds
-    broker_connection_max_retries=0,  # for unlimited retries
+    broker_connection_max_retries=10,  # for 10 retries, will repeat same creds
     task_acks_late=False
 )
 
