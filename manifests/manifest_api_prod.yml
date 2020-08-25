@@ -18,3 +18,4 @@ routes:
 applications:
   - name: api
     instances: 10
+    disk_quota: 1G
