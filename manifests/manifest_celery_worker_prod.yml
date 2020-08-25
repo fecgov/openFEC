@@ -17,7 +17,7 @@ applications:
   - name: celery-worker
     instances: 6
     memory: 1G
-    disk_quota: 2G
+    disk_quota: 1G
     no-route: true
     health-check-type: process
     command: celery worker --app webservices.tasks --loglevel ${LOGLEVEL:=INFO} --concurrency 3
