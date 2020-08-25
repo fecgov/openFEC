@@ -12,6 +12,10 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
+CANDIDATE_NAME_LABEL = 'candidate_name'
+COMMITTEE_NAME_LABEL = 'committee_name'
+
+
 class AggregateResource(ApiResource):
     query_args = {}
 
@@ -209,7 +213,7 @@ class CandidateAggregateResource(AggregateResource):
         return args.make_sort_args(
             validator=args.IndexValidator(
                 self.model,
-                extra=['candidate_name', 'committee_name', 'candidate_id', 'committee_id'],
+                extra=[CANDIDATE_NAME_LABEL, COMMITTEE_NAME_LABEL, 'candidate_id', 'committee_id'],
             ),
         )
 
@@ -316,7 +320,7 @@ class CCAggregatesView(AggregateResource):
         return args.make_sort_args(
             validator=args.IndexValidator(
                 self.model,
-                extra=['candidate', 'committee'],
+                extra=[CANDIDATE_NAME_LABEL, COMMITTEE_NAME_LABEL],
             ),
         )
 
@@ -371,7 +375,7 @@ class ECAggregatesView(AggregateResource):
         return args.make_sort_args(
             validator=args.IndexValidator(
                 self.model,
-                extra=['candidate', 'committee'],
+                extra=[CANDIDATE_NAME_LABEL, COMMITTEE_NAME_LABEL],
             ),
         )
 
@@ -395,7 +399,7 @@ class ECAggregatesView(AggregateResource):
         ('candidate_id', model.candidate_id),
         ('committee_id', model.committee_id),
     ]
-
+    
 
 def join_cand_cmte_names(query):
     query = query.subquery()
@@ -403,8 +407,8 @@ def join_cand_cmte_names(query):
         query,
         models.CandidateHistory.candidate_id.label('candidate_id'),
         models.CommitteeHistory.committee_id.label('committee_id'),
-        models.CandidateHistory.name.label('candidate_name'),
-        models.CommitteeHistory.name.label('committee_name'),
+        models.CandidateHistory.name.label(CANDIDATE_NAME_LABEL),
+        models.CommitteeHistory.name.label(COMMITTEE_NAME_LABEL),
     ).outerjoin(
         models.CandidateHistory,
         sa.and_(

@@ -176,7 +176,7 @@ def limit_remote_addr():
                 request_api_key_id = request.headers.get('X-Api-User-Id')
                 if request_api_key_id not in BYPASS_RESTRICTION_API_KEY_IDS:
                     # Service unavailable
-                    abort(503, RESTRICT_API_MESSAGE)
+                    abort(503, RESTRICT_MESSAGE)
 
 
 def get_cache_header(url):

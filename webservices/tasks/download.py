@@ -119,7 +119,8 @@ def get_s3_name(path, qs):
     # TODO: consider base64 vs hash
     raw = '{}{}'.format(path, qs)
     hashed = hashlib.sha224(raw.encode('utf-8')).hexdigest()
-    return '{}.csv'.format(hashed)
+    prefix = 'user-downloads/'
+    return '{}{}.csv'.format(prefix, hashed)
 
 
 def make_bundle(resource):

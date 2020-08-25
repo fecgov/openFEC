@@ -3,26 +3,26 @@ from webservices.env import env
 
 """Narrative API documentation."""
 API_DESCRIPTION = '''
-This application programming interface (API) allows you to explore the way
+This application programming interface (API) allows you to explore the way \
 candidates and committees fund their campaigns.
 
-The FEC API is a RESTful web service supporting full-text and field-specific searches on
-FEC data. [Bulk downloads](https://www.fec.gov/data/advanced/?tab=bulk-data) are available \
-on the current site. Information is tied to the underlying forms by file ID and image ID. \
-Data is updated nightly.
+The Federal Election Commission (FEC) API is a RESTful web service supporting full-text and field-specific searches on
+FEC data. [Bulk downloads](https://www.fec.gov/data/advanced/?tab=bulk-data) are available on the current
+site. Information is tied to the underlying forms by file ID and image ID. Data is updated
+nightly.
 
 There are a lot of data, and a good place to start is to use search to find
 interesting candidates and committees. Then, you can use their IDs to find report or line
 item details with the other endpoints. If you are interested in individual donors, check
-out contributor information in schedule_a.
+out contributor information in the `/schedule_a/` endpoints.
 
 <b class="body" id="getting_started_head">Getting started with the openFEC API</b><br>
+
 If you would like to use the FEC's API programmatically, you can sign up for your own API \
 key using our form. Alternatively, you can still try out our API without an API key by using \
 the web interface and using DEMO_KEY. Note that when you use the openFEC API you are \
 subject to the [Terms of Service](https://github.com/fecgov/FEC/blob/master/TERMS-OF-SERVICE.md) \
 and [Acceptable Use policy](https://github.com/fecgov/FEC/blob/master/ACCEPTABLE-USE-POLICY.md).
-
 
 Signing up for an API key will enable you to place up to 1,000 calls an hour. Each call \
 is limited to 100 results per page. You can email questions, comments or a request to get \
@@ -37,7 +37,7 @@ A few restrictions limit the way you can use FEC data. For example, you can’t 
 lists for commercial purposes or to solicit donations.
 [Learn more here](https://www.fec.gov/updates/sale-or-use-contributor-information/).
 
-[View our source code](https://github.com/fecgov/openFEC). We welcome issues and pull requests!
+[Inspect our source code](https://github.com/fecgov/openFEC). We welcome issues and pull requests!
 
 <p><br></p>
 <h2 class="title" id="signup_head">Sign up for an API key</h2>
@@ -60,8 +60,8 @@ office. People become candidates when they (or agents working on their behalf)
 raise contributions or make expenditures that exceed $5,000.
 
 The candidate endpoints primarily use data from FEC registration
-[Form 1](http://www.fec.gov/pdf/forms/fecfrm1.pdf), for candidate information, and
-[Form 2](http://www.fec.gov/pdf/forms/fecfrm2.pdf), for committee information.
+[Form 1](https://www.fec.gov/resources/cms-content/documents/fecfrm1.pdf), for candidate information, and
+[Form 2](https://www.fec.gov/resources/cms-content/documents/fecfrm2.pdf), for committee information.
 '''
 
 CANDIDATE_ID = '''
@@ -75,10 +75,10 @@ True indicates that a candidate is inactive.
 
 CANDIDATE_CYCLE = '''
 Two-year election cycle in which a candidate runs for office.
-Calculated from FEC Form 2. The cycle begins with
+Calculated from Form 2. The cycle begins with
 an odd year and is named for its ending, even year. This cycle follows
 the traditional house election cycle and subdivides the presidential
-and Senate elections into comparable two-year blocks. To see data for
+and Senate elections into comparable two-year blocks. To retrieve data for
 the entire four years of a presidential term or six years of a senatorial term,
 you will need the `election_full` flag.
 '''
@@ -145,7 +145,7 @@ OFFICE = 'Federal office candidate runs for: H, S or P'
 
 STATE = 'US state or territory where a candidate runs for office'
 
-YEAR = 'See records pertaining to a particular election year. The list of election years \
+YEAR = 'Retrieve records pertaining to a particular election year. The list of election years \
 is based on a candidate filing a statement of candidacy (F2) for that year.'
 
 DISTRICT = 'Two-digit US House distirict of the office the candidate is running for. \
@@ -254,13 +254,13 @@ committees change treasurers, designation, or `committee_type`.
 
 COMMITTEE_CYCLE = '''
 A two year election cycle that the committee was active- (after original registration
-date but before expiration date in FEC Form 1s) The cycle begins with
+date but before expiration date in Form 1s) The cycle begins with
 an odd year and is named for its ending, even year.
 '''
 
 COMMITTEE_CYCLES_HAS_FINANCIAL = '''
 A two year election cycle that the committee was active- (after original registration
-date but before expiration date in FEC Form 1s), and the commitee files the financial reports
+date but before expiration date in Form 1s), and the commitee files the financial reports
 ('F3', 'F3X', 'F3P', 'F3L', 'F4', 'F5', 'F7', 'F13') during this cycle.
 '''
 
@@ -271,7 +271,7 @@ The latest two year election cycle that the committee files the financial report
 
 COMMITTEE_CYCLES_HAS_ACTIVITY = '''
 A two year election cycle that the committee was active- (after original registration
-date but before expiration date in FEC Form 1), and the committee has filling activity during the cycle
+date but before expiration date in Form 1), and the committee has filling activity during the cycle
 '''
 
 COMMITTEE_LAST_CYCLE_HAS_ACTIVITY = '''
@@ -550,7 +550,7 @@ abbreviation.
 House races require state and a two-digit district number.
 
 Since this endpoint reflects financial information, it will only have candidates once they file
-financial reporting forms. Query the `/candidates` endpoint to see an up to date list of all the
+financial reporting forms. Query the `/candidates` endpoint to retrieve an-up-to-date list of all the
 candidates that filed to run for a particular seat.
 '''
 STATE_ELECTION_OFFICES = '''
@@ -640,18 +640,18 @@ label these fields while conveying clear meaning to ensure accessibility for all
 '''
 
 REPORTS = '''
-Each report represents the summary information from FEC Form 3, Form 3X and Form 3P.
+Each report represents the summary information from Form 3, Form 3X and Form 3P.
 These reports have key statistics that illuminate the financial status of a given committee.
 Things like cash on hand, debts owed by committee, total receipts, and total disbursements
 are especially helpful for understanding a committee's financial dealings.
 
 By default, this endpoint includes both amended and final versions of each report. To restrict
-to only the final versions of each report, use `is_amended=false`; to view only reports that
+to only the final versions of each report, use `is_amended=false`; to retrieve only reports that
 have been amended, use `is_amended=true`.
 
 Several different reporting structures exist, depending on the type of organization that
 submits financial information. To see an example of these reporting requirements,
-look at the summary and detailed summary pages of FEC Form 3, Form 3X, and Form 3P.
+look at the summary and detailed summary pages of Form 3, Form 3X, and Form 3P.
 '''
 
 REPORTS += WIP_TAG
@@ -701,7 +701,7 @@ TOTALS = '''
 This endpoint provides information about a committee's Form 3, Form 3X, or Form 3P financial reports,
 which are aggregated by two-year period. We refer to two-year periods as a `cycle`.
 
-The cycle is named after the even-numbered year and includes the year before it. To see
+The cycle is named after the even-numbered year and includes the year before it. To obtain
 totals from 2013 and 2014, you would use 2014. In odd-numbered years, the current cycle
 is the next year — for example, in 2015, the current cycle is 2016.
 
@@ -833,7 +833,7 @@ SCHEDULE_B_BY_PURPOSE = '''
 Schedule B disbursements aggregated by disbursement purpose category. To avoid double counting,
 memoed items are not included.
 Purpose is a combination of transaction codes, category codes and disbursement description.
-See the `disbursement_purpose` sql function within the migrations for more details.
+Inspect the `disbursement_purpose` sql function within the migrations for more details.
 '''
 
 SCHEDULE_B_BY_RECIPIENT = '''
@@ -958,28 +958,28 @@ The $200.00 and under category includes contributions of $200 or less combined w
 
 SCHEDULE_A_BY_STATE = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated by \
-the contributor’s state. If you are interested in our “is_individual” methodology see the \
+the contributor’s state. If you are interested in our “is_individual” methodology, review the \
 [methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
 Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_BY_ZIP = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated by \
-the contributor’s ZIP code. If you are interested in our “is_individual” methodology see the \
+the contributor’s ZIP code. If you are interested in our “is_individual” methodology, review the \
 [methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
 Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_BY_EMPLOYER = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated by \
-the contributor’s employer name. If you are interested in our “is_individual” methodology see the \
+the contributor’s employer name. If you are interested in our “is_individual” methodology, review the \
 [methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
 Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_BY_OCCUPATION = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated by \
-the contributor’s occupation. If you are interested in our “is_individual” methodology see the \
+the contributor’s occupation. If you are interested in our “is_individual” methodology, review the \
 [methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
 Unitemized individual contributions are not included.
 '''
@@ -1010,21 +1010,21 @@ Number of records making up the total.
 
 SCHEDULE_A_SIZE_CANDIDATE_TAG = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated by \
-size of contribution and candidate. If you are interested in our “is_individual” methodology see the \
+size of contribution and candidate. If you are interested in our “is_individual” methodology, review the \
 [methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
 Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_STATE_CANDIDATE_TAG = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated \
-by contributor’s state and candidate. If you are interested in our “is_individual” methodology see the \
+by contributor’s state and candidate. If you are interested in our “is_individual” methodology, review the \
 [methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
 Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_A_STATE_CANDIDATE_TOTAL_TAG = '''
 Itemized individual contributions aggregated by contributor’s state, candidate, committee type \
-and cycle. If you are interested in our “is_individual” methodology see the \
+and cycle. If you are interested in our “is_individual” methodology, review the \
 [methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
 Unitemized individual contributions are not included.
 
@@ -1040,7 +1040,7 @@ Aggregated candidate receipts and disbursements grouped by cycle.
 
 STATE_AGGREGATE_RECIPIENT_TOTALS = '''
 This endpoint provides itemized individual contributions received by a committee, aggregated by \
-contributor’s state, committee type and cycle. If you are interested in our “is_individual” methodology see the \
+contributor’s state, committee type and cycle. If you are interested in our “is_individual” methodology, review the \
 [methodology page] (https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology). \
 Unitemized individual contributions are not included.
 '''
@@ -1220,11 +1220,17 @@ or candidate election year
 '''
 
 COMMUNICATION_COST = '''
-52 U.S.C. 30118 allows "communications by a corporation to its stockholders and
-executive or administrative personnel and their families or by a labor organization
-to its members and their families on any subject," including the express advocacy of
-the election or defeat of any Federal candidate.  The costs of such communications
-must be reported to the Federal Election Commission under certain circumstances.
+<b>Deprecation notice: This endpoint will be replaced with a new endpoint \
+ `/communication_costs/`, so that the pagination schema will be in line with \
+the other endpoints sharing the "communication cost" tag. Please note `/communication_costs/` \
+ is not yet in place, and this notice will be updated once it is in service.</b>
+
+52 U.S.C. 30118 allows \
+"communications by a corporation to its stockholders and executive or administrative \
+personnel and their families or by a labor organization to its members and their families \
+on any subject," including the express advocacy of the election or defeat of any Federal \
+candidate.  The costs of such communications must be reported to the Federal Election \
+Commission under certain circumstances.
 '''
 
 COMMUNICATION_COST_AGGREGATE = 'Communication cost aggregated by candidate ID and committee ID.'
@@ -1598,7 +1604,7 @@ FILE_NUMBER = 'Filing ID number'
 
 AMENDMENT_CHAIN = '''
 The first value in the chain is the original filing.  The ordering in the chain reflects the order the
-amendments were filed up to the amendment being viewed.
+amendments were filed up to the amendment being inspected.
 '''
 
 AMENDMENT_INDICATOR = 'Amendent types:\n\
@@ -1620,8 +1626,8 @@ of the final amended
 report in the ameded_by field and the final report will have no id in the amended_by field.
 '''
 AMENDS_FILE = '''
-For amendments, this file_number is the file_number of the previous report that is being amended. See amended_by
-for the most recent version of the report.
+For amendments, this file_number is the file_number of the previous report that is being amended. \
+Refer to the amended_by for the most recent version of the report.
 '''
 AMENDMENT_NUMBER = '''
 Number of times the report has been amended.
