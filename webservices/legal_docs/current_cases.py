@@ -277,7 +277,7 @@ def get_single_case(case_type, case_no):
             case['open_date'], case['close_date'] = get_open_and_close_dates(case_id)
             return case
         else:
-            logger.info("Not a valid {0} number.".format(case_type))
+            logger.error("Not a valid {0} number.".format(case_type))
             return None
 
 

@@ -22,6 +22,11 @@ from .index_management import (  # noqa
     restore_elasticsearch_backup,
 )
 
+from .archived_murs import ( # noqa
+    load_archived_murs,
+    extract_pdf_text,
+)
+
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger('elasticsearch')
 logger.setLevel('WARN')
