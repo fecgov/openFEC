@@ -140,13 +140,13 @@ def load_archived_murs(mur_no=None):
     mur_count = 0
     for mur in get_murs(mur_no):
         if mur is not None:
-            logger.info("Loading archived murs: {0}".format(mur["no"]))
+            logger.info("Loading archived MUR No: {0}".format(mur["no"]))
             es.index("archived_murs", get_es_type(), mur, id=mur["doc_id"])
             mur_count += 1
 
             logger.info("{0} Archived Mur(s) loaded".format(mur_count))
         else:
-            logger.info("Invalid archived MUR")
+            logger.error("Invalid archived MUR")
 
         # ==for dubug use, display the JSON format of object "mur"
         logger.debug("mur_json_data =" + json.dumps(mur, indent=4, cls=DateTimeEncoder))
@@ -184,7 +184,7 @@ def get_single_mur(mur_no):
             mur["documents"] = get_documents(mur_id)
             return mur
         else:
-            logger.info("Not a valid archived mur number.")
+            logger.error("Not a valid archived mur number.")
             return None
 
 
