@@ -135,8 +135,6 @@ def load_archived_murs(mur_no=None):
     in Elasticsearch in the index `archived_murs` with a doc_type of `murs`.
     """
     es = utils.get_elasticsearch_connection()
-    logger.info("Loading archived mur{0}...".format(mur_no))
-
     mur_count = 0
     for mur in get_murs(mur_no):
         if mur is not None:
