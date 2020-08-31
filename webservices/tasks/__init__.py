@@ -1,7 +1,7 @@
 import celery
 from celery import signals
 from celery.schedules import crontab
-
+from random import randint
 from webservices.env import env
 from webservices.tasks import utils
 
@@ -55,8 +55,9 @@ def redis_url():
         redis_url = redis_env.credentials.get('uri')
 
         return redis_url
-
-    return env.get_credential('FEC_REDIS_URL', 'redis://localhost:6379/0')
+    return env.get_credential(
+        'FEC_REDIS_URL',
+        'redis://localhost:6379/' + str(randint(0, 1)))
 
 
 app = celery.Celery('openfec')
