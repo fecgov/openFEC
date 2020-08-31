@@ -12,13 +12,13 @@ logger = logging.getLogger(__name__)
 CASE_DOCUMENT_MAPPINGS = {
     "type": "nested",
     "properties": {
-        "category": {"type": "string", "index": "not_analyzed"},
-        "description": {"type": "string"},
+        "category": {"type": "keyword"},
+        "description": {"type": "text"},
         "document_date": {"type": "date", "format": "dateOptionalTime"},
-        "document_id": {"type": "long", "index": "no"},
-        "length": {"type": "long", "index": "no"},
-        "text": {"type": "string"},
-        "url": {"type": "string", "index": "no"},
+        "document_id": {"type": "long"},
+        "length": {"type": "long"},
+        "text": {"type": "text"},
+        "url": {"type": "text"},
     },
 }
 
@@ -68,6 +68,28 @@ MUR_ADR_MAPPINGS = {
 MUR_MAPPINGS = copy.deepcopy(MUR_ADR_MAPPINGS)
 
 MUR_MAPPINGS["properties"]["mur_type"] = {"type": "string"}
+
+ARCH_MUR_MAPPINGS = {
+    "dynamic": False,
+    "properties": {
+        "no": {"type": "keyword"},
+        "doc_id": {"type": "text", "index": False},
+        # "open_date": {"type": "date", "format": "dateOptionalTime"},
+        # "close_date": {"type": "date", "format": "dateOptionalTime"},
+        # "url": {"type": "text"},
+        # "subjects": {"type": "text"},
+        # "citations": {
+        #     "properties": {
+        #         "text": {"type": "text"},
+        #         "title": {"type": "text"},
+        #         "type": {"type": "text"},
+        #         "url": {"type": "text"},
+        #     }
+        # },
+        # "respondent": {"type": "text"},
+        # "documents": CASE_DOCUMENT_MAPPINGS,
+    }
+}
 
 MAPPINGS = {
     "_default_": {
@@ -248,14 +270,23 @@ def create_archived_murs_index():
     logger.info(
         "Create index 'archived_murs' with aliases 'docs_search' and 'archived_murs_index'"
     )
+
     es.indices.create(
         'archived_murs',
         {
-            "mappings": MAPPINGS,
+            "mappings": ARCH_MUR_MAPPINGS,
             "settings": ANALYZER_SETTINGS,
             "aliases": {'archived_murs_index': {}, 'docs_search': {}},
         },
     )
+    # es.indices.create(
+    #     'archived_murs',
+    #     {
+    #         "mappings": MAPPINGS,
+    #         "settings": ANALYZER_SETTINGS,
+    #         "aliases": {'archived_murs_index': {}, 'docs_search': {}},
+    #     },
+    # )
 
 
 def delete_all_indices():
