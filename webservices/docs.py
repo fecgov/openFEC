@@ -1219,8 +1219,7 @@ or candidate election year
 COMMUNICATION_COST = '''
 <b>Deprecation notice: This endpoint will be replaced with a new endpoint \
  `/communication_costs/`, so that the pagination schema will be in line with \
-the other endpoints sharing the "communication cost" tag. Please note `/communication_costs/` \
- is not yet in place, and this notice will be updated once it is in service.</b>
+the other endpoints sharing the "communication cost" tag.</b>
 
 52 U.S.C. 30118 allows \
 "communications by a corporation to its stockholders and executive or administrative \
