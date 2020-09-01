@@ -69,27 +69,41 @@ MUR_MAPPINGS = copy.deepcopy(MUR_ADR_MAPPINGS)
 
 MUR_MAPPINGS["properties"]["mur_type"] = {"type": "string"}
 
-ARCH_MUR_MAPPINGS = {
-    "dynamic": False,
+ARCH_MUR_DOCUMENT_MAPPINGS = {
+    "type": "nested",
     "properties": {
-        "no": {"type": "keyword"},
+        "document_id": {"type": "integer"},
+        "length": {"type": "long"},
+        "text": {"type": "text"},
+        "url": {"type": "text"},
+    },
+}
+
+ARCH_MUR_MAPPINGS = {
+    "properties": {
+        "type": {"type": "keyword"},
         "doc_id": {"type": "text", "index": False},
-        # "open_date": {"type": "date", "format": "dateOptionalTime"},
-        # "close_date": {"type": "date", "format": "dateOptionalTime"},
-        # "url": {"type": "text"},
-        # "subjects": {"type": "text"},
-        # "citations": {
-        #     "properties": {
-        #         "text": {"type": "text"},
-        #         "title": {"type": "text"},
-        #         "type": {"type": "text"},
-        #         "url": {"type": "text"},
-        #     }
-        # },
-        # "respondent": {"type": "text"},
-        # "documents": CASE_DOCUMENT_MAPPINGS,
+        "no": {"type": "keyword"},
+        "mur_name": {"type": "keyword"},
+        "mur_type": {"type": "keyword"},
+        "open_date": {"type": "date", "format": "dateOptionalTime"},
+        "close_date": {"type": "date", "format": "dateOptionalTime"},
+        "url": {"type": "text"},
+        "subjects": {"type": "text"},
+        "citations": {
+            "properties": {
+                "text": {"type": "text"},
+                "title": {"type": "text"},
+                "type": {"type": "text"},
+                "url": {"type": "text"},
+            }
+        },
+        "complainants": {"type": "text"},
+        "respondent": {"type": "text"},
+        "documents": ARCH_MUR_DOCUMENT_MAPPINGS,
     }
 }
+
 
 MAPPINGS = {
     "_default_": {

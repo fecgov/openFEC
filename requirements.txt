@@ -21,8 +21,10 @@ gevent==1.4.0
 webargs==5.5.3
 ujson==1.33
 requests==2.22.0
-elasticsearch==5.5.3
-elasticsearch-dsl==5.4.0
+# elasticsearch==5.5.3
+# elasticsearch-dsl==5.4.0
+elasticsearch==7.6.0
+elasticsearch-dsl==7.2.1
 
 # Marshalling
 flask-apispec==0.7.0
