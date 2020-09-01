@@ -65,12 +65,9 @@ We are always trying to improve our documentation. If you have suggestions or ru
            a test database](https://github.com/fecgov/openFEC#create-a-development-database), below) and specify the location of the database migration files (*SQL)
        * See [Database migrations](https://github.com/fecgov/openFEC#database-migration) for more information on installing and configuring flyway
 
+2. Clone this repository
 
-2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
-
-3. Set up your Python environment— learn how to do this with our [Python Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/python.md).
-
-4. Clone this repository.
+3. Removed ecosystem guides. Next steps??
 
 ### Project dependencies
 
