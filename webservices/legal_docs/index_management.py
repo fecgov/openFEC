@@ -6,9 +6,9 @@ import datetime
 from webservices import utils
 from webservices.env import env
 
-
 logger = logging.getLogger(__name__)
 
+# ==== start define mapping for index: docs
 CASE_DOCUMENT_MAPPINGS = {
     "type": "nested",
     "properties": {
@@ -22,53 +22,176 @@ CASE_DOCUMENT_MAPPINGS = {
     },
 }
 
-MUR_ADR_MAPPINGS = {
-    "properties": {
-        "no": {"type": "string", "index": "not_analyzed"},
-        "doc_id": {"type": "string", "index": "no"},
-        "name": {"type": "string", "analyzer": "english"},
-        "election_cycles": {"type": "long"},
-        "open_date": {"type": "date", "format": "dateOptionalTime"},
-        "close_date": {"type": "date", "format": "dateOptionalTime"},
-        "url": {"type": "string", "index": "no"},
-        "subjects": {"type": "string"},
-        "commission_votes": {
-            "properties": {
-                "text": {"type": "string"},
-                "vote_date": {"type": "date", "format": "dateOptionalTime"},
-            }
-        },
-        "dispositions": {
-            "properties": {
-                "citations": {
-                    "properties": {
-                        "text": {"type": "string"},
-                        "title": {"type": "string"},
-                        "type": {"type": "string"},
-                        "url": {"type": "string"},
-                    }
-                },
-                "disposition": {"type": "string", "index": "not_analyzed"},
-                "penalty": {"type": "double"},
-                "respondent": {"type": "string"},
-            }
-        },
-        "documents": CASE_DOCUMENT_MAPPINGS,
-        "participants": {
-            "properties": {
-                "citations": {"type": "object"},
-                "name": {"type": "string"},
-                "role": {"type": "string"},
-            }
-        },
-        "respondents": {"type": "string"},
-    }
+ADMIN_FINES = {
+    "type": {"type": "keyword"},
+    "no": {"type": "keyword", "index": True},
+    "doc_id": {"type": "keyword", "index": False},
+    "name": {"type": "text", "analyzer": "english"},
+    "url": {"type": "text", "index": False},
+    "committee_id": {"type": "text", "index": False},
+    "report_year": {"type": "keyword"},
+    "report_type": {"type": "text", "index": False},
+    "reason_to_believe_action_date": {
+        "type": "date",
+        "format": "dateOptionalTime",
+    },
+    "reason_to_believe_fine_amount": {"type": "long"},
+    "challenge_receipt_date": {"type": "date", "format": "dateOptionalTime"},
+    "challenge_outcome": {"type": "text", "index": False},
+    "final_determination_date": {"type": "date", "format": "dateOptionalTime"},
+    "final_determination_amount": {"type": "long"},
+    "check_amount": {"type": "long", "index": False},
+    "treasury_referral_date": {"type": "date", "format": "dateOptionalTime"},
+    "treasury_referral_amount": {"type": "long", "index": False},
+    "petition_court_filing_date": {
+        "type": "date",
+        "format": "dateOptionalTime",
+    },
+    "petition_court_decision_date": {
+        "type": "date",
+        "format": "dateOptionalTime",
+    },
+    "commission_votes": {
+        "properties": {
+            "text": {"type": "text"},
+            "vote_date": {"type": "date", "format": "dateOptionalTime"},
+        }
+    },
+    "documents": CASE_DOCUMENT_MAPPINGS,
 }
 
+ADVISORY_OPINIONS = {
+    "type": {"type": "keyword"},
+    "no": {"type": "keyword", "index": False},
+    "name": {"type": "text", "analyzer": "english"},
+    "summary": {"type": "text", "analyzer": "english"},
+    "issue_date": {"type": "date", "format": "dateOptionalTime"},
+    "is_pending": {"type": "boolean"},
+    "status": {"type": "text"},
+    "ao_citations": {
+        "properties": {"name": {"type": "text"}, "no": {"type": "text"}}
+    },
+    "aos_cited_by": {
+        "properties": {"name": {"type": "text"}, "no": {"type": "text"}}
+    },
+    "statutory_citations": {
+        "type": "nested",
+        "properties": {
+            "section": {"type": "text"},
+            "title": {"type": "long"},
+        },
+    },
+    "regulatory_citations": {
+        "type": "nested",
+        "properties": {
+            "part": {"type": "long"},
+            "section": {"type": "long"},
+            "title": {"type": "long"},
+        },
+    },
+    "requestor_names": {"type": "text"},
+    "requestor_types": {"type": "keyword", "index": False},
+    "documents": {
+        "type": "nested",
+        "properties": {
+            "document_id": {"type": "long", "index": False},
+            "category": {"type": "keyword", "index": False},
+            "description": {"type": "text"},
+            "date": {"type": "date", "format": "dateOptionalTime"},
+            "text": {"type": "text"},
+            "url": {"type": "text", "index": False},
+        },
+    },
+}
+
+CITATIONS = {
+    "type": {"type": "keyword"},
+    "citation_type": {"type": "keyword", "index": False},
+    "citation_text": {"type": "text", "index": False},
+}
+
+MUR_ADR_MAPPINGS = {
+    "type": {"type": "keyword"},
+    "no": {"type": "keyword", "index": False},
+    "doc_id": {"type": "keyword", "index": False},
+    "name": {"type": "text", "analyzer": "english"},
+    "election_cycles": {"type": "long"},
+    "open_date": {"type": "date", "format": "dateOptionalTime"},
+    "close_date": {"type": "date", "format": "dateOptionalTime"},
+    "url": {"type": "text", "index": False},
+    "subjects": {"type": "text"},
+    "commission_votes": {
+        "properties": {
+            "text": {"type": "text"},
+            "vote_date": {"type": "date", "format": "dateOptionalTime"},
+        }
+    },
+    "dispositions": {
+        "properties": {
+            "citations": {
+                "properties": {
+                    "text": {"type": "text"},
+                    "title": {"type": "text"},
+                    "type": {"type": "text"},
+                    "url": {"type": "text"},
+                }
+            },
+            "disposition": {"type": "text", "index": False},
+            "penalty": {"type": "double"},
+            "respondent": {"type": "text"},
+        }
+    },
+    "documents": CASE_DOCUMENT_MAPPINGS,
+    "participants": {
+        "properties": {
+            "citations": {"type": "object"},
+            "name": {"type": "text"},
+            "role": {"type": "text"},
+        }
+    },
+    "respondents": {"type": "text"},
+}
+
+
 MUR_MAPPINGS = copy.deepcopy(MUR_ADR_MAPPINGS)
+MUR_MAPPINGS["mur_type"] = {"type": "keyword"}
 
-MUR_MAPPINGS["properties"]["mur_type"] = {"type": "string"}
+STATUTES = {
+    "type": {"type": "keyword"},
+    "doc_id": {"type": "keyword", "index": False},
+    "name": {"type": "text", "analyzer": "english"},
+    "text": {"type": "text", "analyzer": "english"},
+    "no": {"type": "keyword", "index": False},
+    "title": {"type": "text"},
+    "chapter": {"type": "text"},
+    "subchapter": {"type": "text"},
+    "url": {"type": "text", "index": False},
+}
 
+
+REGULATIONS = {
+    "type": {"type": "keyword"},
+    "doc_id": {"type": "keyword", "index": False},
+    "name": {"type": "text", "analyzer": "english"},
+    "text": {"type": "text", "analyzer": "english"},
+    "no": {"type": "text", "index": False},
+    "url": {"type": "text", "index": False},
+}
+
+MAPPINGS_SUM = {}
+MAPPINGS_SUM.update(ADMIN_FINES)
+MAPPINGS_SUM.update(ADVISORY_OPINIONS)
+MAPPINGS_SUM.update(CITATIONS)
+MAPPINGS_SUM.update(ADVISORY_OPINIONS)
+MAPPINGS_SUM.update(MUR_ADR_MAPPINGS)
+MAPPINGS_SUM.update(REGULATIONS)
+MAPPINGS_SUM.update(STATUTES)
+
+MAPPINGS = {"properties": MAPPINGS_SUM}
+# ==== end define mapping for index: docs
+
+
+# ==== start define mapping for index: archived_murs
 ARCH_MUR_DOCUMENT_MAPPINGS = {
     "type": "nested",
     "properties": {
@@ -80,11 +203,12 @@ ARCH_MUR_DOCUMENT_MAPPINGS = {
 }
 
 ARCH_MUR_MAPPINGS = {
+    "dynamic": "false",
     "properties": {
         "type": {"type": "keyword"},
-        "doc_id": {"type": "text", "index": False},
+        "doc_id": {"type": "keyword", "index": False},
         "no": {"type": "keyword"},
-        "mur_name": {"type": "keyword"},
+        "mur_name": {"type": "text"},
         "mur_type": {"type": "keyword"},
         "open_date": {"type": "date", "format": "dateOptionalTime"},
         "close_date": {"type": "date", "format": "dateOptionalTime"},
@@ -103,127 +227,8 @@ ARCH_MUR_MAPPINGS = {
         "documents": ARCH_MUR_DOCUMENT_MAPPINGS,
     }
 }
+# ==== end define mapping for index: archived_murs
 
-
-MAPPINGS = {
-    "_default_": {
-        "properties": {
-            "sort1": {"type": "integer", "include_in_all": False},
-            "sort2": {"type": "integer", "include_in_all": False},
-        }
-    },
-    "citations": {
-        "properties": {
-            "citation_type": {"type": "string", "index": "not_analyzed"},
-            "citation_text": {"type": "string", "index": "not_analyzed"},
-        }
-    },
-    "murs": MUR_MAPPINGS,
-    "adrs": MUR_ADR_MAPPINGS,
-    "admin_fines": {
-        "properties": {
-            "no": {"type": "string", "index": "not_analyzed"},
-            "doc_id": {"type": "string", "index": "no"},
-            "name": {"type": "string", "analyzer": "english"},
-            "url": {"type": "string", "index": "no"},
-            "committee_id": {"type": "string", "index": "not_analyzed"},
-            "report_year": {"type": "string"},
-            "report_type": {"type": "string", "index": "no"},
-            "reason_to_believe_action_date": {
-                "type": "date",
-                "format": "dateOptionalTime",
-            },
-            "reason_to_believe_fine_amount": {"type": "long"},
-            "challenge_receipt_date": {"type": "date", "format": "dateOptionalTime"},
-            "challenge_outcome": {"type": "string", "index": "no"},
-            "final_determination_date": {"type": "date", "format": "dateOptionalTime"},
-            "final_determination_amount": {"type": "long"},
-            "check_amount": {"type": "long", "index": "no"},
-            "treasury_referral_date": {"type": "date", "format": "dateOptionalTime"},
-            "treasury_referral_amount": {"type": "long", "index": "no"},
-            "petition_court_filing_date": {
-                "type": "date",
-                "format": "dateOptionalTime",
-            },
-            "petition_court_decision_date": {
-                "type": "date",
-                "format": "dateOptionalTime",
-            },
-            "commission_votes": {
-                "properties": {
-                    "text": {"type": "string"},
-                    "vote_date": {"type": "date", "format": "dateOptionalTime"},
-                }
-            },
-            "documents": CASE_DOCUMENT_MAPPINGS,
-        }
-    },
-    "statutes": {
-        "properties": {
-            "doc_id": {"type": "string", "index": "no"},
-            "name": {"type": "string", "analyzer": "english"},
-            "text": {"type": "string", "analyzer": "english"},
-            "no": {"type": "string", "index": "not_analyzed"},
-            "title": {"type": "string"},
-            "chapter": {"type": "string"},
-            "subchapter": {"type": "string"},
-            "url": {"type": "string", "index": "no"},
-        }
-    },
-    "regulations": {
-        "properties": {
-            "doc_id": {"type": "string", "index": "no"},
-            "name": {"type": "string", "analyzer": "english"},
-            "text": {"type": "string", "analyzer": "english"},
-            "no": {"type": "string", "index": "not_analyzed"},
-            "url": {"type": "string", "index": "no"},
-        }
-    },
-    "advisory_opinions": {
-        "properties": {
-            "no": {"type": "string", "index": "not_analyzed"},
-            "name": {"type": "string", "analyzer": "english"},
-            "summary": {"type": "string", "analyzer": "english"},
-            "issue_date": {"type": "date", "format": "dateOptionalTime"},
-            "is_pending": {"type": "boolean"},
-            "status": {"type": "string"},
-            "ao_citations": {
-                "properties": {"name": {"type": "string"}, "no": {"type": "string"}}
-            },
-            "aos_cited_by": {
-                "properties": {"name": {"type": "string"}, "no": {"type": "string"}}
-            },
-            "statutory_citations": {
-                "type": "nested",
-                "properties": {
-                    "section": {"type": "string"},
-                    "title": {"type": "long"},
-                },
-            },
-            "regulatory_citations": {
-                "type": "nested",
-                "properties": {
-                    "part": {"type": "long"},
-                    "section": {"type": "long"},
-                    "title": {"type": "long"},
-                },
-            },
-            "requestor_names": {"type": "string"},
-            "requestor_types": {"type": "string", "index": "not_analyzed"},
-            "documents": {
-                "type": "nested",
-                "properties": {
-                    "document_id": {"type": "long", "index": "no"},
-                    "category": {"type": "string", "index": "not_analyzed"},
-                    "description": {"type": "string"},
-                    "date": {"type": "date", "format": "dateOptionalTime"},
-                    "text": {"type": "string"},
-                    "url": {"type": "string", "index": "no"},
-                },
-            },
-        }
-    },
-}
 
 ANALYZER_SETTINGS = {"analysis": {"analyzer": {"default": {"type": "english"}}}}
 
