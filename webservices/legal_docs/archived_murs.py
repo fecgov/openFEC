@@ -14,7 +14,7 @@ from json import JSONEncoder
 logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line
-logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.DEBUG)
 
 ALL_ARCHIVED_MURS = """
     SELECT DISTINCT
