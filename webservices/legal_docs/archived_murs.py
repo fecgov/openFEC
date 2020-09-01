@@ -13,7 +13,7 @@ from json import JSONEncoder
 
 logger = logging.getLogger(__name__)
 
-# for debug
+# for debug, uncomment this line
 logger.setLevel(logging.DEBUG)
 
 ALL_ARCHIVED_MURS = """
@@ -139,7 +139,7 @@ def load_archived_murs(mur_no=None):
     for mur in get_murs(mur_no):
         if mur is not None:
             logger.info("Loading archived MUR No: {0}".format(mur["no"]))
-            es.index("archived_murs", id=mur["doc_id"])
+            es.index("archived_murs", mur, id=mur["doc_id"])
             mur_count += 1
 
             logger.info("{0} Archived Mur(s) loaded".format(mur_count))
@@ -147,7 +147,9 @@ def load_archived_murs(mur_no=None):
             logger.error("Invalid archived MUR")
 
         # ==for dubug use, display the JSON format of object "mur"
-        logger.debug("mur_json_data =" + json.dumps(mur, indent=4, cls=DateTimeEncoder))
+        mur_debug_data = mur
+        del mur_debug_data['documents']
+        logger.debug("mur_debug_data =" + json.dumps(mur_debug_data, indent=4, cls=DateTimeEncoder))
 
 
 def get_murs(mur_no=None):
@@ -167,19 +169,20 @@ def get_single_mur(mur_no):
         if row is not None:
             mur_id = row["mur_id"]
             mur = {
+                "type": get_es_type(),
                 "doc_id": "mur_{0}".format(row["mur_no"]),
                 "no": row["mur_no"],
-                # "url": "/legal/matter-under-review/{0}/".format(row["mur_no"]),
-                # "mur_type": "archived",
-                # "mur_name": row["mur_name"],
-                # "open_date": row["open_date"],
-                # "close_date": row["close_date"],
+                "url": "/legal/matter-under-review/{0}/".format(row["mur_no"]),
+                "mur_type": "archived",
+                "mur_name": row["mur_name"],
+                "open_date": row["open_date"],
+                "close_date": row["close_date"],
             }
-            # mur["complainants"] = get_complainants(mur_id)
-            # mur["respondents"] = get_respondents(mur_id)
-            # mur["citations"] = get_citations_arch_mur(mur_id)
-            # mur["subject"] = get_subjects(mur_id)
-            # mur["documents"] = get_documents(mur_id)
+            mur["complainants"] = get_complainants(mur_id)
+            mur["respondents"] = get_respondents(mur_id)
+            mur["citations"] = get_citations_arch_mur(mur_id)
+            mur["subject"] = get_subjects(mur_id)
+            mur["documents"] = get_documents(mur_id)
             return mur
         else:
             logger.error("Not a valid archived mur number.")
