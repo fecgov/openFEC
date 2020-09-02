@@ -1,6 +1,6 @@
 ---
 path: ../
-memory: 1G
+memory: 1500M # 1.5G
 stack: cflinuxfs3
 buildpack: python_buildpack
 env:
