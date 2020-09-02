@@ -14,7 +14,7 @@ services:
   - fec-s3-stage
 applications:
   - name: celery-worker
-    instances: 1
+    instances: 6
     memory: 1G
     disk_quota: 1G
     no-route: true
