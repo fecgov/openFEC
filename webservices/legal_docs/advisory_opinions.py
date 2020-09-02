@@ -115,7 +115,7 @@ def load_advisory_opinions(from_ao_no=None):
     ao_count = 0
     for ao in get_advisory_opinions(from_ao_no):
         logger.info("Loading AO: %s", ao['no'])
-        es.index('docs_index', 'advisory_opinions', ao, id=ao['no'])
+        es.index('docs_index', ao, id=ao['no'])
         ao_count += 1
     logger.info("%d advisory opinions loaded", ao_count)
 
@@ -156,6 +156,7 @@ def get_advisory_opinions(from_ao_no):
             ao_id = row["ao_id"]
             year, serial = ao_no_to_component_map[row["ao_no"]]
             ao = {
+                "type": "advisory_opinions",
                 "no": row["ao_no"],
                 "name": row["name"],
                 "summary": row["summary"],
@@ -238,12 +239,12 @@ def get_documents(ao_id, bucket):
                 )
                 document["url"] = '/files/' + pdf_key
                 logger.debug("S3: Uploading {}".format(pdf_key))
-                bucket.put_object(
-                    Key=pdf_key,
-                    Body=bytes(row["fileimage"]),
-                    ContentType="application/pdf",
-                    ACL="public-read",
-                )
+                # bucket.put_object(
+                #     Key=pdf_key,
+                #     Body=bytes(row["fileimage"]),
+                #     ContentType="application/pdf",
+                #     ACL="public-read",
+                # )
                 documents.append(document)
 
     return documents
@@ -377,17 +378,19 @@ def get_citations(ao_names):
 
     for citation in all_regulatory_citations:
         entry = {
+            "type": "citations",
             'citation_text': '%d CFR §%d.%d' % (citation[0], citation[1], citation[2]),
             'citation_type': 'regulation',
         }
-        es.index('docs_index', 'citations', entry, id=entry['citation_text'])
+        es.index('docs_index', entry, id=entry['citation_text'])
 
     for citation in all_statutory_citations:
         entry = {
+            "type": "citations",
             'citation_text': '%d U.S.C. §%s' % (citation[0], citation[1]),
             'citation_type': 'statute',
         }
-        es.index('docs_index', 'citations', entry, id=entry['citation_text'])
+        es.index('docs_index', entry, id=entry['citation_text'])
 
     logger.info("Citations loaded.")
 
