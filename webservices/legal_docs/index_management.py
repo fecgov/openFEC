@@ -186,7 +186,6 @@ ALL_MAPPINGS = {}
 ALL_MAPPINGS.update(ADMIN_FINES)
 ALL_MAPPINGS.update(ADVISORY_OPINIONS)
 ALL_MAPPINGS.update(CITATIONS)
-ALL_MAPPINGS.update(ADVISORY_OPINIONS)
 ALL_MAPPINGS.update(MUR_ADR_MAPPINGS)
 ALL_MAPPINGS.update(REGULATIONS)
 ALL_MAPPINGS.update(STATUTES)
@@ -194,7 +193,6 @@ ALL_MAPPINGS.update(SORT_MAPPINGS)
 
 MAPPINGS = {"properties": ALL_MAPPINGS}
 # ==== end define mapping for index: docs
-
 
 # ==== start define mapping for index: archived_murs
 ARCH_MUR_DOCUMENT_MAPPINGS = {
@@ -230,12 +228,12 @@ ARCH_MUR_MAPPINGS = {
         "complainants": {"type": "text"},
         "respondent": {"type": "text"},
         "documents": ARCH_MUR_DOCUMENT_MAPPINGS,
+        "sort1": {"type": "integer"},
+        "sort2": {"type": "integer"}
     }
 }
-ARCH_MUR_MAPPINGS.update(SORT_MAPPINGS)
 
 # ==== end define mapping for index: archived_murs
-
 
 ANALYZER_SETTINGS = {"analysis": {"analyzer": {"default": {"type": "english"}}}}
 
@@ -305,15 +303,7 @@ def create_archived_murs_index():
             "aliases": {'archived_murs_index': {}, 'docs_search': {}},
         },
     )
-    # es.indices.create(
-    #     'archived_murs',
-    #     {
-    #         "mappings": MAPPINGS,
-    #         "settings": ANALYZER_SETTINGS,
-    #         "aliases": {'archived_murs_index': {}, 'docs_search': {}},
-    #     },
-    # )
-
+   
 
 def delete_all_indices():
     """

@@ -27,6 +27,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
     def test_pending_ao(self, get_bucket):
         expected_ao = {
+            "type": "advisory_opinions",
             "no": "2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
@@ -65,6 +66,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         expected_commenter_names = ["Tom Troll", "Harry Troll"]
         expected_representative_names = ["Dewey Cheetham and Howe LLC"]
         expected_ao = {
+            "type": "advisory_opinions",
             "no": "2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
@@ -261,6 +263,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
     def test_ao_offsets(self, get_bucket):
         expected_ao1 = {
+            "type": "advisory_opinions",
             "no": "2015-01",
             "name": "AO name1",
             "summary": "AO summary1",
@@ -283,6 +286,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         }
         expected_ao2 = {
             "no": "2015-02",
+            "type": "advisory_opinions",
             "name": "An AO name2",
             "summary": "An AO summary2",
             "request_date": datetime.date(2016, 6, 10),
@@ -303,6 +307,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "entities": [],
         }
         expected_ao3 = {
+            "type": "advisory_opinions",
             "no": "2016-01",
             "name": "An AO name3",
             "summary": "An AO summary3",
