@@ -9,6 +9,11 @@ from webservices.env import env
 logger = logging.getLogger(__name__)
 
 # ==== start define mapping for index: docs
+SORT_MAPPINGS = {
+    "sort1": {"type": "integer"},
+    "sort2": {"type": "integer"},
+}
+
 CASE_DOCUMENT_MAPPINGS = {
     "type": "nested",
     "properties": {
@@ -152,7 +157,6 @@ MUR_ADR_MAPPINGS = {
     "respondents": {"type": "text"},
 }
 
-
 MUR_MAPPINGS = copy.deepcopy(MUR_ADR_MAPPINGS)
 MUR_MAPPINGS["mur_type"] = {"type": "keyword"}
 
@@ -178,16 +182,17 @@ REGULATIONS = {
     "url": {"type": "text", "index": False},
 }
 
-MAPPINGS_SUM = {}
-MAPPINGS_SUM.update(ADMIN_FINES)
-MAPPINGS_SUM.update(ADVISORY_OPINIONS)
-MAPPINGS_SUM.update(CITATIONS)
-MAPPINGS_SUM.update(ADVISORY_OPINIONS)
-MAPPINGS_SUM.update(MUR_ADR_MAPPINGS)
-MAPPINGS_SUM.update(REGULATIONS)
-MAPPINGS_SUM.update(STATUTES)
+ALL_MAPPINGS = {}
+ALL_MAPPINGS.update(ADMIN_FINES)
+ALL_MAPPINGS.update(ADVISORY_OPINIONS)
+ALL_MAPPINGS.update(CITATIONS)
+ALL_MAPPINGS.update(ADVISORY_OPINIONS)
+ALL_MAPPINGS.update(MUR_ADR_MAPPINGS)
+ALL_MAPPINGS.update(REGULATIONS)
+ALL_MAPPINGS.update(STATUTES)
+ALL_MAPPINGS.update(SORT_MAPPINGS)
 
-MAPPINGS = {"properties": MAPPINGS_SUM}
+MAPPINGS = {"properties": ALL_MAPPINGS}
 # ==== end define mapping for index: docs
 
 
@@ -227,6 +232,8 @@ ARCH_MUR_MAPPINGS = {
         "documents": ARCH_MUR_DOCUMENT_MAPPINGS,
     }
 }
+ARCH_MUR_MAPPINGS.update(SORT_MAPPINGS)
+
 # ==== end define mapping for index: archived_murs
 
 
