@@ -443,7 +443,7 @@ def get_current_cycle():
 
 
 def get_elasticsearch_connection():
-    es_conn = env.get_service(name='fec-api-search56')
+    es_conn = env.get_service(name='fec-api-elasticsearch')
     if es_conn:
         url = es_conn.get_url(url='uri')
     else:
