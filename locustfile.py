@@ -6,6 +6,11 @@
 `locust --host=https://fec-dev-api.app.cloud.gov/v1/` (dev)
 
 command, then open localhost:8089 to run tests.
+
+API keys:
+- Use an unlimited `FEC_API_KEY`
+- Borrow the `FEC_DOWNLOAD_API_KEY` from the staging space
+
 """
 
 import os
@@ -19,6 +24,7 @@ import locust
 resource.setrlimit(resource.RLIMIT_NOFILE, (9999, 999999))
 
 API_KEY = os.environ["FEC_API_KEY"]
+DOWNLOAD_KEY = os.environ["FEC_DOWNLOAD_API_KEY"]
 
 # it seems like AUTH is NOT used for current tests
 try:
@@ -238,7 +244,7 @@ class Tasks(locust.TaskSet):
         _cycle = (_year + 1) if _year % 2 == 1 else _year
 
         params = {
-            "api_key": API_KEY,
+            "api_key": DOWNLOAD_KEY,
             "sort_hide_null": False,
             "sort_nulls_last": False,
             "two_year_transaction_period": _cycle,
