@@ -213,7 +213,7 @@ def load_cases(case_type, case_no=None):
             if case is not None:
                 if case.get('published_flg'):
                     logger.info("Loading {0}: {1}".format(case_type, case['no']))
-                    es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
+                    es.index('docs_index', case, id=case['doc_id'])
                     case_count += 1
                     logger.info("{0} {1}(s) loaded".format(case_count, case_type))
                 else:
@@ -251,6 +251,7 @@ def get_single_case(case_type, case_no):
             case_id = row['case_id']
             sort1, sort2 = get_sort_fields(row['case_no'])
             case = {
+                "type": get_es_type(case_type),
                 'doc_id': '{0}_{1}'.format(case_type.lower(), row['case_no']),
                 'no': row['case_no'],
                 'name': row['name'],
@@ -459,8 +460,8 @@ def get_documents(case_id, bucket, bucket_name):
                     row['filename'].replace(' ', '-'))
                 document['url'] = '/files/' + pdf_key
                 logger.debug("S3: Uploading {}".format(pdf_key))
-                bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
-                        ContentType='application/pdf', ACL='public-read')
+                # bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
+                #         ContentType='application/pdf', ACL='public-read')
                 documents.append(document)
 
     return documents

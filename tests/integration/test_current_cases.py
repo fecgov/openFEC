@@ -26,6 +26,7 @@ class TestLoadCurrentCases(BaseTestCase):
     def test_simple_mur(self, get_bucket):
         mur_subject = 'Fraudulent misrepresentation'
         expected_mur = {
+            "type": "murs",
             'no': '1',
             'name': 'Simple MUR',
             'mur_type': 'current',
@@ -59,6 +60,7 @@ class TestLoadCurrentCases(BaseTestCase):
     def test_unpublished_mur(self, get_bucket):
         mur_subject = 'Unpublished MUR'
         expected_mur = {
+            "type": "murs",
             'no': '101',
             'name': 'Test Unpublished MUR',
             'mur_type': 'current',
@@ -92,6 +94,7 @@ class TestLoadCurrentCases(BaseTestCase):
     def test_simple_adr(self, get_bucket):
         adr_subject = 'Personal use'
         expected_adr = {
+            "type": "adrs",
             'no': '1',
             'name': 'Simple ADR',
             'election_cycles': [2016],
@@ -125,6 +128,7 @@ class TestLoadCurrentCases(BaseTestCase):
     def test_admin_fine(self, get_bucket):
         dummy_subject = 'Personal use'
         expected_admin_fine = {
+            "type": "admin_fines",
             'no': '1',
             'name': 'Big Admin Fine',
             'doc_id': 'af_1',
@@ -184,6 +188,7 @@ class TestLoadCurrentCases(BaseTestCase):
         case_id = 1
         mur_subject = 'Fraudulent misrepresentation'
         expected_mur = {
+            "type": "murs",
             'no': '1',
             'name': 'MUR with participants',
             'mur_type': 'current',
@@ -328,6 +333,7 @@ class TestLoadCurrentCases(BaseTestCase):
         actual_mur = next(get_cases('MUR'))
 
         expected_mur = {
+            "type": "murs",
             'commission_votes': [
                 {
                     'action': 'Conciliation Reached.',
@@ -377,6 +383,7 @@ class TestLoadCurrentCases(BaseTestCase):
     def test_mur_offsets(self, get_bucket):
         mur_subject = 'Fraudulent misrepresentation'
         expected_mur1 = {
+            "type": "murs",
             'no': '1',
             'name': 'Simple MUR1',
             'mur_type': 'current',
@@ -396,6 +403,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'sort2': None,
         }
         expected_mur2 = {
+            "type": "murs",
             'no': '2',
             'name': 'Simple MUR2',
             'mur_type': 'current',
@@ -415,6 +423,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'sort2': None,
         }
         expected_mur3 = {
+            "type": "murs",
             'no': '3',
             'name': 'Simple MUR',
             'mur_type': 'current',

@@ -160,6 +160,15 @@ MUR_ADR_MAPPINGS = {
 MUR_MAPPINGS = copy.deepcopy(MUR_ADR_MAPPINGS)
 MUR_MAPPINGS["mur_type"] = {"type": "keyword"}
 
+REGULATIONS = {
+    "type": {"type": "keyword"},
+    "doc_id": {"type": "keyword", "index": False},
+    "name": {"type": "text", "analyzer": "english"},
+    "text": {"type": "text", "analyzer": "english"},
+    "no": {"type": "text", "index": False},
+    "url": {"type": "text", "index": False},
+}
+
 STATUTES = {
     "type": {"type": "keyword"},
     "doc_id": {"type": "keyword", "index": False},
@@ -172,21 +181,12 @@ STATUTES = {
     "url": {"type": "text", "index": False},
 }
 
-
-REGULATIONS = {
-    "type": {"type": "keyword"},
-    "doc_id": {"type": "keyword", "index": False},
-    "name": {"type": "text", "analyzer": "english"},
-    "text": {"type": "text", "analyzer": "english"},
-    "no": {"type": "text", "index": False},
-    "url": {"type": "text", "index": False},
-}
-
 ALL_MAPPINGS = {}
 ALL_MAPPINGS.update(ADMIN_FINES)
 ALL_MAPPINGS.update(ADVISORY_OPINIONS)
 ALL_MAPPINGS.update(CITATIONS)
 ALL_MAPPINGS.update(MUR_ADR_MAPPINGS)
+ALL_MAPPINGS.update(MUR_MAPPINGS)
 ALL_MAPPINGS.update(REGULATIONS)
 ALL_MAPPINGS.update(STATUTES)
 ALL_MAPPINGS.update(SORT_MAPPINGS)
@@ -246,7 +246,7 @@ def create_docs_index():
     """
     Initialize Elasticsearch for storing legal documents.
     Create the `docs` index, and set up the aliases `docs_index` and `docs_search`
-    to point to the `docs` index. If the `doc` index already exists, delete it.
+    to point to the `docs` index. If the `docs` index already exists, delete it.
     """
 
     es = utils.get_elasticsearch_connection()
