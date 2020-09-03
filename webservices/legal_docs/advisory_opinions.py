@@ -239,12 +239,12 @@ def get_documents(ao_id, bucket):
                 )
                 document["url"] = '/files/' + pdf_key
                 logger.debug("S3: Uploading {}".format(pdf_key))
-                # bucket.put_object(
-                #     Key=pdf_key,
-                #     Body=bytes(row["fileimage"]),
-                #     ContentType="application/pdf",
-                #     ACL="public-read",
-                # )
+                bucket.put_object(
+                    Key=pdf_key,
+                    Body=bytes(row["fileimage"]),
+                    ContentType="application/pdf",
+                    ACL="public-read",
+                )
                 documents.append(document)
 
     return documents
