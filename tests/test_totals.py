@@ -186,6 +186,31 @@ class TestTotals(ApiBaseTest):
         )
         self.assertEqual(results[0], fields)
 
+    def test_House_Senate_Jointed_totals(self):
+        committee_id = 'C009'
+        history = factories.CommitteeHistoryFactory(  # noqa
+            committee_id=committee_id, committee_type='S',
+        )
+
+        house_senate_fields = {
+            'committee_id': committee_id,
+            'cycle': 2016,
+            'all_other_loans': 1,
+            'candidate_contribution': 2,
+            'loan_repayments': 3,
+            'loan_repayments_candidate_loans': 4,
+            'loan_repayments_other_loans': 5,
+            'committee_type': 'S',
+            'committee_designation': 'J',
+        }
+
+        committee_total = factories.TotalsHouseSenateFactory(**house_senate_fields) # noqa
+        results = self._results(
+            api.url_for(TotalsCommitteeView, committee_id=committee_id)
+        )
+
+        self.assertEqual(len(results), 1)
+
     def test_Pac_Party_totals(self):
         committee_id = 'C8675311'
         transaction_coverage = factories.TransactionCoverageFactory(  # noqa
