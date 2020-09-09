@@ -1,6 +1,6 @@
 ---
 path: ../
-memory: 1G
+memory: 1500M # 1.5G
 stack: cflinuxfs3
 buildpack: python_buildpack
 env:
@@ -18,3 +18,4 @@ routes:
 applications:
   - name: api
     instances: 10
+    disk_quota: 1G
