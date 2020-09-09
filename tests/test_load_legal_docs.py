@@ -32,7 +32,7 @@ class ElasticSearchMock:
         self.dictToIndex = dictToIndex
         self.indices = ElasticSearchMock.ElasticSearchIndicesMock()
 
-    def index(self, index, doc_type, doc, id):
+    def index(self, index, doc, id):
         assert self.dictToIndex == doc
 
     def delete_by_query(self, index, body, doc_type):
@@ -144,6 +144,7 @@ class IndexStatutesTest(unittest.TestCase):
         'webservices.utils.get_elasticsearch_connection',
         get_es_with_doc(
             {
+                'type': 'statutes',
                 'name': 'title',
                 'chapter': '1',
                 'title': '26',
@@ -177,6 +178,7 @@ class IndexStatutesTest(unittest.TestCase):
         'webservices.utils.get_elasticsearch_connection',
         get_es_with_doc(
             {
+                'type': 'statutes',
                 'subchapter': 'I',
                 'doc_id': '/us/usc/t52/s123',
                 'chapter': '1',
@@ -222,6 +224,7 @@ class IndexRegulationsTest(unittest.TestCase):
         'webservices.utils.get_elasticsearch_connection',
         get_es_with_doc(
             {
+                'type': 'regulations',
                 'text': 'sectionContentA sectionContentB',
                 'no': '104.1',
                 'name': 'Title',
