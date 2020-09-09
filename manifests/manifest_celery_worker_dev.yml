@@ -12,7 +12,7 @@ services:
   - fec-s3-dev
 applications:
   - name: celery-worker
-    instances: 2
+    instances: 1
     memory: 1G
     disk_quota: 1G
     no-route: true
