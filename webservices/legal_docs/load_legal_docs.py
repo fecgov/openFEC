@@ -33,6 +33,15 @@ def get_text(node):
     return text
 
 
+# curl command examples:
+# 1)curl -X GET "localhost:9200/docs/_search?pretty" -H 'Content-Type: application/json' 
+# -d'{"query": {"terms": {"_id": [ "9039_3", "100_110"] }}}'
+#
+# 2)curl -d '{"query": {"term": {"type": "regulations"}}}' -H "Content-Type: application/json" 
+# -X POST "localhost:9200/docs/_count?pretty"
+#
+# 3)curl -d '{"from" : 0, "size" : 600, "query": {"term": {"type": "regulations"}}}' -H "Content-Type: application/json" 
+# -X POST "localhost:9200/docs/_search?pretty" -o regulation_out.json
 def index_regulations():
     """
     Indexes the regulations relevant to the FEC in Elasticsearch.
@@ -64,6 +73,7 @@ def index_regulations():
             no = '%s.%s' % (section_label[0], section_label[1])
             name = sections[section_label]['title'].split(no)[1].strip()
             doc = {
+                "type": "regulations",
                 "doc_id": doc_id,
                 "name": name,
                 "text": sections[section_label]['text'],
@@ -73,9 +83,9 @@ def index_regulations():
                 "sort2": int(section_label[1]),
             }
 
-            es.index('docs_index', 'regulations', doc, id=doc['doc_id'])
+            es.index('docs_index', doc, id=doc['doc_id'])
         reg_count += 1
-    logger.info("%d regulation parts indexed", reg_count)
+        logger.info("%d regulation parts indexed.", reg_count)
 
 
 def get_ao_citations():
@@ -175,6 +185,7 @@ def get_title_52_statutes():
                     ).group(1)
                     pdf_url = 'https://www.govinfo.gov/link/uscode/52/%s' % section_no
                     doc = {
+                        "type": "statutes",
                         "doc_id": section.attrib['identifier'],
                         "text": text,
                         "name": heading,
@@ -186,7 +197,7 @@ def get_title_52_statutes():
                         "sort1": 52,
                         "sort2": int(section_no),
                     }
-                    es.index('docs_index', 'statutes', doc, id=doc['doc_id'])
+                    es.index('docs_index', doc, id=doc['doc_id'])
                     section_count += 1
     return section_count
 
@@ -218,6 +229,7 @@ def get_title_26_statutes():
                     ).group(1)
                     pdf_url = 'https://www.govinfo.gov/link/uscode/26/%s' % section_no
                     doc = {
+                        "type": "statutes",
                         "doc_id": section.attrib['identifier'],
                         "text": text,
                         "name": heading,
@@ -228,11 +240,17 @@ def get_title_26_statutes():
                         "sort1": 26,
                         "sort2": int(section_no),
                     }
-                    es.index('docs_index', 'statutes', doc, id=doc['doc_id'])
+                    es.index('docs_index', doc, id=doc['doc_id'])
                     section_count += 1
     return section_count
 
 
+# curl command examples:
+# 1)curl -X GET "localhost:9200/docs/_search?pretty" -H 'Content-Type: application/json' -d'
+# {"query": {"terms": {"_id": ["/us/usc/t26/s9009, "/us/usc/t52/s30110"] }}}'
+#
+# 2)curl -d '{"query": {"term": {"type": "statutes"}}}' -H "Content-Type: application/json" 
+# -X POST "localhost:9200/docs/_count?pretty"
 def index_statutes():
     """
         Indexes statutes with titles 26 and 52 in Elasticsearch.
