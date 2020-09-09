@@ -165,15 +165,67 @@ REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?')
 CASE_NO_REGEX = re.compile(r'(?P<serial>\d+)')
 
 
+# curl commands examples:
+# 1)curl -X GET "localhost:9200/docs/_search?pretty" -H 'Content-Type: application/json'
+# -d'{"query": {"terms": {"_id": [ "mur_4633", "mur_7212"] }}}' -o mur_out.json
+#
+# (current murs + archived murs count)
+# 2)curl -d '{"query": {"term": {"type": "murs"}}}' -H "Content-Type: application/json"
+# -X POST "localhost:9200/docs_search/_count?pretty"
+#
+# (only current mur count)
+# 3)curl -d '{"query": {"term": {"type": "murs"}}}' -H "Content-Type: application/json"
+# -X POST "localhost:9200/docs/_count?pretty"
+
 def load_current_murs(specific_mur_no=None):
+    """
+    Reads data for current MURs from a Postgres database,
+    assembles a JSON document corresponding to the case, and indexes this document
+    in Elasticsearch in the index `docs_index` with a type=`murs`.
+    In addition, all documents attached to the case are uploaded to an
+    S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
+    """
     load_cases('MUR', specific_mur_no)
 
 
+# curl commands examples:
+# 1)curl -X GET "localhost:9200/docs/_search?pretty" -H 'Content-Type: application/json'
+# -d'{"query": {"terms": {"_id": [ "adr_008", "adr_101"] }}}'
+#
+# 2)curl -d '{"query": {"term": {"type": "adrs"}}}' -H "Content-Type: application/json"
+# -X POST "localhost:9200/docs/_count?pretty"
+#
+# 3)curl -d '{"from" : 0, "size" : 1000, "query": {"term": {"type": "adrs"}}}' -H "Content-Type: application/json"
+# -X POST "localhost:9200/docs/_search?pretty" -o adr_out.json
 def load_adrs(specific_adr_no=None):
+    """
+    Reads data for ADRs from a Postgres database,
+    assembles a JSON document corresponding to the case, and indexes this document
+    in Elasticsearch in the index `docs_index` with a type=`adrs`.
+    In addition, all documents attached to the case are uploaded to an
+    S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
+    """
     load_cases('ADR', specific_adr_no)
 
 
+# curl commands examples:
+# 1)curl -X GET "localhost:9200/docs/_search?pretty" -H 'Content-Type: application/json'
+# -d'{"query": {"terms": {"_id": [ "af_10", "af_12"] }}}'
+#
+# 2)curl -d '{"query": {"term": {"type": "admin_fines"}}}' -H "Content-Type: application/json"
+# -X POST "localhost:9200/docs/_count?pretty"
+#
+# 3)curl -d '{"from" : 0, "size" : 1000, "query": {"term": {"type": "admin_fines"}}}'
+# -H "Content-Type: application/json"
+# -X POST "localhost:9200/docs/_search?pretty" -o af_out.json
 def load_admin_fines(specific_af_no=None):
+    """
+    Reads data for AFs from a Postgres database,
+    assembles a JSON document corresponding to the case, and indexes this document
+    in Elasticsearch in the index `docs_index` with a type=`admin_fines`.
+    In addition, all documents attached to the case are uploaded to an
+    S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
+    """
     load_cases('AF', specific_af_no)
 
 
@@ -198,13 +250,6 @@ def get_full_name(case_type):
 
 
 def load_cases(case_type, case_no=None):
-    """
-    Reads data for current MURs, AFs, and ADRs from a Postgres database,
-    assembles a JSON document corresponding to the case, and indexes this document
-    in Elasticsearch in the index `docs_index` with a doc_type of `murs`, `adrs`, or `admin_fines`.
-    In addition, all documents attached to the case are uploaded to an
-    S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
-    """
     if case_type in ('MUR', 'ADR', 'AF'):
         es = get_elasticsearch_connection()
         logger.info("Loading {0}(s)".format(case_type))
