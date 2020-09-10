@@ -205,6 +205,36 @@ ARCH_MUR_DOCUMENT_MAPPINGS = {
     },
 }
 
+ARCH_MUR_SUBJECT_MAPPINGS = {
+    "type": "nested",
+    "properties": {
+        "text": {"type": "text"},
+        "children": {
+            "type": "nested",
+            "properties": {
+                "text": {"type": "text"},
+                "children": {
+                    "type": "nested",
+                    "properties": {
+                        "text": {"type": "text"}
+                    }
+                }
+            }
+        }
+    }
+}
+
+ARCH_MUR_CITATION_MAPPINGS = {
+    "properties": {
+        "us_code": {
+            "properties": {"text": {"type": "text"}, "url": {"type": "text"}}
+        },
+        "regulations": {
+            "properties": {"text": {"type": "text"}, "url": {"type": "text"}}
+        }
+    }
+}
+
 ARCH_MUR_MAPPINGS = {
     "dynamic": "false",
     "properties": {
@@ -216,18 +246,11 @@ ARCH_MUR_MAPPINGS = {
         "open_date": {"type": "date", "format": "dateOptionalTime"},
         "close_date": {"type": "date", "format": "dateOptionalTime"},
         "url": {"type": "text"},
-        "subjects": {"type": "text"},
-        "citations": {
-            "properties": {
-                "text": {"type": "text"},
-                "title": {"type": "text"},
-                "type": {"type": "text"},
-                "url": {"type": "text"},
-            }
-        },
         "complainants": {"type": "text"},
         "respondent": {"type": "text"},
         "documents": ARCH_MUR_DOCUMENT_MAPPINGS,
+        "citations": ARCH_MUR_CITATION_MAPPINGS,
+        "subject": ARCH_MUR_SUBJECT_MAPPINGS,
         "sort1": {"type": "integer"},
         "sort2": {"type": "integer"}
     }

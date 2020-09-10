@@ -128,11 +128,10 @@ class DateTimeEncoder(JSONEncoder):
 
 
 def load_archived_murs(mur_no=None):
-
     """
     Reads data for Archived MURs from a Postgres database (under schema:mur_arch),
     assembles a JSON document corresponding to the mur, and indexes this document
-    in Elasticsearch in the index `archived_murs` with a doc_type of `murs`.
+    in Elasticsearch in the index `archived_murs` with a type=`murs` and mur_type=`archived`.
     """
     es = utils.get_elasticsearch_connection()
     mur_count = 0
