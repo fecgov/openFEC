@@ -105,7 +105,7 @@ def load_advisory_opinions(from_ao_no=None):
     Reads data for advisory opinions from a Postgres database,
     assembles a JSON document corresponding to the advisory opinion
     and indexes this document in Elasticsearch in the index `docs_index`
-    with a doc_type of `advisory_opinions`.
+    with a type=`advisory_opinions`.
     In addition, all documents attached to the advisory opinion
     are uploaded to an S3 bucket under the _directory_`legal/aos/`.
     """
