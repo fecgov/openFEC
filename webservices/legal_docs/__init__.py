@@ -27,6 +27,10 @@ from .archived_murs import ( # noqa
     extract_pdf_text,
 )
 
+from .test_es7 import ( # noqa
+    test_es_conn,
+)
+
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger('elasticsearch')
 logger.setLevel('WARN')

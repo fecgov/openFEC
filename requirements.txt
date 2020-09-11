@@ -25,6 +25,7 @@ requests==2.22.0
 # elasticsearch-dsl==5.4.0
 elasticsearch==7.6.0
 elasticsearch-dsl==7.2.1
+requests-aws4auth==1.0
 
 # Marshalling
 flask-apispec==0.7.0
