@@ -444,6 +444,7 @@ def get_current_cycle():
 
 
 SERVICE_NAME = "fec-api-elasticsearch"
+SERVICE = "es"
 REGION = "us-gov-west-1"
 PORT = 443
 
@@ -456,17 +457,14 @@ def get_es_credentials(service_name):
     return service.credentials
 
 
-def create_es_client(service_name=None):
+def create_es_client():
     """
     Creates an elasticsearch client from the service name of
     the legacy Elasticsearch service or the new AWS Elasticsearch
     service based on the credentials supplied to the service.
     """
-    if not service_name:
-        service_name = SERVICE_NAME
-
     try:
-        credentials = get_es_credentials(service_name)
+        credentials = get_es_credentials(SERVICE_NAME)
         # If the username and password is supplied in the service credentials
         # Create an Elasticsearch client for the old, kubernetes-broker service
         if "username" in credentials and "password" in credentials:
@@ -488,7 +486,7 @@ def create_es_client(service_name=None):
             host = credentials["host"]
             access_key = credentials["access_key"]
             secret_key = credentials["secret_key"]
-            aws_auth = AWS4Auth(access_key, secret_key, REGION, service_name)
+            aws_auth = AWS4Auth(access_key, secret_key, REGION, SERVICE)
 
             #  Along with the "host" and "http_auth" arguments for the Elasticsearch client,
             #  you will also need to set the "use_ssl", "verify_certs", and "connection_class"
