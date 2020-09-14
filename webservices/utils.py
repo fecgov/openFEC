@@ -469,6 +469,9 @@ def create_es_client():
                 verify_certs=True,
                 ca_certs=certifi.where(),
                 connection_class=RequestsHttpConnection,
+                timeout=40,
+                max_retries=10,
+                retry_on_timeout=True,
             )
         else:
             # create local elasticsearch client
