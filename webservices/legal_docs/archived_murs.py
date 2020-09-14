@@ -3,7 +3,7 @@ from elasticsearch_dsl import Search
 import logging
 import re
 from webservices.rest import db
-from webservices import utils
+from webservices.utils import create_eregs_link, create_es_client
 from .reclassify_statutory_citation import reclassify_statutory_citation
 
 # import these 3 libraries to display the JSON format of object "mur"
@@ -133,12 +133,12 @@ def load_archived_murs(mur_no=None):
     assembles a JSON document corresponding to the mur, and indexes this document
     in Elasticsearch in the index `archived_murs` with a type=`murs` and mur_type=`archived`.
     """
-    es = utils.get_elasticsearch_connection()
+    es_client = create_es_client()
     mur_count = 0
     for mur in get_murs(mur_no):
         if mur is not None:
             logger.info("Loading archived MUR No: {0}".format(mur["no"]))
-            es.index("archived_murs", mur, id=mur["doc_id"])
+            es_client.index("archived_murs", mur, id=mur["doc_id"])
             mur_count += 1
 
             logger.info("{0} Archived Mur(s) loaded".format(mur_count))
@@ -245,7 +245,7 @@ def get_citations_arch_mur(mur_id):
                     us_codes.append({"text": citation_text, "url": url})
 
                 elif regulation_match:
-                    url = utils.create_eregs_link(regulation_match.group("part"), regulation_match.group("section"))
+                    url = create_eregs_link(regulation_match.group("part"), regulation_match.group("section"))
                     regulations.append({"text": row["cite"], "url": url})
                 else:
                     raise Exception("Could not parse archived mur's citation.")
@@ -304,7 +304,7 @@ def extract_pdf_text(mur_no=None):
     4)Run this command carefully, backup mur_arch.documents table first
     and empty it. the data will be inserted into table: mur_arch.documents
     """
-    es = utils.get_elasticsearch_connection()
+    es_client = create_es_client()
     each_fetch_size = 1000
     max_size = 5000
     all_results = []
@@ -313,7 +313,7 @@ def extract_pdf_text(mur_no=None):
     for from_no in range(0, max_size, each_fetch_size):
         es_results = (
             Search()
-            .using(es)
+            .using(es_client)
             .source(includes=[
                 "no",
                 "text",

@@ -7,7 +7,8 @@ import logging
 import requests
 from webservices.rest import db
 from webservices.env import env
-from webservices import utils
+# from webservices import utils
+from webservices.utils import create_es_client
 from webservices.tasks.utils import get_bucket
 
 logger = logging.getLogger('manager')
@@ -56,7 +57,7 @@ def index_regulations():
 
     logger.info("Indexing regulations")
     reg_versions = requests.get(eregs_api + 'regulation').json()['versions']
-    es = utils.get_elasticsearch_connection()
+    es_client = create_es_client()
     reg_count = 0
     for reg in reg_versions:
         url = '%sregulation/%s/%s' % (eregs_api, reg['regulation'], reg['version'])
@@ -83,7 +84,7 @@ def index_regulations():
                 "sort2": int(section_label[1]),
             }
 
-            es.index('docs_index', doc, id=doc['doc_id'])
+            es_client.index('docs_index', doc, id=doc['doc_id'])
         reg_count += 1
         logger.info("%d regulation parts indexed.", reg_count)
 
@@ -157,7 +158,7 @@ def get_xml_tree_from_url(url):
 
 
 def get_title_52_statutes():
-    es = utils.get_elasticsearch_connection()
+    es_client = create_es_client()
 
     title_parsed = get_xml_tree_from_url(
         'http://uscode.house.gov/download/'
@@ -197,13 +198,13 @@ def get_title_52_statutes():
                         "sort1": 52,
                         "sort2": int(section_no),
                     }
-                    es.index('docs_index', doc, id=doc['doc_id'])
+                    es_client.index('docs_index', doc, id=doc['doc_id'])
                     section_count += 1
     return section_count
 
 
 def get_title_26_statutes():
-    es = utils.get_elasticsearch_connection()
+    es_client = create_es_client()
 
     title_parsed = get_xml_tree_from_url(
         'http://uscode.house.gov/download/'
@@ -240,7 +241,7 @@ def get_title_26_statutes():
                         "sort1": 26,
                         "sort2": int(section_no),
                     }
-                    es.index('docs_index', doc, id=doc['doc_id'])
+                    es_client.index('docs_index', doc, id=doc['doc_id'])
                     section_count += 1
     return section_count
 
@@ -291,7 +292,7 @@ def delete_from_es(index, doc_type):
     """
     Deletes all documents with the given `doc_type` from Elasticsearch
     """
-    es = utils.get_elasticsearch_connection()
-    es.delete_by_query(
+    es_client = create_es_client()
+    es_client.delete_by_query(
         index=index, body={'query': {'match_all': {}}}, doc_type=doc_type
     )

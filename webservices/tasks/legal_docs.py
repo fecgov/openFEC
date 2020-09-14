@@ -4,7 +4,9 @@ import logging
 
 from celery_once import QueueOnce
 
-from webservices import utils
+# from webservices import utils
+from webservices.utils import create_es_client
+
 from webservices.legal_docs.advisory_opinions import load_advisory_opinions
 from webservices.legal_docs.current_cases import load_cases
 from webservices.legal_docs.index_management import create_elasticsearch_backup

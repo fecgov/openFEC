@@ -14,6 +14,7 @@ from sqlalchemy.orm import foreign
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.dialects import postgresql
 from elasticsearch import Elasticsearch, RequestsHttpConnection
+import certifi
 from requests_aws4auth import AWS4Auth
 from marshmallow_pagination import paginators
 from webargs import fields
@@ -449,56 +450,36 @@ REGION = "us-gov-west-1"
 PORT = 443
 
 
-def get_es_credentials(service_name):
-    """
-    Get elasticsearch credentials via the service name.
-    """
-    service = env.get_service(name=service_name)
-    return service.credentials
-
-
 def create_es_client():
-    """
-    Creates an elasticsearch client from the service name of
-    the legacy Elasticsearch service or the new AWS Elasticsearch
-    service based on the credentials supplied to the service.
-    """
     try:
-        credentials = get_es_credentials(SERVICE_NAME)
-        # If the username and password is supplied in the service credentials
-        # Create an Elasticsearch client for the old, kubernetes-broker service
-        if "username" in credentials and "password" in credentials:
-            #  Note:
-            #  The old service only needs to set the "host" value
-            #  for the Elasticsearch client "hosts" argument based on the service's
-            #  "URI" value in the "credentials"
-            uri = credentials["uri"]
-            client = Elasticsearch(hosts=[uri], use_ssl=False, verify_certs=False)
-
-            return {"client": client, "broker": "kubernetes-broker"}
-
-        # Else, if create an Elasticsearch client for the new, aws-broker service
-        else:
-            #  The new AWS Elasticsearch service needs to set the "host" and "port"
-            #  for the Elasticsearch client "hosts" argument with addition to
-            #  the "access_key", "secret_key", "region", and "service" to create the
-            #  Elasticsearch client "http_auth" argument.
+        es_service = env.get_service(name=SERVICE_NAME)
+        if es_service:
+            credentials = es_service.credentials
+            #  create "http_auth".
             host = credentials["host"]
             access_key = credentials["access_key"]
             secret_key = credentials["secret_key"]
             aws_auth = AWS4Auth(access_key, secret_key, REGION, SERVICE)
 
-            #  Along with the "host" and "http_auth" arguments for the Elasticsearch client,
-            #  you will also need to set the "use_ssl", "verify_certs", and "connection_class"
-            client = Elasticsearch(
+            #  create elasticsearch client through "http_auth"
+            es_client = Elasticsearch(
                 hosts=[{"host": host, "port": PORT}],
                 http_auth=aws_auth,
                 use_ssl=True,
                 verify_certs=True,
+                ca_certs=certifi.where(),
                 connection_class=RequestsHttpConnection,
             )
-
-            return {"client": client, "broker": "aws-broker"}
+        else:
+            # create local elasticsearch client
+            url = 'http://localhost:9200'
+            es_client = Elasticsearch(
+                url,
+                timeout=30,
+                max_retries=10,
+                retry_on_timeout=True,
+            )
+        return es_client
     except Exception as err:
         logger.error('An error occurred trying to create Elasticsearch client.{0}'.format(err))
 

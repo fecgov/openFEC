@@ -188,8 +188,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         assert actual_ao2["aos_cited_by"] == []
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
-    @patch("webservices.legal_docs.advisory_opinions.get_elasticsearch_connection")
-    def test_statutory_citations(self, get_bucket, get_elasticsearch_connection):
+    @patch("webservices.legal_docs.advisory_opinions.create_es_client")
+    def test_statutory_citations(self, get_bucket, create_es_client):
         ao_document = {
             "document_id": 1,
             "category": "Final Opinion",
@@ -215,8 +215,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         assert actual_ao["statutory_citations"] == [{'title': 52, 'section': '30101'}]
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
-    @patch("webservices.legal_docs.advisory_opinions.get_elasticsearch_connection")
-    def test_regulatory_citations(self, get_bucket, get_elasticsearch_connection):
+    @patch("webservices.legal_docs.advisory_opinions.create_es_client")
+    def test_regulatory_citations(self, get_bucket, create_es_client):
         ao_document = {
             "document_id": 1,
             "category": "Final Opinion",
