@@ -234,19 +234,23 @@ def get_documents(ao_id, bucket):
                     )
                 )
             else:
-                pdf_key = "legal/aos/{0}/{1}".format(
-                    row['ao_no'], row["filename"].replace(' ', '-')
-                )
-                document["url"] = '/files/' + pdf_key
-                logger.debug("S3: Uploading {}".format(pdf_key))
-                bucket.put_object(
-                    Key=pdf_key,
-                    Body=bytes(row["fileimage"]),
-                    ContentType="application/pdf",
-                    ACL="public-read",
-                )
-                documents.append(document)
-
+                try:
+                    pdf_key = "legal/aos/{0}/{1}".format(
+                        row['ao_no'], row["filename"].replace(' ', '-')
+                    )
+                    document["url"] = '/files/' + pdf_key
+                    logger.debug("S3: Uploading {}".format(pdf_key))
+                    bucket.put_object(
+                        Key=pdf_key,
+                        Body=bytes(row["fileimage"]),
+                        ContentType="application/pdf",
+                        ACL="public-read",
+                    )
+                    documents.append(document)
+                except Exception as err:
+                    logger.error(
+                        'An error occurred while putting AO pdf to S3:\nao_no={0} \npdf_key={1} \nerr={2}'.format(
+                            row['ao_no'], pdf_key, err))
     return documents
 
 

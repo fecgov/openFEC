@@ -292,7 +292,6 @@ def get_cases(case_type, case_no=None):
 
 def get_single_case(case_type, case_no):
     bucket = get_bucket()
-    bucket_name = env.get_credential('bucket')
 
     with db.engine.connect() as conn:
         rs = conn.execute(SINGLE_CASE, case_type, case_no)
@@ -310,7 +309,7 @@ def get_single_case(case_type, case_no):
                 'sort2': sort2,
             }
             case['commission_votes'] = get_commission_votes(case_type, case_id)
-            case['documents'] = get_documents(case_id, bucket, bucket_name)
+            case['documents'] = get_documents(case_id, bucket)
             case['url'] = '/legal/{0}/{1}/'.format(get_full_name(case_type), row['case_no'])
             if case_type == 'AF':
                 case = extend(case, get_af_specific_fields(case_id))
@@ -488,7 +487,7 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
     return citations
 
 
-def get_documents(case_id, bucket, bucket_name):
+def get_documents(case_id, bucket):
     documents = []
     with db.engine.connect() as conn:
         rs = conn.execute(CASE_DOCUMENTS, case_id)
@@ -506,14 +505,18 @@ def get_documents(case_id, bucket, bucket_name):
                     'Error uploading document ID {0} for {1} %{2}: No file image'.
                     format(row['document_id'], row['case_type'], row['case_no']))
             else:
-                pdf_key = 'legal/{0}/{1}/{2}'.format(get_es_type(row['case_type']), row['case_no'],
-                    row['filename'].replace(' ', '-'))
-                document['url'] = '/files/' + pdf_key
-                logger.debug("S3: Uploading {}".format(pdf_key))
-                # bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
-                #         ContentType='application/pdf', ACL='public-read')
-                documents.append(document)
-
+                try:
+                    pdf_key = 'legal/{0}/{1}/{2}'.format(get_es_type(row['case_type']), row['case_no'],
+                        row['filename'].replace(' ', '-'))
+                    document['url'] = '/files/' + pdf_key
+                    logger.debug("S3: Uploading {}".format(pdf_key))
+                    bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
+                            ContentType='application/pdf', ACL='public-read')
+                    documents.append(document)
+                except Exception as err:
+                    logger.error(
+                        'An error occurred while putting pdf to S3:\ncase_id={0} \npdf_key={1} \nerr={2}'.format(
+                            case_id, pdf_key, err))
     return documents
 
 
