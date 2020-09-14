@@ -3,7 +3,7 @@ import logging
 import re
 
 from webservices.rest import db
-from webservices.utils import get_elasticsearch_connection
+from webservices.utils import create_es_client
 from webservices.tasks.utils import get_bucket
 from .reclassify_statutory_citation import reclassify_statutory_citation
 
@@ -109,13 +109,13 @@ def load_advisory_opinions(from_ao_no=None):
     In addition, all documents attached to the advisory opinion
     are uploaded to an S3 bucket under the _directory_`legal/aos/`.
     """
-    es = get_elasticsearch_connection()
+    es_client = create_es_client()
 
     logger.info("Loading advisory opinions")
     ao_count = 0
     for ao in get_advisory_opinions(from_ao_no):
         logger.info("Loading AO: %s", ao['no'])
-        es.index('docs_index', ao, id=ao['no'])
+        es_client.index('docs_index', ao, id=ao['no'])
         ao_count += 1
     logger.info("%d advisory opinions loaded", ao_count)
 
@@ -374,7 +374,7 @@ def get_citations(ao_names):
             key=lambda d: (d["title"], d["part"], d["section"]),
         )
 
-    es = get_elasticsearch_connection()
+    es_client = create_es_client()
 
     for citation in all_regulatory_citations:
         entry = {
@@ -382,7 +382,7 @@ def get_citations(ao_names):
             'citation_text': '%d CFR §%d.%d' % (citation[0], citation[1], citation[2]),
             'citation_type': 'regulation',
         }
-        es.index('docs_index', entry, id=entry['citation_text'])
+        es_client.index('docs_index', entry, id=entry['citation_text'])
 
     for citation in all_statutory_citations:
         entry = {
@@ -390,7 +390,7 @@ def get_citations(ao_names):
             'citation_text': '%d U.S.C. §%s' % (citation[0], citation[1]),
             'citation_type': 'statute',
         }
-        es.index('docs_index', entry, id=entry['citation_text'])
+        es_client.index('docs_index', entry, id=entry['citation_text'])
 
     logger.info("Citations loaded.")
 

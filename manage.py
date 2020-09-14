@@ -48,7 +48,7 @@ manager.command(legal_docs.refresh_current_legal_docs_zero_downtime)
 manager.command(legal_docs.configure_backup_repository)
 manager.command(legal_docs.create_elasticsearch_backup)
 manager.command(legal_docs.restore_elasticsearch_backup)
-manager.command(legal_docs.test_es_conn)
+manager.command(legal_docs.check_legal_doc)
 
 def execute_sql_file(path):
     """This helper is typically used within a multiprocessing pool; create a new database

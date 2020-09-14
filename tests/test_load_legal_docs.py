@@ -141,7 +141,7 @@ class IndexStatutesTest(unittest.TestCase):
         assert etree.getroot().tag == 'test'
 
     @patch(
-        'webservices.utils.get_elasticsearch_connection',
+        'webservices.utils.create_es_client',
         get_es_with_doc(
             {
                 'type': 'statutes',
@@ -175,7 +175,7 @@ class IndexStatutesTest(unittest.TestCase):
         get_title_26_statutes()
 
     @patch(
-        'webservices.utils.get_elasticsearch_connection',
+        'webservices.utils.create_es_client',
         get_es_with_doc(
             {
                 'type': 'statutes',
@@ -221,7 +221,7 @@ class IndexRegulationsTest(unittest.TestCase):
     )
     @patch('webservices.legal_docs.load_legal_docs.requests.get', mock_get_regulations)
     @patch(
-        'webservices.utils.get_elasticsearch_connection',
+        'webservices.utils.create_es_client',
         get_es_with_doc(
             {
                 'type': 'regulations',
@@ -244,6 +244,6 @@ class IndexRegulationsTest(unittest.TestCase):
 
 
 class InitializeLegalDocsTest(unittest.TestCase):
-    @patch('webservices.utils.get_elasticsearch_connection', get_es_with_doc({}))
+    @patch('webservices.utils.create_es_client', get_es_with_doc({}))
     def test_create_docs_index(self):
         create_docs_index()

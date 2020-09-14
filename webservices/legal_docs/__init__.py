@@ -27,8 +27,8 @@ from .archived_murs import ( # noqa
     extract_pdf_text,
 )
 
-from .test_es7 import ( # noqa
-    test_es_conn,
+from .check_legal_doc import ( # noqa
+    check_legal_doc,
 )
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)

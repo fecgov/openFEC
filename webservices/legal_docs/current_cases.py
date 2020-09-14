@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from webservices.env import env
 from webservices.rest import db
-from webservices.utils import extend, create_eregs_link, get_elasticsearch_connection
+from webservices.utils import extend, create_eregs_link, create_es_client
 from webservices.tasks.utils import get_bucket
 
 from .reclassify_statutory_citation import reclassify_statutory_citation_without_title
@@ -251,21 +251,26 @@ def get_full_name(case_type):
 
 def load_cases(case_type, case_no=None):
     if case_type in ('MUR', 'ADR', 'AF'):
-        es = get_elasticsearch_connection()
+        es_client = create_es_client()
         logger.info("Loading {0}(s)".format(case_type))
         case_count = 0
         for case in get_cases(case_type, case_no):
             if case is not None:
                 if case.get('published_flg'):
                     logger.info("Loading {0}: {1}".format(case_type, case['no']))
-                    es.index('docs_index', case, id=case['doc_id'])
+                    es_client.index('docs_index', case, id=case['doc_id'])
                     case_count += 1
                     logger.info("{0} {1}(s) loaded".format(case_count, case_type))
                 else:
-                    logger.info("Found an unpublished case - deleting {0}: {1} from ES".format(case_type, case['no']))
-                    es.delete_by_query(index='docs_index', body={'query': {"term": {"no": case['no']}}},
-                        doc_type=get_es_type(case_type))
-                    logger.info('Successfully deleted {} {} from ES'.format(case_type, case['no']))
+                    try:
+                        logger.info("Found an unpublished case - deleting {0}: {1} from ES".format(
+                            case_type, case['no']))
+                        es_client.delete(index="docs_index", id="case['doc_id']")
+                        logger.info('Successfully deleted {} {} from ES'.format(case_type, case['no']))
+                    except Exception as err:
+                        logger.error('An error occurred while deteting an unpublished case.{0} {1} {2}'.format(
+                            case_type, case['no'], err))
+
     else:
         logger.error("Invalid case_type: must be 'MUR', 'ADR', or 'AF'.")
 
