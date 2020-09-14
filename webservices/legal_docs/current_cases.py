@@ -210,6 +210,7 @@ def load_cases(case_type, case_no=None):
         logger.info("Loading {0}(s)".format(case_type))
         case_count = 0
         for case in get_cases(case_type, case_no):
+            logger.info('TEST MESSAGE: Found {0}: {1}'.format(case_type, case['no']))
             if case is not None:
                 if case.get('published_flg'):
                     logger.info("Loading {0}: {1}".format(case_type, case['no']))
@@ -221,6 +222,7 @@ def load_cases(case_type, case_no=None):
                     es.delete_by_query(index='docs_index', body={'query': {"term": {"no": case['no']}}},
                         doc_type=get_es_type(case_type))
                     logger.info('Successfully deleted {} {} from ES'.format(case_type, case['no']))
+        logger.info('TEST MESSAGE: did not find {0}: {1}'.format(case_type, case['no']))
     else:
         logger.error("Invalid case_type: must be 'MUR', 'ADR', or 'AF'.")
 
