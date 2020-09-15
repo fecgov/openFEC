@@ -12,7 +12,7 @@ from smart_open import smart_open
 from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
-from webservices.legal_docs.index_management import BACKUP_DIRECTORY
+from webservices.legal_docs.es_management import BACKUP_DIRECTORY
 
 from webservices.tasks import app
 from webservices.tasks import utils as task_utils

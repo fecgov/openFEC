@@ -2,15 +2,27 @@ import logging
 import sys
 
 from .advisory_opinions import load_advisory_opinions
-from .current_cases import load_current_murs, load_adrs, load_admin_fines
-from .load_legal_docs import (  # noqa
-    delete_advisory_opinions_from_es,
-    delete_current_murs_from_es,
-    delete_murs_from_s3,
-    index_regulations,
-    index_statutes,
+
+from .current_cases import (
+    load_current_murs,
+    load_adrs,
+    load_admin_fines,
 )
-from .index_management import (  # noqa
+
+from .archived_murs import ( # noqa
+    load_archived_murs,
+    extract_pdf_text,
+)
+
+from .statutes import (  # noqa
+    load_statutes,
+)
+
+from .regulations import (  # noqa
+    load_regulations,
+)
+
+from .es_management import (  # noqa
     create_docs_index,
     create_archived_murs_index,
     delete_all_indices,
@@ -20,15 +32,13 @@ from .index_management import (  # noqa
     configure_backup_repository,
     create_elasticsearch_backup,
     restore_elasticsearch_backup,
+    delete_advisory_opinions_from_es,
+    delete_current_murs_from_es,
+    delete_murs_from_s3,
 )
 
-from .archived_murs import ( # noqa
-    load_archived_murs,
-    extract_pdf_text,
-)
-
-from .check_legal_doc import ( # noqa
-    check_legal_doc,
+from .check_legal_data import ( # noqa
+    check_legal_data,
 )
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
@@ -41,12 +51,12 @@ logger.setLevel('WARN')
 
 
 def load_current_legal_docs():
-    index_statutes()
-    index_regulations()
     load_advisory_opinions()
     load_current_murs()
     load_adrs()
     load_admin_fines()
+    load_statutes()
+    load_regulations()
 
 
 def initialize_current_legal_docs():
