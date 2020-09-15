@@ -13,7 +13,7 @@ class DateTimeEncoder(JSONEncoder):
             return obj.isoformat()
 
 
-def check_legal_doc():
+def check_legal_data():
 
     try:
         es_client = utils.create_es_client()

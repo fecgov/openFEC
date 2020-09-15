@@ -29,8 +29,8 @@ manager.add_command('runserver', Server(use_debugger=True, use_reloader=True))
 manager.command(legal_docs.delete_advisory_opinions_from_es)
 manager.command(legal_docs.delete_current_murs_from_es)
 manager.command(legal_docs.delete_murs_from_s3)
-manager.command(legal_docs.index_regulations)
-manager.command(legal_docs.index_statutes)
+manager.command(legal_docs.load_regulations)
+manager.command(legal_docs.load_statutes)
 manager.command(legal_docs.load_advisory_opinions)
 manager.command(legal_docs.load_current_murs)
 manager.command(legal_docs.load_archived_murs)
@@ -48,7 +48,8 @@ manager.command(legal_docs.refresh_current_legal_docs_zero_downtime)
 manager.command(legal_docs.configure_backup_repository)
 manager.command(legal_docs.create_elasticsearch_backup)
 manager.command(legal_docs.restore_elasticsearch_backup)
-manager.command(legal_docs.check_legal_doc)
+manager.command(legal_docs.check_legal_data)
+
 
 def execute_sql_file(path):
     """This helper is typically used within a multiprocessing pool; create a new database

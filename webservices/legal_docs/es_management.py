@@ -5,6 +5,8 @@ import datetime
 
 from webservices.utils import create_es_client
 from webservices.env import env
+from webservices.tasks.utils import get_bucket
+
 
 logger = logging.getLogger(__name__)
 
@@ -553,3 +555,37 @@ def get_most_recent_snapshot(repository_name=None):
     )
 
     return snapshot_list.pop().get('snapshot')
+
+
+def delete_murs_from_s3():
+    """
+    Deletes all MUR documents from S3
+    """
+    bucket = get_bucket()
+    for obj in bucket.objects.filter(Prefix="legal/murs"):
+        obj.delete()
+
+
+def delete_current_murs_from_es():
+    """
+    Deletes all current MURs from Elasticsearch
+    """
+    delete_from_es('docs_index', 'murs')
+
+
+def delete_advisory_opinions_from_es():
+    """
+    Deletes all advisory opinions from Elasticsearch
+    """
+    delete_from_es('docs_index', 'advisory_opinions')
+
+
+def delete_from_es(index, doc_type):
+    """
+    Deletes all documents with the given `doc_type` from Elasticsearch
+    """
+    es_client = create_es_client()
+    es_client.delete_by_query(
+        index=index, body={'query': {'match_all': {}}}, doc_type=doc_type
+    )
+
