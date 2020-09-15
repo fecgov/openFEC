@@ -27,7 +27,7 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
 
         'refresh_legal_docs': {
             'task': 'webservices.tasks.legal_docs.refresh',
-            'schedule': crontab(minute='*/5', hour='10-23'),
+            'schedule': crontab(minute='*/5'),
         },
 
         'backup_elasticsearch_every_sunday': {
