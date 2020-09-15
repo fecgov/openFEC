@@ -64,6 +64,7 @@ class ScheduleBView(ItemizedResource):
         'recipient_name',
         'recipient_city',
     ]
+    use_pk_for_count = True
 
     @property
     def args(self):
