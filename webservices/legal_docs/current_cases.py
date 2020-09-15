@@ -209,9 +209,11 @@ def load_cases(case_type, case_no=None):
         es = get_elasticsearch_connection()
         logger.info("Loading {0}(s)".format(case_type))
         case_count = 0
+        logger.info('TEST MESSAGE: before get_cases')
         for case in get_cases(case_type, case_no):
             logger.info('TEST MESSAGE: Found {0}: {1}'.format(case_type, case['no']))
             if case is not None:
+                logger.info('TEST MESSAGE: Case is not None! {0}: {1}'.format(case_type, case['no']))
                 if case.get('published_flg'):
                     logger.info("Loading {0}: {1}".format(case_type, case['no']))
                     es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])

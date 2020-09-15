@@ -41,6 +41,7 @@ RECENTLY_MODIFIED_CASES = """
 
 @app.task(once={'graceful': True}, base=QueueOnce)
 def refresh():
+    logger.info("TEST MESSAGE: @app.task(once={'graceful': True}, base=QueueOnce)")
     with db.engine.connect() as conn:
         refresh_aos(conn)
         refresh_cases(conn)
@@ -100,7 +101,7 @@ def refresh_aos(conn):
 
 
 def refresh_cases(conn):
-    logger.info('Checking for modified cases')
+    logger.info('TEST zzz: Checking for modified cases')
     rs = conn.execute(RECENTLY_MODIFIED_CASES)
     if rs.returns_rows:
         load_count = 0
