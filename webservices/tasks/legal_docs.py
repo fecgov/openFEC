@@ -39,7 +39,7 @@ RECENTLY_MODIFIED_CASES = """
 """
 
 
-@app.task(ignore_result=True)
+@app.task(once={'graceful': True}, base=QueueOnce)
 def refresh():
     logger.info("TEST MESSAGE: @app.task(ignore_result=True)")
     with db.engine.connect() as conn:
