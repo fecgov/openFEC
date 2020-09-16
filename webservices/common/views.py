@@ -69,6 +69,19 @@ class ItemizedResource(ApiResource):
         to avoid slow queries when one or more relevant committees has many
         records.
         """
+        self.validate_kwargs(kwargs)
+
+        if len(kwargs.get("committee_id", [])) > 1:
+            query, count = self.join_committee_queries(kwargs)
+            return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
+        if len(kwargs.get("two_year_transaction_period", [])) > 1:
+            query, count = self.join_year_queries(kwargs)
+            return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
+        query = self.build_query(**kwargs)
+        count, _ = counts.get_count(self, query)
+        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
+
+    def validate_kwargs(self, kwargs):
         if kwargs.get("last_index"):
             if all(
                 kwargs.get("last_{}".format(option)) is None
@@ -95,12 +108,7 @@ class ItemizedResource(ApiResource):
                 ),
                 status_code=422,
             )
-        if len(kwargs.get("committee_id", [])) > 1:
-            query, count = self.join_committee_queries(kwargs)
-            return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
-        query = self.build_query(**kwargs)
-        count, _ = counts.get_count(self, query)
-        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
+
 
     def join_committee_queries(self, kwargs):
         """Build and compose per-committee subqueries using `UNION ALL`.
@@ -110,13 +118,39 @@ class ItemizedResource(ApiResource):
         temp_kwargs = {}
         print("\nkwargs\n")
         print(kwargs)
-        for committee_id in kwargs.get('committee_id', []):
-            temp_kwargs['committee_id'] = [committee_id]
-            for two_year_transaction_period in kwargs.get('two_year_transaction_period', []):
-                temp_kwargs['two_year_transaction_period'] = [two_year_transaction_period]
+        for committee_id in kwargs.get("committee_id", []):
+            temp_kwargs["committee_id"] = [committee_id]
+            if len(kwargs.get("two_year_transaction_period", [])) > 1:
+                for two_year_transaction_period in kwargs.get('two_year_transaction_period', []):
+                    temp_kwargs['two_year_transaction_period'] = [two_year_transaction_period]
+                    query, count = self.build_union_subquery(kwargs, temp_kwargs)
+                    queries.append(query.subquery().select())
+                    total += count
+            else:
                 query, count = self.build_union_subquery(kwargs, temp_kwargs)
                 queries.append(query.subquery().select())
                 total += count
+        query = models.db.session.query(
+            self.model
+        ).select_entity_from(
+            sa.union_all(*queries)
+        )
+        query = query.options(*self.query_options)
+        return query, total
+
+    def join_year_queries(self, kwargs):
+        """Build and compose per-committee subqueries using `UNION ALL`.
+        """
+        queries = []
+        total = 0
+        temp_kwargs = {}
+        print("\nkwargs\n")
+        print(kwargs)
+        for year in kwargs.get("two_year_transaction_period", []):
+            temp_kwargs["two_year_transaction_period"] = [year]
+            query, count = self.build_union_subquery(kwargs, temp_kwargs)
+            queries.append(query.subquery().select())
+            total += count
         query = models.db.session.query(
             self.model
         ).select_entity_from(
