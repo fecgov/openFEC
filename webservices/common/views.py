@@ -72,9 +72,17 @@ class ItemizedResource(ApiResource):
         """
         self.validate_kwargs(kwargs)
 
+        # TODO: Add debugging log statements?
+
+        # Add all 2-year transaction periods where not specified
+        if (type(self).__name__ in ("ScheduleAView", "ScheduleBView")
+            and not kwargs.get("two_year_transaction_period")):
+            kwargs["two_year_transaction_period"] = range(1976, utils.get_current_cycle() + 2, 2)
+
         if len(kwargs.get("committee_id", [])) > 1:
             query, count = self.join_committee_queries(kwargs)
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
+
         if len(kwargs.get("two_year_transaction_period", [])) > 1:
             query, count = self.join_year_queries(kwargs)
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
@@ -110,7 +118,6 @@ class ItemizedResource(ApiResource):
                 status_code=422,
             )
 
-
     def join_committee_queries(self, kwargs):
         """Build and compose per-committee subqueries using `UNION ALL`.
         """
@@ -122,12 +129,7 @@ class ItemizedResource(ApiResource):
         for committee_id in kwargs.get("committee_id", []):
             temp_kwargs["committee_id"] = [committee_id]
             if len(kwargs.get("two_year_transaction_period", [])) > 1:
-                query, count = join_year_queries(**utils.extend(kwargs, temp_kwargs))
-                # for two_year_transaction_period in kwargs.get('two_year_transaction_period', []):
-                #     temp_kwargs['two_year_transaction_period'] = [two_year_transaction_period]
-                #     query, count = self.build_union_subquery(kwargs, temp_kwargs)
-                #     queries.append(query.subquery().select())
-                #     total += count
+                query, count = self.join_year_queries(utils.extend(kwargs, temp_kwargs))
             else:
                 query, count = self.build_union_subquery(kwargs, temp_kwargs)
             queries.append(query.subquery().select())
@@ -141,7 +143,8 @@ class ItemizedResource(ApiResource):
         return query, total
 
     def join_year_queries(self, kwargs):
-        """Build and compose per-committee subqueries using `UNION ALL`.
+
+        """Build and compose two_year_transaction_period subqueries using `UNION ALL`.
         """
         queries = []
         total = 0
