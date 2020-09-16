@@ -103,7 +103,7 @@ MUR_DOCUMENTS = """
         mur_id,
         length,
         url
-    FROM MUR_ARCH.DOCUMENTS
+    FROM MUR_ARCH.DOCUMENTS_A
     WHERE mur_id = %s
     ORDER BY document_id
 """
