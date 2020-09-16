@@ -69,6 +69,22 @@ class ItemizedResource(ApiResource):
         to avoid slow queries when one or more relevant committees has many
         records.
         """
+        self.validate_kwargs(kwargs)
+        # Add all 2-year transaction periods where not specified
+        if (type(self).__name__ in ("ScheduleAView", "ScheduleBView")
+            and not kwargs.get("two_year_transaction_period")):
+            kwargs["two_year_transaction_period"] = range(1976, utils.get_current_cycle() + 2, 2)
+        if len(kwargs.get("committee_id", [])) > 1:
+            query, count = self.join_committee_queries(kwargs)
+            return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
+        if len(kwargs.get("two_year_transaction_period", [])) > 1:
+            query, count = self.join_year_queries(kwargs)
+            return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
+        query = self.build_query(**kwargs)
+        count, _ = counts.get_count(self, query)
+        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
+
+    def validate_kwargs(self, kwargs):
         if kwargs.get("last_index"):
             if all(
                 kwargs.get("last_{}".format(option)) is None
@@ -95,20 +111,19 @@ class ItemizedResource(ApiResource):
                 ),
                 status_code=422,
             )
-        if len(kwargs.get("committee_id", [])) > 1:
-            query, count = self.join_committee_queries(kwargs)
-            return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
-        query = self.build_query(**kwargs)
-        count, _ = counts.get_count(self, query)
-        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
 
     def join_committee_queries(self, kwargs):
         """Build and compose per-committee subqueries using `UNION ALL`.
         """
         queries = []
         total = 0
-        for committee_id in kwargs.get('committee_id', []):
-            query, count = self.build_committee_query(kwargs, committee_id)
+        temp_kwargs = {}
+        for committee_id in kwargs.get("committee_id", []):
+            temp_kwargs["committee_id"] = [committee_id]
+            if len(kwargs.get("two_year_transaction_period", [])) > 1:
+                query, count = self.join_year_queries(utils.extend(kwargs, temp_kwargs))
+            else:
+                query, count = self.build_union_subquery(kwargs, temp_kwargs)
             queries.append(query.subquery().select())
             total += count
         query = models.db.session.query(
@@ -119,10 +134,30 @@ class ItemizedResource(ApiResource):
         query = query.options(*self.query_options)
         return query, total
 
-    def build_committee_query(self, kwargs, committee_id):
+    def join_year_queries(self, kwargs):
+
+        """Build and compose two_year_transaction_period subqueries using `UNION ALL`.
+        """
+        queries = []
+        total = 0
+        temp_kwargs = {}
+        for year in kwargs.get("two_year_transaction_period", []):
+            temp_kwargs["two_year_transaction_period"] = [year]
+            query, count = self.build_union_subquery(kwargs, temp_kwargs)
+            queries.append(query.subquery().select())
+            total += count
+        query = models.db.session.query(
+            self.model
+        ).select_entity_from(
+            sa.union_all(*queries)
+        )
+        query = query.options(*self.query_options)
+        return query, total
+
+    def build_union_subquery(self, kwargs, temp_kwargs):
         """Build a subquery by committee.
         """
-        query = self.build_query(_apply_options=False, **utils.extend(kwargs, {'committee_id': [committee_id]}))
+        query = self.build_query(_apply_options=False, **utils.extend(kwargs, temp_kwargs))
         sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
         query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null)
         page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
