@@ -34,16 +34,16 @@ RECENTLY_MODIFIED_STARTING_AO = """
 RECENTLY_MODIFIED_CASES = """
     SELECT case_no, case_type, pg_date, published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
-    WHERE pg_date >= NOW() - '160 hour'::INTERVAL
+    WHERE pg_date >= NOW() - '180 hour'::INTERVAL
     ORDER BY case_serial
 """
 
 
-@app.task(once={'graceful': True}, base=QueueOnce)
+# @app.task(once={'graceful': True}, base=QueueOnce)
+@app.task(ignore_result=True)
 def refresh():
     logger.info("TEST MESSAGE: @app.task(ignore_result=True)")
     with db.engine.connect() as conn:
-        refresh_aos(conn)
         refresh_cases(conn)
 
 
