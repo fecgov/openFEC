@@ -63,6 +63,7 @@ class ItemizedResource(ApiResource):
     filters_with_max_count = []
     max_count = 10
 
+
     def get(self, **kwargs):
         """Get itemized resources. If multiple values are passed for `committee_id`,
         create a subquery for each and combine with `UNION ALL`. This is necessary
@@ -121,15 +122,16 @@ class ItemizedResource(ApiResource):
         for committee_id in kwargs.get("committee_id", []):
             temp_kwargs["committee_id"] = [committee_id]
             if len(kwargs.get("two_year_transaction_period", [])) > 1:
-                for two_year_transaction_period in kwargs.get('two_year_transaction_period', []):
-                    temp_kwargs['two_year_transaction_period'] = [two_year_transaction_period]
-                    query, count = self.build_union_subquery(kwargs, temp_kwargs)
-                    queries.append(query.subquery().select())
-                    total += count
+                query, count = join_year_queries(**utils.extend(kwargs, temp_kwargs))
+                # for two_year_transaction_period in kwargs.get('two_year_transaction_period', []):
+                #     temp_kwargs['two_year_transaction_period'] = [two_year_transaction_period]
+                #     query, count = self.build_union_subquery(kwargs, temp_kwargs)
+                #     queries.append(query.subquery().select())
+                #     total += count
             else:
                 query, count = self.build_union_subquery(kwargs, temp_kwargs)
-                queries.append(query.subquery().select())
-                total += count
+            queries.append(query.subquery().select())
+            total += count
         query = models.db.session.query(
             self.model
         ).select_entity_from(
