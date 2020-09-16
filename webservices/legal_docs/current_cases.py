@@ -207,10 +207,12 @@ def load_cases(case_type, case_no=None):
     """
     if case_type in ('MUR', 'ADR', 'AF'):
         es = get_elasticsearch_connection()
+        logger.info("TEST MESSAGE 4: current_cases es: {0}".format(es))
         logger.info("Loading {0}(s)".format(case_type))
         case_count = 0
         for case in get_cases(case_type, case_no):
             if case is not None:
+                logger.info("TEST zzz: in case")
                 if case.get('published_flg'):
                     logger.info("Loading {0}: {1}".format(case_type, case['no']))
                     es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
