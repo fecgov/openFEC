@@ -65,6 +65,10 @@ class ScheduleBView(ItemizedResource):
         'recipient_city',
     ]
     use_pk_for_count = True
+    query_options = [
+        sa.orm.joinedload(models.ScheduleB.committee),
+        sa.orm.joinedload(models.ScheduleB.recipient_committee),
+    ]
 
     @property
     def args(self):
@@ -78,9 +82,6 @@ class ScheduleBView(ItemizedResource):
 
     def build_query(self, **kwargs):
         query = super(ScheduleBView, self).build_query(**kwargs)
-        query = query.options(sa.orm.joinedload(models.ScheduleB.committee))
-        query = query.options(
-            sa.orm.joinedload(models.ScheduleB.recipient_committee))
         # might be worth looking to factoring these out into the filter script
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
