@@ -107,10 +107,16 @@ class ItemizedResource(ApiResource):
         """
         queries = []
         total = 0
+        temp_kwargs = {}
+        print("\nkwargs\n")
+        print(kwargs)
         for committee_id in kwargs.get('committee_id', []):
-            query, count = self.build_committee_query(kwargs, committee_id)
-            queries.append(query.subquery().select())
-            total += count
+            temp_kwargs['committee_id'] = [committee_id]
+            for two_year_transaction_period in kwargs.get('two_year_transaction_period', []):
+                temp_kwargs['two_year_transaction_period'] = [two_year_transaction_period]
+                query, count = self.build_union_subquery(kwargs, temp_kwargs)
+                queries.append(query.subquery().select())
+                total += count
         query = models.db.session.query(
             self.model
         ).select_entity_from(
@@ -119,10 +125,10 @@ class ItemizedResource(ApiResource):
         query = query.options(*self.query_options)
         return query, total
 
-    def build_committee_query(self, kwargs, committee_id):
+    def build_union_subquery(self, kwargs, temp_kwargs):
         """Build a subquery by committee.
         """
-        query = self.build_query(_apply_options=False, **utils.extend(kwargs, {'committee_id': [committee_id]}))
+        query = self.build_query(_apply_options=False, **utils.extend(kwargs, temp_kwargs))
         sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
         query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null)
         page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
