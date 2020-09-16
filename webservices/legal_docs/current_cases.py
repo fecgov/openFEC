@@ -212,7 +212,7 @@ def load_cases(case_type, case_no=None):
         case_count = 0
         for case in get_cases(case_type, case_no):
             if case is not None:
-                logger.info("TEST zzzz: in case")
+                logger.info("TEST 5: case.get('published_flg') {0}".format(case.get('published_flg')))
                 if case.get('published_flg'):
                     logger.info("Loading {0}: {1}".format(case_type, case['no']))
                     es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
