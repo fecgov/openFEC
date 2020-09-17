@@ -64,7 +64,6 @@ class ItemizedResource(ApiResource):
     max_count = 10
     union_all_fields = ["committee_id"]
 
-
     def get(self, **kwargs):
         """Get itemized resources. If multiple values are passed for `committee_id`,
         create a subquery for each and combine with `UNION ALL`. This is necessary
@@ -79,23 +78,27 @@ class ItemizedResource(ApiResource):
             kwargs["two_year_transaction_period"] = range(
                 1976, utils.get_current_cycle() + 2, 2
             )
+        # Generate subqueries for multiple committee ID's and 2-year periods
         if len(kwargs.get("committee_id", [])) > 1:
             query, count = self.join_sub_queries(
                 kwargs,
                 primary_field="committee_id",
                 secondary_field="two_year_transaction_period",
             )
-            return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
-        if len(kwargs.get("two_year_transaction_period", [])) > 1:
+        # Generate subqueries for multiple 2-year periods
+        elif len(kwargs.get("two_year_transaction_period", [])) > 1:
             query, count = self.join_sub_queries(
-                kwargs, primary_field="two_year_transaction_period"
+                kwargs,
+                primary_field="two_year_transaction_period"
             )
-            return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
-        query = self.build_query(**kwargs)
-        count, _ = counts.get_count(self, query)
+        else:
+            query = self.build_query(**kwargs)
+            count, _ = counts.get_count(self, query)
+
         return utils.fetch_seek_page(
             query, kwargs, self.index_column, count=count, cap=self.cap
         )
+
     def validate_kwargs(self, kwargs):
         if kwargs.get("last_index"):
             if all(
