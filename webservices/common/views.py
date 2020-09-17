@@ -80,14 +80,18 @@ class ItemizedResource(ApiResource):
             )
         # Generate subqueries for multiple committee ID's and 2-year periods
         if len(kwargs.get("committee_id", [])) > 1:
-            query, count = self.join_sub_queries(
+            query_for_count = self.build_query(**kwargs)
+            count, _ = counts.get_count(self, query_for_count)
+            query = self.join_sub_queries(
                 kwargs,
                 primary_field="committee_id",
                 secondary_field="two_year_transaction_period",
             )
         # Generate subqueries for multiple 2-year periods
         elif len(kwargs.get("two_year_transaction_period", [])) > 1:
-            query, count = self.join_sub_queries(
+            query_for_count = self.build_query(**kwargs)
+            count, _ = counts.get_count(self, query_for_count)
+            query = self.join_sub_queries(
                 kwargs,
                 primary_field="two_year_transaction_period"
             )
@@ -131,23 +135,21 @@ class ItemizedResource(ApiResource):
         """Build and compose per-field subqueries using `UNION ALL`.
         """
         queries = []
-        total = 0
         temp_kwargs = {}
         for argument in kwargs.get(primary_field, []):
             temp_kwargs[primary_field] = [argument]
             if secondary_field and len(kwargs.get(secondary_field, [])) > 1:
-                query, count = self.join_sub_queries(utils.extend(kwargs, temp_kwargs), primary_field=secondary_field)
+                query = self.join_sub_queries(utils.extend(kwargs, temp_kwargs), primary_field=secondary_field)
             else:
-                query, count = self.build_union_subquery(kwargs, temp_kwargs)
+                query = self.build_union_subquery(kwargs, temp_kwargs)
             queries.append(query.subquery().select())
-            total += count
         query = models.db.session.query(
             self.model
         ).select_entity_from(
             sa.union_all(*queries)
         )
         query = query.options(*self.query_options)
-        return query, total
+        return query
 
     def build_union_subquery(self, kwargs, temp_kwargs):
         """Build a subquery by committee.
@@ -156,5 +158,4 @@ class ItemizedResource(ApiResource):
         sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
         query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null)
         page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
-        count, _ = counts.get_count(self, query)
-        return page_query, count
+        return page_query
