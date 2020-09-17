@@ -74,18 +74,28 @@ class ItemizedResource(ApiResource):
         self.validate_kwargs(kwargs)
         # Add all 2-year transaction periods where not specified
         if ("two_year_transaction_period" in self.union_all_fields
-            and not kwargs.get("two_year_transaction_period")):
-            kwargs["two_year_transaction_period"] = range(1976, utils.get_current_cycle() + 2, 2)
+            and not kwargs.get("two_year_transaction_period")
+        ):
+            kwargs["two_year_transaction_period"] = range(
+                1976, utils.get_current_cycle() + 2, 2
+            )
         if len(kwargs.get("committee_id", [])) > 1:
-            query, count = self.join_committee_queries(kwargs)
+            query, count = self.join_sub_queries(
+                kwargs,
+                primary_field="committee_id",
+                secondary_field="two_year_transaction_period",
+            )
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         if len(kwargs.get("two_year_transaction_period", [])) > 1:
-            query, count = self.join_year_queries(kwargs)
+            query, count = self.join_sub_queries(
+                kwargs, primary_field="two_year_transaction_period"
+            )
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
         count, _ = counts.get_count(self, query)
-        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
-
+        return utils.fetch_seek_page(
+            query, kwargs, self.index_column, count=count, cap=self.cap
+        )
     def validate_kwargs(self, kwargs):
         if kwargs.get("last_index"):
             if all(
@@ -114,38 +124,18 @@ class ItemizedResource(ApiResource):
                 status_code=422,
             )
 
-    def join_committee_queries(self, kwargs):
-        """Build and compose per-committee subqueries using `UNION ALL`.
+    def join_sub_queries(self, kwargs, primary_field, secondary_field=None):
+        """Build and compose per-field subqueries using `UNION ALL`.
         """
         queries = []
         total = 0
         temp_kwargs = {}
-        for committee_id in kwargs.get("committee_id", []):
-            temp_kwargs["committee_id"] = [committee_id]
-            if len(kwargs.get("two_year_transaction_period", [])) > 1:
-                query, count = self.join_year_queries(utils.extend(kwargs, temp_kwargs))
+        for argument in kwargs.get(primary_field, []):
+            temp_kwargs[primary_field] = [argument]
+            if secondary_field and len(kwargs.get(secondary_field, [])) > 1:
+                query, count = self.join_sub_queries(utils.extend(kwargs, temp_kwargs), primary_field=secondary_field)
             else:
                 query, count = self.build_union_subquery(kwargs, temp_kwargs)
-            queries.append(query.subquery().select())
-            total += count
-        query = models.db.session.query(
-            self.model
-        ).select_entity_from(
-            sa.union_all(*queries)
-        )
-        query = query.options(*self.query_options)
-        return query, total
-
-    def join_year_queries(self, kwargs):
-
-        """Build and compose two_year_transaction_period subqueries using `UNION ALL`.
-        """
-        queries = []
-        total = 0
-        temp_kwargs = {}
-        for year in kwargs.get("two_year_transaction_period", []):
-            temp_kwargs["two_year_transaction_period"] = [year]
-            query, count = self.build_union_subquery(kwargs, temp_kwargs)
             queries.append(query.subquery().select())
             total += count
         query = models.db.session.query(
