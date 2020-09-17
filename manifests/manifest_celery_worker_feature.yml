@@ -6,7 +6,8 @@ buildpack: python_buildpack
 env:
   APP_NAME: fec | api | feature
 services:
-  - fec-s3-feature
+  - fec-s3-api
+  - fec-s3-snapshot
   - fec-redis
   - fec-api-elasticsearch
   - fec-creds-feature
