@@ -70,10 +70,6 @@ class ScheduleAView(ItemizedResource):
     filter_multi_start_with_fields = [
         ('contributor_zip', models.ScheduleA.contributor_zip),
     ]
-    query_options = [
-        sa.orm.joinedload(models.ScheduleA.committee),
-        sa.orm.joinedload(models.ScheduleA.contributor),
-    ]
     sort_options = [
         'contribution_receipt_date',
         'contribution_receipt_amount',
@@ -87,6 +83,11 @@ class ScheduleAView(ItemizedResource):
         'contributor_occupation',
     ]
     use_pk_for_count = True
+    union_all_fields = ["committee_id", "two_year_transaction_period"]
+    query_options = [
+        sa.orm.joinedload(models.ScheduleA.committee),
+        sa.orm.joinedload(models.ScheduleA.contributor),
+    ]
 
     @property
     def args(self):

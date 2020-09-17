@@ -62,6 +62,8 @@ class ItemizedResource(ApiResource):
     index_column = None
     filters_with_max_count = []
     max_count = 10
+    union_all_fields = ["committee_id"]
+
 
     def get(self, **kwargs):
         """Get itemized resources. If multiple values are passed for `committee_id`,
@@ -71,7 +73,7 @@ class ItemizedResource(ApiResource):
         """
         self.validate_kwargs(kwargs)
         # Add all 2-year transaction periods where not specified
-        if (type(self).__name__ in ("ScheduleAView", "ScheduleBView")
+        if ("two_year_transaction_period" in self.union_all_fields
             and not kwargs.get("two_year_transaction_period")):
             kwargs["two_year_transaction_period"] = range(1976, utils.get_current_cycle() + 2, 2)
         if len(kwargs.get("committee_id", [])) > 1:

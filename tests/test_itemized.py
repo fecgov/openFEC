@@ -99,6 +99,82 @@ class TestScheduleA(ApiBaseTest):
         )
         self.assertEqual(len(response['results']), 2)
 
+    def test_schedule_a_multiple_cmte_id_and_two_year_transaction_period(self):
+        """
+        testing schedule_a api can take multiple cycles now
+        """
+        receipts = [  # noqa
+            factories.ScheduleAFactory(
+                report_year=2014,
+                contribution_receipt_date=datetime.date(2014, 1, 1),
+                two_year_transaction_period=2014,
+                committee_id='C001',
+            ),
+            factories.ScheduleAFactory(
+                report_year=2016,
+                contribution_receipt_date=datetime.date(2016, 1, 1),
+                two_year_transaction_period=2016,
+                committee_id='C001',
+            ),
+            factories.ScheduleAFactory(
+                report_year=2018,
+                contribution_receipt_date=datetime.date(2018, 1, 1),
+                two_year_transaction_period=2018,
+                committee_id='C001',
+            ),
+            factories.ScheduleAFactory(
+                report_year=2014,
+                contribution_receipt_date=datetime.date(2014, 1, 1),
+                two_year_transaction_period=2014,
+                committee_id='C002',
+            ),
+            factories.ScheduleAFactory(
+                report_year=2016,
+                contribution_receipt_date=datetime.date(2016, 1, 1),
+                two_year_transaction_period=2016,
+                committee_id='C002',
+            ),
+            factories.ScheduleAFactory(
+                report_year=2018,
+                contribution_receipt_date=datetime.date(2018, 1, 1),
+                two_year_transaction_period=2018,
+                committee_id='C002',
+            ),
+            factories.ScheduleAFactory(
+                report_year=2014,
+                contribution_receipt_date=datetime.date(2014, 1, 1),
+                two_year_transaction_period=2014,
+                committee_id='C003',
+            ),
+            factories.ScheduleAFactory(
+                report_year=2016,
+                contribution_receipt_date=datetime.date(2016, 1, 1),
+                two_year_transaction_period=2016,
+                committee_id='C003',
+            ),
+            factories.ScheduleAFactory(
+                report_year=2018,
+                contribution_receipt_date=datetime.date(2018, 1, 1),
+                two_year_transaction_period=2018,
+                committee_id='C003',
+            ),
+        ]
+        response = self._response(
+            api.url_for(
+                ScheduleAView,
+                two_year_transaction_period=[2016, 2018],
+                committee_id=['C001', 'C002'],
+            )
+        )
+        self.assertEqual(len(response['results']), 4)
+        response = self._response(
+            api.url_for(
+                ScheduleAView,
+                committee_id='C001',
+            )
+        )
+        self.assertEqual(len(response['results']), 3)
+
     def test_schedule_a_two_year_transaction_period_limits_results_per_cycle(self):
         receipts = [  # noqa
             factories.ScheduleAFactory(
