@@ -65,6 +65,7 @@ class ScheduleBView(ItemizedResource):
         'recipient_city',
     ]
     union_all_fields = ["committee_id", "two_year_transaction_period"]
+    use_pk_for_count = True
     query_options = [
         sa.orm.joinedload(models.ScheduleB.committee),
         sa.orm.joinedload(models.ScheduleB.recipient_committee),

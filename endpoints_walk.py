@@ -76,12 +76,10 @@ endpoints = [
     "/candidates/totals/?api_key={api_key}",
     "/schedules/schedule_a/by_state/totals/?api_key={api_key}",
 
-    "/committee/{committee_id}/communication_costs/by_candidate/?api_key={api_key}&candidate_id={candidate_id}",
     "/communication-costs/?api_key={api_key}",
     "/communication_costs/by_candidate/?api_key={api_key}&candidate_id={candidate_id}",
     "/communication_costs/totals/by_candidate?api_key={api_key}",
 
-    "/committee/{committee_id}/electioneering/by_candidate/?api_key={api_key}&candidate_id={candidate_id}",
     "/electioneering/?api_key={api_key}",
     "/electioneering/aggregates/?api_key={api_key}",
     "/electioneering/by_candidate/?api_key={api_key}&candidate_id={candidate_id}",

@@ -370,7 +370,6 @@ api.add_resource(candidate_aggregates.AggregateByOfficeByPartyView, '/candidates
 api.add_resource(
     aggregates.CommunicationCostByCandidateView,
     '/communication_costs/by_candidate/',
-    '/committee/<string:committee_id>/communication_costs/by_candidate/',
 )
 
 api.add_resource(
@@ -381,7 +380,6 @@ api.add_resource(
 api.add_resource(
     aggregates.ElectioneeringByCandidateView,
     '/electioneering/by_candidate/',
-    '/committee/<string:committee_id>/electioneering/by_candidate/',
 )
 
 api.add_resource(
