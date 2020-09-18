@@ -266,24 +266,32 @@ def get_single_case(case_type, case_no):
                 'sort2': sort2,
             }
             case['commission_votes'] = get_commission_votes(case_type, case_id)
-            logger.info("TEST MESSAGE commission_votes = {0}".format(case['commission_votes']))
-            logger.info("TEST MESSAGE case_type = {0}".format(case_type))
+            logger.info("DEBUG 0")
             case['documents'] = get_documents(case_id, bucket, bucket_name)
+            logger.info("DEBUG 1")
             case['url'] = '/legal/{0}/{1}/'.format(get_full_name(case_type), row['case_no'])
+            logger.info("DEBUG 2")
             if case_type == 'AF':
+                logger.info("DEBUG 3")
                 case = extend(case, get_af_specific_fields(case_id))
                 return case
             if case_type == 'MUR':
+                logger.info("DEBUG 3")
                 case['mur_type'] = 'current'
             case['subjects'] = get_subjects(case_id)
+            logger.info("DEBUG 4")
             case['election_cycles'] = get_election_cycles(case_id)
+            logger.info("DEBUG 5")
             participants = get_participants(case_id)
+            logger.info("DEBUG 6")
             case['participants'] = list(participants.values())
+            logger.info("DEBUG 7")
             case['respondents'] = get_sorted_respondents(case['participants'])
-
+            logger.info("DEBUG 8")
             case['dispositions'] = get_dispositions(case_id)
+            logger.info("DEBUG 9")
             case['open_date'], case['close_date'] = get_open_and_close_dates(case_id)
-            logger.info("TEST MESSAGE case result = {0}".format(case))
+            logger.info("DEBUG 10")
             return case
         else:
             logger.info("TEST MESSAGE 11: row is None")
