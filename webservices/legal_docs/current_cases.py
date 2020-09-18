@@ -207,7 +207,7 @@ def load_cases(case_type, case_no=None):
     """
     if case_type in ('MUR', 'ADR', 'AF'):
         es = get_elasticsearch_connection()
-        logger.info("TEST MESSAGE 4: current_cases es: {0}")
+        logger.info("TEST MESSAGE 4: current_cases es")
         logger.info("Loading {0}(s)".format(case_type))
         case_count = 0
         for case in get_cases(case_type, case_no):
@@ -247,11 +247,12 @@ def get_cases(case_type, case_no=None):
 def get_single_case(case_type, case_no):
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
-
+    logger.info("TEST MESSAGE 8: get_single_case")
     with db.engine.connect() as conn:
         rs = conn.execute(SINGLE_CASE, case_type, case_no)
         row = rs.first()
         if row is not None:
+            logger.info("TEST MESSAGE 9: get_single_case, row is not None")
             case_id = row['case_id']
             sort1, sort2 = get_sort_fields(row['case_no'])
             case = {
@@ -281,6 +282,7 @@ def get_single_case(case_type, case_no):
             case['open_date'], case['close_date'] = get_open_and_close_dates(case_id)
             return case
         else:
+            logger.info("TEST MESSAGE 10: row is None") 
             logger.error("Not a valid {0} number.".format(case_type))
             return None
 
