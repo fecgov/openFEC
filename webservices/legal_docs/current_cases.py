@@ -267,6 +267,7 @@ def get_single_case(case_type, case_no):
             }
             case['commission_votes'] = get_commission_votes(case_type, case_id)
             logger.info("TEST MESSAGE commission_votes = {0}".format(case['commission_votes']))
+            logger.info("TEST MESSAGE case_type = {0}".format(case_type))
             case['documents'] = get_documents(case_id, bucket, bucket_name)
             case['url'] = '/legal/{0}/{1}/'.format(get_full_name(case_type), row['case_no'])
             if case_type == 'AF':
