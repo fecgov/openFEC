@@ -282,6 +282,7 @@ def get_single_case(case_type, case_no):
 
             case['dispositions'] = get_dispositions(case_id)
             case['open_date'], case['close_date'] = get_open_and_close_dates(case_id)
+            logger.info("TEST MESSAGE case result = {0}".format(case))
             return case
         else:
             logger.info("TEST MESSAGE 11: row is None")
