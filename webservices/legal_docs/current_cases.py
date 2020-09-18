@@ -234,11 +234,13 @@ def get_cases(case_type, case_no=None):
     Unlike AOs, cases are not published in sequential order.
     """
     if case_no is None:
+        logger.info("TEST MESSAGE 6: get_cases (case is None) {0}: {1}".format(case_type, case_no))
         with db.engine.connect() as conn:
             rs = conn.execute(ALL_CASES, case_type)
             for row in rs:
                 yield get_single_case(case_type, row['case_no'])
     else:
+        logger.info("TEST MESSAGE 7: get_cases (case is not None) {0}: {1}".format(case_type, case_no))
         yield get_single_case(case_type, case_no)
 
 

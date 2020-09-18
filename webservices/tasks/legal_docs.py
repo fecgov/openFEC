@@ -34,7 +34,7 @@ RECENTLY_MODIFIED_STARTING_AO = """
 RECENTLY_MODIFIED_CASES = """
     SELECT case_no, case_type, pg_date, published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
-    WHERE pg_date >= NOW() - '180 hour'::INTERVAL
+    WHERE pg_date >= NOW() - '280 hour'::INTERVAL
     ORDER BY case_serial
 """
 
