@@ -276,7 +276,7 @@ def get_single_case(case_type, case_no):
                 case = extend(case, get_af_specific_fields(case_id))
                 return case
             if case_type == 'MUR':
-                logger.info("DEBUG 3")
+                logger.info("DEBUG 3 case_id = {0}".format(case_id))
                 case['mur_type'] = 'current'
             case['subjects'] = get_subjects(case_id)
             logger.info("DEBUG 4")
