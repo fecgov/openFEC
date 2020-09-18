@@ -388,14 +388,20 @@ def get_sorted_respondents(participants):
 
 
 def get_subjects(case_id):
+    logging.info("DEBUG 3.1: {0}".format(case_id))
     subjects = []
     with db.engine.connect() as conn:
+        logging.info("DEBUG 3.2")
         rs = conn.execute(CASE_SUBJECTS, case_id)
+        logging.info("DEBUG 3.3")
+        i = 0
         for row in rs:
+            i += 1
             if row['rel']:
                 subject_str = row['subj'] + "-" + row['rel']
             else:
                 subject_str = row['subj']
+            logging.info("DEBUG 3.3.{0}: {1}".format(str(i), subject_str))
             subjects.append(subject_str)
     return subjects
 
