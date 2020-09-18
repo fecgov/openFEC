@@ -211,8 +211,9 @@ def load_cases(case_type, case_no=None):
         logger.info("Loading {0}(s)".format(case_type))
         case_count = 0
         for case in get_cases(case_type, case_no):
+            logger.info("TEST MESSAGE 5: case found in get_cases")
             if case is not None:
-                logger.info("TEST 5: case.get('published_flg') {0}".format(case.get('published_flg')))
+                logger.info("TEST 6: case.get('published_flg') {0}".format(case.get('published_flg')))
                 if case.get('published_flg'):
                     logger.info("Loading {0}: {1}".format(case_type, case['no']))
                     es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
@@ -234,25 +235,25 @@ def get_cases(case_type, case_no=None):
     Unlike AOs, cases are not published in sequential order.
     """
     if case_no is None:
-        logger.info("TEST MESSAGE 6: get_cases (case is None) {0}: {1}".format(case_type, case_no))
+        logger.info("TEST MESSAGE 7: get_cases (case is None) {0}: {1}".format(case_type, case_no))
         with db.engine.connect() as conn:
             rs = conn.execute(ALL_CASES, case_type)
             for row in rs:
                 yield get_single_case(case_type, row['case_no'])
     else:
-        logger.info("TEST MESSAGE 7: get_cases (case is not None) {0}: {1}".format(case_type, case_no))
+        logger.info("TEST MESSAGE 8: get_cases (case is not None) {0}: {1}".format(case_type, case_no))
         yield get_single_case(case_type, case_no)
 
 
 def get_single_case(case_type, case_no):
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
-    logger.info("TEST MESSAGE 8: get_single_case")
+    logger.info("TEST MESSAGE 9: get_single_case")
     with db.engine.connect() as conn:
         rs = conn.execute(SINGLE_CASE, case_type, case_no)
         row = rs.first()
         if row is not None:
-            logger.info("TEST MESSAGE 9: get_single_case, row is not None")
+            logger.info("TEST MESSAGE 10: get_single_case, row is not None")
             case_id = row['case_id']
             sort1, sort2 = get_sort_fields(row['case_no'])
             case = {
@@ -282,7 +283,7 @@ def get_single_case(case_type, case_no):
             case['open_date'], case['close_date'] = get_open_and_close_dates(case_id)
             return case
         else:
-            logger.info("TEST MESSAGE 10: row is None") 
+            logger.info("TEST MESSAGE 11: row is None")
             logger.error("Not a valid {0} number.".format(case_type))
             return None
 
