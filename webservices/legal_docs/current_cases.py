@@ -214,6 +214,7 @@ def load_cases(case_type, case_no=None):
             logger.info("TEST MESSAGE 5: case found in get_cases")
             if case is not None:
                 logger.info("TEST 6: case.get('published_flg') {0}".format(case.get('published_flg')))
+                logger.info("TEST 6.1: {0}".format(case))
                 if case.get('published_flg'):
                     logger.info("Loading {0}: {1}".format(case_type, case['no']))
                     es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
@@ -279,7 +280,6 @@ def get_single_case(case_type, case_no):
             case['respondents'] = get_sorted_respondents(case['participants'])
 
             case['dispositions'] = get_dispositions(case_id)
-
             case['open_date'], case['close_date'] = get_open_and_close_dates(case_id)
             return case
         else:
