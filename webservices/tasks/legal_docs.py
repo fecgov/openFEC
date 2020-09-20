@@ -42,7 +42,6 @@ RECENTLY_MODIFIED_CASES = """
 # @app.task(once={'graceful': True}, base=QueueOnce)
 @app.task(ignore_result=True)
 def refresh():
-    logger.info("TEST MESSAGE 0: @app.task(ignore_result=True)")
     with db.engine.connect() as conn:
         refresh_cases(conn)
 
@@ -102,15 +101,10 @@ def refresh_aos(conn):
 
 def refresh_cases(conn):
     rs = conn.execute(RECENTLY_MODIFIED_CASES)
-    logger.info("TEST MESSAGE 1: refresh_cases(conn) initial")
     if rs.returns_rows:
         load_count = 0
         deleted_case_count = 0
-        logger.info("TEST MESSAGE 2: refresh_cases(conn) rs.return_rows (rows returned)")
         for row in rs:
-            logger.info(
-                "TEST MESSAGE 3.{0}: refresh_cases row: {1}, {2}, {3}".format(
-                    load_count, row["case_type"], row["case_no"], row["pg_date"]))
             logger.info("%s %s found modified at %s", row["case_type"], row["case_no"], row["pg_date"])
             load_cases(row["case_type"], row["case_no"])
             if row["published_flg"]:

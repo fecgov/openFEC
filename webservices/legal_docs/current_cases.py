@@ -207,14 +207,10 @@ def load_cases(case_type, case_no=None):
     """
     if case_type in ('MUR', 'ADR', 'AF'):
         es = get_elasticsearch_connection()
-        logger.info("TEST MESSAGE 4: current_cases es")
         logger.info("Loading {0}(s)".format(case_type))
         case_count = 0
         for case in get_cases(case_type, case_no):
-            logger.info("TEST MESSAGE 5: case found in get_cases")
             if case is not None:
-                logger.info("TEST 6: case.get('published_flg') {0}".format(case.get('published_flg')))
-                logger.info("TEST 6.1: {0}, {1}, {2}".format(case_type, case_no, case))
                 if case.get('published_flg'):
                     logger.info("Loading {0}: {1}".format(case_type, case['no']))
                     es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
@@ -236,25 +232,21 @@ def get_cases(case_type, case_no=None):
     Unlike AOs, cases are not published in sequential order.
     """
     if case_no is None:
-        logger.info("TEST MESSAGE 7: get_cases (case is None) {0}: {1}".format(case_type, case_no))
         with db.engine.connect() as conn:
             rs = conn.execute(ALL_CASES, case_type)
             for row in rs:
                 yield get_single_case(case_type, row['case_no'])
     else:
-        logger.info("TEST MESSAGE 8: get_cases (case is not None) {0}: {1}".format(case_type, case_no))
         yield get_single_case(case_type, case_no)
 
 
 def get_single_case(case_type, case_no):
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
-    logger.info("TEST MESSAGE 9: get_single_case")
     with db.engine.connect() as conn:
         rs = conn.execute(SINGLE_CASE, case_type, case_no)
         row = rs.first()
         if row is not None:
-            logger.info("TEST MESSAGE 10: get_single_case, row is not None")
             case_id = row['case_id']
             sort1, sort2 = get_sort_fields(row['case_no'])
             case = {
@@ -266,36 +258,22 @@ def get_single_case(case_type, case_no):
                 'sort2': sort2,
             }
             case['commission_votes'] = get_commission_votes(case_type, case_id)
-            logger.info("DEBUG 0")
             case['documents'] = get_documents(case_id, bucket, bucket_name)
-            logger.info("DEBUG 1")
             case['url'] = '/legal/{0}/{1}/'.format(get_full_name(case_type), row['case_no'])
-            logger.info("DEBUG 2")
             if case_type == 'AF':
-                logger.info("DEBUG 3")
                 case = extend(case, get_af_specific_fields(case_id))
                 return case
-            logger.info("DEBUG zzz")
             if case_type == 'MUR':
-                logger.info("DEBUG 3 case_id = {0}".format(case_id))
                 case['mur_type'] = 'current'
             case['subjects'] = get_subjects(case_id)
-            logger.info("DEBUG 4")
             case['election_cycles'] = get_election_cycles(case_id)
-            logger.info("DEBUG 5")
             participants = get_participants(case_id)
-            logger.info("DEBUG 6")
             case['participants'] = list(participants.values())
-            logger.info("DEBUG 7")
             case['respondents'] = get_sorted_respondents(case['participants'])
-            logger.info("DEBUG 8")
             case['dispositions'] = get_dispositions(case_id)
-            logger.info("DEBUG 9")
             case['open_date'], case['close_date'] = get_open_and_close_dates(case_id)
-            logger.info("DEBUG 10")
             return case
         else:
-            logger.info("TEST MESSAGE 11: row is None")
             logger.error("Not a valid {0} number.".format(case_type))
             return None
 
@@ -389,12 +367,9 @@ def get_sorted_respondents(participants):
 
 
 def get_subjects(case_id):
-    logging.info("DEBUG 3.1: {0}".format(case_id))
     subjects = []
     with db.engine.connect() as conn:
-        logging.info("DEBUG 3.2")
         rs = conn.execute(CASE_SUBJECTS, case_id)
-        logging.info("DEBUG 3.3")
         i = 0
         for row in rs:
             i += 1
@@ -402,7 +377,6 @@ def get_subjects(case_id):
                 subject_str = row['subj'] + "-" + row['rel']
             else:
                 subject_str = row['subj']
-            logging.info("DEBUG 3.3.{0}: {1}".format(str(i), subject_str))
             subjects.append(subject_str)
     return subjects
 
