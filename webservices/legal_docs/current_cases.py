@@ -209,12 +209,10 @@ def load_cases(case_type, case_no=None):
         es = get_elasticsearch_connection()
         logger.info("Loading {0}(s)".format(case_type))
         case_count = 0
-        logger.info("TESTING load_cases: before for case loop: {0}".format(case_type))
         for case in get_cases(case_type, case_no):
             logger.info("TESTING load_cases: inside for case loop: {0} {1}".format(case_type, case_no))
             if case is not None:
                 if case.get('published_flg'):
-                    logger.info("Loading {0}: {1}".format(case_type, case['no']))
                     es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
                     case_count += 1
                     logger.info("{0} {1}(s) loaded".format(case_count, case_type))
@@ -233,6 +231,7 @@ def get_cases(case_type, case_no=None):
     If none are specified, all cases are reloaded
     Unlike AOs, cases are not published in sequential order.
     """
+    logger.info("TEST get_cases: {0} {1}".format(case_type, case_no))
     if case_no is None:
         with db.engine.connect() as conn:
             rs = conn.execute(ALL_CASES, case_type)
