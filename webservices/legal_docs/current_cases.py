@@ -233,11 +233,13 @@ def get_cases(case_type, case_no=None):
     """
     logger.info("TEST get_cases: {0} {1}".format(case_type, case_no))
     if case_no is None:
+        logger.info("TEST get_cases `if`: {0}".format(case_no))
         with db.engine.connect() as conn:
             rs = conn.execute(ALL_CASES, case_type)
             for row in rs:
                 yield get_single_case(case_type, row['case_no'])
     else:
+        logger.info("TEST get_cases `else`: {0}".format(case_no))
         yield get_single_case(case_type, case_no)
 
 
