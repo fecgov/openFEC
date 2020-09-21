@@ -152,10 +152,8 @@ class ItemizedResource(ApiResource):
         return query
 
     def build_union_subquery(self, kwargs, temp_kwargs):
-        """Build a subquery by committee.
+        """Build a subquery by specified arguments.
         """
         query = self.build_query(_apply_options=False, **utils.extend(kwargs, temp_kwargs))
-        sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
-        query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null)
         page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
         return page_query
