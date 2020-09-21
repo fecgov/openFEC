@@ -231,7 +231,6 @@ def get_cases(case_type, case_no=None):
     If none are specified, all cases are reloaded
     Unlike AOs, cases are not published in sequential order.
     """
-    logger.info("TEST get_cases: {0} {1}".format(case_type, case_no))
     if case_no is None:
         logger.info("TEST get_cases `if`: {0}".format(case_no))
         with db.engine.connect() as conn:
@@ -248,6 +247,7 @@ def get_single_case(case_type, case_no):
     bucket_name = env.get_credential('bucket')
     with db.engine.connect() as conn:
         rs = conn.execute(SINGLE_CASE, case_type, case_no)
+        logger.info("TEST get_single_case: {0} {1}".format(case_type, case_no))
         row = rs.first()
         if row is not None:
             case_id = row['case_id']
