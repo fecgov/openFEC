@@ -209,7 +209,9 @@ def load_cases(case_type, case_no=None):
         es = get_elasticsearch_connection()
         logger.info("Loading {0}(s)".format(case_type))
         case_count = 0
+        logger.info("TESTING load_cases: before for case loop")
         for case in get_cases(case_type, case_no):
+            logger.info("TESTING load_cases: inside for case loop: {0} {1}".format(case_type, case_no))
             if case is not None:
                 if case.get('published_flg'):
                     logger.info("Loading {0}: {1}".format(case_type, case['no']))
