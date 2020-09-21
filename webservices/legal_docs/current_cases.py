@@ -250,6 +250,7 @@ def get_single_case(case_type, case_no):
         logger.info("TEST get_single_case: {0} {1}".format(case_type, case_no))
         row = rs.first()
         if row is not None:
+            Tlogger.info("TEST get_single_case `row is not None`: {0} {1}".format(case_type, case_no))
             case_id = row['case_id']
             sort1, sort2 = get_sort_fields(row['case_no'])
             case = {
