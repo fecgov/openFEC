@@ -268,6 +268,7 @@ def get_single_case(case_type, case_no):
                 case = extend(case, get_af_specific_fields(case_id))
                 return case
             if case_type == 'MUR':
+                logger.info("TEST single case binary search 0")
                 case['mur_type'] = 'current'
             case['subjects'] = get_subjects(case_id)
             case['election_cycles'] = get_election_cycles(case_id)
