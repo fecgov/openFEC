@@ -276,6 +276,7 @@ def get_single_case(case_type, case_no):
             case['respondents'] = get_sorted_respondents(case['participants'])
             case['dispositions'] = get_dispositions(case_id)
             case['open_date'], case['close_date'] = get_open_and_close_dates(case_id)
+            logger.info("TEST get_single_case before single  case  return: {0} {1}".format(case_type, case_no))
             return case
         else:
             logger.error("Not a valid {0} number.".format(case_type))
