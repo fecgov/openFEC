@@ -417,13 +417,15 @@ class TestScheduleA(ApiBaseTest):
     def test_schedule_a_pagination_with_null_sort_column_values_hidden(self):
         # First 5 results [0:4] have missing receipt date
         filings = [
-            factories.ScheduleAFactory(contribution_receipt_date=None) for _ in range(5)
+            factories.ScheduleAFactory(
+                contribution_receipt_date=None,
+                committee_id="1") for _ in range(5)
         ]
         # Results [5:30] have date
         filings = filings + [
             factories.ScheduleAFactory(
-                contribution_receipt_date=datetime.date(2016, 1, 1)
-            )
+                contribution_receipt_date=datetime.date(2016, 1, 1),
+                committee_id="2")
             for _ in range(25)
         ]
         page1 = self._results(
@@ -442,8 +444,6 @@ class TestScheduleA(ApiBaseTest):
             [each['contribution_receipt_date'] for each in page1],
             [
                 each.contribution_receipt_date.strftime('%Y-%m-%d')
-                if each.contribution_receipt_date
-                else None
                 for each in filings[5:25]
             ],
         )
@@ -466,11 +466,34 @@ class TestScheduleA(ApiBaseTest):
             [each['contribution_receipt_date'] for each in page2],
             [
                 each.contribution_receipt_date.strftime('%Y-%m-%d')
-                if each.contribution_receipt_date
-                else None
                 for each in filings[25:]
             ],
         )
+        # Test pagination counts - only 25 have dates
+        # Multiple committee ID's
+        response = self._response(
+            api.url_for(
+                ScheduleAView,
+                sort='contribution_receipt_date',
+                sort_hide_null=True,
+                per_page=30,
+                committee_id=["1", "2"],
+                **self.kwargs)
+        )
+        count = response["pagination"]["count"]
+        self.assertEqual(count, 25)
+        # One committee ID
+        response = self._response(
+            api.url_for(
+                ScheduleAView,
+                sort='contribution_receipt_date',
+                sort_hide_null=True,
+                per_page=30,
+                committee_id=["1"],
+                **self.kwargs)
+        )
+        count = response["pagination"]["count"]
+        self.assertEqual(count, 0)
 
     def test_schedule_a_pagination_with_null_sort_column_values_showing(self):
         # First 5 results [0:4] have missing receipt date
