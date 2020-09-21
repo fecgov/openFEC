@@ -34,7 +34,7 @@ RECENTLY_MODIFIED_STARTING_AO = """
 RECENTLY_MODIFIED_CASES = """
     SELECT case_no, case_type, pg_date, published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
-    WHERE pg_date >= NOW() - '280 hour'::INTERVAL
+    WHERE pg_date >= NOW() - '380 hour'::INTERVAL
     ORDER BY case_serial
 """
 
@@ -43,6 +43,7 @@ RECENTLY_MODIFIED_CASES = """
 @app.task(ignore_result=True)
 def refresh():
     with db.engine.connect() as conn:
+        logger.info("TEST 0: tast refresh")
         refresh_cases(conn)
 
 
