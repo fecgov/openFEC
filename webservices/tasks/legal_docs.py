@@ -43,7 +43,7 @@ RECENTLY_MODIFIED_CASES = """
 @app.task(ignore_result=True)
 def refresh():
     with db.engine.connect() as conn:
-        logger.info("TEST 0: tast refresh")
+        logger.info("TEST 0: task refresh")
         refresh_cases(conn)
 
 
@@ -103,11 +103,14 @@ def refresh_aos(conn):
 def refresh_cases(conn):
     rs = conn.execute(RECENTLY_MODIFIED_CASES)
     if rs.returns_rows:
+        logger.info("TEST: refresh_cases task: rs.return_rows success"
         load_count = 0
         deleted_case_count = 0
         for row in rs:
             logger.info("%s %s found modified at %s", row["case_type"], row["case_no"], row["pg_date"])
+            logger.info("TEST: refresh_cases before load_cases") 
             load_cases(row["case_type"], row["case_no"])
+            logger.info("TEST: refresh_cases after load_cases")
             if row["published_flg"]:
                 load_count += 1
                 logger.info("Total of %d case(s) loaded...", load_count)
