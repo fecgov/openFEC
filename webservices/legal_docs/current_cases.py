@@ -250,7 +250,7 @@ def get_single_case(case_type, case_no):
         logger.info("TEST get_single_case: {0} {1}".format(case_type, case_no))
         row = rs.first()
         if row is not None:
-            logger.info("TEST zzz get_single_case `row is not None`: {0} {1}".format(case_type, case_no))
+            logger.info("TEST get_single_case `row is not None`: {0} {1}".format(case_type, case_no))
             case_id = row['case_id']
             sort1, sort2 = get_sort_fields(row['case_no'])
             case = {
@@ -268,7 +268,7 @@ def get_single_case(case_type, case_no):
                 case = extend(case, get_af_specific_fields(case_id))
                 return case
             if case_type == 'MUR':
-                logger.info("TEST zzz single case binary search 0")
+                logger.info("TEST single case binary search 0")
                 case['mur_type'] = 'current'
             case['subjects'] = get_subjects(case_id)
             case['election_cycles'] = get_election_cycles(case_id)
