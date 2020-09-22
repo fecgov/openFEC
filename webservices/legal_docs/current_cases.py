@@ -263,7 +263,7 @@ def get_single_case(case_type, case_no):
             }
             case['commission_votes'] = get_commission_votes(case_type, case_id)
             case['documents'] = get_documents(case_id, bucket, bucket_name)
-            logger.info("TEST single_case binary search 1")
+            logger.info("TEST single_case binary search 1: {0} {1}".format(case_type, case_no))
             case['url'] = '/legal/{0}/{1}/'.format(get_full_name(case_type), row['case_no'])
             if case_type == 'AF':
                 case = extend(case, get_af_specific_fields(case_id))
