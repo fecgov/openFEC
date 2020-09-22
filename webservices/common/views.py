@@ -78,26 +78,23 @@ class ItemizedResource(ApiResource):
             kwargs["two_year_transaction_period"] = range(
                 1976, utils.get_current_cycle() + 2, 2
             )
-        # Generate subqueries for multiple committee ID's and 2-year periods
+        # Generate traditional "IN" query and counts for all
+        query = self.build_query(**kwargs)
+        count, _ = counts.get_count(self, query)
+
+        # Generate "UNION ALL" subqueries for multiple committee ID's and 2-year periods
         if len(kwargs.get("committee_id", [])) > 1:
-            query_for_count = self.build_query(**kwargs)
-            count, _ = counts.get_count(self, query_for_count)
             query = self.join_sub_queries(
                 kwargs,
                 primary_field="committee_id",
                 secondary_field="two_year_transaction_period",
             )
-        # Generate subqueries for multiple 2-year periods
+        # Generate subqueries for only multiple 2-year periods
         elif len(kwargs.get("two_year_transaction_period", [])) > 1:
-            query_for_count = self.build_query(**kwargs)
-            count, _ = counts.get_count(self, query_for_count)
             query = self.join_sub_queries(
                 kwargs,
                 primary_field="two_year_transaction_period"
             )
-        else:
-            query = self.build_query(**kwargs)
-            count, _ = counts.get_count(self, query)
 
         return utils.fetch_seek_page(
             query, kwargs, self.index_column, count=count, cap=self.cap
