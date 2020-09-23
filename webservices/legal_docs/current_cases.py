@@ -210,7 +210,7 @@ def load_cases(case_type, case_no=None):
         logger.info("Loading {0}(s)".format(case_type))
         case_count = 0
         for case in get_cases(case_type, case_no):
-            logger.info("TESTING load_cases: inside for case loop: {0} {1}".format(case_type, case_no))
+            logger.info("TESTING load_cases: inside for case loop: {0} {1}".format(case_type, case_no)) # NO MUR
             if case is not None:
                 if case.get('published_flg'):
                     es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
@@ -446,7 +446,7 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
 
 
 def get_documents(case_id, bucket, bucket_name):
-    logger.info("TEST get_documents: {0}".format(case_id))
+    logger.info("TEST get_documents 0: {0}".format(case_id)) # YES MUR case id 60000002999600
     documents = []
     with db.engine.connect() as conn:
         rs = conn.execute(CASE_DOCUMENTS, case_id)
@@ -466,6 +466,7 @@ def get_documents(case_id, bucket, bucket_name):
             else:
                 pdf_key = 'legal/{0}/{1}/{2}'.format(get_es_type(row['case_type']), row['case_no'],
                     row['filename'].replace(' ', '-'))
+                logger.info("TEST get_documents 1: {0}".format(pdf_key))
                 document['url'] = '/files/' + pdf_key
                 logger.debug("S3: Uploading {}".format(pdf_key))
                 bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
