@@ -21,10 +21,10 @@ BEGIN
     linkage_type       varchar(1) ,
     cmte_count_cand_yr numeric(2,0),
     efile_paper_ind    varchar(1),
-    created_by         numeric(12,0)                    DEFAULT  1,
-    created_date       timestamp without time zone      DEFAULT now(),
-    updated_by         numeric(12,0)                    DEFAULT  1,
-    updated_date       timestamp without time zone      DEFAULT now(),
+    created_by         numeric(12,0),
+    created_date       timestamp without time zone,
+    updated_by         numeric(12,0),
+    updated_date       timestamp without time zone,
     pg_date            timestamp without time zone      DEFAULT now(),
     CONSTRAINT cand_cmte_linkage_alternate_pkey PRIMARY KEY (sub_id)
 )
@@ -77,7 +77,7 @@ GRANT SELECT ON TABLE disclosure.leadership_pac_cand_cmte_link  TO fec_read;
  
 --------------------------------------------------------------
 -- rename cloumn name in mur_arch.archived_murs
--- addon for mur_arch database work
+-- addon for previous mur_arch database work
 --------------------------------------------------------------
 DO $$
 BEGIN
