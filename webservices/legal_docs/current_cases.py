@@ -263,6 +263,7 @@ def get_single_case(case_type, case_no):
             }
             logger.info("TEST single_case binary search 2: {0} {1}".format(case_type, case_no))
             case['commission_votes'] = get_commission_votes(case_type, case_id)
+            logger.info("TEST single case binary search 3: {0} {1}".format(case_type, case_no))
             case['documents'] = get_documents(case_id, bucket, bucket_name)
             logger.info("TEST single_case binary search 1 : {0} {1}".format(case_type, case_no))
             case['url'] = '/legal/{0}/{1}/'.format(get_full_name(case_type), row['case_no'])
