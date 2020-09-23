@@ -129,6 +129,7 @@ def refresh_materialized(concurrent=True):
             'ofec_filings_all_mv',
         ],
         'ofec_agg_coverage_date': ['ofec_agg_coverage_date_mv'],
+        'ofec_pcc_to_pac': ['ofec_pcc_to_pac_mv'],
         'ofec_sched_a_agg_state': ['ofec_sched_a_agg_state_mv'],
         'ofec_sched_e_mv': ['ofec_sched_e_mv'],
         'reports_house_senate': ['ofec_reports_house_senate_mv'],
