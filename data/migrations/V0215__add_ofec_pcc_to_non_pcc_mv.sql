@@ -148,6 +148,7 @@ and cand_yr.candidate_election_year is not null
 and (COALESCE(receipts, 0) > 0 or COALESCE(disbursements, 0) > 0)
 and (FIRST_CMTE_DSGN not IN ('J') AND LATEST_CMTE_DSGN NOT IN ('J'))
 and LATEST_CMTE_TP NOT IN ('X','Y')
+and (change_capture.cmte_id, change_capture.fec_election_yr) not in (select cmte_id, fec_election_yr from public.ofec_pcc_conversion_exclude)
 ORDER BY CHANGE_CAPTURE.CMTE_ID, CHANGE_CAPTURE.FEC_ELECTION_YR;
 
 alter table public.ofec_pcc_to_pac_mv owner to fec;
