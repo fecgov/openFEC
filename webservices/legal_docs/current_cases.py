@@ -449,9 +449,11 @@ def get_documents(case_id, bucket, bucket_name):
     logger.info("TEST get_documents 0: {0}".format(case_id)) # YES MUR case id 60000002999600
     documents = []
     with db.engine.connect() as conn:
+        logger.info("TEST get_documents BEFORE rs {0}" .format(case_id))
         rs = conn.execute(CASE_DOCUMENTS, case_id)
+        logger.info("TEST get_documents BEFORE rs {0}" .format(case_id))
         for row in rs:
-            logger.info("TEST get_documents result DOCUMENT 0: {0}".format(case_id))
+            logger.info("TEST get_documents result DOCUMENT 0: {0}".format(case_id)) # NO MUR case id 60000002999600
             document = {
                 'document_id': row['document_id'],
                 'category': row['category'],
@@ -460,7 +462,7 @@ def get_documents(case_id, bucket, bucket_name):
                 'text': row['ocrtext'],
                 'document_date': row['document_date'],
             }
-            logger.info("TEST get_documents result DOCUMENT 0: {0}".format(case_id))
+            logger.info("TEST get_documents result DOCUMENT 1: {0}".format(case_id)) # NO MUR case id 60000002999600
             if not row['fileimage']:
                 logger.error(
                     'Error uploading document ID {0} for {1} %{2}: No file image'.
