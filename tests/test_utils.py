@@ -323,3 +323,18 @@ class TestEnvVarSplit(TestCase):
         for test_case in test_cases:
             result = utils.split_env_var(test_case)
             self.assertEqual(result, expected)
+
+
+class TestDecadeRange(TestCase):
+    def test_get_decade_range(self):
+        start_year = 2000
+        current_year = 2020
+        expected = [(None, 2000), (2000, 2010), (2010, None)]
+        result = utils.get_decade_range(start_year, current_year)
+        self.assertEqual(result, expected)
+
+        start_year = 2000
+        current_year = 2022
+        expected = [(None, 2000), (2000, 2010), (2010, 2020), (2020, None)]
+        result = utils.get_decade_range(start_year, current_year)
+        self.assertEqual(result, expected)

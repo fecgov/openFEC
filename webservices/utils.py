@@ -490,3 +490,22 @@ def post_to_slack(message, channel):
 def split_env_var(env_var):
     """ Remove whitespace and split to a list based of comma delimiter"""
     return env_var.replace(" ", "").split(',')
+
+
+def get_decade_range(start_year, current_year):
+    """Get a list of tuples representing min, max decades
+    between start_year and current_year.
+
+    Used with > min_year and <= max_year
+    2020 will end with (2010, None) and 2022 will end with (2020, None)
+    because max_year is inclusive
+    """
+
+    min_year = None
+    decade_ranges = []
+    for max_year in range(start_year, current_year, 10):
+        decade_ranges.append((min_year, max_year))
+        min_year = max_year
+    # Add current decade forward
+    decade_ranges.append((max_year, None))
+    return decade_ranges

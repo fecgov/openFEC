@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+import copy
 
 from flask_apispec import Ref, marshal_with
 from webservices import utils
@@ -63,38 +64,38 @@ class ItemizedResource(ApiResource):
     filters_with_max_count = []
     max_count = 10
     union_all_fields = ["committee_id"]
+    ALL_YEARS = range(1976, utils.get_current_cycle() + 2, 2)
 
     def get(self, **kwargs):
-        """Get itemized resources. If multiple values are passed for `committee_id`,
-        create a subquery for each and combine with `UNION ALL`. This is necessary
-        to avoid slow queries when one or more relevant committees has many
-        records.
+        """Get itemized resources. If multiple values are passed for `committee_id`
+        or `two_year_transaction_period` create a subquery for each and combine
+        with `UNION ALL`. This is necessary to avoid slow queries when
+        one or more relevant committees has many records.
         """
         self.validate_kwargs(kwargs)
+
         # Add all 2-year transaction periods where not specified
         if ("two_year_transaction_period" in self.union_all_fields
             and not kwargs.get("two_year_transaction_period")
         ):
-            kwargs["two_year_transaction_period"] = range(
-                1976, utils.get_current_cycle() + 2, 2
-            )
+            kwargs["two_year_transaction_period"] = self.ALL_YEARS
+
+        # Only use UNION ALL for 2-15 or all two_year_periods
+        use_two_year_union = (
+            2 <= len(kwargs.get("two_year_transaction_period", [])) <= 15
+            or kwargs.get("two_year_transaction_period") == self.ALL_YEARS
+        )
+
         # Generate traditional "IN" query and counts for all
         query = self.build_query(**kwargs)
         count, _ = counts.get_count(self, query)
 
         # Generate "UNION ALL" subqueries for multiple committee ID's and 2-year periods
         if len(kwargs.get("committee_id", [])) > 1:
-            query = self.join_sub_queries(
-                kwargs,
-                primary_field="committee_id",
-                secondary_field="two_year_transaction_period",
-            )
+            query = self.join_committee_queries(kwargs, use_two_year_union)
         # Generate subqueries for only multiple 2-year periods
-        elif len(kwargs.get("two_year_transaction_period", [])) > 1:
-            query = self.join_sub_queries(
-                kwargs,
-                primary_field="two_year_transaction_period"
-            )
+        elif use_two_year_union:
+            query = self.join_year_queries(kwargs)
 
         return utils.fetch_seek_page(
             query, kwargs, self.index_column, count=count, cap=self.cap
@@ -128,18 +129,48 @@ class ItemizedResource(ApiResource):
                 status_code=422,
             )
 
-    def join_sub_queries(self, kwargs, primary_field, secondary_field=None):
+    def join_committee_queries(self, kwargs, use_two_year_union=False):
         """Build and compose per-field subqueries using `UNION ALL`.
         """
         queries = []
         temp_kwargs = {}
-        for argument in kwargs.get(primary_field, []):
-            temp_kwargs[primary_field] = [argument]
-            if secondary_field and len(kwargs.get(secondary_field, [])) > 1:
-                query = self.join_sub_queries(utils.extend(kwargs, temp_kwargs), primary_field=secondary_field)
+        for argument in kwargs.get("committee_id", []):
+            temp_kwargs["committee_id"] = [argument]
+            if use_two_year_union:
+                query = self.join_year_queries(utils.extend(kwargs, temp_kwargs))
             else:
                 query = self.build_union_subquery(kwargs, temp_kwargs)
             queries.append(query.subquery().select())
+        query = models.db.session.query(
+            self.model
+        ).select_entity_from(
+            sa.union_all(*queries)
+        )
+        query = query.options(*self.query_options)
+        return query
+
+    def join_year_queries(self, kwargs):
+        """Build and compose per-field subqueries using `UNION ALL`.
+        If all years, break up two_year_transaction period into 10-year ranges
+        starting in 2020
+        """
+        queries = []
+        temp_kwargs = {}
+        # Use decade range for all years
+        if kwargs["two_year_transaction_period"] == self.ALL_YEARS:
+            range_column = self.model.two_year_transaction_period
+            temp_kwargs = copy.deepcopy(kwargs)
+            # Don't filter with IN because we're constructing with UNION
+            del temp_kwargs["two_year_transaction_period"]
+            # Break into 10-year ranges starting in 2000
+            for min_year, max_year in utils.get_decade_range(2000, utils.get_current_cycle()):
+                query = self.build_union_range_subquery(temp_kwargs, range_column, min_year, max_year)
+                queries.append(query.subquery().select())
+        else:
+            for argument in kwargs.get("two_year_transaction_period", []):
+                temp_kwargs["two_year_transaction_period"] = [argument]
+                query = self.build_union_subquery(kwargs, temp_kwargs)
+                queries.append(query.subquery().select())
         query = models.db.session.query(
             self.model
         ).select_entity_from(
@@ -152,5 +183,17 @@ class ItemizedResource(ApiResource):
         """Build a subquery by specified arguments.
         """
         query = self.build_query(_apply_options=False, **utils.extend(kwargs, temp_kwargs))
+        page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
+        return page_query
+
+    def build_union_range_subquery(self, kwargs, column, min_value=None, max_value=None):
+        """Build a subquery by ranges
+        """
+        query = self.build_query(_apply_options=False, **kwargs)
+        if min_value:
+            query = query.filter(column > min_value)
+        if max_value:
+            query = query.filter(column <= max_value)
+
         page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
         return page_query

@@ -21,6 +21,13 @@ from webservices.resources.sched_h4 import ScheduleH4View
 class TestItemized(ApiBaseTest):
     kwargs = {'two_year_transaction_period': 2016}
 
+    def _results(self, qry):
+        """Overwrite default to add test for counts"""
+        response = self._response(qry)
+        if response["pagination"]["count"] <= response["pagination"]["per_page"]:
+            self.assertEqual(len(response['results']), response['pagination']['count'])
+        return response['results']
+
     def test_fields(self):
 
         params = [
@@ -170,10 +177,26 @@ class TestScheduleA(ApiBaseTest):
         response = self._response(
             api.url_for(
                 ScheduleAView,
+                committee_id=['C001', 'C002'],
+            )
+        )
+        self.assertEqual(len(response['results']), 6)
+        response = self._response(
+            api.url_for(
+                ScheduleAView,
                 committee_id='C001',
             )
         )
         self.assertEqual(len(response['results']), 3)
+        # Use `IN` logic for over 15 two-year periods
+        response = self._response(
+            api.url_for(
+                ScheduleAView,
+                two_year_transaction_period=list(range(1980, 2020, 2)),
+                committee_id=['C001', 'C002'],
+            )
+        )
+        self.assertEqual(len(response['results']), 6)
 
     def test_schedule_a_two_year_transaction_period_limits_results_per_cycle(self):
         receipts = [  # noqa
