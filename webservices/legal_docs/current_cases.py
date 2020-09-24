@@ -449,7 +449,10 @@ def get_documents(case_id, bucket, bucket_name):
     logger.info("TEST get_documents 0: {0}".format(case_id)) # YES MUR case id 60000002999600
     documents = []
     with db.engine.connect() as conn:
-        rs = conn.execute(CASE_DOCUMENTS, case_id)
+        try:
+            rs = conn.execute(CASE_DOCUMENTS, case_id)
+        except:
+            logger.info("TEST get_documents EXCEPTION {0}".format(case_id))
         for row in rs:
             document = {
                 'document_id': row['document_id'],
@@ -466,7 +469,7 @@ def get_documents(case_id, bucket, bucket_name):
             else:
                 pdf_key = 'legal/{0}/{1}/{2}'.format(get_es_type(row['case_type']), row['case_no'],
                     row['filename'].replace(' ', '-'))
-                logger.info("TEST get_documents 1: {0}".format(pdf_key))
+                logger.info("TEST get_documents 1: {0}".format(pdf_key)) #NO MUR pdf_key!
                 document['url'] = '/files/' + pdf_key
                 logger.debug("S3: Uploading {}".format(pdf_key))
                 bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
