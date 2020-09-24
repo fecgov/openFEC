@@ -1,6 +1,7 @@
 import datetime
 
 import logging
+from celery.app.log import TaskFormatter
 
 from celery_once import QueueOnce
 
@@ -42,6 +43,7 @@ RECENTLY_MODIFIED_CASES = """
 # @app.task(once={'graceful': True}, base=QueueOnce)
 @app.task(ignore_result=True)
 def refresh():
+    logger.info(TaskFormatter('CELERY LOGGING TEST: %(asctime)s - %(task_id)s - %(task_name)s - %(name)s - %(levelname)s - %(message)s'))
     with db.engine.connect() as conn:
         logger.info("TEST 0: task refresh")
         refresh_cases(conn)
