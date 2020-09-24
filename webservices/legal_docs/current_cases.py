@@ -451,7 +451,7 @@ def get_documents(case_id, bucket, bucket_name):
     with db.engine.connect() as conn:
         logger.info("TEST get_documents BEFORE rs {0}" .format(case_id))
         rs = conn.execute(CASE_DOCUMENTS, case_id)
-        logger.info("TEST get_documents BEFORE rs {0}" .format(case_id))
+        logger.info("TEST get_documents AFTER rs {0}" .format(case_id))
         for row in rs:
             logger.info("TEST get_documents result DOCUMENT 0: {0}".format(case_id)) # NO MUR case id 60000002999600
             document = {
