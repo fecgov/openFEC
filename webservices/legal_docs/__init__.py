@@ -30,6 +30,7 @@ from .es_management import (  # noqa
     restore_from_staging_index,
     move_archived_murs,
     configure_backup_repository,
+    configure_snapshot_repository,
     create_elasticsearch_backup,
     restore_elasticsearch_backup,
     delete_advisory_opinions_from_es,
