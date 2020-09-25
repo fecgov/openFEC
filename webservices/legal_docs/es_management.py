@@ -3,7 +3,12 @@ import elasticsearch
 import copy
 import datetime
 
-from webservices.utils import create_es_client
+from webservices.utils import (
+    create_es_client,
+    get_service_instance,
+    get_service_instance_credentials,
+)
+
 from webservices.env import env
 from webservices.tasks.utils import get_bucket
 
@@ -479,6 +484,40 @@ def configure_backup_repository(repository=BACKUP_REPOSITORY_NAME):
     es_client.snapshot.create_repository(repository=repository, body=body)
 
 
+S3_PRIVATE_SERVICE_INSTANCE_NAME = "fec-s3-snapshot"
+
+
+def configure_snapshot_repository(repository=BACKUP_REPOSITORY_NAME):
+    '''
+    Configure s3 backup repository using api credentials.
+    This needs to get re-run when s3 credentials change for each API deployment
+    '''
+    es_client = create_es_client()
+    logger.info("Configuring snapshot repository: {0}".format(repository))
+
+    credentials = get_service_instance_credentials(
+        get_service_instance(
+            S3_PRIVATE_SERVICE_INSTANCE_NAME))
+
+    try:
+        body = {
+            "type": "s3",
+            "settings": {
+                "bucket": credentials["bucket"],
+                "region": credentials["region"],
+                "access_key": credentials["access_key_id"],
+                "secret_key": credentials["secret_access_key"],
+                "base_path": BACKUP_DIRECTORY,
+                "role_arn": env.get_credential("ES_SNAPSHOT_ROLE_ARN"),
+            },
+        }
+        es_client.snapshot.create_repository(repository=repository, body=body)
+        logger.info("Configuring snapshot repository done.: {0}".format(repository))
+
+    except Exception as err:
+        logger.error('configure_snapshot_repository.{0}'.format(err))
+
+
 def create_elasticsearch_backup(repository_name=None, snapshot_name="auto_backup"):
     '''
     Create elasticsearch shapshot in the `legal_s3_repository` or specified repository.
@@ -486,7 +525,7 @@ def create_elasticsearch_backup(repository_name=None, snapshot_name="auto_backup
     es_client = create_es_client()
 
     repository_name = repository_name or BACKUP_REPOSITORY_NAME
-    configure_backup_repository(repository_name)
+    configure_snapshot_repository(repository_name)
 
     snapshot_name = "{0}_{1}".format(
         datetime.datetime.today().strftime('%Y%m%d'), snapshot_name

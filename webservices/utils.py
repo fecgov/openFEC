@@ -444,22 +444,30 @@ def get_current_cycle():
     return year + year % 2
 
 
-SERVICE_NAME = "fec-api-elasticsearch"
-SERVICE = "es"
+ES_SERVICE_INSTANCE_NAME = "fec-api-elasticsearch"
+AWS_ES_SERVICE = "es"
 REGION = "us-gov-west-1"
 PORT = 443
 
 
+def get_service_instance(service_instance_name):
+    return env.get_service(name=service_instance_name)
+
+
+def get_service_instance_credentials(service_instance):
+    return service_instance.credentials
+
+
 def create_es_client():
     try:
-        es_service = env.get_service(name=SERVICE_NAME)
+        es_service = get_service_instance(ES_SERVICE_INSTANCE_NAME)
         if es_service:
             credentials = es_service.credentials
             #  create "http_auth".
             host = credentials["host"]
             access_key = credentials["access_key"]
             secret_key = credentials["secret_key"]
-            aws_auth = AWS4Auth(access_key, secret_key, REGION, SERVICE)
+            aws_auth = AWS4Auth(access_key, secret_key, REGION, AWS_ES_SERVICE)
 
             #  create elasticsearch client through "http_auth"
             es_client = Elasticsearch(
