@@ -35,7 +35,7 @@ RECENTLY_MODIFIED_STARTING_AO = """
 RECENTLY_MODIFIED_CASES = """
     SELECT case_no, case_type, pg_date, published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
-    WHERE pg_date >= NOW() - '380 hour'::INTERVAL
+    WHERE pg_date >= NOW() - '400 hour'::INTERVAL
     ORDER BY case_serial
 """
 
@@ -43,7 +43,6 @@ RECENTLY_MODIFIED_CASES = """
 # @app.task(once={'graceful': True}, base=QueueOnce)
 @app.task(ignore_result=True)
 def refresh():
-    logger.info(TaskFormatter('CELERY LOGGING TEST: %(asctime)s - %(task_id)s - %(task_name)s - %(name)s - %(levelname)s - %(message)s'))
     with db.engine.connect() as conn:
         logger.info("TEST 0: task refresh")
         refresh_cases(conn)
