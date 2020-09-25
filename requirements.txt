@@ -36,7 +36,10 @@ git+https://github.com/fecgov/marshmallow-pagination@master
 smart_open==1.8.0
 
 # Task queue
-celery==4.3.0 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
+# if celery version is updated, need to verify compatibility with
+# kombu and ensure correct version of kombu is pinned above
+celery==4.3.0
+billiard==3.6.1 # test to see if solves large MUR problem
 celery-once==3.0.0
 redis==3.2.0
 
