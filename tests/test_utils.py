@@ -327,14 +327,21 @@ class TestEnvVarSplit(TestCase):
 
 class TestDecadeRange(TestCase):
     def test_get_decade_range(self):
+
+        start_year = 2000
+        current_year = 2018
+        expected = [(None, 2000), (2000, 2010), (2010, 2020)]
+        result = utils.get_decade_range(start_year, current_year)
+        self.assertEqual(result, expected)
+
         start_year = 2000
         current_year = 2020
-        expected = [(None, 2000), (2000, 2010), (2010, None)]
+        expected = [(None, 2000), (2000, 2010), (2010, 2020)]
         result = utils.get_decade_range(start_year, current_year)
         self.assertEqual(result, expected)
 
         start_year = 2000
         current_year = 2022
-        expected = [(None, 2000), (2000, 2010), (2010, 2020), (2020, None)]
+        expected = [(None, 2000), (2000, 2010), (2010, 2020), (2020, 2030)]
         result = utils.get_decade_range(start_year, current_year)
         self.assertEqual(result, expected)
