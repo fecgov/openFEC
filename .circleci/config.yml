@@ -15,7 +15,7 @@ jobs:
           SQLA_TEST_CONN: postgresql://postgres@0.0.0.0/cfdm_unit_test
 
       # PostgreSQL
-      - image: circleci/postgres:9.6.8
+      - image: circleci/postgres:10.14
         environment:
           POSTGRES_USER: postgres
           POSTGRES_DB: cfdm_unit_test
