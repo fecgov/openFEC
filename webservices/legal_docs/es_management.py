@@ -592,7 +592,7 @@ def get_most_recent_snapshot(repository_name=None):
     snapshot_list = es_client.snapshot.get(repository=repository_name, snapshot="*").get(
         'snapshots'
     )
-
+    logger.info("Successfully retrieved most recent snapshot", snapshot_list.pop().get('snapshot'))
     return snapshot_list.pop().get('snapshot')
 
 
