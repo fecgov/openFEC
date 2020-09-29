@@ -50,6 +50,7 @@ manager.command(legal_docs.configure_snapshot_repository)
 manager.command(legal_docs.create_elasticsearch_backup)
 manager.command(legal_docs.restore_elasticsearch_backup)
 manager.command(legal_docs.check_legal_data)
+manager.command(legal_docs.get_most_recent_snapshot)
 
 
 def execute_sql_file(path):

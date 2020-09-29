@@ -36,6 +36,7 @@ from .es_management import (  # noqa
     delete_advisory_opinions_from_es,
     delete_current_murs_from_es,
     delete_murs_from_s3,
+    get_most_recent_snapshot,
 )
 
 from .check_legal_data import ( # noqa
