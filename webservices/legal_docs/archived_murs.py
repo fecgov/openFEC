@@ -3,13 +3,13 @@ from elasticsearch_dsl import Search
 import logging
 import re
 from webservices.rest import db
-from webservices.utils import create_eregs_link, create_es_client
+from webservices.utils import (
+    create_es_client,
+    create_eregs_link,
+    DateTimeEncoder,
+)
 from .reclassify_statutory_citation import reclassify_statutory_citation
-
-# import these 3 libraries to display the JSON format of object "mur"
 import json
-import datetime
-from json import JSONEncoder
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +103,7 @@ MUR_DOCUMENTS = """
         mur_id,
         length,
         url
-    FROM MUR_ARCH.DOCUMENTS_A
+    FROM MUR_ARCH.DOCUMENTS
     WHERE mur_id = %s
     ORDER BY document_id
 """
@@ -118,13 +118,6 @@ INSERT_DOCUMENT = """
         url
     ) VALUES (:document_id, :mur_no, :pdf_text, :mur_id, :length, :url)
 """
-
-
-# To display the open_date and close_date of JSON format inside object "mur"
-class DateTimeEncoder(JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, (datetime.date, datetime.datetime)):
-            return obj.isoformat()
 
 
 def load_archived_murs(mur_no=None):
@@ -150,7 +143,7 @@ def load_archived_murs(mur_no=None):
         # ==for dubug use, display the JSON format of object "mur"
         mur_debug_data = mur
         del mur_debug_data['documents']
-        logger.debug("mur_debug_data =" + json.dumps(mur_debug_data, indent=4, cls=DateTimeEncoder))
+        logger.debug("mur_debug_data =" + json.dumps(mur_debug_data, indent=3, cls=DateTimeEncoder))
 
 
 def get_murs(mur_no=None):
