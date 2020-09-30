@@ -7,7 +7,14 @@ from flask_apispec import doc
 
 from webservices import docs
 from webservices import args
-from webservices import utils
+from webservices.utils import (
+    create_es_client,
+    Resource,
+    DateTimeEncoder,
+)
+
+import json
+
 from webservices.utils import use_kwargs
 from elasticsearch import RequestError
 from webservices.exceptions import ApiError
@@ -15,8 +22,13 @@ import webservices.legal_docs.responses as responses
 import logging
 
 
-es = utils.get_elasticsearch_connection()
 logger = logging.getLogger(__name__)
+
+# for debug, uncomment this line
+# logger.setLevel(logging.DEBUG)
+
+es_client = create_es_client()
+
 
 INNER_HITS = {
     "_source": False,
@@ -36,7 +48,7 @@ ALL_DOCUMENT_TYPES = [
 ]
 
 
-class GetLegalCitation(utils.Resource):
+class GetLegalCitation(Resource):
     @property
     def args(self):
         return {
@@ -52,7 +64,7 @@ class GetLegalCitation(utils.Resource):
         citation = '*%s*' % citation
         query = (
             Search()
-            .using(es)
+            .using(es_client)
             .query(
                 'bool',
                 must=[
@@ -75,7 +87,7 @@ class GetLegalCitation(utils.Resource):
         return results
 
 
-class GetLegalDocument(utils.Resource):
+class GetLegalDocument(Resource):
     @property
     def args(self):
         return {
@@ -88,7 +100,7 @@ class GetLegalDocument(utils.Resource):
     def get(self, doc_type, no, **kwargs):
         es_results = (
             Search()
-            .using(es)
+            .using(es_client)
             .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)])
             .source(exclude='documents.text')
             .extra(size=200)
@@ -109,7 +121,7 @@ class GetLegalDocument(utils.Resource):
     tags=['legal'],
     responses=responses.LEGAL_SEARCH_RESPONSE,
 )
-class UniversalSearch(utils.Resource):
+class UniversalSearch(Resource):
     @use_kwargs(args.query)
     def get(self, q='', from_hit=0, hits_returned=20, **kwargs):
         query_builders = {
@@ -136,12 +148,16 @@ class UniversalSearch(utils.Resource):
         results = {}
         total_count = 0
 
+        total_count_dict = {}
         for type_ in doc_types:
             try:
                 query = query_builders.get(type_)(
                     q, type_, from_hit, hits_returned, **kwargs
                 )
-                formatted_hits, count = execute_query(query)
+                logger.debug("query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+
+                formatted_hits, total_count_dict = execute_query(query)
+                logger.debug(total_count_dict["value"])
             except TypeError as te:
                 logger.error(te.args)
                 raise ApiError("Not a valid search type", 400)
@@ -152,8 +168,8 @@ class UniversalSearch(utils.Resource):
                 logger.error(e.args)
                 raise ApiError("Unexpected Server Error", 500)
             results[type_] = formatted_hits
-            results['total_%s' % type_] = count
-            total_count += count
+            results['total_%s' % type_] = total_count_dict["value"]
+            total_count += total_count_dict["value"]
 
         results['total_all'] = total_count
         return results
@@ -167,7 +183,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
     query = (
         Search()
-        .using(es)
+        .using(es_client)
         .query(Q('bool', must=must_query))
         .highlight(
             'text', 'name', 'no', 'summary', 'documents.text', 'documents.description'
@@ -178,7 +194,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .index('docs_search')
         .sort("sort1", "sort2")
     )
-
+    logger.debug("query =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return query
 
 
@@ -194,6 +210,8 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         ]
 
     query = query.query('bool', must=must_clauses)
+
+    logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     if type_ == 'admin_fines':
         return apply_af_specific_query_params(query, **kwargs)
@@ -248,6 +266,7 @@ def apply_mur_adr_specific_query_params(query, **kwargs):
         must_clauses.append(Q("range", close_date=date_range))
 
     query = query.query('bool', must=must_clauses)
+    logger.debug("apply_mur_adr_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     return query
 

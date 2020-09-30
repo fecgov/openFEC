@@ -27,6 +27,10 @@ from webservices import sorting
 from webservices import decoders
 from webservices import exceptions
 
+# import these 2 libraries to display the JSON formate with "datetime" data type
+import datetime
+from json import JSONEncoder
+
 
 logger = logging.getLogger(__name__)
 
@@ -543,3 +547,11 @@ def post_to_slack(message, channel):
 def split_env_var(env_var):
     """ Remove whitespace and split to a list based of comma delimiter"""
     return env_var.replace(" ", "").split(',')
+
+
+# To display the open_date and close_date of JSON format inside object "mur"
+class DateTimeEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (datetime.date, datetime.datetime)):
+            return obj.isoformat()
+
