@@ -114,8 +114,8 @@ def load_advisory_opinions(from_ao_no=None):
     logger.info("Loading advisory opinions")
     ao_count = 0
     for ao in get_advisory_opinions(from_ao_no):
-        logger.info("Loading AO: %s", ao['no'])
-        es_client.index('docs_index', ao, id=ao['no'])
+        logger.info("Loading AO: %s", ao["no"])
+        es_client.index("docs_index", ao, id=ao["no"])
         ao_count += 1
     logger.info("%d advisory opinions loaded", ao_count)
 
@@ -141,14 +141,14 @@ def get_advisory_opinions(from_ao_no):
     bucket = get_bucket()
 
     ao_names = get_ao_names()
-    ao_no_to_component_map = {a: tuple(map(int, a.split('-'))) for a in ao_names}
+    ao_no_to_component_map = {a: tuple(map(int, a.split("-"))) for a in ao_names}
 
     citations = get_citations(ao_names)
 
     if from_ao_no is None:
         start_ao_year, start_ao_serial = 0, 0
     else:
-        start_ao_year, start_ao_serial = tuple(map(int, from_ao_no.split('-')))
+        start_ao_year, start_ao_serial = tuple(map(int, from_ao_no.split("-")))
 
     with db.engine.connect() as conn:
         rs = conn.execute(ALL_AOS, (start_ao_year, start_ao_serial, start_ao_year))
@@ -227,30 +227,28 @@ def get_documents(ao_id, bucket):
                 "text": row["ocrtext"],
                 "date": row["document_date"],
             }
-            if not row['fileimage']:
+            if not row["fileimage"]:
                 logger.error(
-                    'Error uploading document ID {0} for AO no {1}: No file image'.format(
-                        row['document_id'], row['ao_no']
+                    "Error uploading document ID {0} for AO no {1}: No file image".format(
+                        row["document_id"], row["ao_no"]
                     )
                 )
             else:
-                try:
-                    pdf_key = "legal/aos/{0}/{1}".format(
-                        row['ao_no'], row["filename"].replace(' ', '-')
-                    )
-                    document["url"] = '/files/' + pdf_key
-                    logger.debug("S3: Uploading {}".format(pdf_key))
+                pdf_key = "legal/aos/{0}/{1}".format(
+                    row["ao_no"], row["filename"].replace(" ", "-")
+                )
+                document["url"] = "/files/" + pdf_key
+                logger.debug("S3: Uploading {}".format(pdf_key))
+
+                if bucket:
                     bucket.put_object(
                         Key=pdf_key,
                         Body=bytes(row["fileimage"]),
                         ContentType="application/pdf",
                         ACL="public-read",
                     )
-                    documents.append(document)
-                except Exception as err:
-                    logger.error(
-                        'An error occurred while putting AO pdf to S3:\nao_no={0} \npdf_key={1} \nerr={2}'.format(
-                            row['ao_no'], pdf_key, err))
+                documents.append(document)
+
     return documents
 
 
@@ -266,27 +264,27 @@ def get_ao_names():
 def fix_citations(ao_no, citation_type, citations):
     """
     Exclude false positives and include missed citations due to
-    parsing errors. Citation types are 'ao', 'statute', and 'regulation'
+    parsing errors. Citation types are "ao", "statute", and "regulation"
 
     Example lookup:
-    {'2017-03':
-        {'ao': ['2011-12', '2018-11']},
-        {'statute': [(52, '30101'), (52, '30116')]},
-        {'regulation': [(11, 110, 3), (11, 100, 5)]},
+    {"2017-03":
+        {"ao": ["2011-12", "2018-11"]},
+        {"statute": [(52, "30101"), (52, "30116")]},
+        {"regulation": [(11, 110, 3), (11, 100, 5)]},
     }
 
     """
 
     CITATION_EXCLUDE_LOOKUP = {
-        '2017-03': {'ao': ['2010-11', '2011-12', '2015-16']},
-        '2019-11': {'statute': [(52, '301')]},
+        "2017-03": {"ao": ["2010-11", "2011-12", "2015-16"]},
+        "2019-11": {"statute": [(52, "301")]},
     }
 
     CITATION_INCLUDE_LOOKUP = {
-        '1999-40': {'regulation': [(11, 110, 3)]},
-        '2019-14': {'regulation': [(11, 102, 1), (11, 102, 6), (11, 104, 1), (11, 300, 10)]},
-        '2019-11': {'regulation': [(11, 110, 11)]},
-        '2018-15': {'regulation': [(11, 112, 1), (11, 112, 5), (11, 113, 1), (11, 113, 2)]},
+        "1999-40": {"regulation": [(11, 110, 3)]},
+        "2019-14": {"regulation": [(11, 102, 1), (11, 102, 6), (11, 104, 1), (11, 300, 10)]},
+        "2019-11": {"regulation": [(11, 110, 11)]},
+        "2018-15": {"regulation": [(11, 112, 1), (11, 112, 5), (11, 113, 1), (11, 113, 2)]},
     }
 
     exclude_list = CITATION_EXCLUDE_LOOKUP.get(ao_no, {}).get(citation_type)
@@ -305,14 +303,15 @@ def fix_citations(ao_no, citation_type, citations):
 
 
 def get_citations(ao_names):
-    ao_component_to_name_map = {tuple(map(int, a.split('-'))): a for a in ao_names}
+    ao_component_to_name_map = {tuple(map(int, a.split("-"))): a for a in ao_names}
 
     logger.info("Getting citations...")
 
     rs = db.engine.execute(
         """SELECT ao_no, ocrtext FROM aouser.document
-                                INNER JOIN aouser.ao USING (ao_id)
-                              WHERE category = 'Final Opinion'"""
+            INNER JOIN aouser.ao USING (ao_id)
+            WHERE category = 'Final Opinion'
+        """
     )
 
     all_regulatory_citations = set()
@@ -324,7 +323,7 @@ def get_citations(ao_names):
         if not row["ocrtext"]:
             logger.error(
                 "Missing OCR text for AO no {0}: unable to get citations".format(
-                    row['ao_no']
+                    row["ao_no"]
                 )
             )
         ao_citations_in_doc = parse_ao_citations(
@@ -335,12 +334,12 @@ def get_citations(ao_names):
         statutory_citations = parse_statutory_citations(row["ocrtext"])
         regulatory_citations = parse_regulatory_citations(row["ocrtext"])
         # Manually fix parsing mistakes
-        ao_citations_in_doc = fix_citations(row["ao_no"], 'ao', ao_citations_in_doc)
+        ao_citations_in_doc = fix_citations(row["ao_no"], "ao", ao_citations_in_doc)
         statutory_citations = fix_citations(
-            row["ao_no"], 'statute', statutory_citations
+            row["ao_no"], "statute", statutory_citations
         )
         regulatory_citations = fix_citations(
-            row["ao_no"], 'regulation', regulatory_citations
+            row["ao_no"], "regulation", regulatory_citations
         )
 
         for citation in ao_citations_in_doc:
@@ -383,18 +382,18 @@ def get_citations(ao_names):
     for citation in all_regulatory_citations:
         entry = {
             "type": "citations",
-            'citation_text': '%d CFR §%d.%d' % (citation[0], citation[1], citation[2]),
-            'citation_type': 'regulation',
+            "citation_text": "%d CFR §%d.%d" % (citation[0], citation[1], citation[2]),
+            "citation_type": "regulation",
         }
-        es_client.index('docs_index', entry, id=entry['citation_text'])
+        es_client.index("docs_index", entry, id=entry["citation_text"])
 
     for citation in all_statutory_citations:
         entry = {
             "type": "citations",
-            'citation_text': '%d U.S.C. §%s' % (citation[0], citation[1]),
-            'citation_type': 'statute',
+            "citation_text": "%d U.S.C. §%s" % (citation[0], citation[1]),
+            "citation_type": "statute",
         }
-        es_client.index('docs_index', entry, id=entry['citation_text'])
+        es_client.index("docs_index", entry, id=entry["citation_text"])
 
     logger.info("Citations loaded.")
 
@@ -407,8 +406,8 @@ def parse_ao_citations(text, ao_component_to_name_map):
     if text:
         for citation in AO_CITATION_REGEX.finditer(text):
             year, serial_no = (
-                int(citation.group('year')),
-                int(citation.group('serial_no')),
+                int(citation.group("year")),
+                int(citation.group("serial_no")),
             )
             if (year, serial_no) in ao_component_to_name_map:
                 matches.add(ao_component_to_name_map[(year, serial_no)])
@@ -432,13 +431,13 @@ def validate_statute_citation(title, section):
     except Exception:
         return False
 
-    if title == '2':
+    if title == "2":
         return 431 <= section_lookup <= 457
-    elif title == '18':
+    elif title == "18":
         return 590 <= section_lookup <= 619 or section_lookup == 100
-    elif title == '26':
+    elif title == "26":
         return 900 <= section_lookup <= 904 or section_lookup in (501, 527)
-    elif title == '52':
+    elif title == "52":
         return section_lookup == 301
 
     return True
@@ -449,18 +448,18 @@ def parse_statutory_citations(text):
     if text:
         for citation in SINGLE_STATUTE_CITATION_REGEX.finditer(text):
             new_title, new_section = reclassify_statutory_citation(
-                citation.group('title'), citation.group('section')
+                citation.group("title"), citation.group("section")
             )
             matches.add((int(new_title), str(new_section)))
         for possible_multiple_citation in MULTIPLE_STATUTE_CITATION_REGEX.finditer(
             text
         ):
-            citations_title = possible_multiple_citation.group('title')
-            possible_sections = possible_multiple_citation.group('possible_sections')
+            citations_title = possible_multiple_citation.group("title")
+            possible_sections = possible_multiple_citation.group("possible_sections")
 
             for section in STATUTE_SECTION_ONLY_REGEX.finditer(possible_sections):
                 new_title, new_section = reclassify_statutory_citation(
-                    citations_title, section.group('section')
+                    citations_title, section.group("section")
                 )
 
                 if validate_statute_citation(new_title, new_section):
@@ -491,7 +490,7 @@ def validate_regulation_citation(title, part):
     except Exception:
         return False
 
-    if title == '11':
+    if title == "11":
         return (
             1 <= part <= 8
             or 100 <= part <= 120
@@ -510,18 +509,18 @@ def parse_regulatory_citations(text):
         for citation in SINGLE_REGULATION_CITATION_REGEX.finditer(text):
             matches.add(
                 (
-                    int(citation.group('title')),
-                    int(citation.group('part')),
-                    int(citation.group('section')),
+                    int(citation.group("title")),
+                    int(citation.group("part")),
+                    int(citation.group("section")),
                 )
             )
 
         for possible_multiple_citation in MULTIPLE_REGULATION_CITATION_REGEX.finditer(
             text
         ):
-            citations_title = possible_multiple_citation.group('title')
+            citations_title = possible_multiple_citation.group("title")
             possible_parts_and_sections = possible_multiple_citation.group(
-                'possible_parts_and_sections'
+                "possible_parts_and_sections"
             )
 
             for part_and_section in REGULATION_SECTION_ONLY_REGEX.finditer(
@@ -529,21 +528,21 @@ def parse_regulatory_citations(text):
             ):
 
                 if validate_regulation_citation(
-                    citations_title, part_and_section.group('part')
+                    citations_title, part_and_section.group("part")
                 ):
                     matches.add(
                         (
                             int(citations_title),
-                            int(part_and_section.group('part')),
-                            int(part_and_section.group('section')),
+                            int(part_and_section.group("part")),
+                            int(part_and_section.group("section")),
                         )
                     )
                 else:
                     logger.debug(
                         "Citation out of range - excluding {} CFR {}.{} from multiples.".format(
                             citations_title,
-                            part_and_section.group('part'),
-                            int(part_and_section.group('section')),
+                            part_and_section.group("part"),
+                            int(part_and_section.group("section")),
                         )
                     )
     return matches

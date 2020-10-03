@@ -137,12 +137,12 @@ def load_archived_murs(mur_no=None):
                 logger.info("{0} Archived Mur(s) loaded".format(mur_count))
             except Exception as err:
                 logger.error(
-                    'An error occurred while uploading archived mur:\nmur["no"]={0} \nerr={1}'.format(
+                    "An error occurred while uploading archived mur:\nmur no={0} \nerr={1}".format(
                         mur["no"], err))
 
         # ==for dubug use, display the JSON format of object "mur"
         mur_debug_data = mur
-        del mur_debug_data['documents']
+        del mur_debug_data["documents"]
         logger.debug("mur_debug_data =" + json.dumps(mur_debug_data, indent=3, cls=DateTimeEncoder))
 
 
@@ -332,7 +332,7 @@ def extract_pdf_text(mur_no=None):
     logger.debug("all_mur_docs = " + json.dumps(results, indent=3, cls=DateTimeEncoder))
 
     logger.info("Get {0} archived mur(s) from elasticserch index: \"archived_murs\"".format(
-        str(len(results['all_mur_docs']))))
+        str(len(results["all_mur_docs"]))))
 
     if results and results.get("all_mur_docs"):
         with db.engine.connect() as conn:

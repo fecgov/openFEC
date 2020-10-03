@@ -25,7 +25,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
 
@@ -176,7 +176,8 @@ class UniversalSearch(Resource):
 
 
 def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
-    must_query = [Q('term', _type=type_)]
+    # must_query = [Q('term', _type=type_)]
+    must_query = [Q('term', type=type_)]
 
     if q:
         must_query.append(Q('query_string', query=q))
@@ -194,7 +195,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .index('docs_search')
         .sort("sort1", "sort2")
     )
-    logger.debug("query =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    logger.debug("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return query
 
 
