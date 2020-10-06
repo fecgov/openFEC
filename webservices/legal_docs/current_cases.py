@@ -3,12 +3,21 @@ import re
 from collections import defaultdict
 
 from webservices.rest import db
-from webservices.utils import extend, create_eregs_link, create_es_client
+from webservices.utils import (
+    extend,
+    create_es_client,
+    create_eregs_link,
+    DateTimeEncoder,
+)
 from webservices.tasks.utils import get_bucket
 
 from .reclassify_statutory_citation import reclassify_statutory_citation_without_title
+import json
 
 logger = logging.getLogger(__name__)
+
+# for debug, uncomment this line
+# logger.setLevel(logging.DEBUG)
 
 ALL_CASES = """
     SELECT
@@ -238,6 +247,12 @@ def load_cases(case_type, case_no=None):
                     except Exception as err:
                         logger.error("An error occurred while deteting an unpublished case.{0} {1} {2}".format(
                             case_type, case["no"], err))
+
+            # ==for local dubug use: remove the big "documents" section to display the object "case_type" data
+            debug_case_data = case
+            del debug_case_data["documents"]
+            logger.debug("case_data count=" + str(case_count))
+            logger.debug("debug_case_data =" + json.dumps(debug_case_data, indent=3, cls=DateTimeEncoder))
 
     else:
         logger.error("Invalid case_type: must be 'MUR', 'ADR', or 'AF'.")
@@ -478,11 +493,11 @@ def get_documents(case_id, bucket):
                 pdf_key = "legal/{0}/{1}/{2}".format(get_es_type(row["case_type"]), row["case_no"],
                     row["filename"].replace(" ", "-"))
                 document["url"] = "/files/" + pdf_key
-                logger.debug("S3: Uploading {}".format(pdf_key))
                 documents.append(document)
 
                 # bucket is None on local, don't need upload pdf to s3
                 if bucket:
+                    logger.debug("S3: Uploading {}".format(pdf_key))
                     bucket.put_object(
                         Key=pdf_key,
                         Body=bytes(row["fileimage"]),

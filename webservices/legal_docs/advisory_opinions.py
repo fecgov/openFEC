@@ -3,17 +3,18 @@ import logging
 import re
 
 from webservices.rest import db
-from webservices.utils import create_es_client
+from webservices.utils import (
+    create_es_client,
+    DateTimeEncoder,
+)
+
 from webservices.tasks.utils import get_bucket
 from .reclassify_statutory_citation import reclassify_statutory_citation
-
+import json
 
 logger = logging.getLogger(__name__)
 
-"""Uncomment this for additional local logging:
-We've kept some logs at DEBUG to avoid cluttering production logs.
-"""
-
+# for debug, uncomment this line
 # logger.setLevel(logging.DEBUG)
 
 
@@ -117,6 +118,13 @@ def load_advisory_opinions(from_ao_no=None):
         logger.info("Loading AO: %s", ao["no"])
         es_client.index("docs_index", ao, id=ao["no"])
         ao_count += 1
+
+        # ==for local dubug use: remove the big "documents" section to display the object "ao" data.
+        debug_ao_data = ao
+        del debug_ao_data["documents"]
+        logger.debug("ao_data count=" + str(ao_count))
+        logger.debug("debug_ao_data =" + json.dumps(debug_ao_data, indent=3, cls=DateTimeEncoder))
+
     logger.info("%d advisory opinions loaded", ao_count)
 
 

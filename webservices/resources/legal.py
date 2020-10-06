@@ -14,7 +14,6 @@ from webservices.utils import (
 )
 
 import json
-
 from webservices.utils import use_kwargs
 from elasticsearch import RequestError
 from webservices.exceptions import ApiError
@@ -68,7 +67,7 @@ class GetLegalCitation(Resource):
             .query(
                 'bool',
                 must=[
-                    Q("term", _type='citations'),
+                    Q("term", type='citations'),
                     Q('match', citation_type=citation_type),
                 ],
                 should=[
@@ -87,6 +86,7 @@ class GetLegalCitation(Resource):
         return results
 
 
+# example endpoint url: http://127.0.0.1:5000/v1/legal/docs/murs/2804R
 class GetLegalDocument(Resource):
     @property
     def args(self):
@@ -101,7 +101,7 @@ class GetLegalDocument(Resource):
         es_results = (
             Search()
             .using(es_client)
-            .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)])
+            .query('bool', must=[Q('term', no=no), Q('term', type=doc_type)])
             .source(exclude='documents.text')
             .extra(size=200)
             .index('docs_search')
@@ -109,6 +109,7 @@ class GetLegalDocument(Resource):
         )
 
         results = {"docs": [hit.to_dict() for hit in es_results]}
+        logger.debug("GetLegalDocument() results =" + json.dumps(results, indent=3, cls=DateTimeEncoder))
 
         if len(results['docs']) > 0:
             return results
@@ -116,6 +117,7 @@ class GetLegalDocument(Resource):
             return abort(404)
 
 
+# example endpoint url: http://127.0.0.1:5000/v1/legal/search/?case_no=3744&type=murs
 @doc(
     description=docs.LEGAL_SEARCH,
     tags=['legal'],
@@ -147,17 +149,18 @@ class UniversalSearch(Resource):
 
         results = {}
         total_count = 0
-
         total_count_dict = {}
         for type_ in doc_types:
             try:
                 query = query_builders.get(type_)(
                     q, type_, from_hit, hits_returned, **kwargs
                 )
-                logger.debug("query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+                logger.debug("UniversalSearch() final query =" + json.dumps(
+                    query.to_dict(), indent=3, cls=DateTimeEncoder))
 
                 formatted_hits, total_count_dict = execute_query(query)
-                logger.debug(total_count_dict["value"])
+                logger.debug("total count=" + str(total_count_dict["value"]))
+
             except TypeError as te:
                 logger.error(te.args)
                 raise ApiError("Not a valid search type", 400)
@@ -176,7 +179,6 @@ class UniversalSearch(Resource):
 
 
 def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
-    # must_query = [Q('term', _type=type_)]
     must_query = [Q('term', type=type_)]
 
     if q:
@@ -211,7 +213,6 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         ]
 
     query = query.query('bool', must=must_clauses)
-
     logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     if type_ == 'admin_fines':
@@ -230,7 +231,7 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     ]
 
     query = query.query('bool', should=should_query, minimum_should_match=1)
-
+    logger.debug("ao_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return apply_ao_specific_query_params(query, **kwargs)
 
 
@@ -307,6 +308,7 @@ def apply_af_specific_query_params(query, **kwargs):
         )
 
     query = query.query('bool', must=must_clauses)
+    logger.debug("apply_af_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     return query
 
@@ -489,14 +491,15 @@ def apply_ao_specific_query_params(query, **kwargs):
         )
 
     query = query.query('bool', must=must_clauses)
+    logger.debug("apply_ao_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     return query
 
 
 def execute_query(query):
     es_results = query.execute()
-
-    logger.debug("es_results =" + json.dumps(es_results.to_dict(), indent=3, cls=DateTimeEncoder))
+    logger.debug("UniversalSearch() execute_query() es_results =" + json.dumps(
+        es_results.to_dict(), indent=3, cls=DateTimeEncoder))
 
     formatted_hits = []
     for hit in es_results:

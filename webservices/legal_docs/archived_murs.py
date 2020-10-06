@@ -140,9 +140,10 @@ def load_archived_murs(mur_no=None):
                     "An error occurred while uploading archived mur:\nmur no={0} \nerr={1}".format(
                         mur["no"], err))
 
-        # ==for dubug use, display the JSON format of object "mur"
+        # ==for dubug use: remove the big "documents" section to display the object "mur" data
         mur_debug_data = mur
         del mur_debug_data["documents"]
+        logger.debug("mur_data count=" + str(mur_count))
         logger.debug("mur_debug_data =" + json.dumps(mur_debug_data, indent=3, cls=DateTimeEncoder))
 
 
