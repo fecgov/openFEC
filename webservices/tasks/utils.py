@@ -22,7 +22,7 @@ def get_bucket():
         s3 = session.resource("s3")
         bucket = s3.Bucket(env.get_credential("bucket"))
     except Exception as err:
-        print("no s3 connection from local. err={0}".format(err))
+        print("There is no s3 connection on local. err={0}".format(err))
         return
     return bucket
 
