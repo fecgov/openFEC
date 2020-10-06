@@ -239,7 +239,9 @@ def get_documents(ao_id, bucket):
                 )
                 document["url"] = "/files/" + pdf_key
                 logger.debug("S3: Uploading {}".format(pdf_key))
+                documents.append(document)
 
+                # bucket is None on local, don't need upload pdf to s3
                 if bucket:
                     bucket.put_object(
                         Key=pdf_key,
@@ -247,8 +249,6 @@ def get_documents(ao_id, bucket):
                         ContentType="application/pdf",
                         ACL="public-read",
                     )
-                documents.append(document)
-
     return documents
 
 

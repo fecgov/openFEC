@@ -475,14 +475,20 @@ def get_documents(case_id, bucket):
                     "Error uploading document ID {0} for {1} %{2}: No file image".
                     format(row["document_id"], row["case_type"], row["case_no"]))
             else:
-                if bucket:
-                    pdf_key = "legal/{0}/{1}/{2}".format(get_es_type(row["case_type"]), row["case_no"],
-                        row["filename"].replace(" ", "-"))
-                    document["url"] = "/files/" + pdf_key
-                    logger.debug("S3: Uploading {}".format(pdf_key))
-                    bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
-                            ContentType="application/pdf", ACL="public-read")
+                pdf_key = "legal/{0}/{1}/{2}".format(get_es_type(row["case_type"]), row["case_no"],
+                    row["filename"].replace(" ", "-"))
+                document["url"] = "/files/" + pdf_key
+                logger.debug("S3: Uploading {}".format(pdf_key))
                 documents.append(document)
+
+                # bucket is None on local, don't need upload pdf to s3
+                if bucket:
+                    bucket.put_object(
+                        Key=pdf_key,
+                        Body=bytes(row["fileimage"]),
+                        ContentType="application/pdf",
+                        ACL="public-read",
+                    )
     return documents
 
 

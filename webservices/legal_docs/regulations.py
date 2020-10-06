@@ -2,7 +2,6 @@
 import logging
 import requests
 from webservices.env import env
-# from webservices import utils
 from webservices.utils import create_es_client
 
 logger = logging.getLogger('manager')
@@ -28,15 +27,6 @@ def get_text(node):
     return text
 
 
-# curl command examples:
-# 1)curl -X GET "localhost:9200/docs/_search?pretty" -H 'Content-Type: application/json'
-# -d'{"query": {"terms": {"_id": [ "9039_3", "100_110"] }}}'
-#
-# 2)curl -d '{"query": {"term": {"type": "regulations"}}}' -H "Content-Type: application/json"
-# -X POST "localhost:9200/docs/_count?pretty"
-#
-# 3)curl -d '{"from" : 0, "size" : 600, "query": {"term": {"type": "regulations"}}}' -H "Content-Type: application/json"
-# -X POST "localhost:9200/docs/_search?pretty" -o regulation_out.json
 def load_regulations():
     """
     Indexes the regulations relevant to the FEC in Elasticsearch.
@@ -49,7 +39,7 @@ def load_regulations():
         )
         return
 
-    logger.info("Indexing regulations")
+    logger.info("Uploading regulations...")
     reg_versions = requests.get(eregs_api + 'regulation').json()['versions']
     es_client = create_es_client()
     reg_count = 0
@@ -80,4 +70,4 @@ def load_regulations():
 
             es_client.index('docs_index', doc, id=doc['doc_id'])
         reg_count += 1
-        logger.info("%d regulation parts indexed.", reg_count)
+        logger.info("%d regulation parts loaded.", reg_count)

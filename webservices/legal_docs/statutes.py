@@ -117,20 +117,14 @@ def get_title_26_statutes():
     return section_count
 
 
-# curl command examples:
-# 1)curl -X GET "localhost:9200/docs/_search?pretty" -H 'Content-Type: application/json' -d'
-# {"query": {"terms": {"_id": ["/us/usc/t26/s9009, "/us/usc/t52/s30110"] }}}'
-#
-# 2)curl -d '{"query": {"term": {"type": "statutes"}}}' -H "Content-Type: application/json"
-# -X POST "localhost:9200/docs/_count?pretty"
 def load_statutes():
     """
         Indexes statutes with titles 26 and 52 in Elasticsearch.
         The statutes are downloaded from http://uscode.house.gov.
     """
-    logger.info("Indexing statutes")
+    logger.info("Uploading statutes")
     title_26_section_count = get_title_26_statutes()
     title_52_section_count = get_title_52_statutes()
     logger.info(
-        "%d statute sections indexed", title_26_section_count + title_52_section_count
+        "%d statute sections uploaded", title_26_section_count + title_52_section_count
     )

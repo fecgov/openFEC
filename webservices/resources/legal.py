@@ -495,6 +495,9 @@ def apply_ao_specific_query_params(query, **kwargs):
 
 def execute_query(query):
     es_results = query.execute()
+
+    logger.debug("es_results =" + json.dumps(es_results.to_dict(), indent=3, cls=DateTimeEncoder))
+
     formatted_hits = []
     for hit in es_results:
         formatted_hit = hit.to_dict()
