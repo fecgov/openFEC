@@ -28,7 +28,10 @@ CASE_DOCUMENT_MAPPINGS = {
         "category": {"type": "keyword"},
         "description": {"type": "text"},
         "length": {"type": "long"},
-        "text": {"type": "text"},
+        "text": {
+            "type": "text",
+            "term_vector": "with_positions_offsets",
+        },
         "document_date": {"type": "date", "format": "dateOptionalTime"},
         "url": {"type": "text"},
     },
@@ -124,7 +127,10 @@ ADVISORY_OPINIONS = {
             "document_id": {"type": "long"},
             "category": {"type": "keyword"},
             "description": {"type": "text"},
-            "text": {"type": "text"},
+            "text": {
+                "type": "text",
+                "term_vector": "with_positions_offsets",
+            },
             "date": {"type": "date", "format": "dateOptionalTime"},
             "url": {"type": "text", "index": False},
         },
@@ -231,7 +237,10 @@ ARCH_MUR_DOCUMENT_MAPPINGS = {
     "properties": {
         "document_id": {"type": "integer"},
         "length": {"type": "long"},
-        "text": {"type": "text"},
+        "text": {
+            "type": "text",
+            "term_vector": "with_positions_offsets",
+        },
         "url": {"type": "text", "index": False},
     },
 }
