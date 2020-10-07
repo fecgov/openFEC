@@ -70,6 +70,11 @@ class CommitteeHistory(BaseCommittee):
     cycles_has_activity = db.Column(ARRAY(db.Integer), doc=docs.COMMITTEE_CYCLES_HAS_ACTIVITY)
     last_cycle_has_activity = db.Column(db.Integer, doc=docs.COMMITTEE_LAST_CYCLE_HAS_ACTIVITY)
     is_active = db.Column(db.Boolean, doc=docs.IS_COMMITTEE_ACTIVE)
+    former_cmte_name = db.Column(db.String(200), doc=docs.COMMITTEE_NAME)
+    former_cand_id  = db.Column(db.String(9), doc=docs.CANDIDATE_ID)
+    former_cand_name = db.Column(db.String(90), doc=docs.CANDIDATE_NAME)
+    former_cand_election_year = db.Column(db.Integer, doc=docs.CANDIDATE_ELECTION_YEAR)
+    convert_to_pac_flg = db.Column(db.Boolean)
 
 
 class CommitteeDetail(BaseConcreteCommittee):

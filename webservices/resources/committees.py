@@ -9,6 +9,7 @@ from webservices import exceptions
 from webservices.common import models
 from webservices.common.views import ApiResource
 
+#from sqlalchemy.dialects import postgresql
 
 def filter_year(model, query, years):
     return query.filter(
@@ -194,6 +195,8 @@ class CommitteeHistoryView(ApiResource):
             # use for
             # '/candidate/<candidate_id>/committees/history/',
             # '/candidate/<candidate_id>/committees/history/<int:cycle>/',
+            query_converted = query.filter(models.CommitteeHistory.former_cand_id == candidate_id.upper())
+
             query = query.join(
                 models.CandidateCommitteeLink,
                 sa.and_(
@@ -203,12 +206,14 @@ class CommitteeHistoryView(ApiResource):
             ).filter(
                 models.CandidateCommitteeLink.candidate_id == candidate_id.upper(),
             )
+
+
         if cycle:
             # use for
             # '/committee/<string:committee_id>/history/<int:cycle>/',
-            # '/candidate/<candidate_id>/committees/history/<int:cycle>/',
+            # '/candidate/<string:candidate_id>/committees/history/<int:cycle>/',
             if kwargs.get('election_full') and candidate_id:
-                query = query.filter(
+                query_regular = query.filter(
                     models.CandidateCommitteeLink.election_yr_to_be_included == cycle,
                 ).order_by(
                     models.CommitteeHistory.committee_id,
@@ -217,6 +222,24 @@ class CommitteeHistoryView(ApiResource):
                     # in same election_yr_to_be_included, remove duplicate committee
                     models.CommitteeHistory.committee_id,
                 )
+                
+                query_converted = query_converted.filter(
+                    models.CommitteeHistory.former_cand_election_year == cycle,
+                ).order_by(
+                    models.CommitteeHistory.committee_id,
+                    sa.desc(models.CommitteeHistory.cycle),
+                ).distinct(
+                    # in same election_yr_to_be_included, remove duplicate committee
+                    models.CommitteeHistory.committee_id,
+                )
+
+                query = query_regular.union(query_converted).order_by(
+                    models.CommitteeHistory.committee_id,
+                    sa.desc(models.CommitteeHistory.cycle),
+                    )
+    
             else:
                 query = query.filter(models.CommitteeHistory.cycle == cycle)
+
+        
         return query
