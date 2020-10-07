@@ -1,6 +1,6 @@
 /*
 This migration file is for #4587
-1) Add column sponsor_candidate_id to ofec_committee_history_mv
+1) Add column sponsor_candidate_ids to ofec_committee_history_mv
 */
 
 
