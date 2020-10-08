@@ -9,8 +9,6 @@ from webservices import exceptions
 from webservices.common import models
 from webservices.common.views import ApiResource
 
-#from sqlalchemy.dialects import postgresql
-
 def filter_year(model, query, years):
     return query.filter(
         sa.or_(*[
@@ -240,6 +238,5 @@ class CommitteeHistoryView(ApiResource):
     
             else:
                 query = query.filter(models.CommitteeHistory.cycle == cycle)
-
-        
+                        
         return query
