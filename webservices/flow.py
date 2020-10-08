@@ -118,12 +118,11 @@ def get_graph():
     graph.add_edge('committee_detail', 'sched_a_by_state_recipient_totals')
 
     graph.add_edges_from([
-        ('totals_combined', 'ofec_pcc_to_pac'),
         ('cand_cmte_linkage', 'ofec_pcc_to_pac'),
         ('candidate_history', 'ofec_pcc_to_pac'),
     ])
 
-    # graph.add_edge('ofec_pcc_to_pac', 'committee_history'),
+    graph.add_edge('ofec_pcc_to_pac', 'committee_history'),
     
 
     return graph
