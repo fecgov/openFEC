@@ -45,12 +45,11 @@ manager.command(legal_docs.delete_all_indices)
 manager.command(legal_docs.move_archived_murs)
 manager.command(legal_docs.initialize_current_legal_docs)
 manager.command(legal_docs.refresh_current_legal_docs_zero_downtime)
-manager.command(legal_docs.configure_backup_repository)
 manager.command(legal_docs.configure_snapshot_repository)
 manager.command(legal_docs.create_elasticsearch_backup)
 manager.command(legal_docs.restore_elasticsearch_backup)
 manager.command(legal_docs.check_legal_data)
-manager.command(legal_docs.get_most_recent_snapshot)
+manager.command(legal_docs.retrieve_snapshots)
 
 
 def execute_sql_file(path):

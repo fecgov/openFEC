@@ -29,14 +29,13 @@ from .es_management import (  # noqa
     create_staging_index,
     restore_from_staging_index,
     move_archived_murs,
-    configure_backup_repository,
     configure_snapshot_repository,
     create_elasticsearch_backup,
     restore_elasticsearch_backup,
     delete_advisory_opinions_from_es,
     delete_current_murs_from_es,
     delete_murs_from_s3,
-    get_most_recent_snapshot,
+    retrieve_snapshots,
 )
 
 from .check_legal_data import ( # noqa

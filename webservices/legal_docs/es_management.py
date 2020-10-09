@@ -2,16 +2,19 @@ import logging
 import elasticsearch
 import copy
 import datetime
+import json
 
 from webservices.utils import (
     create_es_client,
     get_service_instance,
     get_service_instance_credentials,
+    DateTimeEncoder,
 )
-
 from webservices.env import env
 from webservices.tasks.utils import get_bucket
 
+# for debug, uncomment this line
+# logger.setLevel(logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
@@ -301,6 +304,8 @@ BACKUP_REPOSITORY_NAME = "legal_s3_repository"
 
 BACKUP_DIRECTORY = "es-backups"
 
+S3_PRIVATE_SERVICE_INSTANCE_NAME = "fec-s3-snapshot"
+
 
 def create_docs_index():
     """
@@ -454,7 +459,6 @@ def move_aliases_to_docs_index():
     Move `docs_index` and `docs_search` aliases to point to the `docs` index.
     Delete index `docs_staging`.
     """
-
     es_client = create_es_client()
 
     logger.info("Move aliases 'docs_index' and 'docs_search' to point to 'docs'")
@@ -492,29 +496,6 @@ def move_archived_murs():
 
     logger.info("Copy archived MURs from 'docs' index to 'archived_murs' index")
     es_client.reindex(body=body, wait_for_completion=True, request_timeout=1500)
-
-
-def configure_backup_repository(repository=BACKUP_REPOSITORY_NAME):
-    '''
-    Configure s3 backup repository using api credentials.
-    This needs to get re-run when s3 credentials change for each API deployment
-    '''
-    es_client = create_es_client()
-    logger.info("Configuring backup repository: {0}".format(repository))
-    body = {
-        'type': 's3',
-        'settings': {
-            'bucket': env.get_credential("bucket"),
-            'region': env.get_credential("region"),
-            'access_key': env.get_credential("access_key_id"),
-            'secret_key': env.get_credential("secret_access_key"),
-            'base_path': BACKUP_DIRECTORY,
-        },
-    }
-    es_client.snapshot.create_repository(repository=repository, body=body)
-
-
-S3_PRIVATE_SERVICE_INSTANCE_NAME = "fec-s3-snapshot"
 
 
 def configure_snapshot_repository(repository=BACKUP_REPOSITORY_NAME):
@@ -579,7 +560,7 @@ def restore_elasticsearch_backup(repository_name=None, snapshot_name=None):
     es_client = create_es_client()
 
     repository_name = repository_name or BACKUP_REPOSITORY_NAME
-    configure_backup_repository(repository_name)
+    configure_snapshot_repository(repository_name)
 
     most_recent_snapshot_name = get_most_recent_snapshot(repository_name)
     snapshot_name = snapshot_name or most_recent_snapshot_name
@@ -622,8 +603,21 @@ def get_most_recent_snapshot(repository_name=None):
     snapshot_list = es_client.snapshot.get(repository=repository_name, snapshot="*").get(
         'snapshots'
     )
-    logger.info("Successfully retrieved most recent snapshot", snapshot_list.pop().get('snapshot'))
     return snapshot_list.pop().get('snapshot')
+
+
+def retrieve_snapshots(repository_name=None):
+    '''
+    Display all the snapshots available on ES cluster (sorted by date, ascending) 
+    '''
+    es_client = create_es_client()
+
+    repository_name = repository_name or BACKUP_REPOSITORY_NAME
+    logger.info("Retreiving all the snapshots available on elastic search cluster")
+    snapshot_list = es_client.snapshot.get(repository=repository_name, snapshot="*").get(
+        'snapshots'
+    )
+    logger.info("snapshots  =" + json.dumps(snapshot_list, indent=3, cls=DateTimeEncoder))
 
 
 def delete_murs_from_s3():
