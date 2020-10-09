@@ -405,9 +405,9 @@ class TestCommitteeHistory(ApiBaseTest):
                 designation='P',
                 is_active=True,
                 # Needed to show conversion info
-                former_cand_id=self.candidate.candidate_id,
-                former_cand_election_year=2016,
-                former_cmte_name="Used to be PCC but I'm a PAC now committeee"
+                former_candidate_id=self.candidate.candidate_id,
+                former_candidate_election_year=2016,
+                former_committee_name="Used to be PCC but I'm a PAC now committeee"
             ),
             factories.CommitteeHistoryFactory(
                 committee_id=self.committees[3].committee_id,
@@ -551,7 +551,7 @@ class TestCommitteeHistory(ApiBaseTest):
         )
 
         assert len(results) == 1
-        assert results[0].get("former_cand_id") == self.candidate.candidate_id
+        assert results[0].get("former_candidate_id") == self.candidate.candidate_id
 
     def test_case_insensitivity(self):
         lower_candidate = factories.CandidateDetailFactory(candidate_id="H01")

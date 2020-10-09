@@ -330,7 +330,7 @@ Website url as reported on the Form 1
 COMMITTEE_YEAR = 'A year that the committee was active— (after original registration date \
     or filing but before expiration date)'
 
-CONVERT_TO_PAC_FLG = 'True indicates that a candidate committee had been converted to a PAC'
+CONVERT_TO_PAC_FLAG = 'True indicates that a candidate committee had been converted to a PAC'
 
 FILING_FREQUENCY = 'The one-letter \n\
     code of the filing frequency:\n\

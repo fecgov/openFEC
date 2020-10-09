@@ -2,11 +2,12 @@
 This migration file is for #4458
 Add the following 5 columns to ofec_committee_history_mv:
 
-convert_to_pac_flg,
-pcc.first_cmte_nm as former_cmte_name,
-pcc.cand_id as former_cand_id,
-pcc.cand_name as former_cand_name,
-pcc.candidate_election_year as former_cand_election_year
+convert_to_pac_flag
+former_committee_name
+former_candidate_id
+former_candidate_name
+former_candidate_election_year
+
 */
 
 -- ----------
@@ -20,14 +21,14 @@ CREATE MATERIALIZED VIEW public.ofec_pcc_to_pac_mv
 AS
 with BASE_INFO as
 (
-    SELECT CMTE_PK, CMTE_ID, CMTE_NM, FILED_CMTE_TP, FILED_CMTE_DSGN, CREATE_DATE, 
+    SELECT CMTE_PK, CMTE_ID, CMTE_NM, FILED_CMTE_TP, FILED_CMTE_DSGN, CREATE_DATE,
     TO_CHAR(CREATE_DATE, 'YYYY')::numeric +MOD(TO_CHAR(CREATE_DATE, 'YYYY')::numeric , 2)::numeric (4, 0) as FEC_ELECTION_YR
     ,SUBSTRING(CMTE_PK::varchar,10, 6) CREATE_TIME, MST_RCT_REC_FLG
     FROM DISCLOSURE.DIM_CMTE_IE_INF
     WHERE CREATE_DATE IS NOT NULL
     ORDER BY CMTE_ID, CREATE_DATE, CREATE_TIME
 )
-, first_record_per_cycle as 
+, first_record_per_cycle as
 (
     SELECT CMTE_PK, CMTE_ID, CMTE_NM, FILED_CMTE_TP, FILED_CMTE_DSGN, CREATE_DATE, CREATE_TIME, fec_election_yr, MST_RCT_REC_FLG
     ,rank() over (partition by cmte_id, fec_election_yr order by create_date, CREATE_TIME) the_rank
@@ -44,23 +45,23 @@ with BASE_INFO as
     ,fec_election_yr, MST_RCT_REC_FLG
     from first_record_per_cycle
     where the_rank = 1
-) 
-, last_record_per_cycle as 
+)
+, last_record_per_cycle as
 (
     SELECT CMTE_PK, CMTE_ID, CMTE_NM, FILED_CMTE_TP, FILED_CMTE_DSGN, CREATE_DATE, CREATE_TIME, fec_election_yr, MST_RCT_REC_FLG
     ,rank() over (partition by cmte_id, fec_election_yr order by MST_RCT_REC_FLG desc, create_date desc, CREATE_TIME desc) the_rank
     FROM BASE_INFO
 )
-, info_end_cycle AS 
+, info_end_cycle AS
 (
     SELECT CMTE_PK, CMTE_ID, CMTE_NM, FILED_CMTE_TP, FILED_CMTE_DSGN, CREATE_DATE, CREATE_TIME
     , fec_election_yr, MST_RCT_REC_FLG
-    FROM last_record_per_cycle 
+    FROM last_record_per_cycle
     where the_rank = 1
 )
-, CHANGE_CAPTURE AS 
+, CHANGE_CAPTURE AS
 (
-    SELECT info_end_cycle.CMTE_ID 
+    SELECT info_end_cycle.CMTE_ID
     , info_begin_cycle.CMTE_NM AS FIRST_CMTE_NM
     , info_end_cycle.CMTE_NM AS LATEST_CMTE_NM
     , info_begin_cycle.FILED_CMTE_TP AS FIRST_CMTE_TP
@@ -74,8 +75,8 @@ with BASE_INFO as
 )
 /*
 Some cand/cmte has special election that happened in the odd year,
-followed by regular election in even year.  
-For financial cycle purpose here, only care about the fec_election_yr.  
+followed by regular election in even year.
+For financial cycle purpose here, only care about the fec_election_yr.
 So only take one row per CAND_ID/CMTE_ID/FEC_ELECTION_YR
 */
 , CAND_CMTE_LINKAGE AS
@@ -86,12 +87,12 @@ So only take one row per CAND_ID/CMTE_ID/FEC_ELECTION_YR
 )
 /*
 some cmte filed different type of forms, either due to change of cmte_tp, or by mistakes
-ofec_totals_combined_vw include form_type in ('F3', 'F3P', 'F3X').  
-Here we need to know if these committees file financial information, no matter which form they reported money from.  
+ofec_totals_combined_vw include form_type in ('F3', 'F3P', 'F3X').
+Here we need to know if these committees file financial information, no matter which form they reported money from.
 Therefore get a cmte total per cycle.
 ** In issue #4458, ofec_committee_history_mv need to refers to ofec_pcc_to_pac_mv,
 **  the complicated dependencies cause refresh sequences of MVs error out.
-since we only need to if these committees file financial information or not, 
+since we only need to if these committees file financial information or not,
 no need use whole ofec_totals_combined_vw.  Take the information from the base table of ofec_totals_combined_vw
 using the same criteria.  Result had been compared to make sure it is the same.
 */
@@ -118,7 +119,7 @@ SELECT CHANGE_CAPTURE.CMTE_ID
 , CHANGE_CAPTURE.LATEST_CMTE_DSGN
 ,totals.receipts, totals.disbursements
 FROM CHANGE_CAPTURE
-join CAND_CMTE_LINKAGE ccl 
+join CAND_CMTE_LINKAGE ccl
 on ccl.cmte_id = CHANGE_CAPTURE.cmte_id and ccl.fec_election_yr = CHANGE_CAPTURE.fec_election_yr
 JOIN ofec_candidate_history_vw cand_yr
 ON cand_yr.candidate_id  = ccl.cand_id and cand_yr.two_year_period = CHANGE_CAPTURE.fec_election_yr
@@ -139,11 +140,11 @@ alter table public.ofec_pcc_to_pac_mv owner to fec;
 grant all on public.ofec_pcc_to_pac_mv to fec;
 grant select on public.ofec_pcc_to_pac_mv to fec_read;
 
-CREATE UNIQUE INDEX idx_ofec_pcc_to_pac_mv_cmte_id_fec_election_yr 
+CREATE UNIQUE INDEX idx_ofec_pcc_to_pac_mv_cmte_id_fec_election_yr
     ON public.ofec_pcc_to_pac_mv USING btree (cmte_id,fec_election_yr);
 
 -- ------------------
-CREATE OR REPLACE VIEW public.ofec_pcc_to_pac_vw 
+CREATE OR REPLACE VIEW public.ofec_pcc_to_pac_vw
 AS select * from public.ofec_pcc_to_pac_mv;
 
 alter table public.ofec_pcc_to_pac_vw owner to fec;
@@ -158,14 +159,14 @@ grant select on public.ofec_pcc_to_pac_vw to fec_read;
 DROP MATERIALIZED VIEW IF EXISTS public.ofec_committee_history_mv_tmp;
 
 CREATE MATERIALIZED VIEW public.ofec_committee_history_mv_tmp AS
-WITH cycles AS 
+WITH cycles AS
 (
     SELECT cmte_valid_fec_yr.cmte_id,
     array_agg(cmte_valid_fec_yr.fec_election_yr) FILTER (WHERE cmte_valid_fec_yr.fec_election_yr is not NULL)::integer[] AS cycles,
     max(cmte_valid_fec_yr.fec_election_yr) AS max_cycle
     FROM disclosure.cmte_valid_fec_yr
     GROUP BY cmte_valid_fec_yr.cmte_id
-), dates AS 
+), dates AS
 (
     SELECT f_rpt_or_form_sub.cand_cmte_id AS cmte_id,
     min(f_rpt_or_form_sub.receipt_dt) AS first_file_date,
@@ -175,13 +176,13 @@ WITH cycles AS
     array_agg(DISTINCT get_cycle(f_rpt_or_form_sub.rpt_yr)) FILTER (WHERE f_rpt_or_form_sub.rpt_yr is not NULL) AS cycles_has_activity
     FROM disclosure.f_rpt_or_form_sub
     GROUP BY f_rpt_or_form_sub.cand_cmte_id
-), candidates AS 
+), candidates AS
 (
     SELECT cand_cmte_linkage.cmte_id,
     array_agg(DISTINCT cand_cmte_linkage.cand_id)::text[] AS candidate_ids
     FROM disclosure.cand_cmte_linkage
     GROUP BY cand_cmte_linkage.cmte_id
-), reports AS 
+), reports AS
 (
     SELECT f_rpt_or_form_sub.cand_cmte_id AS cmte_id,
     max(get_cycle(f_rpt_or_form_sub.rpt_yr)) AS last_cycle_has_financial,
@@ -189,7 +190,7 @@ WITH cycles AS
     FROM disclosure.f_rpt_or_form_sub
     WHERE upper(f_rpt_or_form_sub.form_tp::text) = ANY (ARRAY['F3'::text, 'F3X'::text, 'F3P'::text, 'F3L'::text, 'F4'::text, 'F5'::text, 'F7'::text, 'F13'::text, 'F24'::text, 'F6'::text, 'F9'::text, 'F10'::text, 'F11'::text])
     GROUP BY f_rpt_or_form_sub.cand_cmte_id
-), leadership_pac_linkage AS 
+), leadership_pac_linkage AS
 (
     SELECT cand_cmte_linkage_alternate.cmte_id, cand_cmte_linkage_alternate.fec_election_yr,
     array_agg(DISTINCT cand_cmte_linkage_alternate.cand_id)::text[] AS sponsor_candidate_ids
@@ -264,11 +265,11 @@ SELECT DISTINCT ON (fec_yr.cmte_id, fec_yr.fec_election_yr) row_number() OVER ()
     dates.cycles_has_activity,
     is_committee_active(fec_yr.cmte_filing_freq) AS is_active,
     l.sponsor_candidate_ids,
-  (case when pcc.cand_id is null then false else true end)::bool as convert_to_pac_flg,
-  pcc.first_cmte_nm as former_cmte_name, 
-  pcc.cand_id as former_cand_id, 
-  pcc.cand_name as former_cand_name,
-  pcc.candidate_election_year as former_cand_election_year  
+  (case when pcc.cand_id is null then false else true end)::bool as convert_to_pac_flag,
+  pcc.first_cmte_nm as former_committee_name,
+  pcc.cand_id as former_candidate_id,
+  pcc.cand_name as former_candidate_name,
+  pcc.candidate_election_year as former_candidate_election_year
 FROM disclosure.cmte_valid_fec_yr fec_yr
 LEFT JOIN fec_vsum_f1_vw f1 ON fec_yr.cmte_id::text = f1.cmte_id::text AND fec_yr.fec_election_yr >= f1.rpt_yr
 LEFT JOIN cycles ON fec_yr.cmte_id::text = cycles.cmte_id::text

@@ -149,7 +149,6 @@ class CommitteeView(ApiResource):
 
         return query
 
-
 @doc(
     tags=['committee'],
     description=docs.COMMITTEE_HISTORY,
@@ -193,7 +192,7 @@ class CommitteeHistoryView(ApiResource):
             # use for
             # '/candidate/<candidate_id>/committees/history/',
             # '/candidate/<candidate_id>/committees/history/<int:cycle>/',
-            query_converted = query.filter(models.CommitteeHistory.former_cand_id == candidate_id.upper())
+            query_converted = query.filter(models.CommitteeHistory.former_candidate_id == candidate_id.upper())
 
             query = query.join(
                 models.CandidateCommitteeLink,
@@ -204,7 +203,6 @@ class CommitteeHistoryView(ApiResource):
             ).filter(
                 models.CandidateCommitteeLink.candidate_id == candidate_id.upper(),
             )
-
 
         if cycle:
             # use for
@@ -220,9 +218,9 @@ class CommitteeHistoryView(ApiResource):
                     # in same election_yr_to_be_included, remove duplicate committee
                     models.CommitteeHistory.committee_id,
                 )
-                
+
                 query_converted = query_converted.filter(
-                    models.CommitteeHistory.former_cand_election_year == cycle,
+                    models.CommitteeHistory.former_candidate_election_year == cycle,
                 ).order_by(
                     models.CommitteeHistory.committee_id,
                     sa.desc(models.CommitteeHistory.cycle),
@@ -235,8 +233,8 @@ class CommitteeHistoryView(ApiResource):
                     models.CommitteeHistory.committee_id,
                     sa.desc(models.CommitteeHistory.cycle),
                     )
-    
+
             else:
                 query = query.filter(models.CommitteeHistory.cycle == cycle)
-                        
+
         return query
