@@ -307,8 +307,8 @@ api.add_resource(
     committees.CommitteeHistoryView,
     '/committee/<string:committee_id>/history/',
     '/committee/<string:committee_id>/history/<int:cycle>/',
-    '/candidate/<candidate_id>/committees/history/',
-    '/candidate/<candidate_id>/committees/history/<int:cycle>/',
+    '/candidate/<string:candidate_id>/committees/history/',
+    '/candidate/<string:candidate_id>/committees/history/<int:cycle>/',
 )
 api.add_resource(totals.TotalsByCommitteeTypeView, '/totals/<string:committee_type>/')
 api.add_resource(totals.TotalsCommitteeView, '/committee/<string:committee_id>/totals/')
