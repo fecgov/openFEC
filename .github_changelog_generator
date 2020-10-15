@@ -1,0 +1,16 @@
+unreleased=true
+since-tag=public-20200922
+project=openFEC
+user=fecgov
+filter-by-milestone=true
+breaking-labels="breaking change"
+breaking-label=**Breaking changes:**
+deprecated-labels="deprecated"
+enhancement-labels="enhancement"
+enhancement-label=**Added:**
+security-labels="Security: general,Security: high,Security: moderate,Security:low"
+issues=false
+pr-label=**Under the hood:**
+release-branch=master
+exclude-labels=release-branch
+
