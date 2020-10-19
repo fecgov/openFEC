@@ -305,6 +305,7 @@ committee_list = {
     'min_last_f1_date': fields.Date(description=docs.MIN_LAST_F1_DATE),
     'max_last_f1_date': fields.Date(description=docs.MAX_LAST_F1_DATE),
     'treasurer_name': fields.List(fields.Str, description=docs.TREASURER_NAME),
+    'sponsor_candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
 }
 
 

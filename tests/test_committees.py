@@ -373,6 +373,20 @@ class CommitteeFormatTest(ApiBaseTest):
             )
         )
 
+    def test_filter_by_sponsor_candidate_ids(self):
+        sponsor_candidate_ids = ['H001']
+        factories.CommitteeFactory(sponsor_candidate_ids=sponsor_candidate_ids)
+
+        response = self._response(
+            api.url_for(CommitteeList, sponsor_candidate_id='H001')
+        )
+        assert len(response['results']) == 1
+
+        response = self._response(
+            api.url_for(CommitteeList, sponsor_candidate_id='-H001')
+        )
+        assert len(response['results']) == 0
+
 
 class TestCommitteeHistory(ApiBaseTest):
     def setUp(self):
