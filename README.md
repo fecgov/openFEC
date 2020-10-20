@@ -575,7 +575,7 @@ Incrementally-updated aggregates and materialized views are updated nightly; see
 ### Loading legal documents
 There are individual management commands for loading individual legal documents. More information is available by invoking each of these commands with a `--help` option. These commands can be run as [tasks](https://docs.cloudfoundry.org/devguide/using-tasks.html) on `cloud.gov`, e.g.,
 ```
-cf run-task api  "python manage.py index_statutes" -m 2G --name index-statutes
+cf run-task api --command "python manage.py index_statutes" -m 2G --name index-statutes
 ```
 The progress of these tasks can be monitored using, e.g.,
 ```
