@@ -60,7 +60,15 @@ def check_legal_data():
 
         # ---display admin fine data:
         try:
-            af_id = "af_12"
+            af_id = "af_3726"
+            logger.info("\n*** admin fine {0} data: ***\n{1}".format(
+                af_id,
+                json.dumps(es_client.get(index="docs", id=af_id), indent=2, cls=DateTimeEncoder)))
+        except Exception as err:
+            logger.error("admin fine {0} not found.".format(af_id))
+
+        try:
+            af_id = "af_3571"
             logger.info("\n*** admin fine {0} data: ***\n{1}".format(
                 af_id,
                 json.dumps(es_client.get(index="docs", id=af_id), indent=2, cls=DateTimeEncoder)))
@@ -78,7 +86,7 @@ def check_legal_data():
 
         # ---display ao data:
         try:
-            ao_id = "1975-01"
+            ao_id = "2020-04"
             logger.info("\n*** ao id {0} data: ***\n{1}".format(
                 ao_id,
                 json.dumps(es_client.get(index="docs", id=ao_id), indent=2, cls=DateTimeEncoder)))
@@ -87,7 +95,7 @@ def check_legal_data():
 
         # ---display archived mur data:
         try:
-            arch_mur_id = "mur_4"
+            arch_mur_id = "mur_400"
             logger.info("\n*** archived {0} data: ***\n{1}".format(
                 arch_mur_id,
                 json.dumps(es_client.get(index="archived_murs", id=arch_mur_id), indent=2, cls=DateTimeEncoder)))

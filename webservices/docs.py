@@ -1857,17 +1857,26 @@ Search for candidates by candiate id or candidate first or last name
 
 
 # ======== legal start =========
-LEGAL_SEARCH = '''
-Search for legal documents.
-'''
-
 LEGAL = '''
 Explore relevant statutes, regulations and Commission actions.
 '''
 
 LEGAL_SEARCH = '''
-Search legal documents by type, or across all document types using keywords, parameter values and ranges.
+Search legal documents by document type, or across all document types using keywords, parameter values and ranges.
 '''
+
+LEGAL_DOC_SEARCH = '''
+Search legal documents by type and No.
+'''
+
+LEGAL_DOC_NO = '''
+Document number to fetch.
+'''
+
+LEGAL_DOC_TYPE = '''
+Document type to fetch.
+'''
+
 # ======== legal end =========
 
 

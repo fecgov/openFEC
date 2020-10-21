@@ -1,6 +1,5 @@
 import logging
 import elasticsearch
-import copy
 import datetime
 import json
 
@@ -298,7 +297,19 @@ ARCH_MUR_MAPPINGS = {
 
 # ==== end define mapping for index: archived_murs
 
-ANALYZER_SETTINGS = {"analysis": {"analyzer": {"default": {"type": "english"}}}}
+# ANALYZER_SETTINGS = {"analysis": {"analyzer": {"default": {"type": "english"}}}}
+
+ANALYZER_SETTINGS = {
+    "analysis": {
+        "analyzer": {
+            "default": {
+                "type": "english"
+            }
+        }
+    },
+    "highlight.max_analyzed_offset": 60000000,
+}
+
 
 BACKUP_REPOSITORY_NAME = "legal_s3_repository"
 
