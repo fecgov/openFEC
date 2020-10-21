@@ -134,7 +134,6 @@ to provide context.
 CANDIDATE_DETAIL = '''
 This endpoint is useful for finding detailed information about a particular candidate. Use the
 `candidate_id` to find the most recent information about that candidate.
-
 '''
 
 CANDIDATE_NAME = 'Name of candidate running for office'
@@ -531,6 +530,11 @@ Affiliated committee or connected organization
 
 IS_COMMITTEE_ACTIVE = '''
 True indicates that a committee is active.
+'''
+
+SPONSOR_CANDIDATE_ID = '''
+A unique identifier assigned to each candidate registered with the FEC.
+If a person runs for several offices, that person will have separate candidate IDs for each office. This is a filter for Leadership PAC sponsor.
 '''
 # ======== committee end ===========
 
