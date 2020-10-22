@@ -309,9 +309,9 @@ invoke dump postgresql://:@/cfdm_test data/subset.dump
 If you haven't used Cloud Foundry in other projects, you'll need to install the Cloud Foundry CLI and the autopilot plugin.
 
 #### Deploy
-Before deploying, install the [Cloud Foundry CLI](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) and the [autopilot plugin](https://github.com/concourse/autopilot):
+Before deploying, install version 7 of the [Cloud Foundry CLI](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) and the [autopilot plugin](https://github.com/concourse/autopilot):
 
-1. Read [Cloud Foundry documentation](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) to install Cloud Foundry CLI.
+1. Read [Cloud Foundry documentation](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) to install version 7 of the Cloud Foundry CLI.
 
 2. Install autopilot by running:
 
@@ -575,7 +575,7 @@ Incrementally-updated aggregates and materialized views are updated nightly; see
 ### Loading legal documents
 There are individual management commands for loading individual legal documents. More information is available by invoking each of these commands with a `--help` option. These commands can be run as [tasks](https://docs.cloudfoundry.org/devguide/using-tasks.html) on `cloud.gov`, e.g.,
 ```
-cf run-task api  "python manage.py index_statutes" -m 2G --name index-statutes
+cf run-task api --command "python manage.py index_statutes" -m 2G --name index-statutes
 ```
 The progress of these tasks can be monitored using, e.g.,
 ```
