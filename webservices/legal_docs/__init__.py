@@ -25,30 +25,33 @@ from .regulations import (  # noqa
 from .es_management import (  # noqa
     create_docs_index,
     create_archived_murs_index,
-    delete_all_indices,
+    delete_index,
     create_staging_index,
     restore_from_staging_index,
-    move_archived_murs,
     configure_snapshot_repository,
-    create_elasticsearch_backup,
-    restore_elasticsearch_backup,
+    delete_repository,
+    display_repositories,
+    create_es_snapshot,
+    restore_es_snapshot,
+    delete_snapshot,
+    display_snapshots,
+    display_snapshot_detail,
     delete_advisory_opinions_from_es,
     delete_current_murs_from_es,
     delete_murs_from_s3,
-    retrieve_snapshots,
 )
 
-from .check_legal_data import ( # noqa
-    check_legal_data,
+from .show_legal_data import ( # noqa
+    show_legal_data,
 )
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-logger = logging.getLogger('elasticsearch')
-logger.setLevel('WARN')
-logger = logging.getLogger('pdfminer')
-logger.setLevel('ERROR')
-logger = logging.getLogger('botocore')
-logger.setLevel('WARN')
+logger = logging.getLogger("elasticsearch")
+logger.setLevel("WARN")
+logger = logging.getLogger("pdfminer")
+logger.setLevel("ERROR")
+logger = logging.getLogger("botocore")
+logger.setLevel("WARN")
 
 
 def load_current_legal_docs():
