@@ -398,6 +398,17 @@ class TestCommitteeHistory(ApiBaseTest):
                 designation='P',
                 is_active=True,
             ),
+            # Candidate PCC converted to PAC in 2016
+            factories.CommitteeHistoryFactory(
+                committee_id=self.committees[2].committee_id,
+                cycle=2016,
+                designation='P',
+                is_active=True,
+                # Needed to show conversion info
+                former_candidate_id=self.candidate.candidate_id,
+                former_candidate_election_year=2016,
+                former_committee_name="Used to be PCC but I'm a PAC now committeee"
+            ),
             factories.CommitteeHistoryFactory(
                 committee_id=self.committees[3].committee_id,
                 cycle=2014,
@@ -527,6 +538,20 @@ class TestCommitteeHistory(ApiBaseTest):
         )
         assert len(results) == 4
         assert 'J' not in [committee.get('designation') for committee in results]
+
+    def test_converted_commtitee(self):
+        """Where PCC converted to PAC in 2016, still show committee history"""
+        results = self._results(
+            api.url_for(
+                CommitteeHistoryView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2016,
+                election_full=True
+            )
+        )
+
+        assert len(results) == 1
+        assert results[0].get("former_candidate_id") == self.candidate.candidate_id
 
     def test_case_insensitivity(self):
         lower_candidate = factories.CandidateDetailFactory(candidate_id="H01")
