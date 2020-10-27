@@ -526,6 +526,7 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
 * Check if there are any SQL files changed. Depending on where the changes are, you may need to run migrations. Ask the person who made the change what, if anything, you need to run.
 * Make sure your pull request has been approved
 * Make sure local laptop copies of `master`, `develop`, and `release/[release name]` github branches are up-to-date by checking them out and using `git pull` for each branch.
+* Rebuild candidate release branch, i.e., `release/public-YYYYMMDD`, in staging environment, and verify there are no errors and that build passes.
 * Developer merges release branch into `master` (and backmerges into `develop`) and pushes to origin:
 
     ```
