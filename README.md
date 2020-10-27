@@ -532,7 +532,7 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
     git config --global push.followTags true
     git flow release finish my-release
     ```
-    You'll need to save several merge messages, and add a tag message which is named the name of the release (eg., public-beta-20170118).
+    You'll need to save several merge messages, and add a tag message which is named the name of the release (eg., public-beta-20170118). Check to see what `git branch` returns. If it shows you are on `master`, ignore the next step for checking out and pushing to `develop`.
     ```
     git checkout develop
     git push origin develop
@@ -541,6 +541,7 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
 
     ```
     git checkout master
+    git log         # make sure tag for release is present
     git push origin master --follow-tags
     ```
    Watch Circle to make sure it passes, then test the production site manually to make sure everything looks ok.
