@@ -241,7 +241,6 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
                 cancel_deploy = ctx.run('cf cancel-deployment {}'.format(app), echo=True, warn=True)
                 if cancel_deploy.ok:
                     print("Successfully cancelled deploy. Check logs.")
-                    ctx.run('cf app {}'.format(app), echo=True, warn=True)
                 else:
                     print("Unable to cancel deploy. Check logs.")
 
