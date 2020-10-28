@@ -373,6 +373,25 @@ class CommitteeFormatTest(ApiBaseTest):
             )
         )
 
+    def test_filter_by_sponsor_candidate_ids(self):
+        sponsor_candidate_ids1 = ['H001']
+        sponsor_candidate_ids2 = ['S001']
+        factories.CommitteeFactory(sponsor_candidate_ids=sponsor_candidate_ids1)
+        factories.CommitteeFactory(sponsor_candidate_ids=sponsor_candidate_ids2)
+
+        results = self._results(
+            api.url_for(CommitteeList, sponsor_candidate_id='H001')
+        )
+
+        assert len(results) == 1
+        assert results[0]['sponsor_candidate_ids'] == sponsor_candidate_ids1
+
+        results = self._results(
+            api.url_for(CommitteeList, sponsor_candidate_id='-H001')
+        )
+        assert len(results) == 1
+        assert results[0]['sponsor_candidate_ids'] == sponsor_candidate_ids2
+
 
 class TestCommitteeHistory(ApiBaseTest):
     def setUp(self):
@@ -540,7 +559,7 @@ class TestCommitteeHistory(ApiBaseTest):
         assert 'J' not in [committee.get('designation') for committee in results]
 
     def test_converted_commtitee(self):
-        """Where PCC converted to PAC in 2016, still show committee history"""
+        """Where PCC converted to PAC in 2016, still show committee history."""
         results = self._results(
             api.url_for(
                 CommitteeHistoryView,

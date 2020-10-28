@@ -9,6 +9,7 @@ from webservices import exceptions
 from webservices.common import models
 from webservices.common.views import ApiResource
 
+
 def filter_year(model, query, years):
     return query.filter(
         sa.or_(*[
@@ -51,6 +52,10 @@ class CommitteeList(ApiResource):
     filter_fulltext_fields = [
         ('q', models.CommitteeSearch.fulltxt),
         ('treasurer_name', models.Committee.treasurer_text),
+    ]
+
+    filter_overlap_fields = [
+        ('sponsor_candidate_id', models.Committee.sponsor_candidate_ids),
     ]
 
     @property
@@ -232,7 +237,7 @@ class CommitteeHistoryView(ApiResource):
                 query = query_regular.union(query_converted).order_by(
                     models.CommitteeHistory.committee_id,
                     sa.desc(models.CommitteeHistory.cycle),
-                    )
+                )
 
             else:
                 query = query.filter(models.CommitteeHistory.cycle == cycle)

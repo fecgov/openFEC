@@ -44,6 +44,7 @@ class BaseConcreteCommittee(BaseCommittee):
 
     committee_id = db.Column(db.String, primary_key=True, unique=True, index=True, doc=docs.COMMITTEE_ID)
     candidate_ids = db.Column(ARRAY(db.Text), doc=docs.CANDIDATE_ID)
+    sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
 
 
 class Committee(BaseConcreteCommittee):
