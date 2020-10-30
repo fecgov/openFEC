@@ -10,10 +10,10 @@ from webservices.tasks import utils
 schedule = {}
 # if env.app.get('space_name', 'unknown-space').lower() != 'feature':
 schedule = {
-    'refresh_materialized_views': {
-        'task': 'webservices.tasks.refresh.refresh_materialized_views',
-        'schedule': crontab(minute=0, hour=9),
-    },
+    # 'refresh_materialized_views': {
+    #     'task': 'webservices.tasks.refresh.refresh_materialized_views',
+    #     'schedule': crontab(minute=0, hour=9),
+    # },
 
     'reload_all_aos_daily_except_sunday': {
         'task': 'webservices.tasks.legal_docs.reload_all_aos_when_change',
