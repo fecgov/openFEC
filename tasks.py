@@ -218,6 +218,7 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
     # Deploy API and worker applications
     for app in ('api', 'celery-worker', 'celery-beat'):
         existing_deploy = ctx.run('cf app {0}'.format(app), echo=True, warn=True)
+        print("\n")
         cmd = 'push --strategy rolling' if existing_deploy.ok else 'push'
         new_deploy = ctx.run('cf {cmd} {app} -f manifests/manifest_{file}_{space}.yml'.format(
             cmd=cmd,
@@ -245,6 +246,9 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
                     print("Unable to cancel deploy. Check logs.")
 
             return sys.exit(1)
+
+        print("\nA new version of your application '{}' has been successfully pushed!".format(app))
+        ctx.run('cf apps', echo=True, warn=True)
 
     # Needed for CircleCI
     return sys.exit(0)
