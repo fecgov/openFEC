@@ -38,6 +38,9 @@ RECENTLY_MODIFIED_CASES = """
     ORDER BY case_serial
 """
 
+# SLACK_BOTS = "#bots"
+SLACK_BOTS = "#test-bot"
+
 
 @app.task(once={'graceful': True}, base=QueueOnce)
 def refresh():
@@ -59,12 +62,12 @@ def reload_all_aos_when_change():
             load_advisory_opinions()
             logger.info("Daily (%s) reload of all AOs completed", datetime.date.today().strftime("%A"))
             slack_message = 'Daily reload of all AOs completed in {0} space'.format(get_app_name())
-            utils.post_to_slack(slack_message, '#bots')
+            utils.post_to_slack(slack_message, SLACK_BOTS)
         else:
             logger.info("No daily (%s) modified AOs found", datetime.date.today().strftime("%A"))
             slack_message = \
                 'No modified AOs found for the day - Reload of all AOs skipped in {0} space'.format(get_app_name())
-            utils.post_to_slack(slack_message, '#bots')
+            utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
 @app.task(once={'graceful': True}, base=QueueOnce)
@@ -73,7 +76,7 @@ def reload_all_aos():
     load_advisory_opinions()
     logger.info("Weekly (%s) reload of all AOs completed", datetime.date.today().strftime("%A"))
     slack_message = 'Weekly reload of all AOs completed in {0} space'.format(get_app_name())
-    utils.post_to_slack(slack_message, '#bots')
+    utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
 @app.task(once={'graceful': True}, base=QueueOnce)
@@ -83,11 +86,11 @@ def create_es_backup():
         create_es_snapshot()
         logger.info("Weekly (%s) elasticsearch backup completed", datetime.date.today().strftime("%A"))
         slack_message = 'Weekly elasticsearch backup completed in {0} space'.format(get_app_name())
-        utils.post_to_slack(slack_message, '#bots')
+        utils.post_to_slack(slack_message, SLACK_BOTS)
     except Exception as error:
         logger.exception(error)
         slack_message = '*ERROR* elasticsearch backup failed for {0}. Check logs.'.format(get_app_name())
-        utils.post_to_slack(slack_message, '#bots')
+        utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
 def refresh_aos(conn):

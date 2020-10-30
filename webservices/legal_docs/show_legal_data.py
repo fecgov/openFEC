@@ -19,16 +19,6 @@ def show_legal_data():
         es_client = utils.create_es_client()
 
         logger.info("\n==================Legal doc info==================")
-        logger.info("\n*** All indices: ***\n{0}".format(es_client.cat.indices()))
-
-        if es_client.indices.exists(index="docs"):
-            logger.info("\n*** alias under 'docs': ***\n{0}".format(
-                json.dumps(es_client.indices.get_alias(index="docs"), indent=2)))
-
-        if es_client.indices.exists(index="archived_murs"):
-            logger.info("\n*** alias under 'archived_murs': ***\n{0}".format(
-                json.dumps(es_client.indices.get_alias(index="archived_murs"), indent=2)))
-
         if es_client.indices.exists(index="docs"):
             logger.info("\n*** total count in 'docs': ***\n{0}".format(
                 json.dumps(es_client.count(index="docs"), indent=2)))
@@ -40,14 +30,6 @@ def show_legal_data():
         if es_client.indices.exists(index="docs_search"):
             logger.info("\n*** total count in 'docs_search': ***\n{0}".format(
                 json.dumps(es_client.count(index="docs_search"), indent=2)))
-
-        if es_client.indices.exists(index="docs"):
-            logger.info("\n*** mappings for 'docs':***\n{0}".format(
-                json.dumps(es_client.indices.get_mapping(index="docs"), indent=2)))
-
-        if es_client.indices.exists(index="archived_murs"):
-            logger.info("\n*** mappings for 'archived_murs': ***\n{0}".format(
-                json.dumps(es_client.indices.get_mapping(index="archived_murs"), indent=2)))
 
         # ---display current mur data:
         try:
