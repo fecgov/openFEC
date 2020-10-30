@@ -165,7 +165,7 @@ def limit_remote_addr():
             if api_data_route not in TRUSTED_PROXY_IPS:
                 abort(403)
             if source_ip in BLOCKED_IPS:
-                abort(403)
+                abort(503, RESTRICT_MESSAGE)
             if RESTRICT_DOWNLOADS in true_values and '/download/' in request.url:
                 # 'X-Api-User-Id' header is passed through by the API umbrella
                 request_api_key_id = request.headers.get('X-Api-User-Id')
