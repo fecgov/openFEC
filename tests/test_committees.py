@@ -21,6 +21,7 @@ class CommitteeFormatTest(ApiBaseTest):
             committee_type='P',
             treasurer_name='Robert J. Lipshutz',
             party='DEM',
+            sponsor_candidate_ids=['P001']
         )
         response = self._response(
             api.url_for(CommitteeView, committee_id=committee.committee_id)
@@ -35,6 +36,7 @@ class CommitteeFormatTest(ApiBaseTest):
         self.assertEqual(result['committee_type'], committee.committee_type)
         self.assertEqual(result['treasurer_name'], committee.treasurer_name)
         self.assertEqual(result['party'], committee.party)
+        self.assertEqual(result['sponsor_candidate_ids'], committee.sponsor_candidate_ids)
 
     def test_fulltext_search(self):
         committee = factories.CommitteeFactory(
@@ -397,7 +399,7 @@ class TestCommitteeHistory(ApiBaseTest):
     def setUp(self):
         super().setUp()
         self.candidate = factories.CandidateDetailFactory()
-        self.committees = [factories.CommitteeDetailFactory() for _ in range(5)]
+        self.committees = [factories.CommitteeDetailFactory() for _ in range(6)]
         self.histories = [
             factories.CommitteeHistoryFactory(
                 committee_id=self.committees[0].committee_id,
@@ -439,6 +441,13 @@ class TestCommitteeHistory(ApiBaseTest):
                 cycle=2014,
                 designation='J',
                 is_active=False,
+            ),
+            factories.CommitteeHistoryFactory(
+                committee_id=self.committees[5].committee_id,
+                cycle=2020,
+                designation='D',
+                is_active=True,
+                sponsor_candidate_ids=['H003']
             ),
         ]
 
@@ -627,3 +636,13 @@ class TestCommitteeHistory(ApiBaseTest):
             )
         )
         assert len(results) == 1
+
+    def test_committee_history_fields(self):
+        result = self._results(
+            api.url_for(
+                CommitteeHistoryView,
+                committee_id=self.committees[5].committee_id,
+            )
+        )
+        assert len(result) == 1
+        self.assertEqual(result[0]['sponsor_candidate_ids'], ['H003'])
