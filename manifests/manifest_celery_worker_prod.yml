@@ -1,18 +1,4 @@
 ---
-path: ../
-memory: 1G
-stack: cflinuxfs3
-buildpack: python_buildpack
-env:
-  FEC_API_USE_PROXY: true
-  FEC_API_RESTRICT_DOWNLOADS: true
-  APP_NAME: fec | api | prod
-  PRODUCTION: True
-services:
-  - fec-api-search56
-  - fec-redis
-  - fec-creds-prod
-  - fec-s3-prod
 applications:
   - name: celery-worker
     instances: 6
@@ -21,3 +7,17 @@ applications:
     no-route: true
     health-check-type: process
     command: celery worker --app webservices.tasks --loglevel ${LOGLEVEL:=INFO} --concurrency 3
+    path: ../
+    stack: cflinuxfs3
+    buildpacks:
+      - python_buildpack
+    services:
+      - fec-api-search56
+      - fec-redis
+      - fec-creds-prod
+      - fec-s3-prod
+    env:
+      FEC_API_USE_PROXY: true
+      FEC_API_RESTRICT_DOWNLOADS: true
+      APP_NAME: fec | api | prod
+      PRODUCTION: True

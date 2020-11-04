@@ -1,19 +1,21 @@
-path: ../
+---
 applications:
 - name: <name>-kill-<date>
   memory: 1024M
   disk_quota: 1024M
   command: "(<put your command here> && echo SUCCESS || echo FAIL) && sleep infinity"  # "(python manage.py refresh_materialized && echo SUCCESS || echo FAIL) && sleep infinity"
-  buildpack: python_buildpack
+  no-route: true
+  path: ../
+  stack: cflinuxfs3
+  buildpacks:
+    - python_buildpack
+  health-check-type: process
+  services:
+    - fec-s3-dev
+    - fec-api-search56
+    - fec-creds-dev
+    - fec-redis
   env:
     FEC_API_USE_PROXY: true
     APP_NAME: fec | api | dev
     PRODUCTION: True
-  no-route: true
-  services:
-  - fec-s3-dev
-  - fec-api-search56
-  - fec-creds-dev
-  - fec-redis
-  stack: cflinuxfs3
-  health-check-type: process

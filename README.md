@@ -306,22 +306,14 @@ invoke dump postgresql://:@/cfdm_test data/subset.dump
 ## Deployment (FEC team only)
 
 ### Deployment prerequisites
-If you haven't used Cloud Foundry in other projects, you'll need to install the Cloud Foundry CLI and the autopilot plugin.
+If you haven't used Cloud Foundry in other projects, you'll need to install the Cloud Foundry CLI.
 
 #### Deploy
-Before deploying, install version 7 of the [Cloud Foundry CLI](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) and the [autopilot plugin](https://github.com/concourse/autopilot):
+Before deploying, install version 7 of the [Cloud Foundry CLI](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html):
 
 1. Read [Cloud Foundry documentation](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) to install version 7 of the Cloud Foundry CLI.
 
-2. Install autopilot by running:
-
-   ```
-   cf install-plugin autopilot -r CF-Community
-   ```
-
-   [Learn more about autopilot](https://github.com/concourse/autopilot).
-
-3. Set environment variables used by the deploy script:
+2. Set environment variables used by the deploy script:
 
    ```
    export FEC_CF_USERNAME=<your_cf_username>
