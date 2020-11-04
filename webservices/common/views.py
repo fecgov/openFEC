@@ -35,11 +35,12 @@ class ApiResource(utils.Resource):
     @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
-        count, _ = counts.get_count(self, query)
+        count, is_estimate = counts.get_count(self, query)
+        if not is_estimate:
+            count = None
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
-
         return utils.fetch_page(
             query, kwargs,
             count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
@@ -98,28 +99,34 @@ class ItemizedResource(ApiResource):
                 status_code=422,
             )
         if len(kwargs.get("committee_id", [])) > 1:
-            query, count = self.join_committee_queries(kwargs)
+            # query, count = self.join_committee_queries(kwargs)
+            query = self.join_committee_queries(kwargs)
+            count, is_estimate = counts.get_count(self, query)
+            if not is_estimate:
+                count = None
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
-        count, _ = counts.get_count(self, query)
+        count, is_estimate = counts.get_count(self, query)
+        if not is_estimate:
+            count = None
         return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
 
     def join_committee_queries(self, kwargs):
         """Build and compose per-committee subqueries using `UNION ALL`.
         """
         queries = []
-        total = 0
         for committee_id in kwargs.get('committee_id', []):
             query, count = self.build_committee_query(kwargs, committee_id)
             queries.append(query.subquery().select())
-            total += count
+            # total += count
         query = models.db.session.query(
             self.model
         ).select_entity_from(
             sa.union_all(*queries)
         )
         query = query.options(*self.query_options)
-        return query, total
+        # return query, total
+        return query
 
     def build_committee_query(self, kwargs, committee_id):
         """Build a subquery by committee.
@@ -128,5 +135,7 @@ class ItemizedResource(ApiResource):
         sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
         query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null)
         page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
-        count, _ = counts.get_count(self, query)
+        count, is_estimate = counts.get_count(self, query)
+        if not is_estimate:
+            count = None
         return page_query, count

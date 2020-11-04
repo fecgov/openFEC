@@ -209,7 +209,6 @@ class CandidateView(ApiResource):
                     == kwargs['federal_funds_flag']
                 )
             )
-
         return query
 
 
@@ -278,5 +277,4 @@ class CandidateHistoryView(ApiResource):
                 )
             else:
                 query = query.filter(models.CandidateHistory.two_year_period == cycle)
-
         return query
