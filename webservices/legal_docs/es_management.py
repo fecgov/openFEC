@@ -359,6 +359,15 @@ def create_index(index_name=None, aliases_name=None):
         logger.debug("aliases under " + DOCS_INDEX + " = " + json.dumps(aliases, indent=3, cls=DateTimeEncoder))
         body.update({"aliases": aliases})
 
+    elif index_name == ARCHIVED_MURS_INDEX:
+        # by default, use ARCHIVED_MURS_INDEX and ARCHIVED_MURS_INDEX_ALIAS, SEARCH_ALIAS
+        aliases_list = [ARCHIVED_MURS_INDEX_ALIAS, SEARCH_ALIAS]
+        for alias in aliases_list:
+            aliases.update({alias: {}})
+
+        logger.debug("aliases for " + ARCHIVED_MURS_INDEX + " = " + json.dumps(aliases, indent=3, cls=DateTimeEncoder))
+        body.update({"aliases": aliases})
+
     else:
         if aliases_name:
             aliases_list = aliases_name.split(',')
