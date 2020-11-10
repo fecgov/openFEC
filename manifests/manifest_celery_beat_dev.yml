@@ -1,15 +1,4 @@
 ---
-path: ../
-memory: 1G
-stack: cflinuxfs3
-buildpack: python_buildpack
-env:
-  APP_NAME: fec | api | dev
-services:
-  - fec-api-search56
-  - fec-redis
-  - fec-creds-dev
-  - fec-s3-dev
 applications:
   - name: celery-beat
     instances: 1
@@ -18,3 +7,14 @@ applications:
     no-route: true
     health-check-type: process
     command: celery beat --app webservices.tasks --loglevel INFO
+    path: ../
+    stack: cflinuxfs3
+    buildpacks:
+      - python_buildpack
+    services:
+      - fec-api-search56
+      - fec-redis
+      - fec-creds-dev
+      - fec-s3-dev
+    env:
+      APP_NAME: fec | api | dev

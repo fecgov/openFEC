@@ -278,3 +278,35 @@ class TestFilterOther(ApiBaseTest):
                 if 'Report' in each.summary and 'IE' not in each.summary
             ),
         )
+
+
+class TestFilterOverlap(ApiBaseTest):
+    def setUp(self):
+        super(TestFilterOverlap, self).setUp()
+        self.committees = [
+            factories.CommitteeFactory(committee_id='C001', sponsor_candidate_ids=['S001']),
+            factories.CommitteeFactory(committee_id='C002', sponsor_candidate_ids=['H001']),
+        ]
+
+    def test_filter_overlap(self):
+        """Test the filter that compares whether two arrays have elements in common."""
+        query_committees = filters.filter_overlap(
+            models.Committee.query,
+            {'sponsor_candidate_id': ['H001']},
+            CommitteeList.filter_overlap_fields,
+        )
+        self.assertEqual(
+            set(query_committees.all()),
+            set(each for each in self.committees if each.sponsor_candidate_ids == ['H001']),
+        )
+
+    def test_filter_overlap_exclude(self):
+        query_committees = filters.filter_overlap(
+            models.Committee.query,
+            {'sponsor_candidate_id': ['-H001']},
+            CommitteeList.filter_overlap_fields,
+        )
+        self.assertEqual(
+            set(query_committees.all()),
+            set(each for each in self.committees if each.sponsor_candidate_ids == ['S001']),
+        )

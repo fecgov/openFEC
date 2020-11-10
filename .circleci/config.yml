@@ -100,8 +100,7 @@ jobs:
           command: |
             mkdir -p $HOME/bin
             export PATH=$HOME/bin:$PATH
-            curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.32.0" | tar xzv -C $HOME/bin
-            cf install-plugin autopilot -f -r CF-Community
+            curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&version=7.1.0" | tar xzv -C $HOME/bin
 
       - add_ssh_keys # add Bastion host private keys configured in the UI
       - run: echo $FEC_BASTION_HOST_PUBLIC_KEY >> ~/.ssh/known_hosts # copy Bastion host public key

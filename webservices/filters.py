@@ -62,6 +62,23 @@ def filter_range(query, kwargs, fields):
     return query
 
 
+def filter_overlap(query, kwargs, fields):
+    """The purpose of this filter is to compare whether two arrays have elements in common.
+
+    It returns a Boolean value.
+    """
+    for key, column in fields:
+        if kwargs.get(key):
+            # handle combination exclude/include lists
+            exclude_list = build_exclude_list(kwargs.get(key))
+            include_list = build_include_list(kwargs.get(key))
+            if exclude_list:
+                query = query.filter(~column.overlap(exclude_list))
+            if include_list:
+                query = query.filter(column.overlap(include_list))
+    return query
+
+
 def filter_fulltext(query, kwargs, fields):
     for key, column in fields:
         if kwargs.get(key):

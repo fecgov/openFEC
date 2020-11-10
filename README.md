@@ -306,22 +306,14 @@ invoke dump postgresql://:@/cfdm_test data/subset.dump
 ## Deployment (FEC team only)
 
 ### Deployment prerequisites
-If you haven't used Cloud Foundry in other projects, you'll need to install the Cloud Foundry CLI and the autopilot plugin.
+If you haven't used Cloud Foundry in other projects, you'll need to install the Cloud Foundry CLI.
 
 #### Deploy
-Before deploying, install the [Cloud Foundry CLI](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) and the [autopilot plugin](https://github.com/concourse/autopilot):
+Before deploying, install version 7 of the [Cloud Foundry CLI](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html):
 
-1. Read [Cloud Foundry documentation](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) to install Cloud Foundry CLI.
+1. Read [Cloud Foundry documentation](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) to install version 7 of the Cloud Foundry CLI.
 
-2. Install autopilot by running:
-
-   ```
-   cf install-plugin autopilot -r CF-Community
-   ```
-
-   [Learn more about autopilot](https://github.com/concourse/autopilot).
-
-3. Set environment variables used by the deploy script:
+2. Set environment variables used by the deploy script:
 
    ```
    export FEC_CF_USERNAME=<your_cf_username>
@@ -526,13 +518,14 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
 * Check if there are any SQL files changed. Depending on where the changes are, you may need to run migrations. Ask the person who made the change what, if anything, you need to run.
 * Make sure your pull request has been approved
 * Make sure local laptop copies of `master`, `develop`, and `release/[release name]` github branches are up-to-date by checking them out and using `git pull` for each branch.
+* Rebuild candidate release branch, i.e., `release/public-YYYYMMDD`, in staging environment, and verify there are no errors and that build passes.
 * Developer merges release branch into `master` (and backmerges into `develop`) and pushes to origin:
 
     ```
     git config --global push.followTags true
     git flow release finish my-release
     ```
-    You'll need to save several merge messages, and add a tag message which is named the name of the release (eg., public-beta-20170118).
+    You'll need to save several merge messages, and add a tag message which is named the name of the release (eg., public-beta-20170118). Check to see what `git branch` returns. If it shows you are on `master`, ignore the next step for checking out and pushing to `develop`.
     ```
     git checkout develop
     git push origin develop
@@ -541,6 +534,7 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
 
     ```
     git checkout master
+    git log         # make sure tag for release is present
     git push origin master --follow-tags
     ```
    Watch Circle to make sure it passes, then test the production site manually to make sure everything looks ok.
@@ -575,7 +569,7 @@ Incrementally-updated aggregates and materialized views are updated nightly; see
 ### Loading legal documents
 There are individual management commands for loading individual legal documents. More information is available by invoking each of these commands with a `--help` option. These commands can be run as [tasks](https://docs.cloudfoundry.org/devguide/using-tasks.html) on `cloud.gov`, e.g.,
 ```
-cf run-task api  "python manage.py index_statutes" -m 2G --name index-statutes
+cf run-task api --command "python manage.py index_statutes" -m 2G --name index-statutes
 ```
 The progress of these tasks can be monitored using, e.g.,
 ```

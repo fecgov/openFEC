@@ -1,20 +1,21 @@
 ---
-path: ../
-memory: 1500M # 1.5G
-stack: cflinuxfs3
-buildpack: python_buildpack
-env:
-  FEC_API_USE_PROXY: true
-  FEC_API_RESTRICT_DOWNLOADS: true
-  APP_NAME: fec | api | stage
-services:
-  - fec-api-search56
-  - fec-redis
-  - fec-creds-stage
-  - fec-s3-stage
-routes:
-  - route: fec-stage-api.app.cloud.gov
 applications:
   - name: api
     instances: 1
+    memory: 1.5G
     disk_quota: 1G
+    stack: cflinuxfs3
+    buildpacks:
+      - python_buildpack
+    path: ../
+    routes:
+      - route: fec-stage-api.app.cloud.gov
+    services:
+      - fec-api-search56
+      - fec-redis
+      - fec-creds-stage
+      - fec-s3-stage
+    env:
+      FEC_API_USE_PROXY: true
+      FEC_API_RESTRICT_DOWNLOADS: true
+      APP_NAME: fec | api | stage
