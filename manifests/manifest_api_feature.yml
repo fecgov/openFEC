@@ -1,19 +1,20 @@
 ---
-path: ../
-memory: 1G
-stack: cflinuxfs3
-buildpack: python_buildpack
-env:
-  APP_NAME: fec | api | feature
-services:
-  - fec-s3-api
-  - fec-s3-snapshot
-  - fec-redis
-  - fec-api-elasticsearch
-  - fec-creds-feature
-routes:
-  - route: fec-feature-api.app.cloud.gov
 applications:
   - name: api
     instances: 1
+    memory: 1.5G
     disk_quota: 1G
+    stack: cflinuxfs3
+    buildpacks:
+      - python_buildpack
+    path: ../
+    routes:
+      - route: fec-feature-api.app.cloud.gov
+    services:
+      - fec-s3-api
+      - fec-s3-snapshot
+      - fec-redis
+      - fec-api-elasticsearch
+      - fec-creds-feature
+    env:
+      APP_NAME: fec | api | feature
