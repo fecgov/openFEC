@@ -1,182 +1,182 @@
-# from webservices import rest
-# import json
-# import codecs
-# import unittest
+from webservices import rest
+import json
+import codecs
+import unittest
 # import unittest.mock as mock
-# from unittest.mock import patch
+from unittest.mock import patch
 
-# from webservices.resources.legal import es
-# from elasticsearch import RequestError
+# from webservices.resources.legal import es_client
+from elasticsearch import RequestError
 # import datetime
 
-# # TODO: integrate more with API Schema so that __API_VERSION__ is returned
-# # self.assertEqual(result['api_version'], __API_VERSION__)
+# TODO: integrate more with API Schema so that __API_VERSION__ is returned
+# self.assertEqual(result['api_version'], __API_VERSION__)
 
 
-# def get_path(obj, path):
-#     parts = path.split('.')
-#     first = parts[0]
-#     assert first in obj
+def get_path(obj, path):
+    parts = path.split('.')
+    first = parts[0]
+    assert first in obj
 
-#     if len(parts) == 1:
-#         return obj[first]
-#     else:
-#         return get_path(obj[first], '.'.join(parts[1:]))
-
-
-# def es_advisory_opinion(*args, **kwargs):
-#     return {
-#         'hits': {
-#             'hits': [
-#                 {'_source': {'text': 'abc'}, '_type': 'advisory_opinions'},
-#                 {'_source': {'no': '123'}, '_type': 'advisory_opinions'},
-#             ]
-#         }
-#     }
+    if len(parts) == 1:
+        return obj[first]
+    else:
+        return get_path(obj[first], '.'.join(parts[1:]))
 
 
-# def es_mur(*args, **kwargs):
-#     return {
-#         'hits': {
-#             'hits': [
-#                 {'_source': {'text': 'abc'}, '_type': 'murs'},
-#                 {'_source': {'no': '123'}, '_type': 'murs'},
-#             ]
-#         }
-#     }
+def es_advisory_opinion(*args, **kwargs):
+    return {
+        'hits': {
+            'hits': [
+                {'_source': {'text': 'abc'}, 'type': 'advisory_opinions'},
+                {'_source': {'no': '123'}, 'type': 'advisory_opinions'},
+            ]
+        }
+    }
 
 
-# def es_invalid_search(*args, **kwargs):
-#     raise RequestError("invalid query")
+def es_mur(*args, **kwargs):
+    return {
+        'hits': {
+            'hits': [
+                {'_source': {'text': 'abc'}, 'type': 'murs'},
+                {'_source': {'no': '123'}, 'type': 'murs'},
+            ]
+        }
+    }
 
 
-# def es_search(**kwargs):
-#     _type = kwargs["body"]["query"]["bool"]["must"][0]["term"]["_type"]
-
-#     if _type == 'regulations':
-#         return {
-#             'hits': {
-#                 'hits': [
-#                     {
-#                         'highlight': {'text': ['a', 'b']},
-#                         '_source': {},
-#                         '_type': 'regulations',
-#                     }
-#                 ],
-#                 'total': 1,
-#             }
-#         }
-#     if _type == 'advisory_opinions':
-#         return {
-#             'hits': {
-#                 'hits': [
-#                     {
-#                         'highlight': {'text': ['a', 'b']},
-#                         '_source': {},
-#                         '_type': 'advisory_opinions',
-#                     },
-#                     {
-#                         'highlight': {'text': ['c', 'd']},
-#                         '_source': {},
-#                         '_type': 'advisory_opinions',
-#                     },
-#                 ],
-#                 'total': 2,
-#             }
-#         }
-#     if _type == 'statutes':
-#         return {
-#             'hits': {
-#                 'hits': [
-#                     {'highlight': {'text': ['e']}, '_source': {}, '_type': 'statutes'}
-#                 ],
-#                 'total': 3,
-#             }
-#         }
-
-#     if _type == 'murs':
-#         return {
-#             'hits': {
-#                 'hits': [
-#                     {'highlight': {'text': ['f']}, '_source': {}, '_type': 'murs'}
-#                 ],
-#                 'total': 4,
-#             }
-#         }
-
-#     if _type == 'adrs':
-#         return {
-#             'hits': {
-#                 'hits': [
-#                     {'highlight': {'text': ['f']}, '_source': {}, '_type': 'adrs'}
-#                 ],
-#                 'total': 2,
-#             }
-#         }
-
-#     if _type == 'admin_fines':
-#         return {
-#             'hits': {
-#                 'hits': [
-#                     {
-#                         'highlight': {'text': ['f']},
-#                         '_source': {},
-#                         '_type': 'admin_fines',
-#                     }
-#                 ],
-#                 'total': 5,
-#             }
-#         }
+def es_invalid_search(*args, **kwargs):
+    raise RequestError("invalid query")
 
 
-# class CanonicalPageTest(unittest.TestCase):
-#     @patch('webservices.rest.legal.es.search', es_advisory_opinion)
-#     def test_advisory_opinion_search(self):
-#         app = rest.app.test_client()
-#         response = app.get('/v1/legal/docs/advisory_opinions/1993-02?api_key=1234')
-#         assert response.status_code == 200
-#         result = json.loads(codecs.decode(response.data))
-#         assert result == {'docs': [{'text': 'abc'}, {'no': '123'}]}
+def es_search(**kwargs):
+    type = kwargs["body"]["query"]["bool"]["must"][0]["term"]["type"]
 
-#     @patch('webservices.rest.legal.es.search', es_mur)
-#     def test_mur_search(self):
-#         app = rest.app.test_client()
-#         response = app.get('/v1/legal/docs/murs/1?api_key=1234')
-#         assert response.status_code == 200
-#         result = json.loads(codecs.decode(response.data))
-#         assert result == {'docs': [{'text': 'abc'}, {'no': '123'}]}
+    if type == 'regulations':
+        return {
+            'hits': {
+                'hits': [
+                    {
+                        'highlight': {'text': ['a', 'b']},
+                        '_source': {},
+                        'type': 'regulations',
+                    }
+                ],
+                'total': 1,
+            }
+        }
+    if type == 'advisory_opinions':
+        return {
+            'hits': {
+                'hits': [
+                    {
+                        'highlight': {'text': ['a', 'b']},
+                        '_source': {},
+                        'type': 'advisory_opinions',
+                    },
+                    {
+                        'highlight': {'text': ['c', 'd']},
+                        '_source': {},
+                        'type': 'advisory_opinions',
+                    },
+                ],
+                'total': 2,
+            }
+        }
+    if type == 'statutes':
+        return {
+            'hits': {
+                'hits': [
+                    {'highlight': {'text': ['e']}, '_source': {}, 'type': 'statutes'}
+                ],
+                'total': 3,
+            }
+        }
 
-#     @patch.object(es, 'search')
-#     def test_query_dsl(self, es_search):
-#         app = rest.app.test_client()
-#         response = app.get('/v1/legal/docs/advisory_opinions/1993-02?api_key=1234')
-#         assert response.status_code == 404
+    if type == 'murs':
+        return {
+            'hits': {
+                'hits': [
+                    {'highlight': {'text': ['f']}, '_source': {}, 'type': 'murs'}
+                ],
+                'total': 4,
+            }
+        }
 
-#         # This is mostly copy/pasted from the dict-based query. This is not a
-#         # very meaningful test but helped to ensure we're using the
-#         # elasitcsearch_dsl correctly.
-#         expected_query = {
-#             "query": {
-#                 "bool": {
-#                     "must": [
-#                         {"term": {"no": "1993-02"}},
-#                         {"term": {"_type": "advisory_opinions"}},
-#                     ]
-#                 }
-#             },
-#             "_source": {"exclude": "documents.text"},
-#             "size": 200,
-#         }
-#         es_search.assert_called_with(
-#             body=expected_query, doc_type=mock.ANY, index=mock.ANY
-#         )
+    if type == 'adrs':
+        return {
+            'hits': {
+                'hits': [
+                    {'highlight': {'text': ['f']}, '_source': {}, 'type': 'adrs'}
+                ],
+                'total': 2,
+            }
+        }
+
+    if type == 'admin_fines':
+        return {
+            'hits': {
+                'hits': [
+                    {
+                        'highlight': {'text': ['f']},
+                        '_source': {},
+                        'type': 'admin_fines',
+                    }
+                ],
+                'total': 5,
+            }
+        }
+
+
+class CanonicalPageTest(unittest.TestCase):
+    @patch('webservices.rest.legal.es_client.search', es_advisory_opinion)
+    def test_advisory_opinion_search(self):
+        app = rest.app.test_client()
+        response = app.get('/v1/legal/docs/advisory_opinions/1993-02?api_key=1234')
+        assert response.status_code == 200
+        result = json.loads(codecs.decode(response.data))
+        assert result == {'docs': [{'text': 'abc'}, {'no': '123'}]}
+
+    @patch('webservices.rest.legal.es_client.search', es_mur)
+    def test_mur_search(self):
+        app = rest.app.test_client()
+        response = app.get('/v1/legal/docs/murs/1?api_key=1234')
+        assert response.status_code == 200
+        result = json.loads(codecs.decode(response.data))
+        assert result == {'docs': [{'text': 'abc'}, {'no': '123'}]}
+
+    # @patch.object(es_client, 'search')
+    # def test_query_dsl(self, es_search):
+    #     app = rest.app.test_client()
+    #     response = app.get('/v1/legal/docs/advisory_opinions/1993-02?api_key=1234')
+    #     assert response.status_code == 404
+
+    #     # This is mostly copy/pasted from the dict-based query. This is not a
+    #     # very meaningful test but helped to ensure we're using the
+    #     # elasitcsearch_dsl correctly.
+    #     expected_query = {
+    #         "query": {
+    #             "bool": {
+    #                 "must": [
+    #                     {"term": {"no": "1993-02"}},
+    #                     {"term": {"type": "advisory_opinions"}},
+    #                 ]
+    #             }
+    #         },
+    #         "_source": {"exclude": "documents.text"},
+    #         "size": 200,
+    #     }
+    #     es_search.assert_called_with(
+    #         body=expected_query, doc_type=mock.ANY, index=mock.ANY
+    #     )
 
 
 # class SearchTest(unittest.TestCase):
 #     def setUp(self):
 #         self.app = rest.app.test_client()
 
-#     @patch('webservices.rest.legal.es.search', es_search)
+#     @patch('webservices.rest.legal.es_client.search', es_search)
 #     def test_default_search(self):
 #         response = self.app.get('/v1/legal/search/?q=president&api_key=1234')
 #         assert response.status_code == 200
@@ -200,7 +200,7 @@
 #             'total_all': 17,
 #         }
 
-#     @patch('webservices.rest.legal.es.search', es_search)
+#     @patch('webservices.rest.legal.es_client.search', es_search)
 #     def test_type_search(self):
 #         response = self.app.get(
 #             '/v1/legal/search/' + '?q=president&type=advisory_opinions'
@@ -216,14 +216,14 @@
 #             'total_all': 2,
 #         }
 
-#     @patch('webservices.rest.legal.es.search', es_invalid_search)
+#     @patch('webservices.rest.legal.es_client.search', es_invalid_search)
 #     def test_invalid_search(self):
 #         response = self.app.get(
 #             '/v1/legal/search/' + '?q=president%20AND%20OR&type=advisory_opinions'
 #         )
 #         assert response.status_code == 400
 
-#     @patch.object(es, 'search')
+#     @patch.object(es_client, 'search')
 #     def test_query_dsl(self, es_search):
 #         response = self.app.get(
 #             '/v1/legal/search/', query_string={'q': 'president', 'type': 'statutes'}
@@ -241,7 +241,7 @@
 #             'query': {
 #                 'bool': {
 #                     'must': [
-#                         {'term': {'_type': 'statutes'}},
+#                         {'term': {'type': 'statutes'}},
 #                         {'query_string': {'query': 'president'}},
 #                     ]
 #                 }
@@ -264,7 +264,7 @@
 #             body=expected_query, index=mock.ANY, doc_type=mock.ANY
 #         )
 
-#     @patch.object(es, 'search')
+#     @patch.object(es_client, 'search')
 #     def test_query_dsl_with_ao_category_filter(self, es_search):
 #         response = self.app.get(
 #             '/v1/legal/search/',
@@ -279,7 +279,7 @@
 #             'query': {
 #                 'bool': {
 #                     'must': [
-#                         {'term': {'_type': 'advisory_opinions'}},
+#                         {'term': {'type': 'advisory_opinions'}},
 #                         {'bool': {'minimum_should_match': 1}},
 #                     ],
 #                     'minimum_should_match': 1,
@@ -341,7 +341,7 @@
 #             body=expected_query, index=mock.ANY, doc_type=mock.ANY
 #         )
 
-#     @patch.object(es, 'search')
+#     @patch.object(es_client, 'search')
 #     def test_query_dsl_with_case_filters(self, es_search):
 #         response = self.app.get(
 #             '/v1/legal/search/',
@@ -360,7 +360,7 @@
 #             "query": {
 #                 "bool": {
 #                     "must": [
-#                         {"term": {"_type": "murs"}},
+#                         {"term": {"type": "murs"}},
 #                         {"query_string": {"query": "embezzle"}},
 #                         {
 #                             "range": {

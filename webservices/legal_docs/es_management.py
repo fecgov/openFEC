@@ -351,21 +351,23 @@ def create_index(index_name=None, aliases_name=None):
     body.update({"settings": ANALYZER_SETTINGS})
 
     if index_name == DOCS_INDEX:
-        # by default, use DOCS_INDEX and DOCS_INDEX_ALIAS, SEARCH_ALIAS
-        aliases_list = [DOCS_INDEX_ALIAS, SEARCH_ALIAS]
+        # by default, use DOCS_INDEX and SEARCH_ALIAS, DOCS_INDEX_ALIAS
+        aliases_list = [SEARCH_ALIAS, DOCS_INDEX_ALIAS]
         for alias in aliases_list:
             aliases.update({alias: {}})
 
-        logger.debug("aliases under " + DOCS_INDEX + " = " + json.dumps(aliases, indent=3, cls=DateTimeEncoder))
+        logger.debug("aliases under '" + DOCS_INDEX + "' = " + json.dumps(
+            aliases, indent=3, cls=DateTimeEncoder))
         body.update({"aliases": aliases})
 
     elif index_name == ARCHIVED_MURS_INDEX:
-        # by default, use ARCHIVED_MURS_INDEX and ARCHIVED_MURS_INDEX_ALIAS, SEARCH_ALIAS
-        aliases_list = [ARCHIVED_MURS_INDEX_ALIAS, SEARCH_ALIAS]
+        # by default, use ARCHIVED_MURS_INDEX and SEARCH_ALIAS, ARCHIVED_MURS_INDEX_ALIAS
+        aliases_list = [SEARCH_ALIAS, ARCHIVED_MURS_INDEX_ALIAS]
         for alias in aliases_list:
             aliases.update({alias: {}})
 
-        logger.debug("aliases for " + ARCHIVED_MURS_INDEX + " = " + json.dumps(aliases, indent=3, cls=DateTimeEncoder))
+        logger.debug("aliases under '" + ARCHIVED_MURS_INDEX + "' = " + json.dumps(
+            aliases, indent=3, cls=DateTimeEncoder))
         body.update({"aliases": aliases})
 
     else:
@@ -438,6 +440,23 @@ def delete_index(index_name=None):
         logger.info("The index '{0}' is deleted successfully.".format(index_name))
     except elasticsearch.exceptions.NotFoundError:
         pass
+
+    if index_name == DOCS_INDEX:
+        try:
+            logger.info("Deleting alias '{0}' under index '{1}' ...".format(DOCS_INDEX_ALIAS, DOCS_INDEX))
+            es_client.indices.delete(DOCS_INDEX_ALIAS)
+            logger.info("The alias '{0}' is deleted successfully.".format(DOCS_INDEX_ALIAS))
+        except elasticsearch.exceptions.NotFoundError:
+            pass
+
+    if index_name == ARCHIVED_MURS_INDEX:
+        try:
+            logger.info("Deleting alias '{0}' under index '{1}'...".format(
+                ARCHIVED_MURS_INDEX_ALIAS, ARCHIVED_MURS_INDEX))
+            es_client.indices.delete(ARCHIVED_MURS_INDEX_ALIAS)
+            logger.info("The alias '{0}' is deleted successfully.".format(ARCHIVED_MURS_INDEX_ALIAS))
+        except elasticsearch.exceptions.NotFoundError:
+            pass
 
 
 def move_alias(original_index=None, original_alias=None, staging_index=None):
