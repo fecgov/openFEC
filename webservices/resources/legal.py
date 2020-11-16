@@ -46,6 +46,7 @@ ALL_DOCUMENT_TYPES = [
 
 # endpoint path: /legal/docs/<doc_type>/<no>
 # test url: http://127.0.0.1:5000/v1/legal/docs/murs/7212
+# TO DO: add this endpoint to swagger
 @doc(
     tags=["legal"],
     description=docs.LEGAL_DOC_SEARCH,
@@ -245,6 +246,8 @@ def apply_af_specific_query_params(query, **kwargs):
 def apply_mur_adr_specific_query_params(query, **kwargs):
     must_clauses = []
 
+    if kwargs.get("mur_type"):
+        must_clauses.append(Q("match", mur_type=kwargs.get("mur_type")))
     if kwargs.get("case_respondents"):
         must_clauses.append(Q("match", respondents=kwargs.get("case_respondents")))
     if kwargs.get("case_dispositions"):

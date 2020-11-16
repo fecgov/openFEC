@@ -1,15 +1,16 @@
 from collections import defaultdict
 import logging
 import re
-
 from webservices.rest import db
 from webservices.utils import (
     create_es_client,
     DateTimeEncoder,
 )
-
 from webservices.tasks.utils import get_bucket
 from .reclassify_statutory_citation import reclassify_statutory_citation
+from .es_management import (  # noqa
+    DOCS_ALIAS,
+)
 import json
 
 logger = logging.getLogger(__name__)
@@ -105,18 +106,19 @@ def load_advisory_opinions(from_ao_no=None):
     """
     Reads data for advisory opinions from a Postgres database,
     assembles a JSON document corresponding to the advisory opinion
-    and indexes this document in Elasticsearch in the index `docs_index`
+    and indexes this document in Elasticsearch in the DOCS_ALIAS of DOCS_INDEX
     with a type=`advisory_opinions`.
     In addition, all documents attached to the advisory opinion
     are uploaded to an S3 bucket under the _directory_`legal/aos/`.
     """
     es_client = create_es_client()
 
+    # TO DO: check if DOCS_ALIAS exist before uploading.
     logger.info("Loading advisory opinions")
     ao_count = 0
     for ao in get_advisory_opinions(from_ao_no):
         logger.info("Loading AO: %s", ao["no"])
-        es_client.index("docs_index", ao, id=ao["no"])
+        es_client.index(DOCS_ALIAS, ao, id=ao["no"])
         ao_count += 1
 
         # ==for local dubug use: remove the big "documents" section to display the object "ao" data.
@@ -393,7 +395,7 @@ def get_citations(ao_names):
             "citation_text": "%d CFR §%d.%d" % (citation[0], citation[1], citation[2]),
             "citation_type": "regulation",
         }
-        es_client.index("docs_index", entry, id=entry["citation_text"])
+        es_client.index(DOCS_ALIAS, entry, id=entry["citation_text"])
 
     for citation in all_statutory_citations:
         entry = {
@@ -401,7 +403,7 @@ def get_citations(ao_names):
             "citation_text": "%d U.S.C. §%s" % (citation[0], citation[1]),
             "citation_type": "statute",
         }
-        es_client.index("docs_index", entry, id=entry["citation_text"])
+        es_client.index(DOCS_ALIAS, entry, id=entry["citation_text"])
 
     logger.info("Citations loaded.")
 

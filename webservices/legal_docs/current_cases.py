@@ -10,9 +10,12 @@ from webservices.utils import (
     DateTimeEncoder,
 )
 from webservices.tasks.utils import get_bucket
-
+from .es_management import (  # noqa
+    DOCS_ALIAS,
+)
 from .reclassify_statutory_citation import reclassify_statutory_citation_without_title
 import json
+
 
 logger = logging.getLogger(__name__)
 
@@ -177,7 +180,7 @@ def load_current_murs(specific_mur_no=None):
     """
     Reads data for current MURs from a Postgres database,
     assembles a JSON document corresponding to the case, and indexes this document
-    in Elasticsearch in the index `docs_index` with a type=`murs`.
+    in Elasticsearch in the DOCS_ALIAS of DOCS_INDEX with a type=`murs`.
     In addition, all documents attached to the case are uploaded to an
     S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
     """
@@ -188,7 +191,7 @@ def load_adrs(specific_adr_no=None):
     """
     Reads data for ADRs from a Postgres database,
     assembles a JSON document corresponding to the case, and indexes this document
-    in Elasticsearch in the index `docs_index` with a type=`adrs`.
+    in Elasticsearch the DOCS_ALIAS of DOCS_INDEX with a type=`adrs`.
     In addition, all documents attached to the case are uploaded to an
     S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
     """
@@ -199,7 +202,7 @@ def load_admin_fines(specific_af_no=None):
     """
     Reads data for AFs from a Postgres database,
     assembles a JSON document corresponding to the case, and indexes this document
-    in Elasticsearch in the index `docs_index` with a type=`admin_fines`.
+    in Elasticsearch the DOCS_ALIAS of DOCS_INDEX with a type=`admin_fines`.
     In addition, all documents attached to the case are uploaded to an
     S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
     """
@@ -227,6 +230,7 @@ def get_full_name(case_type):
 
 
 def load_cases(case_type, case_no=None):
+    # TO DO: check if DOCS_ALIAS exist before uploading.
     if case_type in ("MUR", "ADR", "AF"):
         es_client = create_es_client()
         logger.info("Loading {0}(s)".format(case_type))
@@ -235,14 +239,14 @@ def load_cases(case_type, case_no=None):
             if case is not None:
                 if case.get("published_flg"):
                     logger.info("Loading {0}: {1}".format(case_type, case["no"]))
-                    es_client.index("docs_index", case, id=case["doc_id"])
+                    es_client.index(DOCS_ALIAS, case, id=case["doc_id"])
                     case_count += 1
                     logger.info("{0} {1}(s) loaded".format(case_count, case_type))
                 else:
                     try:
                         logger.info("Found an unpublished case - deleting {0}: {1} from ES".format(
                             case_type, case["no"]))
-                        es_client.delete(index="docs_index", id="case['doc_id']")
+                        es_client.delete(index=DOCS_ALIAS, id="case['doc_id']")
                         logger.info("Successfully deleted {} {} from ES".format(case_type, case["no"]))
                     except Exception as err:
                         logger.error("An error occurred while deteting an unpublished case.{0} {1} {2}".format(

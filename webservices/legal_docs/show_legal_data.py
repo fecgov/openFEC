@@ -33,7 +33,7 @@ def show_legal_data():
 
         # ---display current mur data:
         try:
-            mur_id = "mur_2804R"
+            mur_id = "mur_7212"
             logger.info("\n*** current {0} data: ***\n{1}".format(
                 mur_id,
                 json.dumps(es_client.get(index="docs", id=mur_id), indent=2, cls=DateTimeEncoder)))

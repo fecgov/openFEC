@@ -6,6 +6,9 @@ from webservices.utils import (
     create_es_client,
     DateTimeEncoder,
 )
+from .es_management import (  # noqa
+    DOCS_ALIAS,
+)
 import json
 
 logger = logging.getLogger("manager")
@@ -54,6 +57,7 @@ def load_regulations():
     reg_versions = requests.get(eregs_api + "regulation").json()["versions"]
     logger.debug("reg_versions =" + json.dumps(reg_versions, indent=3, cls=DateTimeEncoder))
 
+    # TO DO: check if DOCS_ALIAS exist before uploading.
     es_client = create_es_client()
     regulation_part_count = 0
     document_count = 0
@@ -87,7 +91,7 @@ def load_regulations():
             each_part_document_count += 1
             document_count += 1
 
-            es_client.index("docs_index", doc, id=doc["doc_id"])
+            es_client.index(DOCS_ALIAS, doc, id=doc["doc_id"])
         logger.debug("Part %s: %d document(s) are loaded." % (reg["regulation"], each_part_document_count))
         regulation_part_count += 1
-        logger.info("%d regulation parts and %d documents are loaded.", regulation_part_count, document_count)
+        logger.info("%d regulation parts with %d documents are loaded.", regulation_part_count, document_count)

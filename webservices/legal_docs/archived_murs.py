@@ -10,11 +10,15 @@ from webservices.utils import (
 )
 from .reclassify_statutory_citation import reclassify_statutory_citation
 import json
+from .es_management import (  # noqa
+    ARCHIVED_MURS_INDEX,
+    ARCHIVED_MURS_ALIAS,
+)
 
 logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 ALL_ARCHIVED_MURS = """
     SELECT DISTINCT
@@ -124,15 +128,16 @@ def load_archived_murs(mur_no=None):
     """
     Reads data for Archived MURs from a Postgres database (under schema:mur_arch),
     assembles a JSON document corresponding to the mur, and indexes this document
-    in Elasticsearch in the index `archived_murs` with a type=`murs` and mur_type=`archived`.
+    in Elasticsearch in the alias ARCHIVED_MURS_ALIAS of ARCHIVED_MURS_INDEX with a type=`murs` and mur_type=`archived`.
     """
+    # TO DO: check if ARCHIVED_MURS_ALIAS exist before uploading.
     es_client = create_es_client()
     mur_count = 0
     for mur in get_murs(mur_no):
         if mur is not None:
             try:
                 logger.info("Loading archived MUR No: {0}".format(mur["no"]))
-                es_client.index("archived_murs", mur, id=mur["doc_id"])
+                es_client.index(ARCHIVED_MURS_ALIAS, mur, id=mur["doc_id"])
                 mur_count += 1
                 logger.info("{0} Archived Mur(s) loaded".format(mur_count))
             except Exception as err:
@@ -142,7 +147,7 @@ def load_archived_murs(mur_no=None):
 
         # ==for dubug use: remove the big "documents" section to display the object "mur" data
         mur_debug_data = mur
-        del mur_debug_data["documents"]
+        # del mur_debug_data["documents"]
         logger.debug("mur_data count=" + str(mur_count))
         logger.debug("mur_debug_data =" + json.dumps(mur_debug_data, indent=3, cls=DateTimeEncoder))
 
@@ -294,7 +299,7 @@ def get_documents(mur_id):
 def extract_pdf_text(mur_no=None):
     """
     1)Reads "text" and "documents" object data for Archived MURs from Elasticsearch,
-    under index: `archived_murs` and doc_type of `murs`
+    under index: ARCHIVED_MURS_INDEX and type of `murs`
     2)Assembles a JSON document corresponding to the archived murs,
     3)Insert the JSON document into Postgres database table: mur_arch.documents
     4)Run this command carefully, backup mur_arch.documents table first
@@ -319,7 +324,7 @@ def extract_pdf_text(mur_no=None):
                 "documents.text"
             ])
             .extra(size=each_fetch_size, from_=from_no)
-            .index("archived_murs")
+            .index(ARCHIVED_MURS_ALIAS)
             .doc_type("murs")
             .sort("no")
             .execute()
@@ -332,7 +337,7 @@ def extract_pdf_text(mur_no=None):
     results = {"all_mur_docs": all_results}
     logger.debug("all_mur_docs = " + json.dumps(results, indent=3, cls=DateTimeEncoder))
 
-    logger.info("Get {0} archived mur(s) from elasticserch index: \"archived_murs\"".format(
+    logger.info("Get {0} archived mur(s) from elasticserch index: \"ARCHIVED_MURS_INDEX\"".format(
         str(len(results["all_mur_docs"]))))
 
     if results and results.get("all_mur_docs"):
