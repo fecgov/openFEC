@@ -1,21 +1,21 @@
 ---
-path: ../
-memory: 1G
-stack: cflinuxfs3
-buildpack: python_buildpack
-env:
-  APP_NAME: fec | api | feature
-services:
-  - fec-s3-api
-  - fec-s3-snapshot
-  - fec-redis
-  - fec-api-elasticsearch
-  - fec-creds-feature
 applications:
   - name: celery-worker
-    instances: 2
+    instances: 1
     memory: 1G
     disk_quota: 1G
     no-route: true
     health-check-type: process
     command: celery worker --app webservices.tasks --loglevel ${LOGLEVEL:=INFO} --concurrency 2
+    path: ../
+    stack: cflinuxfs3
+    buildpacks:
+      - python_buildpack
+    services:
+      - fec-s3-api
+      - fec-s3-snapshot
+      - fec-redis
+      - fec-api-elasticsearch
+      - fec-creds-feature
+    env:
+      APP_NAME: fec | api | feature
