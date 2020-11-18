@@ -38,8 +38,7 @@ RECENTLY_MODIFIED_CASES = """
     ORDER BY case_serial
 """
 
-# SLACK_BOTS = "#bots"
-SLACK_BOTS = "#test-bot"
+SLACK_BOTS = "#bots"
 
 
 @app.task(once={'graceful': True}, base=QueueOnce)

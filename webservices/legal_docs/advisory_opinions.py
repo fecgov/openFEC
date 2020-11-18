@@ -251,14 +251,18 @@ def get_documents(ao_id, bucket):
                 logger.debug("S3: Uploading {}".format(pdf_key))
                 documents.append(document)
 
-                # bucket is None on local, don't need upload pdf to s3
-                if bucket:
-                    bucket.put_object(
-                        Key=pdf_key,
-                        Body=bytes(row["fileimage"]),
-                        ContentType="application/pdf",
-                        ACL="public-read",
-                    )
+                try:
+                    # bucket is None on local, don't need upload pdf to s3
+                    if bucket:
+                        logger.debug("S3: Uploading {}".format(pdf_key))
+                        bucket.put_object(
+                            Key=pdf_key,
+                            Body=bytes(row["fileimage"]),
+                            ContentType="application/pdf",
+                            ACL="public-read",
+                        )
+                except Exception:
+                    pass
     return documents
 
 

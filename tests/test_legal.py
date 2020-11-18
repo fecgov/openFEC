@@ -8,11 +8,13 @@ from unittest.mock import patch
 # from webservices.resources.legal import es_client
 from elasticsearch import RequestError
 # import datetime
+from webservices.legal_docs.es_management import (  # noqa
+    DOCS_INDEX,
+)
+
 
 # TODO: integrate more with API Schema so that __API_VERSION__ is returned
 # self.assertEqual(result['api_version'], __API_VERSION__)
-
-
 def get_path(obj, path):
     parts = path.split('.')
     first = parts[0]
@@ -50,7 +52,7 @@ def es_invalid_search(*args, **kwargs):
     raise RequestError("invalid query")
 
 
-def es_search(**kwargs):
+def legal_search_data(**kwargs):
     type = kwargs["body"]["query"]["bool"]["must"][0]["term"]["type"]
 
     if type == 'regulations':
@@ -129,54 +131,98 @@ def es_search(**kwargs):
         }
 
 
-class CanonicalPageTest(unittest.TestCase):
-    @patch('webservices.rest.legal.es_client.search', es_advisory_opinion)
-    def test_advisory_opinion_search(self):
+def advisory_opinion_data(*args, **kwargs):
+    return {
+        "hits": {
+            "hits": [
+                {
+                    "_source": {
+                        "type": "advisory_opinions",
+                        "no": "2020-01",
+                        "summary": "2020-01 advisory opinions",
+                        "documents": [
+                            {
+                                "document_id": 100,
+                                "category": "Final Opinion",
+                                "description": "Closeout Letter",
+                                "date": "01/01/2020",
+                                "url": "files/legal/aos/2020-01/111.pdf",
+                            },
+                            {
+                                "document_id": 200,
+                                "category": "Draft Documents",
+                                "description": "Vote",
+                                "date": "01/02/2020",
+                                "url": "files/legal/aos/2020-01/222.pdf",
+                            }
+                        ]
+                    },
+                },
+            ]
+        }
+    }
+
+
+# Test endpoint: /legal/docs/<doc_type>/<no>
+# It is called in legal docs canonical page.
+# ex: https://www.fec.gov/data/legal/advisory-opinions/2013-17/
+class TestLegalDocs(unittest.TestCase):
+    @patch("webservices.rest.legal.es_client.search", advisory_opinion_data)
+# Test '/legal/docs/advisory_opinions/<no>'
+    def test_advisory_opinion_docs(self):
         app = rest.app.test_client()
-        response = app.get('/v1/legal/docs/advisory_opinions/1993-02?api_key=1234')
+        response = app.get("/v1/legal/docs/advisory_opinions/2020-01?api_key=1234")
         assert response.status_code == 200
         result = json.loads(codecs.decode(response.data))
-        assert result == {'docs': [{'text': 'abc'}, {'no': '123'}]}
-
-    @patch('webservices.rest.legal.es_client.search', es_mur)
-    def test_mur_search(self):
-        app = rest.app.test_client()
-        response = app.get('/v1/legal/docs/murs/1?api_key=1234')
-        assert response.status_code == 200
-        result = json.loads(codecs.decode(response.data))
-        assert result == {'docs': [{'text': 'abc'}, {'no': '123'}]}
-
-    # @patch.object(es_client, 'search')
-    # def test_query_dsl(self, es_search):
-    #     app = rest.app.test_client()
-    #     response = app.get('/v1/legal/docs/advisory_opinions/1993-02?api_key=1234')
-    #     assert response.status_code == 404
-
-    #     # This is mostly copy/pasted from the dict-based query. This is not a
-    #     # very meaningful test but helped to ensure we're using the
-    #     # elasitcsearch_dsl correctly.
-    #     expected_query = {
-    #         "query": {
-    #             "bool": {
-    #                 "must": [
-    #                     {"term": {"no": "1993-02"}},
-    #                     {"term": {"type": "advisory_opinions"}},
-    #                 ]
-    #             }
-    #         },
-    #         "_source": {"exclude": "documents.text"},
-    #         "size": 200,
-    #     }
-    #     es_search.assert_called_with(
-    #         body=expected_query, doc_type=mock.ANY, index=mock.ANY
-    #     )
+        assert result == {
+            DOCS_INDEX: [{
+                "type": "advisory_opinions",
+                "no": "2020-01",
+                "summary": "2020-01 advisory opinions",
+                "documents": [
+                    {
+                        "document_id": 100,
+                        "category": "Final Opinion",
+                        "description": "Closeout Letter",
+                        "date": "01/01/2020",
+                        "url": "files/legal/aos/2020-01/111.pdf",
+                    },
+                    {
+                        "document_id": 200,
+                        "category": "Draft Documents",
+                        "description": "Vote",
+                        "date": "01/02/2020",
+                        "url": "files/legal/aos/2020-01/222.pdf",
+                    }
+                ]
+            }]
+        }
 
 
-# class SearchTest(unittest.TestCase):
+# Test endpoint: /legal/search/
+# It is called in legal docs search page.
+# ex: https://www.fec.gov/data/legal/search/advisory-opinions/?type=advisory_opinions
+# class TestLegalSearch(unittest.TestCase):
 #     def setUp(self):
 #         self.app = rest.app.test_client()
 
-#     @patch('webservices.rest.legal.es_client.search', es_search)
+#     @patch('webservices.rest.legal.es_client.search', legal_search_data)
+#     def test_type_search(self):
+#         response = self.app.get(
+#             "/v1/legal/search/" + "?type=advisory_opinions"
+#         )
+#         assert response.status_code == 200
+#         result = json.loads(codecs.decode(response.data))
+#         assert result == {
+#             "total_advisory_opinions": 2,
+#             "advisory_opinions": [
+#                 {"highlights": ["a", "b"], "document_highlights": {}},
+#                 {"highlights": ["c", "d"], "document_highlights": {}},
+#             ],
+#             "total_all": 2,
+#         }
+
+#     @patch('webservices.rest.legal.es_client.search', legal_search_data)
 #     def test_default_search(self):
 #         response = self.app.get('/v1/legal/search/?q=president&api_key=1234')
 #         assert response.status_code == 200
@@ -200,21 +246,68 @@ class CanonicalPageTest(unittest.TestCase):
 #             'total_all': 17,
 #         }
 
-#     @patch('webservices.rest.legal.es_client.search', es_search)
-#     def test_type_search(self):
-#         response = self.app.get(
-#             '/v1/legal/search/' + '?q=president&type=advisory_opinions'
-#         )
+    # @patch('webservices.rest.legal.es_client.search', es_mur)
+    # def test_mur_search(self):
+    #     app = rest.app.test_client()
+    #     response = app.get('/v1/legal/docs/murs/1?api_key=1234')
+    #     assert response.status_code == 200
+    #     result = json.loads(codecs.decode(response.data))
+    #     assert result == {'docs': [{'text': 'abc'}, {'no': '123'}]}
+
+    # @patch.object(es_client, 'search')
+    # def test_query_dsl(self, legal_search_data):
+    #     app = rest.app.test_client()
+    #     response = app.get('/v1/legal/docs/advisory_opinions/1993-02?api_key=1234')
+    #     assert response.status_code == 404
+
+    #     # This is mostly copy/pasted from the dict-based query. This is not a
+    #     # very meaningful test but helped to ensure we're using the
+    #     # elasitcsearch_dsl correctly.
+    #     expected_query = {
+    #         "query": {
+    #             "bool": {
+    #                 "must": [
+    #                     {"term": {"no": "1993-02"}},
+    #                     {"term": {"type": "advisory_opinions"}},
+    #                 ]
+    #             }
+    #         },
+    #         "_source": {"exclude": "documents.text"},
+    #         "size": 200,
+    #     }
+    #     legal_search_data.assert_called_with(
+    #         body=expected_query, doc_type=mock.ANY, index=mock.ANY
+    #     )
+
+
+# class SearchTest(unittest.TestCase):
+#     def setUp(self):
+#         self.app = rest.app.test_client()
+
+#     @patch('webservices.rest.legal.es_client.search', legal_search_data)
+#     def test_default_search(self):
+#         response = self.app.get('/v1/legal/search/?q=president&api_key=1234')
 #         assert response.status_code == 200
 #         result = json.loads(codecs.decode(response.data))
 #         assert result == {
-#             'total_advisory_opinions': 2,
+#             'regulations': [{'highlights': ['a', 'b'], 'document_highlights': {}}],
+#             'total_regulations': 1,
+#             'statutes': [{'highlights': ['e'], 'document_highlights': {}}],
+#             'total_statutes': 3,
+#             'murs': [{'highlights': ['f'], 'document_highlights': {}}],
+#             'total_murs': 4,
+#             'adrs': [{'highlights': ['f'], 'document_highlights': {}}],
+#             'total_adrs': 2,
+#             'admin_fines': [{'highlights': ['f'], 'document_highlights': {}}],
+#             'total_admin_fines': 5,
 #             'advisory_opinions': [
 #                 {'highlights': ['a', 'b'], 'document_highlights': {}},
 #                 {'highlights': ['c', 'd'], 'document_highlights': {}},
 #             ],
-#             'total_all': 2,
+#             'total_advisory_opinions': 2,
+#             'total_all': 17,
 #         }
+
 
 #     @patch('webservices.rest.legal.es_client.search', es_invalid_search)
 #     def test_invalid_search(self):
@@ -224,7 +317,7 @@ class CanonicalPageTest(unittest.TestCase):
 #         assert response.status_code == 400
 
 #     @patch.object(es_client, 'search')
-#     def test_query_dsl(self, es_search):
+#     def test_query_dsl(self, legal_search_data):
 #         response = self.app.get(
 #             '/v1/legal/search/', query_string={'q': 'president', 'type': 'statutes'}
 #         )
@@ -260,12 +353,12 @@ class CanonicalPageTest(unittest.TestCase):
 #             '_source': {'exclude': ['text', 'documents.text', 'sort1', 'sort2']},
 #         }
 
-#         es_search.assert_called_with(
+#         legal_search_data.assert_called_with(
 #             body=expected_query, index=mock.ANY, doc_type=mock.ANY
 #         )
 
 #     @patch.object(es_client, 'search')
-#     def test_query_dsl_with_ao_category_filter(self, es_search):
+#     def test_query_dsl_with_ao_category_filter(self, legal_search_data):
 #         response = self.app.get(
 #             '/v1/legal/search/',
 #             query_string={'q': 'president', 'type': 'advisory_opinions'},
@@ -337,12 +430,12 @@ class CanonicalPageTest(unittest.TestCase):
 #             'sort': ['sort1', 'sort2'],
 #         }
 
-#         es_search.assert_called_with(
+#         legal_search_data.assert_called_with(
 #             body=expected_query, index=mock.ANY, doc_type=mock.ANY
 #         )
 
 #     @patch.object(es_client, 'search')
-#     def test_query_dsl_with_case_filters(self, es_search):
+#     def test_query_dsl_with_case_filters(self, legal_search_data):
 #         response = self.app.get(
 #             '/v1/legal/search/',
 #             query_string={
@@ -398,6 +491,6 @@ class CanonicalPageTest(unittest.TestCase):
 #             "size": 20,
 #         }
 
-#         es_search.assert_called_with(
+#         legal_search_data.assert_called_with(
 #             body=expected_query, index=mock.ANY, doc_type=mock.ANY
 #         )

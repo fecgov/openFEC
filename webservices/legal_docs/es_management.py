@@ -467,6 +467,7 @@ def delete_index(index_name=None):
     a) cf run-task api --command "python manage.py delete_index -i docs" -m 2G --name delete_index
     b) cf run-task api --command "python manage.py delete_index -i archived_murs" -m 2G --name delete_index
     """
+    # TODO: check if DOCS_INDEX exist before deleting.
     es_client = create_es_client()
     index_name = index_name or DOCS_INDEX
     try:
@@ -476,6 +477,7 @@ def delete_index(index_name=None):
     except elasticsearch.exceptions.NotFoundError:
         pass
 
+    # TODO: check if DOCS_INDEX exist before deleting.
     if index_name == DOCS_INDEX:
         try:
             logger.info("Deleting alias '{0}' under index '{1}' ...".format(DOCS_ALIAS, DOCS_INDEX))
