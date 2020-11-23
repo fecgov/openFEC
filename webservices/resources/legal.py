@@ -21,7 +21,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
-# for debug, uncomment this line
+# for debug, uncomment this line:
 # logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
@@ -46,7 +46,7 @@ ALL_DOCUMENT_TYPES = [
 
 # endpoint path: /legal/docs/<doc_type>/<no>
 # test url: http://127.0.0.1:5000/v1/legal/docs/murs/7212
-# TO DO: add this endpoint to swagger
+# TODO: add this endpoint to swagger
 @doc(
     tags=["legal"],
     description=docs.LEGAL_DOC_SEARCH,
@@ -109,10 +109,11 @@ class UniversalSearch(Resource):
                 doc_types = ALL_DOCUMENT_TYPES
 
         hits_returned = min([200, hits_returned])
+        print(hits_returned)
 
         results = {}
         total_count = 0
-        total_count_dict = {}
+        count_by_type = 0
         for type_ in doc_types:
             try:
                 query = query_builders.get(type_)(
@@ -120,9 +121,7 @@ class UniversalSearch(Resource):
                 )
                 logger.debug("UniversalSearch() final query =" + json.dumps(
                     query.to_dict(), indent=3, cls=DateTimeEncoder))
-
-                formatted_hits, total_count_dict = execute_query(query)
-
+                formatted_hits, count_by_type = execute_query(query)
             except TypeError as te:
                 logger.error(te.args)
                 raise ApiError("Not a valid search type", 400)
@@ -133,10 +132,9 @@ class UniversalSearch(Resource):
                 logger.error(e.args)
                 raise ApiError("Unexpected Server Error", 500)
             results[type_] = formatted_hits
-            results["total_%s" % type_] = total_count_dict["value"]
-            total_count += total_count_dict["value"]
+            results["total_%s" % type_] = count_by_type
+            total_count += count_by_type
             logger.debug("total count={0}".format(str(total_count)))
-
         results["total_all"] = total_count
         return results
 
@@ -510,11 +508,16 @@ def execute_query(query):
                         hl for hl_list in highlights for hl in hl_list
                     ]
 
-                    # set "highlights" in return hit
+                    # put "highlights" in return hit
                     for key in inner_hit.meta.highlight:
                         formatted_hit["highlights"].extend(inner_hit.meta.highlight[key])
     logger.debug("formatted_hits =" + json.dumps(formatted_hits, indent=3, cls=DateTimeEncoder))
-    return formatted_hits, es_results.hits.total
+
+# Since ES7 the `total` becomes an object : "total": {"value": 1,"relation": "eq"}
+# We can set rest_total_hits_as_int=true, default is false.
+# but elasticsearch-dsl==7.3.0 has not supported this setting yet.
+    count_dict = es_results.hits.total
+    return formatted_hits, count_dict["value"]
 
 
 # endpoint path: /legal/citation/<citation_type>/<citation>

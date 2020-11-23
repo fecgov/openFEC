@@ -483,7 +483,18 @@ def delete_index(index_name=None):
             logger.info("Deleting alias '{0}' under index '{1}' ...".format(DOCS_ALIAS, DOCS_INDEX))
             es_client.indices.delete(DOCS_ALIAS)
             logger.info("The alias '{0}' is deleted successfully.".format(DOCS_ALIAS))
-        except elasticsearch.exceptions.NotFoundError:
+
+        except elasticsearch.exceptions.NotFoundError as err1:
+            logger.error("NotFoundError occured while deleting index/alias '{0}' and error is '{1}' ".format(
+                DOCS_ALIAS, err1))
+            pass
+        except elasticsearch.exceptions.RequestError as err2:
+            logger.error("RequestError occured while deleting index/alias '{0}' and error is '{1}' ".format(
+                DOCS_ALIAS, err2))
+            pass
+        except Exception as err:
+            logger.error("Error occured while deleting index/alias '{0}' and error is '{1}' ".format(
+                DOCS_ALIAS, err))
             pass
 
     if index_name == ARCHIVED_MURS_INDEX:
@@ -492,7 +503,18 @@ def delete_index(index_name=None):
                 ARCHIVED_MURS_ALIAS, ARCHIVED_MURS_INDEX))
             es_client.indices.delete(ARCHIVED_MURS_ALIAS)
             logger.info("The alias '{0}' is deleted successfully.".format(ARCHIVED_MURS_ALIAS))
-        except elasticsearch.exceptions.NotFoundError:
+
+        except elasticsearch.exceptions.NotFoundError as err1:
+            logger.error("NotFoundError occured while deleting index/alias '{0}' and error is '{1}' ".format(
+                ARCHIVED_MURS_ALIAS, err1))
+            pass
+        except elasticsearch.exceptions.RequestError as err2:
+            logger.error("RequestError occured while deleting index/alias '{0}' and error is '{1}' ".format(
+                ARCHIVED_MURS_ALIAS, err2))
+            pass
+        except Exception as err:
+            logger.error("Error occured while deleting index/alias '{0}' and error is '{1}' ".format(
+                ARCHIVED_MURS_ALIAS, err))
             pass
 
 

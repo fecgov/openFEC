@@ -24,7 +24,7 @@ webargs==5.5.3
 ujson==1.33
 requests==2.22.0
 elasticsearch==7.6.0
-elasticsearch-dsl==7.2.1
+elasticsearch-dsl==7.3.0
 requests-aws4auth==1.0
 
 # Marshalling
