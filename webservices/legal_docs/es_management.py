@@ -383,7 +383,7 @@ def create_index(index_name=None, aliases_name=None):
 
     else:
         if aliases_name:
-            aliases_list = aliases_name.split(',')
+            aliases_list = aliases_name.split(",")
             aliases = {}
             for alias in aliases_list:
                 aliases.update({alias: {}})

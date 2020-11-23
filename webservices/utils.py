@@ -34,7 +34,7 @@ from json import JSONEncoder
 
 logger = logging.getLogger(__name__)
 
-use_kwargs = functools.partial(use_kwargs_original, locations=('query',))
+use_kwargs = functools.partial(use_kwargs_original, locations=("query",))
 
 
 class Resource(six.with_metaclass(MethodResourceMeta, restful.Resource)):
@@ -42,22 +42,22 @@ class Resource(six.with_metaclass(MethodResourceMeta, restful.Resource)):
 
 
 API_KEY_ARG = fields.Str(
-    required=True, missing='DEMO_KEY', description=docs.API_KEY_DESCRIPTION,
+    required=True, missing="DEMO_KEY", description=docs.API_KEY_DESCRIPTION,
 )
-if env.get_credential('PRODUCTION'):
-    Resource = use_kwargs({'api_key': API_KEY_ARG})(Resource)
+if env.get_credential("PRODUCTION"):
+    Resource = use_kwargs({"api_key": API_KEY_ARG})(Resource)
 
-fec_url_map = {'9': 'http://docquery.fec.gov/dcdev/posted/{0}.fec'}
+fec_url_map = {"9": "http://docquery.fec.gov/dcdev/posted/{0}.fec"}
 fec_url_map = defaultdict(
-    lambda: 'http://docquery.fec.gov/paper/posted/{0}.fec', fec_url_map
+    lambda: "http://docquery.fec.gov/paper/posted/{0}.fec", fec_url_map
 )
 
 
 def check_cap(kwargs, cap):
     if cap:
-        if not kwargs.get('per_page') or kwargs['per_page'] > cap:
+        if not kwargs.get("per_page") or kwargs["per_page"] > cap:
             raise exceptions.ApiError(
-                'Parameter "per_page" must be between 1 and {}'.format(cap),
+                "Parameter 'per_page' must be between 1 and {}".format(cap),
                 status_code=422,
             )
 
@@ -76,9 +76,9 @@ def fetch_page(
 ):
     check_cap(kwargs, cap)
     sort, hide_null, nulls_last = (
-        kwargs.get('sort'),
-        kwargs.get('sort_hide_null'),
-        kwargs.get('sort_nulls_last'),
+        kwargs.get("sort"),
+        kwargs.get("sort_hide_null"),
+        kwargs.get("sort_nulls_last"),
     )
     if sort and multi:
         query, _ = sorting.multi_sort(
@@ -104,8 +104,8 @@ def fetch_page(
             index_column=index_column,
             nulls_last=nulls_last,
         )
-    paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
-    return paginator.get_page(kwargs['page'])
+    paginator = paginators.OffsetPaginator(query, kwargs["per_page"], count=count)
+    return paginator.get_page(kwargs["page"])
 
 
 class SeekCoalescePaginator(paginators.SeekPaginator):
@@ -141,7 +141,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             else:
                 comparator = self.max_column_map.get(self.sort_column[5])
 
-            if 'coalesce' not in str(left_index):
+            if "coalesce" not in str(left_index):
                 left_index = sa.func.coalesce(left_index, comparator)
 
             lhs += (left_index,)
@@ -167,10 +167,10 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         """
         from webservices.common.models import db
 
-        ret = {'last_index': str(paginators.convert_value(result, self.index_column))}
+        ret = {"last_index": str(paginators.convert_value(result, self.index_column))}
 
         if self.sort_column:
-            key = 'last_{0}'.format(self.sort_column[2])
+            key = "last_{0}".format(self.sort_column[2])
 
             # Check to see if we are dealing with a sort column or sort
             # expression.  If we're dealing with a sort expression, we need to
@@ -207,7 +207,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
 
             if ret[key] is None:
                 ret.pop(key)
-                ret['sort_null_only'] = True
+                ret["sort_null_only"] = True
 
         return ret
 
@@ -219,7 +219,7 @@ def fetch_seek_page(
         query, kwargs, index_column, clear=clear, count=count, cap=cap
     )
     if paginator.sort_column is not None:
-        sort_index = kwargs['last_{0}'.format(paginator.sort_column[2])]
+        sort_index = kwargs["last_{0}".format(paginator.sort_column[2])]
         null_sort_by = paginator.sort_column[0]
 
         # Check to see if we are sorting by an expression.  If we are, we need
@@ -228,7 +228,7 @@ def fetch_seek_page(
             null_sort_by = paginator.sort_column[6]
         if (
             not sort_index
-            and kwargs['sort_null_only']
+            and kwargs["sort_null_only"]
             and paginator.sort_column[1] == sa.asc
         ):
             sort_index = None
@@ -238,7 +238,7 @@ def fetch_seek_page(
         sort_index = None
 
     return paginator.get_page(
-        last_index=kwargs['last_index'], sort_index=sort_index, eager=eager
+        last_index=kwargs["last_index"], sort_index=sort_index, eager=eager
     )
 
 
@@ -246,9 +246,9 @@ def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, c
     check_cap(kwargs, cap)
     model = index_column.parent.class_
     sort, hide_null, nulls_last = (
-        kwargs.get('sort'),
-        kwargs.get('sort_hide_null'),
-        kwargs.get('sort_nulls_last'),
+        kwargs.get("sort"),
+        kwargs.get("sort_hide_null"),
+        kwargs.get("sort_nulls_last"),
     )
     if sort:
         query, sort_column = sorting.sort(
@@ -262,7 +262,7 @@ def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, c
     else:
         sort_column = None
     return SeekCoalescePaginator(
-        query, kwargs['per_page'], index_column, sort_column=sort_column, count=count,
+        query, kwargs["per_page"], index_column, sort_column=sort_column, count=count,
     )
 
 
@@ -292,14 +292,14 @@ def parse_fulltext(text):
     bytestring. For further parsing in re.sub below, the string is first decoded into
     ascii (the encode and decode are chained).
     '''
-    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
-    return ' & '.join([part + ':*' for part in re.sub(r'\W', ' ', text).split()])
+    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+    return " & ".join([part + ":*" for part in re.sub(r"\W", " ", text).split()])
 
 
-office_args_required = ['office', 'cycle']
+office_args_required = ["office", "cycle"]
 office_args_map = {
-    'house': ['state', 'district'],
-    'senate': ['state'],
+    "house": ["state", "district"],
+    "senate": ["state"],
 }
 
 
@@ -307,14 +307,14 @@ def check_election_arguments(kwargs):
     for arg in office_args_required:
         if kwargs.get(arg) is None:
             raise exceptions.ApiError(
-                'Required parameter "{0}" not found.'.format(arg), status_code=422,
+                "Required parameter '{0}' not found.".format(arg), status_code=422,
             )
-    conditional_args = office_args_map.get(kwargs['office'], [])
+    conditional_args = office_args_map.get(kwargs["office"], [])
     for arg in conditional_args:
         if kwargs.get(arg) is None:
             raise exceptions.ApiError(
-                'Must include argument "{0}" with office type "{1}"'.format(
-                    arg, kwargs['office'],
+                "Must include argument '{0}' with office type '{1}'".format(
+                    arg, kwargs["office"],
                 ),
                 status_code=422,
             )
@@ -356,17 +356,17 @@ def related(
     return related
 
 
-related_committee = functools.partial(related, 'CommitteeDetail', 'committee_id')
-related_candidate = functools.partial(related, 'CandidateDetail', 'candidate_id')
+related_committee = functools.partial(related, "CommitteeDetail", "committee_id")
+related_candidate = functools.partial(related, "CandidateDetail", "candidate_id")
 
 related_committee_history = functools.partial(
-    related, 'CommitteeHistory', 'committee_id', related_cycle_label='cycle',
+    related, "CommitteeHistory", "committee_id", related_cycle_label="cycle",
 )
 related_candidate_history = functools.partial(
-    related, 'CandidateHistory', 'candidate_id', related_cycle_label='two_year_period',
+    related, "CandidateHistory", "candidate_id", related_cycle_label="two_year_period",
 )
 related_efile_summary = functools.partial(
-    related, 'EFilings', 'file_number', related_id_label='file_number',
+    related, "EFilings", "file_number", related_id_label="file_number",
 )
 
 
@@ -374,22 +374,22 @@ def document_description(
     report_year, report_type=None, document_type=None, form_type=None
 ):
     if report_type:
-        clean = re.sub(r'\{[^)]*\}', '', report_type)
+        clean = re.sub(r"\{[^)]*\}", "", report_type)
     elif document_type:
         clean = document_type
     elif form_type and form_type in decoders.form_types:
         clean = decoders.form_types[form_type]
     else:
-        clean = 'Document'
+        clean = "Document"
 
-    if form_type and (form_type == 'RFAI' or form_type == 'FRQ'):
-        clean = 'RFAI: ' + clean
-    return '{0} {1}'.format(clean.strip(), report_year)
+    if form_type and (form_type == "RFAI" or form_type == "FRQ"):
+        clean = "RFAI: " + clean
+    return "{0} {1}".format(clean.strip(), report_year)
 
 
 def make_report_pdf_url(image_number):
     if image_number:
-        return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
+        return "http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf".format(
             str(image_number)[-3:], image_number,
         )
     else:
@@ -398,15 +398,15 @@ def make_report_pdf_url(image_number):
 
 def make_schedule_pdf_url(image_number):
     if image_number:
-        return 'http://docquery.fec.gov/cgi-bin/fecimg/?' + image_number
+        return "http://docquery.fec.gov/cgi-bin/fecimg/?" + image_number
 
 
 def make_csv_url(file_num):
     file_number = str(file_num)
     if file_num > -1 and file_num < 100:
-        return 'http://docquery.fec.gov/csv/000/{0}.csv'.format(file_number)
+        return "http://docquery.fec.gov/csv/000/{0}.csv".format(file_number)
     elif file_num >= 100:
-        return 'http://docquery.fec.gov/csv/{0}/{1}.csv'.format(
+        return "http://docquery.fec.gov/csv/{0}/{1}.csv".format(
             file_number[-3:], file_number
         )
 
@@ -431,16 +431,16 @@ def get_index_column(model):
 
 def cycle_param(**kwargs):
     ret = {
-        'name': 'cycle',
-        'type': 'integer',
-        'in': 'path',
+        "name": "cycle",
+        "type": "integer",
+        "in": "path",
     }
     ret.update(kwargs)
     return ret
 
 
 def get_election_duration(column):
-    return sa.case([(column == 'S', 6), (column == 'P', 4), ], else_=2,)
+    return sa.case([(column == "S", 6), (column == "P", 4), ], else_=2,)
 
 
 def get_current_cycle():
@@ -487,7 +487,7 @@ def create_es_client():
             )
         else:
             # create local elasticsearch client
-            url = 'http://localhost:9200'
+            url = "http://localhost:9200"
             es_client = Elasticsearch(
                 url,
                 timeout=30,
@@ -496,7 +496,7 @@ def create_es_client():
             )
         return es_client
     except Exception as err:
-        logger.error('An error occurred trying to create Elasticsearch client.{0}'.format(err))
+        logger.error("An error occurred trying to create Elasticsearch client.{0}".format(err))
 
 
 def print_literal_query_string(query):
@@ -512,31 +512,31 @@ def print_literal_query_string(query):
 def create_eregs_link(part, section):
     url_part_section = part
     if section:
-        url_part_section += '-' + section
-    return '/regulations/{}/CURRENT'.format(url_part_section)
+        url_part_section += "-" + section
+    return "/regulations/{}/CURRENT".format(url_part_section)
 
 
 def post_to_slack(message, channel):
     response = requests.post(
-        env.get_credential('SLACK_HOOK'),
+        env.get_credential("SLACK_HOOK"),
         data=json.dumps(
             {
-                'text': message,
-                'channel': channel,
-                'link_names': 1,
-                'username': 'Ms. Robot',
-                'icon_emoji': ':robot_face:',
+                "text": message,
+                "channel": channel,
+                "link_names": 1,
+                "username": "Ms. Robot",
+                "icon_emoji": ":robot_face:",
             }
         ),
-        headers={'Content-Type': 'application/json'},
+        headers={"Content-Type": "application/json"},
     )
     if response.status_code != 200:
-        logger.error('SLACK ERROR- Message failed to send:{0}'.format(message))
+        logger.error("SLACK ERROR- Message failed to send:{0}".format(message))
 
 
 def split_env_var(env_var):
     """ Remove whitespace and split to a list based of comma delimiter"""
-    return env_var.replace(" ", "").split(',')
+    return env_var.replace(" ", "").split(",")
 
 
 # To display the open_date and close_date of JSON format inside object "mur"
@@ -544,4 +544,3 @@ class DateTimeEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (datetime.date, datetime.datetime)):
             return obj.isoformat()
-

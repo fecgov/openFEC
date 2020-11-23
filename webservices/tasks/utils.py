@@ -22,7 +22,7 @@ def get_bucket():
         s3 = session.resource("s3")
         bucket = s3.Bucket(env.get_credential("bucket"))
     except Exception as err:
-        logging.error('An error occurred trying to connect to s3. Please disregard if running locally.{0}'.format(err))
+        logging.error("An error occurred trying to connect to s3. Please disregard if running locally.{0}".format(err))
         return
     return bucket
 

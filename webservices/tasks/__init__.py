@@ -34,6 +34,7 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
             'task': 'webservices.tasks.legal_docs.create_es_backup',
             'schedule': crontab(minute=0, hour=4, day_of_week='sun'),
         },
+
     }
 
 
