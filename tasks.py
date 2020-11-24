@@ -142,7 +142,8 @@ def _detect_space(repo, branch=None, yes=False):
 
 DEPLOY_RULES = (
     ('prod', _detect_prod),
-    ('stage', lambda _, branch: branch.startswith('release')),
+    # ('stage', lambda _, branch: branch.startswith('release')),
+    ('stage', lambda _, branch: branch == 'feature/upgrade-es7-service'),
     ('dev', lambda _, branch: branch == 'develop'),
     ('feature', lambda _, branch: branch == 'feature/upgrade-es7-service')
 )
