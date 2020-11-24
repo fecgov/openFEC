@@ -14,7 +14,7 @@ applications:
       - fec-api-elasticsearch
       - fec-redis
       - fec-creds-stage
-      - fec-s3-stage
+      - fec-s3-api
       - fec-s3-snapshot
     env:
       FEC_API_USE_PROXY: true
