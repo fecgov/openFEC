@@ -11,10 +11,11 @@ applications:
     routes:
       - route: fec-stage-api.app.cloud.gov
     services:
-      - fec-api-search56
+      - fec-api-elasticsearch
       - fec-redis
       - fec-creds-stage
       - fec-s3-stage
+      - fec-s3-snapshot
     env:
       FEC_API_USE_PROXY: true
       FEC_API_RESTRICT_DOWNLOADS: true

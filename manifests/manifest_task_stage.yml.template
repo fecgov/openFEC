@@ -12,7 +12,8 @@ applications:
   health-check-type: process
   services:
     - fec-s3-stage
-    - fec-api-search56
+    - fec-s3-snapshot
+    - fec-api-elasticsearch
     - fec-creds-stage
     - fec-redis
   env:
