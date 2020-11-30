@@ -15,6 +15,5 @@ applications:
       - fec-redis
       - fec-creds-dev
       - fec-s3-dev
-      - test-aws-glue-etl
     env:
       APP_NAME: fec | api | dev
