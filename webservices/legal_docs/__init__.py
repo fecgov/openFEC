@@ -56,8 +56,6 @@ from .show_legal_data import ( # noqa
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger("elasticsearch")
 logger.setLevel("WARN")
-logger = logging.getLogger("pdfminer")
-logger.setLevel("ERROR")
 logger = logging.getLogger("botocore")
 logger.setLevel("WARN")
 

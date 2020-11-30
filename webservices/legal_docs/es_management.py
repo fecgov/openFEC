@@ -533,6 +533,9 @@ def move_alias(original_index=None, original_alias=None, staging_index=None):
     es_client = create_es_client()
 
     # Remove original_alias from original_index
+    logger.info("Removing alias '{0}' from '{1}'...".format(
+        original_alias, original_index)
+    )
     try:
         es_client.indices.update_aliases(
             body={
@@ -541,7 +544,7 @@ def move_alias(original_index=None, original_alias=None, staging_index=None):
                 ]
             }
         )
-        logger.info("Remove alias '{0}' from '{1}'".format(
+        logger.info("Removed alias '{0}' from '{1}' successfully.".format(
             original_alias, original_index)
         )
     except Exception as err:
@@ -550,6 +553,9 @@ def move_alias(original_index=None, original_alias=None, staging_index=None):
         pass
 
     # Add original_alias to staging_index
+    logger.info("Adding alias '{0}' to point to '{1}'...".format(
+        original_alias, staging_index)
+    )
     es_client.indices.update_aliases(
         body={
             "actions": [
@@ -557,7 +563,7 @@ def move_alias(original_index=None, original_alias=None, staging_index=None):
             ]
         }
     )
-    logger.info("Add alias '{0}' to point to '{1}'".format(
+    logger.info("Added alias '{0}' to point to '{1}' successfully.".format(
         original_alias, staging_index)
     )
 
@@ -574,6 +580,9 @@ def restore_from_staging_index():
     es_client = create_es_client()
 
     # Remove SEARCH_ALIAS from DOCS_INDEX
+    logger.info("Removing alias '{0}' from '{1}'...".format(
+        SEARCH_ALIAS, DOCS_INDEX)
+    )
     try:
         es_client.indices.update_aliases(
             body={
@@ -582,7 +591,7 @@ def restore_from_staging_index():
                 ]
             }
         )
-        logger.info("Remove alias '{0}' from '{1}'".format(
+        logger.info("Removed alias '{0}' from '{1}' successfully.".format(
             SEARCH_ALIAS, DOCS_INDEX)
         )
     except Exception as err:
@@ -591,6 +600,9 @@ def restore_from_staging_index():
         pass
 
     # Add SEARCH_ALIAS points to DOCS_STAGING_INDEX
+    logger.info("Adding alias '{0}' to point to '{1}'...".format(
+        SEARCH_ALIAS, DOCS_STAGING_INDEX)
+    )
     es_client.indices.update_aliases(
         body={
             "actions": [
@@ -598,17 +610,16 @@ def restore_from_staging_index():
             ]
         }
     )
-    logger.info("Add alias '{0}' to point to '{1}'".format(
+    logger.info("Added alias '{0}' to point to '{1}' successfully.".format(
         SEARCH_ALIAS, DOCS_STAGING_INDEX)
     )
 
-    logger.info("Delete and re-create index '{0}'".format(DOCS_INDEX))
-
     delete_index(DOCS_INDEX)
 
-    es_client.indices.create(DOCS_INDEX, {"mappings": MAPPINGS, "settings": ANALYZER_SETTINGS})
+    # Create index 'DOCS_INDEX' with SEARCH_ALIAS, DOCS_ALIAS
+    create_index()
 
-    logger.info("Reindex all documents from index '{0}' to index '{1}'".format(
+    logger.info("Reindexing all documents from index '{0}' to index '{1}'...".format(
         DOCS_STAGING_INDEX, DOCS_INDEX)
     )
     body = {
@@ -620,6 +631,9 @@ def restore_from_staging_index():
         wait_for_completion=True,
         request_timeout=1500
     )
+    logger.info("Reindexed all documents from index '{0}' to index '{1}' successfully.".format(
+        DOCS_STAGING_INDEX, DOCS_INDEX)
+    )
     move_aliases_to_docs_index()
 
 
@@ -630,7 +644,7 @@ def move_aliases_to_docs_index():
     """
     es_client = create_es_client()
 
-    logger.info("Move aliases '{0}' and '{1}' to point to 'docs'".format(
+    logger.info("Moving aliases '{0}' and '{1}' to point to 'docs'...".format(
         DOCS_ALIAS, SEARCH_ALIAS)
     )
     es_client.indices.update_aliases(
@@ -643,8 +657,16 @@ def move_aliases_to_docs_index():
             ]
         }
     )
-    logger.info("Delete index '{0}'".format(DOCS_STAGING_INDEX))
+    logger.info("Moved aliases '{0}' and '{1}' to point to 'docs' successfully.".format(
+        DOCS_ALIAS, SEARCH_ALIAS)
+    )
+
+    logger.info("Deleting index '{0}'...".format(DOCS_STAGING_INDEX))
     es_client.indices.delete(DOCS_STAGING_INDEX)
+    logger.info("Deleted index '{0}' successfully.".format(DOCS_STAGING_INDEX))
+
+    logger.info("The refresh_current_legal_docs_zero_downtime task completed successfully.")
+
 # =========== end index management =============
 
 
