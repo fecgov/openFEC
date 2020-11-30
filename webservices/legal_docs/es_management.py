@@ -531,15 +531,33 @@ def move_alias(original_index=None, original_alias=None, staging_index=None):
     staging_index = staging_index or DOCS_STAGING_INDEX
 
     es_client = create_es_client()
+
+    # Remove original_alias from original_index
+    try:
+        es_client.indices.update_aliases(
+            body={
+                "actions": [
+                    {"remove": {"index": original_index, "alias": original_alias}},
+                ]
+            }
+        )
+        logger.info("Remove alias '{0}' from '{1}'".format(
+            original_alias, original_index)
+        )
+    except Exception as err:
+        logger.error("Error occured while removing index/alias '{0}' and error is '{1}' ".format(
+            original_alias, err))
+        pass
+
+    # Add original_alias to staging_index
     es_client.indices.update_aliases(
         body={
             "actions": [
-                {"remove": {"index": original_index, "alias": original_alias}},
                 {"add": {"index": staging_index, "alias": original_alias}},
             ]
         }
     )
-    logger.info("Move alias '{0}' to point to '{1}'".format(
+    logger.info("Add alias '{0}' to point to '{1}'".format(
         original_alias, staging_index)
     )
 
@@ -555,16 +573,33 @@ def restore_from_staging_index():
     """
     es_client = create_es_client()
 
-    logger.info("Move alias '{0}' to point to '{1}'".format(
-        SEARCH_ALIAS, DOCS_STAGING_INDEX)
-    )
+    # Remove SEARCH_ALIAS from DOCS_INDEX
+    try:
+        es_client.indices.update_aliases(
+            body={
+                "actions": [
+                    {"remove": {"index": DOCS_INDEX, "alias": SEARCH_ALIAS}},
+                ]
+            }
+        )
+        logger.info("Remove alias '{0}' from '{1}'".format(
+            SEARCH_ALIAS, DOCS_INDEX)
+        )
+    except Exception as err:
+        logger.error("Error occured while removing index/alias '{0}' and error is '{1}' ".format(
+            SEARCH_ALIAS, err))
+        pass
+
+    # Add SEARCH_ALIAS points to DOCS_STAGING_INDEX
     es_client.indices.update_aliases(
         body={
             "actions": [
-                {"remove": {"index": DOCS_INDEX, "alias": SEARCH_ALIAS}},
                 {"add": {"index": DOCS_STAGING_INDEX, "alias": SEARCH_ALIAS}},
             ]
         }
+    )
+    logger.info("Add alias '{0}' to point to '{1}'".format(
+        SEARCH_ALIAS, DOCS_STAGING_INDEX)
     )
 
     logger.info("Delete and re-create index '{0}'".format(DOCS_INDEX))

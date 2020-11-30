@@ -12,10 +12,10 @@ applications:
     buildpacks:
       - python_buildpack
     services:
+      - fec-api-elasticsearch
+      - fec-redis
+      - fec-creds-feature
       - fec-s3-api
       - fec-s3-snapshot
-      - fec-redis
-      - fec-api-elasticsearch
-      - fec-creds-feature
     env:
       APP_NAME: fec | api | feature
