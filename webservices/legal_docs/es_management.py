@@ -603,7 +603,9 @@ def restore_from_staging_index():
     )
 
     logger.info("Delete and re-create index '{0}'".format(DOCS_INDEX))
-    es_client.indices.delete(DOCS_INDEX)
+
+    delete_index(DOCS_INDEX)
+
     es_client.indices.create(DOCS_INDEX, {"mappings": MAPPINGS, "settings": ANALYZER_SETTINGS})
 
     logger.info("Reindex all documents from index '{0}' to index '{1}'".format(
