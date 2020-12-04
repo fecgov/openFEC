@@ -109,7 +109,6 @@ class UniversalSearch(Resource):
                 doc_types = ALL_DOCUMENT_TYPES
 
         hits_returned = min([200, hits_returned])
-        print(hits_returned)
 
         results = {}
         total_count = 0
