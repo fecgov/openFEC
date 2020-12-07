@@ -252,6 +252,17 @@ def add_secure_headers(response):
         for directive, value in content_security_policy.items()
     )
 
+    # Expect-CT header
+    expect_ct_max_age = 60 * 60 * 24  # 1 day
+    expect_ct_enforce = False
+    expect_ct_report_uri = False
+    expect_ct_string = 'max-age=%s' % expect_ct_max_age
+    if expect_ct_enforce:
+        expect_ct_string += ', enforce'
+    if expect_ct_report_uri:
+        expect_ct_string += ', report-uri="%s"' % expect_ct_report_uri
+    headers["Expect-CT"] = expect_ct_string
+
     for header, value in headers.items():
         response.headers.add(header, value)
     return response
