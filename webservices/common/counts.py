@@ -13,24 +13,7 @@ from webservices.common import models
 
 count_pattern = re.compile(r'rows=(\d+)')
 
-def is_estimated_count(resource, query):
-    """
-    determine prior to counting if count will be an estimate (avoids calling
-    get_counts and using the `is_estimate` return value which may cause 
-    exact counting (when False)
-    """
-    if resource.use_pk_for_count and resource.model:
-        primary_key = resource.model.__mapper__.primary_key[0]
-        query = query.with_entities(primary_key)
-    if resource.use_estimated_counts:
-        rows = get_query_plan(query)
-        estimated_count = extract_analyze_count(rows)
-        if estimated_count > resource.estimated_count_threshold:
-            is_estimate = True
-            return is_estimate
-    return False
 
-    
 def get_count(resource, query):
     """
     Calculate either the estimated count or exact count.
