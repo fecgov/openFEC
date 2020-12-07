@@ -1223,19 +1223,6 @@ or candidate election year
 '''
 
 COMMUNICATION_COST = '''
-<b>Deprecation notice: This endpoint will be replaced with a new endpoint \
- `/communication_costs/`, so that the pagination schema will be in line with \
-the other endpoints sharing the "communication cost" tag.</b>
-
-52 U.S.C. 30118 allows \
-"communications by a corporation to its stockholders and executive or administrative \
-personnel and their families or by a labor organization to its members and their families \
-on any subject," including the express advocacy of the election or defeat of any Federal \
-candidate.  The costs of such communications must be reported to the Federal Election \
-Commission under certain circumstances.
-'''
-
-COMMUNICATION_COST_OFFSET = '''
 52 U.S.C. 30118 allows "communications by a corporation to its stockholders and executive \
 or administrative personnel and their families or by a labor organization to its members \
 and their families on any subject," including the express advocacy of the election or defeat \
