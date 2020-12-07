@@ -35,10 +35,11 @@ class ApiResource(utils.Resource):
     @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
-        count, is_estimate = counts.get_count(self, query)
-        # Use built-in pagination for exact counts
+        is_estimate = counts.is_estimated_count(self, query)
         if not is_estimate:
             count = None
+        else:
+            count, _ = counts.get_count(self, query)
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
@@ -103,10 +104,11 @@ class ItemizedResource(ApiResource):
             query, count = self.join_committee_queries(kwargs)
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
-        count, is_estimate = counts.get_count(self, query)
-        # Use built-in pagination for exact counts
+        is_estimate = counts.is_estimated_count(self, query)
         if not is_estimate:
             count = None
+        else:
+            count, _ = counts.get_count(self, query)
         return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
 
     def join_committee_queries(self, kwargs):
