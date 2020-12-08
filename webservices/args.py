@@ -412,10 +412,8 @@ committee_reports = {
     'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
 }
 
-totals = {
+committee_totals = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'type': fields.Str(description=docs.COMMITTEE_TYPE),
-    'designation': fields.Str(description=docs.DESIGNATION),
 }
 
 totals_by_committee_type = {
