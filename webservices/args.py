@@ -195,6 +195,7 @@ query = {
     'from_hit': fields.Int(required=False, description='Get results starting from this index.'),
     'hits_returned': fields.Int(required=False, description='Number of results to return (max 10).'),
     'type': fields.Str(required=False, description='Document type to refine search by'),
+    'mur_type': fields.Str(required=False, description='Mur type'),
     'ao_no': fields.List(IStr, required=False, description='Force advisory opinion number'),
     'ao_name': fields.List(IStr, required=False, description='Force advisory opinion name'),
     'ao_min_issue_date': fields.Date(description="Earliest issue date of advisory opinion"),

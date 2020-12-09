@@ -2,14 +2,25 @@ import logging
 import re
 from collections import defaultdict
 
-from webservices.env import env
 from webservices.rest import db
-from webservices.utils import extend, create_eregs_link, get_elasticsearch_connection
+from webservices.utils import (
+    extend,
+    create_es_client,
+    create_eregs_link,
+    DateTimeEncoder,
+)
 from webservices.tasks.utils import get_bucket
-
+from .es_management import (  # noqa
+    DOCS_ALIAS,
+)
 from .reclassify_statutory_citation import reclassify_statutory_citation_without_title
+import json
+
 
 logger = logging.getLogger(__name__)
+
+# for debug, uncomment this line
+# logger.setLevel(logging.DEBUG)
 
 ALL_CASES = """
     SELECT
@@ -160,67 +171,93 @@ AF_COMMISSION_VOTES = """
     ORDER BY action_date desc;
 """
 
-STATUTE_REGEX = re.compile(r'(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)')
-REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?')
-CASE_NO_REGEX = re.compile(r'(?P<serial>\d+)')
+STATUTE_REGEX = re.compile(r"(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)")
+REGULATION_REGEX = re.compile(r"(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?")
+CASE_NO_REGEX = re.compile(r"(?P<serial>\d+)")
 
 
 def load_current_murs(specific_mur_no=None):
-    load_cases('MUR', specific_mur_no)
+    """
+    Reads data for current MURs from a Postgres database,
+    assembles a JSON document corresponding to the case, and indexes this document
+    in Elasticsearch in the DOCS_ALIAS of DOCS_INDEX with a type=`murs`.
+    In addition, all documents attached to the case are uploaded to an
+    S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
+    """
+    load_cases("MUR", specific_mur_no)
 
 
 def load_adrs(specific_adr_no=None):
-    load_cases('ADR', specific_adr_no)
+    """
+    Reads data for ADRs from a Postgres database,
+    assembles a JSON document corresponding to the case, and indexes this document
+    in Elasticsearch the DOCS_ALIAS of DOCS_INDEX with a type=`adrs`.
+    In addition, all documents attached to the case are uploaded to an
+    S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
+    """
+    load_cases("ADR", specific_adr_no)
 
 
 def load_admin_fines(specific_af_no=None):
-    load_cases('AF', specific_af_no)
+    """
+    Reads data for AFs from a Postgres database,
+    assembles a JSON document corresponding to the case, and indexes this document
+    in Elasticsearch the DOCS_ALIAS of DOCS_INDEX with a type=`admin_fines`.
+    In addition, all documents attached to the case are uploaded to an
+    S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
+    """
+    load_cases("AF", specific_af_no)
 
 
 def get_es_type(case_type):
     case_type = case_type.upper()
-    if case_type == 'AF':
-        return 'admin_fines'
-    elif case_type == 'ADR':
-        return 'adrs'
+    if case_type == "AF":
+        return "admin_fines"
+    elif case_type == "ADR":
+        return "adrs"
     else:
-        return 'murs'
+        return "murs"
 
 
 def get_full_name(case_type):
     case_type = case_type.upper()
-    if case_type == 'AF':
-        return 'administrative-fine'
-    elif case_type == 'ADR':
-        return 'alternative-dispute-resolution'
+    if case_type == "AF":
+        return "administrative-fine"
+    elif case_type == "ADR":
+        return "alternative-dispute-resolution"
     else:
-        return 'matter-under-review'
+        return "matter-under-review"
 
 
 def load_cases(case_type, case_no=None):
-    """
-    Reads data for current MURs, AFs, and ADRs from a Postgres database,
-    assembles a JSON document corresponding to the case, and indexes this document
-    in Elasticsearch in the index `docs_index` with a doc_type of `murs`, `adrs`, or `admin_fines`.
-    In addition, all documents attached to the case are uploaded to an
-    S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
-    """
-    if case_type in ('MUR', 'ADR', 'AF'):
-        es = get_elasticsearch_connection()
+    # TO DO: check if DOCS_ALIAS exist before uploading.
+    if case_type in ("MUR", "ADR", "AF"):
+        es_client = create_es_client()
         logger.info("Loading {0}(s)".format(case_type))
         case_count = 0
         for case in get_cases(case_type, case_no):
             if case is not None:
-                if case.get('published_flg'):
-                    logger.info("Loading {0}: {1}".format(case_type, case['no']))
-                    es.index('docs_index', get_es_type(case_type), case, id=case['doc_id'])
+                if case.get("published_flg"):
+                    logger.info("Loading {0}: {1}".format(case_type, case["no"]))
+                    es_client.index(DOCS_ALIAS, case, id=case["doc_id"])
                     case_count += 1
                     logger.info("{0} {1}(s) loaded".format(case_count, case_type))
                 else:
-                    logger.info("Found an unpublished case - deleting {0}: {1} from ES".format(case_type, case['no']))
-                    es.delete_by_query(index='docs_index', body={'query': {"term": {"no": case['no']}}},
-                        doc_type=get_es_type(case_type))
-                    logger.info('Successfully deleted {} {} from ES'.format(case_type, case['no']))
+                    try:
+                        logger.info("Found an unpublished case - deleting {0}: {1} from ES".format(
+                            case_type, case["no"]))
+                        es_client.delete(index=DOCS_ALIAS, id="case['doc_id']")
+                        logger.info("Successfully deleted {} {} from ES".format(case_type, case["no"]))
+                    except Exception as err:
+                        logger.error("An error occurred while deteting an unpublished case.{0} {1} {2}".format(
+                            case_type, case["no"], err))
+
+            # ==for local dubug use: remove the big "documents" section to display the object "case_type" data
+            debug_case_data = case
+            del debug_case_data["documents"]
+            logger.debug("case_data count=" + str(case_count))
+            logger.debug("debug_case_data =" + json.dumps(debug_case_data, indent=3, cls=DateTimeEncoder))
+
     else:
         logger.error("Invalid case_type: must be 'MUR', 'ADR', or 'AF'.")
 
@@ -231,50 +268,52 @@ def get_cases(case_type, case_no=None):
     If none are specified, all cases are reloaded
     Unlike AOs, cases are not published in sequential order.
     """
+    bucket = get_bucket()
+
     if case_no is None:
         with db.engine.connect() as conn:
             rs = conn.execute(ALL_CASES, case_type)
             for row in rs:
-                yield get_single_case(case_type, row['case_no'])
+                yield get_single_case(case_type, row["case_no"], bucket)
     else:
-        yield get_single_case(case_type, case_no)
+        yield get_single_case(case_type, case_no, bucket)
 
 
-def get_single_case(case_type, case_no):
-    bucket = get_bucket()
-    bucket_name = env.get_credential('bucket')
+def get_single_case(case_type, case_no, bucket):
+    # bucket = get_bucket()
 
     with db.engine.connect() as conn:
         rs = conn.execute(SINGLE_CASE, case_type, case_no)
         row = rs.first()
         if row is not None:
-            case_id = row['case_id']
-            sort1, sort2 = get_sort_fields(row['case_no'])
+            case_id = row["case_id"]
+            sort1, sort2 = get_sort_fields(row["case_no"])
             case = {
-                'doc_id': '{0}_{1}'.format(case_type.lower(), row['case_no']),
-                'no': row['case_no'],
-                'name': row['name'],
-                'published_flg': row['published_flg'],
-                'sort1': sort1,
-                'sort2': sort2,
+                "type": get_es_type(case_type),
+                "doc_id": "{0}_{1}".format(case_type.lower(), row["case_no"]),
+                "no": row["case_no"],
+                "name": row["name"],
+                "published_flg": row["published_flg"],
+                "sort1": sort1,
+                "sort2": sort2,
             }
-            case['commission_votes'] = get_commission_votes(case_type, case_id)
-            case['documents'] = get_documents(case_id, bucket, bucket_name)
-            case['url'] = '/legal/{0}/{1}/'.format(get_full_name(case_type), row['case_no'])
-            if case_type == 'AF':
+            case["commission_votes"] = get_commission_votes(case_type, case_id)
+            case["documents"] = get_documents(case_id, bucket)
+            case["url"] = "/legal/{0}/{1}/".format(get_full_name(case_type), row["case_no"])
+            if case_type == "AF":
                 case = extend(case, get_af_specific_fields(case_id))
                 return case
-            if case_type == 'MUR':
-                case['mur_type'] = 'current'
-            case['subjects'] = get_subjects(case_id)
-            case['election_cycles'] = get_election_cycles(case_id)
+            if case_type == "MUR":
+                case["mur_type"] = "current"
+            case["subjects"] = get_subjects(case_id)
+            case["election_cycles"] = get_election_cycles(case_id)
             participants = get_participants(case_id)
-            case['participants'] = list(participants.values())
-            case['respondents'] = get_sorted_respondents(case['participants'])
+            case["participants"] = list(participants.values())
+            case["respondents"] = get_sorted_respondents(case["participants"])
 
-            case['dispositions'] = get_dispositions(case_id)
+            case["dispositions"] = get_dispositions(case_id)
 
-            case['open_date'], case['close_date'] = get_open_and_close_dates(case_id)
+            case["open_date"], case["close_date"] = get_open_and_close_dates(case_id)
             return case
         else:
             logger.error("Not a valid {0} number.".format(case_type))
@@ -309,7 +348,7 @@ def get_election_cycles(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(CASE_ELECTION_CYCLES, case_id)
         for row in rs:
-            election_cycles.append(row['election_cycle'])
+            election_cycles.append(row["election_cycle"])
     return election_cycles
 
 
@@ -325,23 +364,23 @@ def get_dispositions(case_id):
         rs = conn.execute(DISPOSITION_DATA.format(case_id))
         disposition_data = []
         for row in rs:
-            citations = parse_statutory_citations(row['statutory_citation'], case_id, row['name'])
-            citations.extend(parse_regulatory_citations(row['regulatory_citation'], case_id, row['name']))
-            disposition_data.append({'disposition': row['event_name'], 'penalty': row['final_amount'],
-                'respondent': row['name'], 'citations': citations})
+            citations = parse_statutory_citations(row["statutory_citation"], case_id, row["name"])
+            citations.extend(parse_regulatory_citations(row["regulatory_citation"], case_id, row["name"]))
+            disposition_data.append({"disposition": row["event_name"], "penalty": row["final_amount"],
+                "respondent": row["name"], "citations": citations})
 
         return disposition_data
 
 
 def get_commission_votes(case_type, case_id):
     with db.engine.connect() as conn:
-        if case_type == 'AF':
+        if case_type == "AF":
             rs = conn.execute(AF_COMMISSION_VOTES, case_id)
         else:
             rs = conn.execute(MUR_ADR_COMMISSION_VOTES, case_id)
         commission_votes = []
         for row in rs:
-            commission_votes.append({'vote_date': row['vote_date'], 'action': row['action']})
+            commission_votes.append({"vote_date": row["vote_date"], "action": row["action"]})
         return commission_votes
 
 
@@ -350,10 +389,10 @@ def get_participants(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(CASE_PARTICIPANTS, case_id)
         for row in rs:
-            participants[row['entity_id']] = {
-                'name': row['name'],
-                'role': row['role'],
-                'citations': defaultdict(list)
+            participants[row["entity_id"]] = {
+                "name": row["name"],
+                "role": row["role"],
+                "citations": defaultdict(list)
             }
     return participants
 
@@ -362,10 +401,10 @@ def get_sorted_respondents(participants):
     """
     Returns the respondents in a MUR sorted in the order of most important to least important
     """
-    SORTED_RESPONDENT_ROLES = ['Primary Respondent', 'Respondent', 'Previous Respondent']
+    SORTED_RESPONDENT_ROLES = ["Primary Respondent", "Respondent", "Previous Respondent"]
     respondents = []
     for role in SORTED_RESPONDENT_ROLES:
-        respondents.extend(sorted([p['name'] for p in participants if p['role'] == role]))
+        respondents.extend(sorted([p["name"] for p in participants if p["role"] == role]))
     return respondents
 
 
@@ -374,10 +413,10 @@ def get_subjects(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(CASE_SUBJECTS, case_id)
         for row in rs:
-            if row['rel']:
-                subject_str = row['subj'] + "-" + row['rel']
+            if row["rel"]:
+                subject_str = row["subj"] + "-" + row["rel"]
             else:
-                subject_str = row['subj']
+                subject_str = row["subj"]
             subjects.append(subject_str)
     return subjects
 
@@ -386,14 +425,14 @@ def assign_citations(participants, case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(CASE_VIOLATIONS, case_id)
         for row in rs:
-            entity_id = row['entity_id']
+            entity_id = row["entity_id"]
             if entity_id not in participants:
                 logger.warn("Entity %s from violations not found in participants for case %s", entity_id, case_id)
                 continue
-            participants[entity_id]['citations'][row['stage']].extend(
-                parse_statutory_citations(row['statutory_citation'], case_id, entity_id))
-            participants[entity_id]['citations'][row['stage']].extend(
-                parse_regulatory_citations(row['regulatory_citation'], case_id, entity_id))
+            participants[entity_id]["citations"][row["stage"]].extend(
+                parse_statutory_citations(row["statutory_citation"], case_id, entity_id))
+            participants[entity_id]["citations"][row["stage"]].extend(
+                parse_regulatory_citations(row["regulatory_citation"], case_id, entity_id))
 
 
 def parse_statutory_citations(statutory_citation, case_id, entity_id):
@@ -402,15 +441,15 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
         statutory_citation = remove_reclassification_notes(statutory_citation)
         matches = list(STATUTE_REGEX.finditer(statutory_citation))
         for index, match in enumerate(matches):
-            section = match.group('section')
+            section = match.group("section")
             orig_title, new_title, new_section = reclassify_statutory_citation_without_title(section)
-            url = 'https://www.govinfo.gov/link/uscode/{0}/{1}'.format(new_title, new_section)
+            url = "https://www.govinfo.gov/link/uscode/{0}/{1}".format(new_title, new_section)
             if index == len(matches) - 1:
                 match_text = statutory_citation[match.start():]
             else:
                 match_text = statutory_citation[match.start():matches[index + 1].start()]
-            text = match_text.rstrip(' ,;')
-            citations.append({'text': text, 'type': 'statute', 'title': orig_title, 'url': url})
+            text = match_text.rstrip(" ,;")
+            citations.append({"text": text, "type": "statute", "title": orig_title, "url": url})
         if not citations:
             logger.warn("Cannot parse statutory citation %s for Entity %s in case %s",
                     statutory_citation, entity_id, case_id)
@@ -422,47 +461,56 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
     if regulatory_citation:
         matches = list(REGULATION_REGEX.finditer(regulatory_citation))
         for index, match in enumerate(matches):
-            part = match.group('part')
-            section = match.group('section')
+            part = match.group("part")
+            section = match.group("section")
             url = create_eregs_link(part, section)
             if index == len(matches) - 1:
                 match_text = regulatory_citation[match.start():]
             else:
                 match_text = regulatory_citation[match.start():matches[index + 1].start()]
-            text = match_text.rstrip(' ,;')
-            citations.append({'text': text, 'type': 'regulation', 'title': '11', 'url': url})
+            text = match_text.rstrip(" ,;")
+            citations.append({"text": text, "type": "regulation", "title": "11", "url": url})
         if not citations:
             logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
                     regulatory_citation, entity_id, case_id)
     return citations
 
 
-def get_documents(case_id, bucket, bucket_name):
+def get_documents(case_id, bucket):
     documents = []
     with db.engine.connect() as conn:
         rs = conn.execute(CASE_DOCUMENTS, case_id)
         for row in rs:
             document = {
-                'document_id': row['document_id'],
-                'category': row['category'],
-                'description': row['description'],
-                'length': row['length'],
-                'text': row['ocrtext'],
-                'document_date': row['document_date'],
+                "document_id": row["document_id"],
+                "category": row["category"],
+                "description": row["description"],
+                "length": row["length"],
+                "text": row["ocrtext"],
+                "document_date": row["document_date"],
             }
-            if not row['fileimage']:
+            if not row["fileimage"]:
                 logger.error(
-                    'Error uploading document ID {0} for {1} %{2}: No file image'.
-                    format(row['document_id'], row['case_type'], row['case_no']))
+                    "Error uploading document ID {0} for {1} %{2}: No file image".
+                    format(row["document_id"], row["case_type"], row["case_no"]))
             else:
-                pdf_key = 'legal/{0}/{1}/{2}'.format(get_es_type(row['case_type']), row['case_no'],
-                    row['filename'].replace(' ', '-'))
-                document['url'] = '/files/' + pdf_key
-                logger.debug("S3: Uploading {}".format(pdf_key))
-                bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
-                        ContentType='application/pdf', ACL='public-read')
+                pdf_key = "legal/{0}/{1}/{2}".format(get_es_type(row["case_type"]), row["case_no"],
+                    row["filename"].replace(" ", "-"))
+                document["url"] = "/files/" + pdf_key
                 documents.append(document)
 
+                # bucket is None on local, don't need upload pdf to s3
+                try:
+                    if bucket:
+                        logger.debug("S3: Uploading {}".format(pdf_key))
+                        bucket.put_object(
+                            Key=pdf_key,
+                            Body=bytes(row["fileimage"]),
+                            ContentType="application/pdf",
+                            ACL="public-read",
+                        )
+                except Exception:
+                    pass
     return documents
 
 
@@ -471,29 +519,29 @@ def remove_reclassification_notes(statutory_citation):
     "30120 (formerly 441d)" and "30120 (formerly 432(e)(1))". These need to be
     removed as we explicitly perform the necessary reclassifications.
     """
-    UNPARENTHESIZED_FORMERLY_REGEX = re.compile(r' formerly \S*')
-    PARENTHESIZED_FORMERLY_REGEX = re.compile(r'\(formerly ')
+    UNPARENTHESIZED_FORMERLY_REGEX = re.compile(r" formerly \S*")
+    PARENTHESIZED_FORMERLY_REGEX = re.compile(r"\(formerly ")
 
     def remove_to_matching_parens(citation):
         """ In the case of reclassification notes of the form "(formerly ...",
-        remove all characters up to the matching closing ')' allowing for nested
+        remove all characters up to the matching closing ")" allowing for nested
         parentheses pairs.
         """
         match = PARENTHESIZED_FORMERLY_REGEX.search(citation)
         pos = match.end()
         paren_count = 0
         while pos < len(citation):
-            if citation[pos] == ')':
+            if citation[pos] == ")":
                 if paren_count == 0:
                     return citation[:match.start()] + citation[pos + 1:]
                 else:
                     paren_count -= 1
-            elif citation[pos] == '(':
+            elif citation[pos] == "(":
                 paren_count += 1
             pos += 1
-        return citation[:match.start()]  # Degenerate case - no matching ')'
+        return citation[:match.start()]  # Degenerate case - no matching ")"
 
-    cleaned_citation = UNPARENTHESIZED_FORMERLY_REGEX.sub(' ', statutory_citation)
+    cleaned_citation = UNPARENTHESIZED_FORMERLY_REGEX.sub(" ", statutory_citation)
     while PARENTHESIZED_FORMERLY_REGEX.search(cleaned_citation):
         cleaned_citation = remove_to_matching_parens(cleaned_citation)
     return cleaned_citation
