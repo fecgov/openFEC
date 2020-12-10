@@ -23,22 +23,22 @@ def get_cycle_end(year):
 CURRENT_YEAR = datetime.datetime.now().year
 
 SQL_CONFIG = {
-    'START_YEAR': get_cycle_start(1980),
-    'START_YEAR_AGGREGATE': get_cycle_start(2008),
-    'END_YEAR_ITEMIZED': get_cycle_start(CURRENT_YEAR),
+    "START_YEAR": get_cycle_start(1980),
+    "START_YEAR_AGGREGATE": get_cycle_start(2008),
+    "END_YEAR_ITEMIZED": get_cycle_start(CURRENT_YEAR),
 }
 
 REQUIRED_CREDS = (
-    'SQLA_CONN',
-    'FEC_SLACK_TOKEN',
+    "SQLA_CONN",
+    "FEC_SLACK_TOKEN",
 )
 
-REQUIRED_SERVICES = ('redis32', 's3', 'elasticsearch56')
+REQUIRED_SERVICES = ("redis32", "s3", "aws-elasticsearch")
 
 REQUIRED_TABLES = tuple(db.Model.metadata.tables.keys()) + (
-    'ofec_pacronyms',
-    'ofec_nicknames',
-    'ofec_zips_districts',
+    "ofec_pacronyms",
+    "ofec_nicknames",
+    "ofec_zips_districts",
 )
 
 
@@ -52,22 +52,22 @@ def load_table(name):
 def check_keys(keys, getter, formatter):
     missing = [key for key in keys if getter(key) is None]
     if missing:
-        print(formatter.format(', '.join(keys)))
+        print(formatter.format(", ".join(keys)))
     return missing
 
 
 CHECKS = [
-    (REQUIRED_CREDS, env.get_credential, 'Missing creds {}'),
+    (REQUIRED_CREDS, env.get_credential, "Missing creds {}"),
     (
         REQUIRED_SERVICES,
         lambda service: env.get_service(label=service),
-        'Missing services {}',
+        "Missing services {}",
     ),
-    (REQUIRED_TABLES, load_table, 'Missing tables {}'),
+    (REQUIRED_TABLES, load_table, "Missing tables {}"),
 ]
 
 
 def check_config():
     results = [check_keys(*check) for check in CHECKS]
     if any(results):
-        raise RuntimeError('Invalid configuration: {0}'.format(results))
+        raise RuntimeError("Invalid configuration: {0}".format(results))
