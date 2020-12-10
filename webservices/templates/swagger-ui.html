@@ -142,7 +142,7 @@
     };
   </script>
 
-  <!-- { % i f PRODUCTION % } -->
+  {% if PRODUCTION %}
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -158,6 +158,6 @@
       ga('send', 'pageview');
     </script>
     <script id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=FEC"></script>
-  <!-- { % endif % } -->
+  {% endif %}
 </body>
 </html>
