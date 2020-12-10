@@ -8,7 +8,7 @@
 command, then open localhost:8089 to run tests.
 
 API keys:
-- Use an unlimited `FEC_API_KEY`
+- Use an unlimited `FEC_WEB_API_KEY_PUBLIC`
 - Borrow the `FEC_DOWNLOAD_API_KEY` from the staging space
 
 """
@@ -23,7 +23,7 @@ import locust
 # Avoid "Too many open files" error
 resource.setrlimit(resource.RLIMIT_NOFILE, (9999, 999999))
 
-API_KEY = os.environ["FEC_API_KEY"]
+API_KEY = os.environ["FEC_WEB_API_KEY_PUBLIC"]
 DOWNLOAD_KEY = os.environ["FEC_DOWNLOAD_API_KEY"]
 
 # it seems like AUTH is NOT used for current tests
@@ -330,36 +330,6 @@ class Tasks(locust.TaskSet):
         )
 
     @locust.task
-    def load_legal_documents_search(self, term=None):
-        term = term or random.choice(CANDIDATES)
-        params = {"q": term, "api_key": API_KEY}
-        self.client.get("legal/search", name="legal_search", params=params)
-
-    @locust.task
-    def get_mur(self):
-        params = {"api_key": API_KEY}
-        self.client.get("legal/docs/murs/7074", name="legal_get_mur", params=params)
-
-    @locust.task
-    def get_adr(self):
-        params = {"api_key": API_KEY}
-        self.client.get("legal/docs/adrs/668", name="legal_get_adr", params=params)
-
-    @locust.task
-    def get_admin_fine(self):
-        params = {"api_key": API_KEY}
-        self.client.get(
-            "legal/docs/admin_fines/2274", name="legal_get_admin_fine", params=params
-        )
-
-    @locust.task
-    def get_ao(self):
-        params = {"api_key": API_KEY}
-        self.client.get(
-            "legal/docs/advisory_opinions/2018-07", name="legal_get_ao", params=params
-        )
-
-    @locust.task
     def load_schedule_a_small(self):
         params = random.choice(small_records_sched_a)
         params["api_key"] = API_KEY
@@ -416,6 +386,43 @@ class Tasks(locust.TaskSet):
     def load_reports(self):
         params = {"api_key": API_KEY}
         self.client.get("reports/P/", name="load_reports", params=params)
+
+    @locust.task
+    def load_legal_documents_search(self, term=None):
+        params = {"q": term, "api_key": API_KEY}
+        self.client.get("legal/search", name="legal_search", params=params)
+
+    @locust.task
+    def get_docs_mur(self):
+        params = {"api_key": API_KEY}
+        self.client.get("legal/docs/murs/7074", name="get_docs_mur", params=params)
+
+    @locust.task
+    def get_docs_adr(self):
+        params = {"api_key": API_KEY}
+        self.client.get("legal/docs/adrs/668", name="get_docs_adr", params=params)
+
+    @locust.task
+    def get_docs_admin_fine(self):
+        params = {"api_key": API_KEY}
+        self.client.get(
+            "legal/docs/admin_fines/3745", name="get_docs_admin_fine", params=params
+        )
+
+    # archived mur #179
+    @locust.task
+    def get_docs_archived_mur(self):
+        params = {"api_key": API_KEY}
+        self.client.get(
+            "legal/docs/murs/179", name="get_docs_archived_mur", params=params
+        )
+
+    @locust.task
+    def get_docs_advisory_opinions(self):
+        params = {"api_key": API_KEY}
+        self.client.get(
+            "legal/docs/advisory_opinions/2020-01", name="get_docs_advisory_opinions", params=params
+        )
 
 
 class Swarm(locust.HttpLocust):
