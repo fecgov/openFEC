@@ -9,14 +9,12 @@ applications:
       - python_buildpack
     path: ../
     routes:
-      - route: fec-stage-api.app.cloud.gov
+      - route: fec-feature-api.app.cloud.gov
     services:
       - fec-api-elasticsearch
       - fec-redis
-      - fec-creds-stage
+      - fec-creds-feature
       - fec-s3-api
       - fec-s3-snapshot
     env:
-      FEC_API_USE_PROXY: true
-      FEC_API_RESTRICT_DOWNLOADS: true
-      APP_NAME: fec | api | stage
+      APP_NAME: fec | api | feature

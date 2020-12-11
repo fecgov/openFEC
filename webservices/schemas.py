@@ -745,13 +745,12 @@ register_schema(ScheduleEPageSchema)
 CommunicationCostSchema = make_schema(
     models.CommunicationCost,
 )
-CommunicationCostPageSchema = make_page_schema(CommunicationCostSchema, page_type=paging_schemas.SeekPageSchema)
+CommunicationCostPageSchema = make_page_schema(
+    CommunicationCostSchema,
+    page_type=paging_schemas.OffsetPageSchema
+)
 register_schema(CommunicationCostSchema)
 register_schema(CommunicationCostPageSchema)
-
-CommunicationCostOffsetPageSchema = make_page_schema(CommunicationCostSchema, page_type=paging_schemas.OffsetPageSchema,
-                                                     class_name='CommunicationCostOffsetPageSchema')
-register_schema(CommunicationCostOffsetPageSchema)
 
 CCAggregatesSchema = make_schema(
     models.CommunicationCostByCandidate,

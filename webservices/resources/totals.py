@@ -91,7 +91,7 @@ class TotalsByCommitteeTypeView(utils.Resource):
 
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
         totals_class, totals_schema = totals_schema_map.get(
-            committee_type_map.get(committee_type), 
+            committee_type_map.get(committee_type),
             default_schemas,
         )
         query = totals_class.query
@@ -138,7 +138,7 @@ class TotalsByCommitteeTypeView(utils.Resource):
 )
 class TotalsCommitteeView(ApiResource):
     @use_kwargs(args.paging)
-    @use_kwargs(args.totals)
+    @use_kwargs(args.committee_totals)
     @use_kwargs(args.make_sort_args(default='-cycle'))
     @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):

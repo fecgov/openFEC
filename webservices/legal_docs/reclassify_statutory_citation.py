@@ -45,7 +45,7 @@ CITATIONS_MAP = {
 }
 
 # The new section numbers are 5 digit numbers starting with 30. e.g., 30106
-RECLASSIFIED_STATUTE_SECTION_REGEX = re.compile(r'30\d{3,}')
+RECLASSIFIED_STATUTE_SECTION_REGEX = re.compile(r"30\d{3,}")
 
 
 def reclassify_statutory_citation(title, section):
@@ -60,12 +60,12 @@ def reclassify_statutory_citation(title, section):
         mapped_section = CITATIONS_MAP.get(section)
         if mapped_section:
             logger.debug(
-                'Mapping 2 U.S.C statute citation %s -> %s',
+                "Mapping 2 U.S.C statute citation %s -> %s",
                 (title, section),
                 (MAPPED_TITLE, mapped_section),
             )
             return MAPPED_TITLE, mapped_section
-        logger.debug('Unmapped 2 U.S.C citation: %s', (title, section))
+        logger.debug("Unmapped 2 U.S.C citation: %s", (title, section))
     return title, section
 
 
@@ -82,7 +82,7 @@ def reclassify_statutory_citation_without_title(section):
     mapped_section = CITATIONS_MAP.get(section)
     if mapped_section:
         logger.debug(
-            'Mapping current MUR statute citation %s -> %s',
+            "Mapping current MUR statute citation %s -> %s",
             section,
             (MAPPED_TITLE, mapped_section),
         )

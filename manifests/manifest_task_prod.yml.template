@@ -11,10 +11,11 @@ applications:
     - python_buildpack
   health-check-type: process
   services:
-    - fec-s3-prod
-    - fec-api-search56
-    - fec-creds-prod
+    - fec-api-elasticsearch
     - fec-redis
+    - fec-creds-prod
+    - fec-s3-api
+    - fec-s3-snapshot
   env:
     FEC_API_USE_PROXY: true
     APP_NAME: fec | api | prod
