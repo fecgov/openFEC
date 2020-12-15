@@ -347,11 +347,11 @@ invoke deploy --space dev --migrate-database
 
 
 #### Setting up a service
-On Cloud Foundry, we use the redis32
+On Cloud Foundry, we use the aws-elasticache-redis
 service. The Redis service can be created as follows:
 
 ```
-cf create-service redis32 standard-ha fec-redis
+cf create-service aws-elasticache-redis redis-3node fec-elasticache-redis
 ```
 
 #### Setting up credentials

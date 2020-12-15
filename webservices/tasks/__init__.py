@@ -42,12 +42,12 @@ def redis_url():
     """
     Retrieve the URL needed to connect to a Redis instance, depending on environment.
 
-    When running in a cloud.gov environment, retrieve the uri credential for the 'redis32' service.
+    When running in a cloud.gov environment, retrieve the uri credential for the 'aws-elasticache-redis' service.
     """
 
     # Is the app running in a cloud.gov environment
     if env.space is not None:
-        redis_env = env.get_service(label='redis32')
+        redis_env = env.get_service(label='aws-elasticache-redis')
         redis_url = redis_env.credentials.get('uri')
 
         return redis_url
