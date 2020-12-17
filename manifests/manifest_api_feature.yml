@@ -12,7 +12,7 @@ applications:
       - route: fec-feature-api.app.cloud.gov
     services:
       - fec-api-elasticsearch
-      - fec-redis
+      - fec-elasticache-redis
       - fec-creds-feature
       - fec-s3-api
       - fec-s3-snapshot
