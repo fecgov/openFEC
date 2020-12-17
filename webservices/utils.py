@@ -47,9 +47,9 @@ API_KEY_ARG = fields.Str(
 if env.get_credential("PRODUCTION"):
     Resource = use_kwargs({"api_key": API_KEY_ARG})(Resource)
 
-fec_url_map = {"9": "http://docquery.fec.gov/dcdev/posted/{0}.fec"}
+fec_url_map = {'9': 'https://docquery.fec.gov/dcdev/posted/{0}.fec'}
 fec_url_map = defaultdict(
-    lambda: "http://docquery.fec.gov/paper/posted/{0}.fec", fec_url_map
+    lambda: 'https://docquery.fec.gov/paper/posted/{0}.fec', fec_url_map
 )
 
 
@@ -389,7 +389,7 @@ def document_description(
 
 def make_report_pdf_url(image_number):
     if image_number:
-        return "http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf".format(
+        return 'https://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
             str(image_number)[-3:], image_number,
         )
     else:
@@ -398,15 +398,15 @@ def make_report_pdf_url(image_number):
 
 def make_schedule_pdf_url(image_number):
     if image_number:
-        return "http://docquery.fec.gov/cgi-bin/fecimg/?" + image_number
+        return 'https://docquery.fec.gov/cgi-bin/fecimg/?' + image_number
 
 
 def make_csv_url(file_num):
     file_number = str(file_num)
     if file_num > -1 and file_num < 100:
-        return "http://docquery.fec.gov/csv/000/{0}.csv".format(file_number)
+        return 'https://docquery.fec.gov/csv/000/{0}.csv'.format(file_number)
     elif file_num >= 100:
-        return "http://docquery.fec.gov/csv/{0}/{1}.csv".format(
+        return 'https://docquery.fec.gov/csv/{0}/{1}.csv'.format(
             file_number[-3:], file_number
         )
 

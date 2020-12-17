@@ -190,7 +190,7 @@ class TestReports(ApiBaseTest):
         )
         self.assertEqual(
             results[0]['pdf_url'],
-            'http://docquery.fec.gov/pdf/901/12345678901/12345678901.pdf',
+            'https://docquery.fec.gov/pdf/901/12345678901/12345678901.pdf',
         )
 
     def test_no_pdf_link(self):
