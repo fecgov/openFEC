@@ -20,7 +20,7 @@ def get_bucket():
     try:
         session = boto3.Session()
         s3 = session.resource("s3")
-        bucket = s3.Bucket(env.get_credential("AWS_DEFAULT_BUCKET"))
+        bucket = s3.Bucket(env.get_credential("AWS_PUBLIC_BUCKET"))
     except Exception as err:
         logging.error("An error occurred trying to connect to s3. Please disregard if running locally.{0}".format(err))
         return
@@ -33,9 +33,9 @@ def get_object(key):
 
 def get_s3_key(name):
     connection = boto.s3.connect_to_region(
-        env.get_credential("region"),
+        env.get_credential("AWS_DEFAULT_REGION"),
     )
-    bucket = connection.get_bucket(env.get_credential("AWS_DEFAULT_BUCKET"))
+    bucket = connection.get_bucket(env.get_credential("AWS_PUBLIC_BUCKET"))
     key = Key(bucket=bucket, name=name)
     return key
 
