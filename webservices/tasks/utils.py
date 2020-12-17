@@ -18,9 +18,16 @@ def get_app():
 
 def get_bucket():
     try:
-        session = boto3.Session()
+        cf_s3_service = env.get_service(name="fec-s3-api")
+        session = boto3.Session(
+            aws_access_key_id=cf_s3_service.credentials["access_key_id"],
+            aws_secret_access_key=cf_s3_service.credentials["secret_access_key"],
+            region_name="us-gov-west-1"
+        )
         s3 = session.resource("s3")
-        bucket = s3.Bucket(env.get_credential("bucket"))
+        print("cf_s3_service.credentials['bucket']", cf_s3_service.credentials["bucket"])
+        bucket = s3.Bucket(cf_s3_service.credentials["bucket"])
+        print("'get_bucket' bucket: {}".format(bucket))
     except Exception as err:
         logging.error("An error occurred trying to connect to s3. Please disregard if running locally.{0}".format(err))
         return
@@ -32,10 +39,15 @@ def get_object(key):
 
 
 def get_s3_key(name):
+    cf_s3_service = env.get_service(name="fec-s3-api")
     connection = boto.s3.connect_to_region(
-        env.get_credential("region"),
+        "us-gov-west-1",
+        aws_access_key_id=cf_s3_service.credentials["access_key_id"],
+        aws_secret_access_key=cf_s3_service.credentials["secret_access_key"]
     )
-    bucket = connection.get_bucket(env.get_credential("bucket"))
+    print("cf_s3_service.credentials['bucket']", cf_s3_service.credentials["bucket"])
+    bucket = connection.get_bucket(cf_s3_service.credentials["bucket"])
+    print("'get_s3_key' bucket: {}".format(bucket))
     key = Key(bucket=bucket, name=name)
     return key
 
