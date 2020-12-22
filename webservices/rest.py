@@ -236,10 +236,11 @@ def add_secure_headers(response):
     content_security_policy = {
         "default-src": "'self' *.fec.gov *.app.cloud.gov",
         "img-src": "'self' data:",
-        "script-src": "'self' https://api.data.gov 'unsafe-inline'",
+        "script-src": "'self' https://api.data.gov https://dap.digitalgov.gov https://www.google-analytics.com \
+            https://www.googletagmanager.com 'unsafe-inline'",
         "style-src": "'self' https://fonts.googleapis.com https://api.data.gov 'unsafe-inline'",
         "font-src": "'self' https://fonts.gstatic.com data: https://api.data.gov",
-        "connect-src": "*.fec.gov *.cloud.gov https://api.data.gov",
+        "connect-src": "*.fec.gov *.cloud.gov https://api.data.gov https://www.google-analytics.com",
         "object-src": "'none'",
         "report-uri": "/report-csp-violation/",
     }
@@ -251,6 +252,17 @@ def add_secure_headers(response):
         "{0} {1}; ".format(directive, value)
         for directive, value in content_security_policy.items()
     )
+
+    # Expect-CT header
+    expect_ct_max_age = 60 * 60 * 24  # 1 day
+    expect_ct_enforce = False
+    expect_ct_report_uri = False
+    expect_ct_string = 'max-age=%s' % expect_ct_max_age
+    if expect_ct_enforce:
+        expect_ct_string += ', enforce'
+    if expect_ct_report_uri:
+        expect_ct_string += ', report-uri="%s"' % expect_ct_report_uri
+    headers["Expect-CT"] = expect_ct_string
 
     for header, value in headers.items():
         response.headers.add(header, value)
@@ -330,8 +342,7 @@ api.add_resource(sched_e.ScheduleEEfileView, '/schedules/schedule_e/efile/')
 api.add_resource(sched_f.ScheduleFView, '/schedules/schedule_f/', '/schedules/schedule_f/<string:sub_id>/')
 api.add_resource(sched_f.ScheduleFViewBySubId, '/schedules/schedule_f/<string:sub_id>/')
 api.add_resource(sched_h4.ScheduleH4View, '/schedules/schedule_h4/')
-api.add_resource(costs.CommunicationCostView, '/communication-costs/')
-api.add_resource(costs.CommunicationCostViewOffset, '/communication_costs/')
+api.add_resource(costs.CommunicationCostView, '/communication_costs/')
 api.add_resource(costs.ElectioneeringView, '/electioneering/')
 api.add_resource(elections.ElectionView, '/elections/')
 api.add_resource(elections.ElectionsListView, '/elections/search/')
@@ -475,7 +486,6 @@ apidoc.register(sched_d.ScheduleDViewBySubId, blueprint='v1')
 if bool(env.get_credential('FEC_FEATURE_SCHEDULE_H4', '')):
     apidoc.register(sched_h4.ScheduleH4View, blueprint='v1')
 apidoc.register(costs.CommunicationCostView, blueprint='v1')
-apidoc.register(costs.CommunicationCostViewOffset, blueprint='v1')
 apidoc.register(aggregates.CCAggregatesView, blueprint='v1')
 apidoc.register(costs.ElectioneeringView, blueprint='v1')
 apidoc.register(aggregates.ECAggregatesView, blueprint='v1')

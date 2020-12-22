@@ -69,3 +69,42 @@ class TestCounts(ApiBaseTest):
         count, estimate = counts.get_count(resource, query)
         self.assertEqual(count, 2000000)
         self.assertEqual(estimate, True)
+
+    # test boundary conditions (n-1)
+    def test_threshold_boundary_minus_1(self, get_query_plan_mock):
+        query = db.session.query(models.ScheduleA)
+        resource = sched_a.ScheduleAView()
+        get_query_plan_mock.return_value = [
+            (
+                'Seq Scan on fec_fitem_sched_a  \
+            (cost=0.00..10.60 rows={} width=1289)'.format(resource.estimated_count_threshold - 1),
+            )
+        ]
+        count, estimate = counts.get_count(resource, query)
+        self.assertEqual(estimate, False)
+
+    # test boundary conditions (n)
+    def test_threshold_boundary(self, get_query_plan_mock):
+        query = db.session.query(models.ScheduleA)
+        resource = sched_a.ScheduleAView()
+        get_query_plan_mock.return_value = [
+            (
+                'Seq Scan on fec_fitem_sched_a  \
+            (cost=0.00..10.60 rows={} width=1289)'.format(resource.estimated_count_threshold),
+            )
+        ]
+        count, estimate = counts.get_count(resource, query)
+        self.assertEqual(estimate, False)
+
+    # test boundary conditions (n+1)
+    def test_threshold_boundary_plus_1(self, get_query_plan_mock):
+        query = db.session.query(models.ScheduleA)
+        resource = sched_a.ScheduleAView()
+        get_query_plan_mock.return_value = [
+            (
+                'Seq Scan on fec_fitem_sched_a  \
+            (cost=0.00..10.60 rows={} width=1289)'.format(resource.estimated_count_threshold + 1),
+            )
+        ]
+        count, estimate = counts.get_count(resource, query)
+        self.assertEqual(estimate, True)

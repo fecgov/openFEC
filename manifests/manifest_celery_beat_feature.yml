@@ -2,7 +2,7 @@
 applications:
   - name: celery-beat
     instances: 1
-    memory: 500M
+    memory: 256M
     disk_quota: 1G
     no-route: true
     health-check-type: process
@@ -14,11 +14,8 @@ applications:
     services:
       - fec-api-elasticsearch
       - fec-redis
-      - fec-creds-prod
+      - fec-creds-feature
       - fec-s3-api
       - fec-s3-snapshot
     env:
-      FEC_API_USE_PROXY: true
-      FEC_API_RESTRICT_DOWNLOADS: true
-      APP_NAME: fec | api | prod
-      PRODUCTION: True
+      APP_NAME: fec | api | feature

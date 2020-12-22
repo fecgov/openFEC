@@ -76,7 +76,6 @@ endpoints = [
     "/candidates/totals/?api_key={api_key}",
     "/schedules/schedule_a/by_state/totals/?api_key={api_key}",
 
-    "/communication-costs/?api_key={api_key}",
     "/communication_costs/by_candidate/?api_key={api_key}&candidate_id={candidate_id}",
     "/communication_costs/totals/by_candidate?api_key={api_key}",
 

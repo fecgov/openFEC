@@ -3,17 +3,21 @@ from elasticsearch_dsl import Search
 import logging
 import re
 from webservices.rest import db
-from webservices import utils
+from webservices.utils import (
+    create_es_client,
+    create_eregs_link,
+    DateTimeEncoder,
+)
 from .reclassify_statutory_citation import reclassify_statutory_citation
-
-# import these 3 libraries to display the JSON format of object "mur"
 import json
-import datetime
-from json import JSONEncoder
+from .es_management import (  # noqa
+    ARCHIVED_MURS_INDEX,
+    ARCHIVED_MURS_ALIAS,
+)
 
 logger = logging.getLogger(__name__)
 
-# for debug
+# for debug, uncomment this line
 # logger.setLevel(logging.DEBUG)
 
 ALL_ARCHIVED_MURS = """
@@ -120,34 +124,32 @@ INSERT_DOCUMENT = """
 """
 
 
-# To display the open_date and close_date of JSON format inside object "mur"
-class DateTimeEncoder(JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, (datetime.date, datetime.datetime)):
-            return obj.isoformat()
-
-
 def load_archived_murs(mur_no=None):
-
     """
     Reads data for Archived MURs from a Postgres database (under schema:mur_arch),
     assembles a JSON document corresponding to the mur, and indexes this document
-    in Elasticsearch in the index `archived_murs` with a doc_type of `murs`.
+    in Elasticsearch in the alias ARCHIVED_MURS_ALIAS of ARCHIVED_MURS_INDEX with a type=`murs` and mur_type=`archived`.
     """
-    es = utils.get_elasticsearch_connection()
+    # TO DO: check if ARCHIVED_MURS_ALIAS exist before uploading.
+    es_client = create_es_client()
     mur_count = 0
     for mur in get_murs(mur_no):
         if mur is not None:
-            logger.info("Loading archived MUR No: {0}".format(mur["no"]))
-            es.index("archived_murs", get_es_type(), mur, id=mur["doc_id"])
-            mur_count += 1
+            try:
+                logger.info("Loading archived MUR No: {0}".format(mur["no"]))
+                es_client.index(ARCHIVED_MURS_ALIAS, mur, id=mur["doc_id"])
+                mur_count += 1
+                logger.info("{0} Archived Mur(s) loaded".format(mur_count))
+            except Exception as err:
+                logger.error(
+                    "An error occurred while uploading archived mur:\nmur no={0} \nerr={1}".format(
+                        mur["no"], err))
 
-            logger.info("{0} Archived Mur(s) loaded".format(mur_count))
-        else:
-            logger.error("Invalid archived MUR")
-
-        # ==for dubug use, display the JSON format of object "mur"
-        logger.debug("mur_json_data =" + json.dumps(mur, indent=4, cls=DateTimeEncoder))
+        # ==for dubug use: remove the big "documents" section to display the object "mur" data
+        mur_debug_data = mur
+        # del mur_debug_data["documents"]
+        logger.debug("mur_data count=" + str(mur_count))
+        logger.debug("mur_debug_data =" + json.dumps(mur_debug_data, indent=3, cls=DateTimeEncoder))
 
 
 def get_murs(mur_no=None):
@@ -167,6 +169,7 @@ def get_single_mur(mur_no):
         if row is not None:
             mur_id = row["mur_id"]
             mur = {
+                "type": get_es_type(),
                 "doc_id": "mur_{0}".format(row["mur_no"]),
                 "no": row["mur_no"],
                 "url": "/legal/matter-under-review/{0}/".format(row["mur_no"]),
@@ -243,7 +246,7 @@ def get_citations_arch_mur(mur_id):
                     us_codes.append({"text": citation_text, "url": url})
 
                 elif regulation_match:
-                    url = utils.create_eregs_link(regulation_match.group("part"), regulation_match.group("section"))
+                    url = create_eregs_link(regulation_match.group("part"), regulation_match.group("section"))
                     regulations.append({"text": row["cite"], "url": url})
                 else:
                     raise Exception("Could not parse archived mur's citation.")
@@ -296,13 +299,13 @@ def get_documents(mur_id):
 def extract_pdf_text(mur_no=None):
     """
     1)Reads "text" and "documents" object data for Archived MURs from Elasticsearch,
-    under index: `archived_murs` and doc_type of `murs`
+    under index: ARCHIVED_MURS_INDEX and type of `murs`
     2)Assembles a JSON document corresponding to the archived murs,
     3)Insert the JSON document into Postgres database table: mur_arch.documents
     4)Run this command carefully, backup mur_arch.documents table first
     and empty it. the data will be inserted into table: mur_arch.documents
     """
-    es = utils.get_elasticsearch_connection()
+    es_client = create_es_client()
     each_fetch_size = 1000
     max_size = 5000
     all_results = []
@@ -311,7 +314,7 @@ def extract_pdf_text(mur_no=None):
     for from_no in range(0, max_size, each_fetch_size):
         es_results = (
             Search()
-            .using(es)
+            .using(es_client)
             .source(includes=[
                 "no",
                 "text",
@@ -321,7 +324,7 @@ def extract_pdf_text(mur_no=None):
                 "documents.text"
             ])
             .extra(size=each_fetch_size, from_=from_no)
-            .index("archived_murs")
+            .index(ARCHIVED_MURS_ALIAS)
             .doc_type("murs")
             .sort("no")
             .execute()
@@ -334,8 +337,8 @@ def extract_pdf_text(mur_no=None):
     results = {"all_mur_docs": all_results}
     logger.debug("all_mur_docs = " + json.dumps(results, indent=3, cls=DateTimeEncoder))
 
-    logger.info("Get {0} archived mur(s) from elasticserch index: \"archived_murs\"".format(
-        str(len(results['all_mur_docs']))))
+    logger.info("Get {0} archived mur(s) from elasticserch index: \"ARCHIVED_MURS_INDEX\"".format(
+        str(len(results["all_mur_docs"]))))
 
     if results and results.get("all_mur_docs"):
         with db.engine.connect() as conn:
