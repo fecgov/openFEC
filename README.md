@@ -207,7 +207,7 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
 Follow these steps every time you want to work on this project locally.
 
 1. If you are using the legal search portion of the site, you will need Elastic Search running.
-Navigate to the installation folder (eg., `elasticsearch-5.6.8`) and run:
+Navigate to the installation folder (eg., `elasticsearch-7.4`) and run:
 
 ```
 cd bin
