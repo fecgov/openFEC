@@ -62,7 +62,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
 		   ```
 
 		   to enable connection to a local database (e.g., `cfdm_test` from [Create
-           a test database](https://github.com/fecgov/openFEC#create-a-development-database), below) and specify the location of the database migration files (*SQL)
+           a test database](https://github.com/fecgov/openFEC#create-a-development-database), below) and specify the location of the database migration files (SQL)
     * See [Database migrations](https://github.com/fecgov/openFEC#database-migration) for more information on installing and configuring flyway
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
@@ -607,7 +607,7 @@ cf run-task api --command "python manage.py initialize_current_legal_docs" -m 4G
 ```
 cf run-task api --command "python manage.py initialize_archived_mur_docs" -m 4G --name initialize_arch_mur_data
 ```
-These commands are used when initialize data at the first time with downtime.
+These commands are used to reload all legal docs with downtime (approximately two hours).
 
 ### Upload individual legal documents
 The progress of these tasks can be monitored using, e.g.,
