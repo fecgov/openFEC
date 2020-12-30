@@ -50,7 +50,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
          * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](https://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
-    * Elastic Search 5.6 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/_installation.html))
+    * Elastic Search 7.x (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/_installation.html))
     * Flyway 5.2.4 ([download](https://flywaydb.org/getstarted/download))
 		* After downloading, open `flyway5.2.4/conf/flyway.conf` and set
            the flyway environment variables `flyway.url` and
@@ -63,8 +63,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
 
 		   to enable connection to a local database (e.g., `cfdm_test` from [Create
            a test database](https://github.com/fecgov/openFEC#create-a-development-database), below) and specify the location of the database migration files (*SQL)
-       * See [Database migrations](https://github.com/fecgov/openFEC#database-migration) for more information on installing and configuring flyway
-
+    * See [Database migrations](https://github.com/fecgov/openFEC#database-migration) for more information on installing and configuring flyway
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
 
@@ -599,7 +598,7 @@ cf run-task api --command "python manage.py delete_index -i <index_name>" -m 2G 
 ```
 cf run-task api --command "python manage.py refresh_current_legal_docs_zero_downtime" -m 4G --name refresh_data
 ```
-This command is typically used when there is a schema change. A staging index is built and populated in the background. When ready, the staging index is moved to the production index with no downtime.
+This command is typically used when there is a schema change. A staging index (DOCS_STAGING_INDEX) is built and populated in the background. When ready, the staging index is moved to the current index (DOCS_INDEX) with no downtime.
 
 #### Initialize the current legal documents and archived MURs (with downtime)
 ```
