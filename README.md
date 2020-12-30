@@ -50,7 +50,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
          * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](https://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
-    * Elastic Search 5.6 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/_installation.html))
+    * Elastic Search 7.x (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/_installation.html))
     * Flyway 5.2.4 ([download](https://flywaydb.org/getstarted/download))
 		* After downloading, open `flyway5.2.4/conf/flyway.conf` and set
            the flyway environment variables `flyway.url` and
@@ -62,9 +62,8 @@ We are always trying to improve our documentation. If you have suggestions or ru
 		   ```
 
 		   to enable connection to a local database (e.g., `cfdm_test` from [Create
-           a test database](https://github.com/fecgov/openFEC#create-a-development-database), below) and specify the location of the database migration files (*SQL)
-       * See [Database migrations](https://github.com/fecgov/openFEC#database-migration) for more information on installing and configuring flyway
-
+           a test database](https://github.com/fecgov/openFEC#create-a-development-database), below) and specify the location of the database migration files (SQL)
+    * See [Database migrations](https://github.com/fecgov/openFEC#database-migration) for more information on installing and configuring flyway
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
 
@@ -569,64 +568,86 @@ The production and staging environments use relational database service (RDS) in
 Incrementally-updated aggregates and materialized views are updated nightly; see
 `webservices/tasks/refresh.py` for details. When the nightly update finishes, logs and error reports are slacked to the team.
 
-### Loading legal documents
-There are individual management commands for loading individual legal documents. More information is available by invoking each of these commands with a `--help` option. These commands can be run as [tasks](https://docs.cloudfoundry.org/devguide/using-tasks.html) on `cloud.gov`, e.g.,
-```
-cf run-task api --command "python manage.py index_statutes" -m 2G --name index-statutes
-```
-The progress of these tasks can be monitored using, e.g.,
-```
-cf logs api | grep reinit-legal
-```
+### Managing Elasticsearch
+Reference Wiki [Elasticsearch 7.x.0 management instruction](https://github.com/fecgov/openFEC/wiki/Elasticsearch-7.x.0-management-instruction)
 
-#### Create index for current legal documents (excludes archived MURs)
+There are some management commands to manage (display, create, delete, restore) repository, index and snapshot on Elasticsearch.
+More information is available by invoking each of these commands with a `--help` option. These commands can be run as [tasks](https://docs.cloudfoundry.org/devguide/using-tasks.html) on `cloud.gov`, e.g.,
+#### Display, Configure and Delete a repository
 ```
-python manage.py initialize_current_legal_docs
+cf run-task api --command "python manage.py display_repositories" -m 2G --name display_repositories
 ```
-#### Create index for archived MURs
 ```
-python manage.py create_archived_murs_index
+cf run-task api --command "python manage.py configure_snapshot_repository -r <repository_name>" -m 4G --name configure_docs_snapshot_repository
 ```
-
-#### Loading statutes
 ```
-python manage.py index_statutes
+cf run-task api --command "python manage.py delete_repository -r <repository_name>" -m 4G --name delete_repository
 ```
-
-#### Loading regulations
+#### Display, Create and Delete an index
+We have two indexes for FEC legal documents, one is used for current legal documents, another is used for archived MURs.
 ```
-python manage.py index_regulations
+cf run-task api --command "python manage.py display_index_alias" -m 2G --name display_index_alias
 ```
-This command requires that the environment variable `FEC_EREGS_API` is set to the API endpoint of a valid `eregs` instance.
-
-#### Loading advisory opinions [beginning with FROM_AO_NO through newest AO]
 ```
-python manage.py load_advisory_opinions [-f FROM_AO_NO]
+cf run-task api --command "python manage.py create_index -i <index_name> -a [alias_name1,alias_name2]" -m 2G --name create_index
 ```
-
-#### Loading current MURs [only one MUR_NO]
 ```
-python manage.py load_current_murs [-s MUR_NO]
+cf run-task api --command "python manage.py delete_index -i <index_name>" -m 2G --name delete_index
 ```
-
-#### Loading ADRs [only one ADR_NO]
-```
-python manage.py load_adrs [-s ADR_NO]
-```
-
-#### Loading Admin Fines [only one AF_NO]
-```
-python manage.py load_admin_fines [-s AF_NO]
-```
-
 #### Reloading all current legal documents with no downtime (excludes archived MURs)
 ```
-python manage.py refresh_current_legal_docs_zero_downtime
+cf run-task api --command "python manage.py refresh_current_legal_docs_zero_downtime" -m 4G --name refresh_data
 ```
-This command is typically used when there is a schema change. A staging index is built
-and populated in the background. When ready, the staging index is moved to the production index with no downtime.
+This command is typically used when there is a schema change. A staging index (DOCS_STAGING_INDEX) is built and populated in the background. When ready, the staging index is moved to the current index (DOCS_INDEX) with no downtime.
 
+#### Initialize the current legal documents and archived MURs (with downtime)
+```
+cf run-task api --command "python manage.py initialize_current_legal_docs" -m 4G --name initialize_docs_data
+```
+```
+cf run-task api --command "python manage.py initialize_archived_mur_docs" -m 4G --name initialize_arch_mur_data
+```
+These commands are used to reload all legal docs with downtime (approximately two hours).
 
+### Upload individual legal documents
+The progress of these tasks can be monitored using, e.g.,
+```
+cf logs api | grep <some key word>
+```
+#### Loading advisory opinions [beginning with FROM_AO_NO through newest AO]
+```
+cf run-task api --command "python manage.py load_advisory_opinions [-f FROM_AO_NO]" -m 4G --name load_advisory_opinions
+```
+#### Loading current MURs (type=murs and mur_type=current) [only one MUR_NO]
+```
+cf run-task api --command "python manage.py load_current_murs [-s MUR_NO]" -m 4G --name load_current_murs
+```
+#### Loading ADRs [only one ADR_NO]
+```
+cf run-task api --command "python manage.py load_adrs [-s ADR_NO]"  -m 4G --name load_adrs
+```
+#### Loading Admin Fines [only one AF_NO]
+```
+cf run-task api --command "python manage.py load_admin_fines [-s AF_NO]" --name load_admin_fines
+```
+#### Loading regulations
+```
+cf run-task api --command "python manage.py load_regulations" --name load_regulations
+```
+This command requires that the environment variable `FEC_EREGS_API` is set to the API endpoint of a valid `eregs` instance.
+#### Loading statutes
+```
+cf run-task api --command "python manage.py load_statutes" --name load_statutes
+```
+#### Loading archived murs(type=murs and mur_type=archived)
+(load one arch_mur):
+```
+cf run-task api --command "python manage.py load_archived_murs [-m MUR_NO]" --name upload_one_arch_mur
+```
+(load all arch_mur):
+```
+cf run-task api --command "python manage.py load_archived_murs" --name upload_arch_mur
+```
 ### Production stack
 The OpenFEC API is a Flask application deployed using the gunicorn WSGI server behind
 an nginx reverse proxy. Static files are compressed and served directly through nginx;
