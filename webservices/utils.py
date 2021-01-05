@@ -50,6 +50,7 @@ if env.get_credential("PRODUCTION"):
 fec_url_map = {'9': 'https://docquery.fec.gov/dcdev/posted/{0}.fec'}
 fec_url_map = defaultdict(
     lambda: 'https://docquery.fec.gov/paper/posted/{0}.fec', fec_url_map
+
 )
 
 

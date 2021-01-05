@@ -13,7 +13,7 @@ applications:
       - python_buildpack
     services:
       - fec-api-elasticsearch
-      - fec-redis
+      - fec-elasticache-redis
       - fec-creds-prod
       - fec-s3-api
       - fec-s3-snapshot

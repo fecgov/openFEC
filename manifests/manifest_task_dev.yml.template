@@ -12,7 +12,7 @@ applications:
   health-check-type: process
   services:
     - fec-api-elasticsearch
-    - fec-redis
+    - fec-elasticache-redis
     - fec-creds-dev
     - fec-s3-api
     - fec-s3-snapshot
