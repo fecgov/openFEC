@@ -2,7 +2,7 @@
 import re
 from zipfile import ZipFile
 from tempfile import NamedTemporaryFile
-from xml.etree import ElementTree as Et
+from defusedxml import ElementTree as Et
 import logging
 import requests
 from webservices.utils import create_es_client

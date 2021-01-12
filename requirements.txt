@@ -27,6 +27,7 @@ elasticsearch==7.6.0
 elasticsearch-dsl==7.3.0
 requests-aws4auth==1.0
 certifi==2020.11.8
+defusedxml==0.6.0
 
 # Marshalling
 flask-apispec==0.7.0
