@@ -27,7 +27,7 @@ class CommitteeSearchFactory(BaseFactory):
 
 
 class BaseCandidateFactory(BaseFactory):
-    candidate_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
+    candidate_id = factory.Sequence(lambda n: "ID{0}".format(n))
 
 
 class CandidateFactory(BaseCandidateFactory):
@@ -93,7 +93,7 @@ class CandidateFlagsFactory(BaseFactory):
 
 
 class BaseCommitteeFactory(BaseFactory):
-    committee_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
+    committee_id = factory.Sequence(lambda n: "ID{0}".format(n))
 
 
 class CommitteeFactory(BaseCommitteeFactory):
@@ -133,6 +133,13 @@ class CandidateCommitteeLinkFactory(BaseFactory):
         model = models.CandidateCommitteeLink
 
     linkage_id = factory.Sequence(lambda n: n)
+
+
+class CandidateCommitteeAlternateLinkFactory(BaseFactory):
+    class Meta:
+        model = models.CandidateCommitteeAlternateLink
+
+    sub_id = factory.Sequence(lambda n: n)
 
 
 class BaseTotalsFactory(BaseFactory):
@@ -369,7 +376,7 @@ class ScheduleEByCandidateFactory(BaseAggregateFactory):
         model = models.ScheduleEByCandidate
 
     candidate_id = factory.Sequence(lambda n: str(n))
-    support_oppose_indicator = 'S'
+    support_oppose_indicator = "S"
 
 
 class CommunicationCostByCandidateFactory(BaseAggregateFactory):
@@ -377,7 +384,7 @@ class CommunicationCostByCandidateFactory(BaseAggregateFactory):
         model = models.CommunicationCostByCandidate
 
     candidate_id = factory.Sequence(lambda n: str(n))
-    support_oppose_indicator = 'S'
+    support_oppose_indicator = "S"
 
 
 class ElectioneeringByCandidateFactory(BaseAggregateFactory):
@@ -423,7 +430,7 @@ class ZipsDistrictsFactory(BaseFactory):
     class Meta:
         model = models.ZipsDistricts
 
-    active = 'Y'
+    active = "Y"
 
 
 class CommunicationCostFactory(BaseFactory):
@@ -456,7 +463,7 @@ class ElectioneeringFactory(BaseFactory):
         model = models.Electioneering
 
     idx = factory.Sequence(lambda n: n)
-    election_type_raw = 'G'
+    election_type_raw = "G"
 
     @factory.post_generation
     def update_fulltext(obj, create, extracted, **kwargs):
@@ -488,23 +495,23 @@ class AuditCaseFactory(BaseFactory):
     class Meta:
         model = models.AuditCase
 
-    audit_case_id = '2219'
-    primary_category_id = '3'
-    sub_category_id = '227'
+    audit_case_id = "2219"
+    primary_category_id = "3"
+    sub_category_id = "227"
 
 
 class AuditCategoryFactory(BaseFactory):
     class Meta:
         model = models.AuditCategory
 
-    primary_category_id = '3'
+    primary_category_id = "3"
 
 
 class AuditPrimaryCategoryFactory(BaseFactory):
     class Meta:
         model = models.AuditPrimaryCategory
 
-    primary_category_id = '3'
+    primary_category_id = "3"
 
 
 class AuditCandidateSearchFactory(BaseFactory):
@@ -525,8 +532,8 @@ class StateElectionOfficesFactory(BaseFactory):
     class Meta:
         model = models.StateElectionOfficeInfo
 
-    state = 'VA'
-    office_type = 'STATE CAMPAIGN FINANCE'
+    state = "VA"
+    office_type = "STATE CAMPAIGN FINANCE"
 
 
 class OperationsLogFactory(BaseFactory):
