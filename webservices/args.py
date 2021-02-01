@@ -682,12 +682,23 @@ schedule_c = {
     'max_incurred_date': fields.Date(missing=None, description=docs.MAX_INCURRED_DATE),
 }
 
-# These arguments will evolve with updated filtering needs
 schedule_d = {
+    'image_number': fields.List(
+        fields.Str,
+        description='The image number of the page where the schedule item is reported',
+    ),
+    'min_image_number': fields.Str(),
+    'max_image_number': fields.Str(),
+    'min_date': fields.Date(description='Minimum load date'),
+    'max_date': fields.Date(description='Maximum load date'),
     'min_payment_period': fields.Float(),
     'max_payment_period': fields.Float(),
     'min_amount_incurred': fields.Float(),
     'max_amount_incurred': fields.Float(),
+    'min_amount_outstanding_beginning': fields.Float(),
+    'max_amount_outstanding_beginning': fields.Float(),
+    'min_amount_outstanding_close': fields.Float(),
+    'max_amount_outstanding_close': fields.Float(),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'creditor_debtor_name': fields.List(fields.Str),
     'nature_of_debt': fields.Str(),
