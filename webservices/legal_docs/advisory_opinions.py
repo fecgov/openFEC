@@ -41,6 +41,10 @@ ALL_AOS = """
 
 AO_ENTITIES = """
     SELECT
+        e.prefix AS prefix,
+        e.first_name AS firstname,
+        e.last_name AS lastname,
+        e.suffix AS suffix,
         e.name,
         et.description AS entity_type_description,
         r.description AS role_description
@@ -203,19 +207,34 @@ def get_entities(ao_id):
         rs = conn.execute(AO_ENTITIES, ao_id)
         for row in rs:
             if row["role_description"] == "Requestor":
+                print ("Inside Requestor if block...")
                 requestor_names.append(row["name"])
                 requestor_types.add(row["entity_type_description"])
             elif row["role_description"] == "Commenter":
+                print ("Inside Commenter if block...")
                 commenter_names.append(row["name"])
             elif row["role_description"] == "Counsel/Representative":
                 representative_names.append(row["name"])
-            entities.append(
-                {
-                    "role": row["role_description"],
-                    "name": row["name"],
-                    "type": row["entity_type_description"],
-                }
-            )
+
+            # For Individual entity types the name column is empty. In legacy
+            # system for individual types,  name is population by combining
+            # prefix, firstname, lastname and suffix.
+            if row["entity_type_description"] == "Individual":
+                entities.append(
+                    {
+                        "role": row["role_description"],
+                        "name": row["prefix"] + "" + row["firstname"] + " " + row["lastname"] + " " + row["suffix"],
+                        "type": row["entity_type_description"],
+                    }
+                )
+            else:
+                entities.append(
+                    {
+                        "role": row["role_description"],
+                        "name": row["name"],
+                        "type": row["entity_type_description"],
+                    }
+                )
     return (
         requestor_names,
         list(requestor_types),
