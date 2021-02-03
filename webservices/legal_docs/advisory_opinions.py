@@ -207,17 +207,13 @@ def get_entities(ao_id):
         rs = conn.execute(AO_ENTITIES, ao_id)
         for row in rs:
             if row["role_description"] == "Requestor":
-                print ("Inside Requestor if block...")
                 requestor_names.append(row["name"])
                 requestor_types.add(row["entity_type_description"])
             elif row["role_description"] == "Commenter":
-                print ("Inside Commenter if block...")
                 commenter_names.append(row["name"])
             elif row["role_description"] == "Counsel/Representative":
                 representative_names.append(row["name"])
-
-            # For Individual entity types the name column is empty. In legacy
-            # system for individual types,  name is population by combining
+            # For entity type "individual" populate the name column by combining
             # prefix, firstname, lastname and suffix.
             if row["entity_type_description"] == "Individual":
                 entities.append(
