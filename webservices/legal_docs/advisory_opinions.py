@@ -219,7 +219,7 @@ def get_entities(ao_id):
                 entities.append(
                     {
                         "role": row["role_description"],
-                        "name": row["prefix"] + "" + row["firstname"] + " " + row["lastname"] + " " + row["suffix"],
+                        "name": row["prefix"] + " " + row["firstname"] + " " + row["lastname"] + " " + row["suffix"],
                         "type": row["entity_type_description"],
                     }
                 )
