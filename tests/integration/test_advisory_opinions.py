@@ -101,6 +101,34 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         )
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
+    def test_ao_with_entity_individual(self, get_bucket):
+        expected_entity = {
+            "role": "Commenter",
+            "name": "Mr Dan Becker MD",
+            "type": "Individual",
+        }
+        expected_ao = {
+            "type": "advisory_opinions",
+            "no": "2017-01",
+            "name": "An AO name",
+            "summary": "An AO summary",
+            "request_date": datetime.date(2016, 6, 10),
+            "issue_date": datetime.date(2016, 12, 15),
+            "documents": [],
+            "requestor_names": [],
+            "requestor_types": [],
+            "entities": [expected_entity],
+        }
+        self.create_ao(1, expected_ao)
+        self.create_entity_individual(1, 123, "", 15, 2, "Mr", "Dan", "Becker", "MD")
+
+        actual_ao = next(get_advisory_opinions(None))
+        assert actual_ao["entities"] == [
+            {"role": "Commenter",
+            "name": "Mr Dan Becker MD",
+            "type": "Individual"}]
+
+    @patch("webservices.legal_docs.advisory_opinions.get_bucket")
     def test_completed_ao_with_docs(self, get_bucket):
         ao_no = "2017-01"
         filename = "Some File.pdf"
@@ -377,6 +405,32 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             INSERT INTO aouser.entity
             (entity_id, name, type)
             VALUES (%s, %s, %s)""",
+            entity_id,
+            requestor_name,
+            entity_type_id,
+        )
+        self.connection.execute(
+            """
+            INSERT INTO aouser.players
+            (player_id, ao_id, entity_id, role_id)
+            VALUES (%s, %s, %s, %s)""",
+            entity_id,
+            ao_id,
+            entity_id,
+            role_id,
+        )
+
+    def create_entity_individual(self, ao_id, entity_id, requestor_name,
+            entity_type_id, role_id, prefix, first_name, last_name, suffix):
+        self.connection.execute(
+            """
+            INSERT INTO aouser.entity
+            (prefix, first_name, last_name, suffix, entity_id, name, type)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+            prefix,
+            first_name,
+            last_name,
+            suffix,
             entity_id,
             requestor_name,
             entity_type_id,
