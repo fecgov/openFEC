@@ -41,10 +41,10 @@ ALL_AOS = """
 
 AO_ENTITIES = """
     SELECT
-        e.prefix AS prefix,
-        e.first_name AS firstname,
-        e.last_name AS lastname,
-        e.suffix AS suffix,
+        COALESCE(e.prefix,'') AS prefix,
+        COALESCE(e.first_name,'') AS firstname,
+        COALESCE(e.last_name,'') AS lastname,
+        COALESCE(e.suffix,'') AS suffix,
         e.name,
         et.description AS entity_type_description,
         r.description AS role_description
