@@ -536,6 +536,34 @@ SPONSOR_CANDIDATE_ID = '''
 A unique identifier assigned to each candidate registered with the FEC.
 If a person runs for several offices, that person will have separate candidate IDs for each office. This is a filter for Leadership PAC sponsor.
 '''
+
+bank_depository_nm = '''
+Primary bank or depository in which the committee deposits funds, holds accounts, rents safety deposit boxes or maintains funds.
+'''
+
+bank_depository_st1 = '''
+Street of bank or depository as reported on their Form 1.
+'''
+
+bank_depository_st2 = '''
+Second line of the street of bank or depository as reported on the Form 1
+'''
+
+bank_depository_city = '''
+City of bank or depository as reported on the Form 1
+'''
+
+bank_depository_st = '''
+State of bank or depository as reported on the Form 1
+'''
+
+bank_depository_zip = '''
+Zip code of bank or depository as reported on the Form 1
+'''
+
+additional_bank_names = '''
+Additional banks or depositories in which the committee deposits funds, holds accounts, rents safety deposit boxes or maintains funds.
+'''
 # ======== committee end ===========
 
 
