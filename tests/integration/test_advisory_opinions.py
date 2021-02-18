@@ -129,6 +129,35 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "type": "Individual"}]
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
+    def test_ao_with_null_values_entity_individual(self, get_bucket):
+        expected_entity = {
+            "role": "Commenter",
+            "name": "Tom Dolan",
+            "type": "Individual",
+        }
+        expected_ao = {
+            "type": "advisory_opinions",
+            "no": "2020-01",
+            "name": "An AO name",
+            "summary": "An AO summary",
+            "request_date": datetime.date(2016, 6, 10),
+            "issue_date": datetime.date(2016, 12, 15),
+            "documents": [],
+            "requestor_names": [],
+            "requestor_types": [],
+            "entities": [expected_entity],
+        }
+        self.create_ao(2, expected_ao)
+        # create an individual entity by passing None in prefix and suffix columns
+        self.create_entity_individual(2, 456, "", 15, 2, None, "Tom", "Dolan", None)
+
+        actual_ao = next(get_advisory_opinions(None))
+        assert actual_ao["entities"] == [
+            {"role": "Commenter",
+            "name": " Tom Dolan ",
+            "type": "Individual"}]
+
+    @patch("webservices.legal_docs.advisory_opinions.get_bucket")
     def test_completed_ao_with_docs(self, get_bucket):
         ao_no = "2017-01"
         filename = "Some File.pdf"
