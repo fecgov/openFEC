@@ -30,6 +30,14 @@ class TestFilings(ApiBaseTest):
         results = self._results(api.url_for(FilingsList))
         self.assertEqual(len(results), 2)
 
+    def test_filings_with_bank(self):
+        """ Check filings returns bank information"""
+        factories.FilingsFactory(committee_id='C001', bank_depository_name='Bank A')
+
+        results = self._results(api.url_for(FilingsList))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['bank_depository_name'], 'Bank A')
+
     def test_filter_date(self):
         [
             factories.FilingsFactory(receipt_date=datetime.date(2012, 1, 1)),
