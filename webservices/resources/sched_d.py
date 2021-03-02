@@ -31,8 +31,10 @@ class ScheduleDView(ApiResource):
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleD.load_date),
         (('min_payment_period', 'max_payment_period'), models.ScheduleD.payment_period),
-        (('min_amount_incurred_period', 'max_amount_incurred_period'), models.ScheduleD.amount_incurred_period),
+        (('min_amount_incurred', 'max_amount_incurred'), models.ScheduleD.amount_incurred_period),
         (('min_image_number', 'max_image_number'), models.ScheduleD.image_number),
+        (('min_amount_outstanding_beginning', 'max_amount_outstanding_beginning'), models.ScheduleD.outstanding_balance_beginning_of_period),
+        (('min_amount_outstanding_close', 'max_amount_outstanding_close'), models.ScheduleD.outstanding_balance_close_of_period),
     ]
 
     filter_match_fields = [
@@ -46,7 +48,6 @@ class ScheduleDView(ApiResource):
     @property
     def args(self):
         return utils.extend(
-            args.itemized,
             args.schedule_d,
             args.paging,
             args.make_sort_args(

@@ -41,6 +41,10 @@ ALL_AOS = """
 
 AO_ENTITIES = """
     SELECT
+        COALESCE(e.prefix,'') AS prefix,
+        COALESCE(e.first_name,'') AS firstname,
+        COALESCE(e.last_name,'') AS lastname,
+        COALESCE(e.suffix,'') AS suffix,
         e.name,
         et.description AS entity_type_description,
         r.description AS role_description
@@ -209,13 +213,24 @@ def get_entities(ao_id):
                 commenter_names.append(row["name"])
             elif row["role_description"] == "Counsel/Representative":
                 representative_names.append(row["name"])
-            entities.append(
-                {
-                    "role": row["role_description"],
-                    "name": row["name"],
-                    "type": row["entity_type_description"],
-                }
-            )
+            # For entity type "individual" populate the name column by combining
+            # prefix, firstname, lastname and suffix.
+            if row["entity_type_description"] == "Individual":
+                entities.append(
+                    {
+                        "role": row["role_description"],
+                        "name": row["prefix"] + " " + row["firstname"] + " " + row["lastname"] + " " + row["suffix"],
+                        "type": row["entity_type_description"],
+                    }
+                )
+            else:
+                entities.append(
+                    {
+                        "role": row["role_description"],
+                        "name": row["name"],
+                        "type": row["entity_type_description"],
+                    }
+                )
     return (
         requestor_names,
         list(requestor_types),

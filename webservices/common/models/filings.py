@@ -69,6 +69,13 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     most_recent_file_number = db.Column(db.BigInteger)
     amendment_version = db.Column(db.Integer)
     form_category = db.Column(db.String, index=True, doc=docs.FORM_CATEGORY)
+    bank_depository_name = db.Column('bank_depository_nm', db.String, doc=docs.bank_depository_nm)
+    bank_depository_street_1 = db.Column('bank_depository_st1', db.String, doc=docs.bank_depository_st1)
+    bank_depository_street_2 = db.Column('bank_depository_st2', db.String, doc=docs.bank_depository_st2)
+    bank_depository_city = db.Column(db.String, doc=docs.bank_depository_city)
+    bank_depository_state = db.Column('bank_depository_st', db.String, doc=docs.bank_depository_st)
+    bank_depository_zip = db.Column(db.String, doc=docs.bank_depository_zip)
+    additional_bank_names = db.Column(ARRAY(db.String), doc=docs.additional_bank_names)
 
     @property
     def document_description(self):
