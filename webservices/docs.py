@@ -754,11 +754,10 @@ If you are interested in our "is_individual" methodology visit
 our [methodology page](https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/).\n
 
 
-Schedule A is also available as a database dump file, updated weekly on Sunday.
-We cannot provide help with restoring these database dump files.
-You can refer to this community led [group](https://groups.google.com/forum/#!forum/fec-data) for discussion.
-Those files are here: https://www.fec.gov/files/bulk-downloads/index.html?prefix=bulk-downloads/data-dump/schedules/.
-The instructions are here: https://www.fec.gov/files//bulk-downloads/data-dump/schedules/README.txt
+Schedule A is also available as a database dump file that is updated weekly on Sunday.
+The database dump files are here: https://www.fec.gov/files/bulk-downloads/index.html?prefix=bulk-downloads/data-dump/schedules/.
+The instructions are here: https://www.fec.gov/files//bulk-downloads/data-dump/schedules/README.txt.
+We cannot provide help with restoring the database dump files, but you can refer to this community led [group](https://groups.google.com/forum/#!forum/fec-data) for discussion.
 '''
 
 SCHEDULE_A = '''
