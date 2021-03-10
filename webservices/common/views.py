@@ -76,7 +76,7 @@ class ItemizedResource(ApiResource):
         """
         self.validate_kwargs(kwargs)
         if len(kwargs.get("committee_id", [])) > 1:
-            query, count = self.join_committee_queries(kwargs)
+            query, count = self.join_union_subqueries(kwargs, union_field="committee_id")
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
         is_estimate = counts.is_estimated_count(self, query)
@@ -86,13 +86,13 @@ class ItemizedResource(ApiResource):
             count, _ = counts.get_count(self, query)
         return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
 
-    def join_union_subqueries(self, kwargs):
-        """Build and compose per-committee subqueries using `UNION ALL`.
+    def join_union_subqueries(self, kwargs, union_field):
+        """Build and compose per-union field subqueries using `UNION ALL`.
         """
         queries = []
         total = 0
-        for committee_id in kwargs.get('committee_id', []):
-            query, count = self.build_union_subquery(kwargs, committee_id)
+        for argument in kwargs.get(union_field, []):
+            query, count = self.build_union_subquery(kwargs, union_field, argument)
             queries.append(query.subquery().select())
             total += count
         query = models.db.session.query(
@@ -103,10 +103,10 @@ class ItemizedResource(ApiResource):
         query = query.options(*self.query_options)
         return query, total
 
-    def build_union_subquery(self, kwargs, committee_id):
-        """Build a subquery by committee.
+    def build_union_subquery(self, kwargs, union_field, argument):
+        """Build a subquery by specified argument.
         """
-        query = self.build_query(_apply_options=False, **utils.extend(kwargs, {'committee_id': [committee_id]}))
+        query = self.build_query(_apply_options=False, **utils.extend(kwargs, {union_field: [argument]}))
         sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
         query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null)
         page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
