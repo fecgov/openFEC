@@ -66,6 +66,7 @@ class ItemizedResource(ApiResource):
     year_column = None
     index_column = None
     filters_with_max_count = []
+    union_all_fields = []
     max_count = 10
 
     def get(self, **kwargs):
@@ -75,8 +76,20 @@ class ItemizedResource(ApiResource):
         records.
         """
         self.validate_kwargs(kwargs)
+        # Generate UNION ALL subqueries if querying multiple committee IDs
         if len(kwargs.get("committee_id", [])) > 1:
             query, count = self.join_union_subqueries(kwargs, union_field="committee_id")
+            return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
+        # If 2-year period isn't specified, add all to kwargs
+        if "two_year_transaction_period" in self.union_all_fields and not kwargs.get(
+            "two_year_transaction_period"
+        ):
+            kwargs["two_year_transaction_period"] = range(
+                1976, utils.get_current_cycle() + 2, 2
+            )
+        # Generate UNION ALL subqueries if searching multiple 2-year periods
+        if len(kwargs.get("two_year_transaction_period", [])) > 1:
+            query, count = self.join_union_subqueries(kwargs, union_field="two_year_transaction_period")
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
         is_estimate = counts.is_estimated_count(self, query)
