@@ -68,10 +68,13 @@ class ItemizedResource(ApiResource):
     filters_with_max_count = []
     union_all_fields = []
     max_count = 10
+    secondary_index_options = []
 
     def get(self, **kwargs):
-        """Get itemized resources. If multiple values are passed for `committee_id`,
-        create a subquery for each and combine with `UNION ALL`. This is necessary
+        """Get itemized resources.
+
+        If multiple values are passed for `committee_id` or `two_year_transaction_period`,
+        create a subquery for each value and combine with `UNION ALL`. This is necessary
         to avoid slow queries when one or more relevant committees has many
         records.
         """
@@ -129,9 +132,24 @@ class ItemizedResource(ApiResource):
     def validate_kwargs(self, kwargs):
         """Custom keyword argument validation
 
+        - Secondary index
         - Pagination
         - Filters with max count
+
         """
+        if self.secondary_index_options:
+            two_year_transaction_periods = set(
+                kwargs.get('two_year_transaction_period', [])
+            )
+            if len(two_year_transaction_periods) != 1:
+                if not any(kwargs.get(field) for field in self.secondary_index_options):
+                    raise exceptions.ApiError(
+                        "Please choose a single `two_year_transaction_period` or "
+                        "add one of the following filters to your query: `{}`".format(
+                            "`, `".join(self.secondary_index_options)
+                        ),
+                        status_code=400,
+                    )
         if kwargs.get("last_index"):
             if all(
                 kwargs.get("last_{}".format(option)) is None

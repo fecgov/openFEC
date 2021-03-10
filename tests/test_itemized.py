@@ -238,6 +238,12 @@ class TestScheduleA(ApiBaseTest):
         )
         self.assertEqual(response.status_code, 400)
 
+    def test_schedule_a_missing_secondary_index(self):
+        response = self.app.get(
+            api.url_for(ScheduleAView, contributor_state='WY')
+        )
+        self.assertEqual(response.status_code, 400)
+
     def test_schedule_a_recipient_committee_type_filter(self):
         [
             factories.ScheduleAFactory(recipient_committee_type='S'),
