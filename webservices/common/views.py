@@ -73,27 +73,28 @@ class ItemizedResource(ApiResource):
     def get(self, **kwargs):
         """Get itemized resources.
 
-        If multiple values are passed for `committee_id` or `two_year_transaction_period`,
+        If multiple values are passed for any `union_all_field`,
         create a subquery for each value and combine with `UNION ALL`. This is necessary
         to avoid slow queries when one or more relevant committees has many
         records.
+
+        The `union_all_field` values are checked in the order they're specified in the resource file.
+        The first `union_all_field` encountered is used to keep the number of subqueries manageable.
         """
         self.validate_kwargs(kwargs)
-        # Generate UNION ALL subqueries if querying multiple committee IDs
-        if len(kwargs.get("committee_id", [])) > 1:
-            query, count = self.join_union_subqueries(kwargs, union_field="committee_id")
-            return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
-        # If 2-year period isn't specified, add all to kwargs
-        if "two_year_transaction_period" in self.union_all_fields and not kwargs.get(
-            "two_year_transaction_period"
-        ):
-            kwargs["two_year_transaction_period"] = range(
-                1976, utils.get_current_cycle() + 2, 2
-            )
-        # Generate UNION ALL subqueries if searching multiple 2-year periods
-        if len(kwargs.get("two_year_transaction_period", [])) > 1:
-            query, count = self.join_union_subqueries(kwargs, union_field="two_year_transaction_period")
-            return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
+        # Generate UNION ALL subqueries if `union_all_fields` are specified
+        for union_field in self.union_all_fields:
+            # Manually expand two year period to include all if not specified
+            if union_field == "two_year_transaction_period" and not kwargs.get(
+                "two_year_transaction_period"
+            ):
+                kwargs["two_year_transaction_period"] = range(
+                    1976, utils.get_current_cycle() + 2, 2
+                )
+            # Return `UNION ALL` subqueries for the first multiple found
+            if len(kwargs.get(union_field, [])) > 1:
+                query, count = self.join_union_subqueries(kwargs, union_field=union_field)
+                return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
         is_estimate = counts.is_estimated_count(self, query)
         if not is_estimate:
