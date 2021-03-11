@@ -22,7 +22,7 @@ gevent==1.4.0
 greenlet==0.4.16 # pinned to fix build problem (parent is gevent)
 webargs==5.5.3
 ujson==1.33
-requests==2.22.0
+requests==2.25.1
 elasticsearch==7.6.0
 elasticsearch-dsl==7.3.0
 requests-aws4auth==1.0
