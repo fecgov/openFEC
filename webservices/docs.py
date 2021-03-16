@@ -748,8 +748,16 @@ SCHEDULE_A_TAG = '''
 This collection of endpoints includes Schedule A records reported by a committee. \
 Schedule A records describe itemized receipts, including contributions from individuals. \
 If you are interested in contributions from individuals, use the /schedules/schedule_a/ endpoint. \
-For a more complete description of all Schedule A records visit [About receipts data](https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/). \
-If you are interested in our "is_individual" methodology visit our [methodology page](https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/).
+For a more complete description of all Schedule A records visit
+[About receipts data](https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/). \
+If you are interested in our "is_individual" methodology visit
+our [methodology page](https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/).\n
+
+
+Schedule A is also available as a database dump file that is updated weekly on Sunday.
+The database dump files are here: https://www.fec.gov/files/bulk-downloads/index.html?prefix=bulk-downloads/data-dump/schedules/.
+The instructions are here: https://www.fec.gov/files//bulk-downloads/data-dump/schedules/README.txt.
+We cannot provide help with restoring the database dump files, but you can refer to this community led [group](https://groups.google.com/forum/#!forum/fec-data) for discussion.
 '''
 
 SCHEDULE_A = '''
