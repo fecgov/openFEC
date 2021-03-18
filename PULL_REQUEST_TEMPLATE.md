@@ -33,5 +33,5 @@ _This might include:_
 - Any local environmental setup, including unusual env vars, API version to point to, etc.
 
 ## System architecture updates (if applicable)
-_If this pull request changes our [current system diagram](https://github.com/fecgov/FEC/wiki/2.-FEC-system-diagram), include a description of those changes here and update the system diagram._
+_If this pull request changes our [current system diagram](https://github.com/fecgov/FEC/wiki/2.-FEC-system-diagram), include a description of those changes here and create a new ticket to update the system diagram._
 ____
