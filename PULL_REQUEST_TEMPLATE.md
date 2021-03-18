@@ -35,7 +35,7 @@ Include any information that may be helpful to the reviewer(s).
 _This might include:_
 
 - links to sample pages to test
-- Any local environmental setup, including unusual env vars, API version to point to, etc.
+- Any local environmental setup, including unusual public env vars, API version to point to, etc.
 
 ## System architecture updates (if applicable)
 
