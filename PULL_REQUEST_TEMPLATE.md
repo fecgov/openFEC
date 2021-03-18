@@ -30,7 +30,7 @@ Include any information that may be helpful to the reviewer(s).
 _This might include:_
 
 - links to sample pages to test
-- Any local environmental setup that is unusual (env vars, API version to point to, etc)
+- Any local environmental setup, including unusual env vars, API version to point to, etc.
 
 ## System architecture updates (if applicable)
 _If this pull request changes our [current system diagram](https://github.com/fecgov/FEC/wiki/2.-FEC-system-diagram), include a description of those changes here and update the system diagram._
