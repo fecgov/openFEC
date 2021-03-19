@@ -66,14 +66,91 @@ class ItemizedResource(ApiResource):
     year_column = None
     index_column = None
     filters_with_max_count = []
+    union_all_fields = []
     max_count = 10
+    secondary_index_options = []
 
     def get(self, **kwargs):
-        """Get itemized resources. If multiple values are passed for `committee_id`,
-        create a subquery for each and combine with `UNION ALL`. This is necessary
+        """Get itemized resources.
+
+        If multiple values are passed for any `union_all_field`,
+        create a subquery for each value and combine with `UNION ALL`. This is necessary
         to avoid slow queries when one or more relevant committees has many
         records.
+
+        The `union_all_field` values are checked in the order they're specified in the resource file.
+        The first `union_all_field` encountered is used to keep the number of subqueries manageable.
         """
+        self.validate_kwargs(kwargs)
+        # Generate UNION ALL subqueries if `union_all_fields` are specified
+        for union_field in self.union_all_fields:
+            # Manually expand two year period to include all if not specified
+            if union_field == "two_year_transaction_period" and not kwargs.get(
+                "two_year_transaction_period"
+            ):
+                kwargs["two_year_transaction_period"] = range(
+                    1976, utils.get_current_cycle() + 2, 2
+                )
+            # Return `UNION ALL` subqueries for the first multiple found
+            if len(kwargs.get(union_field, [])) > 1:
+                query, count = self.join_union_subqueries(kwargs, union_field=union_field)
+                return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
+        query = self.build_query(**kwargs)
+        is_estimate = counts.is_estimated_count(self, query)
+        if not is_estimate:
+            count = None
+        else:
+            count, _ = counts.get_count(self, query)
+        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
+
+    def join_union_subqueries(self, kwargs, union_field):
+        """Build and compose per-union field subqueries using `UNION ALL`.
+        """
+        queries = []
+        total = 0
+        for argument in kwargs.get(union_field, []):
+            query, count = self.build_union_subquery(kwargs, union_field, argument)
+            queries.append(query.subquery().select())
+            total += count
+        query = models.db.session.query(
+            self.model
+        ).select_entity_from(
+            sa.union_all(*queries)
+        )
+        query = query.options(*self.query_options)
+        return query, total
+
+    def build_union_subquery(self, kwargs, union_field, argument):
+        """Build a subquery by specified argument.
+        """
+        query = self.build_query(_apply_options=False, **utils.extend(kwargs, {union_field: [argument]}))
+        sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
+        query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null)
+        page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
+        count, _ = counts.get_count(self, query)
+        return page_query, count
+
+    def validate_kwargs(self, kwargs):
+        """Custom keyword argument validation
+
+        - Secondary index
+        - Pagination
+        - Filters with max count
+
+        """
+        if self.secondary_index_options:
+            two_year_transaction_periods = set(
+                kwargs.get('two_year_transaction_period', [])
+            )
+            if len(two_year_transaction_periods) != 1:
+                if not any(kwargs.get(field) for field in self.secondary_index_options):
+                    raise exceptions.ApiError(
+                        "Please choose a single `two_year_transaction_period` or "
+                        "add one of the following filters to your query: `{}`".format(
+                            "`, `".join(self.secondary_index_options)
+                        ),
+                        status_code=400,
+                    )
         if kwargs.get("last_index"):
             if all(
                 kwargs.get("last_{}".format(option)) is None
@@ -100,40 +177,3 @@ class ItemizedResource(ApiResource):
                 ),
                 status_code=422,
             )
-        if len(kwargs.get("committee_id", [])) > 1:
-            query, count = self.join_committee_queries(kwargs)
-            return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
-        query = self.build_query(**kwargs)
-        is_estimate = counts.is_estimated_count(self, query)
-        if not is_estimate:
-            count = None
-        else:
-            count, _ = counts.get_count(self, query)
-        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
-
-    def join_committee_queries(self, kwargs):
-        """Build and compose per-committee subqueries using `UNION ALL`.
-        """
-        queries = []
-        total = 0
-        for committee_id in kwargs.get('committee_id', []):
-            query, count = self.build_committee_query(kwargs, committee_id)
-            queries.append(query.subquery().select())
-            total += count
-        query = models.db.session.query(
-            self.model
-        ).select_entity_from(
-            sa.union_all(*queries)
-        )
-        query = query.options(*self.query_options)
-        return query, total
-
-    def build_committee_query(self, kwargs, committee_id):
-        """Build a subquery by committee.
-        """
-        query = self.build_query(_apply_options=False, **utils.extend(kwargs, {'committee_id': [committee_id]}))
-        sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
-        query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null)
-        page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
-        count, _ = counts.get_count(self, query)
-        return page_query, count
