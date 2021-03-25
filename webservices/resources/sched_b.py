@@ -66,7 +66,6 @@ class ScheduleBView(ItemizedResource):
     ]
     union_all_fields = [
         'committee_id',
-        'two_year_transaction_period',
     ]
     use_pk_for_count = True
     query_options = [
