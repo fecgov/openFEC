@@ -88,7 +88,6 @@ class ScheduleAView(ItemizedResource):
     ]
     union_all_fields = [
         'committee_id',
-        'two_year_transaction_period',
     ]
     secondary_index_options = [
         'committee_id',
