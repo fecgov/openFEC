@@ -14,14 +14,14 @@ class TestFilings(BaseTestCase):
     committee = {
         'valid_fec_yr_id': 1,
         'committee_id': 'C001',
-        'fec_election_yr': 1996,
+        'fec_election_yr': 1998,
         'committee_type': 'H',
         'date_entered': 'now()',
     }
 
     FIRST_FILING = {
         'cand_cmte_id': 'C001',
-        'report_year': 1996,
+        'report_year': 1997,
         'form_type': 'F1',
         'begin_image_num': '95039770818',
         'pdf_url': 'https://docquery.fec.gov/pdf/818/95039770818/95039770818.pdf'
