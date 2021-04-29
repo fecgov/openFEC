@@ -43,7 +43,8 @@ class RoutingSession(SignallingSession):
 
     def get_bind(self, mapper=None, clause=None):
         if self.use_follower:
-            return create_engine(self.follower)
+            #  Don't reuse existing connection over 9 minutes old
+            return create_engine(self.follower, pool_recycle=540)
 
         return super().get_bind(mapper=mapper, clause=clause)
 
