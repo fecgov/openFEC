@@ -1,6 +1,5 @@
 import celery
 from sqlalchemy import orm, create_engine
-from flask import request
 from flask_sqlalchemy import SQLAlchemy as SQLAlchemyBase
 from flask_sqlalchemy import SignallingSession
 
