@@ -82,7 +82,7 @@ app.config['SQLALCHEMY_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS'] = bool(
 app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
     'webservices.tasks.download.export_query',
 ]
-app.config['SQLALCHEMY_FOLLOWER'] = env.get_credential('SQLA_FOLLOWERS', '')
+app.config['SQLALCHEMY_FOLLOWER'] = env.get_credential('SQLA_FOLLOWER', '')
 
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
