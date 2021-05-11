@@ -1,5 +1,5 @@
 import celery
-from sqlalchemy import orm, create_engine
+from sqlalchemy import orm
 from flask_sqlalchemy import SQLAlchemy as SQLAlchemyBase
 from flask_sqlalchemy import SignallingSession
 
@@ -42,7 +42,7 @@ class RoutingSession(SignallingSession):
 
     def get_bind(self, mapper=None, clause=None):
         if self.use_follower:
-            return create_engine(self.follower)
+            return self.follower
 
         return super().get_bind(mapper=mapper, clause=clause)
 

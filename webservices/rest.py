@@ -9,6 +9,7 @@ import os
 import ujson
 import flask_cors as cors
 import flask_restful as restful
+import sqlalchemy as sa
 
 from datetime import datetime, time
 from flask import abort
@@ -82,7 +83,9 @@ app.config['SQLALCHEMY_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS'] = bool(
 app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
     'webservices.tasks.download.export_query',
 ]
-app.config['SQLALCHEMY_FOLLOWER'] = env.get_credential('SQLA_FOLLOWER', '')
+app.config["SQLALCHEMY_FOLLOWER"] = sa.create_engine(
+    env.get_credential("SQLA_FOLLOWER", "")
+)
 
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
