@@ -7,7 +7,6 @@ import http
 import logging
 import os
 import ujson
-import sqlalchemy as sa
 import flask_cors as cors
 import flask_restful as restful
 
@@ -83,14 +82,8 @@ app.config['SQLALCHEMY_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS'] = bool(
 app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
     'webservices.tasks.download.export_query',
 ]
-app.config['SQLALCHEMY_FOLLOWERS'] = [
-    sa.create_engine(follower.strip())
-    for follower in utils.split_env_var(env.get_credential('SQLA_FOLLOWERS', ''))
-    if follower.strip()
-]
-app.config['SQLALCHEMY_ROUTE_SCHEDULE_A'] = bool(
-    env.get_credential('SQLA_ROUTE_SCHEDULE_A', '')
-)
+app.config['SQLALCHEMY_FOLLOWER'] = env.get_credential('SQLA_FOLLOWER', '')
+
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
 # app.config['SQLALCHEMY_ECHO'] = True
@@ -194,22 +187,24 @@ def get_cache_header(url):
     DEFAULT_HEADER_TYPE = 'Cache-Control'
     DEFAULT_HEADER_PREFIX = 'public, max-age='
 
+    LONG_CACHE_ENDPOINTS = ['/totals', '/schedules/']
+
     if '/efile/' in url:
         return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, EFILING_CACHE)
     elif '/calendar-dates/' in url:
         return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, CALENDAR_CACHE)
     elif '/legal/' in url:
         return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, LEGAL_CACHE)
-    # This will work differently in local environment - will use local timezone
-    elif (
-        '/schedules/' in url and PEAK_HOURS_START <= datetime.now().time() <= PEAK_HOURS_END
-    ):
-        peak_hours_expiration_time = datetime.combine(
-            datetime.now().date(), PEAK_HOURS_END
-        ).strftime('%a, %d %b %Y %H:%M:%S GMT')
-        return 'Expires', peak_hours_expiration_time
 
-    return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, DEFAULT_CACHE)
+    # This will work differently in local environment - will use local timezone
+    for endpoint in LONG_CACHE_ENDPOINTS:
+        if endpoint in url and PEAK_HOURS_START <= datetime.now().time() <= PEAK_HOURS_END:
+            peak_hours_expiration_time = datetime.combine(
+                datetime.now().date(), PEAK_HOURS_END
+            ).strftime('%a, %d %b %Y %H:%M:%S GMT')
+            return 'Expires', peak_hours_expiration_time
+    else:
+        return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, DEFAULT_CACHE)
 
 
 @app.after_request
