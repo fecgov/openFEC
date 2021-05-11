@@ -7,9 +7,9 @@ import http
 import logging
 import os
 import ujson
-import sqlalchemy as sa
 import flask_cors as cors
 import flask_restful as restful
+import sqlalchemy as sa
 
 from datetime import datetime, time
 from flask import abort
@@ -83,14 +83,10 @@ app.config['SQLALCHEMY_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS'] = bool(
 app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
     'webservices.tasks.download.export_query',
 ]
-app.config['SQLALCHEMY_FOLLOWERS'] = [
-    sa.create_engine(follower.strip())
-    for follower in utils.split_env_var(env.get_credential('SQLA_FOLLOWERS', ''))
-    if follower.strip()
-]
-app.config['SQLALCHEMY_ROUTE_SCHEDULE_A'] = bool(
-    env.get_credential('SQLA_ROUTE_SCHEDULE_A', '')
+app.config["SQLALCHEMY_FOLLOWER"] = sa.create_engine(
+    env.get_credential("SQLA_FOLLOWER", "")
 )
+
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
 # app.config['SQLALCHEMY_ECHO'] = True
