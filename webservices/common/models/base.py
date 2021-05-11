@@ -1,5 +1,7 @@
+import random
 import celery
-from sqlalchemy import orm, create_engine
+from sqlalchemy import orm
+from flask import request
 from flask_sqlalchemy import SQLAlchemy as SQLAlchemyBase
 from flask_sqlalchemy import SignallingSession
 
@@ -11,8 +13,8 @@ class RoutingSession(SignallingSession):
     """
 
     @property
-    def follower(self):
-        return self.app.config['SQLALCHEMY_FOLLOWER']
+    def followers(self):
+        return self.app.config['SQLALCHEMY_FOLLOWERS']
 
     @property
     def follower_tasks(self):
@@ -24,13 +26,13 @@ class RoutingSession(SignallingSession):
 
     @property
     def use_follower(self):
-        # Check for read operations and configured follower.
+        # Check for read operations and configured followers.
         use_follower = (
             not self._flushing
-            and self.follower
+            and len(self.followers) > 0
         )
 
-        # Optionally restrict traffic to follower for only supported tasks.
+        # Optionally restrict traffic to followers for only supported tasks.
         if use_follower and self.restrict_follower_traffic_to_tasks:
             use_follower = (
                 celery.current_task
@@ -39,10 +41,25 @@ class RoutingSession(SignallingSession):
 
         return use_follower
 
+    @property
+    def route_schedule_a(self):
+        """If we have more than 1 replica, separate Schedule A traffic. """
+        return (
+            self.app.config['SQLALCHEMY_ROUTE_SCHEDULE_A'] and len(self.followers) > 1
+        )
 
     def get_bind(self, mapper=None, clause=None):
         if self.use_follower:
-            return create_engine(self.follower)
+            # Celery worker doesn't have request context
+            if request and self.route_schedule_a:
+                if '/schedule_a/' not in request.path:
+                    # Route all non-schedule A traffic to replica 1
+                    return self.followers[0]
+                else:
+                    # Split out Schedule A to remaining replicas
+                    return random.choice(self.followers[1:])
+
+            return random.choice(self.followers)
 
         return super().get_bind(mapper=mapper, clause=clause)
 
