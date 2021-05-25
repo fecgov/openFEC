@@ -172,7 +172,7 @@ class TestLoadCurrentCases(BaseTestCase):
             expected_admin_fine['challenge_outcome'],
             expected_admin_fine['final_determination_date'],
             expected_admin_fine['final_determination_amount'],
-            expected_admin_fine['check_amount'],
+            expected_admin_fine['payment_amount'],
             expected_admin_fine['treasury_referral_date'],
             expected_admin_fine['treasury_referral_amount'],
             expected_admin_fine['petition_court_filing_date'],
