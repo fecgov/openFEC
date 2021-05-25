@@ -530,7 +530,7 @@ class TestLoadCurrentCases(BaseTestCase):
         self.connection.execute(
             "INSERT INTO fecmur.af_case (case_id, committee_id, report_year, report_type, \
             rtb_action_date, rtb_fine_amount, chal_receipt_date, chal_outcome_code_desc, \
-            fd_date, fd_final_fine_amount, payment_amount, treasury_date, treasury_amount, \
+            fd_date, fd_final_fine_amount, check_amount, treasury_date, treasury_amount, \
             petition_court_filing_date, petition_court_decision_date) "
             "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             case_id,
