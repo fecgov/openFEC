@@ -194,20 +194,22 @@ def get_cache_header(url):
     DEFAULT_HEADER_TYPE = 'Cache-Control'
     DEFAULT_HEADER_PREFIX = 'public, max-age='
 
+    LONG_CACHE_ENDPOINTS = ['/totals', '/schedules/']
+
     if '/efile/' in url:
         return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, EFILING_CACHE)
-    elif '/calendar-dates/' in url:
+    if '/calendar-dates/' in url:
         return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, CALENDAR_CACHE)
-    elif '/legal/' in url:
+    if '/legal/' in url:
         return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, LEGAL_CACHE)
+
     # This will work differently in local environment - will use local timezone
-    elif (
-        '/schedules/' in url and PEAK_HOURS_START <= datetime.now().time() <= PEAK_HOURS_END
-    ):
-        peak_hours_expiration_time = datetime.combine(
-            datetime.now().date(), PEAK_HOURS_END
-        ).strftime('%a, %d %b %Y %H:%M:%S GMT')
-        return 'Expires', peak_hours_expiration_time
+    for endpoint in LONG_CACHE_ENDPOINTS:
+        if endpoint in url and PEAK_HOURS_START <= datetime.now().time() <= PEAK_HOURS_END:
+            peak_hours_expiration_time = datetime.combine(
+                datetime.now().date(), PEAK_HOURS_END
+            ).strftime('%a, %d %b %Y %H:%M:%S GMT')
+            return 'Expires', peak_hours_expiration_time
 
     return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, DEFAULT_CACHE)
 
