@@ -4,7 +4,7 @@ git+https://github.com/18F/rdbms-subsetter
 
 # Testing
 pdbpp==0.9.1
-click==8.0.0 #celery 5.1.0 has requirement click<8.0,>=7.0
+click==7.1.2 #celery 5.1.0 has requirement click<8.0,>=7.0
 
 # requirements.txt generation (pip-compile)
 pip-tools==4.2.0
