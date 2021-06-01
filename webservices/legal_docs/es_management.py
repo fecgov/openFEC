@@ -83,7 +83,7 @@ ADMIN_FINES = {
         "format": "dateOptionalTime",
     },
     "final_determination_amount": {"type": "long"},
-    "check_amount": {"type": "long", "index": False},
+    "payment_amount": {"type": "long", "index": False},
     "treasury_referral_date": {
         "type": "date",
         "format": "dateOptionalTime",

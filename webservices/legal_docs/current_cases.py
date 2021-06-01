@@ -335,7 +335,7 @@ def get_af_specific_fields(case_id):
             case["challenge_outcome"] = row["chal_outcome_code_desc"]
             case["final_determination_date"] = row["fd_date"]
             case["final_determination_amount"] = row["fd_final_fine_amount"]
-            case["check_amount"] = row["check_amount"]
+            case["payment_amount"] = row["check_amount"]
             case["treasury_referral_date"] = row["treasury_date"]
             case["treasury_referral_amount"] = row["treasury_amount"]
             case["petition_court_filing_date"] = row["petition_court_filing_date"]
