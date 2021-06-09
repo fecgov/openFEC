@@ -210,6 +210,10 @@ class CommitteeTotalsPacParty(CommitteeTotals):
     unitemized_convention_exp = db.Column(db.Numeric(30, 2))
     itemized_other_disb = db.Column(db.Numeric(30, 2))
     unitemized_other_disb = db.Column(db.Numeric(30, 2))
+    treasurer_name = db.Column(db.String(100), index=True, doc=docs.TREASURER_NAME)
+    committee_state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
+    filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
+    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
 
 
 class CommitteeTotalsHouseSenate(CommitteeTotals):
