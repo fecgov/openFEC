@@ -10,7 +10,12 @@ New fields/columns need to be at the end
     `filing_frequency_full`,
     `first_file_date`,
 
-2 - Modify `ofec_totals_pac_party_vw` to bring in new fields from `ofec_totals_combined_vw`
+    Replaces V0204
+
+2 - Modify `ofec_totals_pac_party_vw` to bring in new fields
+from `ofec_totals_combined_vw`
+
+    Replaces V0190 (create view) and V0202 (rename `sub_id`)
 
 */
 
@@ -250,8 +255,6 @@ CREATE INDEX idx_ofec_totals_combined_mv_tmp_receipts_sub_id
 
 -- Recreate vw -> select all from new _tmp MV
 
--- Need to drop view because we're adding columns
-
 CREATE OR REPLACE VIEW ofec_totals_combined_vw
 AS SELECT * FROM ofec_totals_combined_mv_tmp;
 
@@ -274,8 +277,6 @@ ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_receipts_sub_id RENAME TO 
 ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_sub_id RENAME TO idx_ofec_totals_combined_mv_sub_id;
 
 -- 2 - Modify `ofec_totals_pac_party_vw` to bring in new fields
-
--- Replaces migration 190 (create view) and 202 (rename sub_id)
 
 CREATE OR REPLACE VIEW public.ofec_totals_pac_party_vw
 AS
