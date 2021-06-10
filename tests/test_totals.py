@@ -60,6 +60,10 @@ class TestTotalsByCommitteeType(ApiBaseTest):
             'cycle': 2018,
             'all_loans_received': 1,
             'allocated_federal_election_levin_share': 2,
+            'treasurer_name': 'Treasurer, Trudy',
+            'committee_state': 'DC',
+            'filing_frequency': 'Q',
+            'first_file_date': datetime.date.fromisoformat("1982-12-31"),
         }
         second_pac_total = {
             'committee_id': 'C00002',
@@ -67,6 +71,10 @@ class TestTotalsByCommitteeType(ApiBaseTest):
             'cycle': 2016,
             'all_loans_received': 10,
             'allocated_federal_election_levin_share': 20,
+            'treasurer_name': 'Treasurer, Tom',
+            'committee_state': 'CT',
+            'filing_frequency': 'M',
+            'first_file_date': datetime.date.fromisoformat("1984-12-31"),
         }
         factories.TotalsPacFactory(**first_pac_total)
         factories.TotalsPacFactory(**second_pac_total)
@@ -77,6 +85,17 @@ class TestTotalsByCommitteeType(ApiBaseTest):
         assert len(results) == 2
         assert results[0]['committee_id'] == 'C00001'
         assert results[1]['committee_id'] == 'C00002'
+
+        # Test all fields for result #2
+
+        # Dates are weird - pulling them out to test separately
+        result_first_file_date = results[1].pop('first_file_date')
+        expected_first_file_date = second_pac_total.pop('first_file_date').isoformat()
+        self.assertEqual(result_first_file_date, expected_first_file_date)
+
+        # Check all the results for fields we've created in `second_pac_total`
+        test_subset = {k: v for k, v in results[1].items() if k in second_pac_total}
+        self.assertEqual(test_subset, second_pac_total)
 
     def test_cycle_filter(self):
         presidential_fields = {
