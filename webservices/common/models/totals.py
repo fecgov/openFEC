@@ -213,6 +213,7 @@ class CommitteeTotalsPacParty(CommitteeTotals):
     treasurer_name = db.Column(db.String(100), index=True, doc=docs.TREASURER_NAME)
     committee_state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
     filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
+    filing_frequency_full = db.Column(db.String, doc=docs.FILING_FREQUENCY)
     first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
 
 

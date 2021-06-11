@@ -3,7 +3,16 @@ This migration file is for #4872
 
 New fields/columns need to be at the end
 
-1 - Modify `ofec_totals_combined_mv` and `ofec_totals_combined_vw` to add:
+1 - Add new function `expand_filing_frequency`
+
+     - A Administratively terminated
+     - D Debt
+     - M Monthly filer
+     - Q Quarterly filer
+     - T Terminated
+     - W Waived
+
+2 - Modify `ofec_totals_combined_mv` and `ofec_totals_combined_vw` to add:
     `committee_state`
     `treasurer_name`,
     `filing_frequency`,
@@ -12,7 +21,7 @@ New fields/columns need to be at the end
 
     Replaces V0204
 
-2 - Modify `ofec_totals_pac_party_vw` to bring in new fields
+3 - Modify `ofec_totals_pac_party_vw` to bring in new fields
 from `ofec_totals_combined_vw`
 
     Replaces V0190 (create view) and V0202 (rename `sub_id`)
@@ -20,7 +29,34 @@ from `ofec_totals_combined_vw`
 */
 
 
--- 1 - Re-create `ofec_totals_combined_mv` with new fields
+-- 1 - Add new function `expand_filing_frequency`
+
+--
+-- Name: expand_filing_frequency(text); Type: FUNCTION; Schema: public; Owner: fec
+--
+
+CREATE OR REPLACE FUNCTION expand_filing_frequency(acronym text) RETURNS text
+    LANGUAGE plpgsql
+    AS $$
+    begin
+        return case acronym
+            when 'A' then 'Administratively terminated'
+            when 'D' then 'Debt'
+            when 'M' then 'Monthly filer'
+            when 'Q' then 'Quarterly filer'
+            when 'T' then 'Terminated'
+            when 'W' then 'Waived'
+            else null
+        end;
+    end
+$$;
+
+
+ALTER FUNCTION public.expand_filing_frequency(acronym text) OWNER TO fec;
+
+
+
+-- 2 - Re-create `ofec_totals_combined_mv` with new fields
 
 DROP MATERIALIZED VIEW IF EXISTS public.ofec_totals_combined_mv_tmp;
 
@@ -204,7 +240,7 @@ CREATE MATERIALIZED VIEW ofec_totals_combined_mv_tmp AS
     max(committee_info.cmte_st::text) AS committee_state,
     max(committee_info.tres_nm::text) AS treasurer_name,
     max(committee_info.cmte_filing_freq::text) AS filing_frequency,
-    max(committee_info.cmte_filing_freq_desc::text) AS filing_frequency_full,
+    max(expand_filing_frequency(committee_info.cmte_filing_freq::text)) AS filing_frequency_full,
     min(dates.first_file_date::text::date) AS first_file_date
    FROM disclosure.v_sum_and_det_sum_report vsd
      -- New join
@@ -276,7 +312,7 @@ ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_disb_sub_id RENAME TO idx_
 ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_receipts_sub_id RENAME TO idx_ofec_totals_combined_mv_receipts_sub_id;
 ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_sub_id RENAME TO idx_ofec_totals_combined_mv_sub_id;
 
--- 2 - Modify `ofec_totals_pac_party_vw` to bring in new fields
+-- 3 - Modify `ofec_totals_pac_party_vw` to bring in new fields
 
 CREATE OR REPLACE VIEW public.ofec_totals_pac_party_vw
 AS

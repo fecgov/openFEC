@@ -63,6 +63,7 @@ class TestTotalsByCommitteeType(ApiBaseTest):
             'treasurer_name': 'Treasurer, Trudy',
             'committee_state': 'DC',
             'filing_frequency': 'Q',
+            'filing_frequency_full': 'Quarterly filer',
             'first_file_date': datetime.date.fromisoformat("1982-12-31"),
         }
         second_pac_total = {
@@ -74,6 +75,7 @@ class TestTotalsByCommitteeType(ApiBaseTest):
             'treasurer_name': 'Treasurer, Tom',
             'committee_state': 'CT',
             'filing_frequency': 'M',
+            'filing_frequency_full': 'Monthly filer',
             'first_file_date': datetime.date.fromisoformat("1984-12-31"),
         }
         factories.TotalsPacFactory(**first_pac_total)
@@ -245,6 +247,7 @@ class TestTotals(ApiBaseTest):
             'treasurer_name': 'Treasurer, Trudy',
             'committee_state': 'DC',
             'filing_frequency': 'Q',
+            'filing_frequency_full': 'Quarterly filer',
             'first_file_date': datetime.date.fromisoformat("1982-12-31"),
             'all_loans_received': 1,
             'allocated_federal_election_levin_share': 2,
@@ -321,6 +324,7 @@ class TestTotals(ApiBaseTest):
             'treasurer_name': 'Treasurer, Trudy',
             'committee_state': 'DC',
             'filing_frequency': 'Q',
+            'filing_frequency_full': 'Quarterly filer',
             'first_file_date': datetime.date.fromisoformat("1982-12-31"),
             'all_loans_received': 1,
             'allocated_federal_election_levin_share': 2,
@@ -398,6 +402,7 @@ class TestTotals(ApiBaseTest):
             'treasurer_name': 'Treasurer, Trudy',
             'committee_state': 'DC',
             'filing_frequency': 'Q',
+            'filing_frequency_full': 'Quarterly filer',
             'first_file_date': datetime.date.fromisoformat("1982-12-31"),
             'committee_name': 'PRESIDENTIAL INAUGURAL COMMITTEE',
             'coverage_start_date': '2012-12-10 00:00:00',
