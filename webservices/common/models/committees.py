@@ -45,6 +45,15 @@ class BaseConcreteCommittee(BaseCommittee):
     committee_id = db.Column(db.String, primary_key=True, unique=True, index=True, doc=docs.COMMITTEE_ID)
     candidate_ids = db.Column(ARRAY(db.Text), doc=docs.CANDIDATE_ID)
     sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
+    candidate_sponsors = db.relationship(
+        'BaseConcreteCandidate',
+        primaryjoin='''and_(
+                Committee.sponsor_candidate_ids.any(BaseConcreteCandidate.candidate_id),
+            )''',
+        foreign_keys=sponsor_candidate_ids,
+        uselist=True,
+        lazy='subquery',
+    )
 
 
 class Committee(BaseConcreteCommittee):

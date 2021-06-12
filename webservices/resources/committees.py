@@ -60,6 +60,10 @@ class CommitteeList(ApiResource):
         ("sponsor_candidate_id", models.Committee.sponsor_candidate_ids),
     ]
 
+    query_options = [
+        sa.orm.subqueryload(models.Committee.candidate_sponsors),
+    ]
+
     @property
     def args(self):
         return utils.extend(
@@ -101,6 +105,7 @@ class CommitteeList(ApiResource):
         if kwargs.get("cycle"):
             query = query.filter(models.Committee.cycles.overlap(kwargs["cycle"]))
 
+        print(query)
         return query
 
 

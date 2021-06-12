@@ -58,6 +58,9 @@ class ApiResource(utils.Resource):
         query = filters.filter_overlap(query, kwargs, self.filter_overlap_fields)
         if _apply_options:
             query = query.options(*self.query_options)
+
+        print('1------Inside apiresource-----')
+        print(query)
         return query
 
 
