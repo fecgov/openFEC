@@ -860,7 +860,7 @@ ItemizedScheduleBfilingsSchema = make_schema(
     options={
         'relationships': [
             Relationship(
-                models.ScheduleEEfile.committee,
+                models.ScheduleBEfile.committee,
                 models.CommitteeHistory.name,
                 'committee_name',
                 1
