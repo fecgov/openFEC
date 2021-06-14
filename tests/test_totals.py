@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from tests import factories
@@ -59,6 +60,11 @@ class TestTotalsByCommitteeType(ApiBaseTest):
             'cycle': 2018,
             'all_loans_received': 1,
             'allocated_federal_election_levin_share': 2,
+            'treasurer_name': 'Treasurer, Trudy',
+            'committee_state': 'DC',
+            'filing_frequency': 'Q',
+            'filing_frequency_full': 'Quarterly filer',
+            'first_file_date': datetime.date.fromisoformat("1982-12-31"),
         }
         second_pac_total = {
             'committee_id': 'C00002',
@@ -66,6 +72,11 @@ class TestTotalsByCommitteeType(ApiBaseTest):
             'cycle': 2016,
             'all_loans_received': 10,
             'allocated_federal_election_levin_share': 20,
+            'treasurer_name': 'Treasurer, Tom',
+            'committee_state': 'CT',
+            'filing_frequency': 'M',
+            'filing_frequency_full': 'Monthly filer',
+            'first_file_date': datetime.date.fromisoformat("1984-12-31"),
         }
         factories.TotalsPacFactory(**first_pac_total)
         factories.TotalsPacFactory(**second_pac_total)
@@ -76,6 +87,17 @@ class TestTotalsByCommitteeType(ApiBaseTest):
         assert len(results) == 2
         assert results[0]['committee_id'] == 'C00001'
         assert results[1]['committee_id'] == 'C00002'
+
+        # Test all fields for result #2
+
+        # Dates are weird - pulling them out to test separately
+        result_first_file_date = results[1].pop('first_file_date')
+        expected_first_file_date = second_pac_total.pop('first_file_date').isoformat()
+        self.assertEqual(result_first_file_date, expected_first_file_date)
+
+        # Check all the results for fields we've created in `second_pac_total`
+        test_subset = {k: v for k, v in results[1].items() if k in second_pac_total}
+        self.assertEqual(test_subset, second_pac_total)
 
     def test_cycle_filter(self):
         presidential_fields = {
@@ -222,6 +244,11 @@ class TestTotals(ApiBaseTest):
         pac_party_fields = {
             'committee_id': committee_id,
             'cycle': 2016,
+            'treasurer_name': 'Treasurer, Trudy',
+            'committee_state': 'DC',
+            'filing_frequency': 'Q',
+            'filing_frequency_full': 'Quarterly filer',
+            'first_file_date': datetime.date.fromisoformat("1982-12-31"),
             'all_loans_received': 1,
             'allocated_federal_election_levin_share': 2,
             'coordinated_expenditures_by_party_committee': 3,
@@ -277,7 +304,11 @@ class TestTotals(ApiBaseTest):
         results = self._results(
             api.url_for(TotalsCommitteeView, committee_id=committee_id)
         )
+        # Dates are weird - pulling them out to test separately
+        result_first_file_date = results[0].pop('first_file_date')
+        fields_first_file_date = fields.pop('first_file_date').isoformat()
         self.assertEqual(results[0], fields)
+        self.assertEqual(result_first_file_date, fields_first_file_date)
 
     def test_Pac_totals(self):
         committee_id = 'C8675311'
@@ -290,6 +321,11 @@ class TestTotals(ApiBaseTest):
         pac_fields = {
             'committee_id': committee_id,
             'cycle': 2016,
+            'treasurer_name': 'Treasurer, Trudy',
+            'committee_state': 'DC',
+            'filing_frequency': 'Q',
+            'filing_frequency_full': 'Quarterly filer',
+            'first_file_date': datetime.date.fromisoformat("1982-12-31"),
             'all_loans_received': 1,
             'allocated_federal_election_levin_share': 2,
             'coordinated_expenditures_by_party_committee': 3,
@@ -345,7 +381,11 @@ class TestTotals(ApiBaseTest):
         results = self._results(
             api.url_for(TotalsCommitteeView, committee_id=committee_id)
         )
+        # Dates are weird - pulling them out to test separately
+        result_first_file_date = results[0].pop('first_file_date')
+        fields_first_file_date = fields.pop('first_file_date').isoformat()
         self.assertEqual(results[0], fields)
+        self.assertEqual(result_first_file_date, fields_first_file_date)
 
     def test_party_totals(self):
 
@@ -359,6 +399,11 @@ class TestTotals(ApiBaseTest):
         party_fields = {
             'committee_id': committee_id,
             'cycle': 2014,
+            'treasurer_name': 'Treasurer, Trudy',
+            'committee_state': 'DC',
+            'filing_frequency': 'Q',
+            'filing_frequency_full': 'Quarterly filer',
+            'first_file_date': datetime.date.fromisoformat("1982-12-31"),
             'committee_name': 'PRESIDENTIAL INAUGURAL COMMITTEE',
             'coverage_start_date': '2012-12-10 00:00:00',
             'coverage_end_date': '2013-08-07 00:00:00',
@@ -417,7 +462,11 @@ class TestTotals(ApiBaseTest):
         results = self._results(
             api.url_for(TotalsCommitteeView, committee_id=committee_id)
         )
+        # Dates are weird - pulling them out to test separately
+        result_first_file_date = results[0].pop('first_file_date')
+        fields_first_file_date = fields.pop('first_file_date').isoformat()
         self.assertEqual(results[0], fields)
+        self.assertEqual(result_first_file_date, fields_first_file_date)
 
     def test_ie_totals(self):
         committee_id = 'C8675312'
