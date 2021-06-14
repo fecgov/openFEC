@@ -369,13 +369,13 @@ make_efiling_schema = functools.partial(
 )
 
 
-# make_committee_schema = functools.partial(
-#     make_schema,
-#     options={'exclude': ('idx', 'treasurer_text')},
-#     fields={
-#         'candidate_sponsors': ma.fields.Nested(schemas['CandidateSchema'], many=True),
-#     },
-# )
+make_committee_schema = functools.partial(
+    make_schema,
+    options={'exclude': ('idx', 'treasurer_text')},
+    fields={
+        'sponsor_list': ma.fields.List(ma.fields.Str(attribute='sponsor_candidate_name.sponsor_list')),
+    }
+)
 
 augment_models(
     make_efiling_schema,
@@ -384,12 +384,12 @@ augment_models(
     models.BaseF3Filing,
 )
 
-# augment_models(
-#     make_committee_schema,
-#     models.Committee,
-#     models.CommitteeHistory,
-#     models.CommitteeDetail,
-# )
+augment_models(
+    make_committee_schema,
+    models.Committee,
+    models.CommitteeHistory,
+    models.CommitteeDetail,
+)
 
 
 make_candidate_schema = functools.partial(
@@ -408,20 +408,6 @@ augment_models(
 
 )
 
-make_committee_schema = functools.partial(
-    make_schema,
-    options={'exclude': ('idx', 'treasurer_text')},
-    # fields={
-    #     'candidate_sponsors': ma.fields.Nested(schemas['CandidateSchema'], many=True),
-    # },
-)
-
-augment_models(
-    make_committee_schema,
-    models.Committee,
-    models.CommitteeHistory,
-    models.CommitteeDetail,
-)
 
 # built these schemas without make_candidate_schema, as it was filtering out the flags
 augment_models(

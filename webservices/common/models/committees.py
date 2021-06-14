@@ -45,15 +45,13 @@ class BaseConcreteCommittee(BaseCommittee):
     committee_id = db.Column(db.String, primary_key=True, unique=True, index=True, doc=docs.COMMITTEE_ID)
     candidate_ids = db.Column(ARRAY(db.Text), doc=docs.CANDIDATE_ID)
     sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
-    candidate_sponsors = db.relationship(
-        'BaseConcreteCandidate',
-        primaryjoin='''and_(
-                Committee.sponsor_candidate_ids.any(BaseConcreteCandidate.candidate_id),
-            )''',
-        foreign_keys=sponsor_candidate_ids,
-        uselist=True,
-        lazy='subquery',
-    )
+
+
+class PacSponsorCandidate(db.Model):
+    __tablename__ = 'ofec_pac_sponsor_name_vw_hc'
+
+    committee_id = db.Column(db.String, primary_key=True, index=True, doc=docs.COMMITTEE_ID)
+    sponsor_list = db.Column(ARRAY(db.Text), doc=docs.CANDIDATE_NAME)
 
 
 class Committee(BaseConcreteCommittee):
@@ -63,6 +61,16 @@ class Committee(BaseConcreteCommittee):
     first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
     last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
     last_f1_date = db.Column(db.Date, doc=docs.LAST_F1_DATE)
+
+    sponsor_candidate_name = db.relationship(
+        'PacSponsorCandidate',
+        primaryjoin='''and_(
+                Committee.committee_id == PacSponsorCandidate.committee_id,
+            )''',
+        foreign_keys=PacSponsorCandidate.committee_id,
+        uselist=True,
+        # lazy='joined',
+    )
 
 
 class CommitteeHistory(BaseCommittee):
