@@ -24,7 +24,7 @@ class TestFilings(BaseTestCase):
         'report_year': 1997,
         'form_type': 'F1',
         'begin_image_num': '95039770818',
-        'pdf_url': 'https://docquery.fec.gov/pdf/818/95039770818/95039770818.pdf'
+        'pdf_url': 'https://docquery.fec.gov/pdf/818/95039770818/95039770818.pdf',
     }
 
     SECOND_FILING = {
@@ -116,6 +116,39 @@ class TestFilings(BaseTestCase):
         view_result = results[0]
 
         self.assert_filings_equal(view_result, expected_filing)
+
+    def test_fec_url(self):
+        no_fec_url = True
+        expected_filing = self.FIRST_FILING
+        self.insert_committee(self.committee)
+        self.insert_filing(100, expected_filing)
+
+        # Refresh `ofec_filings_all_mv`
+        manage.refresh_materialized(concurrent=False)
+
+        # FilingsList view
+        # /filings/ endpoint
+        results = self._results(
+            rest.api.url_for(FilingsList, committee_id=expected_filing['cand_cmte_id'])
+        )
+        assert len(results) == 1
+        list_result = results[0]
+
+        key_to_lookup = 'fec_url'
+        fec_url_not_in_result = True if key_to_lookup not in list_result else False
+
+        assert no_fec_url == fec_url_not_in_result
+
+        # FilingsView view
+        # /committee/<committee_id>/filings/ and /candidate/<candidate_id>/filings/
+        results = self._results(
+            rest.api.url_for(FilingsView, committee_id=expected_filing['cand_cmte_id'])
+        )
+        assert len(results) == 1
+        view_result = results[0]
+
+        fec_url_not_in_output = True if key_to_lookup not in view_result else False
+        assert no_fec_url == fec_url_not_in_output
 
     def insert_committee(self, committee):
         self.connection.execute(
