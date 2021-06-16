@@ -324,7 +324,7 @@ api.add_resource(
     '/candidate/<string:candidate_id>/committees/history/',
     '/candidate/<string:candidate_id>/committees/history/<int:cycle>/',
 )
-api.add_resource(totals.TotalsByCommitteeTypeView, '/totals/<string:committee_type>/')
+api.add_resource(totals.TotalsByEntityTypeView, '/totals/<string:committee_type>/')
 api.add_resource(totals.TotalsCommitteeView, '/committee/<string:committee_id>/totals/')
 api.add_resource(totals.CandidateTotalsView, '/candidate/<string:candidate_id>/totals/')
 api.add_resource(reports.ReportsView, '/reports/<string:committee_type>/')
@@ -469,7 +469,7 @@ apidoc.register(reports.CommitteeReportsView, blueprint='v1')
 apidoc.register(reports.EFilingHouseSenateSummaryView, blueprint='v1')
 apidoc.register(reports.EFilingPresidentialSummaryView, blueprint='v1')
 apidoc.register(reports.EFilingPacPartySummaryView, blueprint='v1')
-apidoc.register(totals.TotalsByCommitteeTypeView, blueprint='v1')
+apidoc.register(totals.TotalsByEntityTypeView, blueprint='v1')
 apidoc.register(totals.CandidateTotalsView, blueprint='v1')
 apidoc.register(totals.TotalsCommitteeView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAView, blueprint='v1')

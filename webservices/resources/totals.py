@@ -77,7 +77,7 @@ default_candidate_schemas = (
         },
     },
 )
-class TotalsByCommitteeTypeView(utils.Resource):
+class TotalsByEntityTypeView(utils.Resource):
     @use_kwargs(args.paging)
     @use_kwargs(args.totals_by_committee_type)
     @use_kwargs(args.make_sort_args(default='-cycle'))
