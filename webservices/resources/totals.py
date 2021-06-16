@@ -79,7 +79,7 @@ default_candidate_schemas = (
 )
 class TotalsByEntityTypeView(utils.Resource):
     @use_kwargs(args.paging)
-    @use_kwargs(args.totals_by_committee_type)
+    @use_kwargs(args.totals_by_entity_type)
     @use_kwargs(args.make_sort_args(default='-cycle'))
     @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
     def get(self, committee_id=None, entity_type=None, **kwargs):
