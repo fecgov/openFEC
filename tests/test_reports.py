@@ -44,7 +44,7 @@ class TestReports(ApiBaseTest):
     def test_reports_by_committee_type(self):
         presidential_report = factories.ReportsPresidentialFactory()
         house_report = factories.ReportsHouseSenateFactory()
-        results = self._results(api.url_for(ReportsView, committee_type='presidential'))
+        results = self._results(api.url_for(ReportsView, entity_type='presidential'))
         self._check_committee_ids(results, [presidential_report], [house_report])
 
     def test_reports_by_committee_type_and_cycle(self):
@@ -52,7 +52,7 @@ class TestReports(ApiBaseTest):
         presidential_report_2016 = factories.ReportsPresidentialFactory(cycle=2016)
         house_report_2016 = factories.ReportsHouseSenateFactory(cycle=2016)
         results = self._results(
-            api.url_for(ReportsView, committee_type='presidential', cycle=2016,)
+            api.url_for(ReportsView, entity_type='presidential', cycle=2016,)
         )
         self._check_committee_ids(
             results,
@@ -61,7 +61,7 @@ class TestReports(ApiBaseTest):
         )
         # Test repeated cycle parameter
         results = self._results(
-            api.url_for(ReportsView, committee_type='presidential', cycle=[2016, 2018],)
+            api.url_for(ReportsView, entity_type='presidential', cycle=[2016, 2018],)
         )
         self._check_committee_ids(
             results,
@@ -83,17 +83,17 @@ class TestReports(ApiBaseTest):
                 factory(is_amended=True),
             ]
 
-            results = self._results(api.url_for(ReportsView, committee_type=category))
+            results = self._results(api.url_for(ReportsView, entity_type=category))
             self.assertEqual(len(results), 2)
 
             results = self._results(
-                api.url_for(ReportsView, committee_type=category, is_amended='false')
+                api.url_for(ReportsView, entity_type=category, is_amended='false')
             )
             self.assertEqual(len(results), 1)
             self.assertEqual(results[0]['committee_id'], reports[0].committee_id)
 
             results = self._results(
-                api.url_for(ReportsView, committee_type=category, is_amended='true')
+                api.url_for(ReportsView, entity_type=category, is_amended='true')
             )
             self.assertEqual(len(results), 1)
             self.assertEqual(results[0]['committee_id'], reports[1].committee_id)
@@ -107,7 +107,7 @@ class TestReports(ApiBaseTest):
         )
         house_report_2016 = factories.ReportsHouseSenateFactory(report_year=2016)
         results = self._results(
-            api.url_for(ReportsView, committee_type='presidential', year=2016,)
+            api.url_for(ReportsView, entity_type='presidential', year=2016,)
         )
         self._check_committee_ids(
             results,
@@ -116,7 +116,7 @@ class TestReports(ApiBaseTest):
         )
         # Test repeated cycle parameter
         results = self._results(
-            api.url_for(ReportsView, committee_type='presidential', year=[2016, 2018],)
+            api.url_for(ReportsView, entity_type='presidential', year=[2016, 2018],)
         )
         self._check_committee_ids(
             results,
@@ -184,7 +184,7 @@ class TestReports(ApiBaseTest):
         results = self._results(
             api.url_for(
                 ReportsView,
-                committee_type='presidential',
+                entity_type='presidential',
                 beginning_image_number=number,
             )
         )
@@ -208,7 +208,7 @@ class TestReports(ApiBaseTest):
         results = self._results(
             api.url_for(
                 ReportsView,
-                committee_type='presidential',
+                entity_type='presidential',
                 beginning_image_number=number,
             )
         )
@@ -229,7 +229,7 @@ class TestReports(ApiBaseTest):
         results = self._results(
             api.url_for(
                 ReportsView,
-                committee_type='house-senate',
+                entity_type='house-senate',
                 beginning_image_number=number,
             )
         )
@@ -282,7 +282,7 @@ class TestReports(ApiBaseTest):
         )
         results = self._results(
             api.url_for(
-                ReportsView, committee_type='ie-only', beginning_image_number=number,
+                ReportsView, entity_type='ie-only', beginning_image_number=number,
             )
         )
         result = results[0]
