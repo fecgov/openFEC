@@ -64,7 +64,7 @@ default_candidate_schemas = (
     tags=['financial'],
     description=docs.TOTALS,
     params={
-        'committee_type': {
+        'entity_type': {
             'description': 'House, Senate, presidential, independent expenditure only',
             'enum': [
                 'presidential',
@@ -82,16 +82,16 @@ class TotalsByEntityTypeView(utils.Resource):
     @use_kwargs(args.totals_by_committee_type)
     @use_kwargs(args.make_sort_args(default='-cycle'))
     @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
-    def get(self, committee_id=None, committee_type=None, **kwargs):
+    def get(self, committee_id=None, entity_type=None, **kwargs):
         query, totals_class, totals_schema = self.build_query(
-            committee_id=committee_id, committee_type=committee_type, **kwargs
+            committee_id=committee_id, entity_type=entity_type, **kwargs
         )
         page = utils.fetch_page(query, kwargs, model=totals_class)
         return totals_schema().dump(page).data
 
-    def build_query(self, committee_id=None, committee_type=None, **kwargs):
+    def build_query(self, committee_id=None, entity_type=None, **kwargs):
         totals_class, totals_schema = totals_schema_map.get(
-            committee_type_map.get(committee_type),
+            committee_type_map.get(entity_type),
             default_schemas,
         )
         query = totals_class.query
@@ -101,15 +101,15 @@ class TotalsByEntityTypeView(utils.Resource):
             query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
         if kwargs.get('committee_designation'):
             query = query.filter(totals_class.committee_designation.in_(kwargs['committee_designation']))
-        if committee_type == 'pac':
+        if entity_type == 'pac':
             query = query.filter(
                 models.CommitteeTotalsPacParty.committee_type.in_(pac_cmte_list)
             )
-        if committee_type == 'party':
+        if entity_type == 'party':
             query = query.filter(
                 models.CommitteeTotalsPacParty.committee_type.in_(party_cmte_list)
             )
-        if committee_type == 'pac-party':
+        if entity_type == 'pac-party':
             query = query.filter(
                 models.CommitteeTotalsPacParty.committee_type.in_(
                     pac_cmte_list.union(party_cmte_list)

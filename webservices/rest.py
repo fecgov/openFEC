@@ -324,7 +324,7 @@ api.add_resource(
     '/candidate/<string:candidate_id>/committees/history/',
     '/candidate/<string:candidate_id>/committees/history/<int:cycle>/',
 )
-api.add_resource(totals.TotalsByEntityTypeView, '/totals/<string:committee_type>/')
+api.add_resource(totals.TotalsByEntityTypeView, '/totals/<string:entity_type>/')
 api.add_resource(totals.TotalsCommitteeView, '/committee/<string:committee_id>/totals/')
 api.add_resource(totals.CandidateTotalsView, '/candidate/<string:candidate_id>/totals/')
 api.add_resource(reports.ReportsView, '/reports/<string:committee_type>/')
