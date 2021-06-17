@@ -55,6 +55,14 @@ class Committee(BaseConcreteCommittee):
     last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
     last_f1_date = db.Column(db.Date, doc=docs.LAST_F1_DATE)
 
+    sponsor_candidate_list = db.relationship(
+        'PacSponsorCandidate',
+        primaryjoin='''and_(
+                    foreign(PacSponsorCandidate.committee_id) == Committee.committee_id,
+                )''',
+        lazy='joined'
+    )
+
 
 class CommitteeHistory(BaseCommittee):
     __tablename__ = 'ofec_committee_history_mv'

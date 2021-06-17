@@ -23,6 +23,7 @@ class CommitteeFormatTest(ApiBaseTest):
             party="DEM",
             sponsor_candidate_ids=["P001"]
         )
+
         response = self._response(
             api.url_for(CommitteeView, committee_id=committee.committee_id)
         )
@@ -393,6 +394,35 @@ class CommitteeFormatTest(ApiBaseTest):
         )
         assert len(results) == 1
         assert results[0]["sponsor_candidate_ids"] == sponsor_candidate_ids2
+
+    def test_field_sponsor_cnadidate_list(self):
+        committee = factories.CommitteeFactory(
+            party="REP",
+            name="For America",
+            sponsor_candidate_ids=["H002"]
+        )
+        factories.PacSponsorCandidateFactory(
+            committee_id=committee.committee_id,
+            sponsor_candidate_id="H002",
+            sponsor_candidate_name="Sponsor A",
+        )
+        factories.PacSponsorCandidateFactory(
+            committee_id='C007',
+            sponsor_candidate_id="S003",
+            sponsor_candidate_name="Sponsor B",
+        )
+        results = self._results(
+            api.url_for(CommitteeList, committee_id=committee.committee_id)
+        )
+
+        self.assertEqual(len(results), 1)
+        self.assertIn("sponsor_candidate_list", results[0])
+        self.assertEqual(
+            results[0]["sponsor_candidate_list"][0]["sponsor_candidate_name"], "Sponsor A"
+        )
+        self.assertEqual(
+            results[0]["sponsor_candidate_list"][0]["sponsor_candidate_id"], "H002"
+        )
 
 
 # test these endpoints:

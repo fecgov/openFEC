@@ -591,3 +591,10 @@ class PresidentialBySizeFactory(BaseFactory):
         model = models.PresidentialBySize
 
     idx = factory.Sequence(lambda n: n)
+
+
+class PacSponsorCandidateFactory(BaseFactory):
+    class Meta:
+        model = models.PacSponsorCandidate
+
+    idx = factory.Sequence(lambda n: n)

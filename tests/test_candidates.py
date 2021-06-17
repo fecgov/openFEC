@@ -105,7 +105,6 @@ class CandidateFormatTest(ApiBaseTest):
             api.url_for(CandidateView, candidate_id=candidate.candidate_id)
         )
         assert response[0].keys() == schemas.CandidateDetailSchema().fields.keys()
-        response = response[0]
 
     def test_extra_fields(self):
         candidate = factories.CandidateDetailFactory(
