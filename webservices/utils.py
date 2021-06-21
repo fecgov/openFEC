@@ -545,3 +545,15 @@ class DateTimeEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (datetime.date, datetime.datetime)):
             return obj.isoformat()
+
+
+def get_percentage(numerators, denominators):
+    """Calculate the percentage numerator (top) is of denominator (bottom), 2 decimals
+    """
+    numerator = sum(value or 0 for value in numerators)
+    denominator = sum(value or 0 for value in denominators)
+    # Handle divide by zero errors
+    try:
+        return round((numerator / denominator) * 100, 2)
+    except:
+        return None

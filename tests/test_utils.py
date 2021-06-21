@@ -323,3 +323,19 @@ class TestEnvVarSplit(TestCase):
         for test_case in test_cases:
             result = utils.split_env_var(test_case)
             self.assertEqual(result, expected)
+
+
+class TestPercentages(TestCase):
+    def test_get_percentage(self):
+        test_cases = [
+            ([3], [9], 33.33),
+            ([2, 3], [10], 50.0),
+            ([1, 2, 3], [10], 60.0),
+            ([1, 2, 3], [0], None),
+            ([2], [5, 5], 20.0),
+            ([0], [10], 0),
+        ]
+        for test_case in test_cases:
+            numerator, denominator, expected = test_case
+            result = utils.get_percentage(numerator, denominator)
+            self.assertEqual(result, expected)
