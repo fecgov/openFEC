@@ -207,3 +207,12 @@ class CandidateElection(db.Model):
         db.Integer, primary_key=True, index=True, doc=docs.CANDIDATE_ELECTION_YEAR
     )
     prev_election_year = db.Column(db.Integer, index=True)
+
+
+class PacSponsorCandidate(db.Model):
+    __tablename__ = "ofec_pac_sponsor_candidate_vw"
+
+    idx = db.Column(db.Integer, primary_key=True)
+    committee_id = db.Column(db.String, doc=docs.COMMITTEE_ID)
+    sponsor_candidate_id = db.Column(db.String, doc=docs.CANDIDATE_ID)
+    sponsor_candidate_name = db.Column(db.String(100), doc=docs.CANDIDATE_NAME)
