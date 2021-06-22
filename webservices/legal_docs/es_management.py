@@ -97,6 +97,30 @@ ADMIN_FINES = {
         "type": "date",
         "format": "dateOptionalTime",
     },
+    "civil_penalty_payment_status": {
+        "type": "text",
+        "index": False,
+    },
+    "civil_penalty_due_date": {
+        "type": "date",
+        "format": "dateOptionalTime",
+    },
+    "af_dispositions": {
+        "properties": {
+            "disposition_description": {
+                "type": "text",
+                "index": False,
+            },
+            "disposition_date": {
+                "type": "date",
+                "format": "dateOptionalTime",
+            },
+            "amount": {
+                "type": "long",
+                "index": False,
+            },
+        }
+    },
 }
 
 ADVISORY_OPINIONS = {
