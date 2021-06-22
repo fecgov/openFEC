@@ -63,13 +63,6 @@ class District(fields.Str):
 
 election_full = fields.Bool(missing=True, description=docs.ELECTION_FULL)
 
-check_full_election_parameter = {
-    # Parameter `full_election` is replaced by `election_full`.
-    # if user pass full_election, send error message.
-    # this one is only used in resources/totals.py for CandidateTotalsView
-    'full_election': fields.Bool(description=docs.FULL_ELECTION),
-}
-
 paging = {
     'page': Natural(missing=1, description='For paginating through results, starting at page 1'),
     'per_page': per_page,

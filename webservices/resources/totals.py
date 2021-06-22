@@ -182,7 +182,6 @@ class CandidateTotalsView(utils.Resource):
     @use_kwargs(args.paging)
     @use_kwargs(args.candidate_totals_detail)
     @use_kwargs(args.make_sort_args(default='-cycle'))
-    @use_kwargs(args.check_full_election_parameter)
     @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
     def get(self, candidate_id, **kwargs):
         query, totals_class, totals_schema = self.build_query(
@@ -201,12 +200,6 @@ class CandidateTotalsView(utils.Resource):
         )
         query = totals_class.query
         query = query.filter(totals_class.candidate_id == candidate_id.upper())
-
-        if 'full_election' in kwargs.keys():
-            # full_election is replaced by election_full.
-            raise exceptions.ApiError(
-                exceptions.FULL_ELECTION_ERROR, status_code=400,
-            )
 
         if kwargs.get('election_full') is None:
             # not pass election_full

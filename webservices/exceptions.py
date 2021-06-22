@@ -4,9 +4,6 @@ LINE_NUMBER_ERROR = """Invalid line_number detected. A valid line_number is usin
 from form F3X line number 16.
 """
 
-FULL_ELECTION_ERROR = """Parameter 'full_election' is replaced by 'election_full'. Please use 'election_full' instead.
-"""
-
 
 class ApiError(Exception):
     status_code = 400

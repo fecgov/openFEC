@@ -290,7 +290,6 @@ Filter records to only those that were applicable to a given year.
 ELECTION_FULL = '''`True` indicates that full election period of a candidate.
 `False` indicates that two year election cycle.'''
 
-FULL_ELECTION = 'Parameter `full_election` is replaced by `election_full`. Please use `election_full` instead.'
 
 COMMITTEE_STREET_1 = '''
 Street address of committee as reported on the Form 1
@@ -741,7 +740,6 @@ is the next year — for example, in 2015, the current cycle is 2016.
 
 For presidential and Senate candidates, multiple two-year cycles exist between elections.
 
-Parameter `full_election` is replaced by `election_full`. Please use `election_full` instead.
 '''
 
 SCHEDULE_A_TAG = '''
