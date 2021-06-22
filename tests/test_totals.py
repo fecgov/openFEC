@@ -8,7 +8,7 @@ from webservices import utils
 from webservices.rest import api
 from webservices.resources.totals import (
     TotalsCommitteeView,
-    TotalsByCommitteeTypeView,
+    TotalsByEntityTypeView,
     ScheduleAByStateRecipientTotalsView,
 )
 
@@ -82,7 +82,7 @@ class TestTotalsByCommitteeType(ApiBaseTest):
         factories.TotalsPacFactory(**second_pac_total)
 
         results = self._results(
-            api.url_for(TotalsByCommitteeTypeView, committee_type='pac')
+            api.url_for(TotalsByEntityTypeView, entity_type='pac')
         )
         assert len(results) == 2
         assert results[0]['committee_id'] == 'C00001'
@@ -109,7 +109,7 @@ class TestTotalsByCommitteeType(ApiBaseTest):
         }
         factories.CommitteeTotalsPerCycleFactory(**presidential_fields)
         results = self._results(
-            api.url_for(TotalsByCommitteeTypeView, cycle=2016, committee_type='presidential')
+            api.url_for(TotalsByEntityTypeView, cycle=2016, entity_type='presidential')
         )
         assert len(results) == 1
         self.assertEqual(results[0]['cycle'], presidential_fields['cycle'])
@@ -126,7 +126,7 @@ class TestTotalsByCommitteeType(ApiBaseTest):
         }
         factories.TotalsPacFactory(**party_fields)
         results = self._results(
-            api.url_for(TotalsByCommitteeTypeView, committee_designation='U', committee_type='party')
+            api.url_for(TotalsByEntityTypeView, committee_designation='U', entity_type='party')
         )
         assert len(results) == 1
         self.assertEqual(results[0]['committee_designation'], party_fields['committee_designation'])

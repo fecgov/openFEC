@@ -128,8 +128,9 @@ def get_match_filters():
     tags=['financial'],
     description=docs.REPORTS,
     params={
-        'committee_type': {
-            'description': 'House, Senate, presidential, independent expenditure only',
+        'entity_type': {
+            'description': 'Committee groupings based on FEC filing form. \
+                Choose one of: `presidential`, `pac-party`, `house-senate`, or `ie-only`',
             'enum': ['presidential', 'pac-party', 'house-senate', 'ie-only'],
         },
     },
@@ -139,9 +140,9 @@ class ReportsView(views.ApiResource):
     @use_kwargs(args.reports)
     @use_kwargs(args.make_multi_sort_args(default=['-coverage_end_date']))
     @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
-    def get(self, committee_type=None, **kwargs):
+    def get(self, entity_type=None, **kwargs):
         query, reports_class, reports_schema = self.build_query(
-            committee_type=committee_type, **kwargs
+            entity_type=entity_type, **kwargs
         )
         if kwargs['sort']:
             validator = args.IndicesValidator(reports_class)
@@ -149,10 +150,10 @@ class ReportsView(views.ApiResource):
         page = utils.fetch_page(query, kwargs, model=reports_class, multi=True)
         return reports_schema().dump(page).data
 
-    def build_query(self, committee_type=None, **kwargs):
+    def build_query(self, entity_type=None, **kwargs):
         # For this endpoint we now enforce the enpoint specified to map the right model.
         reports_class, reports_schema = reports_schema_map.get(
-            reports_type_map.get(committee_type), default_schemas,
+            reports_type_map.get(entity_type), default_schemas,
         )
         query = reports_class.query
 

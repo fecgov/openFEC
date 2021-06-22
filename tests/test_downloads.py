@@ -115,7 +115,7 @@ class TestDownloadTask(ApiBaseTest):
 
         for view in DOWNLOADABLE_RESOURCES:
             if view.endpoint in ['reportsview']:
-                url = api.url_for(view, committee_type=committee.committee_type)
+                url = api.url_for(view, entity_type=committee.committee_type)
             elif view.endpoint in [
                 'filingsview',
                 'committeereportsview',
