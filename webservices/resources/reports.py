@@ -129,7 +129,8 @@ def get_match_filters():
     description=docs.REPORTS,
     params={
         'entity_type': {
-            'description': 'House, Senate, presidential, independent expenditure only',
+            'description': 'Committee groupings based on FEC filing form. \
+                Choose one of: `presidential`, `pac-party`, `house-senate`, or `ie-only`',
             'enum': ['presidential', 'pac-party', 'house-senate', 'ie-only'],
         },
     },
