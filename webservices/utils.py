@@ -557,12 +557,15 @@ def get_percentage(numerators, denominators):
     if not isinstance(numerators, list) and denominators(numerators, list):
         raise TypeError("Numerator and denominators must be type 'list'")
 
-    # Return percentage if between 0 and 100
+    # Unable to calculate unless all values are present
+    if None in numerators or None in denominators:
+        return None
+
     try:
         numerator = sum(value or 0 for value in numerators)
         denominator = sum(value or 0 for value in denominators)
         percentage = round((numerator / denominator) * 100, 2)
-        return percentage if 0 <= percentage <= 100 else None
+        return percentage
 
     # None for divide by zero errors
     except ZeroDivisionError:

@@ -335,12 +335,22 @@ class TestPercentages(TestCase):
             ([1, 2, 3], [10], 60.0),
             ([2], [5, 5], 20.0),
             ([0], [10], 0),
-            # Unusual data scenarios should return None
-            ([1, 2, 3], [0], None),  # Divide by zero
-            ([10], [5], None),  # Over 100%
-            ([-10], [5], None),  # Negative numerator
-            ([10], [-5], None),  # Negative denominator
-            ([None], [None], None),  # Null values
+            ([0, 0, 0], [10], 0),
+            # Unusual but should still calculate
+            ([10], [5], 200.0),  # Over 100%
+            ([-5], [10], -50.0),  # Negative numerator
+            ([5], [-10], -50.0),  # Negative denominator
+            ([-5], [-10], 50.0),  # Both negative
+            ([1], [10000], .01),  # Under 1%
+            # None == Unable to calculate
+            # Divide by zero
+            ([1, 2, 3], [0], None),
+            # Null values
+            ([None], [None], None),
+            ([0], [None], None),
+            ([None], [100], None),
+            ([], [], None),
+            ([1, None, 3], [10], None),
         ]
         for test_case in test_cases:
             numerator, denominator, expected = test_case

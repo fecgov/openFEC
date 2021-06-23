@@ -243,7 +243,7 @@ class CommitteeTotalsPacParty(CommitteeTotals):
             self.independent_expenditures,
             self.coordinated_expenditures_by_party_committee,
         ]
-        denominators = [self.disbursements,]
+        denominators = [self.disbursements]
         return utils.get_percentage(numerators, denominators)
 
     @property
