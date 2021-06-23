@@ -1,3 +1,5 @@
+import pytest
+
 from unittest import TestCase
 from flask import request
 from webargs import flaskparser
@@ -331,11 +333,20 @@ class TestPercentages(TestCase):
             ([3], [9], 33.33),
             ([2, 3], [10], 50.0),
             ([1, 2, 3], [10], 60.0),
-            ([1, 2, 3], [0], None),
             ([2], [5, 5], 20.0),
             ([0], [10], 0),
+            # Unusual data scenarios should return None
+            ([1, 2, 3], [0], None),  # Divide by zero
+            ([10], [5], None),  # Over 100%
+            ([-10], [5], None),  # Negative numerator
+            ([10], [-5], None),  # Negative denominator
+            ([None], [None], None),  # Null values
         ]
         for test_case in test_cases:
             numerator, denominator, expected = test_case
             result = utils.get_percentage(numerator, denominator)
             self.assertEqual(result, expected)
+
+        # Developer forgets to put values in list
+        with pytest.raises(TypeError):
+            utils.get_percentage(5, 10)
