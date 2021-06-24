@@ -52,16 +52,16 @@ Number of pages in the document
 # ======== candidate start ===========
 CANDIDATE_TAG = '''
 Candidate endpoints give you access to information about the people running for office.
-This information is organized by candidate_id. If you're unfamiliar with candidate IDs,
-using `/candidates/search` will help you locate a particular candidate.
+This information is organized by `candidate_id`. If you're unfamiliar with candidate IDs,
+using `/candidates/search/` will help you locate a particular candidate.
 
 Officially, a candidate is an individual seeking nomination for election to a federal
 office. People become candidates when they (or agents working on their behalf)
 raise contributions or make expenditures that exceed $5,000.
 
 The candidate endpoints primarily use data from FEC registration
-[Form 1](https://www.fec.gov/resources/cms-content/documents/fecfrm1.pdf), for candidate information, and
-[Form 2](https://www.fec.gov/resources/cms-content/documents/fecfrm2.pdf), for committee information.
+[Form 1](https://www.fec.gov/resources/cms-content/documents/fecfrm1.pdf) for committee information and
+[Form 2](https://www.fec.gov/resources/cms-content/documents/fecfrm2.pdf) for candidate information.
 '''
 
 CANDIDATE_ID = '''
@@ -126,9 +126,8 @@ stays the same. If the same person runs for multiple offices — for example, a 
 candidate runs for a Senate office — that candidate will get a unique ID for each office.
 
 The candidate endpoints primarily use data from FEC registration
-[Form 1](http://www.fec.gov/pdf/forms/fecfrm1.pdf), for candidate information, and
-[Form 2](http://www.fec.gov/pdf/forms/fecfrm2.pdf), for committees information, with additional information
-to provide context.
+[Form 1](http://www.fec.gov/pdf/forms/fecfrm1.pdf) for committee information and
+[Form 2](http://www.fec.gov/pdf/forms/fecfrm2.pdf) for candidate information.
 '''
 
 CANDIDATE_DETAIL = '''
