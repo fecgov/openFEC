@@ -52,9 +52,9 @@ shared_fields = {
 transaction_coverage_fields = {'transaction_coverage_date': None}
 
 
-# test for endpoint: /totals/{committee_type}
-class TestTotalsByCommitteeType(ApiBaseTest):
-    def test_pac_total_by_committee_type(self):
+# test for endpoint: /totals/{entity_type}
+class TestTotalsByEntityType(ApiBaseTest):
+    def test_pac_total_by_entity_type(self):
         first_pac_total = {
             'committee_id': 'C00001',
             'committee_type': 'O',
