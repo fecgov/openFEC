@@ -353,8 +353,8 @@ class TestPercentages(TestCase):
             ([1, None, 3], [10], None),
         ]
         for test_case in test_cases:
-            numerator, denominator, expected = test_case
-            result = utils.get_percentage(numerator, denominator)
+            numerators, denominators, expected = test_case
+            result = utils.get_percentage(numerators, denominators)
             self.assertEqual(result, expected)
 
         # Developer forgets to put values in list

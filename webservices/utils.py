@@ -548,22 +548,22 @@ class DateTimeEncoder(JSONEncoder):
 
 
 def get_percentage(numerators, denominators):
-    """Calculate the percentage numerator (top) is of denominator (bottom), 2 decimals
+    """Calculate the percentage numerators (top) are of denominators (bottom), 2 decimals
 
-    For unusual data scenarios, return None
+    If unable to calculate, return None
     """
 
     # Values must be in a list
-    if not isinstance(numerators, list) and denominators(numerators, list):
+    if not isinstance(numerators, list) and isinstance(denominators, list):
         raise TypeError("Numerator and denominators must be type 'list'")
 
-    # Unable to calculate unless all values are present
+    # Unable to calculate unless ALL values are present
     if None in numerators or None in denominators:
         return None
 
     try:
-        numerator = sum(value or 0 for value in numerators)
-        denominator = sum(value or 0 for value in denominators)
+        numerator = sum(value for value in numerators)
+        denominator = sum(value for value in denominators)
         percentage = round((numerator / denominator) * 100, 2)
         return percentage
 
@@ -571,7 +571,7 @@ def get_percentage(numerators, denominators):
     except ZeroDivisionError:
         return None
 
-    # Output unexpected exceptions
+    # Output unexpected exceptions in debug mode
     except Exception as exception:
-        logger.error(exception, False)
+        logger.debug(exception, False)
         return None
