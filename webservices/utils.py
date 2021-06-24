@@ -574,4 +574,4 @@ def get_percentage(numerators, denominators):
     # Output unexpected exceptions
     except Exception as exception:
         logger.error(exception, False)
-        raise
+        return None
