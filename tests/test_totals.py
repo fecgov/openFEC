@@ -5,6 +5,7 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices import utils
+from webservices.common.models import CommitteeTotalsPacParty
 from webservices.rest import api
 from webservices.resources.totals import (
     TotalsCommitteeView,
@@ -130,6 +131,22 @@ class TestTotalsByCommitteeType(ApiBaseTest):
         )
         assert len(results) == 1
         self.assertEqual(results[0]['committee_designation'], party_fields['committee_designation'])
+
+    def test_pac_party_filters(self):
+
+        filters = [
+            ('committee_type', CommitteeTotalsPacParty.committee_type, ['Q', 'N']),
+        ]
+        for label, column, values in filters:
+            [
+                factories.TotalsPacPartyFactory(**{column.key: value})
+                for value in values
+            ]
+            results = self._results(
+                api.url_for(TotalsByEntityTypeView, entity_type='pac-party', **{label: values[0]})
+            )
+            assert len(results) == 1
+            assert results[0][column.key] == values[0]
 
 
 # test for endpoint: /committee/{committee_id}/totals/

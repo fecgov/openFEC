@@ -103,6 +103,8 @@ class TotalsByEntityTypeView(utils.Resource):
             query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
         if kwargs.get('committee_designation'):
             query = query.filter(totals_class.committee_designation.in_(kwargs['committee_designation']))
+        if kwargs.get('committee_type'):
+            query = query.filter(totals_class.committee_type.in_(kwargs['committee_type']))
         if entity_type == 'pac':
             query = query.filter(
                 models.CommitteeTotalsPacParty.committee_type.in_(pac_cmte_list)
