@@ -231,6 +231,11 @@ class CommitteeTotalsHouseSenate(CommitteeTotals):
     transfers_from_other_authorized_committee = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
+    treasurer_name = db.Column(db.String(100), index=True, doc=docs.TREASURER_NAME)
+    committee_state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
+    filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
+    filing_frequency_full = db.Column(db.String, doc=docs.FILING_FREQUENCY)
+    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
 
 
 class CommitteeTotalsIEOnly(BaseModel):
@@ -242,6 +247,11 @@ class CommitteeTotalsIEOnly(BaseModel):
     coverage_end_date = db.Column(db.DateTime, doc=docs.COVERAGE_END_DATE)
     total_independent_contributions = db.Column(db.Numeric(30, 2))
     total_independent_expenditures = db.Column(db.Numeric(30, 2))
+    treasurer_name = db.Column(db.String(100), index=True, doc=docs.TREASURER_NAME)
+    committee_state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
+    filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
+    filing_frequency_full = db.Column(db.String, doc=docs.FILING_FREQUENCY)
+    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
 
     transaction_coverage = db.relationship(
         'TransactionCoverage',
@@ -313,3 +323,8 @@ class CommitteeTotalsPerCycle(CommitteeTotals):
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
     net_operating_expenditures = db.Column('last_net_operating_expenditures', db.Numeric(30, 2))
     net_contributions = db.Column('last_net_contributions', db.Numeric(30, 2))
+    treasurer_name = db.Column(db.String(100), index=True, doc=docs.TREASURER_NAME)
+    committee_state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
+    filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
+    filing_frequency_full = db.Column(db.String, doc=docs.FILING_FREQUENCY)
+    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
