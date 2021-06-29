@@ -1,5 +1,6 @@
 import datetime
 import json
+import sqlalchemy as sa
 
 from tests import factories
 from tests.common import ApiBaseTest
@@ -58,33 +59,43 @@ transaction_coverage_fields = {'transaction_coverage_date': None}
 
 # test for endpoint: /totals/{entity_type}
 class TestTotalsByEntityType(ApiBaseTest):
+
+    # Factories are being weird about test data - base cases to share
+    first_pac_total = {
+        'committee_id': 'C00001',
+        'committee_type': 'O',
+        'cycle': 2018,
+        'committee_designation': 'A',
+        'all_loans_received': 1,
+        'allocated_federal_election_levin_share': 2,
+        'treasurer_name': 'Treasurer, Trudy',
+        'committee_state': 'DC',
+        'filing_frequency': 'Q',
+        'filing_frequency_full': 'Quarterly filer',
+        'first_file_date': datetime.date.fromisoformat("1982-12-31"),
+        'receipts': 50,
+        'disbursements': 200,
+    }
+    second_pac_total = {
+        'committee_id': 'C00002',
+        'committee_type': 'N',
+        'cycle': 2016,
+        'committee_designation': 'B',
+        'all_loans_received': 10,
+        'allocated_federal_election_levin_share': 20,
+        'treasurer_name': 'Treasurer, Tom',
+        'committee_state': 'CT',
+        'filing_frequency': 'M',
+        'filing_frequency_full': 'Monthly filer',
+        'first_file_date': datetime.date.fromisoformat("1984-12-31"),
+        'receipts': 200,
+        'disbursements': 50,
+    }
+
     def test_pac_total_by_entity_type(self):
-        first_pac_total = {
-            'committee_id': 'C00001',
-            'committee_type': 'O',
-            'cycle': 2018,
-            'all_loans_received': 1,
-            'allocated_federal_election_levin_share': 2,
-            'treasurer_name': 'Treasurer, Trudy',
-            'committee_state': 'DC',
-            'filing_frequency': 'Q',
-            'filing_frequency_full': 'Quarterly filer',
-            'first_file_date': datetime.date.fromisoformat("1982-12-31"),
-        }
-        second_pac_total = {
-            'committee_id': 'C00002',
-            'committee_type': 'N',
-            'cycle': 2016,
-            'all_loans_received': 10,
-            'allocated_federal_election_levin_share': 20,
-            'treasurer_name': 'Treasurer, Tom',
-            'committee_state': 'CT',
-            'filing_frequency': 'M',
-            'filing_frequency_full': 'Monthly filer',
-            'first_file_date': datetime.date.fromisoformat("1984-12-31"),
-        }
-        factories.TotalsPacFactory(**first_pac_total)
-        factories.TotalsPacFactory(**second_pac_total)
+
+        factories.TotalsPacFactory(**self.first_pac_total)
+        factories.TotalsPacFactory(**self.second_pac_total)
 
         results = self._results(
             api.url_for(TotalsByEntityTypeView, entity_type='pac')
@@ -97,12 +108,12 @@ class TestTotalsByEntityType(ApiBaseTest):
 
         # Dates are weird - pulling them out to test separately
         result_first_file_date = results[1].pop('first_file_date')
-        expected_first_file_date = second_pac_total.pop('first_file_date').isoformat()
+        expected_first_file_date = self.second_pac_total.pop('first_file_date').isoformat()
         self.assertEqual(result_first_file_date, expected_first_file_date)
 
         # Check all the results for fields we've created in `second_pac_total`
-        test_subset = {k: v for k, v in results[1].items() if k in second_pac_total}
-        self.assertEqual(test_subset, second_pac_total)
+        test_subset = {k: v for k, v in results[1].items() if k in self.second_pac_total}
+        self.assertEqual(test_subset, self.second_pac_total)
 
     def test_cycle_filter(self):
         presidential_fields = {
@@ -138,35 +149,8 @@ class TestTotalsByEntityType(ApiBaseTest):
 
     def test_pac_party_multi_filters(self):
 
-        first_pac_total = {
-            'committee_id': 'C00001',
-            'committee_type': 'O',
-            'cycle': 2018,
-            'committee_designation': 'A',
-            'all_loans_received': 1,
-            'allocated_federal_election_levin_share': 2,
-            'treasurer_name': 'Treasurer, Trudy',
-            'committee_state': 'DC',
-            'filing_frequency': 'Q',
-            'filing_frequency_full': 'Quarterly filer',
-            'first_file_date': datetime.date.fromisoformat("1982-12-31"),
-        }
-        second_pac_total = {
-            'committee_id': 'C00002',
-            'committee_type': 'N',
-            'cycle': 2016,
-            'committee_designation': 'B',
-            'all_loans_received': 10,
-            'allocated_federal_election_levin_share': 20,
-            'treasurer_name': 'Treasurer, Tom',
-            'committee_state': 'CT',
-            'filing_frequency': 'M',
-            'filing_frequency_full': 'Monthly filer',
-            'first_file_date': datetime.date.fromisoformat("1984-12-31"),
-        }
-
-        factories.TotalsPacFactory(**first_pac_total)
-        factories.TotalsPacFactory(**second_pac_total)
+        factories.TotalsPacFactory(**self.first_pac_total)
+        factories.TotalsPacFactory(**self.second_pac_total)
 
         filters = [
             'committee_type',
@@ -182,18 +166,16 @@ class TestTotalsByEntityType(ApiBaseTest):
             results = self._results(
                 api.url_for(TotalsByEntityTypeView,
                     entity_type='pac-party',
-                    **{field: second_pac_total.get(field)})
+                    **{field: self.second_pac_total.get(field)})
             )
             assert len(results) == 1
-            assert results[0][field] == second_pac_total.get(field)
+            assert results[0][field] == self.second_pac_total.get(field)
 
     def test_filter_receipts(self):
-        [
-            factories.TotalsPacFactory(receipts=50),
-            factories.TotalsPacFactory(receipts=70),
-            factories.TotalsPacFactory(receipts=90),
-            factories.TotalsPacFactory(receipts=20),
-        ]
+
+        factories.TotalsPacFactory(**self.first_pac_total)
+        factories.TotalsPacFactory(**self.second_pac_total)
+
         results = self._results(
             api.url_for(
                 TotalsByEntityTypeView,
@@ -209,7 +191,7 @@ class TestTotalsByEntityType(ApiBaseTest):
                 max_receipts=150
             )
         )
-        self.assertTrue(all(each['payment_to_date'] <= 150 for each in results))
+        self.assertTrue(all(each['receipts'] <= 150 for each in results))
         results = self._results(
             api.url_for(
                 TotalsByEntityTypeView,
@@ -220,12 +202,10 @@ class TestTotalsByEntityType(ApiBaseTest):
         self.assertTrue(all(60 <= each['receipts'] <= 100 for each in results))
 
     def test_filter_disbursements(self):
-        [
-            factories.TotalsPacFactory(disbursements=50),
-            factories.TotalsPacFactory(disbursements=70),
-            factories.TotalsPacFactory(disbursements=90),
-            factories.TotalsPacFactory(disbursements=20),
-        ]
+
+        factories.TotalsPacFactory(**self.first_pac_total)
+        factories.TotalsPacFactory(**self.second_pac_total)
+
         results = self._results(
             api.url_for(
                 TotalsByEntityTypeView,
@@ -241,15 +221,45 @@ class TestTotalsByEntityType(ApiBaseTest):
                 max_disbursements=150
             )
         )
-        self.assertTrue(all(each['payment_to_date'] <= 150 for each in results))
+        self.assertTrue(all(each['disbursements'] <= 150 for each in results))
         results = self._results(
             api.url_for(
                 TotalsByEntityTypeView,
                 entity_type='pac-party',
                 min_disbursements=60,
-                max_disbursements=100)
+                max_disbursements=100
+            )
         )
         self.assertTrue(all(60 <= each['disbursements'] <= 100 for each in results))
+
+    def test_treasurer_filter(self):
+
+        factories.TotalsPacFactory(
+            **utils.extend(
+                self.first_pac_total,
+                {'treasurer_text': sa.func.to_tsvector("Treasurer, Trudy")}
+            )
+        )
+        factories.TotalsPacFactory(
+            **utils.extend(
+                self.second_pac_total,
+                {'treasurer_text': sa.func.to_tsvector("Treasurer, Tom")}
+            )
+        )
+
+        results = self._results(api.url_for(
+            TotalsByEntityTypeView,
+            entity_type='pac-party')
+        )
+        results = self._results(
+            api.url_for(
+                TotalsByEntityTypeView,
+                entity_type='pac-party',
+                treasurer_name='Tom'
+            )
+        )
+        assert len(results) == 1
+        assert results[0]["committee_id"] == self.second_pac_total.get("committee_id")
 
 
 # test for endpoint: /committee/{committee_id}/totals/

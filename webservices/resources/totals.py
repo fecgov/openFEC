@@ -107,6 +107,10 @@ class TotalsByEntityTypeView(utils.Resource):
             ("filing_frequency", totals_class.filing_frequency),
         ]
 
+        filter_fulltext_fields = [
+            ("treasurer_name", totals_class.treasurer_text),
+        ]
+
         filter_range_fields = [
             (
                 ('min_receipts', 'max_receipts'),
@@ -131,6 +135,7 @@ class TotalsByEntityTypeView(utils.Resource):
 
         query = filters.filter_multi(query, kwargs, filter_multi_fields)
         query = filters.filter_range(query, kwargs, filter_range_fields)
+        query = filters.filter_fulltext(query, kwargs, filter_fulltext_fields)
 
         if committee_id is not None:
             query = query.filter(totals_class.committee_id == committee_id)

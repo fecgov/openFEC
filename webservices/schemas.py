@@ -506,7 +506,7 @@ make_totals_schema = functools.partial(
             default=None),
     },
     options={
-        'exclude': ('transaction_coverage', 'idx')
+        'exclude': ('transaction_coverage', 'idx', 'treasurer_text')
     },
 )
 augment_models(

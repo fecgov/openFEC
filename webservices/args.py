@@ -420,14 +420,15 @@ totals_by_entity_type = {
         IStr(validate=validate.OneOf(['', 'A', 'M', 'N', 'Q', 'T', 'W', '-A', '-T'])),
         description=docs.FILING_FREQUENCY,
     ),
-    'min_disbursements_amount': Currency(description=docs.MIN_FILTER),
-    'max_disbursements_amount': Currency(description=docs.MAX_FILTER),
-    'min_receipts_amount': Currency(description=docs.MIN_FILTER),
-    'max_receipts_amount': Currency(description=docs.MAX_FILTER),
-    'min_cash_on_hand_end_period_amount': Currency(description=docs.MIN_FILTER),
-    'max_cash_on_hand_end_period_amount': Currency(description=docs.MAX_FILTER),
-    'min_debts_owed_amount': Currency(description=docs.MIN_FILTER),
-    'max_debts_owed_expenditures': Currency(description=docs.MAX_FILTER),
+    'treasurer_name': fields.List(fields.Str, description=docs.TREASURER_NAME),
+    'min_disbursements': Currency(description=docs.MIN_FILTER),
+    'max_disbursements': Currency(description=docs.MAX_FILTER),
+    'min_receipts': Currency(description=docs.MIN_FILTER),
+    'max_receipts': Currency(description=docs.MAX_FILTER),
+    'min_last_cash_on_hand_end_period': Currency(description=docs.MIN_FILTER),
+    'max_last_cash_on_hand_end_period_amount': Currency(description=docs.MAX_FILTER),
+    'min_last_debts_owed_by_committee': Currency(description=docs.MIN_FILTER),
+    'max_last_debts_owed_by_committee': Currency(description=docs.MAX_FILTER),
 }
 
 candidate_totals_detail = {
