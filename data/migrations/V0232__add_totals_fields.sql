@@ -4,7 +4,7 @@ This migration file is for #4878
 New fields/columns need to be at the end
 
 1 - Modify `ofec_totals_combined_mv` and `ofec_totals_combined_vw` to add:
-    `treasurer_text`
+    `treasurer_text` and index
 
     Replaces V0228
 
@@ -26,7 +26,7 @@ New fields/columns need to be at the end
 4 - Modify `ofec_totals_house_senate_mv` to add:
     `committee_state`
     `treasurer_name`,
-    `treasurer_text`
+    `treasurer_text` and index
     `filing_frequency`,
     `filing_frequency_full`,
     `first_file_date`,
@@ -276,6 +276,11 @@ CREATE INDEX idx_ofec_totals_combined_mv_tmp_receipts_sub_id
     ON public.ofec_totals_combined_mv_tmp USING btree
     (receipts, sub_id);
 
+-- Added w/ V0232
+CREATE INDEX idx_ofec_totals_combined_mv_tmp_treasurer_text
+ON public.idx_ofec_totals_combined_mv_tmp USING gin (treasurer_text);
+
+
 -- Recreate vw -> select all from new _tmp MV
 
 CREATE OR REPLACE VIEW ofec_totals_combined_vw
@@ -291,13 +296,31 @@ DROP MATERIALIZED VIEW IF EXISTS public.ofec_totals_combined_mv;
 ALTER MATERIALIZED VIEW IF EXISTS public.ofec_totals_combined_mv_tmp RENAME TO ofec_totals_combined_mv;
 
 -- Rename indexes
-ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_dsgn_full_sub_id RENAME TO idx_ofec_totals_combined_mv_cmte_dsgn_full_sub_id;
-ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_id_sub_id RENAME TO idx_ofec_totals_combined_mv_cmte_id_sub_id;
-ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_tp_full_sub_id RENAME TO idx_ofec_totals_combined_mv_cmte_tp_full_sub_id;
-ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cycle_sub_id RENAME TO idx_ofec_totals_combined_mv_cycle_sub_id;
-ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_disb_sub_id RENAME TO idx_ofec_totals_combined_mv_disb_sub_id;
-ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_receipts_sub_id RENAME TO idx_ofec_totals_combined_mv_receipts_sub_id;
-ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_sub_id RENAME TO idx_ofec_totals_combined_mv_sub_id;
+ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_dsgn_full_sub_id
+RENAME TO idx_ofec_totals_combined_mv_cmte_dsgn_full_sub_id;
+
+ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_id_sub_id
+RENAME TO idx_ofec_totals_combined_mv_cmte_id_sub_id;
+
+ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_tp_full_sub_id
+RENAME TO idx_ofec_totals_combined_mv_cmte_tp_full_sub_id;
+
+ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cycle_sub_id
+RENAME TO idx_ofec_totals_combined_mv_cycle_sub_id;
+
+ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_disb_sub_id
+RENAME TO idx_ofec_totals_combined_mv_disb_sub_id;
+
+ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_receipts_sub_id
+RENAME TO idx_ofec_totals_combined_mv_receipts_sub_id;
+
+ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_sub_id
+RENAME TO idx_ofec_totals_combined_mv_sub_id;
+
+-- Added w/ V0232
+ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_treasurer_text
+RENAME TO idx_ofec_totals_combined_mv_treasurer_text;
+
 
 -- 2 - Modify `ofec_totals_pac_party_vw` to bring in new field
 
@@ -629,6 +652,10 @@ CREATE INDEX idx_ofec_totals_house_senate_mv_tmp_cmte_dsgn_full_idx
   USING btree
   (committee_designation_full, idx);
 
+CREATE INDEX idx_ofec_totals_house_senate_mv_tmp_treasurer_text
+  ON ofec_totals_house_senate_mv_tmp
+  USING gin (treasurer_text);
+
 -- ---------------
 DROP VIEW IF EXISTS public.ofec_totals_house_senate_vw;
 
@@ -647,20 +674,29 @@ DROP MATERIALIZED VIEW IF EXISTS public.ofec_totals_house_senate_mv;
 ALTER MATERIALIZED VIEW IF EXISTS public.ofec_totals_house_senate_mv_tmp RENAME TO ofec_totals_house_senate_mv;
 
 -- rename indexes
-ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_idx RENAME TO idx_ofec_totals_house_senate_mv_idx;
+ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_idx
+  RENAME TO idx_ofec_totals_house_senate_mv_idx;
 
-ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cand_id_idx RENAME TO idx_ofec_totals_house_senate_mv_cand_id_idx;
+ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cand_id_idx
+  RENAME TO idx_ofec_totals_house_senate_mv_cand_id_idx;
 
-ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cmte_id_idx RENAME TO idx_ofec_totals_house_senate_mv_cmte_id_idx;
+ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cmte_id_idx
+  RENAME TO idx_ofec_totals_house_senate_mv_cmte_id_idx;
 
-ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cmte_type_full_idx RENAME TO idx_ofec_totals_house_senate_mv_cmte_tp_full_idx;
+ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cmte_type_full_idx
+  RENAME TO idx_ofec_totals_house_senate_mv_cmte_tp_full_idx;
 
-ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cycle_cmte_id RENAME TO idx_ofec_totals_house_senate_mv_cycle_cmte_id;
+ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cycle_cmte_id
+  RENAME TO idx_ofec_totals_house_senate_mv_cycle_cmte_id;
 
-ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cycle_idx RENAME TO idx_ofec_totals_house_senate_mv_cycle_idx;
+ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cycle_idx
+  RENAME TO idx_ofec_totals_house_senate_mv_cycle_idx;
 
-ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cmte_dsgn_full_idx RENAME TO idx_ofec_totals_house_senate_mv_cmte_dsgn_full_idx;
+ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cmte_dsgn_full_idx
+  RENAME TO idx_ofec_totals_house_senate_mv_cmte_dsgn_full_idx;
 
+ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_treasurer_text
+  RENAME TO idx_ofec_totals_house_senate_mv_treasurer_text;
 
 
 -- 5 - Modify `ofec_totals_ie_only_mv`
@@ -714,6 +750,7 @@ ON public.ofec_totals_ie_only_mv_tmp USING btree (cycle, committee_id);
 
 CREATE INDEX ofec_totals_ie_only_mv_tmp_cycle_idx_idx
 ON public.ofec_totals_ie_only_mv_tmp USING btree (cycle, idx);
+
 
 -- Recreate view
 
