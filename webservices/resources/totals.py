@@ -3,6 +3,7 @@ from flask_apispec import doc, marshal_with
 
 from webservices import args
 from webservices import docs
+from webservices import filters
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
@@ -97,14 +98,42 @@ class TotalsByEntityTypeView(utils.Resource):
             default_schemas,
         )
         query = totals_class.query
+
+        filter_multi_fields = [
+            ("cycle", totals_class.cycle),
+            ("committee_designation", totals_class.committee_designation),
+            ("committee_type", totals_class.committee_type),
+            ("committee_state", totals_class.committee_state),
+            ("filing_frequency", totals_class.filing_frequency),
+        ]
+
+        filter_range_fields = [
+            (
+                ('min_receipts', 'max_receipts'),
+                totals_class.receipts,
+            ),
+            (
+                ('min_disbursements', 'max_disbursements'),
+                totals_class.disbursements,
+            ),
+            (
+                (
+                    'min_last_cash_on_hand_end_period',
+                    'max_last_cash_on_hand_end_period',
+                ),
+                totals_class.last_cash_on_hand_end_period,
+            ),
+            (
+                ('min_last_debts_owed_by_committee', 'max_last_debts_owed_by_committee'),
+                totals_class.last_debts_owed_by_committee,
+            ),
+        ]
+
+        query = filters.filter_multi(query, kwargs, filter_multi_fields)
+        query = filters.filter_range(query, kwargs, filter_range_fields)
+
         if committee_id is not None:
             query = query.filter(totals_class.committee_id == committee_id)
-        if kwargs.get('cycle'):
-            query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
-        if kwargs.get('committee_designation'):
-            query = query.filter(totals_class.committee_designation.in_(kwargs['committee_designation']))
-        if kwargs.get('committee_type'):
-            query = query.filter(totals_class.committee_type.in_(kwargs['committee_type']))
         if entity_type == 'pac':
             query = query.filter(
                 models.CommitteeTotalsPacParty.committee_type.in_(pac_cmte_list)

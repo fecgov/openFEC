@@ -415,6 +415,19 @@ totals_by_entity_type = {
     'committee_designation': fields.List(fields.Str, description=docs.DESIGNATION),
     'committee_id': fields.Str(description=docs.COMMITTEE_ID),
     'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
+    'committee_state': fields.List(IStr, description=docs.STATE_GENERIC),
+        'filing_frequency': fields.List(
+        IStr(validate=validate.OneOf(['', 'A', 'M', 'N', 'Q', 'T', 'W', '-A', '-T'])),
+        description=docs.FILING_FREQUENCY,
+    ),
+    'min_disbursements_amount': Currency(description=docs.MIN_FILTER),
+    'max_disbursements_amount': Currency(description=docs.MAX_FILTER),
+    'min_receipts_amount': Currency(description=docs.MIN_FILTER),
+    'max_receipts_amount': Currency(description=docs.MAX_FILTER),
+    'min_cash_on_hand_end_period_amount': Currency(description=docs.MIN_FILTER),
+    'max_cash_on_hand_end_period_amount': Currency(description=docs.MAX_FILTER),
+    'min_debts_owed_amount': Currency(description=docs.MIN_FILTER),
+    'max_debts_owed_expenditures': Currency(description=docs.MAX_FILTER),
 }
 
 candidate_totals_detail = {

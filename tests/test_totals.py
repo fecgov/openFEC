@@ -5,7 +5,6 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices import utils
-from webservices.common.models import CommitteeTotalsPacParty
 from webservices.rest import api
 from webservices.resources.totals import (
     TotalsCommitteeView,
@@ -137,21 +136,120 @@ class TestTotalsByEntityType(ApiBaseTest):
         assert len(results) == 1
         self.assertEqual(results[0]['committee_designation'], party_fields['committee_designation'])
 
-    def test_pac_party_filters(self):
+    def test_pac_party_multi_filters(self):
+
+        first_pac_total = {
+            'committee_id': 'C00001',
+            'committee_type': 'O',
+            'cycle': 2018,
+            'committee_designation': 'A',
+            'all_loans_received': 1,
+            'allocated_federal_election_levin_share': 2,
+            'treasurer_name': 'Treasurer, Trudy',
+            'committee_state': 'DC',
+            'filing_frequency': 'Q',
+            'filing_frequency_full': 'Quarterly filer',
+            'first_file_date': datetime.date.fromisoformat("1982-12-31"),
+        }
+        second_pac_total = {
+            'committee_id': 'C00002',
+            'committee_type': 'N',
+            'cycle': 2016,
+            'committee_designation': 'B',
+            'all_loans_received': 10,
+            'allocated_federal_election_levin_share': 20,
+            'treasurer_name': 'Treasurer, Tom',
+            'committee_state': 'CT',
+            'filing_frequency': 'M',
+            'filing_frequency_full': 'Monthly filer',
+            'first_file_date': datetime.date.fromisoformat("1984-12-31"),
+        }
+
+        factories.TotalsPacFactory(**first_pac_total)
+        factories.TotalsPacFactory(**second_pac_total)
 
         filters = [
-            ('committee_type', CommitteeTotalsPacParty.committee_type, ['Q', 'N']),
+            'committee_type',
+            'cycle',
+            'committee_id',
+            'committee_designation',
+            'committee_state',
+            'committee_id',
+            'filing_frequency',
         ]
-        for label, column, values in filters:
-            [
-                factories.TotalsPacPartyFactory(**{column.key: value})
-                for value in values
-            ]
+
+        for field in filters:
             results = self._results(
-                api.url_for(TotalsByEntityTypeView, entity_type='pac-party', **{label: values[0]})
+                api.url_for(TotalsByEntityTypeView,
+                    entity_type='pac-party',
+                    **{field: second_pac_total.get(field)})
             )
             assert len(results) == 1
-            assert results[0][column.key] == values[0]
+            assert results[0][field] == second_pac_total.get(field)
+
+    def test_filter_receipts(self):
+        [
+            factories.TotalsPacFactory(receipts=50),
+            factories.TotalsPacFactory(receipts=70),
+            factories.TotalsPacFactory(receipts=90),
+            factories.TotalsPacFactory(receipts=20),
+        ]
+        results = self._results(
+            api.url_for(
+                TotalsByEntityTypeView,
+                entity_type='pac-party',
+                min_receipts=100
+            )
+        )
+        self.assertTrue(all(each['receipts'] >= 100 for each in results))
+        results = self._results(
+            api.url_for(
+                TotalsByEntityTypeView,
+                entity_type='pac-party',
+                max_receipts=150
+            )
+        )
+        self.assertTrue(all(each['payment_to_date'] <= 150 for each in results))
+        results = self._results(
+            api.url_for(
+                TotalsByEntityTypeView,
+                entity_type='pac-party',
+                min_receipts=60,
+                max_receipts=100)
+        )
+        self.assertTrue(all(60 <= each['receipts'] <= 100 for each in results))
+
+    def test_filter_disbursements(self):
+        [
+            factories.TotalsPacFactory(disbursements=50),
+            factories.TotalsPacFactory(disbursements=70),
+            factories.TotalsPacFactory(disbursements=90),
+            factories.TotalsPacFactory(disbursements=20),
+        ]
+        results = self._results(
+            api.url_for(
+                TotalsByEntityTypeView,
+                entity_type='pac-party',
+                min_disbursements=100
+            )
+        )
+        self.assertTrue(all(each['disbursements'] >= 100 for each in results))
+        results = self._results(
+            api.url_for(
+                TotalsByEntityTypeView,
+                entity_type='pac-party',
+                max_disbursements=150
+            )
+        )
+        self.assertTrue(all(each['payment_to_date'] <= 150 for each in results))
+        results = self._results(
+            api.url_for(
+                TotalsByEntityTypeView,
+                entity_type='pac-party',
+                min_disbursements=60,
+                max_disbursements=100)
+        )
+        self.assertTrue(all(60 <= each['disbursements'] <= 100 for each in results))
 
 
 # test for endpoint: /committee/{committee_id}/totals/
