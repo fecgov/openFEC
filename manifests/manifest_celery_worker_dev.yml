@@ -2,7 +2,7 @@
 applications:
   - name: celery-worker
     instances: 1
-    memory: 1G
+    memory: 512M
     disk_quota: 1G
     no-route: true
     health-check-type: process
