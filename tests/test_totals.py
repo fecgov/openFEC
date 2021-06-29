@@ -446,8 +446,63 @@ class TestTotals(ApiBaseTest):
         # Dates are weird - pulling them out to test separately
         result_first_file_date = results[0].pop('first_file_date')
         fields_first_file_date = fields.pop('first_file_date').isoformat()
-        self.assertEqual(results[0], fields)
         self.assertEqual(result_first_file_date, fields_first_file_date)
+
+        # Test calculated percentages
+
+        # `individual_contributions_percent`
+        individual_percent = utils.get_percentage(
+            [fields.get('individual_contributions')],
+            [fields.get('receipts')]
+        )
+        individual_percent_result = results[0].pop('individual_contributions_percent')
+        self.assertEqual(individual_percent, individual_percent_result)
+
+        # `party_and_other_committee_contributions_percent`
+        party_percent = utils.get_percentage(
+            [
+                fields.get('other_political_committee_contributions'),
+                fields.get('political_party_committee_contributions')
+            ],
+            [fields.get('receipts')]
+        )
+        party_percent_result = results[0].pop(
+            'party_and_other_committee_contributions_percent'
+        )
+        self.assertEqual(party_percent, party_percent_result)
+
+        # `contributions_ie_and_party_expenditures_made_percent`
+
+        contributions_made_percent = utils.get_percentage(
+            [
+                fields.get('fed_candidate_committee_contributions'),
+                fields.get('independent_expenditures'),
+                fields.get('coordinated_expenditures_by_party_committee'),
+
+            ],
+            [fields.get('disbursements')]
+        )
+        contributions_made_percent_result = results[0].pop(
+            'contributions_ie_and_party_expenditures_made_percent'
+        )
+        self.assertEqual(
+            contributions_made_percent, contributions_made_percent_result
+        )
+
+        # `operating_expenditures_percent`
+        operating_expenditures_percent = utils.get_percentage(
+            [fields.get('operating_expenditures')],
+            [fields.get('disbursements')]
+        )
+        operating_expenditures_percent_result = results[0].pop(
+            'operating_expenditures_percent'
+        )
+        self.assertEqual(
+            operating_expenditures_percent, operating_expenditures_percent_result
+        )
+
+        # Test the rest of the fields
+        self.assertEqual(results[0], fields)
 
     def test_Pac_totals(self):
         committee_id = 'C8675311'
@@ -519,8 +574,63 @@ class TestTotals(ApiBaseTest):
         # Dates are weird - pulling them out to test separately
         result_first_file_date = results[0].pop('first_file_date')
         fields_first_file_date = fields.pop('first_file_date').isoformat()
-        self.assertEqual(results[0], fields)
         self.assertEqual(result_first_file_date, fields_first_file_date)
+
+        # Test calculated percentages
+
+        # `individual_contributions_percent`
+        individual_percent = utils.get_percentage(
+            [fields.get('individual_contributions')],
+            [fields.get('receipts')]
+        )
+        individual_percent_result = results[0].pop('individual_contributions_percent')
+        self.assertEqual(individual_percent, individual_percent_result)
+
+        # `party_and_other_committee_contributions_percent`
+        party_percent = utils.get_percentage(
+            [
+                fields.get('other_political_committee_contributions'),
+                fields.get('political_party_committee_contributions')
+            ],
+            [fields.get('receipts')]
+        )
+        party_percent_result = results[0].pop(
+            'party_and_other_committee_contributions_percent'
+        )
+        self.assertEqual(party_percent, party_percent_result)
+
+        # `contributions_ie_and_party_expenditures_made_percent`
+
+        contributions_made_percent = utils.get_percentage(
+            [
+                fields.get('fed_candidate_committee_contributions'),
+                fields.get('independent_expenditures'),
+                fields.get('coordinated_expenditures_by_party_committee'),
+
+            ],
+            [fields.get('disbursements')]
+        )
+        contributions_made_percent_result = results[0].pop(
+            'contributions_ie_and_party_expenditures_made_percent'
+        )
+        self.assertEqual(
+            contributions_made_percent, contributions_made_percent_result
+        )
+
+        # `operating_expenditures_percent`
+        operating_expenditures_percent = utils.get_percentage(
+            [fields.get('operating_expenditures')],
+            [fields.get('disbursements')]
+        )
+        operating_expenditures_percent_result = results[0].pop(
+            'operating_expenditures_percent'
+        )
+        self.assertEqual(
+            operating_expenditures_percent, operating_expenditures_percent_result
+        )
+
+        # Test the rest of the fields
+        self.assertEqual(results[0], fields)
 
     def test_party_totals(self):
 
@@ -595,8 +705,63 @@ class TestTotals(ApiBaseTest):
         # Dates are weird - pulling them out to test separately
         result_first_file_date = results[0].pop('first_file_date')
         fields_first_file_date = fields.pop('first_file_date').isoformat()
-        self.assertEqual(results[0], fields)
         self.assertEqual(result_first_file_date, fields_first_file_date)
+
+        # Test calculated percentages
+
+        # `individual_contributions_percent`
+        individual_percent = utils.get_percentage(
+            [fields.get('individual_contributions')],
+            [fields.get('receipts')]
+        )
+        individual_percent_result = results[0].pop('individual_contributions_percent')
+        self.assertEqual(individual_percent, individual_percent_result)
+
+        # `party_and_other_committee_contributions_percent`
+        party_percent = utils.get_percentage(
+            [
+                fields.get('other_political_committee_contributions'),
+                fields.get('political_party_committee_contributions')
+            ],
+            [fields.get('receipts')]
+        )
+        party_percent_result = results[0].pop(
+            'party_and_other_committee_contributions_percent'
+        )
+        self.assertEqual(party_percent, party_percent_result)
+
+        # `contributions_ie_and_party_expenditures_made_percent`
+
+        contributions_made_percent = utils.get_percentage(
+            [
+                fields.get('fed_candidate_committee_contributions'),
+                fields.get('independent_expenditures'),
+                fields.get('coordinated_expenditures_by_party_committee'),
+
+            ],
+            [fields.get('disbursements')]
+        )
+        contributions_made_percent_result = results[0].pop(
+            'contributions_ie_and_party_expenditures_made_percent'
+        )
+        self.assertEqual(
+            contributions_made_percent, contributions_made_percent_result
+        )
+
+        # `operating_expenditures_percent`
+        operating_expenditures_percent = utils.get_percentage(
+            [fields.get('operating_expenditures')],
+            [fields.get('disbursements')]
+        )
+        operating_expenditures_percent_result = results[0].pop(
+            'operating_expenditures_percent'
+        )
+        self.assertEqual(
+            operating_expenditures_percent, operating_expenditures_percent_result
+        )
+
+        # Test other fields
+        self.assertEqual(results[0], fields)
 
     def test_ie_totals(self):
         committee_id = 'C8675312'

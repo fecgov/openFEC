@@ -1,5 +1,5 @@
 from sqlalchemy.dialects.postgresql import TSVECTOR
-from webservices import docs
+from webservices import docs, utils
 from .base import db, BaseModel
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -194,6 +194,44 @@ class CommitteeTotalsPacParty(CommitteeTotals):
     unitemized_convention_exp = db.Column(db.Numeric(30, 2))
     itemized_other_disb = db.Column(db.Numeric(30, 2))
     unitemized_other_disb = db.Column(db.Numeric(30, 2))
+
+    @property
+    def individual_contributions_percent(self):
+        """ Line 11(a)(iii) divided by Line 19 """
+        numerators = [self.individual_contributions]
+        denominators = [self.receipts]
+        return utils.get_percentage(numerators, denominators)
+
+
+    @property
+    def party_and_other_committee_contributions_percent(self):
+        """  (Line 11(b) + Line 11(c)) divided by Line 19 """
+        numerators = [
+            self.other_political_committee_contributions,
+            self.political_party_committee_contributions,
+        ]
+        denominators = [self.receipts]
+        return utils.get_percentage(numerators, denominators)
+
+    @property
+    def contributions_ie_and_party_expenditures_made_percent(self):
+        """  (Line 23 + 24 + 25) divided by Line 31 """
+
+        numerators = [
+            self.fed_candidate_committee_contributions,
+            self.independent_expenditures,
+            self.coordinated_expenditures_by_party_committee,
+        ]
+        denominators = [self.disbursements]
+        return utils.get_percentage(numerators, denominators)
+
+    @property
+    def operating_expenditures_percent(self):
+        """  Line 21(c) divided by Line 31 """
+
+        numerators = [self.operating_expenditures]
+        denominators = [self.disbursements]
+        return utils.get_percentage(numerators, denominators)
 
 
 class CommitteeTotalsHouseSenate(CommitteeTotals):
