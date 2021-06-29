@@ -511,7 +511,6 @@ make_totals_schema = functools.partial(
 )
 augment_models(
     make_totals_schema,
-    models.CommitteeTotalsPresidential,
     models.CommitteeTotalsHouseSenate,
     models.CommitteeTotalsPacParty,
     models.CommitteeTotalsIEOnly,
@@ -535,7 +534,6 @@ register_schema(CommitteeReportsSchema)
 register_schema(CommitteeReportsPageSchema)
 
 totals_schemas = (
-    schemas['CommitteeTotalsPresidentialSchema'],
     schemas['CommitteeTotalsHouseSenateSchema'],
     schemas['CommitteeTotalsPacPartySchema'],
     schemas['CommitteeTotalsIEOnlySchema'],
