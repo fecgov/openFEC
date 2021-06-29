@@ -222,8 +222,6 @@ class CommitteeTotalsIEOnly(BaseModel):
     total_independent_contributions = db.Column(db.Numeric(30, 2))
     total_independent_expenditures = db.Column(db.Numeric(30, 2))
 
-    treasurer_name = db.Column(db.String(100), index=True, doc=docs.TREASURER_NAME)
-    treasurer_text = db.Column(TSVECTOR)
     committee_state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
     filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
     filing_frequency_full = db.Column(db.String, doc=docs.FILING_FREQUENCY)

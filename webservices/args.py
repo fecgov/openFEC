@@ -426,7 +426,7 @@ totals_by_entity_type = {
     'min_receipts': Currency(description=docs.MIN_FILTER),
     'max_receipts': Currency(description=docs.MAX_FILTER),
     'min_last_cash_on_hand_end_period': Currency(description=docs.MIN_FILTER),
-    'max_last_cash_on_hand_end_period_amount': Currency(description=docs.MAX_FILTER),
+    'max_last_cash_on_hand_end_period': Currency(description=docs.MAX_FILTER),
     'min_last_debts_owed_by_committee': Currency(description=docs.MIN_FILTER),
     'max_last_debts_owed_by_committee': Currency(description=docs.MAX_FILTER),
 }

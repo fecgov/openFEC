@@ -610,7 +610,6 @@ class TestTotals(ApiBaseTest):
             'coverage_end_date': None,
             'total_independent_contributions': 1,
             'total_independent_expenditures': 2,
-            'treasurer_name': 'Treasurer, Trudy',
             'committee_state': 'DC',
             'filing_frequency': 'Q',
             'filing_frequency_full': 'Quarterly filer',

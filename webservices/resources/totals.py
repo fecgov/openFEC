@@ -101,11 +101,25 @@ class TotalsByEntityTypeView(utils.Resource):
 
         filter_multi_fields = [
             ("cycle", totals_class.cycle),
-            ("committee_designation", totals_class.committee_designation),
-            ("committee_type", totals_class.committee_type),
             ("committee_state", totals_class.committee_state),
             ("filing_frequency", totals_class.filing_frequency),
         ]
+
+        if committee_id is not None:
+            query = query.filter(totals_class.committee_id == committee_id)
+
+        # Only a few filters apply to IE-only
+        if entity_type == 'ie-only':
+            query = filters.filter_multi(query, kwargs, filter_multi_fields)
+
+            return query, totals_class, totals_schema
+
+        # Other filers have more applicable filters
+
+        filter_multi_fields.extend([
+            ("committee_type", totals_class.committee_type),
+            ("committee_designation", totals_class.committee_designation),
+        ])
 
         filter_fulltext_fields = [
             ("treasurer_name", totals_class.treasurer_text),
@@ -137,8 +151,6 @@ class TotalsByEntityTypeView(utils.Resource):
         query = filters.filter_range(query, kwargs, filter_range_fields)
         query = filters.filter_fulltext(query, kwargs, filter_fulltext_fields)
 
-        if committee_id is not None:
-            query = query.filter(totals_class.committee_id == committee_id)
         if entity_type == 'pac':
             query = query.filter(
                 models.CommitteeTotalsPacParty.committee_type.in_(pac_cmte_list)
@@ -153,6 +165,7 @@ class TotalsByEntityTypeView(utils.Resource):
                     pac_cmte_list.union(party_cmte_list)
                 )
             )
+
         return query, totals_class, totals_schema
 
 

@@ -35,8 +35,6 @@ New fields/columns need to be at the end
 
 5 - Modify `ofec_totals_ie_only_mv` to add:
     `committee_state`
-    `treasurer_name`,
-    `treasurer_text`
     `filing_frequency`,
     `filing_frequency_full`,
     `first_file_date`,
@@ -287,7 +285,7 @@ ALTER VIEW ofec_totals_combined_vw OWNER TO fec;
 GRANT SELECT ON ofec_totals_combined_vw TO fec_read;
 
 -- Drop old `MV`
-DROP MATERIALIZED VIEW public.ofec_totals_combined_mv;
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_totals_combined_mv;
 
 -- Rename _tmp mv to mv
 ALTER MATERIALIZED VIEW IF EXISTS public.ofec_totals_combined_mv_tmp RENAME TO ofec_totals_combined_mv;
@@ -643,7 +641,7 @@ GRANT ALL ON TABLE public.ofec_totals_house_senate_vw TO fec;
 GRANT SELECT ON TABLE public.ofec_totals_house_senate_vw TO fec_read;
 
 -- drop old MV
-DROP MATERIALIZED VIEW public.ofec_totals_house_senate_mv;
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_totals_house_senate_mv;
 
 -- rename _tmp mv to mv
 ALTER MATERIALIZED VIEW IF EXISTS public.ofec_totals_house_senate_mv_tmp RENAME TO ofec_totals_house_senate_mv;
@@ -684,8 +682,6 @@ CREATE MATERIALIZED VIEW public.ofec_totals_ie_only_mv_tmp AS
     ofec_totals_combined_vw.party_full,
     -- Added w/ V0232
     ofec_totals_combined_vw.committee_state,
-    ofec_totals_combined_vw.treasurer_name,
-    ofec_totals_combined_vw.treasurer_text,
     ofec_totals_combined_vw.filing_frequency,
     ofec_totals_combined_vw.filing_frequency_full,
     ofec_totals_combined_vw.first_file_date
