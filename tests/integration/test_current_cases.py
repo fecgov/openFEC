@@ -1,6 +1,6 @@
 import subprocess
 from unittest.mock import patch
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 import pytest
 
@@ -127,6 +127,7 @@ class TestLoadCurrentCases(BaseTestCase):
     @patch('webservices.legal_docs.current_cases.get_bucket')
     def test_admin_fine(self, get_bucket):
         dummy_subject = 'Personal use'
+        case_id = 1
         expected_admin_fine = {
             "type": "admin_fines",
             'no': '1',
@@ -150,11 +151,26 @@ class TestLoadCurrentCases(BaseTestCase):
             'petition_court_filing_date': None,
             'petition_court_decision_date': None,
             'url': '/legal/administrative-fine/1/',
+            'civil_penalty_due_date': None,
+            'civil_penalty_payment_status': 'Paid In Full',
+            'af_dispositions': [
+                {
+                    'amount': Decimal('350'),
+                    'disposition_description': 'Challenged',
+                    "disposition_date": date(2021, 6, 25)
+                }
+            ],
             'sort1': -1,
             'sort2': None,
         }
+
+        expected_af_case_disposition = {
+            'amount': Decimal('350'),
+            'disposition_description': 'Challenged',
+            'disposition_date': date(2021, 6, 25),
+        }
         self.create_case(
-            1,
+            case_id,
             expected_admin_fine['no'],
             expected_admin_fine['name'],
             dummy_subject,
@@ -162,7 +178,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'AF',
         )
         self.create_admin_fine(
-            1,
+            case_id,
             expected_admin_fine['committee_id'],
             expected_admin_fine['report_year'],
             expected_admin_fine['report_type'],
@@ -177,6 +193,15 @@ class TestLoadCurrentCases(BaseTestCase):
             expected_admin_fine['treasury_referral_amount'],
             expected_admin_fine['petition_court_filing_date'],
             expected_admin_fine['petition_court_decision_date'],
+            expected_admin_fine['civil_penalty_due_date'],
+            expected_admin_fine['civil_penalty_payment_status'],
+        )
+
+        self.create_af_case_disposition(
+            case_id,
+            expected_af_case_disposition['amount'],
+            expected_af_case_disposition['disposition_description'],
+            expected_af_case_disposition['disposition_date'],
         )
         actual_admin_fine = next(get_cases('AF'))
 
@@ -525,14 +550,17 @@ class TestLoadCurrentCases(BaseTestCase):
         treasury_referral_amount,
         petition_court_filing_date,
         petition_court_decision_date,
+        civil_penalty_due_date,
+        civil_penalty_pymt_status_flg,
     ):
 
         self.connection.execute(
             "INSERT INTO fecmur.af_case (case_id, committee_id, report_year, report_type, \
             rtb_action_date, rtb_fine_amount, chal_receipt_date, chal_outcome_code_desc, \
             fd_date, fd_final_fine_amount, check_amount, treasury_date, treasury_amount, \
-            petition_court_filing_date, petition_court_decision_date) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            petition_court_filing_date, petition_court_decision_date, civil_penalty_due_date, \
+            civil_penalty_pymt_status_flg ) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             case_id,
             committee_id,
             report_year,
@@ -548,6 +576,8 @@ class TestLoadCurrentCases(BaseTestCase):
             treasury_referral_amount,
             petition_court_filing_date,
             petition_court_decision_date,
+            civil_penalty_due_date,
+            civil_penalty_pymt_status_flg,
         )
 
     def create_participant(
@@ -715,6 +745,18 @@ class TestLoadCurrentCases(BaseTestCase):
             pg_date,
         )
 
+    def create_af_case_disposition(
+        self, case_id, amount, description, dates
+    ):
+        self.connection.execute(
+            "INSERT INTO fecmur.af_case_disposition (case_id, amount, description, dates) "
+            "VALUES ( %s, %s, %s, %s )",
+            case_id,
+            amount,
+            description,
+            dates,
+        )
+
     def clear_test_data(self):
         tables = [
             "violations",
@@ -730,6 +772,8 @@ class TestLoadCurrentCases(BaseTestCase):
             "commission",
             "subject",
             "role",
+            "af_case",
+            "af_case_disposition",
         ]
         for table in tables:
             self.connection.execute("DELETE FROM fecmur.{}".format(table))
