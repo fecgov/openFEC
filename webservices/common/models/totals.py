@@ -1,7 +1,8 @@
+from sqlalchemy.dialects.postgresql import TSVECTOR
+from webservices import docs, utils
 from .base import db, BaseModel
 from sqlalchemy.ext.declarative import declared_attr
 
-from webservices import docs, utils
 
 
 class CommitteeTotals(BaseModel):
@@ -43,6 +44,13 @@ class CommitteeTotals(BaseModel):
     committee_type_full = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
     committee_designation_full = db.Column(db.String, doc=docs.DESIGNATION)
     party_full = db.Column(db.String, doc=docs.PARTY_FULL)
+
+    treasurer_name = db.Column(db.String(100), index=True, doc=docs.TREASURER_NAME)
+    treasurer_text = db.Column(TSVECTOR)
+    committee_state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
+    filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
+    filing_frequency_full = db.Column(db.String, doc=docs.FILING_FREQUENCY)
+    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
 
     @declared_attr
     def transaction_coverage(self):
@@ -90,30 +98,6 @@ class CandidateCommitteeTotals(db.Model):
     last_cash_on_hand_end_period = db.Column(db.Numeric(30, 2))
     last_debts_owed_by_committee = db.Column(db.Numeric(30, 2))
     last_debts_owed_to_committee = db.Column(db.Numeric(30, 2))
-
-
-class CommitteeTotalsPresidential(CommitteeTotals):
-    __tablename__ = 'ofec_totals_presidential_mv'
-
-    candidate_contribution = db.Column(db.Numeric(30, 2))
-    exempt_legal_accounting_disbursement = db.Column(db.Numeric(30, 2))
-    federal_funds = db.Column(db.Numeric(30, 2))
-    fundraising_disbursements = db.Column(db.Numeric(30, 2))
-    loan_repayments_made = db.Column(db.Numeric(30, 2))
-    loans_received = db.Column(db.Numeric(30, 2))
-    loans_received_from_candidate = db.Column(db.Numeric(30, 2))
-    offsets_to_fundraising_expenditures = db.Column(db.Numeric(30, 2))
-    offsets_to_legal_accounting = db.Column(db.Numeric(30, 2))
-    total_offsets_to_operating_expenditures = db.Column(db.Numeric(30, 2))
-    other_loans_received = db.Column(db.Numeric(30, 2))
-    other_receipts = db.Column(db.Numeric(30, 2))
-    repayments_loans_made_by_candidate = db.Column(db.Numeric(30, 2))
-    repayments_other_loans = db.Column(db.Numeric(30, 2))
-    transfers_from_affiliated_committee = db.Column(db.Numeric(30, 2))
-    transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
-    cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
-    net_operating_expenditures = db.Column('last_net_operating_expenditures', db.Numeric(30, 2))
-    net_contributions = db.Column('last_net_contributions', db.Numeric(30, 2))
 
 
 class CandidateCommitteeTotalsPresidential(CandidateCommitteeTotals):
@@ -210,11 +194,6 @@ class CommitteeTotalsPacParty(CommitteeTotals):
     unitemized_convention_exp = db.Column(db.Numeric(30, 2))
     itemized_other_disb = db.Column(db.Numeric(30, 2))
     unitemized_other_disb = db.Column(db.Numeric(30, 2))
-    treasurer_name = db.Column(db.String(100), index=True, doc=docs.TREASURER_NAME)
-    committee_state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
-    filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
-    filing_frequency_full = db.Column(db.String, doc=docs.FILING_FREQUENCY)
-    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
 
     @property
     def individual_contributions_percent(self):
@@ -280,6 +259,11 @@ class CommitteeTotalsIEOnly(BaseModel):
     coverage_end_date = db.Column(db.DateTime, doc=docs.COVERAGE_END_DATE)
     total_independent_contributions = db.Column(db.Numeric(30, 2))
     total_independent_expenditures = db.Column(db.Numeric(30, 2))
+
+    committee_state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
+    filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
+    filing_frequency_full = db.Column(db.String, doc=docs.FILING_FREQUENCY)
+    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
 
     transaction_coverage = db.relationship(
         'TransactionCoverage',
