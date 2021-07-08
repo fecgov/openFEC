@@ -138,12 +138,7 @@ invoke create_sample_db
 ```
 This will run `flyway` migrations on the empty database to create the schema, and then load sample data into this database from `data/sample_db.sql`.
 
-Next you'll need to load some documents into elasticsearch in order to create the search index.
-To load statutes into elasticsearch, run:
-
-```
-python manage.py index_statutes
-```
+---
 
 #### Connecting to a RDS DB instance instead of local DB
 
