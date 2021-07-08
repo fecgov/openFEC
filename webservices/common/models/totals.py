@@ -51,7 +51,6 @@ class CommitteeTotals(BaseModel):
     filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
     filing_frequency_full = db.Column(db.String, doc=docs.FILING_FREQUENCY)
     first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
-    # sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
 
     @declared_attr
     def transaction_coverage(self):
@@ -195,6 +194,7 @@ class CommitteeTotalsPacParty(CommitteeTotals):
     unitemized_convention_exp = db.Column(db.Numeric(30, 2))
     itemized_other_disb = db.Column(db.Numeric(30, 2))
     unitemized_other_disb = db.Column(db.Numeric(30, 2))
+    sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
 
     @property
     def individual_contributions_percent(self):

@@ -429,6 +429,7 @@ totals_by_entity_type = {
     'max_last_cash_on_hand_end_period': Currency(description=docs.MAX_FILTER),
     'min_last_debts_owed_by_committee': Currency(description=docs.MIN_FILTER),
     'max_last_debts_owed_by_committee': Currency(description=docs.MAX_FILTER),
+    'sponsor_candidate_id': fields.List(IStr, description=docs.SPONSOR_CANDIDATE_ID),
 }
 
 candidate_totals_detail = {

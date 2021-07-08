@@ -115,6 +115,11 @@ class TotalsByEntityTypeView(utils.Resource):
             query,
             kwargs,
             self.get_filter_fulltext_fields(entity_type, totals_class))
+        query = filters.filter_overlap(
+            query,
+            kwargs,
+            self.get_filter_overlap_fields(entity_type, totals_class)
+        )
 
         if entity_type == 'pac':
             query = query.filter(
@@ -186,14 +191,15 @@ class TotalsByEntityTypeView(utils.Resource):
             ("treasurer_name", totals_class.treasurer_text),
         ]
 
-    # def get_filter_overlap_fields(self, entity_type, totals_class):
+    def get_filter_overlap_fields(self, entity_type, totals_class):
 
-    #     if entity_type == 'ie-only':
-    #         return []
+        if 'pac' not in entity_type:
+            return []
 
-    #     return [
-    #         ("sponsor_candidate_id", models.Committee.sponsor_candidate_ids),
-    #     ]
+        # Only for 'pac' and 'pac-party'
+        return [
+            ("sponsor_candidate_id", totals_class.sponsor_candidate_ids),
+        ]
 
 @doc(
     tags=['financial'],
