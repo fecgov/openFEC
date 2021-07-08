@@ -10,7 +10,7 @@ New fields/columns need to be at the end
     Replaces V0233
 
 2 - Modify `ofec_totals_pac_party_vw` to add:
-    ``sponsor_candidate_ids`
+    `sponsor_candidate_ids`
     `organization_type`
 
     Replaces V0233

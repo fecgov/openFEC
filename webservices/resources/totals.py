@@ -99,33 +99,64 @@ class TotalsByEntityTypeView(utils.Resource):
         )
         query = totals_class.query
 
+        if committee_id is not None:
+            query = query.filter(totals_class.committee_id == committee_id)
+
+        query = filters.filter_multi(
+            query,
+            kwargs,
+            self.get_filter_multi_fields(entity_type, totals_class)
+        )
+        query = filters.filter_range(
+            query,
+            kwargs,
+            self.get_filter_range_fields(entity_type, totals_class))
+        query = filters.filter_fulltext(
+            query,
+            kwargs,
+            self.get_filter_fulltext_fields(entity_type, totals_class))
+
+        if entity_type == 'pac':
+            query = query.filter(
+                models.CommitteeTotalsPacParty.committee_type.in_(pac_cmte_list)
+            )
+        if entity_type == 'party':
+            query = query.filter(
+                models.CommitteeTotalsPacParty.committee_type.in_(party_cmte_list)
+            )
+        if entity_type == 'pac-party':
+            query = query.filter(
+                models.CommitteeTotalsPacParty.committee_type.in_(
+                    pac_cmte_list.union(party_cmte_list)
+                )
+            )
+
+        return query, totals_class, totals_schema
+
+    def get_filter_multi_fields(self, entity_type, totals_class):
+
         filter_multi_fields = [
             ("cycle", totals_class.cycle),
             ("committee_state", totals_class.committee_state),
             ("filing_frequency", totals_class.filing_frequency),
         ]
 
-        if committee_id is not None:
-            query = query.filter(totals_class.committee_id == committee_id)
-
-        # Only a few filters apply to IE-only
         if entity_type == 'ie-only':
-            query = filters.filter_multi(query, kwargs, filter_multi_fields)
+            return filter_multi_fields
 
-            return query, totals_class, totals_schema
-
-        # Other filers have more applicable filters
-
+        # All other entity types
         filter_multi_fields.extend([
             ("committee_type", totals_class.committee_type),
             ("committee_designation", totals_class.committee_designation),
         ])
 
-        filter_fulltext_fields = [
-            ("treasurer_name", totals_class.treasurer_text),
-        ]
+        return filter_multi_fields
 
-        filter_range_fields = [
+    def get_filter_range_fields(self, entity_type, totals_class):
+        if entity_type == 'ie-only':
+            return []
+
+        return [
             (
                 ('min_receipts', 'max_receipts'),
                 totals_class.receipts,
@@ -147,27 +178,22 @@ class TotalsByEntityTypeView(utils.Resource):
             ),
         ]
 
-        query = filters.filter_multi(query, kwargs, filter_multi_fields)
-        query = filters.filter_range(query, kwargs, filter_range_fields)
-        query = filters.filter_fulltext(query, kwargs, filter_fulltext_fields)
+    def get_filter_fulltext_fields(self, entity_type, totals_class):
+        if entity_type == 'ie-only':
+            return []
 
-        if entity_type == 'pac':
-            query = query.filter(
-                models.CommitteeTotalsPacParty.committee_type.in_(pac_cmte_list)
-            )
-        if entity_type == 'party':
-            query = query.filter(
-                models.CommitteeTotalsPacParty.committee_type.in_(party_cmte_list)
-            )
-        if entity_type == 'pac-party':
-            query = query.filter(
-                models.CommitteeTotalsPacParty.committee_type.in_(
-                    pac_cmte_list.union(party_cmte_list)
-                )
-            )
+        return [
+            ("treasurer_name", totals_class.treasurer_text),
+        ]
 
-        return query, totals_class, totals_schema
+    # def get_filter_overlap_fields(self, entity_type, totals_class):
 
+    #     if entity_type == 'ie-only':
+    #         return []
+
+    #     return [
+    #         ("sponsor_candidate_id", models.Committee.sponsor_candidate_ids),
+    #     ]
 
 @doc(
     tags=['financial'],

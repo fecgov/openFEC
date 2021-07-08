@@ -1,4 +1,4 @@
-from sqlalchemy.dialects.postgresql import TSVECTOR
+from sqlalchemy.dialects.postgresql import TSVECTOR, ARRAY
 from webservices import docs, utils
 from .base import db, BaseModel
 from sqlalchemy.ext.declarative import declared_attr
@@ -51,6 +51,7 @@ class CommitteeTotals(BaseModel):
     filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
     filing_frequency_full = db.Column(db.String, doc=docs.FILING_FREQUENCY)
     first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
+    # sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
 
     @declared_attr
     def transaction_coverage(self):
