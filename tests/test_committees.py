@@ -395,7 +395,7 @@ class CommitteeFormatTest(ApiBaseTest):
         assert len(results) == 1
         assert results[0]["sponsor_candidate_ids"] == sponsor_candidate_ids2
 
-    def test_field_sponsor_cnadidate_list(self):
+    def test_field_sponsor_candidate_list(self):
         committee = factories.CommitteeFactory(
             party="REP",
             name="For America",

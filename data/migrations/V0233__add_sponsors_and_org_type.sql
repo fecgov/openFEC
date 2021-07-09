@@ -7,28 +7,28 @@ New fields/columns need to be at the end
     `sponsor_candidate_ids`
     `organization_type`
 
-    Replaces V0233
+    Replaces V0232
 
 2 - Modify `ofec_totals_pac_party_vw` to add:
     `sponsor_candidate_ids`
     `organization_type`
 
-    Replaces V0233
+    Replaces V0232
 
 3 - Modify `ofec_committee_totals_per_cycle_vw` to add:
     `organization_type`
 
-    Replaces V0233
+    Replaces V0232
 
 4 - Modify `ofec_totals_house_senate_mv` and `ofec_totals_house_senate_vw` to add:
     `organization_type`
 
-    Replaces V0233
+    Replaces V0232
 
 5 - Modify `ofec_totals_ie_only_mv` and `ofec_totals_ie_only_vw` to add:
     `organization_type`
 
-    Replaces V0233
+    Replaces V0232
 
 */
 

@@ -278,6 +278,44 @@ class TestTotalsByEntityType(ApiBaseTest):
         assert len(results) == 1
         assert results[0]["committee_id"] == self.second_pac_total.get("committee_id")
 
+    def test_field_sponsor_candidate_list(self):
+
+        committee = factories.TotalsPacFactory(**self.first_pac_total)
+
+        factories.PacSponsorCandidatePerCycleFactory(
+            committee_id=committee.committee_id,
+            cycle=committee.cycle,
+            sponsor_candidate_id="H01",
+            sponsor_candidate_name="Sponsor A",
+        )
+        factories.PacSponsorCandidatePerCycleFactory(
+            committee_id='C007',
+            cycle=committee.cycle + 2,
+            sponsor_candidate_id="S03",
+            sponsor_candidate_name="Sponsor B",
+        )
+        factories.PacSponsorCandidatePerCycleFactory(
+            committee_id='C007',
+            cycle=committee.cycle,
+            sponsor_candidate_id="S03",
+            sponsor_candidate_name="Sponsor B",
+        )
+        results = self._results(
+            api.url_for(
+                TotalsByEntityTypeView,
+                entity_type='pac-party',
+                committee_id=committee.committee_id
+            )
+        )
+        self.assertEqual(len(results), 1)
+        self.assertIn("sponsor_candidate_list", results[0])
+        self.assertEqual(
+            results[0]["sponsor_candidate_list"][0]["sponsor_candidate_name"], "Sponsor A"
+        )
+        self.assertEqual(
+            results[0]["sponsor_candidate_list"][0]["sponsor_candidate_id"], "H01"
+        )
+
 
 # test for endpoint: /committee/{committee_id}/totals/
 class TestTotals(ApiBaseTest):
@@ -452,6 +490,7 @@ class TestTotals(ApiBaseTest):
             'itemized_other_disb': 4,
             'unitemized_other_disb': 4,
             'sponsor_candidate_ids': ['H01'],
+            'sponsor_candidate_list': [],
         }
         fields = utils.extend(pac_party_fields, shared_fields)
         committee_total = factories.TotalsPacPartyFactory(**fields)  # noqa
@@ -581,6 +620,7 @@ class TestTotals(ApiBaseTest):
             'itemized_other_disb': 4,
             'unitemized_other_disb': 4,
             'sponsor_candidate_ids': ['S01'],
+            'sponsor_candidate_list': [],
         }
         fields = utils.extend(pac_fields, shared_fields)
         committee_total = factories.TotalsPacFactory(**fields)  # noqa
@@ -712,7 +752,8 @@ class TestTotals(ApiBaseTest):
             'unitemized_convention_exp': 4,
             'itemized_other_disb': 4,
             'unitemized_other_disb': 4,
-            'sponsor_candidate_ids': ['S02']
+            'sponsor_candidate_ids': ['S02'],
+            'sponsor_candidate_list': [],
         }
         fields = utils.extend(party_fields, shared_fields)
         committee_total = factories.TotalsPartyFactory(**fields)  # noqa

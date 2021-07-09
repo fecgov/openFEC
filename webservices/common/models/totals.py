@@ -235,6 +235,15 @@ class CommitteeTotalsPacParty(CommitteeTotals):
         denominators = [self.disbursements]
         return utils.get_percentage(numerators, denominators)
 
+    sponsor_candidate_list = db.relationship(
+        'PacSponsorCandidatePerCycle',
+        primaryjoin='''and_(
+                    foreign(PacSponsorCandidatePerCycle.committee_id) == CommitteeTotalsPacParty.committee_id,
+                    PacSponsorCandidatePerCycle.cycle == CommitteeTotalsPacParty.cycle,
+                )''',
+        lazy='joined'
+    )
+
 
 class CommitteeTotalsHouseSenate(CommitteeTotals):
     __tablename__ = 'ofec_totals_house_senate_mv'

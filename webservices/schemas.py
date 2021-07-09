@@ -521,6 +521,60 @@ augment_models(
     models.CommitteeTotalsPerCycle,
 )
 
+entity_fields = {
+    'pdf_url': ma.fields.Str(),
+    'report_form': ma.fields.Str(),
+    # 'committee_type': ma.fields.Str(attribute='committee.committee_type'),
+    'last_cash_on_hand_end_period': ma.fields.Decimal(places=2),
+    'last_beginning_image_number': ma.fields.Str(),
+    'transaction_coverage_date': ma.fields.Date(
+        attribute='transaction_coverage.transaction_coverage_date',
+        default=None),
+    'individual_contributions_percent': ma.fields.Decimal(places=2),
+    'party_and_other_committee_contributions_percent': ma.fields.Decimal(places=2),
+    'contributions_ie_and_party_expenditures_made_percent': ma.fields.Decimal(places=2),
+    'operating_expenditures_percent': ma.fields.Decimal(places=2),
+}
+# All /totals/entity_type/except 'pac', 'party', 'pac-party'
+make_totals_schema = functools.partial(
+    make_schema,
+    fields=entity_fields,
+    options={
+        'exclude': (
+            'transaction_coverage',
+            'idx',
+            'treasurer_text',
+            'sponsor_candidate_list',
+            'sponsor_candidate_ids'
+        )
+    },
+)
+augment_models(
+    make_totals_schema,
+    models.CommitteeTotalsHouseSenate,
+    models.CommitteeTotalsIEOnly,
+    models.CommitteeTotalsPerCycle,
+)
+# /totals/entity_type/ 'pac', 'party', 'pac-party'
+make_pac_party_totals_schema = functools.partial(
+    make_schema,
+    fields=utils.extend(
+        entity_fields,
+        {'sponsor_candidate_list': ma.fields.Nested(PacSponsorCandidateschema, many=True)}
+    ),
+    options={
+        'exclude': (
+            'transaction_coverage',
+            'idx',
+            'treasurer_text',
+        )
+    },
+)
+augment_models(
+    make_pac_party_totals_schema,
+    models.CommitteeTotalsPacParty,
+)
+
 make_candidate_totals_schema = functools.partial(
     make_schema,
     fields={
