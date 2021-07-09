@@ -153,6 +153,7 @@ class TotalsByEntityTypeView(utils.Resource):
         filter_multi_fields.extend([
             ("committee_type", totals_class.committee_type),
             ("committee_designation", totals_class.committee_designation),
+            ("organization_type", totals_class.organization_type),
         ])
 
         return filter_multi_fields

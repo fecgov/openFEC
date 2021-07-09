@@ -51,6 +51,7 @@ class CommitteeTotals(BaseModel):
     filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
     filing_frequency_full = db.Column(db.String, doc=docs.FILING_FREQUENCY)
     first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
+    organization_type = db.Column(db.String(1), index=True, doc=docs.ORGANIZATION_TYPE)
 
     @declared_attr
     def transaction_coverage(self):

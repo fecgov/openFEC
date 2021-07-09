@@ -430,6 +430,10 @@ totals_by_entity_type = {
     'min_last_debts_owed_by_committee': Currency(description=docs.MIN_FILTER),
     'max_last_debts_owed_by_committee': Currency(description=docs.MAX_FILTER),
     'sponsor_candidate_id': fields.List(IStr, description=docs.SPONSOR_CANDIDATE_ID),
+    'organization_type': fields.List(
+        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
+        description=docs.ORGANIZATION_TYPE,
+    )
 }
 
 candidate_totals_detail = {

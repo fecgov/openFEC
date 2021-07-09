@@ -20,12 +20,12 @@ New fields/columns need to be at the end
 
     Replaces V0233
 
-4 - Modify `ofec_totals_house_senate_mv` to add:
+4 - Modify `ofec_totals_house_senate_mv` and `ofec_totals_house_senate_vw` to add:
     `organization_type`
 
     Replaces V0233
 
-5 - Modify `ofec_totals_ie_only_mv` to add:
+5 - Modify `ofec_totals_ie_only_mv` and `ofec_totals_ie_only_vw` to add:
     `organization_type`
 
     Replaces V0233
@@ -92,7 +92,7 @@ CREATE MATERIALIZED VIEW ofec_totals_combined_mv_tmp AS
         cmte_valid_fec_yr.tres_nm,
         cmte_valid_fec_yr.cmte_filing_freq,
         cmte_valid_fec_yr.cmte_filing_freq_desc,
-        -- Added w/V0234
+        -- Added w/V0233
         cmte_valid_fec_yr.org_tp
        FROM disclosure.cmte_valid_fec_yr
     ), dates AS (
@@ -102,7 +102,7 @@ CREATE MATERIALIZED VIEW ofec_totals_combined_mv_tmp AS
         max(f_rpt_or_form_sub.receipt_dt) FILTER (WHERE ((f_rpt_or_form_sub.form_tp)::text = 'F1'::text)) AS last_f1_date
         FROM disclosure.f_rpt_or_form_sub
         GROUP BY f_rpt_or_form_sub.cand_cmte_id
-    ), leadership_pac_linkage AS ( -- Added w/ V0234
+    ), leadership_pac_linkage AS ( -- Added w/ V0233
      SELECT cand_cmte_linkage_alternate.cmte_id,
         cand_cmte_linkage_alternate.fec_election_yr,
         COALESCE(array_agg(DISTINCT cand_cmte_linkage_alternate.cand_id)::text[], ARRAY[]::text[]) AS sponsor_candidate_ids
@@ -228,7 +228,7 @@ CREATE MATERIALIZED VIEW ofec_totals_combined_mv_tmp AS
     min(dates.first_file_date::text::date) AS first_file_date,
     -- Added w/ V0232
     max(to_tsvector(parse_fulltext(committee_info.tres_nm::text)::text)::text) AS treasurer_text,
-    -- Added w/ V0234
+    -- Added w/ V0233
     -- Can't use array_agg with empty arrays, so adding to group by
     l.sponsor_candidate_ids,
     max(committee_info.org_tp) AS organization_type
@@ -237,7 +237,7 @@ CREATE MATERIALIZED VIEW ofec_totals_combined_mv_tmp AS
      LEFT JOIN last ON vsd.cmte_id::text = last.cmte_id::text AND get_cycle(vsd.rpt_yr) = last.cycle
      LEFT JOIN first ON vsd.cmte_id::text = first.committee_id::text AND get_cycle(vsd.rpt_yr) = first.cycle
      LEFT JOIN committee_info ON vsd.cmte_id::text = committee_info.cmte_id::text AND get_cycle(vsd.rpt_yr)::numeric = committee_info.fec_election_yr
-     -- Added w/V0234
+     -- Added w/V0233
      LEFT JOIN leadership_pac_linkage l ON vsd.cmte_id::text = l.cmte_id::text AND get_cycle(vsd.rpt_yr) = l.fec_election_yr
   WHERE get_cycle(vsd.rpt_yr) >= 1979
     AND (
@@ -548,7 +548,7 @@ SELECT
     max(ofec_totals_combined_vw.filing_frequency) AS filing_frequency,
     max(ofec_totals_combined_vw.filing_frequency_full) AS filing_frequency_full,
     min(ofec_totals_combined_vw.first_file_date) AS first_file_date,
-    -- Added w/ V0234
+    -- Added w/ V0233
     max(ofec_totals_combined_vw.organization_type) AS organization_type
 FROM public.ofec_totals_combined_vw
 GROUP BY ofec_totals_combined_vw.committee_id, ofec_totals_combined_vw.cycle;
@@ -615,7 +615,7 @@ SELECT f3.candidate_id,
     f3.filing_frequency,
     f3.filing_frequency_full,
     f3.first_file_date,
-    -- Added w/ V0234
+    -- Added w/ V0233
     f3.organization_type
 FROM ofec_totals_combined_vw f3
 WHERE f3.form_type in ('F3', 'F3P', 'F3X')
@@ -733,7 +733,7 @@ CREATE MATERIALIZED VIEW public.ofec_totals_ie_only_mv_tmp AS
     ofec_totals_combined_vw.filing_frequency,
     ofec_totals_combined_vw.filing_frequency_full,
     ofec_totals_combined_vw.first_file_date,
-    -- Added w/ V0234
+    -- Added w/ V0233
    ofec_totals_combined_vw.organization_type
    FROM public.ofec_totals_combined_vw
   WHERE ((ofec_totals_combined_vw.form_type)::text = 'F5'::text)

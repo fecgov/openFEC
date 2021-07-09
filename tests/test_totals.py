@@ -52,6 +52,7 @@ shared_fields = {
     'filing_frequency': 'Q',
     'filing_frequency_full': 'Quarterly filer',
     'first_file_date': datetime.date.fromisoformat("1982-12-31"),
+    'organization_type': 'L'
 }
 
 transaction_coverage_fields = {'transaction_coverage_date': None}
@@ -76,6 +77,7 @@ class TestTotalsByEntityType(ApiBaseTest):
         'receipts': 50,
         'disbursements': 200,
         'sponsor_candidate_ids': ['H01'],
+        'organization_type': 'C',
     }
     second_pac_total = {
         'committee_id': 'C00002',
@@ -92,6 +94,7 @@ class TestTotalsByEntityType(ApiBaseTest):
         'receipts': 200,
         'disbursements': 50,
         'sponsor_candidate_ids': ['H02'],
+        'organization_type': 'T',
     }
 
     def test_pac_total_by_entity_type(self):
@@ -162,7 +165,7 @@ class TestTotalsByEntityType(ApiBaseTest):
             'committee_state',
             'committee_id',
             'filing_frequency',
-            # 'organization_type',
+            'organization_type',
         ]
 
         for field in filters:
