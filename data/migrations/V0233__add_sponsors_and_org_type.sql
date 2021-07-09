@@ -5,30 +5,44 @@ New fields/columns need to be at the end
 
 1 - Modify `ofec_totals_combined_mv` and `ofec_totals_combined_vw` to add:
     `sponsor_candidate_ids`
-    `organization_type`
+    `organization_type` and index
+    `organization_type_full`
+
+    Change index on `committee_designation_full` to `committee_designation`
+    Change index on `committee_type_full` to `committee_type`
 
     Replaces V0232
 
 2 - Modify `ofec_totals_pac_party_vw` to add:
     `sponsor_candidate_ids`
     `organization_type`
+    `organization_type_full`
 
     Replaces V0232
 
 3 - Modify `ofec_committee_totals_per_cycle_vw` to add:
     `organization_type`
+    `organization_type_full`
 
     Replaces V0232
 
 4 - Modify `ofec_totals_house_senate_mv` and `ofec_totals_house_senate_vw` to add:
-    `organization_type`
+    `organization_type` and index
+    `organization_type_full`
 
     Replaces V0232
+
+    Change index on `committee_type_full` to `committee_type`
+    Change index on `committee_designation_full` to `committee_designation`
 
 5 - Modify `ofec_totals_ie_only_mv` and `ofec_totals_ie_only_vw` to add:
-    `organization_type`
+    `organization_type` and index
+    `organization_type_full`
 
     Replaces V0232
+
+    Change index on `committee_designation_full` to `committee_designation`
+    Change index on `committee_type_full` to `committee_type`
 
 */
 
@@ -93,7 +107,8 @@ CREATE MATERIALIZED VIEW ofec_totals_combined_mv_tmp AS
         cmte_valid_fec_yr.cmte_filing_freq,
         cmte_valid_fec_yr.cmte_filing_freq_desc,
         -- Added w/V0233
-        cmte_valid_fec_yr.org_tp
+        cmte_valid_fec_yr.org_tp,
+        expand_organization_type((cmte_valid_fec_yr.org_tp)::text) AS org_tp_full
        FROM disclosure.cmte_valid_fec_yr
     ), dates AS (
      SELECT f_rpt_or_form_sub.cand_cmte_id AS cmte_id,
@@ -231,7 +246,8 @@ CREATE MATERIALIZED VIEW ofec_totals_combined_mv_tmp AS
     -- Added w/ V0233
     -- Can't use array_agg with empty arrays, so adding to group by
     l.sponsor_candidate_ids,
-    max(committee_info.org_tp) AS organization_type
+    max(committee_info.org_tp) AS organization_type,
+    max(committee_info.org_tp_full) AS organization_type_full
    FROM disclosure.v_sum_and_det_sum_report vsd
      LEFT JOIN dates on vsd.cmte_id::text = dates.cmte_id::text
      LEFT JOIN last ON vsd.cmte_id::text = last.cmte_id::text AND get_cycle(vsd.rpt_yr) = last.cycle
@@ -261,15 +277,20 @@ GRANT SELECT ON TABLE public.ofec_totals_combined_mv_tmp TO fec_read;
 CREATE UNIQUE INDEX idx_ofec_totals_combined_mv_tmp_sub_id
     ON public.ofec_totals_combined_mv_tmp USING btree
     (sub_id);
-CREATE INDEX idx_ofec_totals_combined_mv_tmp_cmte_dsgn_full_sub_id
+
+-- Changed w/ V0233
+CREATE INDEX idx_ofec_totals_combined_mv_tmp_cmte_dsgn_sub_id
     ON public.ofec_totals_combined_mv_tmp USING btree
-    (committee_designation_full COLLATE pg_catalog."default", sub_id);
+    (committee_designation COLLATE pg_catalog."default", sub_id);
 CREATE INDEX idx_ofec_totals_combined_mv_tmp_cmte_id_sub_id
     ON public.ofec_totals_combined_mv_tmp USING btree
     (committee_id , sub_id);
-CREATE INDEX idx_ofec_totals_combined_mv_tmp_cmte_tp_full_sub_id
+
+-- Changed w/ V0233
+CREATE INDEX idx_ofec_totals_combined_mv_tmp_cmte_tp_sub_id
     ON public.ofec_totals_combined_mv_tmp USING btree
-    (committee_type_full, sub_id);
+    (committee_type, sub_id);
+
 CREATE INDEX idx_ofec_totals_combined_mv_tmp_cycle_sub_id
     ON public.ofec_totals_combined_mv_tmp USING btree
     (cycle, sub_id);
@@ -283,6 +304,11 @@ CREATE INDEX idx_ofec_totals_combined_mv_tmp_receipts_sub_id
 -- Added w/ V0232
 CREATE INDEX idx_ofec_totals_combined_mv_tmp_treasurer_text
 ON public.ofec_totals_combined_mv_tmp USING gin (treasurer_text);
+
+-- Added w/ V0233
+CREATE INDEX idx_ofec_totals_combined_mv_tmp_org_tp_sub_id
+    ON public.ofec_totals_combined_mv_tmp USING btree
+    (organization_type, sub_id);
 
 
 -- Recreate vw -> select all from new _tmp MV
@@ -300,14 +326,16 @@ DROP MATERIALIZED VIEW IF EXISTS public.ofec_totals_combined_mv;
 ALTER MATERIALIZED VIEW IF EXISTS public.ofec_totals_combined_mv_tmp RENAME TO ofec_totals_combined_mv;
 
 -- Rename indexes
-ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_dsgn_full_sub_id
-RENAME TO idx_ofec_totals_combined_mv_cmte_dsgn_full_sub_id;
+-- Changed w/ V0233
+ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_dsgn_sub_id
+RENAME TO idx_ofec_totals_combined_mv_cmte_dsgn_sub_id;
 
 ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_id_sub_id
 RENAME TO idx_ofec_totals_combined_mv_cmte_id_sub_id;
 
-ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_tp_full_sub_id
-RENAME TO idx_ofec_totals_combined_mv_cmte_tp_full_sub_id;
+-- Changed w/ V0233
+ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cmte_tp_sub_id
+RENAME TO idx_ofec_totals_combined_mv_cmte_tp_sub_id;
 
 ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_cycle_sub_id
 RENAME TO idx_ofec_totals_combined_mv_cycle_sub_id;
@@ -325,6 +353,9 @@ RENAME TO idx_ofec_totals_combined_mv_sub_id;
 ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_treasurer_text
 RENAME TO idx_ofec_totals_combined_mv_treasurer_text;
 
+-- Added w/ V0233
+ALTER INDEX IF EXISTS idx_ofec_totals_combined_mv_tmp_org_tp_sub_id
+RENAME TO idx_ofec_totals_combined_mv_org_tp_sub_id;
 
 -- 2 - Modify `ofec_totals_pac_party_vw` to bring in new field
 
@@ -420,7 +451,8 @@ SELECT max(ofec_totals_combined_vw.sub_id) AS idx,
     -- Added w/ V0233
     -- Can't use array_agg with empty arrays, so adding to group by
     ofec_totals_combined_vw.sponsor_candidate_ids,
-    max(ofec_totals_combined_vw.organization_type) AS organization_type
+    max(ofec_totals_combined_vw.organization_type) AS organization_type,
+    max(ofec_totals_combined_vw.organization_type_full) AS organization_type_full
 FROM ofec_totals_combined_vw
 WHERE ofec_totals_combined_vw.committee_type IN ('N', 'O', 'Q', 'V', 'W', 'X', 'Y')
     AND ofec_totals_combined_vw.form_type IN ('F3X', 'F13', 'F4', 'F3','F3P')
@@ -549,7 +581,8 @@ SELECT
     max(ofec_totals_combined_vw.filing_frequency_full) AS filing_frequency_full,
     min(ofec_totals_combined_vw.first_file_date) AS first_file_date,
     -- Added w/ V0233
-    max(ofec_totals_combined_vw.organization_type) AS organization_type
+    max(ofec_totals_combined_vw.organization_type) AS organization_type,
+    max(ofec_totals_combined_vw.organization_type_full) AS organization_type_full
 FROM public.ofec_totals_combined_vw
 GROUP BY ofec_totals_combined_vw.committee_id, ofec_totals_combined_vw.cycle;
 
@@ -616,7 +649,8 @@ SELECT f3.candidate_id,
     f3.filing_frequency_full,
     f3.first_file_date,
     -- Added w/ V0233
-    f3.organization_type
+    f3.organization_type,
+    f3.organization_type_full
 FROM ofec_totals_combined_vw f3
 WHERE f3.form_type in ('F3', 'F3P', 'F3X')
 AND f3.committee_type in ('H','S')
@@ -644,10 +678,12 @@ CREATE INDEX idx_ofec_totals_house_senate_mv_tmp_cmte_id_idx
   USING btree
   (committee_id, idx);
 
-CREATE INDEX idx_ofec_totals_house_senate_mv_tmp_cmte_type_full_idx
+-- Changed w/ V0233
+
+CREATE INDEX idx_ofec_totals_house_senate_mv_tmp_cmte_type_idx
   ON public.ofec_totals_house_senate_mv_tmp
   USING btree
-  (committee_type_full, idx);
+  (committee_type, idx);
 
 CREATE INDEX idx_ofec_totals_house_senate_mv_tmp_cycle_cmte_id
   ON public.ofec_totals_house_senate_mv_tmp
@@ -659,14 +695,23 @@ CREATE INDEX idx_ofec_totals_house_senate_mv_tmp_cycle_idx
   USING btree
   (cycle, idx);
 
-CREATE INDEX idx_ofec_totals_house_senate_mv_tmp_cmte_dsgn_full_idx
+-- Changed w/ V0233
+CREATE INDEX idx_ofec_totals_house_senate_mv_tmp_cmte_dsgn_idx
   ON public.ofec_totals_house_senate_mv_tmp
   USING btree
-  (committee_designation_full, idx);
+  (committee_designation, idx);
 
-CREATE INDEX idx_ofec_totals_house_senate_mv_tmp_treasurer_text
+-- Changed w/ V0233 (rename)
+CREATE INDEX idx_ofec_totals_house_senate_mv_tmp_treas_text_idx
   ON ofec_totals_house_senate_mv_tmp
   USING gin (treasurer_text);
+
+-- Added w/ V0233
+CREATE INDEX idx_ofec_totals_house_senate_mv_tmp_org_tp_idx
+  ON public.ofec_totals_house_senate_mv_tmp
+  USING btree
+  (organization_type, idx);
+
 
 -- ---------------
 DROP VIEW IF EXISTS public.ofec_totals_house_senate_vw;
@@ -695,8 +740,9 @@ ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cand_id_idx
 ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cmte_id_idx
   RENAME TO idx_ofec_totals_house_senate_mv_cmte_id_idx;
 
-ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cmte_type_full_idx
-  RENAME TO idx_ofec_totals_house_senate_mv_cmte_tp_full_idx;
+-- Changed w/ V0233
+ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cmte_type_idx
+  RENAME TO idx_ofec_totals_house_senate_mv_cmte_tp_idx;
 
 ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cycle_cmte_id
   RENAME TO idx_ofec_totals_house_senate_mv_cycle_cmte_id;
@@ -704,11 +750,16 @@ ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cycle_cmte_id
 ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cycle_idx
   RENAME TO idx_ofec_totals_house_senate_mv_cycle_idx;
 
-ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cmte_dsgn_full_idx
-  RENAME TO idx_ofec_totals_house_senate_mv_cmte_dsgn_full_idx;
+-- Changed w/ V0233
+ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_cmte_dsgn_idx
+  RENAME TO idx_ofec_totals_house_senate_mv_cmte_dsgn_idx;
 
-ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_treasurer_text
-  RENAME TO idx_ofec_totals_house_senate_mv_treasurer_text;
+ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_treas_text_idx
+  RENAME TO idx_ofec_totals_house_senate_mv_treas_text_idx;
+
+-- Added w/ V0233
+ALTER INDEX IF EXISTS idx_ofec_totals_house_senate_mv_tmp_org_tp_idx
+  RENAME TO idx_ofec_totals_house_senate_mv_org_tp_idx;
 
 
 -- 5 - Modify `ofec_totals_ie_only_mv`
@@ -734,7 +785,8 @@ CREATE MATERIALIZED VIEW public.ofec_totals_ie_only_mv_tmp AS
     ofec_totals_combined_vw.filing_frequency_full,
     ofec_totals_combined_vw.first_file_date,
     -- Added w/ V0233
-   ofec_totals_combined_vw.organization_type
+   ofec_totals_combined_vw.organization_type,
+   ofec_totals_combined_vw.organization_type_full
    FROM public.ofec_totals_combined_vw
   WHERE ((ofec_totals_combined_vw.form_type)::text = 'F5'::text)
   WITH DATA;
@@ -750,14 +802,16 @@ GRANT SELECT ON TABLE public.ofec_totals_ie_only_mv_tmp TO fec_read;
 CREATE UNIQUE INDEX ofec_totals_ie_only_mv_tmp_idx_idx
 ON public.ofec_totals_ie_only_mv_tmp USING btree (idx);
 
-CREATE INDEX ofec_totals_ie_only_mv_tmp_committee_designation_full_idx_idx
-ON public.ofec_totals_ie_only_mv_tmp USING btree (committee_designation_full, idx);
+-- Changed w/ V0233
+CREATE INDEX ofec_totals_ie_only_mv_tmp_committee_designation_idx_idx
+ON public.ofec_totals_ie_only_mv_tmp USING btree (committee_designation, idx);
 
 CREATE INDEX ofec_totals_ie_only_mv_tmp_committee_id_idx_idx
 ON public.ofec_totals_ie_only_mv_tmp USING btree (committee_id, idx);
 
-CREATE INDEX ofec_totals_ie_only_mv_tmp_committee_type_full_idx_idx
-ON public.ofec_totals_ie_only_mv_tmp USING btree (committee_type_full, idx);
+-- Changed w/ V0233
+CREATE INDEX ofec_totals_ie_only_mv_tmp_committee_type_idx_idx
+ON public.ofec_totals_ie_only_mv_tmp USING btree (committee_type, idx);
 
 CREATE INDEX ofec_totals_ie_only_mv_tmp_cycle_committee_id_idx1
 ON public.ofec_totals_ie_only_mv_tmp USING btree (cycle, committee_id);
@@ -791,14 +845,16 @@ RENAME TO idx_ofec_totals_house_senate_mv_idx;
 ALTER INDEX IF EXISTS ofec_totals_ie_only_mv_tmp_idx_idx
 RENAME TO ofec_totals_ie_only_mv_idx_idx ;
 
-ALTER INDEX IF EXISTS ofec_totals_ie_only_mv_tmp_committee_designation_full_idx_idx
-RENAME TO ofec_totals_ie_only_mv_committee_designation_full_idx_idx;
+-- Changed w/ V0233
+ALTER INDEX IF EXISTS ofec_totals_ie_only_mv_tmp_committee_designation_idx_idx
+RENAME TO ofec_totals_ie_only_mv_committee_designation_idx_idx;
 
 ALTER INDEX IF EXISTS ofec_totals_ie_only_mv_tmp_committee_id_idx_idx
 RENAME TO ofec_totals_ie_only_mv_committee_id_idx_idx;
 
-ALTER INDEX IF EXISTS ofec_totals_ie_only_mv_tmp_committee_type_full_idx_idx
-RENAME TO ofec_totals_ie_only_mv_committee_type_full_idx_idx;
+-- Changed w/ V0233
+ALTER INDEX IF EXISTS ofec_totals_ie_only_mv_tmp_committee_type_idx_idx
+RENAME TO ofec_totals_ie_only_mv_committee_type_idx_idx;
 
 ALTER INDEX IF EXISTS ofec_totals_ie_only_mv_tmp_cycle_committee_id_idx1
 RENAME TO ofec_totals_ie_only_mv_cycle_committee_id_idx1;
