@@ -493,38 +493,9 @@ reports_schemas = (
 CommitteeReportsSchema = type('CommitteeReportsSchema', reports_schemas, {})
 CommitteeReportsPageSchema = make_page_schema(CommitteeReportsSchema)
 
-make_totals_schema = functools.partial(
-    make_schema,
-    fields={
-        'pdf_url': ma.fields.Str(),
-        'report_form': ma.fields.Str(),
-        # 'committee_type': ma.fields.Str(attribute='committee.committee_type'),
-        'last_cash_on_hand_end_period': ma.fields.Decimal(places=2),
-        'last_beginning_image_number': ma.fields.Str(),
-        'transaction_coverage_date': ma.fields.Date(
-            attribute='transaction_coverage.transaction_coverage_date',
-            default=None),
-        'individual_contributions_percent': ma.fields.Decimal(places=2),
-        'party_and_other_committee_contributions_percent': ma.fields.Decimal(places=2),
-        'contributions_ie_and_party_expenditures_made_percent': ma.fields.Decimal(places=2),
-        'operating_expenditures_percent': ma.fields.Decimal(places=2),
-    },
-    options={
-        'exclude': ('transaction_coverage', 'idx', 'treasurer_text')
-    },
-)
-augment_models(
-    make_totals_schema,
-    models.CommitteeTotalsHouseSenate,
-    models.CommitteeTotalsPacParty,
-    models.CommitteeTotalsIEOnly,
-    models.CommitteeTotalsPerCycle,
-)
-
 entity_fields = {
     'pdf_url': ma.fields.Str(),
     'report_form': ma.fields.Str(),
-    # 'committee_type': ma.fields.Str(attribute='committee.committee_type'),
     'last_cash_on_hand_end_period': ma.fields.Decimal(places=2),
     'last_beginning_image_number': ma.fields.Str(),
     'transaction_coverage_date': ma.fields.Date(
