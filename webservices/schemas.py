@@ -386,7 +386,7 @@ PacSponsorCandidateschema = make_schema(
 PrincipalCommitteeSchema = make_schema(
     models.Committee,
     class_name='PrincipalCommitteeSchema',
-    options={'exclude': ('idx', 'treasurer_text', 'sponsor_candidate_list', 'sponsor_candidate_ids' )},
+    options={'exclude': ('idx', 'treasurer_text', 'sponsor_candidate_list', 'sponsor_candidate_ids')},
 )
 # End create principal committee schema
 

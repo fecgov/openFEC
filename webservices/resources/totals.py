@@ -202,6 +202,7 @@ class TotalsByEntityTypeView(utils.Resource):
             ("sponsor_candidate_id", totals_class.sponsor_candidate_ids),
         ]
 
+
 @doc(
     tags=['financial'],
     description=docs.TOTALS,
