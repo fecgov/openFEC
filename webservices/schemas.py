@@ -504,14 +504,17 @@ make_totals_schema = functools.partial(
         'transaction_coverage_date': ma.fields.Date(
             attribute='transaction_coverage.transaction_coverage_date',
             default=None),
+        'individual_contributions_percent': ma.fields.Decimal(places=2),
+        'party_and_other_committee_contributions_percent': ma.fields.Decimal(places=2),
+        'contributions_ie_and_party_expenditures_made_percent': ma.fields.Decimal(places=2),
+        'operating_expenditures_percent': ma.fields.Decimal(places=2),
     },
     options={
-        'exclude': ('transaction_coverage', 'idx')
+        'exclude': ('transaction_coverage', 'idx', 'treasurer_text')
     },
 )
 augment_models(
     make_totals_schema,
-    models.CommitteeTotalsPresidential,
     models.CommitteeTotalsHouseSenate,
     models.CommitteeTotalsPacParty,
     models.CommitteeTotalsIEOnly,
@@ -535,7 +538,6 @@ register_schema(CommitteeReportsSchema)
 register_schema(CommitteeReportsPageSchema)
 
 totals_schemas = (
-    schemas['CommitteeTotalsPresidentialSchema'],
     schemas['CommitteeTotalsHouseSenateSchema'],
     schemas['CommitteeTotalsPacPartySchema'],
     schemas['CommitteeTotalsIEOnlySchema'],

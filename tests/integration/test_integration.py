@@ -18,7 +18,7 @@ REPORTS_MODELS = [
 
 TOTALS_MODELS = [
     models.CommitteeTotalsPacParty,
-    models.CommitteeTotalsPresidential,
+    models.CommitteeTotalsPerCycle,
     models.CommitteeTotalsHouseSenate,
 ]
 

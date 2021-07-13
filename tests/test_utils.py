@@ -1,3 +1,5 @@
+import pytest
+
 from unittest import TestCase
 from flask import request
 from webargs import flaskparser
@@ -323,3 +325,38 @@ class TestEnvVarSplit(TestCase):
         for test_case in test_cases:
             result = utils.split_env_var(test_case)
             self.assertEqual(result, expected)
+
+
+class TestPercentages(TestCase):
+    def test_get_percentage(self):
+        test_cases = [
+            ([3], [9], 33.33),
+            ([2, 3], [10], 50.0),
+            ([1, 2, 3], [10], 60.0),
+            ([2], [5, 5], 20.0),
+            ([0], [10], 0),
+            ([0, 0, 0], [10], 0),
+            # Unusual but should still calculate
+            ([10], [5], 200.0),  # Over 100%
+            ([-5], [10], -50.0),  # Negative numerator
+            ([5], [-10], -50.0),  # Negative denominator
+            ([-5], [-10], 50.0),  # Both negative
+            ([1], [10000], .01),  # Under 1%
+            # None == Unable to calculate
+            # Divide by zero
+            ([1, 2, 3], [0], None),
+            # Null values
+            ([None], [None], None),
+            ([0], [None], None),
+            ([None], [100], None),
+            ([], [], None),
+            ([1, None, 3], [10], None),
+        ]
+        for test_case in test_cases:
+            numerators, denominators, expected = test_case
+            result = utils.get_percentage(numerators, denominators)
+            self.assertEqual(result, expected)
+
+        # Developer forgets to put values in list
+        with pytest.raises(TypeError):
+            utils.get_percentage(5, 10)

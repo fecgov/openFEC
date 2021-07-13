@@ -414,6 +414,21 @@ totals_by_entity_type = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_designation': fields.List(fields.Str, description=docs.DESIGNATION),
     'committee_id': fields.Str(description=docs.COMMITTEE_ID),
+    'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
+    'committee_state': fields.List(IStr, description=docs.STATE_GENERIC),
+        'filing_frequency': fields.List(
+        IStr(validate=validate.OneOf(['', 'A', 'M', 'N', 'Q', 'T', 'W', '-A', '-T'])),
+        description=docs.FILING_FREQUENCY,
+    ),
+    'treasurer_name': fields.List(fields.Str, description=docs.TREASURER_NAME),
+    'min_disbursements': Currency(description=docs.MIN_FILTER),
+    'max_disbursements': Currency(description=docs.MAX_FILTER),
+    'min_receipts': Currency(description=docs.MIN_FILTER),
+    'max_receipts': Currency(description=docs.MAX_FILTER),
+    'min_last_cash_on_hand_end_period': Currency(description=docs.MIN_FILTER),
+    'max_last_cash_on_hand_end_period': Currency(description=docs.MAX_FILTER),
+    'min_last_debts_owed_by_committee': Currency(description=docs.MIN_FILTER),
+    'max_last_debts_owed_by_committee': Currency(description=docs.MAX_FILTER),
 }
 
 candidate_totals_detail = {

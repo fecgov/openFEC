@@ -67,7 +67,9 @@ AF_SPECIFIC_FIELDS = """
         treasury_date,
         treasury_amount,
         petition_court_filing_date,
-        petition_court_decision_date
+        petition_court_decision_date,
+        civil_penalty_due_date,
+        civil_penalty_pymt_status_flg
     FROM fecmur.af_case
     WHERE case_id = %s
 """
@@ -130,6 +132,16 @@ OPEN_AND_CLOSE_DATES = """
     SELECT min(event_date), max(event_date)
     FROM fecmur.calendar
     WHERE case_id = %s;
+"""
+
+AF_DISPOSITION_DATA = """
+   SELECT
+        amount,
+        dates,
+        description
+    FROM fecmur.af_case_disposition
+    WHERE case_id = %s;
+
 """
 
 DISPOSITION_DATA = """
@@ -340,6 +352,9 @@ def get_af_specific_fields(case_id):
             case["treasury_referral_amount"] = row["treasury_amount"]
             case["petition_court_filing_date"] = row["petition_court_filing_date"]
             case["petition_court_decision_date"] = row["petition_court_decision_date"]
+            case["civil_penalty_due_date"] = row["civil_penalty_due_date"]
+            case["civil_penalty_payment_status"] = row["civil_penalty_pymt_status_flg"]
+            case["af_dispositions"] = get_af_dispositions(case_id)
     return case
 
 
@@ -368,6 +383,17 @@ def get_dispositions(case_id):
             citations.extend(parse_regulatory_citations(row["regulatory_citation"], case_id, row["name"]))
             disposition_data.append({"disposition": row["event_name"], "penalty": row["final_amount"],
                 "respondent": row["name"], "citations": citations})
+
+        return disposition_data
+
+
+def get_af_dispositions(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(AF_DISPOSITION_DATA, case_id)
+        disposition_data = []
+        for row in rs:
+            disposition_data.append({"disposition_description": row["description"],
+                "disposition_date": row["dates"], "amount": row["amount"]})
 
         return disposition_data
 

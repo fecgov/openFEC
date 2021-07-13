@@ -152,11 +152,6 @@ class TotalsHouseSenateFactory(BaseTotalsFactory):
         model = models.CommitteeTotalsHouseSenate
 
 
-class TotalsPresidentialFactory(BaseTotalsFactory):
-    class Meta:
-        model = models.CommitteeTotalsPresidential
-
-
 class TotalsPacPartyFactory(BaseTotalsFactory):
     class Meta:
         model = models.CommitteeTotalsPacParty
