@@ -593,3 +593,10 @@ class PacSponsorCandidateFactory(BaseFactory):
         model = models.PacSponsorCandidate
 
     idx = factory.Sequence(lambda n: n)
+
+
+class PacSponsorCandidatePerCycleFactory(BaseFactory):
+    class Meta:
+        model = models.PacSponsorCandidatePerCycle
+
+    idx = factory.Sequence(lambda n: n)

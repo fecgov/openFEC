@@ -216,3 +216,13 @@ class PacSponsorCandidate(db.Model):
     committee_id = db.Column(db.String, doc=docs.COMMITTEE_ID)
     sponsor_candidate_id = db.Column(db.String, doc=docs.CANDIDATE_ID)
     sponsor_candidate_name = db.Column(db.String(100), doc=docs.CANDIDATE_NAME)
+
+
+class PacSponsorCandidatePerCycle(db.Model):
+    __tablename__ = "ofec_pac_sponsor_candidate_per_cycle_vw"
+
+    idx = db.Column(db.Integer, primary_key=True)
+    committee_id = db.Column(db.String, doc=docs.COMMITTEE_ID)
+    cycle = db.Column(db.Integer)
+    sponsor_candidate_id = db.Column(db.String, doc=docs.CANDIDATE_ID)
+    sponsor_candidate_name = db.Column(db.String(100), doc=docs.CANDIDATE_NAME)
