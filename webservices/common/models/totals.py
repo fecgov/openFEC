@@ -1,4 +1,4 @@
-from sqlalchemy.dialects.postgresql import TSVECTOR
+from sqlalchemy.dialects.postgresql import TSVECTOR, ARRAY
 from webservices import docs, utils
 from .base import db, BaseModel
 from sqlalchemy.ext.declarative import declared_attr
@@ -51,6 +51,8 @@ class CommitteeTotals(BaseModel):
     filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
     filing_frequency_full = db.Column(db.String, doc=docs.FILING_FREQUENCY)
     first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
+    organization_type = db.Column(db.String(1), index=True, doc=docs.ORGANIZATION_TYPE)
+    organization_type_full = db.Column(db.String(100), index=True, doc=docs.ORGANIZATION_TYPE)
 
     @declared_attr
     def transaction_coverage(self):
@@ -194,6 +196,7 @@ class CommitteeTotalsPacParty(CommitteeTotals):
     unitemized_convention_exp = db.Column(db.Numeric(30, 2))
     itemized_other_disb = db.Column(db.Numeric(30, 2))
     unitemized_other_disb = db.Column(db.Numeric(30, 2))
+    sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
 
     @property
     def individual_contributions_percent(self):
@@ -232,6 +235,15 @@ class CommitteeTotalsPacParty(CommitteeTotals):
         numerators = [self.operating_expenditures]
         denominators = [self.disbursements]
         return utils.get_percentage(numerators, denominators)
+
+    sponsor_candidate_list = db.relationship(
+        'PacSponsorCandidatePerCycle',
+        primaryjoin='''and_(
+                    foreign(PacSponsorCandidatePerCycle.committee_id) == CommitteeTotalsPacParty.committee_id,
+                    PacSponsorCandidatePerCycle.cycle == CommitteeTotalsPacParty.cycle,
+                )''',
+        lazy='joined'
+    )
 
 
 class CommitteeTotalsHouseSenate(CommitteeTotals):
