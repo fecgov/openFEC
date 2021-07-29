@@ -110,7 +110,7 @@ def fetch_page(
 
 
 class SeekCoalescePaginator(paginators.SeekPaginator):
-    def __init__(self, cursor, per_page, index_column, sort_column=None, count=None):
+    def __init__(self, cursor, per_page, hide_null, index_column, sort_column=None, count=None):
         self.max_column_map = {
             "date": date.max,
             "float": float("inf"),
@@ -121,6 +121,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             "float": float("inf"),
             "int": float("inf"),
         }
+        self.hide_null = hide_null
         super(SeekCoalescePaginator, self).__init__(
             cursor, per_page, index_column, sort_column, count
         )
@@ -142,7 +143,8 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             else:
                 comparator = self.max_column_map.get(self.sort_column[5])
 
-            if "coalesce" not in str(left_index):
+            # Only add coalesce if nulls allowed in sort index
+            if "coalesce" not in str(left_index) and not self.hide_null:
                 left_index = sa.func.coalesce(left_index, comparator)
 
             lhs += (left_index,)
@@ -262,8 +264,9 @@ def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, c
         )
     else:
         sort_column = None
+
     return SeekCoalescePaginator(
-        query, kwargs["per_page"], index_column, sort_column=sort_column, count=count,
+        query, kwargs["per_page"], kwargs["sort_hide_null"], index_column, sort_column=sort_column, count=count
     )
 
 
