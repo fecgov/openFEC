@@ -126,6 +126,7 @@ ADMIN_FINES = {
 ADVISORY_OPINIONS = {
     "type": {"type": "keyword"},
     "no": {"type": "keyword"},
+    "doc_id": {"type": "keyword"},
     "name": {"type": "text", "analyzer": "english"},
     "summary": {"type": "text", "analyzer": "english"},
     "request_date": {"type": "date", "format": "dateOptionalTime"},
@@ -953,6 +954,41 @@ def display_snapshot_detail(repository_name=None, snapshot_name=None):
 
 # =========== start es document management =============
 
+def delete_doctype_from_es(index_name=None, doc_type=None):
+    """
+    Deletes all records with the given `doc_type` from Elasticsearch
+    """
+    body = {"query": {"match": {"type": doc_type}}}
+
+    es_client = create_es_client()
+    es_client.delete_by_query(
+        index=index_name,
+        body=body,
+    )
+    logger.info("Successfully deleted doc_type={} from index={} on Elasticsearch.".format(
+        doc_type, index_name))
+
+
+def delete_single_doctype_from_es(index_name=None, doc_type=None, num_doc_id=None):
+    """
+    Deletes one record with the given `doc_type` and `doc_id` from Elasticsearch
+    """
+    body = {"query": {
+        "bool": {
+            "must": [
+                {"match": {"type": doc_type}},
+                {"match": {"doc_id": num_doc_id}}
+            ]}}}
+
+    es_client = create_es_client()
+    es_client.delete_by_query(
+        index=index_name,
+        body=body,
+    )
+    logger.info("Successfully deleted doc_type={} and doc_id={} from index={} on Elasticsearch.".format(
+        doc_type, num_doc_id, index_name))
+
+
 def delete_murs_from_s3():
     """
     Deletes all MUR documents from S3
@@ -960,32 +996,3 @@ def delete_murs_from_s3():
     bucket = get_bucket()
     for obj in bucket.objects.filter(Prefix="legal/murs"):
         obj.delete()
-
-
-def delete_current_murs_from_es():
-    """
-    Deletes all current MURs from Elasticsearch
-    """
-    delete_from_es(DOCS_ALIAS, "murs")
-
-
-def delete_advisory_opinions_from_es():
-    """
-    Deletes all advisory opinions from Elasticsearch
-    """
-    delete_from_es(DOCS_ALIAS, "advisory_opinions")
-
-
-def delete_from_es(index, doc_type):
-    """
-    Deletes all documents with the given `doc_type` from Elasticsearch
-    """
-    es_client = create_es_client()
-    es_client.delete_by_query(
-        index=index,
-        body={
-            "query": {"match_all": {}}
-        },
-        type=doc_type,
-    )
-# =========== end es document management =============

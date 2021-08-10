@@ -44,9 +44,9 @@ from .es_management import (  # noqa
     delete_snapshot,
     display_snapshots,
     display_snapshot_detail,
-    delete_advisory_opinions_from_es,
-    delete_current_murs_from_es,
     delete_murs_from_s3,
+    delete_doctype_from_es,
+    delete_single_doctype_from_es,
 )
 
 from .show_legal_data import ( # noqa

@@ -29,6 +29,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         expected_ao = {
             "type": "advisory_opinions",
             "no": "2017-01",
+            "doc_id": "advisory_opinions_2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
             "request_date": datetime.date(2016, 6, 10),
@@ -68,6 +69,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         expected_ao = {
             "type": "advisory_opinions",
             "no": "2017-01",
+            "doc_id": "advisory_opinions_2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
             "request_date": datetime.date(2016, 6, 10),
@@ -110,6 +112,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         expected_ao = {
             "type": "advisory_opinions",
             "no": "2017-01",
+            "doc_id": "advisory_opinions_2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
             "request_date": datetime.date(2016, 6, 10),
@@ -138,6 +141,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         expected_ao = {
             "type": "advisory_opinions",
             "no": "2020-01",
+            "doc_id": "advisory_opinions_2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
             "request_date": datetime.date(2016, 6, 10),
@@ -202,6 +206,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         }
         ao1 = {
             "no": "2017-01",
+            "doc_id": "advisory_opinions_2017-01",
             "name": "1st AO name",
             "summary": "1st AO summary",
             "status": "Final",
@@ -219,6 +224,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         }
         ao2 = {
             "no": "2017-02",
+            "doc_id": "advisory_opinions_2017-02",
             "name": "2nd AO name",
             "summary": "2nd AO summary",
             "status": "Final",
@@ -256,6 +262,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         }
         ao = {
             "no": "2017-01",
+            "doc_id": "advisory_opinions_2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
             "status": "Final",
@@ -283,6 +290,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         }
         ao = {
             "no": "2017-01",
+            "doc_id": "advisory_opinions_2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
             "status": "Final",
@@ -322,6 +330,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         expected_ao1 = {
             "type": "advisory_opinions",
             "no": "2015-01",
+            "doc_id": "advisory_opinions_2015-01",
             "name": "AO name1",
             "summary": "AO summary1",
             "request_date": datetime.date(2016, 6, 10),
@@ -344,6 +353,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         expected_ao2 = {
             "no": "2015-02",
             "type": "advisory_opinions",
+            "doc_id": "advisory_opinions_2015-02",
             "name": "An AO name2",
             "summary": "An AO summary2",
             "request_date": datetime.date(2016, 6, 10),
@@ -366,6 +376,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         expected_ao3 = {
             "type": "advisory_opinions",
             "no": "2016-01",
+            "doc_id": "advisory_opinions_2016-01",
             "name": "An AO name3",
             "summary": "An AO summary3",
             "request_date": datetime.date(2016, 6, 10),

@@ -35,8 +35,8 @@ manager.command(legal_docs.load_admin_fines)
 manager.command(legal_docs.load_archived_murs)
 manager.command(legal_docs.extract_pdf_text)
 
-manager.command(legal_docs.delete_advisory_opinions_from_es)
-manager.command(legal_docs.delete_current_murs_from_es)
+manager.command(legal_docs.delete_doctype_from_es)
+manager.command(legal_docs.delete_single_doctype_from_es)
 manager.command(legal_docs.delete_murs_from_s3)
 manager.command(legal_docs.show_legal_data)
 
