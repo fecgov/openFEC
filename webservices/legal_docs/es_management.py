@@ -392,7 +392,7 @@ def create_index(index_name=None, aliases_name=None):
         for alias in aliases_list:
             aliases.update({alias: {}})
 
-        logger.debug("aliases under index '" + DOCS_INDEX + "' = " + json.dumps(
+        logger.debug(" aliases under index '" + DOCS_INDEX + "' = " + json.dumps(
             aliases, indent=3, cls=DateTimeEncoder))
         body.update({"aliases": aliases})
 
@@ -402,7 +402,7 @@ def create_index(index_name=None, aliases_name=None):
         for alias in aliases_list:
             aliases.update({alias: {}})
 
-        logger.debug("aliases under index '" + ARCHIVED_MURS_INDEX + "' = " + json.dumps(
+        logger.debug(" aliases under index '" + ARCHIVED_MURS_INDEX + "' = " + json.dumps(
             aliases, indent=3, cls=DateTimeEncoder))
         body.update({"aliases": aliases})
 
@@ -413,13 +413,13 @@ def create_index(index_name=None, aliases_name=None):
             for alias in aliases_list:
                 aliases.update({alias: {}})
 
-            logger.debug("aliases =" + json.dumps(aliases, indent=3, cls=DateTimeEncoder))
+            logger.debug(" aliases =" + json.dumps(aliases, indent=3, cls=DateTimeEncoder))
             body.update({"aliases": aliases})
 
     es_client = create_es_client()
     delete_index(index_name)
 
-    logger.info("Creating index '{0}'...".format(index_name))
+    logger.info(" Creating index '{0}'...".format(index_name))
     es_client.indices.create(
         index=index_name,
         body=body,
@@ -427,13 +427,13 @@ def create_index(index_name=None, aliases_name=None):
 
     if aliases_list:
         logger.info(
-            "The index '{0}' with aliases=[{1}] is created successfully.".format(
+            " The index '{0}' with aliases=[{1}] is created successfully.".format(
                 index_name, "".join(alias + "," for alias in aliases_list)
             )
         )
 
     else:
-        logger.info("The index '{0}' is created successfully.".format(index_name))
+        logger.info(" The index '{0}' is created successfully.".format(index_name))
 
 
 def display_index_alias():
@@ -448,10 +448,10 @@ def display_index_alias():
     """
     es_client = create_es_client()
     indices = es_client.cat.indices(format="JSON")
-    logger.info("All indices = " + json.dumps(indices, indent=3))
+    logger.info(" All indices = " + json.dumps(indices, indent=3))
 
     for row in indices:
-        logger.info("The aliases under index '{0}': \n{1}".format(
+        logger.info(" The aliases under index '{0}': \n{1}".format(
             row["index"],
             json.dumps(es_client.indices.get_alias(index=row["index"]), indent=3)))
 
@@ -470,7 +470,7 @@ def display_mappings():
     indices = es_client.cat.indices(format="JSON")
 
     for row in indices:
-        logger.info("The mapping for index '{0}': \n{1}".format(
+        logger.info(" The mapping for index '{0}': \n{1}".format(
             row["index"],
             json.dumps(es_client.indices.get_mapping(index=row["index"]), indent=3)))
 
@@ -496,27 +496,27 @@ def delete_index(index_name=None):
     es_client = create_es_client()
     index_name = index_name or DOCS_INDEX
     try:
-        logger.info("Deleting index '{0}'...".format(index_name))
+        logger.info(" Deleting index '{0}'...".format(index_name))
         es_client.indices.delete(index_name)
-        logger.info("The index '{0}' is deleted successfully.".format(index_name))
+        logger.info(" The index '{0}' is deleted successfully.".format(index_name))
     except elasticsearch.exceptions.NotFoundError:
         pass
 
     # TODO: check if DOCS_INDEX exist before deleting. use exists_alias()
     if index_name == DOCS_INDEX:
         try:
-            logger.info("Deleting alias '{0}' under index '{1}' ...".format(DOCS_ALIAS, DOCS_INDEX))
+            logger.info(" Deleting alias '{0}' under index '{1}' ...".format(DOCS_ALIAS, DOCS_INDEX))
             es_client.indices.delete(DOCS_ALIAS)
-            logger.info("The alias '{0}' is deleted successfully.".format(DOCS_ALIAS))
+            logger.info(" The alias '{0}' is deleted successfully.".format(DOCS_ALIAS))
         except Exception:
             pass
 
     if index_name == ARCHIVED_MURS_INDEX:
         try:
-            logger.info("Deleting alias '{0}' under index '{1}'...".format(
+            logger.info(" Deleting alias '{0}' under index '{1}'...".format(
                 ARCHIVED_MURS_ALIAS, ARCHIVED_MURS_INDEX))
             es_client.indices.delete(ARCHIVED_MURS_ALIAS)
-            logger.info("The alias '{0}' is deleted successfully.".format(ARCHIVED_MURS_ALIAS))
+            logger.info(" The alias '{0}' is deleted successfully.".format(ARCHIVED_MURS_ALIAS))
         except Exception:
             pass
 
@@ -536,7 +536,7 @@ def move_alias(original_index=None, original_alias=None, staging_index=None):
     es_client = create_es_client()
 
     # Remove original_alias from original_index
-    logger.info("Removing alias '{0}' from '{1}'...".format(
+    logger.info(" Removing alias '{0}' from '{1}'...".format(
         original_alias, original_index)
     )
     try:
@@ -547,14 +547,14 @@ def move_alias(original_index=None, original_alias=None, staging_index=None):
                 ]
             }
         )
-        logger.info("Removed alias '{0}' from '{1}' successfully.".format(
+        logger.info(" Removed alias '{0}' from '{1}' successfully.".format(
             original_alias, original_index)
         )
     except Exception:
         pass
 
     # Add original_alias to staging_index
-    logger.info("Adding alias '{0}' to point to '{1}'...".format(
+    logger.info(" Adding alias '{0}' to point to '{1}'...".format(
         original_alias, staging_index)
     )
     es_client.indices.update_aliases(
@@ -564,7 +564,7 @@ def move_alias(original_index=None, original_alias=None, staging_index=None):
             ]
         }
     )
-    logger.info("Added alias '{0}' to point to '{1}' successfully.".format(
+    logger.info(" Added alias '{0}' to point to '{1}' successfully.".format(
         original_alias, staging_index)
     )
 
@@ -581,7 +581,7 @@ def restore_from_staging_index():
     es_client = create_es_client()
 
     # Remove SEARCH_ALIAS from DOCS_INDEX
-    logger.info("Removing alias '{0}' from '{1}'...".format(
+    logger.info(" Removing alias '{0}' from '{1}'...".format(
         SEARCH_ALIAS, DOCS_INDEX)
     )
     try:
@@ -592,14 +592,14 @@ def restore_from_staging_index():
                 ]
             }
         )
-        logger.info("Removed alias '{0}' from '{1}' successfully.".format(
+        logger.info(" Removed alias '{0}' from '{1}' successfully.".format(
             SEARCH_ALIAS, DOCS_INDEX)
         )
     except Exception:
         pass
 
     # Add SEARCH_ALIAS points to DOCS_STAGING_INDEX
-    logger.info("Adding alias '{0}' to point to '{1}'...".format(
+    logger.info(" Adding alias '{0}' to point to '{1}'...".format(
         SEARCH_ALIAS, DOCS_STAGING_INDEX)
     )
     es_client.indices.update_aliases(
@@ -609,7 +609,7 @@ def restore_from_staging_index():
             ]
         }
     )
-    logger.info("Added alias '{0}' to point to '{1}' successfully.".format(
+    logger.info(" Added alias '{0}' to point to '{1}' successfully.".format(
         SEARCH_ALIAS, DOCS_STAGING_INDEX)
     )
 
@@ -618,7 +618,7 @@ def restore_from_staging_index():
     # Create index 'DOCS_INDEX' with SEARCH_ALIAS, DOCS_ALIAS
     create_index()
 
-    logger.info("Reindexing all documents from index '{0}' to index '{1}'...".format(
+    logger.info(" Reindexing all documents from index '{0}' to index '{1}'...".format(
         DOCS_STAGING_INDEX, DOCS_INDEX)
     )
     body = {
@@ -630,7 +630,7 @@ def restore_from_staging_index():
         wait_for_completion=True,
         request_timeout=1500
     )
-    logger.info("Reindexed all documents from index '{0}' to index '{1}' successfully.".format(
+    logger.info(" Reindexed all documents from index '{0}' to index '{1}' successfully.".format(
         DOCS_STAGING_INDEX, DOCS_INDEX)
     )
     move_aliases_to_docs_index()
@@ -643,7 +643,7 @@ def move_aliases_to_docs_index():
     """
     es_client = create_es_client()
 
-    logger.info("Moving aliases '{0}' and '{1}' to point to 'docs'...".format(
+    logger.info(" Moving aliases '{0}' and '{1}' to point to 'docs'...".format(
         DOCS_ALIAS, SEARCH_ALIAS)
     )
     es_client.indices.update_aliases(
@@ -656,13 +656,14 @@ def move_aliases_to_docs_index():
             ]
         }
     )
-    logger.info("Moved aliases '{0}' and '{1}' to point to 'docs' successfully.".format(
+    logger.info(" Moved aliases '{0}' and '{1}' to point to 'docs' successfully.".format(
         DOCS_ALIAS, SEARCH_ALIAS)
     )
 
-    logger.info("Deleting index '{0}'...".format(DOCS_STAGING_INDEX))
+    logger.info(" Deleting index '{0}'...".format(DOCS_STAGING_INDEX))
     es_client.indices.delete(DOCS_STAGING_INDEX)
-    logger.info("Deleted index '{0}' successfully.".format(DOCS_STAGING_INDEX))
+    logger.info(" Deleted index '{0}' successfully.".format(DOCS_STAGING_INDEX))
+    logger.info(" Task refresh_current_legal_docs_zero_downtime has been completed successfully !!!")
 
 # =========== end index management =============
 
@@ -674,11 +675,11 @@ def configure_snapshot_repository(repository_name=DOCS_REPOSITORY_NAME):
     This needs to get re-run when s3 credentials change for each api app deployment.
 
     How to call task command:
-    cf run-task api --command "python manage.py configure_snapshot_repository -r repository_docs" -m 4G --name configure_snapshot_repository_docs
-    cf run-task api --command "python manage.py configure_snapshot_repository -r repository_archived_murs" -m 4G --name configure_snapshot_repository_arch_mur
+    cf run-task api --command "python manage.py configure_snapshot_repository -r repository_docs" -m 2G --name configure_snapshot_repository_docs
+    cf run-task api --command "python manage.py configure_snapshot_repository -r repository_archived_murs" -m 2G --name configure_snapshot_repository_arch_mur
     """
     es_client = create_es_client()
-    logger.info("Configuring snapshot repository: {0}".format(repository_name))
+    logger.info(" Configuring snapshot repository: {0}".format(repository_name))
     credentials = get_service_instance_credentials(get_service_instance(
         S3_PRIVATE_SERVICE_INSTANCE_NAME))
 
@@ -698,10 +699,10 @@ def configure_snapshot_repository(repository_name=DOCS_REPOSITORY_NAME):
             repository=repository_name,
             body=body,
         )
-        logger.info("Configured snapshot repository: {0} successfully.".format(repository_name))
+        logger.info(" Configured snapshot repository: {0} successfully.".format(repository_name))
 
     except Exception as err:
-        logger.error('Error occured in configure_snapshot_repository.{0}'.format(err))
+        logger.error(" Error occured in configure_snapshot_repository.{0}".format(err))
 
 
 def delete_repository(repository_name=None):
@@ -709,17 +710,17 @@ def delete_repository(repository_name=None):
     Delete a s3 repository.
 
     How to call task command:
-    cf run-task api --command "python manage.py delete_repository -r repository_test" -m 4G --name delete_repository
+    cf run-task api --command "python manage.py delete_repository -r repository_test" -m 2G --name delete_repository
     """
     if repository_name:
         try:
             es_client = create_es_client()
             es_client.snapshot.delete_repository(repository=repository_name)
-            logger.info("Deleted snapshot repository: {0} successfully.".format(repository_name))
+            logger.info(" Deleted snapshot repository: {0} successfully.".format(repository_name))
         except Exception as err:
-            logger.error('Error occured in delete_repository.{0}'.format(err))
+            logger.error(" Error occured in delete_repository.{0}".format(err))
     else:
-        logger.info("Please input a snapshot repository name.")
+        logger.info(" Please input a snapshot repository name.")
 
     display_repositories()
 
@@ -738,7 +739,7 @@ def display_repositories():
         v=True,
         s="id",
     )
-    logger.info("Repositories list=" + json.dumps(result, indent=3, cls=DateTimeEncoder))
+    logger.info(" Repositories list=" + json.dumps(result, indent=3, cls=DateTimeEncoder))
 
 # =========== end repository management =============
 
@@ -750,8 +751,8 @@ def create_es_snapshot(repository_name=None, snapshot_name="auto_backup", index_
     Create elasticsearch shapshot of specific 'index_name'(=index1,index2...) in 'repository_name'.
 
     How to call task command:
-    ex1: cf run-task api --command "python manage.py create_es_snapshot -r repository_docs -i docs" -m 4G --name snapshot_docs
-    ex1: cf run-task api --command "python manage.py create_es_snapshot -r repository_archived_murs -i archived_murs -m 4G --name snapshot_archived_murs
+    ex1: cf run-task api --command "python manage.py create_es_snapshot -r repository_docs -i docs" -m 2G --name snapshot_docs
+    ex1: cf run-task api --command "python manage.py create_es_snapshot -r repository_archived_murs -i archived_murs -m 2G --name snapshot_archived_murs
     ex3: cf run-task api --command "python manage.py create_es_snapshot -i docs,archived_murs" -m 2G --name create_snapshot_2index
     """
     es_client = create_es_client()
@@ -771,16 +772,16 @@ def create_es_snapshot(repository_name=None, snapshot_name="auto_backup", index_
     snapshot_name = "{0}_{1}_{2}".format(
         index_name_list[0], datetime.datetime.today().strftime("%Y%m%d%H%M"), snapshot_name
     )
-    logger.info("Creating snapshot {0} ...".format(snapshot_name))
+    logger.info(" Creating snapshot {0} ...".format(snapshot_name))
     result = es_client.snapshot.create(
         repository=repository_name,
         snapshot=snapshot_name,
         body=body,
     )
     if result.get("accepted"):
-        logger.info("The snapshot: {0} is created successfully.".format(snapshot_name))
+        logger.info(" The snapshot: {0} is created successfully.".format(snapshot_name))
     else:
-        logger.error("Unable to create snapshot: {0}".format(snapshot_name))
+        logger.error(" Unable to create snapshot: {0}".format(snapshot_name))
 
 
 def delete_snapshot(repository_name=None, snapshot_name=None):
@@ -794,14 +795,14 @@ def delete_snapshot(repository_name=None, snapshot_name=None):
     if repository_name and snapshot_name:
         configure_snapshot_repository(repository_name)
         try:
-            logger.info("Deleting snapshot {0} from {1} ...".format(snapshot_name, repository_name))
+            logger.info(" Deleting snapshot {0} from {1} ...".format(snapshot_name, repository_name))
             es_client = create_es_client()
             es_client.snapshot.delete(repository=repository_name, snapshot=snapshot_name)
-            logger.info("The snapshot {0} from {1} is deleted successfully.".format(snapshot_name, repository_name))
+            logger.info(" The snapshot {0} from {1} is deleted successfully.".format(snapshot_name, repository_name))
         except Exception as err:
-            logger.error("Error occured in delete_snapshot.{0}".format(err))
+            logger.error(" Error occured in delete_snapshot.{0}".format(err))
     else:
-        logger.info("Please provide both snapshot and repository names.")
+        logger.info(" Please provide both snapshot and repository names.")
 
 
 def restore_es_snapshot(repository_name=None, snapshot_name=None, index_name=None):
@@ -813,7 +814,7 @@ def restore_es_snapshot(repository_name=None, snapshot_name=None, index_name=Non
     -Default to most recent snapshot, optionally specify `snapshot_name`
 
     How to call task command:
-    ex: cf run-task api --command "python manage.py restore_es_snapshot -r repository_docs -s docs_202010272132_auto_backup -i docs" -m 4G --name restore_es_snapshot
+    ex: cf run-task api --command "python manage.py restore_es_snapshot -r repository_docs -s docs_202010272132_auto_backup -i docs" -m 2G --name restore_es_snapshot
     """
     es_client = create_es_client()
 
@@ -827,7 +828,7 @@ def restore_es_snapshot(repository_name=None, snapshot_name=None, index_name=Non
 
     if es_client.indices.exists(index_name):
         logger.info(
-            "Found '{0}' index. Creating staging index for zero-downtime restore".format(index_name)
+            " Found '{0}' index. Creating staging index for zero-downtime restore".format(index_name)
         )
         # Create docs_staging index
         create_index(DOCS_STAGING_INDEX)
@@ -837,7 +838,7 @@ def restore_es_snapshot(repository_name=None, snapshot_name=None, index_name=Non
 
     delete_index(index_name)
 
-    logger.info("Retrieving snapshot: {0}".format(snapshot_name))
+    logger.info(" Retrieving snapshot: {0}".format(snapshot_name))
     body = {"indices": index_name}
     result = es_client.snapshot.restore(
         repository=repository_name,
@@ -845,13 +846,13 @@ def restore_es_snapshot(repository_name=None, snapshot_name=None, index_name=Non
         body=body,
     )
     if result.get("accepted"):
-        logger.info("The snapshot: {0} is restored successfully.".format(snapshot_name))
+        logger.info(" The snapshot: {0} is restored successfully.".format(snapshot_name))
         if es_client.indices.exists(DOCS_STAGING_INDEX):
             move_aliases_to_docs_index()
     else:
-        logger.error("Unable to restore snapshot: {0}".format(snapshot_name))
+        logger.error(" Unable to restore snapshot: {0}".format(snapshot_name))
         logger.info(
-            "You may want to try the most recent snapshot: {0}".format(
+            " You may want to try the most recent snapshot: {0}".format(
                 most_recent_snapshot_name
             )
         )
@@ -866,8 +867,8 @@ def restore_es_snapshot_downtime(repository_name=None, snapshot_name=None, index
     -Default to most recent snapshot, optionally specify `snapshot_name`
 
     How to call task command:
-    ex: cf run-task api --command "python manage.py restore_es_snapshot_downtime -r repository_docs -s docs_202010272130_auto_backup -i docs" -m 4G --name restore_es_snapshot_downtime
-    ex: cf run-task api --command "python manage.py restore_es_snapshot_downtime -r repository_archived_murs -s archived_murs_202010272130_auto_backup -i archived_murs" -m 4G --name restore_es_snapshot_downtime
+    ex: cf run-task api --command "python manage.py restore_es_snapshot_downtime -r repository_docs -s docs_202010272130_auto_backup -i docs" -m 2G --name restore_es_snapshot_downtime
+    ex: cf run-task api --command "python manage.py restore_es_snapshot_downtime -r repository_archived_murs -s archived_murs_202010272130_auto_backup -i archived_murs" -m 2G --name restore_es_snapshot_downtime
     """
     es_client = create_es_client()
 
@@ -882,7 +883,7 @@ def restore_es_snapshot_downtime(repository_name=None, snapshot_name=None, index
 
     delete_index(index_name)
 
-    logger.info("Restoring snapshot: '{0}'...".format(snapshot_name))
+    logger.info(" Restoring snapshot: '{0}'...".format(snapshot_name))
     body = {"indices": index_name}
     result = es_client.snapshot.restore(
         repository=repository_name,
@@ -890,9 +891,9 @@ def restore_es_snapshot_downtime(repository_name=None, snapshot_name=None, index
         body=body,
     )
     if result.get("accepted"):
-        logger.info("Restored snapshot: '{0}' successfully.".format(snapshot_name))
+        logger.info(" Restored snapshot: '{0}' successfully.".format(snapshot_name))
     else:
-        logger.error("Unable to restore snapshot: {0}".format(snapshot_name))
+        logger.error(" Unable to restore snapshot: {0}".format(snapshot_name))
 
 
 def get_most_recent_snapshot(repository_name=None):
@@ -903,7 +904,7 @@ def get_most_recent_snapshot(repository_name=None):
     es_client = create_es_client()
 
     repository_name = repository_name or DOCS_REPOSITORY_NAME
-    logger.info("Retreiving most recent snapshot...")
+    logger.info(" Retreiving most recent snapshot...")
     snapshot_list = es_client.snapshot.get(repository=repository_name, snapshot="*").get(
         "snapshots"
     )
@@ -928,7 +929,7 @@ def display_snapshots(repository_name=None):
         s="id",
         h="id,repository,status,start_time,end_time,duration,indices"
     )
-    logger.info("Snapshot list=" + json.dumps(result, indent=3, cls=DateTimeEncoder))
+    logger.info(" Snapshot list=" + json.dumps(result, indent=3, cls=DateTimeEncoder))
 
 
 def display_snapshot_detail(repository_name=None, snapshot_name=None):
@@ -947,7 +948,7 @@ def display_snapshot_detail(repository_name=None, snapshot_name=None):
         repository=repository_name,
         snapshot=snapshot_name
     )
-    logger.info("Snapshot details =" + json.dumps(result, indent=3, cls=DateTimeEncoder))
+    logger.info(" Snapshot details =" + json.dumps(result, indent=3, cls=DateTimeEncoder))
 
 # =========== end snapshot management =============
 
@@ -957,6 +958,7 @@ def display_snapshot_detail(repository_name=None, snapshot_name=None):
 def delete_doctype_from_es(index_name=None, doc_type=None):
     """
     Deletes all records with the given `doc_type` from Elasticsearch
+    Ex: cf run-task api --command "python manage.py delete_doctype_from_es -i docs -d adrs" -m 2G --name delete_adrs
     """
     body = {"query": {"match": {"type": doc_type}}}
 
@@ -965,13 +967,15 @@ def delete_doctype_from_es(index_name=None, doc_type=None):
         index=index_name,
         body=body,
     )
-    logger.info("Successfully deleted doc_type={} from index={} on Elasticsearch.".format(
+    logger.info(" Successfully deleted doc_type={} from index={} on Elasticsearch.".format(
         doc_type, index_name))
 
 
 def delete_single_doctype_from_es(index_name=None, doc_type=None, num_doc_id=None):
     """
-    Deletes one record with the given `doc_type` and `doc_id` from Elasticsearch
+    Deletes single record with the given `doc_type` and `doc_id` from Elasticsearch
+    Ex: cf run-task api --command "python manage.py delete_single_doctype_from_es -i docs -d admin_fines -n af_4201" -m 2G --name delete_one_af
+        cf run-task api --command "python manage.py delete_single_doctype_from_es -i docs -d advisory_opinions -n advisory_opinions_2021-08" -m 2G --name delete_one_ao
     """
     body = {"query": {
         "bool": {
@@ -985,7 +989,7 @@ def delete_single_doctype_from_es(index_name=None, doc_type=None, num_doc_id=Non
         index=index_name,
         body=body,
     )
-    logger.info("Successfully deleted doc_type={} and doc_id={} from index={} on Elasticsearch.".format(
+    logger.info(" Successfully deleted doc_type={} and doc_id={} from index={} on Elasticsearch.".format(
         doc_type, num_doc_id, index_name))
 
 
