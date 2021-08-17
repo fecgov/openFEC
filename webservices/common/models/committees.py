@@ -45,15 +45,13 @@ class BaseConcreteCommittee(BaseCommittee):
     committee_id = db.Column(db.String, primary_key=True, unique=True, index=True, doc=docs.COMMITTEE_ID)
     candidate_ids = db.Column(ARRAY(db.Text), doc=docs.CANDIDATE_ID)
     sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
-
+    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
+    last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
+    last_f1_date = db.Column(db.Date, doc=docs.LAST_F1_DATE)
 
 class Committee(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
     __tablename__ = 'ofec_committee_detail_mv'
-
-    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
-    last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
-    last_f1_date = db.Column(db.Date, doc=docs.LAST_F1_DATE)
 
     sponsor_candidate_list = db.relationship(
         'PacSponsorCandidate',
@@ -85,17 +83,12 @@ class CommitteeHistory(BaseCommittee):
     former_candidate_election_year = db.Column(db.Integer, doc=docs.CANDIDATE_ELECTION_YEAR)
     convert_to_pac_flag = db.Column(db.Boolean, doc=docs.CONVERT_TO_PAC_FLAG)
     sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
-    # TODO: Move this to BaseConcreteCommittee?
-    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
-    last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
-    last_f1_date = db.Column(db.Date, doc=docs.LAST_F1_DATE)
+
 
 class CommitteeDetail(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
     __tablename__ = 'ofec_committee_detail_mv'
 
-    first_file_date = db.Column(db.Date, doc=docs.FIRST_FILE_DATE)
-    last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
     email = db.Column(db.String(50), doc=docs.COMMITTEE_EMAIL)
     fax = db.Column(db.String(10), doc=docs.COMMITTEE_FAX)
     website = db.Column(db.String(50), doc=docs.COMMITTEE_WEBSITE)
