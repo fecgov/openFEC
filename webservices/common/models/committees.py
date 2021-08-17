@@ -37,6 +37,10 @@ class BaseCommittee(BaseModel):
     party = db.Column(db.String(3), index=True, doc=docs.PARTY)
     party_full = db.Column(db.String(50), doc=docs.PARTY)
     state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
+    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
+    last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
+    first_f1_date = db.Column(db.Date, doc=docs.FIRST_F1_DATE)
+    last_f1_date = db.Column(db.Date, doc=docs.LAST_F1_DATE)
 
 
 class BaseConcreteCommittee(BaseCommittee):
@@ -45,9 +49,7 @@ class BaseConcreteCommittee(BaseCommittee):
     committee_id = db.Column(db.String, primary_key=True, unique=True, index=True, doc=docs.COMMITTEE_ID)
     candidate_ids = db.Column(ARRAY(db.Text), doc=docs.CANDIDATE_ID)
     sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
-    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
-    last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
-    last_f1_date = db.Column(db.Date, doc=docs.LAST_F1_DATE)
+
 
 class Committee(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
