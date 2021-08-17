@@ -85,7 +85,10 @@ class CommitteeHistory(BaseCommittee):
     former_candidate_election_year = db.Column(db.Integer, doc=docs.CANDIDATE_ELECTION_YEAR)
     convert_to_pac_flag = db.Column(db.Boolean, doc=docs.CONVERT_TO_PAC_FLAG)
     sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
-
+    # TODO: Move this to BaseConcreteCommittee?
+    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
+    last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
+    last_f1_date = db.Column(db.Date, doc=docs.LAST_F1_DATE)
 
 class CommitteeDetail(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
