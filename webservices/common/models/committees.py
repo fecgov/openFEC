@@ -37,6 +37,10 @@ class BaseCommittee(BaseModel):
     party = db.Column(db.String(3), index=True, doc=docs.PARTY)
     party_full = db.Column(db.String(50), doc=docs.PARTY)
     state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
+    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
+    last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
+    first_f1_date = db.Column(db.Date, doc=docs.FIRST_F1_DATE)
+    last_f1_date = db.Column(db.Date, doc=docs.LAST_F1_DATE)
 
 
 class BaseConcreteCommittee(BaseCommittee):
@@ -50,10 +54,6 @@ class BaseConcreteCommittee(BaseCommittee):
 class Committee(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
     __tablename__ = 'ofec_committee_detail_mv'
-
-    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
-    last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
-    last_f1_date = db.Column(db.Date, doc=docs.LAST_F1_DATE)
 
     sponsor_candidate_list = db.relationship(
         'PacSponsorCandidate',
@@ -91,8 +91,6 @@ class CommitteeDetail(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
     __tablename__ = 'ofec_committee_detail_mv'
 
-    first_file_date = db.Column(db.Date, doc=docs.FIRST_FILE_DATE)
-    last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
     email = db.Column(db.String(50), doc=docs.COMMITTEE_EMAIL)
     fax = db.Column(db.String(10), doc=docs.COMMITTEE_FAX)
     website = db.Column(db.String(50), doc=docs.COMMITTEE_WEBSITE)

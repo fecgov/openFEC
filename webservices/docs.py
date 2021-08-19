@@ -510,6 +510,8 @@ This is usually a Form 1 committee registration.'
 
 LAST_FILE_DATE = 'The day the FEC received the committee\'s most recent filing'
 
+FIRST_F1_DATE = 'The day the FEC received the committee\'s first Form 1'
+
 LAST_F1_DATE = 'The day the FEC received the committee\'s most recent Form 1'
 
 MEANS_FILED = 'The method used to file with the FEC, either electronic or on paper.'
