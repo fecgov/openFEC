@@ -104,6 +104,7 @@ REGULATION_SECTION_ONLY_REGEX = re.compile(REGULATION_SECTION)
 AO_CITATION_REGEX = re.compile(r"\b(?P<year>\d{4,4})-(?P<serial_no>\d+)\b")
 
 AOS_WITH_CORRECTED_STAGE = {"2009-05": "Withdrawn"}
+AO_DOC_TYPE = "advisory_opinions"
 
 
 def load_advisory_opinions(from_ao_no=None):
@@ -170,8 +171,9 @@ def get_advisory_opinions(from_ao_no):
             ao_id = row["ao_id"]
             year, serial = ao_no_to_component_map[row["ao_no"]]
             ao = {
-                "type": "advisory_opinions",
+                "type": AO_DOC_TYPE,
                 "no": row["ao_no"],
+                "doc_id": "{0}_{1}".format(AO_DOC_TYPE, row["ao_no"]),
                 "name": row["name"],
                 "summary": row["summary"],
                 "request_date": row["req_date"],
