@@ -319,59 +319,72 @@ class CommitteeFormatTest(ApiBaseTest):
         assert len(results) == 1
         assert results[0]["committee_id"] == committees[1].committee_id
 
-    def test_committee_date_filters(self):
+    def test_committee_date_filters_generic(self):
+        self._test_committee_date_filters(
+            "first_file_date",
+            ["2015-01-01", "2015-02-01", "2015-03-01", "2015-04-01"],
+            "min_first_file_date",
+            "max_first_file_date"
+        )
+        self._test_committee_date_filters(
+            "first_f1_date",
+            ["2015-01-01", "2015-02-01", "2015-03-01", "2015-04-01"],
+            "min_first_f1_date",
+            "max_first_f1_date"
+        )
+        self._test_committee_date_filters(
+            "last_f1_date",
+            ["2015-01-01", "2015-02-01", "2015-03-01", "2015-04-01"],
+            "min_last_f1_date",
+            "max_last_f1_date"
+        )
+
+    def _test_committee_date_filters(self, date_field, values, min_date_field, max_date_field, alt=None, **attrs):
+
+        factories.CommitteeFactory(**utils.extend(attrs, {date_field: alt}))
         [
-            factories.CommitteeFactory(
-                first_file_date=datetime.date.fromisoformat("2015-01-01")
-            ),
-            factories.CommitteeFactory(
-                first_file_date=datetime.date.fromisoformat("2015-02-01")
-            ),
-            factories.CommitteeFactory(
-                first_file_date=datetime.date.fromisoformat("2015-03-01")
-            ),
-            factories.CommitteeFactory(
-                first_file_date=datetime.date.fromisoformat("2015-04-01")
-            ),
+            factories.CommitteeFactory(**utils.extend(attrs, {date_field: value}))
+            for value in values
         ]
+
         results = self._results(
             api.url_for(
                 CommitteeList,
-                min_first_file_date=datetime.date.fromisoformat("2015-02-01"),
+                **{min_date_field: datetime.date.fromisoformat(values[1])}
             )
         )
         self.assertTrue(
             all(
-                each["first_file_date"]
-                >= datetime.date.fromisoformat("2015-02-01").isoformat()
+                each[date_field]
+                >= datetime.date.fromisoformat(values[1]).isoformat()
                 for each in results
             )
         )
         results = self._results(
             api.url_for(
                 CommitteeList,
-                max_first_file_date=datetime.date.fromisoformat("2015-02-03"),
+                **{max_date_field: datetime.date.fromisoformat(values[1])}
             )
         )
         self.assertTrue(
             all(
-                each["first_file_date"]
-                <= datetime.date.fromisoformat("2015-02-03").isoformat()
+                each[date_field]
+                <= datetime.date.fromisoformat(values[1]).isoformat()
                 for each in results
             )
         )
         results = self._results(
             api.url_for(
                 CommitteeList,
-                min_first_file_date=datetime.date.fromisoformat("2015-02-01"),
-                max_first_file_date=datetime.date.fromisoformat("2015-03-01"),
+                **{min_date_field: datetime.date.fromisoformat(values[1]),
+                max_date_field: datetime.date.fromisoformat(values[2])}
             )
         )
         self.assertTrue(
             all(
-                datetime.date.fromisoformat("2015-02-01").isoformat()
-                <= each["first_file_date"]
-                <= datetime.date.fromisoformat("2015-03-01").isoformat()
+                datetime.date.fromisoformat(values[1]).isoformat()
+                <= each[date_field]
+                <= datetime.date.fromisoformat(values[2]).isoformat()
                 for each in results
             )
         )
