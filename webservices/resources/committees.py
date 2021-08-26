@@ -49,7 +49,9 @@ class CommitteeList(ApiResource):
     ]
     filter_range_fields = [
         (("min_first_file_date", "max_first_file_date"), models.Committee.first_file_date),
+        (("min_first_f1_date", "max_first_f1_date"), models.Committee.first_f1_date),
         (("min_last_f1_date", "max_last_f1_date"), models.Committee.last_f1_date),
+
     ]
     filter_fulltext_fields = [
         ("q", models.CommitteeSearch.fulltxt),
@@ -104,7 +106,7 @@ class CommitteeList(ApiResource):
         return query
 
 
-# use for these endpoints:(return committee detail information)
+# use for these endpoints:(return one committee detail information)
 #  '/committee/<string:committee_id>/',
 #  '/candidate/<string:candidate_id>/committees/',
 @doc(

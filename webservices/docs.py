@@ -520,6 +520,10 @@ MIN_FIRST_FILE_DATE = 'Filter for committees whose first filing was received on 
 
 MAX_FIRST_FILE_DATE = 'Filter for committees whose first filing was received on or before this date.'
 
+MIN_FIRST_F1_DATE = 'Filter for committees whose first Form 1 was received on or after this date.'
+
+MAX_FIRST_F1_DATE = 'Filter for committees whose first Form 1 was received on or before this date.'
+
 MIN_LAST_F1_DATE = 'Filter for committees whose latest Form 1 was received on or after this date.'
 
 MAX_LAST_F1_DATE = 'Filter for committees whose latest Form 1 was received on or before this date.'
