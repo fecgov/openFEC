@@ -23,6 +23,7 @@ from webservices.resources import (
     sched_d,
     sched_e,
     sched_f,
+    totals
 )
 
 from tests import factories
@@ -111,10 +112,14 @@ class TestDownloadTask(ApiBaseTest):
             sched_e.ScheduleEView,
             sched_e.ScheduleEEfileView,
             sched_f.ScheduleFView,
+            totals.TotalsByEntityTypeView
         }
 
         for view in DOWNLOADABLE_RESOURCES:
-            if view.endpoint in ['reportsview']:
+            if view.endpoint in [
+                'reportsview',
+                'totalsbyentitytypeview',
+            ]:
                 url = api.url_for(view, entity_type=committee.committee_type)
             elif view.endpoint in [
                 'filingsview',

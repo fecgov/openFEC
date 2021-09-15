@@ -180,6 +180,45 @@ class TestTotalsByEntityType(ApiBaseTest):
             assert len(results) == 1
             assert results[0][field] == self.second_pac_total.get(field)
 
+    def test_pac_party_multi_committee_id(self):
+
+        factories.TotalsPacFactory(**self.first_pac_total)
+        factories.TotalsPacFactory(**self.second_pac_total)
+        factories.TotalsPacFactory(
+            **{
+                "committee_id": "C00003",
+                "committee_type": "Q",
+                "cycle": 2016,
+                "committee_designation": "B",
+                "all_loans_received": 10,
+                "allocated_federal_election_levin_share": 20,
+                "treasurer_name": "Treasurer, Tom",
+                "committee_state": "CT",
+                "filing_frequency": "M",
+                "filing_frequency_full": "Monthly filer",
+                "first_file_date": datetime.date.fromisoformat("1984-12-31"),
+                "receipts": 200,
+                "disbursements": 50,
+                "sponsor_candidate_ids": ["H02"],
+                "organization_type": "T",
+                "organization_type_full": "Trade",
+            }
+        )
+
+        results = self._results(
+            api.url_for(
+                TotalsByEntityTypeView,
+                entity_type="pac-party",
+                committee_id=[
+                    self.first_pac_total.get("committee_id"),
+                    self.second_pac_total.get("committee_id"),
+                ],
+            )
+        )
+
+        assert len(results) == 2
+        self.assertTrue(all(each["committee_id"] != "C00003" for each in results))
+
     def test_filter_receipts(self):
 
         factories.TotalsPacFactory(**self.first_pac_total)
