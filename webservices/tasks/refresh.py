@@ -15,14 +15,14 @@ def refresh_materialized_views():
     """Update incremental aggregates, itemized schedules, materialized views,
     then slack a notification to the development team.
     """
-    manage.logger.info('Starting nightly refresh...')
+    manage.logger.info('Starting nightly refresh materialized views...')
     try:
         manage.refresh_materialized()
         download.clear_bucket()
-        slack_message = '*Success* nightly updates for {0} completed'.format(get_app_name())
+        slack_message = '*Success* nightly update materialized views for {0} completed'.format(get_app_name())
         utils.post_to_slack(slack_message, '#bots')
         manage.logger.info(slack_message)
     except Exception as error:
         manage.logger.exception(error)
-        slack_message = '*ERROR* nightly update failed for {0}. Check logs.'.format(get_app_name())
+        slack_message = '*ERROR* nightly update materialized views failed for {0}. Check logs.'.format(get_app_name())
         utils.post_to_slack(slack_message, '#bots')

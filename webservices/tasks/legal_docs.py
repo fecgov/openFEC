@@ -38,6 +38,13 @@ RECENTLY_MODIFIED_CASES = """
     ORDER BY case_serial
 """
 
+RECENTLY_MODIFIED_CASES_SEND_ALERT = """
+    SELECT case_no, case_type, pg_date, published_flg
+    FROM fecmur.cases_with_parsed_case_serial_numbers_vw
+    WHERE pg_date >= NOW() - '13 hour'::INTERVAL
+    ORDER BY case_serial
+"""
+
 SLACK_BOTS = "#bots"
 
 
@@ -106,7 +113,6 @@ def refresh_most_recent_aos(conn):
 def refresh_most_recent_cases(conn):
     logger.info(" Checking for modified cases(MUR/AF/ADR)...")
     rs = conn.execute(RECENTLY_MODIFIED_CASES)
-    slack_message = ""
     if rs.returns_rows:
         load_count = 0
         deleted_case_count = 0
@@ -116,13 +122,28 @@ def refresh_most_recent_cases(conn):
             if row["published_flg"]:
                 load_count += 1
                 logger.info(" Total of %d case(s) loaded...", load_count)
-                slack_message = slack_message + str(row["case_type"]) + " " + str(row["case_no"]) + " found modified at " + str(row["pg_date"])
             else:
                 deleted_case_count += 1
                 logger.info(" Total of %d case(s) unpublished...", deleted_case_count)
-                slack_message = " Total of %d case(s) unpublished...", str(deleted_case_count)
     else:
         logger.info(" No modified cases found")
+
+
+@app.task(once={"graceful": True}, base=QueueOnce)
+def send_alert_most_recent_legal_case():
+    # Send modified legal case(during 6am-7pm EST) alerts to Slack every day at 7pm(EST).
+    slack_message = ""
+    with db.engine.connect() as conn:
+        rs = conn.execute(RECENTLY_MODIFIED_CASES_SEND_ALERT)
+        if rs.returns_rows:
+            for row in rs:
+                if row["published_flg"]:
+                    slack_message = slack_message + str(row["case_type"]) + " " + str(row["case_no"]) + " found published at " + str(row["pg_date"])
+                    slack_message = slack_message + "\n"
+                else:
+                    slack_message = slack_message + str(row["case_type"]) + " " + str(row["case_no"]) + " found unpublished at " + str(row["pg_date"])
+                    slack_message = slack_message + "\n"
+
     if slack_message:
-        slack_message = slack_message + " in {0} space".format(get_app_name())
+        slack_message = slack_message + " in " + get_app_name()
         utils.post_to_slack(slack_message, SLACK_BOTS)
