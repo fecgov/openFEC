@@ -549,6 +549,22 @@ class TestTotals(ApiBaseTest):
 
         # Test calculated percentages
 
+        # `individual_itemized_contributions_percent`
+        itemized_percent = utils.get_percentage(
+            [fields.get('individual_itemized_contributions')],
+            [fields.get('receipts')]
+        )
+        itemized_percent_result = results[0].pop('individual_itemized_contributions_percent')
+        self.assertEqual(itemized_percent, itemized_percent_result)
+
+        # `individual_unitemized_contributions_percent`
+        unitemized_percent = utils.get_percentage(
+            [fields.get('individual_unitemized_contributions')],
+            [fields.get('receipts')]
+        )
+        unitemized_percent_result = results[0].pop('individual_unitemized_contributions_percent')
+        self.assertEqual(unitemized_percent, unitemized_percent_result)
+
         # `individual_contributions_percent`
         individual_percent = utils.get_percentage(
             [fields.get('individual_contributions')],
@@ -556,6 +572,22 @@ class TestTotals(ApiBaseTest):
         )
         individual_percent_result = results[0].pop('individual_contributions_percent')
         self.assertEqual(individual_percent, individual_percent_result)
+
+        # `contributions_percent`
+        contributions_percent = utils.get_percentage(
+            [fields.get('contributions')],
+            [fields.get('receipts')]
+        )
+        contributions_percent_result = results[0].pop('contributions_percent')
+        self.assertEqual(contributions_percent, contributions_percent_result)
+
+        # `other_federal_receipts_percent`
+        other_percent = utils.get_percentage(
+            [fields.get('other_fed_receipts')],
+            [fields.get('receipts')]
+        )
+        other_percent_result = results[0].pop('other_federal_receipts_percent')
+        self.assertEqual(other_percent, other_percent_result)
 
         # `party_and_other_committee_contributions_percent`
         party_percent = utils.get_percentage(
@@ -679,6 +711,22 @@ class TestTotals(ApiBaseTest):
 
         # Test calculated percentages
 
+        # `individual_itemized_contributions_percent`
+        itemized_percent = utils.get_percentage(
+            [fields.get('individual_itemized_contributions')],
+            [fields.get('receipts')]
+        )
+        itemized_percent_result = results[0].pop('individual_itemized_contributions_percent')
+        self.assertEqual(itemized_percent, itemized_percent_result)
+
+        # `individual_unitemized_contributions_percent`
+        unitemized_percent = utils.get_percentage(
+            [fields.get('individual_unitemized_contributions')],
+            [fields.get('receipts')]
+        )
+        unitemized_percent_result = results[0].pop('individual_unitemized_contributions_percent')
+        self.assertEqual(unitemized_percent, unitemized_percent_result)
+
         # `individual_contributions_percent`
         individual_percent = utils.get_percentage(
             [fields.get('individual_contributions')],
@@ -686,6 +734,22 @@ class TestTotals(ApiBaseTest):
         )
         individual_percent_result = results[0].pop('individual_contributions_percent')
         self.assertEqual(individual_percent, individual_percent_result)
+
+        # `contributions_percent`
+        contributions_percent = utils.get_percentage(
+            [fields.get('contributions')],
+            [fields.get('receipts')]
+        )
+        contributions_percent_result = results[0].pop('contributions_percent')
+        self.assertEqual(contributions_percent, contributions_percent_result)
+
+        # `other_federal_receipts_percent`
+        other_percent = utils.get_percentage(
+            [fields.get('other_fed_receipts')],
+            [fields.get('receipts')]
+        )
+        other_percent_result = results[0].pop('other_federal_receipts_percent')
+        self.assertEqual(other_percent, other_percent_result)
 
         # `party_and_other_committee_contributions_percent`
         party_percent = utils.get_percentage(
@@ -812,6 +876,22 @@ class TestTotals(ApiBaseTest):
 
         # Test calculated percentages
 
+        # `individual_itemized_contributions_percent`
+        itemized_percent = utils.get_percentage(
+            [fields.get('individual_itemized_contributions')],
+            [fields.get('receipts')]
+        )
+        itemized_percent_result = results[0].pop('individual_itemized_contributions_percent')
+        self.assertEqual(itemized_percent, itemized_percent_result)
+
+        # `individual_unitemized_contributions_percent`
+        unitemized_percent = utils.get_percentage(
+            [fields.get('individual_unitemized_contributions')],
+            [fields.get('receipts')]
+        )
+        unitemized_percent_result = results[0].pop('individual_unitemized_contributions_percent')
+        self.assertEqual(unitemized_percent, unitemized_percent_result)
+
         # `individual_contributions_percent`
         individual_percent = utils.get_percentage(
             [fields.get('individual_contributions')],
@@ -819,6 +899,22 @@ class TestTotals(ApiBaseTest):
         )
         individual_percent_result = results[0].pop('individual_contributions_percent')
         self.assertEqual(individual_percent, individual_percent_result)
+
+        # `contributions_percent`
+        contributions_percent = utils.get_percentage(
+            [fields.get('contributions')],
+            [fields.get('receipts')]
+        )
+        contributions_percent_result = results[0].pop('contributions_percent')
+        self.assertEqual(contributions_percent, contributions_percent_result)
+
+        # `other_federal_receipts_percent`
+        other_percent = utils.get_percentage(
+            [fields.get('other_fed_receipts')],
+            [fields.get('receipts')]
+        )
+        other_percent_result = results[0].pop('other_federal_receipts_percent')
+        self.assertEqual(other_percent, other_percent_result)
 
         # `party_and_other_committee_contributions_percent`
         party_percent = utils.get_percentage(

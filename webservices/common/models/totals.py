@@ -199,12 +199,39 @@ class CommitteeTotalsPacParty(CommitteeTotals):
     sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
 
     @property
+    def individual_itemized_contributions_percent(self):
+        """ Line 11(a)(i) divided by Line 19 """
+        numerators = [self.individual_itemized_contributions]
+        denominators = [self.receipts]
+        return utils.get_percentage(numerators, denominators)
+
+    @property
+    def individual_unitemized_contributions_percent(self):
+        """ Line 11(a)(ii) divided by Line 19 """
+        numerators = [self.individual_unitemized_contributions]
+        denominators = [self.receipts]
+        return utils.get_percentage(numerators, denominators)
+
+    @property
     def individual_contributions_percent(self):
         """ Line 11(a)(iii) divided by Line 19 """
         numerators = [self.individual_contributions]
         denominators = [self.receipts]
         return utils.get_percentage(numerators, denominators)
 
+    @property
+    def contributions_percent(self):
+        """ Line 11(a)(d) divided by Line 19 """
+        numerators = [self.contributions]
+        denominators = [self.receipts]
+        return utils.get_percentage(numerators, denominators)
+
+    @property
+    def other_federal_receipts_percent(self):
+        """ Line 17 divided by Line 19 """
+        numerators = [self.other_fed_receipts]
+        denominators = [self.receipts]
+        return utils.get_percentage(numerators, denominators)
 
     @property
     def party_and_other_committee_contributions_percent(self):

@@ -501,7 +501,11 @@ entity_fields = {
     'transaction_coverage_date': ma.fields.Date(
         attribute='transaction_coverage.transaction_coverage_date',
         default=None),
+    'individual_itemized_contributions_percent': ma.fields.Decimal(places=2),
+    'individual_unitemized_contributions_percent': ma.fields.Decimal(places=2),
     'individual_contributions_percent': ma.fields.Decimal(places=2),
+    'contributions_percent': ma.fields.Decimal(places=2),
+    'other_federal_receipts_percent': ma.fields.Decimal(places=2),
     'party_and_other_committee_contributions_percent': ma.fields.Decimal(places=2),
     'contributions_ie_and_party_expenditures_made_percent': ma.fields.Decimal(places=2),
     'operating_expenditures_percent': ma.fields.Decimal(places=2),
