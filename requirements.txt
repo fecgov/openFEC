@@ -53,3 +53,4 @@ webtest==2.0.34
 factory_boy==2.8.1
 itsdangerous==1.1.0 #pinned to fix pytest deprecation warning
 jsonschema==3.2.0 #pinned to fix the pytest deprecation warning inside jsonschema/validators.py
+importlib-metadata==3.10.1 #pinned to fix the pytest deprecation warning: SelectableGroups dict interface
