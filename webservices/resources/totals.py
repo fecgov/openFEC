@@ -80,7 +80,7 @@ default_candidate_schemas = (
         },
     },
 )
-class TotalsByEntityTypeView(utils.Resource):
+class TotalsByEntityTypeView(ApiResource):
     @use_kwargs(args.paging)
     @use_kwargs(args.totals_by_entity_type)
     @use_kwargs(args.make_sort_args(default='-cycle'))
@@ -99,8 +99,9 @@ class TotalsByEntityTypeView(utils.Resource):
         )
         query = totals_class.query
 
+        # Committee ID needs to be handled separately because it's not in kwargs
         if committee_id is not None:
-            query = query.filter(totals_class.committee_id == committee_id)
+            query = query.filter(totals_class.committee_id.in_(committee_id))
 
         query = filters.filter_multi(
             query,
