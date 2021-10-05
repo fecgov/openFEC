@@ -4,7 +4,6 @@ from .base import db, BaseModel
 from sqlalchemy.ext.declarative import declared_attr
 
 
-
 class CommitteeTotals(BaseModel):
     __abstract__ = True
 
@@ -53,6 +52,7 @@ class CommitteeTotals(BaseModel):
     first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
     organization_type = db.Column(db.String(1), index=True, doc=docs.ORGANIZATION_TYPE)
     organization_type_full = db.Column(db.String(100), index=True, doc=docs.ORGANIZATION_TYPE)
+    first_f1_date = db.Column(db.Date, index=True, doc=docs.FIRST_F1_DATE)
 
     @declared_attr
     def transaction_coverage(self):
@@ -149,6 +149,7 @@ class CandidateCommitteeTotalsHouseSenate(CandidateCommitteeTotals):
 
 class CommitteeTotalsPacParty(CommitteeTotals):
     __tablename__ = 'ofec_totals_pac_party_vw'
+    # __tablename__ = 'ofec_totals_pac_party_vw_tmp_hc'
 
     all_loans_received = db.Column(db.Numeric(30, 2))
     allocated_federal_election_levin_share = db.Column(db.Numeric(30, 2))
@@ -204,7 +205,6 @@ class CommitteeTotalsPacParty(CommitteeTotals):
         numerators = [self.individual_contributions]
         denominators = [self.receipts]
         return utils.get_percentage(numerators, denominators)
-
 
     @property
     def party_and_other_committee_contributions_percent(self):
@@ -326,6 +326,7 @@ class CommitteeTotalsCombined(CommitteeTotals):
 
 class CommitteeTotalsPerCycle(CommitteeTotals):
     __tablename__ = 'ofec_committee_totals_per_cycle_vw'
+    # __tablename__ = 'ofec_committee_totals_per_cycle_vw_tmp_hc'
 
     idx = db.Column('sub_id', db.Integer, primary_key=True)
     candidate_contribution = db.Column(db.Numeric(30, 2))

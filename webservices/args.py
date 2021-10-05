@@ -418,7 +418,7 @@ totals_by_entity_type = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
     'committee_state': fields.List(IStr, description=docs.STATE_GENERIC),
-        'filing_frequency': fields.List(
+    'filing_frequency': fields.List(
         IStr(validate=validate.OneOf(['', 'A', 'M', 'N', 'Q', 'T', 'W', '-A', '-T'])),
         description=docs.FILING_FREQUENCY,
     ),
@@ -435,7 +435,9 @@ totals_by_entity_type = {
     'organization_type': fields.List(
         IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
         description=docs.ORGANIZATION_TYPE,
-    )
+    ),
+    'min_first_f1_date': fields.Date(description=docs.MIN_FIRST_F1_DATE),
+    'max_first_f1_date': fields.Date(description=docs.MAX_FIRST_F1_DATE)
 }
 
 candidate_totals_detail = {

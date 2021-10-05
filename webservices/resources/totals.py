@@ -183,6 +183,10 @@ class TotalsByEntityTypeView(ApiResource):
                 ('min_last_debts_owed_by_committee', 'max_last_debts_owed_by_committee'),
                 totals_class.last_debts_owed_by_committee,
             ),
+            (
+                ('min_first_f1_date', 'max_first_f1_date'),
+                totals_class.first_f1_date,
+            ),
         ]
 
     def get_filter_fulltext_fields(self, entity_type, totals_class):
