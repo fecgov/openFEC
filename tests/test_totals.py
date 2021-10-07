@@ -54,7 +54,7 @@ shared_fields = {
     'first_file_date': datetime.date.fromisoformat("1982-12-31"),
     'organization_type': 'L',
     'organization_type_full': 'Labor',
-    'first_f1_date': '1982-12-31'
+    'first_f1_date': datetime.date.fromisoformat("1982-12-31")
 }
 
 transaction_coverage_fields = {'transaction_coverage_date': None}
@@ -138,6 +138,7 @@ class TestTotalsByEntityType(ApiBaseTest):
             'candidate_contribution': 1,
             'exempt_legal_accounting_disbursement': 2,
             'federal_funds': 300,
+            'committee_type': 'P',
         }
         factories.CommitteeTotalsPerCycleFactory(**presidential_fields)
         results = self._results(
@@ -366,17 +367,44 @@ class TestTotalsByEntityType(ApiBaseTest):
             results[0]["sponsor_candidate_list"][0]["sponsor_candidate_id"], "H01"
         )
 
-    # def test_first_f1_date_filter(self):
-    #     factories.CommitteeTotalsPerCycleFactory(**presidential_fields)
-    #     results = self._results(
-    #         api.url_for(TotalsByEntityTypeView, cycle=2016, entity_type='presidential')
-    #     )
-    #     assert len(results) == 1
-    #     self.assertEqual(results[0]['cycle'], presidential_fields['cycle'])
+    def test_first_f1_date_filter(self):
+        factories.TotalsPacFactory(**self.first_pac_total)
+        factories.TotalsPacFactory(**self.second_pac_total)
+
+        min_date = datetime.date(1982, 1, 1)
+        max_date = datetime.date(1984, 10, 30)
+        results = self._results(
+            api.url_for(
+                TotalsByEntityTypeView, entity_type='pac', min_first_f1_date=min_date, max_first_f1_date=max_date
+            )
+        )
+
+        assert len(results) == 1
+        assert results[0]['committee_id'] == 'C00001'
+
+    def test_entity_type_filter(self):
+        first_committee = {
+            'committee_id': 'C00003',
+            'committee_type': 'H',
+            'cycle': 2016,
+        }
+        second_committee = {
+            'committee_id': 'C00004',
+            'committee_type': 'P',
+            'cycle': 2016,
+        }
+
+        factories.CommitteeTotalsPerCycleFactory(**first_committee)
+        factories.CommitteeTotalsPerCycleFactory(**second_committee)
+        results = self._results(
+            api.url_for(TotalsByEntityTypeView, entity_type='presidential')
+        )
+
+        assert len(results) == 1
+        assert results[0]['committee_id'] == 'C00004'
+
 
 # test for endpoint: /committee/{committee_id}/totals/
-
-
 class TestTotals(ApiBaseTest):
     def test_Presidential_totals(self):
         committee_id = 'C8675309'
@@ -421,6 +449,11 @@ class TestTotals(ApiBaseTest):
         fields_first_file_date = fields.pop('first_file_date').isoformat()
         self.assertEqual(result_first_file_date, fields_first_file_date)
 
+        # first_f1_date
+        result_first_f1_date = results[0].pop('first_f1_date')
+        expected_first_f1_date = fields.pop('first_f1_date').isoformat()
+        self.assertEqual(result_first_f1_date, expected_first_f1_date)
+
         # Test other fields
         self.assertEqual(results[0], fields)
 
@@ -463,10 +496,13 @@ class TestTotals(ApiBaseTest):
         fields_first_file_date = fields.pop('first_file_date').isoformat()
         self.assertEqual(result_first_file_date, fields_first_file_date)
 
+        # Test first_f1_date
+        result_first_f1_date = results[0].pop('first_f1_date')
+        expected_first_f1_date = fields.pop('first_f1_date').isoformat()
+        self.assertEqual(result_first_f1_date, expected_first_f1_date)
+
         # Test other fields
-        # self.assertEqual(results[0], fields)
-        self.assertEqual(results[0]["first_f1_date"], "1982-12-31")
-        # self.assertEqual(fields["first_f1_date"], "1982-12-31")
+        self.assertEqual(results[0], fields)
 
     def test_House_Senate_Jointed_totals(self):
         committee_id = 'C009'
@@ -565,6 +601,11 @@ class TestTotals(ApiBaseTest):
         result_first_file_date = results[0].pop('first_file_date')
         fields_first_file_date = fields.pop('first_file_date').isoformat()
         self.assertEqual(result_first_file_date, fields_first_file_date)
+
+        # first_f1_date
+        result_first_f1_date = results[0].pop('first_f1_date')
+        expected_first_f1_date = fields.pop('first_f1_date').isoformat()
+        self.assertEqual(result_first_f1_date, expected_first_f1_date)
 
         # Test calculated percentages
 
@@ -695,6 +736,11 @@ class TestTotals(ApiBaseTest):
         result_first_file_date = results[0].pop('first_file_date')
         fields_first_file_date = fields.pop('first_file_date').isoformat()
         self.assertEqual(result_first_file_date, fields_first_file_date)
+
+        # first_f1_date
+        result_first_f1_date = results[0].pop('first_f1_date')
+        expected_first_f1_date = fields.pop('first_f1_date').isoformat()
+        self.assertEqual(result_first_f1_date, expected_first_f1_date)
 
         # Test calculated percentages
 
@@ -828,6 +874,11 @@ class TestTotals(ApiBaseTest):
         result_first_file_date = results[0].pop('first_file_date')
         fields_first_file_date = fields.pop('first_file_date').isoformat()
         self.assertEqual(result_first_file_date, fields_first_file_date)
+
+        # first_f1_date
+        result_first_f1_date = results[0].pop('first_f1_date')
+        expected_first_f1_date = fields.pop('first_f1_date').isoformat()
+        self.assertEqual(result_first_f1_date, expected_first_f1_date)
 
         # Test calculated percentages
 

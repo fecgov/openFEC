@@ -149,7 +149,6 @@ class CandidateCommitteeTotalsHouseSenate(CandidateCommitteeTotals):
 
 class CommitteeTotalsPacParty(CommitteeTotals):
     __tablename__ = 'ofec_totals_pac_party_vw'
-    # __tablename__ = 'ofec_totals_pac_party_vw_tmp_hc'
 
     all_loans_received = db.Column(db.Numeric(30, 2))
     allocated_federal_election_levin_share = db.Column(db.Numeric(30, 2))
@@ -326,7 +325,6 @@ class CommitteeTotalsCombined(CommitteeTotals):
 
 class CommitteeTotalsPerCycle(CommitteeTotals):
     __tablename__ = 'ofec_committee_totals_per_cycle_vw'
-    # __tablename__ = 'ofec_committee_totals_per_cycle_vw_tmp_hc'
 
     idx = db.Column('sub_id', db.Integer, primary_key=True)
     candidate_contribution = db.Column(db.Numeric(30, 2))

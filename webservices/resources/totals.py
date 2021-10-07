@@ -9,7 +9,6 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common.views import ApiResource
 from webservices.utils import use_kwargs
-from webservices import exceptions
 
 committee_type_map = {
     'house-senate': 'H',
@@ -135,6 +134,10 @@ class TotalsByEntityTypeView(ApiResource):
                 models.CommitteeTotalsPacParty.committee_type.in_(
                     pac_cmte_list.union(party_cmte_list)
                 )
+            )
+        if entity_type == 'presidential':
+            query = query.filter(
+                models.CommitteeTotalsPerCycle.committee_type == 'P'
             )
 
         return query, totals_class, totals_schema
