@@ -12,7 +12,7 @@ if env.app.get("space_name", "unknown-space").lower() != "feature":
     schedule = {
         # Reload DAILY_MODIFIED_STARTING_AO at 9pm(EST) except Sunday.
         "reload_all_aos_daily_except_sunday": {
-            "task": "webservices.tasks.legal_docs.reload_all_aos_when_change",
+            "task": "webservices.tasks.legal_docs.daily_reload_all_aos_when_change",
             "schedule": crontab(minute=0, hour=1, day_of_week="mon,tue,wed,thu,fri,sat"),
         },
         # Reload All AOs every Sunday at 9pm(EST).
@@ -26,7 +26,7 @@ if env.app.get("space_name", "unknown-space").lower() != "feature":
             "task": "webservices.tasks.legal_docs.refresh_most_recent_legal_doc",
             "schedule": crontab(minute="*/5", hour="10-23"),
         },
-        # Send modified legal case(during 6am-7pm EST) alerts to Slack every day at 7pm(EST)
+        # Send modified case(s) (MUR/AF/ADR)(during 6am-7pm EST) alerts to Slack every day at 7pm(EST)
         "send_alert_legal_case": {
             "task": "webservices.tasks.legal_docs.send_alert_most_recent_legal_case",
             "schedule": crontab(minute=0, hour=23),
