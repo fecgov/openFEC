@@ -4,7 +4,6 @@ from .base import db, BaseModel
 from sqlalchemy.ext.declarative import declared_attr
 
 
-
 class CommitteeTotals(BaseModel):
     __abstract__ = True
 
@@ -53,6 +52,7 @@ class CommitteeTotals(BaseModel):
     first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
     organization_type = db.Column(db.String(1), index=True, doc=docs.ORGANIZATION_TYPE)
     organization_type_full = db.Column(db.String(100), index=True, doc=docs.ORGANIZATION_TYPE)
+    first_f1_date = db.Column(db.Date, index=True, doc=docs.FIRST_F1_DATE)
 
     @declared_attr
     def transaction_coverage(self):
@@ -204,7 +204,6 @@ class CommitteeTotalsPacParty(CommitteeTotals):
         numerators = [self.individual_contributions]
         denominators = [self.receipts]
         return utils.get_percentage(numerators, denominators)
-
 
     @property
     def party_and_other_committee_contributions_percent(self):
