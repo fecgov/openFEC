@@ -53,7 +53,8 @@ shared_fields = {
     'filing_frequency_full': 'Quarterly filer',
     'first_file_date': datetime.date.fromisoformat("1982-12-31"),
     'organization_type': 'L',
-    'organization_type_full': 'Labor'
+    'organization_type_full': 'Labor',
+    'first_f1_date': None,
 }
 
 transaction_coverage_fields = {'transaction_coverage_date': None}
@@ -80,6 +81,7 @@ class TestTotalsByEntityType(ApiBaseTest):
         'sponsor_candidate_ids': ['H01'],
         'organization_type': 'C',
         'organization_type_full': 'Corporation',
+        'first_f1_date': datetime.date.fromisoformat("1983-02-01"),
     }
     second_pac_total = {
         'committee_id': 'C00002',
@@ -98,6 +100,7 @@ class TestTotalsByEntityType(ApiBaseTest):
         'sponsor_candidate_ids': ['H02'],
         'organization_type': 'T',
         'organization_type_full': 'Trade',
+        'first_f1_date': datetime.date.fromisoformat("1984-12-31"),
     }
 
     def test_pac_total_by_entity_type(self):
@@ -119,6 +122,11 @@ class TestTotalsByEntityType(ApiBaseTest):
         expected_first_file_date = self.second_pac_total.pop('first_file_date').isoformat()
         self.assertEqual(result_first_file_date, expected_first_file_date)
 
+        # Test first_f1_date
+        result_first_f1_date = results[1].pop('first_f1_date')
+        expected_first_f1_date = self.second_pac_total.pop('first_f1_date').isoformat()
+        self.assertEqual(result_first_f1_date, expected_first_f1_date)
+
         # Check all the results for fields we've created in `second_pac_total`
         test_subset = {k: v for k, v in results[1].items() if k in self.second_pac_total}
         self.assertEqual(test_subset, self.second_pac_total)
@@ -130,6 +138,7 @@ class TestTotalsByEntityType(ApiBaseTest):
             'candidate_contribution': 1,
             'exempt_legal_accounting_disbursement': 2,
             'federal_funds': 300,
+            'committee_type': 'P',
         }
         factories.CommitteeTotalsPerCycleFactory(**presidential_fields)
         results = self._results(
@@ -358,10 +367,46 @@ class TestTotalsByEntityType(ApiBaseTest):
             results[0]["sponsor_candidate_list"][0]["sponsor_candidate_id"], "H01"
         )
 
+    def test_first_f1_date_filter(self):
+        factories.TotalsPacFactory(**self.first_pac_total)
+        factories.TotalsPacFactory(**self.second_pac_total)
+
+        min_date = datetime.date(1982, 1, 1)
+        max_date = datetime.date(1984, 10, 30)
+        results = self._results(
+            api.url_for(
+                TotalsByEntityTypeView, entity_type='pac', min_first_f1_date=min_date, max_first_f1_date=max_date
+            )
+        )
+
+        assert len(results) == 1
+        assert results[0]['committee_id'] == 'C00001'
+
+    def test_entity_type_filter(self):
+        first_committee = {
+            'committee_id': 'C00003',
+            'committee_type': 'H',
+            'cycle': 2016,
+        }
+        second_committee = {
+            'committee_id': 'C00004',
+            'committee_type': 'P',
+            'cycle': 2016,
+        }
+
+        factories.CommitteeTotalsPerCycleFactory(**first_committee)
+        factories.CommitteeTotalsPerCycleFactory(**second_committee)
+        results = self._results(
+            api.url_for(TotalsByEntityTypeView, entity_type='presidential')
+        )
+
+        assert len(results) == 1
+        assert results[0]['committee_id'] == 'C00004'
+
 
 # test for endpoint: /committee/{committee_id}/totals/
 class TestTotals(ApiBaseTest):
-    def test_Presidential_totals(self):
+    def test_presidential_totals(self):
         committee_id = 'C8675309'
         transaction_coverage = factories.TransactionCoverageFactory(  # noqa
             committee_id=committee_id, fec_election_year=2016

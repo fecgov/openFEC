@@ -9,7 +9,6 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common.views import ApiResource
 from webservices.utils import use_kwargs
-from webservices import exceptions
 
 committee_type_map = {
     'house-senate': 'H',
@@ -137,6 +136,11 @@ class TotalsByEntityTypeView(ApiResource):
                 )
             )
 
+        if entity_type == 'presidential':
+            query = query.filter(
+                models.CommitteeTotalsPerCycle.committee_type == 'P'
+            )
+
         return query, totals_class, totals_schema
 
     def get_filter_multi_fields(self, entity_type, totals_class):
@@ -182,6 +186,10 @@ class TotalsByEntityTypeView(ApiResource):
             (
                 ('min_last_debts_owed_by_committee', 'max_last_debts_owed_by_committee'),
                 totals_class.last_debts_owed_by_committee,
+            ),
+            (
+                ('min_first_f1_date', 'max_first_f1_date'),
+                totals_class.first_f1_date,
             ),
         ]
 
