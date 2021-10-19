@@ -38,17 +38,25 @@ RECENTLY_MODIFIED_CASES = """
     ORDER BY case_serial
 """
 
+RECENTLY_MODIFIED_CASES_SEND_ALERT = """
+    SELECT case_no, case_type, pg_date, published_flg
+    FROM fecmur.cases_with_parsed_case_serial_numbers_vw
+    WHERE pg_date >= NOW() - '13 hour'::INTERVAL
+    ORDER BY case_serial
+"""
+
 SLACK_BOTS = "#bots"
 
 
-@app.task(once={'graceful': True}, base=QueueOnce)
-def refresh():
+@app.task(once={"graceful": True}, base=QueueOnce)
+def refresh_most_recent_legal_doc():
+    # refresh most recently(within 8 hours) modified legal_doc.
     with db.engine.connect() as conn:
-        refresh_aos(conn)
-        refresh_cases(conn)
+        refresh_most_recent_aos(conn)
+        refresh_most_recent_cases(conn)
 
 
-@app.task(once={'graceful': True}, base=QueueOnce)
+@app.task(once={"graceful": True}, base=QueueOnce)
 def reload_all_aos_when_change():
     """
     Reload all AOs if there were any new or modified AOs found for the past 24 hour period
@@ -56,65 +64,86 @@ def reload_all_aos_when_change():
     with db.engine.connect() as conn:
         row = conn.execute(DAILY_MODIFIED_STARTING_AO).first()
         if row:
-            logger.info("AO found %s modified at %s", row["ao_no"], row["pg_date"])
-            logger.info("Daily (%s) reload of all AOs starting", datetime.date.today().strftime("%A"))
+            logger.info(" AO found %s modified at %s", row["ao_no"], row["pg_date"])
+            logger.info(" Daily (%s) reload of all AOs starting", datetime.date.today().strftime("%A"))
             load_advisory_opinions()
-            logger.info("Daily (%s) reload of all AOs completed", datetime.date.today().strftime("%A"))
-            slack_message = 'Daily reload of all AOs completed in {0} space'.format(get_app_name())
+            logger.info(" Daily (%s) reload of all AOs completed", datetime.date.today().strftime("%A"))
+            slack_message = "Daily reload of all AOs completed in {0} space".format(get_app_name())
+
             utils.post_to_slack(slack_message, SLACK_BOTS)
         else:
-            logger.info("No daily (%s) modified AOs found", datetime.date.today().strftime("%A"))
+            logger.info(" No daily (%s) modified AOs found", datetime.date.today().strftime("%A"))
             slack_message = \
-                'No modified AOs found for the day - Reload of all AOs skipped in {0} space'.format(get_app_name())
+                "No modified AOs found for the day - Reload of all AOs skipped in {0} space".format(get_app_name())
             utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
-@app.task(once={'graceful': True}, base=QueueOnce)
+@app.task(once={"graceful": True}, base=QueueOnce)
 def reload_all_aos():
-    logger.info("Weekly (%s) reload of all AOs starting", datetime.date.today().strftime("%A"))
+    logger.info(" Weekly (%s) reload of all AOs starting", datetime.date.today().strftime("%A"))
     load_advisory_opinions()
-    logger.info("Weekly (%s) reload of all AOs completed", datetime.date.today().strftime("%A"))
-    slack_message = 'Weekly reload of all AOs completed in {0} space'.format(get_app_name())
+    logger.info(" Weekly (%s) reload of all AOs completed", datetime.date.today().strftime("%A"))
+    slack_message = "Weekly reload of all AOs completed in {0} space".format(get_app_name())
     utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
-@app.task(once={'graceful': True}, base=QueueOnce)
+@app.task(once={"graceful": True}, base=QueueOnce)
 def create_es_backup():
     try:
-        logger.info("Weekly (%s) elasticsearch backup starting", datetime.date.today().strftime("%A"))
+        logger.info(" Weekly (%s) elasticsearch backup starting", datetime.date.today().strftime("%A"))
         create_es_snapshot()
-        logger.info("Weekly (%s) elasticsearch backup completed", datetime.date.today().strftime("%A"))
-        slack_message = 'Weekly elasticsearch backup completed in {0} space'.format(get_app_name())
+        logger.info(" Weekly (%s) elasticsearch backup completed", datetime.date.today().strftime("%A"))
+        slack_message = "Weekly elasticsearch backup completed in {0} space".format(get_app_name())
         utils.post_to_slack(slack_message, SLACK_BOTS)
     except Exception as error:
         logger.exception(error)
-        slack_message = '*ERROR* elasticsearch backup failed for {0}. Check logs.'.format(get_app_name())
+        slack_message = "*ERROR* elasticsearch backup failed for {0}. Check logs.".format(get_app_name())
         utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
-def refresh_aos(conn):
+def refresh_most_recent_aos(conn):
     row = conn.execute(RECENTLY_MODIFIED_STARTING_AO).first()
     if row:
-        logger.info("AO %s found modified at %s", row["ao_no"], row["pg_date"])
+        logger.info(" AO %s found modified at %s", row["ao_no"], row["pg_date"])
         load_advisory_opinions(row["ao_no"])
     else:
-        logger.info("No modified AOs found")
+        logger.info(" No modified AOs found")
 
 
-def refresh_cases(conn):
-    logger.info('Checking for modified cases')
+def refresh_most_recent_cases(conn):
+    logger.info(" Checking for modified cases(MUR/AF/ADR)...")
     rs = conn.execute(RECENTLY_MODIFIED_CASES)
     if rs.returns_rows:
         load_count = 0
         deleted_case_count = 0
         for row in rs:
-            logger.info("%s %s found modified at %s", row["case_type"], row["case_no"], row["pg_date"])
+            logger.info(" %s %s found modified at %s", row["case_type"], row["case_no"], row["pg_date"])
             load_cases(row["case_type"], row["case_no"])
             if row["published_flg"]:
                 load_count += 1
-                logger.info("Total of %d case(s) loaded...", load_count)
+                logger.info(" Total of %d case(s) loaded...", load_count)
             else:
                 deleted_case_count += 1
-                logger.info("Total of %d case(s) unpublished...", deleted_case_count)
+                logger.info(" Total of %d case(s) unpublished...", deleted_case_count)
     else:
-        logger.info("No modified cases found")
+        logger.info(" No modified cases found")
+
+
+@app.task(once={"graceful": True}, base=QueueOnce)
+def send_alert_most_recent_legal_case():
+    # Send modified legal case(during 6am-7pm EST) alerts to Slack every day at 7pm(EST).
+    slack_message = ""
+    with db.engine.connect() as conn:
+        rs = conn.execute(RECENTLY_MODIFIED_CASES_SEND_ALERT)
+        if rs.returns_rows:
+            for row in rs:
+                if row["published_flg"]:
+                    slack_message = slack_message + str(row["case_type"]) + " " + str(row["case_no"]) + " found published at " + str(row["pg_date"])
+                    slack_message = slack_message + "\n"
+                else:
+                    slack_message = slack_message + str(row["case_type"]) + " " + str(row["case_no"]) + " found unpublished at " + str(row["pg_date"])
+                    slack_message = slack_message + "\n"
+
+    if slack_message:
+        slack_message = slack_message + " in " + get_app_name()
+        utils.post_to_slack(slack_message, SLACK_BOTS)

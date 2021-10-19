@@ -47,4 +47,4 @@ def get_json_data(response):
 
 
 def get_app_name():
-    return env.get_credential("APP_NAME")
+    return env.get_credential("APP_NAME") if env.get_credential("APP_NAME") is not None else "fec | api | local"
