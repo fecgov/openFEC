@@ -70,10 +70,13 @@ def refresh_most_recent_aos(conn):
     """
     When found any modified AO within 8 hours, relead all AOs starting the earliest AO.
     """
+    logger.info(" Checking for recently modified AO...")
     row = conn.execute(RECENTLY_MODIFIED_STARTING_AO).first()
     if row:
         logger.info(" Recently modified AO %s found at %s", row["ao_no"], row["pg_date"])
         load_advisory_opinions(row["ao_no"])
+    else:
+        logger.info(" No recently modified AO(s) found.")
 
 
 def refresh_most_recent_cases(conn):
@@ -82,10 +85,13 @@ def refresh_most_recent_cases(conn):
         if published_flg = true reload the modified case(s).
         if published_flg = false delete the case(s)
     """
+    logger.info(" Checking for recently modified cases(MUR/AF/ADR)...")
     rs = conn.execute(RECENTLY_MODIFIED_CASES)
+    row_count = 0
     load_count = 0
     deleted_case_count = 0
     for row in rs:
+        row_count += 1
         logger.info(" Recently modified %s %s found at %s", row["case_type"], row["case_no"], row["pg_date"])
         load_cases(row["case_type"], row["case_no"])
         if row["published_flg"]:
@@ -94,6 +100,9 @@ def refresh_most_recent_cases(conn):
         else:
             deleted_case_count += 1
             logger.info(" Total of %d case(s) unpublished.", deleted_case_count)
+
+    if row_count <= 0:
+        logger.info(" No recently modified cases(MUR/AF/ADR) found.")
 
 
 @app.task(once={"graceful": True}, base=QueueOnce)
