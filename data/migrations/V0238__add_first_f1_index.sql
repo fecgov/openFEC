@@ -1,13 +1,13 @@
 /*
-This migration file is for #4928
+This migration file is for #4975
 
 1) Add `first_f1_date` index to ofec_committee_history_mv and ofec_committee_history_vw
 
-Replaces V0218
+Replaces V0235
 
 2) Add `first_f1_date` index to ofec_committee_detail_mv and ofec_committee_detail_vw
 
-Replaces V0217
+Replaces V0235
 
 */
 
