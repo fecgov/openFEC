@@ -295,6 +295,19 @@ class CommitteeFormatTest(ApiBaseTest):
             [each["committee_id"] for each in results], committee_ids[::-1]
         )
 
+    def test_first_f1_date_sort(self):
+        committees = [
+            factories.CommitteeFactory(first_f1_date="2003-10-12"),
+            factories.CommitteeFactory(first_f1_date="2017-05-14"),
+        ]
+        committee_ids = [each.committee_id for each in committees]
+        results = self._results(api.url_for(CommitteeList, sort="first_f1_date"))
+        self.assertEqual([each["committee_id"] for each in results], committee_ids)
+        results = self._results(api.url_for(CommitteeList, sort="-first_f1_date"))
+        self.assertEqual(
+            [each["committee_id"] for each in results], committee_ids[::-1]
+        )
+
     def test_committee_sort_default(self):
         committees = [
             factories.CommitteeFactory(name="Zartlet for America"),
