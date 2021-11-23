@@ -640,8 +640,23 @@ ScheduleBByRecipientIDSchema = make_schema(
         'exclude': ('idx', 'committee', 'recipient')
     },
 )
-
 augment_schemas(ScheduleBByRecipientIDSchema)
+
+
+# Schema/PageSchema for ScheduleBByRecipient
+ScheduleBByRecipientSchema = make_schema(
+    models.ScheduleBByRecipient,
+    fields={
+        'recipient_disbursement_percent': ma.fields.Decimal(places=2),
+    },
+    options={
+        'exclude': ('idx', 'committee', 'recipient')
+    },
+)
+
+ScheduleBByRecipientPageSchema = make_page_schema(ScheduleBByRecipientSchema, page_type=paging_schemas.SeekPageSchema)
+register_schema(ScheduleBByRecipientSchema)
+register_schema(ScheduleBByRecipientPageSchema)
 
 augment_itemized_aggregate_models(
     make_schema,
@@ -651,7 +666,6 @@ augment_itemized_aggregate_models(
     models.ScheduleAByState,
     models.ScheduleAByEmployer,
     models.ScheduleAByOccupation,
-    models.ScheduleBByRecipient,
     models.ScheduleBByPurpose,
 )
 
