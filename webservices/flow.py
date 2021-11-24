@@ -46,6 +46,7 @@ def get_graph():
         'totals_house_senate',
         'totals_ie',
         'totals_presidential',
+        'sched_b_by_recipient',
     ]
     graph.add_nodes_from(MATERIALIZED_VIEWS)
 
@@ -123,6 +124,6 @@ def get_graph():
     ])
 
     graph.add_edge('ofec_pcc_to_pac', 'committee_history'),
-    
+    graph.add_edge('totals_combined', 'sched_b_by_recipient'),
 
     return graph

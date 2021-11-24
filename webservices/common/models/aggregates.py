@@ -54,7 +54,7 @@ class BaseDisbursementAggregate(BaseAggregate):
 
 
 class ScheduleBByRecipient(BaseDisbursementAggregate):
-    __tablename__ = "ofec_sched_b_aggregate_recipient_mv_tmp_hc"
+    __tablename__ = "ofec_sched_b_aggregate_recipient_mv"
 
     recipient_name = db.Column('recipient_nm', db.String, primary_key=True, doc=docs.RECIPIENT_NAME)
     committee_total_disbursements = db.Column('disbursements', db.Numeric(30, 2), index=True, doc=docs.DISBURSEMENTS)
