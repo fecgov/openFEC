@@ -650,7 +650,7 @@ ScheduleBByRecipientSchema = make_schema(
         'recipient_disbursement_percent': ma.fields.Decimal(places=2),
     },
     options={
-        'exclude': ('idx', 'committee', 'recipient')
+        'exclude': ('idx', 'committee')
     },
 )
 
