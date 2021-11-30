@@ -148,6 +148,8 @@ class TestCommitteeAggregates(ApiBaseTest):
             'count': aggregate.count,
             'memo_total': aggregate.memo_total,
             'memo_count': aggregate.memo_count,
+            'committee_total_disbursements': aggregate.committee_total_disbursements,
+            'recipient_disbursement_percent': aggregate.recipient_disbursement_percent,
         }
         self.assertEqual(results[0], expected)
 
