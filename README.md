@@ -439,7 +439,7 @@ Where *<app name>* is the name of the application instance you want to connect t
 . /home/vcap/app/bin/cf_env_setup.sh
 ```
 
-More information about using SSH with cloud.dov can be found in the [cloud.gov SSH documentation](https://cloud.gov/docs/apps/using-ssh/#cf-ssh).
+More information about using SSH with cloud.gov can be found in the [cloud.gov SSH documentation](https://cloud.gov/docs/apps/using-ssh/#cf-ssh).
 
 ### Create a changelog
 If you're preparing a release to production, you should also create a changelog. The preferred way to do this is using the [changelog generator](https://github.com/skywinder/github-changelog-generator).
@@ -562,6 +562,28 @@ The production and staging environments use relational database service (RDS) in
 ### Nightly updates
 Incrementally-updated aggregates and materialized views are updated nightly; see
 `webservices/tasks/refresh.py` for details. When the nightly update finishes, logs and error reports are slacked to the team.
+
+### Refreshing materialized views (excluding schedules)
+The materialized views are manually refreshed when something needs to be removed or updated on the website (data section) on-demand. 
+
+* Log in to CloudFoundry ([Resource](https://docs.cloudfoundry.org/devguide/using-tasks.html))
+* Select the ${cf_space} space
+* Run this command:
+    
+    ```
+    cf run-task api 'python manage.py refresh_materialized' --name refresh
+    ```
+* Check status of task:
+
+    ```
+    cf tasks api
+    ```
+* Open a terminal to tail the logs:
+
+    ```
+    cf logs api | grep "Refreshing"
+    ```
+* View logs using kibana
 
 ### Managing Elasticsearch
 Reference Wiki [Elasticsearch 7.x.0 management instruction](https://github.com/fecgov/openFEC/wiki/Elasticsearch-7.x.0-management-instruction)
