@@ -54,9 +54,16 @@ class BaseDisbursementAggregate(BaseAggregate):
 
 
 class ScheduleBByRecipient(BaseDisbursementAggregate):
-    __table_args__ = {'schema': 'disclosure'}
-    __tablename__ = 'dsc_sched_b_aggregate_recipient_new'
+    __tablename__ = "ofec_sched_b_aggregate_recipient_mv"
+
     recipient_name = db.Column('recipient_nm', db.String, primary_key=True, doc=docs.RECIPIENT_NAME)
+    committee_total_disbursements = db.Column('disbursements', db.Numeric(30, 2), index=True, doc=docs.DISBURSEMENTS)
+
+    @property
+    def recipient_disbursement_percent(self):
+        numerators = [self.total]
+        denominators = [self.committee_total_disbursements]
+        return utils.get_percentage(numerators, denominators)
 
 
 class ScheduleBByRecipientID(BaseDisbursementAggregate):
