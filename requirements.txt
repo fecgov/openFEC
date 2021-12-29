@@ -39,7 +39,7 @@ git+https://github.com/fecgov/marshmallow-pagination@master
 smart_open==1.8.0
 
 # Task queue
-celery==4.3.0 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
+celery==5.2.2 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
 celery-once==3.0.0
 redis==3.2.0
 
