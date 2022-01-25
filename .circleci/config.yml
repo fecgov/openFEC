@@ -56,9 +56,9 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
             [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-            nvm install 14.13.0
-            nvm use 14.13.0
-            nvm alias default 14.13.0
+            nvm install 14.15.5
+            nvm use 14.15.5
+            nvm alias default 14.15.5
             npm install -g npm
             npm install
             npm run build
