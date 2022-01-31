@@ -504,3 +504,19 @@ class TestEFileReports(ApiBaseTest):
                 if min_date.isoformat() <= each['receipt_date'] <= max_date.isoformat()
             )
         )
+
+def test_reports_by_entity_type_and_committee_type(self):
+        presidential_report = factories.ReportsPresidentialFactory(
+            committee_type='P'
+        )
+        house_report = factories.ReportsHouseSenateFactory(
+            committee_type='H'
+        )
+        results = self._results(
+            api.url_for(ReportsView, entity_type='presidential', committee_type='P',)
+        )
+        self._check_committee_ids(
+            results,
+            [presidential_report],
+            [house_report],
+        )
