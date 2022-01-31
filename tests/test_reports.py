@@ -505,7 +505,7 @@ class TestEFileReports(ApiBaseTest):
             )
         )
 
-def test_reports_by_entity_type_and_committee_type(self):
+    def test_reports_by_entity_type_and_committee_type(self):
         presidential_report = factories.ReportsPresidentialFactory(
             committee_type='P'
         )
