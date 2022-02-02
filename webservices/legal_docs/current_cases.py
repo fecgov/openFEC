@@ -258,7 +258,7 @@ def load_cases(case_type, case_no=None):
                     try:
                         logger.info("Found an unpublished case - deleting {0}: {1} from ES".format(
                             case_type, case["no"]))
-                        es_client.delete(index=DOCS_ALIAS, id="case['doc_id']")
+                        es_client.delete(index=DOCS_ALIAS, id=case["doc_id"])
                         logger.info("Successfully deleted {} {} from ES".format(case_type, case["no"]))
                     except Exception as err:
                         logger.error("An error occurred while deteting an unpublished case.{0} {1} {2}".format(
