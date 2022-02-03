@@ -41,13 +41,13 @@ class TestReports(ApiBaseTest):
         )
         self._check_committee_ids(results, [committee_report], [other_report])
 
-    def test_reports_by_committee_type(self):
+    def test_reports_by_entity_type(self):
         presidential_report = factories.ReportsPresidentialFactory()
         house_report = factories.ReportsHouseSenateFactory()
         results = self._results(api.url_for(ReportsView, entity_type='presidential'))
         self._check_committee_ids(results, [presidential_report], [house_report])
 
-    def test_reports_by_committee_type_and_cycle(self):
+    def test_reports_by_entity_type_and_cycle(self):
         presidential_report_2012 = factories.ReportsPresidentialFactory(cycle=2012)
         presidential_report_2016 = factories.ReportsPresidentialFactory(cycle=2016)
         house_report_2016 = factories.ReportsHouseSenateFactory(cycle=2016)
@@ -98,7 +98,7 @@ class TestReports(ApiBaseTest):
             self.assertEqual(len(results), 1)
             self.assertEqual(results[0]['committee_id'], reports[1].committee_id)
 
-    def test_reports_by_committee_type_and_year(self):
+    def test_reports_by_entity_type_and_year(self):
         presidential_report_2012 = factories.ReportsPresidentialFactory(
             report_year=2012
         )
@@ -409,7 +409,7 @@ class TestEFileReports(ApiBaseTest):
         results = self._results(
             api.url_for(
                 EFilingPresidentialSummaryView,
-                committee_type='presidential',
+                entity_type='presidential',
                 committee_id=committee_id,
             )
         )
@@ -447,7 +447,7 @@ class TestEFileReports(ApiBaseTest):
         results = self._results(
             api.url_for(
                 EFilingHouseSenateSummaryView,
-                committee_type='house-senate',
+                entity_type='house-senate',
                 committee_id=committee_id,
             )
         )
@@ -503,4 +503,21 @@ class TestEFileReports(ApiBaseTest):
                 for each in results
                 if min_date.isoformat() <= each['receipt_date'] <= max_date.isoformat()
             )
+        )
+
+    def test_reports_by_entity_type_and_committee_type(self):
+        committee = factories.CommitteeFactory()
+        committee_id = committee.committee_id
+        presidential_report = factories.CommitteeHistoryFactory(
+            committee_id=committee_id, committee_type='P',
+        )
+        factories.ReportsPresidentialFactory(
+            committee_id=committee_id, report_year=2016,
+        )
+        results = self._results(
+            api.url_for(ReportsView, entity_type='presidential', committee_type='P',)
+        )
+        self._check_committee_ids(
+            results,
+            [presidential_report],
         )

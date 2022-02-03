@@ -181,7 +181,10 @@ class ReportsView(views.ApiResource):
             query = query.filter(
                 models.CommitteeHistory.committee_type.in_(kwargs.get('type'))
             )
-
+        if kwargs.get('committee_type'):
+            query = query.filter(
+                models.CommitteeHistory.committee_type.in_(kwargs.get('committee_type'))
+            )
         query = filters.filter_range(query, kwargs, get_range_filters())
         query = filters.filter_match(query, kwargs, get_match_filters())
         query = filters.filter_multi(query, kwargs, filter_multi_fields)
