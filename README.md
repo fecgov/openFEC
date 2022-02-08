@@ -51,8 +51,8 @@ We are always trying to improve our documentation. If you have suggestions or ru
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](https://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
     * Elastic Search 7.x (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/_installation.html))
-    * Flyway 5.2.4 ([download](https://flywaydb.org/getstarted/download))
-		* After downloading, open `flyway5.2.4/conf/flyway.conf` and set
+    * Flyway 8.4.3 ([download](https://flywaydb.org/getstarted/download))
+		* After downloading, open `flyway8.4.3/conf/flyway.conf` and set
            the flyway environment variables `flyway.url` and
            `flyway.locations` as
 
