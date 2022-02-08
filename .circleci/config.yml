@@ -31,13 +31,13 @@ jobs:
           # Commands listed here are from the CircleCI PostgreSQL config docs:
           # https://circleci.com/docs/2.0/postgres-config/#postgresql-circleci-configuration-example
           command: |
-            sudo apt-get --allow-releaseinfo-change update -qq && sudo apt-get install -y build-essential postgresql-client
+            sudo apt-get --allow-releaseinfo-change-suite update -qq && sudo apt-get install -y build-essential postgresql-client
             echo 'export PATH=/usr/lib/postgresql/10.11/bin/:$PATH' >> $BASH_ENV
 
       - run:
           name: Install flyway
           command: |
-            sudo apt-get --allow-releaseinfo-change update && sudo apt-get install -y default-jdk
+            sudo apt-get --allow-releaseinfo-change-suite update && sudo apt-get install -y default-jdk
             mkdir flyway
             curl -s https://repo.maven.apache.org/maven2/org/flywaydb/flyway-commandline/5.2.4/flyway-commandline-5.2.4-linux-x64.tar.gz | tar zxv -C flyway
             echo 'export PATH=./flyway/flyway-5.2.4:$PATH' >> $BASH_ENV
