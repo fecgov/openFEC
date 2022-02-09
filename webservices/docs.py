@@ -372,6 +372,24 @@ COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
         - Y party, qualified\n\
         - Z national party non-federal account\n\
 '
+COMMITTEE_TYPE_OLD = 'The `deprecated` one-letter type code of the organization:\n\
+        - C communication cost\n\
+        - D delegate\n\
+        - E electioneering communication\n\
+        - H House\n\
+        - I independent expenditor (person or group)\n\
+        - N PAC - nonqualified\n\
+        - O independent expenditure-only (super PACs)\n\
+        - P presidential\n\
+        - Q PAC - qualified\n\
+        - S Senate\n\
+        - U single candidate independent expenditure\n\
+        - V PAC with non-contribution account, nonqualified\n\
+        - W PAC with non-contribution account, qualified\n\
+        - X party, nonqualified\n\
+        - Y party, qualified\n\
+        - Z national party non-federal account\n\
+'
 COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS = COMMITTEE_TYPE + '\
         - all All Committee Types\n\
         - all_candidates All Candidate Committee Types (H, S, P)\n\
