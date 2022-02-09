@@ -1,9 +1,9 @@
 /*
 This is for issue #5018.
-Add three columns:
-   1)Itemized individual contributions (for the clickthrough): Line 11a(i)
-   2)Transfers from other committees: Line 12
-   3)Other committee contributions: Line 11c
+Add three new columns in ofec_candidate_totals_mv:
+   1)individual_itemized_contributions (Line 11a(i))
+   2)transfers_from_other_authorized_committee (Line 12)
+   3)other_receipts: (Line 11c)
 
 Previous file: V0181__update_ofec_candidate_totals_mv.sql
 */
