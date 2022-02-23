@@ -242,7 +242,7 @@ class TotalsCandidateView(ApiResource):
 
 # endpoint: /candidates/totals/by_office/
 @doc(
-    tags=['candidate'], description=docs.TOTAL_BY_OFFICE_TAG,
+    tags=["candidate"], description=docs.TOTAL_BY_OFFICE_TAG,
 )
 class AggregateByOfficeView(ApiResource):
     schema = schemas.TotalByOfficeSchema
@@ -259,50 +259,53 @@ class AggregateByOfficeView(ApiResource):
     def build_query(self, **kwargs):
         total = models.CandidateTotal
         query = db.session.query(
-            total.office.label('office'),
-            total.election_year.label('election_year'),
+            total.office.label("office"),
+            total.election_year.label("election_year"),
             sa.func.sum(total.receipts).label(
-                'total_receipts'),
+                "total_receipts"),
             sa.func.sum(total.disbursements).label(
-                'total_disbursements'),
+                "total_disbursements"),
             sa.func.sum(total.individual_itemized_contributions).label(
-                'total_individual_itemized_contributions'),
+                "total_individual_itemized_contributions"),
             sa.func.sum(total.transfers_from_other_authorized_committee).label(
-                'total_transfers_from_other_authorized_committee'),
+                "total_transfers_from_other_authorized_committee"),
             sa.func.sum(total.other_political_committee_contributions).label(
-                'total_other_political_committee_contributions'),
+                "total_other_political_committee_contributions"),
         )
         # remove election_year=null result
         query = query.filter(~total.election_year.is_(None))
 
-        if kwargs.get('office') and kwargs['office'] is not None:
-            query = query.filter(total.office == kwargs['office'])
+        if kwargs.get("office"):
+            query = query.filter(total.office == kwargs["office"])
 
-        if kwargs.get('election_year'):
+        if kwargs.get("election_year"):
             query = query.filter(
-                total.election_year.in_(kwargs['election_year'])
+                total.election_year.in_(kwargs["election_year"])
             )
 
-        if 'is_active_candidate' in kwargs and kwargs.get('is_active_candidate'):
+        # is_active_candidate=true  //only show active candidate totals
+        # is_active_candidate=false //only show inactive candidate totals
+        # is_active_candidate=not specified //show full totals of both active and inactive
+        if kwargs.get("is_active_candidate"):
             query = query.filter(total.candidate_inactive.is_(False))
 
-        elif 'is_active_candidate' in kwargs and not kwargs.get('is_active_candidate'):
+        elif "is_active_candidate" in kwargs and not kwargs.get("is_active_candidate"):
             query = query.filter(total.candidate_inactive.is_(True))
 
         # if not pass election_full variable, election_full default set `true` in args.py
         # if pass election_full = true, election_year is candidate election year
         # if pass election_full = flase, election_year is finance two-year period
-        if 'election_full' in kwargs and kwargs.get('election_full'):
-            query = query.filter(total.is_election.is_(kwargs['election_full']))
+        if kwargs.get("election_full"):
+            query = query.filter(total.is_election.is_(kwargs["election_full"]))
 
-        if kwargs.get('min_election_cycle') and kwargs['min_election_cycle'] is not None:
+        if kwargs.get("min_election_cycle"):
             query = query.filter(
-                total.election_year >= kwargs['min_election_cycle']
+                total.election_year >= kwargs["min_election_cycle"]
             )
 
-        if kwargs.get('max_election_cycle') and kwargs['max_election_cycle'] is not None:
+        if kwargs.get("max_election_cycle"):
             query = query.filter(
-                total.election_year <= kwargs['max_election_cycle']
+                total.election_year <= kwargs["max_election_cycle"]
             )
 
         query = query.group_by(
@@ -313,7 +316,7 @@ class AggregateByOfficeView(ApiResource):
 
 # endpoint: /candidates/totals/by_office/by_party/
 @doc(
-    tags=['candidate'], description=docs.TOTAL_BY_OFFICE_BY_PARTY_TAG,
+    tags=["candidate"], description=docs.TOTAL_BY_OFFICE_BY_PARTY_TAG,
 )
 class AggregateByOfficeByPartyView(ApiResource):
 
@@ -329,49 +332,52 @@ class AggregateByOfficeByPartyView(ApiResource):
     def build_query(self, **kwargs):
         total = models.CandidateTotal
         query = db.session.query(
-            total.office.label('office'),
+            total.office.label("office"),
             sa.case(
                 [
-                    (total.party == 'DFL', 'DEM'),
-                    (total.party == 'DEM', 'DEM'),
-                    (total.party == 'REP', 'REP'),
+                    (total.party == "DFL", "DEM"),
+                    (total.party == "DEM", "DEM"),
+                    (total.party == "REP", "REP"),
                 ],
-                else_='Other',
-            ).label('party'),
-            total.election_year.label('election_year'),
-            sa.func.sum(total.receipts).label('total_receipts'),
-            sa.func.sum(total.disbursements).label('total_disbursements'),
+                else_="Other",
+            ).label("party"),
+            total.election_year.label("election_year"),
+            sa.func.sum(total.receipts).label("total_receipts"),
+            sa.func.sum(total.disbursements).label("total_disbursements"),
         )
 
         # remove election_year=null result
         query = query.filter(~total.election_year.is_(None))
 
-        if kwargs.get('office') and kwargs['office'] is not None:
-            query = query.filter(total.office == kwargs['office'])
-        if kwargs.get('election_year'):
-            query = query.filter(total.election_year.in_(kwargs['election_year']))
+        if kwargs.get("office"):
+            query = query.filter(total.office == kwargs["office"])
+        if kwargs.get("election_year"):
+            query = query.filter(total.election_year.in_(kwargs["election_year"]))
 
-        if 'is_active_candidate' in kwargs and kwargs.get('is_active_candidate'):
+        # is_active_candidate=true  //only show active candidate totals
+        # is_active_candidate=false //only show inactive candidate totals
+        # is_active_candidate=not specified //show full totals of both active and inactive
+        if kwargs.get("is_active_candidate"):
             query = query.filter(total.candidate_inactive.is_(False))
 
-        elif 'is_active_candidate' in kwargs and not kwargs.get('is_active_candidate'):
+        elif "is_active_candidate" in kwargs and not kwargs.get("is_active_candidate"):
             query = query.filter(total.candidate_inactive.is_(True))
 
         # if not pass election_full variable, election_full default set `true` in args.py
         # if pass election_full = true, election_year is candidate election year
         # if pass election_full = flase, election_year is finance two-year period
-        if 'election_full' in kwargs and kwargs.get('election_full'):
-            query = query.filter(total.is_election.is_(kwargs['election_full']))
+        if kwargs.get("election_full"):
+            query = query.filter(total.is_election.is_(kwargs["election_full"]))
 
         query = query.group_by(
             total.office,
             sa.case(
                 [
-                    (total.party == 'DFL', 'DEM'),
-                    (total.party == 'DEM', 'DEM'),
-                    (total.party == 'REP', 'REP'),
+                    (total.party == "DFL", "DEM"),
+                    (total.party == "DEM", "DEM"),
+                    (total.party == "REP", "REP"),
                 ],
-                else_='Other',
+                else_="Other",
             ),
             total.election_year,
         ).order_by(sa.desc(total.election_year))
