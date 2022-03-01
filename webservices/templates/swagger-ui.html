@@ -56,6 +56,13 @@
     font-size: 24px;
     }
 
+    /* npm package, swagger-ui-dist@4.5.0 causes overlapping of columns(name, description) in swagger UI. Override the value of response-col_description value from width: 99 to width: unset */
+    .swagger-ui .parameters-col_description, 
+    .swagger-ui .response-col_description 
+    {
+     width:unset;
+    }
+
   </style>
 </head>
 
