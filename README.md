@@ -51,8 +51,8 @@ We are always trying to improve our documentation. If you have suggestions or ru
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](https://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
     * Elastic Search 7.x (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/_installation.html))
-    * Flyway 8.4.3 ([download](https://flywaydb.org/getstarted/download))
-		* After downloading, open `flyway8.4.3/conf/flyway.conf` and set
+    * Flyway 8.5.1 ([download](https://flywaydb.org/documentation/commandline/))
+		* After downloading, open `flyway8.5.1/conf/flyway.conf` and set
            the flyway environment variables `flyway.url` and
            `flyway.locations` as
 
@@ -686,9 +686,9 @@ You can optionally choose to restrict traffic that goes to the mirrors/replicas 
 #### Installing `flyway`
 `flyway` is a Java application and requires a Java runtime environment (JRE) for execution.
 
-It is recommended that you install the JRE separately using your package manager of choice, e.g., `Homebrew`, `apt`, etc, and download the version without the JRE e.g. `flyway-commandline-5.2.4.tar.gz` from [Flyway downloads](https://flywaydb.org/getstarted/download). This way, you have complete control over your Java version and can use the JRE for other applications like `Elasticsearch`. If you have trouble with a separate JRE or are not comfortable with managing a separate JRE, you can download the `flyway` archive that bundles the JRE, e.g., `flyway-commandline-5.2.4-macosx-x64.tar.gz`, `flyway-commandline-5.2.4-linux-x64.tar.gz`, etc.
+It is recommended that you install the JRE separately using your package manager of choice, e.g., `Homebrew`, `apt`, etc, and download the version without the JRE e.g. `flyway-commandline-8.5.1.tar.gz` from [Flyway downloads](https://flywaydb.org/getstarted/download). This way, you have complete control over your Java version and can use the JRE for other applications like `Elasticsearch`. If you have trouble with a separate JRE or are not comfortable with managing a separate JRE, you can download the `flyway` archive that bundles the JRE, e.g., `flyway-commandline-8.5.1-macosx-x64.tar.gz`, `flyway-commandline-8.5.1-linux-x64.tar.gz`, etc.
 
-Expand the downloaded archive. Add `<target_directory>/flyway/flyway-5.2.4` to your `PATH` where `target_directory` is the directory in which the archive has been expanded.
+Expand the downloaded archive. Add `<target_directory>/flyway/flyway-8.5.1` to your `PATH` where `target_directory` is the directory in which the archive has been expanded.
 
 #### How `flyway` works
 All database schema modification code is checked into version control in the directory `data/migrations` in the form of SQL files that follow a strict naming convention - `V<version_number>__<descriptive_name>.sql`. `flyway` also maintains a table in the target database called `flyway_schema_history` which tracks the migration versions that have already been applied.
