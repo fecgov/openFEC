@@ -1323,6 +1323,9 @@ class TotalByOfficeSchema(ma.Schema):
     election_year = ma.fields.Int()
     total_receipts = ma.fields.Decimal(places=2)
     total_disbursements = ma.fields.Decimal(places=2)
+    total_individual_itemized_contributions = ma.fields.Decimal(places=2)
+    total_transfers_from_other_authorized_committee = ma.fields.Decimal(places=2)
+    total_other_political_committee_contributions = ma.fields.Decimal(places=2)
 
 
 augment_schemas(TotalByOfficeSchema)

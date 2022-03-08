@@ -140,7 +140,8 @@ AF_DISPOSITION_DATA = """
         dates,
         description
     FROM fecmur.af_case_disposition
-    WHERE case_id = %s;
+    WHERE case_id = %s
+    ORDER BY dates ASC;
 
 """
 

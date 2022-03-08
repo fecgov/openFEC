@@ -195,6 +195,9 @@ class CandidateTotal(db.Model):
     party = db.Column(db.String(3), index=True, doc=docs.PARTY)
     office = db.Column(db.String(1), index=True, doc=docs.OFFICE)
     candidate_inactive = db.Column(db.Boolean, doc=docs.CANDIDATE_INACTIVE)
+    individual_itemized_contributions = db.Column(db.Numeric(30, 2), index=True)
+    transfers_from_other_authorized_committee = db.Column(db.Numeric(30, 2), index=True)
+    other_political_committee_contributions = db.Column(db.Numeric(30, 2), index=True)
 
 
 class CandidateElection(db.Model):
