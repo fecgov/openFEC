@@ -21,7 +21,7 @@ dependencies {
         exclude group: "com.google.protobuf", module: "protobuf-java"
         exclude group: "com.google.guava", module: "guava"
         constraints {
-	       implementation("org.postgresql:postgresql:42.2.14.jre6")
+	       implementation("org.postgresql:postgresql:42.2.25.jre6")
         }
     }
 }
@@ -63,7 +63,7 @@ task createRunScript {
 
 task copyPostgresJar(type: Copy) {
     into "$buildDir/drivers"
-    from configurations.runtime
+    from configurations.runtimeOnly
     include "postgres*.jar"
 }
 
