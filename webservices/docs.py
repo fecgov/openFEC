@@ -359,7 +359,7 @@ COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
         - D delegate\n\
         - E electioneering communication\n\
         - H House\n\
-        - I independent expenditor (person or group)\n\
+        - I independent expenditure filer (not a committee)\n\
         - N PAC - nonqualified\n\
         - O independent expenditure-only (super PACs)\n\
         - P presidential\n\
@@ -377,7 +377,7 @@ COMMITTEE_TYPE_OLD = 'The `deprecated` one-letter type code of the organization:
         - D delegate\n\
         - E electioneering communication\n\
         - H House\n\
-        - I independent expenditor (person or group)\n\
+        - I independent expenditure filer (not a committee)\n\
         - N PAC - nonqualified\n\
         - O independent expenditure-only (super PACs)\n\
         - P presidential\n\
