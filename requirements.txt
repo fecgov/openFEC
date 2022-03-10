@@ -1,39 +1,39 @@
 apispec==0.39.0
-prance[osv]>=0.19
+certifi==2020.11.8
 cfenv==0.5.2
-invoke==0.15.0
-kombu==4.6.3
-vine==1.3.0 # pinned temporarily to fix amqp dependency, which is a dependency of kombu
-psycopg2-binary==2.9.1
-werkzeug==0.16.1
-Flask==1.1.1
-Flask-Cors==3.0.9
-Flask-Script==2.0.6
-Flask-RESTful==0.3.7
-Flask-SQLAlchemy==2.4.1
-python-dateutil==2.8.1
-sqlalchemy-postgres-copy==0.3.0
-networkx==2.6.2
-SQLAlchemy==1.3.19
-icalendar==4.0.2
-GitPython==3.1.0
-gunicorn==19.10.0
-gevent==1.4.0
-greenlet==0.4.16 # pinned to fix build problem (parent is gevent)
-webargs==5.5.3
-ujson==1.33
-requests==2.25.1
+defusedxml==0.6.0
 elasticsearch==7.6.0
 elasticsearch-dsl==7.3.0
+Flask==1.1.1
+Flask-Cors==3.0.9
+Flask-RESTful==0.3.7
+Flask-Script==2.0.6
+Flask-SQLAlchemy==2.4.1
+gevent==1.4.0
+greenlet==0.4.16 # pinned to fix build problem (parent is gevent)
+gunicorn==19.10.0
+GitPython==3.1.0
+icalendar==4.0.2
+invoke==0.15.0
+kombu==4.6.3
+networkx==2.6.2
+prance[osv]>=0.19
+psycopg2-binary==2.9.1
+python-dateutil==2.8.1
+requests==2.25.1
 requests-aws4auth==1.0
-certifi==2020.11.8
-defusedxml==0.6.0
+sqlalchemy-postgres-copy==0.3.0
+SQLAlchemy==1.3.19
+ujson==5.1.0 # decoding CSP violation reported
+vine==1.3.0 # pinned temporarily to fix amqp dependency, which is a dependency of kombu
+webargs==5.5.3
+werkzeug==0.16.1
 
 # Marshalling
 flask-apispec==0.7.0
+git+https://github.com/fecgov/marshmallow-pagination@master
 marshmallow==2.16.3
 marshmallow-sqlalchemy==0.15.0
-git+https://github.com/fecgov/marshmallow-pagination@master
 
 # Data export
 smart_open==1.8.0
@@ -44,13 +44,13 @@ celery-once==3.0.0
 redis==3.2.0
 
 # testing and build in circle
-pytest==5.2.0
-pytest-cov==2.5.1
 codecov==2.1.7
-pytest-flake8==1.0.6
-nplusone==0.8.0
-webtest==2.0.34
 factory_boy==2.8.1
 itsdangerous==1.1.0 #pinned to fix pytest deprecation warning
-jsonschema==3.2.0 #pinned to fix the pytest deprecation warning inside jsonschema/validators.py
 importlib-metadata==3.10.1 #pinned to fix the pytest deprecation warning: SelectableGroups dict interface
+jsonschema==3.2.0 #pinned to fix the pytest deprecation warning inside jsonschema/validators.py
+nplusone==0.8.0
+pytest==5.2.0
+pytest-cov==2.5.1
+pytest-flake8==1.0.6
+webtest==2.0.34
