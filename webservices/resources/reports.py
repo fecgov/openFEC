@@ -177,10 +177,7 @@ class ReportsView(views.ApiResource):
                     [kwargs.get('candidate_id')]
                 )
             )
-        if kwargs.get('type'):
-            query = query.filter(
-                models.CommitteeHistory.committee_type.in_(kwargs.get('type'))
-            )
+
         if kwargs.get('committee_type'):
             query = query.filter(
                 models.CommitteeHistory.committee_type.in_(kwargs.get('committee_type'))
