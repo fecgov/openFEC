@@ -1342,6 +1342,24 @@ class TotalByOfficeByPartySchema(ma.Schema):
 augment_schemas(TotalByOfficeByPartySchema)
 
 
+class CandidateTotalAggregateSchema(ma.Schema):
+    election_year = ma.fields.Int()
+    office = ma.fields.Str()
+    party = ma.fields.Str()
+    total_receipts = ma.fields.Decimal(places=2)
+    total_disbursements = ma.fields.Decimal(places=2)
+    total_individual_itemized_contributions = ma.fields.Decimal(places=2)
+    total_transfers_from_other_authorized_committee = ma.fields.Decimal(places=2)
+    total_other_political_committee_contributions = ma.fields.Decimal(places=2)
+    total_cash_on_hand_end_period = ma.fields.Decimal(places=2)
+    state = ma.fields.Str()
+    district = ma.fields.Str()
+    district_number = ma.fields.Int()
+
+
+augment_schemas(CandidateTotalAggregateSchema)
+
+
 class ECTotalsByCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
