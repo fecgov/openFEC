@@ -3,7 +3,6 @@ certifi==2020.11.8
 cfenv==0.5.2
 invoke==0.15.0
 kombu==5.2.4
-#vine==1.3.0 # pinned temporarily to fix amqp dependency, which is a dependency of kombu
 vine==5.0.0 # previosly pinned to 1.3.0 to fix amqp dependency, which is a dependency of kombu
 psycopg2-binary==2.9.1
 werkzeug==0.16.1
@@ -61,7 +60,6 @@ marshmallow-sqlalchemy==0.15.0
 smart_open==1.8.0
 
 # Task queue
-#celery==4.3.0 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
 celery==5.2.2 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
 celery-once==3.0.0
 redis==3.2.0
