@@ -54,3 +54,4 @@ factory_boy==2.8.1
 itsdangerous==1.1.0 #pinned to fix pytest deprecation warning
 jsonschema==3.2.0 #pinned to fix the pytest deprecation warning inside jsonschema/validators.py
 importlib-metadata==3.10.1 #pinned to fix the pytest deprecation warning: SelectableGroups dict interface
+jinja2==3.0.3 #pinned to fix pytest and circle deploy errors caused by the latest jinja2 v3.1.1
