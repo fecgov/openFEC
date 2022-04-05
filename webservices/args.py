@@ -376,7 +376,6 @@ reports = {
     'max_party_coordinated_expenditures': Currency(description=docs.MAX_FILTER),
     'min_total_contributions': Currency(description=docs.MIN_FILTER),
     'max_total_contributions': Currency(description=docs.MAX_FILTER),
-    'type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE_OLD),
     'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
     'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
     'committee_id': fields.List(fields.Str, description=docs.COMMITTEE_ID),
