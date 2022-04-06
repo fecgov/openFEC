@@ -384,9 +384,9 @@ class AggregateByOfficeByPartyView(ApiResource):
         return query
 
 
-# endpoint: /candidates/totals/aggregate/
+# endpoint: /candidates/totals/aggregates/
 @doc(
-    tags=["candidate"], description=docs.TOTAL_BY_OFFICE_TAG,
+    tags=["candidate"], description=docs.CANDIDATE_TOTAL_AGGREGATE_TAG,
 )
 class CandidateTotalAggregateView(ApiResource):
     schema = schemas.CandidateTotalAggregateSchema
@@ -451,69 +451,58 @@ class CandidateTotalAggregateView(ApiResource):
                 total.election_year <= kwargs["max_election_cycle"]
             )
 
-        # aggregate by office
-        if kwargs.get("aggregate_by") and ("office" == kwargs.get("aggregate_by")):
-            if kwargs.get("office"):
-                query = query.filter(total.office == kwargs["office"])
+        if kwargs.get("office"):
+            query = query.filter(total.office == kwargs["office"])
 
-            query = query.add_column(
+        if kwargs.get("state"):
+            query = query.filter(total.state.in_(kwargs["state"]))
+
+        if kwargs.get("district"):
+            query = query.filter(total.district.in_(kwargs["district"]))
+
+        # aggregate by election_year, office
+        if kwargs.get("aggregate_by") and ("office" == kwargs.get("aggregate_by")):
+
+            query = query.add_columns(
                 total.office.label("office")
             )
             query = query.group_by(
                 total.election_year, total.office,
             ).order_by(sa.desc(total.election_year), sa.asc(total.office))
 
-        # aggregate by office, by state.
+        # aggregate by election_year, office, state.
         elif kwargs.get("aggregate_by") and "office-state" == kwargs.get("aggregate_by"):
-            if kwargs.get("office"):
-                query = query.filter(total.office == kwargs["office"])
-
-            if kwargs.get("state"):
-                query = query.filter(total.state.in_(kwargs['state']))
-
-            query = query.add_column(
+            query = query.add_columns(
                 total.office.label("office")
             )
-            query = query.add_column(
+            query = query.add_columns(
                 total.state.label("state")
             )
             query = query.group_by(
                 total.election_year, total.office, total.state
             ).order_by(sa.desc(total.election_year), sa.asc(total.office), sa.asc(total.state))
 
-        # aggregate by office, by state, by district
+        # aggregate by election_year, office, state, district
         elif kwargs.get("aggregate_by") and "office-state-district" == kwargs.get("aggregate_by"):
-            if kwargs.get("office"):
-                query = query.filter(total.office == kwargs["office"])
-
-            if kwargs.get("state"):
-                query = query.filter(total.state.in_(kwargs['state']))
-
-            query = query.add_column(
+            query = query.add_columns(
                 total.office.label("office")
             )
-            query = query.add_column(
+            query = query.add_columns(
                 total.state.label("state")
             )
-            query = query.add_column(
+            query = query.add_columns(
                 total.district.label("district")
             )
             query = query.group_by(
                 total.election_year, total.office, total.state, total.district,
             ).order_by(sa.desc(total.election_year), sa.asc(total.office), sa.asc(total.state), sa.asc(total.district))
 
-        # aggregate by office, by party
+        # aggregate by election_year, office, party
         elif kwargs.get("aggregate_by") and "office-party" == kwargs.get("aggregate_by"):
-            if kwargs.get("office"):
-                query = query.filter(total.office == kwargs["office"])
-
-            if kwargs.get("party"):
-                query = query.filter(total.party == kwargs["party"])
-
-            query = query.add_column(
+            query = query.add_columns(
                 total.office.label("office")
             )
-            query = query.add_column(
+            query = query.add_columns(
                 sa.case(
                     [
                         (total.party == "DFL", "DEM"),
@@ -537,7 +526,7 @@ class CandidateTotalAggregateView(ApiResource):
                 ),
             ).order_by(sa.desc(total.election_year), sa.asc(total.office))
 
-        # without `aggregate_by`, return group by election_year
+        # without `aggregate_by`, aggregate by election_year only
         else:
             query = query.group_by(
                 total.election_year,
