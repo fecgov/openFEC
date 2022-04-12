@@ -22,6 +22,7 @@ from webservices.resources.candidate_aggregates import (
     TotalsCandidateView,
     AggregateByOfficeView,
     AggregateByOfficeByPartyView,
+    CandidateTotalAggregateView,
 )
 
 
@@ -1364,5 +1365,601 @@ class TestCandidateTotalsByOfficeByParty(ApiBaseTest):
                 'party': 'REP',
                 'total_receipts': 200,
                 'total_disbursements': 200,
+            },
+        )
+
+
+# Test /candidates/totals/aggregates/ (candidate_aggregates.CandidateTotalAggregateView
+class TestCandidatesTotalsAggregates(ApiBaseTest):
+    def setUp(self):
+        super().setUp()
+        factories.CandidateTotalFactory(
+            candidate_id="H11",
+            is_election=True,
+            receipts=1000,
+            disbursements=1000,
+            election_year=2016,
+            cycle=2016,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
+            office="H",
+            candidate_inactive=False,  # is_active_candidate=True
+            individual_itemized_contributions=1000,
+            transfers_from_other_authorized_committee=1000,
+            other_political_committee_contributions=1000,
+            cash_on_hand_end_period=1000,
+            state="CA",
+            district="01",
+            party="DEM",
+        )
+        factories.CandidateTotalFactory(
+            candidate_id="H11",
+            is_election=False,
+            receipts=1000,
+            disbursements=1000,
+            election_year=2016,
+            cycle=2016,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
+            office="H",
+            candidate_inactive=False,  # is_active_candidate=True
+            individual_itemized_contributions=1000,
+            transfers_from_other_authorized_committee=1000,
+            other_political_committee_contributions=1000,
+            cash_on_hand_end_period=1000,
+            state="CA",
+            district="01",
+            party="DEM",
+        )
+        factories.CandidateTotalFactory(
+            candidate_id="H22",
+            is_election=True,
+            receipts=2000,
+            disbursements=2000,
+            election_year=2016,
+            cycle=2016,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
+            office="H",
+            candidate_inactive=False,  # is_active_candidate=True
+            individual_itemized_contributions=2000,
+            transfers_from_other_authorized_committee=2000,
+            other_political_committee_contributions=2000,
+            cash_on_hand_end_period=2000,
+            state="CA",
+            district="02",
+            party="DEM",
+        )
+        factories.CandidateTotalFactory(
+            candidate_id="H33",
+            is_election=True,
+            receipts=3300,
+            disbursements=3300,
+            election_year=2016,
+            office="H",
+            candidate_inactive=False,  # is_active_candidate=True
+            individual_itemized_contributions=3300,
+            transfers_from_other_authorized_committee=3300,
+            other_political_committee_contributions=3300,
+            cash_on_hand_end_period=3300,
+            state="VA",
+            district="01",
+            party="REP",
+        )
+        factories.CandidateTotalFactory(
+            candidate_id="H44",
+            is_election=True,
+            receipts=4000,
+            disbursements=4000,
+            election_year=2018,
+            office="H",
+            candidate_inactive=False,  # is_active_candidate=True
+            individual_itemized_contributions=4000,
+            transfers_from_other_authorized_committee=4000,
+            other_political_committee_contributions=4000,
+            cash_on_hand_end_period=4000,
+            state="VA",
+            district="01",
+            party="REP",
+        )
+
+        factories.CandidateTotalFactory(
+            candidate_id="S11",
+            is_election=True,  # candidate election year
+            receipts=100,
+            disbursements=100,
+            election_year=2016,
+            office="S",
+            candidate_inactive=False,  # is_active_candidate=True
+            individual_itemized_contributions=100,
+            transfers_from_other_authorized_committee=100,
+            other_political_committee_contributions=100,
+            cash_on_hand_end_period=100,
+            state="CA",
+            district="00",
+            party="DEM",
+        )
+        factories.CandidateTotalFactory(
+            candidate_id="S11",
+            is_election=False,  # data for two-year period (not candidate election year)
+            cycle=2012,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
+            receipts=200,
+            disbursements=200,
+            election_year=2016,
+            office="S",
+            candidate_inactive=True,  # is_active_candidate=False
+            individual_itemized_contributions=200,
+            transfers_from_other_authorized_committee=200,
+            other_political_committee_contributions=200,
+            cash_on_hand_end_period=200,
+            state="CA",
+            district="00",
+            party="DEM",
+        )
+        factories.CandidateTotalFactory(
+            candidate_id="S11",
+            is_election=False,  # data for two-year period (not candidate election year)
+            cycle=2014,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
+            receipts=400,
+            disbursements=400,
+            election_year=2016,
+            office="S",
+            candidate_inactive=False,  # is_active_candidate=True
+            individual_itemized_contributions=400,
+            transfers_from_other_authorized_committee=400,
+            other_political_committee_contributions=400,
+            cash_on_hand_end_period=400,
+            state="VA",
+            district="00",
+            party="DEM",
+        )
+        factories.CandidateTotalFactory(
+            candidate_id="S11",
+            is_election=False,  # data for two-year period (not candidate election year)
+            cycle=2016,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
+            receipts=600,
+            disbursements=600,
+            election_year=2016,
+            office="S",
+            candidate_inactive=False,  # is_active_candidate=True
+            individual_itemized_contributions=600,
+            transfers_from_other_authorized_committee=600,
+            other_political_committee_contributions=600,
+            cash_on_hand_end_period=600,
+            state="VA",
+            district="00",
+            party="DEM",
+        )
+        factories.CandidateTotalFactory(
+            candidate_id="S22",
+            is_election=True,  # candidate election year
+            receipts=700,
+            disbursements=700,
+            election_year=2010,
+            office="S",
+            candidate_inactive=False,  # is_active_candidate=True
+            individual_itemized_contributions=700,
+            transfers_from_other_authorized_committee=700,
+            other_political_committee_contributions=700,
+            cash_on_hand_end_period=700,
+            state="VA",
+            district="00",
+            party="REP",
+        )
+
+        factories.CandidateTotalFactory(
+            candidate_id="S33",
+            is_election=True,  # candidate election year
+            receipts=800,
+            disbursements=800,
+            election_year=2016,
+            office="S",
+            candidate_inactive=False,  # is_active_candidate=True
+            individual_itemized_contributions=800,
+            transfers_from_other_authorized_committee=800,
+            other_political_committee_contributions=800,
+            cash_on_hand_end_period=800,
+            state="CA",
+            district="00",
+            party="REP",
+        )
+
+        factories.CandidateTotalFactory(
+            candidate_id="S44",
+            is_election=True,  # candidate election year
+            receipts=90,
+            disbursements=90,
+            election_year=2022,
+            office="S",
+            candidate_inactive=False,  # is_active_candidate=True
+            individual_itemized_contributions=90,
+            transfers_from_other_authorized_committee=90,
+            other_political_committee_contributions=90,
+            cash_on_hand_end_period=90,
+            state="CA",
+            district="00",
+            party="REP",
+        )
+
+    def test_base(self):
+        # without any paramenter, group by election_year only
+        # return four rows (election_year: 2010, 2016, 2018, 2022)
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,)
+        )
+        assert len(results) == 4
+
+    def test_aggregate_by_office(self):
+        # aggregate_by=office, election_full default=true
+        # group by election_year, office.
+        # return five rows (2022/S, 2018/S, 2016/H, 2016/S, 2010/S)
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office",)
+        )
+        assert len(results) == 5
+
+    def test_aggregate_by_office_state(self):
+        # aggregate_by=office-state, is_active_candidate=True, election_year=2016, election_full default=true
+        # group by election_year, office, state.
+        # return three rows (2016/H/CA, 2016/H/VA, 2016/S/CA)
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office-state",
+            is_active_candidate=True,
+            election_year=2016,)
+        )
+        assert len(results) == 3
+
+    def test_aggregate_by_office_state_district(self):
+        # aggregate_by=office-state-district, is_active_candidate=True, election_year=2016, election_full default=true
+        # group by election_year, office, state, district.
+        # return four rows (2016/H/CA/01, 2016/H/CA/02,2016/H/VA/01, 2016/S/CA/00)
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office-state-district",
+            is_active_candidate=True,
+            election_year=2016,)
+        )
+        assert len(results) == 4
+
+    def test_aggregate_by_office_party(self):
+        # aggregate_by=office-party, is_active_candidate=True, election_year=2016, election_full default=true
+        # group by election_year, office, party.
+        # return four rows (2016/H/DEM, 2016/H/REP, 2016/S/DEM, 2016/S/REP)
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office-party",
+            is_active_candidate=True,
+            election_year=2016,)
+        )
+        assert len(results) == 4
+
+    def test_filter_by_office(self):
+        # aggregate_by=office, office=H, is_active_candidate=True, election_full default=true
+        # return two rows: (2016/H, 2018/H)
+        # row 1: 2018/total=4000
+        # row 2: 2016/total=1000+2000+3300=6300
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office",
+            is_active_candidate=True,
+            office="H",)
+        )
+        assert len(results) == 2
+        assert_dicts_subset(
+            results[0],
+            {
+                "election_year": 2018,
+                "office": "H",
+                "total_receipts": 4000,
+                "total_disbursements": 4000,
+                "total_individual_itemized_contributions": 4000,
+                "total_transfers_from_other_authorized_committee": 4000,
+                "total_other_political_committee_contributions": 4000,
+                "total_cash_on_hand_end_period": 4000,
+            },
+        )
+        assert_dicts_subset(
+            results[1],
+            {
+                "election_year": 2016,
+                "office": "H",
+                "total_receipts": 6300,
+                "total_disbursements": 6300,
+                "total_individual_itemized_contributions": 6300,
+                "total_transfers_from_other_authorized_committee": 6300,
+                "total_other_political_committee_contributions": 6300,
+                "total_cash_on_hand_end_period": 6300,
+            },
+        )
+
+        # aggregate_by="office-state", office=S, is_active_candidate=True, election_full default=true
+        # return three rows: (2022/S/VA, 2016/S/CA, 2010/S/VA)
+        # row 1: 2022/total=90
+        # row 2: 2016/total=100+800=900
+        # row 3: 2010/total=700
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office-state",
+            office="S",
+            is_active_candidate=True,)
+        )
+        assert len(results) == 3
+        assert_dicts_subset(
+            results[0],
+            {
+                "election_year": 2022,
+                "office": "S",
+                "total_receipts": 90,
+                "total_disbursements": 90,
+                "total_individual_itemized_contributions": 90,
+                "total_transfers_from_other_authorized_committee": 90,
+                "total_other_political_committee_contributions": 90,
+                "total_cash_on_hand_end_period": 90,
+            },
+        )
+        assert_dicts_subset(
+            results[1],
+            {
+                "election_year": 2016,
+                "office": "S",
+                "total_receipts": 900,
+                "total_disbursements": 900,
+                "total_individual_itemized_contributions": 900,
+                "total_transfers_from_other_authorized_committee": 900,
+                "total_other_political_committee_contributions": 900,
+                "total_cash_on_hand_end_period": 900,
+            },
+        )
+        assert_dicts_subset(
+            results[2],
+            {
+                "election_year": 2010,
+                "office": "S",
+                "total_receipts": 700,
+                "total_disbursements": 700,
+                "total_individual_itemized_contributions": 700,
+                "total_transfers_from_other_authorized_committee": 700,
+                "total_other_political_committee_contributions": 700,
+                "total_cash_on_hand_end_period": 700,
+            },
+        )
+
+        # aggregate_by="office-party", election_full default=true, office=H,
+        # is_active_candidate=True, election_year=2016
+        # return two rows:
+        # row 1: 2016/H/DEM/1000+2000=3000
+        # row 2: 2016/H/REP/total=3300
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office-party",
+            office='H',
+            is_active_candidate=True,
+            election_year=2016,)
+        )
+        assert len(results) == 2
+        assert_dicts_subset(
+            results[0],
+            {
+                "election_year": 2016,
+                "total_receipts": 3000,
+                "total_disbursements": 3000,
+                "total_individual_itemized_contributions": 3000,
+                "total_transfers_from_other_authorized_committee": 3000,
+                "total_other_political_committee_contributions": 3000,
+                "total_cash_on_hand_end_period": 3000,
+                "party": "DEM",
+                "office": "H",
+            },
+        )
+        assert_dicts_subset(
+            results[1],
+            {
+                "election_year": 2016,
+                "total_receipts": 3300,
+                "total_disbursements": 3300,
+                "total_individual_itemized_contributions": 3300,
+                "total_transfers_from_other_authorized_committee": 3300,
+                "total_other_political_committee_contributions": 3300,
+                "total_cash_on_hand_end_period": 3300,
+                "party": "REP",
+                "office": "H",
+            },
+        )
+
+    def test_filter_by_election_year(self):
+        # aggregate_by=office, office=S, election_full default=true, election_year=2016
+        # return one rows:
+        # row 1: 2016/total=100+800=900
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office",
+            office="S",
+            is_active_candidate=True,
+            election_year=2016,)
+        )
+        assert len(results) == 1
+        assert_dicts_subset(
+            results[0],
+            {
+                "election_year": 2016,
+                "office": "S",
+                "total_receipts": 900,
+                "total_disbursements": 900,
+                "total_individual_itemized_contributions": 900,
+                "total_transfers_from_other_authorized_committee": 900,
+                "total_other_political_committee_contributions": 900,
+                "total_cash_on_hand_end_period": 900,
+            },
+        )
+
+    def test_filter_by_is_active_candidate(self):
+        # aggregate_by=office, office=S, election_full=true, is_active_candidate=false
+        # return 0 rows:
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office",
+            office="S",
+            is_active_candidate=False,
+            election_full=True,)
+        )
+        assert len(results) == 0
+
+        # aggregate_by=office, office=S, election_full=false, is_active_candidate=false
+        # return one row: 2016/total=200
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office",
+            office="S",
+            election_full=False,  # =is_eleciton
+            is_active_candidate=False,)
+        )
+        assert len(results) == 1
+        assert_dicts_subset(
+            results[0],
+            {
+                "election_year": 2016,
+                "total_receipts": 200,
+                "total_disbursements": 200,
+                "total_individual_itemized_contributions": 200,
+                "total_transfers_from_other_authorized_committee": 200,
+                "total_other_political_committee_contributions": 200,
+                "total_cash_on_hand_end_period": 200,
+            },
+        )
+
+    def test_sort_by_election_year(self):
+        # aggregate_by=office, office=H, election_full=true, is_active_candidate=true
+        # return two rows:
+        # row 1: 2018/total=4000
+        # row 2: 2016/total=1000+2000+3300=6300
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office",
+            office="H",
+            election_full=True,  # =is_eleciton
+            is_active_candidate=True,)
+        )
+        assert len(results) == 2
+        assert_dicts_subset(
+            results[0],
+            {
+                "election_year": 2018,
+                "total_receipts": 4000,
+                "total_disbursements": 4000,
+                "total_individual_itemized_contributions": 4000,
+                "total_transfers_from_other_authorized_committee": 4000,
+                "total_other_political_committee_contributions": 4000,
+                "total_cash_on_hand_end_period": 4000,
+            },
+        )
+        assert_dicts_subset(
+            results[1],
+            {
+                "election_year": 2016,
+                "total_receipts": 6300,
+                "total_disbursements": 6300,
+                "total_individual_itemized_contributions": 6300,
+                "total_transfers_from_other_authorized_committee": 6300,
+                "total_other_political_committee_contributions": 6300,
+                "total_cash_on_hand_end_period": 6300,
+            },
+        )
+
+    def test_filter_by_min_max_election_cycle(self):
+        # case1: aggregate_by=office, office=S, election_full default=true,
+        # is_active_candidate=true, min_election_cycle=2016
+        # return two rows:
+        # row 1: 2022
+        # row 2: 2016
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office",
+            office="S",
+            is_active_candidate=True,
+            min_election_cycle=2016,)
+        )
+        assert len(results) == 2
+
+        # case2: aggregate_by=office, office=S, election_full default =true,
+        # is_active_candidate=true,max_election_cycle=2016
+        # return two rows:
+        # row 1: 2016
+        # row 2: 2010
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office",
+            office="S",
+            is_active_candidate=True,
+            max_election_cycle=2016,)
+        )
+        assert len(results) == 2
+        # case3: aggregate_by=office ,office=S, election_full default=true,
+        # is_active_candidate=true,min_election_cycle=2016,max_election_cycle=2022
+        # return two rows:
+        # row 1: 2022
+        # row 2: 2016
+        # row 3: 2010
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office",
+            office="S",
+            is_active_candidate=True,
+            min_election_cycle=2010,
+            max_election_cycle=2022,)
+        )
+        assert len(results) == 3
+
+    def test_filter_by_state(self):
+        # aggregate_by=office-state, office=H, state=CA
+        # election_full default=true, election_year=2016, is_active_candidate=True
+        # return one row:
+        # row 1: 2016/H/CA/1000+2000=3000
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office-state",
+            office="H",
+            is_active_candidate=True,
+            election_year=2016,
+            state="CA",)
+        )
+        assert len(results) == 1
+        assert_dicts_subset(
+            results[0],
+            {
+                "election_year": 2016,
+                "office": "H",
+                "total_receipts": 3000,
+                "total_disbursements": 3000,
+                "total_individual_itemized_contributions": 3000,
+                "total_transfers_from_other_authorized_committee": 3000,
+                "total_other_political_committee_contributions": 3000,
+                "total_cash_on_hand_end_period": 3000,
+                "state": "CA",
+            },
+        )
+
+    def test_filter_by_district(self):
+        # aggregate_by="office-state-district", office=H, state=CA,
+        # election_full default=true, election_year=2016, is_active_candidate=True
+        # return one rows:
+        # row 1: 2016/H/CA/01
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office-state-district",
+            office="H",
+            is_active_candidate=True,
+            election_year=2016,
+            state="CA",
+            district="01",)
+        )
+        assert len(results) == 1
+        assert_dicts_subset(
+            results[0],
+            {
+                "election_year": 2016,
+                "total_receipts": 1000,
+                "total_disbursements": 1000,
+                "total_individual_itemized_contributions": 1000,
+                "total_transfers_from_other_authorized_committee": 1000,
+                "total_other_political_committee_contributions": 1000,
+                "total_cash_on_hand_end_period": 1000,
+                "state": "CA",
+                "district": "01",
             },
         )
