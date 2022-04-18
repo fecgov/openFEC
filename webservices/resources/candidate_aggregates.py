@@ -397,7 +397,7 @@ class CandidateTotalAggregateView(ApiResource):
         return utils.extend(
             args.paging,
             args.candidate_total_aggregate,
-            args.make_sort_args(),
+            args.make_multi_sort_args(default=["-election_year",]),
         )
 
     def build_query(self, **kwargs):
@@ -418,7 +418,7 @@ class CandidateTotalAggregateView(ApiResource):
                 "total_cash_on_hand_end_period"),
         )
 
-        # remove election_year=null result
+        # remove election_year=null
         query = query.filter(~total.election_year.is_(None))
 
         if kwargs.get("election_year"):
@@ -460,6 +460,14 @@ class CandidateTotalAggregateView(ApiResource):
         if kwargs.get("district"):
             query = query.filter(total.district.in_(kwargs["district"]))
 
+        if kwargs.get("party"):
+            if ("DEM" == kwargs.get("party")):
+                query = query.filter(total.party.in_(["DEM", "DFL"]))
+            elif ("REP" == kwargs.get("party")):
+                query = query.filter(total.party.in_(["REP"]))
+            else:
+                query = query.filter(total.party.notin_(["DEM", "DFL", "REP"]))
+
         # aggregate by election_year, office
         if kwargs.get("aggregate_by") and ("office" == kwargs.get("aggregate_by")):
 
@@ -468,7 +476,7 @@ class CandidateTotalAggregateView(ApiResource):
             )
             query = query.group_by(
                 total.election_year, total.office,
-            ).order_by(sa.desc(total.election_year), sa.asc(total.office))
+            )
 
         # aggregate by election_year, office, state.
         elif kwargs.get("aggregate_by") and "office-state" == kwargs.get("aggregate_by"):
@@ -480,7 +488,7 @@ class CandidateTotalAggregateView(ApiResource):
             )
             query = query.group_by(
                 total.election_year, total.office, total.state
-            ).order_by(sa.desc(total.election_year), sa.asc(total.office), sa.asc(total.state))
+            )
 
         # aggregate by election_year, office, state, district
         elif kwargs.get("aggregate_by") and "office-state-district" == kwargs.get("aggregate_by"):
@@ -493,9 +501,12 @@ class CandidateTotalAggregateView(ApiResource):
             query = query.add_columns(
                 total.district.label("district")
             )
+
+            # remove district=null
+            query = query.filter(~total.district.is_(None))
             query = query.group_by(
                 total.election_year, total.office, total.state, total.district,
-            ).order_by(sa.desc(total.election_year), sa.asc(total.office), sa.asc(total.state), sa.asc(total.district))
+            )
 
         # aggregate by election_year, office, party
         elif kwargs.get("aggregate_by") and "office-party" == kwargs.get("aggregate_by"):
@@ -524,12 +535,12 @@ class CandidateTotalAggregateView(ApiResource):
                     ],
                     else_="Other",
                 ),
-            ).order_by(sa.desc(total.election_year), sa.asc(total.office))
+            )
 
         # without `aggregate_by`, aggregate by election_year only
         else:
             query = query.group_by(
                 total.election_year,
-            ).order_by(sa.desc(total.election_year))
+            )
 
         return query
