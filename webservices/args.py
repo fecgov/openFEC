@@ -997,6 +997,7 @@ operations_log = {
     'max_transaction_data_complete_date': fields.Date(description=docs.MAX_TRANSACTION_DATA_COMPLETE_DATE),
 }
 
+
 totals_by_office = {
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
@@ -1011,6 +1012,21 @@ totals_by_office_by_party = {
     'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
     'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
     'election_full': election_full,
+}
+
+# for /candidates/totals/aggregates/ (candidate_aggregates.CandidateTotalAggregateView
+candidate_total_aggregate = {
+    'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
+    'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
+    'election_full': election_full,
+    'min_election_cycle': fields.Int(description=docs.CYCLE),
+    'max_election_cycle': fields.Int(description=docs.CYCLE),
+    'state': fields.List(IStr, description=docs.STATE),
+    'district': fields.List(IStr, description=docs.DISTRICT),
+    'aggregate_by': fields.Str(
+        validate=validate.OneOf(['office', 'office-state', 'office-state-district', 'office-party']),
+        description=docs.AGGREGATE_BY),
 }
 
 totals_by_candidate_other_costs_EC = {

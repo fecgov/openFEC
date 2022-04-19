@@ -178,16 +178,16 @@ class CandidateHistoryWithFuture(BaseCandidate):
 
 class CandidateTotal(db.Model):
     __tablename__ = "ofec_candidate_totals_mv"
-    candidate_id = db.Column(db.String, index=True, primary_key=True)
+    candidate_id = db.Column(db.String, index=True, primary_key=True, doc=docs.CANDIDATE_ID)
     election_year = db.Column(
-        db.Integer, index=True, primary_key=True, autoincrement=True
+        db.Integer, index=True, primary_key=True, autoincrement=True, doc=docs.ELECTION_YEAR
     )
-    cycle = db.Column(db.Integer, index=True, primary_key=True)
+    cycle = db.Column(db.Integer, index=True, primary_key=True, doc=docs.CYCLE)
     is_election = db.Column(db.Boolean, index=True, primary_key=True)
     receipts = db.Column(db.Numeric(30, 2), index=True)
     disbursements = db.Column(db.Numeric(30, 2), index=True)
-    cash_on_hand_end_period = db.Column(db.Numeric(30, 2))
-    debts_owed_by_committee = db.Column(db.Numeric(30, 2))
+    cash_on_hand_end_period = db.Column(db.Numeric(30, 2), doc=docs.CASH_ON_HAND_END_PERIOD)
+    debts_owed_by_committee = db.Column(db.Numeric(30, 2), doc=docs.DEBTS_OWED_BY_COMMITTEE)
     coverage_start_date = db.Column(db.Date, doc=docs.COVERAGE_START_DATE)
     coverage_end_date = db.Column(db.Date, doc=docs.COVERAGE_END_DATE)
     federal_funds_flag = db.Column(db.Boolean, index=True, doc=docs.FEDERAL_FUNDS_FLAG)
@@ -195,9 +195,18 @@ class CandidateTotal(db.Model):
     party = db.Column(db.String(3), index=True, doc=docs.PARTY)
     office = db.Column(db.String(1), index=True, doc=docs.OFFICE)
     candidate_inactive = db.Column(db.Boolean, doc=docs.CANDIDATE_INACTIVE)
-    individual_itemized_contributions = db.Column(db.Numeric(30, 2), index=True)
-    transfers_from_other_authorized_committee = db.Column(db.Numeric(30, 2), index=True)
-    other_political_committee_contributions = db.Column(db.Numeric(30, 2), index=True)
+    individual_itemized_contributions = db.Column(
+        db.Numeric(30, 2), index=True, doc=docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS
+    )
+    transfers_from_other_authorized_committee = db.Column(
+        db.Numeric(30, 2), index=True, doc=docs.TRANSFERS_FROM_OTHER_AUTHORIZED_COMMITTEE
+    )
+    other_political_committee_contributions = db.Column(
+        db.Numeric(30, 2), index=True, doc=docs.OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS
+    )
+    state = db.Column(db.String(2), index=True, doc=docs.STATE)
+    district = db.Column(db.String(2), index=True, doc=docs.DISTRICT)
+    district_number = db.Column(db.Integer, index=True, doc=docs.DISTRICT)
 
 
 class CandidateElection(db.Model):

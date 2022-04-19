@@ -197,6 +197,13 @@ F2_CANDIDATE_STREET_2 = 'Additional street information of candidate\'s address, 
 
 F2_CANDIDATE_ZIP = 'Zip code of candidate\'s address, as reported on their Form 2.'
 
+AGGREGATE_BY = 'Candidate totals aggregate_by (Chose one of dropdown options):\n\
+        - \' \' grouped by election year\n\
+        - office grouped by election year, by office\n\
+        - office-state grouped by election year, by office, by state\n\
+        - office-state-district grouped by election year, by office, by state, by district\n\
+        - office-party grouped by election year, by office, by party\n\
+'
 # ======== candidate end ===========
 
 # ======== committee start ===========
@@ -1861,6 +1868,9 @@ TOTAL_BY_OFFICE_TAG = ''' Aggregated candidate receipts and disbursements groupe
 '''
 
 TOTAL_BY_OFFICE_BY_PARTY_TAG = ''' Aggregated candidate receipts and disbursements grouped by office by party by cycle.
+'''
+
+CANDIDATE_TOTAL_AGGREGATE_TAG = ''' Candidate total receipts and disbursements aggregated by `aggregate_by`.
 '''
 
 ACTIVE_CANDIDATE = ''' Candidates who are actively seeking office. If no value is specified, all candidates
