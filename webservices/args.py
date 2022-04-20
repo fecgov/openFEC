@@ -1024,6 +1024,7 @@ candidate_total_aggregate = {
     'max_election_cycle': fields.Int(description=docs.CYCLE),
     'state': fields.List(IStr, description=docs.STATE),
     'district': fields.List(IStr, description=docs.DISTRICT),
+    'party': fields.Str(validate=validate.OneOf(['', 'DEM', 'REP', 'OTHER']), description=docs.PARTY),
     'aggregate_by': fields.Str(
         validate=validate.OneOf(['office', 'office-state', 'office-state-district', 'office-party']),
         description=docs.AGGREGATE_BY),

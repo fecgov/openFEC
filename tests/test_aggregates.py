@@ -1963,3 +1963,32 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "district": "01",
             },
         )
+
+    def test_filter_by_party(self):
+        # aggregate_by="office-party", office=H, party=DEM,
+        # election_full default=true, election_year=2016, is_active_candidate=True
+        # return one rows:
+        # row 1: 2016/H/DEM/total=1000+2000=3000
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office-party",
+            office="H",
+            is_active_candidate=True,
+            election_year=2016,
+            party="DEM",)
+        )
+        assert len(results) == 1
+        assert_dicts_subset(
+            results[0],
+            {
+                "election_year": 2016,
+                "total_receipts": 3000,
+                "total_disbursements": 3000,
+                "total_individual_itemized_contributions": 3000,
+                "total_transfers_from_other_authorized_committee": 3000,
+                "total_other_political_committee_contributions": 3000,
+                "total_cash_on_hand_end_period": 3000,
+                "party": "DEM",
+                "office": "H",
+            },
+        )
