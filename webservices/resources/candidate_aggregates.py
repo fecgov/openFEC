@@ -397,7 +397,7 @@ class CandidateTotalAggregateView(ApiResource):
         return utils.extend(
             args.paging,
             args.candidate_total_aggregate,
-            args.make_multi_sort_args(default=["-election_year",]),
+            args.make_multi_sort_args(default=["-election_year", ]),
         )
 
     def build_query(self, **kwargs):
@@ -416,6 +416,8 @@ class CandidateTotalAggregateView(ApiResource):
                 "total_other_political_committee_contributions"),
             sa.func.sum(total.cash_on_hand_end_period).label(
                 "total_cash_on_hand_end_period"),
+            sa.func.sum(total.debts_owed_by_committee).label(
+                "total_debts_owed_by_committee"),
         )
 
         # remove election_year=null
