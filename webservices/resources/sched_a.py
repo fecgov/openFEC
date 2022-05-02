@@ -123,7 +123,7 @@ class ScheduleAView(ItemizedResource):
                 if re.search('[^a-zA-Z0-9-\s]', value):  # noqa
                     raise exceptions.ApiError(
                         'Invalid zip code. It can not have special character',
-                        status_code=400,
+                        status_code=422,
                     )
                 else:
                     zip_list.append(value[:5])

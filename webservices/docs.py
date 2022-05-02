@@ -1421,6 +1421,10 @@ CANDIDATE_MAX_FIRST_FILE_DATE = 'Selects all candidates whose first filing was r
 # schedules
 MEMO_CODE = "'X' indicates that the amount is NOT to be included in the itemization total."
 
+
+
+
+
 # schedule A
 CONTRIBUTOR_ID = 'The FEC identifier should be represented here if the contributor is registered with the FEC.'
 EMPLOYER = 'Employer of contributor as reported on the committee\'s filing'
@@ -1696,6 +1700,10 @@ down to all entries from form `F3X` line number `16`.
 IMAGE_NUMBER = '''
 An unique identifier for each page where the electronic or paper filing is reported.
 '''
+
+MAX_IMAGE_NUMBER = 'Maxium image number of the page where the schedule item is reported'
+
+MIN_IMAGE_NUMBER = 'Minium image number of the page where the schedule item is reported'
 
 MIN_FILTER = '''
 Filter for all amounts greater than a value.

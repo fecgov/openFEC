@@ -61,6 +61,22 @@ class District(fields.Str):
         return '{0:0>2}'.format(value)
 
 
+class ImageNumber(fields.Str):
+
+    def _validate(self, value):
+        super()._validate(value)
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            raise exceptions.ApiError(
+                exceptions.IMAGE_NUMBER_ERROR,
+                status_code=422)
+        if value < 0:
+            raise exceptions.ApiError(
+                exceptions.IMAGE_NUMBER_ERROR,
+                status_code=422)
+
+
 election_full = fields.Bool(missing=True, description=docs.ELECTION_FULL)
 
 paging = {
@@ -321,7 +337,7 @@ filings = {
     'report_type': fields.List(IStr, description=docs.REPORT_TYPE),
     'request_type': fields.List(IStr, description=docs.REQUEST_TYPE),
     'document_type': fields.List(IStr, description=docs.DOC_TYPE),
-    'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
+    'beginning_image_number': fields.List(ImageNumber, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'min_receipt_date': fields.Date(description=docs.MIN_RECEIPT_DATE),
     'max_receipt_date': fields.Date(description=docs.MAX_RECEIPT_DATE),
@@ -352,7 +368,7 @@ efilings = {
 reports = {
     'year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
+    'beginning_image_number': fields.List(ImageNumber, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': fields.List(fields.Str, description=docs.BASE_REPORT_TYPE_W_EXCLUDE),
     'is_amended': fields.Bool(description=docs.IS_AMENDED),
     'most_recent': fields.Bool(description=docs.MOST_RECENT),
@@ -387,7 +403,7 @@ reports = {
 committee_reports = {
     'year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
+    'beginning_image_number': fields.List(ImageNumber, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': fields.List(fields.Str, description=docs.BASE_REPORT_TYPE_W_EXCLUDE),
     'is_amended': fields.Bool(description=docs.IS_AMENDED),
     'min_disbursements_amount': Currency(description=docs.MIN_FILTER),
@@ -448,13 +464,9 @@ candidate_totals_detail = {
 
 
 itemized = {
-    # TODO(jmcarp) Request integer image numbers from FEC and update argument types
-    'image_number': fields.List(
-        fields.Str,
-        description='The image number of the page where the schedule item is reported',
-    ),
-    'min_image_number': fields.Str(),
-    'max_image_number': fields.Str(),
+    'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
+    'min_image_number': ImageNumber(description=docs.MIN_IMAGE_NUMBER),
+    'max_image_number': ImageNumber(description=docs.MAX_IMAGE_NUMBER),
     'min_amount': Currency(description='Filter for all amounts greater than a value.'),
     'max_amount': Currency(description='Filter for all amounts less than a value.'),
     'min_date': fields.Date(description='Minimum date'),
@@ -656,10 +668,7 @@ schedule_b_efile = {
     # if the contributor is registered with the FEC.'),
     # 'recipient_name': fields.List(fields.Str, description='Name of recipient'),
     'disbursement_description': fields.List(fields.Str, description='Description of disbursement'),
-    'image_number': fields.List(
-        fields.Str,
-        description='The image number of the page where the schedule item is reported',
-    ),
+    'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
     'recipient_city': fields.List(IStr, description='City of recipient'),
     'recipient_state': fields.List(IStr, description='State of recipient'),
     'max_date': fields.Date(
@@ -681,12 +690,9 @@ schedule_b_efile = {
 
 schedule_c = {
     # TODO(jmcarp) Request integer image numbers from FEC and update argument types
-    'image_number': fields.List(
-        fields.Str,
-        description=docs.IMAGE_NUMBER,
-    ),
-    'min_image_number': fields.Str(),
-    'max_image_number': fields.Str(),
+    'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
+    'min_image_number': ImageNumber(description=docs.MIN_IMAGE_NUMBER),
+    'max_image_number': ImageNumber(description=docs.MAX_IMAGE_NUMBER),
     'min_amount': Currency(description=docs.MIN_FILTER),
     'max_amount': Currency(description=docs.MAX_FILTER),
     'line_number': fields.Str(description=docs.LINE_NUMBER),
@@ -700,12 +706,9 @@ schedule_c = {
 }
 
 schedule_d = {
-    'image_number': fields.List(
-        fields.Str,
-        description='The image number of the page where the schedule item is reported',
-    ),
-    'min_image_number': fields.Str(),
-    'max_image_number': fields.Str(),
+    'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
+    'min_image_number': ImageNumber(description=docs.MIN_IMAGE_NUMBER),
+    'max_image_number': ImageNumber(description=docs.MAX_IMAGE_NUMBER),
     'min_date': fields.Date(description='Minimum load date'),
     'max_date': fields.Date(description='Maximum load date'),
     'min_payment_period': fields.Float(),
@@ -906,7 +909,7 @@ schedule_e_efile = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'payee_name': fields.List(fields.Str, description=docs.PAYEE_NAME),
-    'image_number': fields.List(fields.Str, description=docs.IMAGE_NUMBER),
+    'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
     'support_oppose_indicator': fields.List(
         IStr(validate=validate.OneOf(['S', 'O'])),
         description=docs.SUPPORT_OPPOSE_INDICATOR),
@@ -984,7 +987,7 @@ auditCase = {
 operations_log = {
     'candidate_committee_id': fields.List(IStr, description=docs.CAND_CMTE_ID),
     'report_type': fields.List(IStr, description=docs.REPORT_TYPE),
-    'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
+    'beginning_image_number': fields.List(ImageNumber, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'form_type': fields.List(IStr, description=docs.FORM_TYPE),
     'amendment_indicator': fields.List(IStr, description=docs.AMENDMENT_INDICATOR),

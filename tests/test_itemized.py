@@ -236,7 +236,7 @@ class TestScheduleA(ApiBaseTest):
         response = self.app.get(
             api.url_for(ScheduleAView, contributor_zip='96%', cycle=2018)
         )
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 422)
 
     def test_schedule_a_missing_secondary_index(self):
         response = self.app.get(
