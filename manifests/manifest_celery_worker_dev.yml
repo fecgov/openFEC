@@ -6,7 +6,7 @@ applications:
     disk_quota: 1G
     no-route: true
     health-check-type: process
-    command: celery worker --app webservices.tasks --loglevel ${LOGLEVEL:=INFO} --concurrency 2
+    command: celery --app webservices.tasks worker --loglevel ${LOGLEVEL:=INFO} --concurrency 2
     path: ../
     stack: cflinuxfs3
     buildpacks:
