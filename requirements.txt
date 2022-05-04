@@ -15,7 +15,7 @@ gunicorn==19.10.0
 GitPython==3.1.0
 icalendar==4.0.2
 invoke==0.15.0
-kombu==5.2.4
+kombu==5.2.4 # Starting from celery 5.x release, the minimum required version is Kombu 5.x
 networkx==2.6.2
 prance[osv]>=0.19
 psycopg2-binary==2.9.1
@@ -39,7 +39,6 @@ marshmallow-sqlalchemy==0.15.0
 smart_open==1.8.0
 
 # Task queue
-#celery==4.3.0 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
 celery==5.2.2 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
 celery-once==3.0.0
 redis==4.2.2
