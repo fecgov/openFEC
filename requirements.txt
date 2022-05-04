@@ -15,7 +15,7 @@ gunicorn==19.10.0
 GitPython==3.1.0
 icalendar==4.0.2
 invoke==0.15.0
-kombu==4.6.3
+kombu==5.2.4
 networkx==2.6.2
 prance[osv]>=0.19
 psycopg2-binary==2.9.1
@@ -25,7 +25,7 @@ requests-aws4auth==1.0
 sqlalchemy-postgres-copy==0.3.0
 SQLAlchemy==1.3.19
 ujson==5.2.0 # decoding CSP violation reported
-vine==1.3.0 # pinned temporarily to fix amqp dependency, which is a dependency of kombu
+vine==5.0.0 # previosly pinned to 1.3.0 to fix amqp dependency, which is a dependency of kombu
 webargs==5.5.3
 werkzeug==0.16.1
 
@@ -42,7 +42,7 @@ smart_open==1.8.0
 #celery==4.3.0 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
 celery==5.2.2 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
 celery-once==3.0.0
-redis==3.2.0
+redis==4.2.2
 
 # testing and build in circle
 codecov==2.1.7
