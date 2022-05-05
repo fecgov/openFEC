@@ -9,5 +9,5 @@ click==8.0.4
 # requirements.txt generation (pip-compile)
 pip-tools==4.2.0
 #locust
-locustio==0.10.0
+locustio==0.14.6 #upgrade locustio to python 3.8 compatible version
 
