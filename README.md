@@ -229,7 +229,8 @@ Running Redis and Celery locally:
 
 ```
 redis-server
-celery worker --app webservices.tasks
+celery --app webservices.tasks worker
+celery --app webservices.tasks beat 
 ```
 
 ## Editing Swagger
