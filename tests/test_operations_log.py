@@ -32,7 +32,7 @@ class TestOperationsLog(ApiBaseTest):
             candidate_committee_id='03',
             report_year=2017,
             transaction_data_complete_date=datetime.date(2016, 10, 15),
-        ),
+        )
 
     def test_empty_query(self):
 
@@ -193,3 +193,9 @@ class TestOperationsLog(ApiBaseTest):
                 <= max_date.isoformat()
             )
         )
+
+    def test_invalid_image_number(self):
+        response = self.app.get(
+            api.url_for(OperationsLogView, beginning_image_number='fec-12345')
+        )
+        self.assertEqual(response.status_code, 422)
