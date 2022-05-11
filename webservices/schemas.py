@@ -1352,6 +1352,7 @@ class CandidateTotalAggregateSchema(ma.Schema):
     total_transfers_from_other_authorized_committee = ma.fields.Decimal(places=2)
     total_other_political_committee_contributions = ma.fields.Decimal(places=2)
     total_cash_on_hand_end_period = ma.fields.Decimal(places=2)
+    total_debts_owed_by_committee = ma.fields.Decimal(places=2)
     state = ma.fields.Str()
     district = ma.fields.Str()
     district_number = ma.fields.Int()

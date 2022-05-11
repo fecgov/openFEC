@@ -1386,6 +1386,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             transfers_from_other_authorized_committee=1000,
             other_political_committee_contributions=1000,
             cash_on_hand_end_period=1000,
+            debts_owed_by_committee=1000,
             state="CA",
             district="01",
             party="DEM",
@@ -1403,6 +1404,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             transfers_from_other_authorized_committee=1000,
             other_political_committee_contributions=1000,
             cash_on_hand_end_period=1000,
+            debts_owed_by_committee=1000,
             state="CA",
             district="01",
             party="DEM",
@@ -1420,6 +1422,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             transfers_from_other_authorized_committee=2000,
             other_political_committee_contributions=2000,
             cash_on_hand_end_period=2000,
+            debts_owed_by_committee=2000,
             state="CA",
             district="02",
             party="DEM",
@@ -1436,6 +1439,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             transfers_from_other_authorized_committee=3300,
             other_political_committee_contributions=3300,
             cash_on_hand_end_period=3300,
+            debts_owed_by_committee=3300,
             state="VA",
             district="01",
             party="REP",
@@ -1452,6 +1456,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             transfers_from_other_authorized_committee=4000,
             other_political_committee_contributions=4000,
             cash_on_hand_end_period=4000,
+            debts_owed_by_committee=4000,
             state="VA",
             district="01",
             party="REP",
@@ -1469,6 +1474,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             transfers_from_other_authorized_committee=100,
             other_political_committee_contributions=100,
             cash_on_hand_end_period=100,
+            debts_owed_by_committee=100,
             state="CA",
             district="00",
             party="DEM",
@@ -1486,6 +1492,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             transfers_from_other_authorized_committee=200,
             other_political_committee_contributions=200,
             cash_on_hand_end_period=200,
+            debts_owed_by_committee=200,
             state="CA",
             district="00",
             party="DEM",
@@ -1503,6 +1510,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             transfers_from_other_authorized_committee=400,
             other_political_committee_contributions=400,
             cash_on_hand_end_period=400,
+            debts_owed_by_committee=400,
             state="VA",
             district="00",
             party="DEM",
@@ -1520,6 +1528,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             transfers_from_other_authorized_committee=600,
             other_political_committee_contributions=600,
             cash_on_hand_end_period=600,
+            debts_owed_by_committee=600,
             state="VA",
             district="00",
             party="DEM",
@@ -1536,6 +1545,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             transfers_from_other_authorized_committee=700,
             other_political_committee_contributions=700,
             cash_on_hand_end_period=700,
+            debts_owed_by_committee=700,
             state="VA",
             district="00",
             party="REP",
@@ -1553,6 +1563,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             transfers_from_other_authorized_committee=800,
             other_political_committee_contributions=800,
             cash_on_hand_end_period=800,
+            debts_owed_by_committee=800,
             state="CA",
             district="00",
             party="REP",
@@ -1570,6 +1581,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             transfers_from_other_authorized_committee=90,
             other_political_committee_contributions=90,
             cash_on_hand_end_period=90,
+            debts_owed_by_committee=90,
             state="CA",
             district="00",
             party="REP",
@@ -1652,6 +1664,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_transfers_from_other_authorized_committee": 4000,
                 "total_other_political_committee_contributions": 4000,
                 "total_cash_on_hand_end_period": 4000,
+                "total_debts_owed_by_committee": 4000,
             },
         )
         assert_dicts_subset(
@@ -1665,6 +1678,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_transfers_from_other_authorized_committee": 6300,
                 "total_other_political_committee_contributions": 6300,
                 "total_cash_on_hand_end_period": 6300,
+                "total_debts_owed_by_committee": 6300,
             },
         )
 
@@ -1691,6 +1705,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_transfers_from_other_authorized_committee": 90,
                 "total_other_political_committee_contributions": 90,
                 "total_cash_on_hand_end_period": 90,
+                "total_debts_owed_by_committee": 90,
             },
         )
         assert_dicts_subset(
@@ -1704,6 +1719,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_transfers_from_other_authorized_committee": 900,
                 "total_other_political_committee_contributions": 900,
                 "total_cash_on_hand_end_period": 900,
+                "total_debts_owed_by_committee": 900,
             },
         )
         assert_dicts_subset(
@@ -1717,6 +1733,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_transfers_from_other_authorized_committee": 700,
                 "total_other_political_committee_contributions": 700,
                 "total_cash_on_hand_end_period": 700,
+                "total_debts_owed_by_committee": 700,
             },
         )
 
@@ -1743,6 +1760,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_transfers_from_other_authorized_committee": 3000,
                 "total_other_political_committee_contributions": 3000,
                 "total_cash_on_hand_end_period": 3000,
+                "total_debts_owed_by_committee": 3000,
                 "party": "DEM",
                 "office": "H",
             },
@@ -1757,6 +1775,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_transfers_from_other_authorized_committee": 3300,
                 "total_other_political_committee_contributions": 3300,
                 "total_cash_on_hand_end_period": 3300,
+                "total_debts_owed_by_committee": 3300,
                 "party": "REP",
                 "office": "H",
             },
@@ -1785,6 +1804,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_transfers_from_other_authorized_committee": 900,
                 "total_other_political_committee_contributions": 900,
                 "total_cash_on_hand_end_period": 900,
+                "total_debts_owed_by_committee": 900,
             },
         )
 
@@ -1820,6 +1840,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_transfers_from_other_authorized_committee": 200,
                 "total_other_political_committee_contributions": 200,
                 "total_cash_on_hand_end_period": 200,
+                "total_debts_owed_by_committee": 200,
             },
         )
 
@@ -1846,6 +1867,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_transfers_from_other_authorized_committee": 4000,
                 "total_other_political_committee_contributions": 4000,
                 "total_cash_on_hand_end_period": 4000,
+                "total_debts_owed_by_committee": 4000,
             },
         )
         assert_dicts_subset(
@@ -1858,6 +1880,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_transfers_from_other_authorized_committee": 6300,
                 "total_other_political_committee_contributions": 6300,
                 "total_cash_on_hand_end_period": 6300,
+                "total_debts_owed_by_committee": 6300,
             },
         )
 
@@ -1930,6 +1953,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_transfers_from_other_authorized_committee": 3000,
                 "total_other_political_committee_contributions": 3000,
                 "total_cash_on_hand_end_period": 3000,
+                "total_debts_owed_by_committee": 3000,
                 "state": "CA",
             },
         )
@@ -1959,7 +1983,38 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_transfers_from_other_authorized_committee": 1000,
                 "total_other_political_committee_contributions": 1000,
                 "total_cash_on_hand_end_period": 1000,
+                "total_debts_owed_by_committee": 1000,
                 "state": "CA",
                 "district": "01",
+            },
+        )
+
+    def test_filter_by_party(self):
+        # aggregate_by="office-party", office=H, party=DEM,
+        # election_full default=true, election_year=2016, is_active_candidate=True
+        # return one rows:
+        # row 1: 2016/H/DEM/total=1000+2000=3000
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office-party",
+            office="H",
+            is_active_candidate=True,
+            election_year=2016,
+            party="DEM",)
+        )
+        assert len(results) == 1
+        assert_dicts_subset(
+            results[0],
+            {
+                "election_year": 2016,
+                "total_receipts": 3000,
+                "total_disbursements": 3000,
+                "total_individual_itemized_contributions": 3000,
+                "total_transfers_from_other_authorized_committee": 3000,
+                "total_other_political_committee_contributions": 3000,
+                "total_cash_on_hand_end_period": 3000,
+                "total_debts_owed_by_committee": 3000,
+                "party": "DEM",
+                "office": "H",
             },
         )
