@@ -4,10 +4,10 @@ git+https://github.com/18F/rdbms-subsetter
 
 # Testing
 pdbpp==0.9.1
-click==6.7
+click==8.0.4
 
 # requirements.txt generation (pip-compile)
 pip-tools==4.2.0
 #locust
-locustio==0.10.0
+locustio==0.14.6 #upgrade locustio to python 3.8 compatible version
 
