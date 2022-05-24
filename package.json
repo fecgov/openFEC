@@ -20,7 +20,7 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "swagger-tools": "^0.10.4",
-    "swagger-ui-dist": "4.5.0"
+    "swagger-ui-dist": "4.10.3"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
