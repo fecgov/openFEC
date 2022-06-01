@@ -87,7 +87,7 @@ class GetLegalDocument(Resource):
     responses=responses.LEGAL_SEARCH_RESPONSE,
 )
 class UniversalSearch(Resource):
-    @use_kwargs(args.query)
+    @use_kwargs(args.legal_universal_search)
     def get(self, q="", from_hit=0, hits_returned=20, **kwargs):
         query_builders = {
             "statutes": generic_query_builder,
@@ -173,22 +173,40 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_clauses = []
     if kwargs.get("case_no"):
         must_clauses.append(Q("terms", no=kwargs.get("case_no")))
-    if kwargs.get("case_document_category"):
-        must_clauses = [
-            Q("terms", documents__category=kwargs.get("case_document_category"))
-        ]
+
     query = query.query("bool", must=must_clauses)
 
     logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     if type_ == "admin_fines":
         return apply_af_specific_query_params(query, **kwargs)
+    elif type_ == "murs":
+        return apply_mur_specific_query_params(query, **kwargs)
     else:
-        return apply_mur_adr_specific_query_params(query, **kwargs)
+        return apply_adr_specific_query_params(query, **kwargs)
 
-
+# Select one or more case_doc_category_id to filter by corresponding case_document_category
+# - 1 - Conciliation Agreements
+# - 2 - Complaint, Responses, Designation of Counsel and Extensions of Timee
+# - 3 - General Counsel Reports, Briefs, Notifications and Responses
+# - 4 - Certifications
+# - 5 - Civil Penalties, Disgorgements and Other Payments
+# - 6 - Statements of Reasons
 def get_case_document_query(q, **kwargs):
     combined_query = []
+    category_queries = []
+    if kwargs.get("case_doc_category_id"):
+
+        for doc_category_id in kwargs.get("case_doc_category_id"):
+            category_queries.append(
+                Q(
+                    "match",
+                    documents__doc_order_id=doc_category_id,
+                ),
+            )
+
+    combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
+
     if q:
         combined_query.append(Q("query_string", query=q, fields=["documents.text"]))
 
@@ -240,7 +258,140 @@ def apply_af_specific_query_params(query, **kwargs):
     return query
 
 
-def apply_mur_adr_specific_query_params(query, **kwargs):
+def apply_mur_specific_query_params(query, **kwargs):
+    must_clauses = []
+
+    if kwargs.get("mur_type"):
+        must_clauses.append(Q("match", mur_type=kwargs.get("mur_type")))
+    if kwargs.get("case_respondents"):
+        must_clauses.append(Q("match", respondents=kwargs.get("case_respondents")))
+    if kwargs.get("case_dispositions"):
+        must_clauses.append(
+            Q("term", disposition__data__disposition=kwargs.get("case_dispositions"))
+        )
+
+    if kwargs.get("case_election_cycles"):
+        must_clauses.append(
+            Q("term", election_cycles=kwargs.get("case_election_cycles"))
+        )
+
+    # gte/lte: greater than or equal to/less than or equal to
+    date_range = {}
+    if kwargs.get("case_min_open_date"):
+        date_range["gte"] = kwargs.get("case_min_open_date")
+    if kwargs.get("case_max_open_date"):
+        date_range["lte"] = kwargs.get("case_max_open_date")
+    if date_range:
+        must_clauses.append(Q("range", open_date=date_range))
+
+    date_range = {}
+    if kwargs.get("case_min_close_date"):
+        date_range["gte"] = kwargs.get("case_min_close_date")
+    if kwargs.get("case_max_close_date"):
+        date_range["lte"] = kwargs.get("case_max_close_date")
+    if date_range:
+        must_clauses.append(Q("range", close_date=date_range))
+
+    query = query.query("bool", must=must_clauses)
+    logger.debug("apply_mur_adr_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+
+    if kwargs.get("case_regulatory_citation") or kwargs.get("case_statutory_citation"):
+        return case_apply_citation_params(query,
+            kwargs.get("case_regulatory_citation"),
+            kwargs.get("case_statutory_citation"),
+            kwargs.get("case_citation_require_all"), **kwargs)
+    else:
+        return query
+
+
+def case_apply_citation_params(query, regulatory_citation, statutory_citation, citation_require_all, **kwargs):
+    #  regulatory citation example: 11 CFR §112.4
+    #  statutory citation example: 52 U.S.C. §30106
+    must_clauses = []
+    citation_queries = []
+    if regulatory_citation:
+
+        for citation in regulatory_citation:
+            exact_match = re.match(
+                r"(?P<title>\d+)\s+C\.?F\.?R\.?\s+§*\s*(?P<text>\d+\.\d+)",
+                citation,
+            )
+            if exact_match:
+                citation_queries.append(
+                    Q(
+                        "nested",
+                        path="dispositions",
+                        query=Q(
+                            "nested",
+                            path="dispositions.citations",
+                            query=Q(
+                                "bool",
+                                must=[
+                                    Q(
+                                        "match",
+                                        dispositions__citations__title=exact_match.group("title"),
+                                    ),
+                                    Q(
+                                        "match",
+                                        dispositions__citations__text=exact_match.group("text"),
+                                    ),
+                                    Q(
+                                        "match",
+                                        dispositions__citations__type="regulation",
+                                    ),
+                                ],
+                            ),
+                        )
+                    )
+                )
+
+    if statutory_citation:
+        for citation in statutory_citation:
+            exact_match = re.match(
+                r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<text>\d+).*\.?", citation
+            )
+            if exact_match:
+                citation_queries.append(
+                    Q(
+                        "nested",
+                        path="dispositions",
+                        query=Q(
+                            "nested",
+                            path="dispositions.citations",
+                            query=Q(
+                                "bool",
+                                must=[
+                                    Q(
+                                        "match",
+                                        dispositions__citations__title=exact_match.group("title"),
+                                    ),
+                                    Q(
+                                        "match",
+                                        dispositions__citations__text=exact_match.group("text"),
+                                    ),
+                                    Q(
+                                        "match",
+                                        dispositions__citations__type="statute",
+                                    ),
+                                ],
+                            ),
+                        )
+                    )
+                )
+
+    if citation_require_all:
+        # if citation_require_all= True, return all matched citations("and" relation)
+        must_clauses.append(Q("bool", must=citation_queries))
+    else:
+        # Default citation_require_all=False, return any matched citations("or" relation)
+        must_clauses.append(Q("bool", should=citation_queries, minimum_should_match=1))
+
+    query = query.query("bool", must=must_clauses)
+    logger.debug("apply_citation_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    return query
+
+
+def apply_adr_specific_query_params(query, **kwargs):
     must_clauses = []
 
     if kwargs.get("mur_type"):

@@ -48,6 +48,7 @@ CASE_DOCUMENT_MAPPINGS = {
         },
         "document_date": {"type": "date", "format": "dateOptionalTime"},
         "url": {"type": "text"},
+        "doc_order_id": {"type": "integer"}
     },
 }
 
@@ -219,8 +220,10 @@ MUR_ADR_MAPPINGS = {
     },
     "respondents": {"type": "text"},
     "dispositions": {
+        "type": "nested",
         "properties": {
             "citations": {
+                "type": "nested",
                 "properties": {
                     "text": {"type": "text"},
                     "title": {"type": "text"},

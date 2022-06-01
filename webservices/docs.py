@@ -1910,17 +1910,173 @@ Search legal documents by document type, or across all document types using keyw
 '''
 
 LEGAL_DOC_SEARCH = '''
-Search legal documents by type and No.
+Search legal documents by type and No
 '''
 
 LEGAL_DOC_NO = '''
-Document number to fetch.
+Document number to fetch
 '''
 
-LEGAL_DOC_TYPE = '''
-Document type to fetch.
+LEGAL_DOC_TYPE = 'Legal Document type to refine search by\n\
+    - statutes\n\
+    - regulations\n\
+    - advisory_opinions\n\
+    - murs\n\
+    - admin_fines\n\
+'
+
+TEXT_SEARCH = '''
+Text to search legal documents for
 '''
 
+FROM_HIT = '''
+Get results starting from this index
+'''
+
+HITS_RETURNED = '''
+Number of results to return (max 10)
+'''
+
+AO_NUMBER = '''
+Force advisory opinion number
+'''
+
+AO_NAME = '''
+Force advisory opinion name
+'''
+
+AO_MIN_ISSUE_DATE = '''
+Earliest issue date of advisory opinion
+'''
+
+AO_MAX_ISSUE_DATE = '''
+Latest issue date of advisory opinion
+'''
+
+AO_MIN_REQUEST_DATE = '''
+Earliest request date of advisory opinion
+'''
+
+AO_MAX_REQUEST_DATE = '''
+Latest request date of advisory opinion
+'''
+
+AO_CATEGORY = '''
+Category of the document
+'''
+
+AO_IS_PENDING = '''
+AO is pending
+'''
+
+AO_STATUS = '''
+Status of AO (pending, withdrawn, or final)
+'''
+
+AO_REQUESTOR = '''
+The requestor of the advisory opinion
+'''
+
+AO_REQUESTOR_TYPE = '''
+Code of the advisory opinion requestor type.
+'''
+
+REGULATORY_CITATION = '''
+Regulatory citations. Example: 11 CFR §110.4
+'''
+
+STATUTORY_CITATION = '''
+Statutory citations. Example: 52 U.S.C. §30116
+'''
+
+CITATION_REQUIRE_ALL = '''
+Require all citations to be in document (default behavior is any)
+'''
+
+AO_ENTITY_NAME = '''
+Name of commenter or representative
+'''
+
+CASE_NO = '''
+Enforcement matter case number
+'''
+
+CASE_RESPONDONTS = '''
+Cases respondents
+'''
+
+CASE_DISPOSTIONS = '''
+Cases dispositions
+'''
+
+CASE_ELECTION_CYCLES = '''
+Cases election cycles
+'''
+
+CASE_MIN_OPEN_DATE = '''
+The earliest date opened of case
+'''
+
+CASE_MAX_OPEN_DATE = '''
+The latest date opened of case
+'''
+
+CASE_MIN_CLOSE_DATE = '''
+The earliest date closed of case
+'''
+
+CASE_MAX_CLOSE_DATE = '''
+The latest date closed of case
+'''
+
+CASE_DOCUMENT_CATEGORY_DESCRIPTION = 'Select one or more case_doc_category_id to filter by corresponding CASE_DOCUMENT_CATEGORY:\n\
+        - 1 - Conciliation Agreements\n\
+        - 2 - Complaint, Responses, Designation of Counsel and Extensions of Timee\n\
+        - 3 - General Counsel Reports, Briefs, Notifications and Responses\n\
+        - 4 - Certifications\n\
+        - 5 - Civil Penalties, Disgorgements and Other Payments\n\
+        - 6 - Statements of Reasons \n\
+'
+
+MUR_TYPE = '''
+Type of MUR : current or archived
+'''
+
+AF_NAME = '''
+Admin fine committee name
+'''
+
+AF_COMMITTEE_ID = '''
+Admin fine committee ID
+'''
+
+AF_REPORT_YEAR = '''
+Admin fine report year
+'''
+
+AF_MIN_RTB_DATE = '''
+The earliest Reason to Believe date
+'''
+
+AF_MAX_RTB_DATE = '''
+The latest Reason to Believe date
+'''
+
+AF_RTB_FINE_AMOUNT = '''
+Reason to Believe fine amount
+'''
+
+AF_MIN_FD_DATE = '''
+The earliest Final Determination date
+'''
+
+AF_MAX_FD_DATE = '''
+The latest Final Determination date
+'''
+
+AF_FD_FINE_AMOUNT = '''
+Final Determination fine amount
+'''
 # ======== legal end =========
 
 
