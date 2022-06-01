@@ -219,8 +219,10 @@ MUR_ADR_MAPPINGS = {
     },
     "respondents": {"type": "text"},
     "dispositions": {
+        "type": "nested",
         "properties": {
             "citations": {
+                "type": "nested",
                 "properties": {
                     "text": {"type": "text"},
                     "title": {"type": "text"},
