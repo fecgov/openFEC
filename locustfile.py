@@ -18,6 +18,7 @@ import random
 import resource
 
 import locust
+from locust import between
 
 
 # Avoid "Too many open files" error
@@ -427,5 +428,4 @@ class Tasks(locust.TaskSet):
 
 class Swarm(locust.HttpLocust):
     task_set = Tasks
-    min_wait = 5000
-    max_wait = 50000
+    wait_time = between(5000, 50000)
