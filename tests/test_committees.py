@@ -460,7 +460,7 @@ class TestCommitteeHistory(ApiBaseTest):
     def setUp(self):
         super().setUp()
         self.candidate = factories.CandidateDetailFactory()
-        self.committees = [factories.CommitteeDetailFactory() for _ in range(7)]
+        self.committees = [factories.CommitteeDetailFactory() for _ in range(8)]
         self.histories = [
             factories.CommitteeHistoryFactory(
                 committee_id=self.committees[0].committee_id,
@@ -525,6 +525,12 @@ class TestCommitteeHistory(ApiBaseTest):
                 designation="D",
                 is_active=True,
                 sponsor_candidate_ids=["H003", "H004"]
+            ),
+            factories.CommitteeHistoryFactory(
+                committee_id=self.committees[7].committee_id,
+                cycle=2022,
+                designation="J",
+                is_active=True,
             ),
         ]
 
@@ -756,3 +762,32 @@ class TestCommitteeHistory(ApiBaseTest):
         )
         assert len(result) == 1
         self.assertEqual(result[0]["sponsor_candidate_ids"], ["H003", "H004"])
+
+    def test_jfc_committee(self):
+        factories.JFCCommitteeFactory(
+            committee_id=self.committees[7].committee_id,
+            joint_committee_name="JFC_001",
+            most_recent_filing_flag='Y',
+        )
+        factories.JFCCommitteeFactory(
+            committee_id=self.committees[7].committee_id,
+            joint_committee_name="JFC_old",
+            most_recent_filing_flag='N',
+        )
+        factories.JFCCommitteeFactory(
+            committee_id=self.committees[7].committee_id,
+            joint_committee_name="JFC_002",
+            most_recent_filing_flag='Y',
+        )
+        results = self._results(
+            api.url_for(CommitteeHistoryView, committee_id=self.committees[7].committee_id)
+        )
+
+        self.assertEqual(len(results), 1)
+        self.assertIn("jfc_committee", results[0])
+        self.assertEqual(
+            results[0]["jfc_committee"][0]["joint_committee_name"], "JFC_001"
+        )
+        self.assertEqual(
+            results[0]["jfc_committee"][1]["joint_committee_name"], "JFC_002"
+        )
