@@ -600,3 +600,10 @@ class PacSponsorCandidatePerCycleFactory(BaseFactory):
         model = models.PacSponsorCandidatePerCycle
 
     idx = factory.Sequence(lambda n: n)
+
+
+class JFCCommitteeFactory(BaseFactory):
+    class Meta:
+        model = models.JFCCommittee
+
+    idx = factory.Sequence(lambda n: n)

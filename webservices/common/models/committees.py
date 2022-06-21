@@ -86,6 +86,15 @@ class CommitteeHistory(BaseCommittee):
     convert_to_pac_flag = db.Column(db.Boolean, doc=docs.CONVERT_TO_PAC_FLAG)
     sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
 
+    jfc_committee = db.relationship(
+        'JFCCommittee',
+        primaryjoin='''and_(
+                    CommitteeHistory.committee_id == foreign(JFCCommittee.committee_id), 
+                    JFCCommittee.most_recent_filing_flag == 'Y',
+                )''',
+        lazy='joined'
+    )
+
 
 class CommitteeDetail(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
@@ -129,3 +138,13 @@ class CommitteeDetail(BaseConcreteCommittee):
     custodian_name_suffix = db.Column(db.String(50), doc=docs.CUSTODIAN_NAME_SUFFIX)
     custodian_name_title = db.Column(db.String(50), doc=docs.CUSTODIAN_NAME_TITLE)
     custodian_zip = db.Column(db.String(9), doc=docs.CUSTODIAN_ZIP)
+
+
+class JFCCommittee(BaseModel):
+    __tablename__ = 'fec_form_1s_vw'
+
+    idx = db.Column('sub_id', db.Integer, primary_key=True)
+    committee_id = db.Column('cmte_id', db.String, doc=docs.COMMITTEE_ID)
+    joint_committee_id = db.Column('joint_cmte_id', db.String, doc=docs.COMMITTEE_ID)
+    joint_committee_name = db.Column('joint_cmte_nm', db.String(100), doc=docs.COMMITTEE_NAME)
+    most_recent_filing_flag = db.Column(db.String(1), doc=docs.MOST_RECENT)

@@ -401,10 +401,19 @@ CommitteePageSchema = make_page_schema(CommitteeSchema)
 register_schema(CommitteeSchema)
 register_schema(CommitteePageSchema)
 
+# create JFC committee schema
+JFCCommitteeSchema = make_schema(
+    models.JFCCommittee,
+    options={'exclude': ( 'idx', 'committee_id', 'most_recent_filing_flag', )},
+)
+# End create JFC committee schema
 
 make_committees_schema = functools.partial(
     make_schema,
     options={'exclude': ('idx', 'treasurer_text', )},
+    fields={
+        'jfc_committee': ma.fields.Nested(JFCCommitteeSchema, many=True),
+    }
 )
 
 augment_models(
