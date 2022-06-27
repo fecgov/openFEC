@@ -48,6 +48,7 @@ CASE_DOCUMENT_MAPPINGS = {
         },
         "document_date": {"type": "date", "format": "dateOptionalTime"},
         "url": {"type": "text"},
+        "doc_order_id": {"type": "integer"},
     },
 }
 

@@ -515,6 +515,7 @@ def get_documents(case_id, bucket):
                 "length": row["length"],
                 "text": row["ocrtext"],
                 "document_date": row["document_date"],
+                "doc_order_id": row["doc_order_id"],
             }
             if not row["fileimage"]:
                 logger.error(

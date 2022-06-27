@@ -226,7 +226,6 @@ legal_universal_search = {
     'ao_entity_name': fields.List(IStr, required=False, description=docs.AO_ENTITY_NAME),
 
     'case_no': fields.List(IStr, required=False, description=docs.CASE_NO),
-    'case_document_category': fields.List(IStr, required=False, description=docs.CASE_DOCUMENT_CATEGORY),
     'case_respondents': fields.Str(IStr, required=False, description=docs.CASE_RESPONDONTS),
     'case_dispositions': fields.List(IStr, required=False, description=docs.CASE_DISPOSTIONS),
     'case_election_cycles': fields.Int(IStr, required=False, description=docs.CASE_ELECTION_CYCLES),
@@ -237,6 +236,10 @@ legal_universal_search = {
     'case_regulatory_citation': fields.List(IStr, required=False, description=docs.REGULATORY_CITATION),
     'case_statutory_citation': fields.List(IStr, required=False, description=docs.STATUTORY_CITATION),
     'case_citation_require_all': fields.Bool(description=docs.CITATION_REQUIRE_ALL),
+
+    # case_doc_category_id is the key of case_document_category
+    'case_doc_category_id': fields.List(IStr(validate=validate.OneOf(['1', '2', '3', '4', '5', '6'])),
+                                    description=docs.CASE_DOCUMENT_CATEGORY_DESCRIPTION),
 
     'mur_type': fields.Str(required=False, description=docs.MUR_TYPE),
 
