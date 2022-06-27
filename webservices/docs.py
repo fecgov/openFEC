@@ -2033,6 +2033,15 @@ CASE_MAX_CLOSE_DATE = '''
 The latest date closed of case
 '''
 
+CASE_DOCUMENT_CATEGORY_DESCRIPTION = 'Select one or more case_doc_category_id to filter by corresponding CASE_DOCUMENT_CATEGORY:\n\
+        - 1 - Conciliation Agreements\n\
+        - 2 - Complaint, Responses, Designation of Counsel and Extensions of Timee\n\
+        - 3 - General Counsel Reports, Briefs, Notifications and Responses\n\
+        - 4 - Certifications\n\
+        - 5 - Civil Penalties, Disgorgements and Other Payments\n\
+        - 6 - Statements of Reasons \n\
+'
+
 MUR_TYPE = '''
 Type of MUR : current or archived
 '''
