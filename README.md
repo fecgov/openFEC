@@ -200,7 +200,14 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
 #### Run locally
 Follow these steps every time you want to work on this project locally.
 
-1. If you are using the legal search portion of the site, you will need Elastic Search running.
+1. Set the FLASK_APP environment variable to specify how to load the application. Flask is used when running the project locally, so you will want to turn the debugger on as well. If you'd like to run in  development mode (reloader will trigger whenever your code or imported modules change and debugger is on by default) you can set FLASK_ENV=development.
+```
+export FLASK_APP=webservices.rest
+export FLASK_DEBUG=1
+
+```
+
+2. If you are using the legal search portion of the site, you will need Elastic Search running.
 Navigate to the installation folder (eg., `elasticsearch-7.4`) and run:
 
 ```
@@ -211,7 +218,7 @@ cd bin
 2. Start the web server:
 
    ```
-   ./manage.py runserver
+   flask run
    ```
 
 3. View your local version of the site at [http://localhost:5000](http://localhost:5000).

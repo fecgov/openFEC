@@ -14,7 +14,7 @@ def migrate_db(request):
         rest.app.config['SQLALCHEMY_DATABASE_URI'] = common.TEST_CONN
         reset_schema()
         run_migrations()
-        manage.refresh_materialized(concurrent=False)
+        manage.refresh_materialized(False)
 
 
 def run_migrations():

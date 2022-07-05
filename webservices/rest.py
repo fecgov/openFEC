@@ -20,7 +20,7 @@ from flask import redirect
 from flask import render_template
 from flask import Flask
 from flask import Blueprint
-from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 from webargs.flaskparser import FlaskParser
 from flask_apispec import FlaskApiSpec
 from webservices import spec

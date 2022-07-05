@@ -4,10 +4,9 @@ cfenv==0.5.2
 defusedxml==0.6.0
 elasticsearch==7.6.0
 elasticsearch-dsl==7.3.0
-Flask==1.1.1
+Flask==2.1.2
 Flask-Cors==3.0.9
-Flask-RESTful==0.3.7
-Flask-Script==2.0.6
+Flask-RESTful==0.3.9
 Flask-SQLAlchemy==2.4.1
 gevent==20.4.0
 greenlet==0.4.16 # pinned to fix build problem (parent is gevent)
@@ -27,7 +26,7 @@ SQLAlchemy==1.3.19
 ujson==5.4.0 # decoding CSP violation reported
 vine==5.0.0 # previosly pinned to 1.3.0 to fix amqp dependency, which is a dependency of kombu
 webargs==5.5.3
-werkzeug==0.16.1
+werkzeug==2.0.0
 
 # Marshalling
 flask-apispec==0.7.0
@@ -46,9 +45,7 @@ redis==4.2.2
 # testing and build in circle
 codecov==2.1.7
 factory_boy==2.8.1
-itsdangerous==1.1.0 #pinned to fix pytest deprecation warning
 importlib-metadata==3.10.1 #pinned to fix the pytest deprecation warning: SelectableGroups dict interface
-jinja2==3.0.3 #pinned to fix pytest and circle deploy errors caused by the latest jinja2 v3.1.1
 jsonschema==3.2.0 #pinned to fix the pytest deprecation warning inside jsonschema/validators.py
 nplusone==0.8.0
 pytest==5.2.0

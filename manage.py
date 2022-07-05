@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import click
 import glob
 import logging
 import subprocess
@@ -7,8 +8,7 @@ import multiprocessing
 import networkx as nx
 import sqlalchemy as sa
 
-from flask_script import Server
-from flask_script import Manager
+from flask.cli import FlaskGroup
 from webservices import flow
 from webservices.common import models
 from webservices.env import env
@@ -18,48 +18,43 @@ from webservices.common.util import get_full_path
 import webservices.legal_docs as legal_docs
 from webservices.utils import post_to_slack
 
-manager = Manager(app)
-logger = logging.getLogger("manager")
+cli = FlaskGroup(app)
+logger = logging.getLogger("cli")
 
-# The Flask app server should only be used for local testing, so we default to
-# using debug mode and auto-reload. To disable debug mode locally, pass the
-# --no-debug flag to `runserver`.
-manager.add_command("runserver", Server(use_debugger=True, use_reloader=True))
+cli.command(legal_docs.load_regulations)
+cli.command(legal_docs.load_statutes)
+cli.command(legal_docs.load_advisory_opinions)
+cli.command(legal_docs.load_current_murs)
+cli.command(legal_docs.load_adrs)
+cli.command(legal_docs.load_admin_fines)
+cli.command(legal_docs.load_archived_murs)
+cli.command(legal_docs.extract_pdf_text)
 
-manager.command(legal_docs.load_regulations)
-manager.command(legal_docs.load_statutes)
-manager.command(legal_docs.load_advisory_opinions)
-manager.command(legal_docs.load_current_murs)
-manager.command(legal_docs.load_adrs)
-manager.command(legal_docs.load_admin_fines)
-manager.command(legal_docs.load_archived_murs)
-manager.command(legal_docs.extract_pdf_text)
+cli.command(legal_docs.delete_doctype_from_es)
+cli.command(legal_docs.delete_single_doctype_from_es)
+cli.command(legal_docs.delete_murs_from_s3)
+cli.command(legal_docs.show_legal_data)
 
-manager.command(legal_docs.delete_doctype_from_es)
-manager.command(legal_docs.delete_single_doctype_from_es)
-manager.command(legal_docs.delete_murs_from_s3)
-manager.command(legal_docs.show_legal_data)
+cli.command(legal_docs.create_index)
+cli.command(legal_docs.restore_from_staging_index)
+cli.command(legal_docs.delete_index)
+cli.command(legal_docs.display_index_alias)
+cli.command(legal_docs.display_mappings)
 
-manager.command(legal_docs.create_index)
-manager.command(legal_docs.restore_from_staging_index)
-manager.command(legal_docs.delete_index)
-manager.command(legal_docs.display_index_alias)
-manager.command(legal_docs.display_mappings)
+cli.command(legal_docs.initialize_current_legal_docs)
+cli.command(legal_docs.initialize_archived_mur_docs)
+cli.command(legal_docs.refresh_current_legal_docs_zero_downtime)
 
-manager.command(legal_docs.initialize_current_legal_docs)
-manager.command(legal_docs.initialize_archived_mur_docs)
-manager.command(legal_docs.refresh_current_legal_docs_zero_downtime)
+cli.command(legal_docs.configure_snapshot_repository)
+cli.command(legal_docs.delete_repository)
+cli.command(legal_docs.display_repositories)
 
-manager.command(legal_docs.configure_snapshot_repository)
-manager.command(legal_docs.delete_repository)
-manager.command(legal_docs.display_repositories)
-
-manager.command(legal_docs.create_es_snapshot)
-manager.command(legal_docs.restore_es_snapshot)
-manager.command(legal_docs.restore_es_snapshot_downtime)
-manager.command(legal_docs.delete_snapshot)
-manager.command(legal_docs.display_snapshots)
-manager.command(legal_docs.display_snapshot_detail)
+cli.command(legal_docs.create_es_snapshot)
+cli.command(legal_docs.restore_es_snapshot)
+cli.command(legal_docs.restore_es_snapshot_downtime)
+cli.command(legal_docs.delete_snapshot)
+cli.command(legal_docs.display_snapshots)
+cli.command(legal_docs.display_snapshot_detail)
 
 
 def execute_sql_file(path):
@@ -88,7 +83,9 @@ def execute_sql_folder(path, processes):
             execute_sql_file(path)
 
 
-@manager.command
+@app.cli.command('refresh_materialized')
+#  @click.option('--concurrent/--no-concurrent', type=bool, default=True)
+@click.argument('concurrent', default=True, type=bool)
 def refresh_materialized(concurrent=True):
     """Refresh materialized views in dependency order
        We usually want to refresh them concurrently so that we don't block other
@@ -181,12 +178,12 @@ def refresh_materialized(concurrent=True):
                         sa.text(refresh_command).execution_options(autocommit=True)
                     )
             else:
-                logger.error("Error refreshing node %s: not found.".format(node))
+                logger.error("Error refreshing node {}: not found.".format(node))
 
     logger.info("Finished refreshing materialized views.")
 
 
-@manager.command
+@app.cli.command('cf_startup')
 def cf_startup():
     """Migrate schemas on `cf push`."""
     check_config()
@@ -194,7 +191,8 @@ def cf_startup():
         subprocess.Popen(["python", "manage.py", "refresh_materialized"])
 
 
-@manager.command
+@app.cli.command('slack_message')
+@click.argument('message')
 def slack_message(message):
     """ Sends a message to the bots channel. you can add this command to ping you when a task is done, etc.
     run ./manage.py slack_message 'The message you want to post'
@@ -202,10 +200,10 @@ def slack_message(message):
     post_to_slack(message, "#bots")
 
 
-@manager.shell
+@app.shell_context_processor
 def make_shell_context():
-    return dict(app=app, db=db, models=models)
+    return {'app': app, 'db': db, 'models': models}
 
 
 if __name__ == "__main__":
-    manager.run()
+    cli()
