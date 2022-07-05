@@ -188,9 +188,28 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     else:
         return apply_adr_specific_query_params(query, **kwargs)
 
-
+# Select one or more case_doc_category_id to filter by corresponding case_document_category
+# - 1 - Conciliation Agreements
+# - 2 - Complaint, Responses, Designation of Counsel and Extensions of Timee
+# - 3 - General Counsel Reports, Briefs, Notifications and Responses
+# - 4 - Certifications
+# - 5 - Civil Penalties, Disgorgements and Other Payments
+# - 6 - Statements of Reasons
 def get_case_document_query(q, **kwargs):
     combined_query = []
+    category_queries = []
+    if kwargs.get("case_doc_category_id"):
+
+        for doc_category_id in kwargs.get("case_doc_category_id"):
+            category_queries.append(
+                Q(
+                    "match",
+                    documents__doc_order_id=doc_category_id,
+                ),
+            )
+
+    combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
+
     if q:
         combined_query.append(Q("query_string", query=q, fields=["documents.text"]))
 
