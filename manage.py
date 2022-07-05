@@ -1,60 +1,18 @@
 #!/usr/bin/env python
 
-import click
 import glob
-import logging
 import subprocess
 import multiprocessing
 import networkx as nx
 import sqlalchemy as sa
 
-from flask.cli import FlaskGroup
 from webservices import flow
-from webservices.common import models
 from webservices.env import env
-from webservices.rest import app, db
+from webservices.rest import db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
-import webservices.legal_docs as legal_docs
 from webservices.utils import post_to_slack
-
-cli = FlaskGroup(app)
-logger = logging.getLogger("cli")
-
-cli.command(legal_docs.load_regulations)
-cli.command(legal_docs.load_statutes)
-cli.command(legal_docs.load_advisory_opinions)
-cli.command(legal_docs.load_current_murs)
-cli.command(legal_docs.load_adrs)
-cli.command(legal_docs.load_admin_fines)
-cli.command(legal_docs.load_archived_murs)
-cli.command(legal_docs.extract_pdf_text)
-
-cli.command(legal_docs.delete_doctype_from_es)
-cli.command(legal_docs.delete_single_doctype_from_es)
-cli.command(legal_docs.delete_murs_from_s3)
-cli.command(legal_docs.show_legal_data)
-
-cli.command(legal_docs.create_index)
-cli.command(legal_docs.restore_from_staging_index)
-cli.command(legal_docs.delete_index)
-cli.command(legal_docs.display_index_alias)
-cli.command(legal_docs.display_mappings)
-
-cli.command(legal_docs.initialize_current_legal_docs)
-cli.command(legal_docs.initialize_archived_mur_docs)
-cli.command(legal_docs.refresh_current_legal_docs_zero_downtime)
-
-cli.command(legal_docs.configure_snapshot_repository)
-cli.command(legal_docs.delete_repository)
-cli.command(legal_docs.display_repositories)
-
-cli.command(legal_docs.create_es_snapshot)
-cli.command(legal_docs.restore_es_snapshot)
-cli.command(legal_docs.restore_es_snapshot_downtime)
-cli.command(legal_docs.delete_snapshot)
-cli.command(legal_docs.display_snapshots)
-cli.command(legal_docs.display_snapshot_detail)
+from cli import logger
 
 
 def execute_sql_file(path):
@@ -83,9 +41,6 @@ def execute_sql_folder(path, processes):
             execute_sql_file(path)
 
 
-@app.cli.command('refresh_materialized')
-#  @click.option('--concurrent/--no-concurrent', type=bool, default=True)
-@click.argument('concurrent', default=True, type=bool)
 def refresh_materialized(concurrent=True):
     """Refresh materialized views in dependency order
        We usually want to refresh them concurrently so that we don't block other
@@ -183,7 +138,6 @@ def refresh_materialized(concurrent=True):
     logger.info("Finished refreshing materialized views.")
 
 
-@app.cli.command('cf_startup')
 def cf_startup():
     """Migrate schemas on `cf push`."""
     check_config()
@@ -191,19 +145,8 @@ def cf_startup():
         subprocess.Popen(["python", "manage.py", "refresh_materialized"])
 
 
-@app.cli.command('slack_message')
-@click.argument('message')
 def slack_message(message):
     """ Sends a message to the bots channel. you can add this command to ping you when a task is done, etc.
     run ./manage.py slack_message 'The message you want to post'
     """
     post_to_slack(message, "#bots")
-
-
-@app.shell_context_processor
-def make_shell_context():
-    return {'app': app, 'db': db, 'models': models}
-
-
-if __name__ == "__main__":
-    cli()
