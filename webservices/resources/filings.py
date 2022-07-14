@@ -7,6 +7,7 @@ from webservices import schemas
 from webservices.common.views import ApiResource
 from webservices.common import counts
 from webservices.common import models
+from webservices import exceptions
 
 
 @doc(
@@ -130,9 +131,16 @@ class EFilingsView(ApiResource):
         )
 
     def build_query(self, **kwargs):
+        VALID_KEYWORD_LENGTH = 3
         query = super().build_query(**kwargs)
 
         if kwargs.get("q"):
+            for keyword in kwargs["q"]:
+                if len(keyword) < VALID_KEYWORD_LENGTH:  # noqa
+                    raise exceptions.ApiError(
+                        "Invalid keyword, the keyword must be at least 3 characters in length.",
+                        status_code=422,
+                    )
             query = query.join(
                 models.CommitteeSearch,
                 self.model.committee_id == models.CommitteeSearch.id,

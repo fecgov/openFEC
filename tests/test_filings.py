@@ -308,7 +308,7 @@ class TestEfileFiles(ApiBaseTest):
         results = self._results(api.url_for(EFilingsView, file_number=file_number))
         self.assertEqual(results[0]["file_number"], file_number)
 
-    def test_fulltext_keyward_search(self):
+    def test_fulltext_keyword_search(self):
         [
             factories.EFilingsFactory(
                 committee_id="C01",
@@ -335,3 +335,9 @@ class TestEfileFiles(ApiBaseTest):
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0]["committee_id"], "C01")
         self.assertEqual(results[1]["committee_id"], "C02")
+
+    def test_invalid_keyword(self):
+        response = self.app.get(
+            api.url_for(EFilingsView, q="ab")
+        )
+        self.assertEqual(response.status_code, 422)
