@@ -19,6 +19,7 @@ networkx==2.6.2
 prance[osv]>=0.19
 psycopg2-binary==2.9.1
 python-dateutil==2.8.1
+python-dotenv>=0.20.0
 requests==2.25.1
 requests-aws4auth==1.0
 sqlalchemy-postgres-copy==0.3.0
