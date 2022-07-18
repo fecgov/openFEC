@@ -369,6 +369,7 @@ efilings = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'min_receipt_date': fields.Date(description=docs.MIN_RECEIPT_DATE),
     'max_receipt_date': fields.Date(description=docs.MAX_RECEIPT_DATE),
+    'q': fields.List(fields.Str, description=docs.COMMITTEE_NAME),
 }
 
 reports = {
