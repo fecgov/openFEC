@@ -172,11 +172,20 @@ DISPOSITION_DATA = """
     ORDER BY fecmur.event.event_name ASC, fecmur.settlement.final_amount DESC NULLS LAST, event_date DESC;
 """
 
-MUR_ADR_COMMISSION_VOTES = """
+MUR_COMMISSION_VOTES = """
     SELECT vote_date, action from fecmur.commission
     WHERE case_id = %s
     ORDER BY vote_date desc;
 """
+ADR_COMMISSION_VOTES = """
+    SELECT c.vote_date , c."action", e.name as commissioner_name,  v.vote_type  
+    FROM fecmur.COMMISSION c, fecmur.votes v, fecmur.entity e
+    WHERE c.CASE_ID = %s
+    AND c.commission_id = v.commission_id
+    AND e.entity_id =  v.entity_id
+    ORDER BY c.vote_date desc;
+"""
+
 
 AF_COMMISSION_VOTES = """
     SELECT action_date as vote_date, action from fecmur.af_case
@@ -310,7 +319,10 @@ def get_single_case(case_type, case_no, bucket):
                 "sort1": sort1,
                 "sort2": sort2,
             }
-            case["commission_votes"] = get_commission_votes(case_type, case_id)
+            if case_type == "ADR":
+                case["commission_votes"] = get_ADR_commission_votes(case_type, case_id)
+            else: 
+                case["commission_votes"] = get_commission_votes(case_type, case_id)
             case["documents"] = get_documents(case_id, bucket)
             case["url"] = "/legal/{0}/{1}/".format(get_full_name(case_type), row["case_no"])
             if case_type == "AF":
@@ -403,11 +415,20 @@ def get_commission_votes(case_type, case_id):
     with db.engine.connect() as conn:
         if case_type == "AF":
             rs = conn.execute(AF_COMMISSION_VOTES, case_id)
-        else:
-            rs = conn.execute(MUR_ADR_COMMISSION_VOTES, case_id)
+        elif case_type == "MUR":
+            rs = conn.execute(MUR_COMMISSION_VOTES, case_id)
         commission_votes = []
         for row in rs:
             commission_votes.append({"vote_date": row["vote_date"], "action": row["action"]})
+        return commission_votes
+
+def get_ADR_commission_votes(case_type, case_id):
+    with db.engine.connect() as conn:
+        if case_type == "ADR":
+            rs = conn.execute(ADR_COMMISSION_VOTES, case_id)
+        commission_votes = []
+        for row in rs:
+            commission_votes.append({"vote_date": row["vote_date"], "action": row["action"], "commissioner_name": row["commissioner_name"], "vote_type": row["vote_type"]})
         return commission_votes
 
 

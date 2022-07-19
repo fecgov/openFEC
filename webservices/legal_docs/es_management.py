@@ -194,7 +194,7 @@ CITATIONS = {
     "citation_text": {"type": "text"},
 }
 
-MUR_ADR_MAPPINGS = {
+MUR_MAPPINGS = {
     "type": {"type": "keyword"},
     "doc_id": {"type": "keyword"},
     "no": {"type": "keyword"},
@@ -204,6 +204,54 @@ MUR_ADR_MAPPINGS = {
         "properties": {
             "vote_date": {"type": "date", "format": "dateOptionalTime"},
             "action": {"type": "text"},
+        }
+    },
+    "documents": CASE_DOCUMENT_MAPPINGS,
+    "url": {"type": "text", "index": False},
+    "mur_type": {"type": "keyword"},
+    "subjects": {"type": "text"},
+    "election_cycles": {"type": "long"},
+    "participants": {
+        "properties": {
+            "citations": {"type": "object"},
+            "name": {"type": "text"},
+            "role": {"type": "text"},
+        }
+    },
+    "respondents": {"type": "text"},
+    "dispositions": {
+        "type": "nested",
+        "properties": {
+            "citations": {
+                "type": "nested",
+                "properties": {
+                    "text": {"type": "text"},
+                    "title": {"type": "text"},
+                    "type": {"type": "text"},
+                    "url": {"type": "text"},
+                }
+            },
+            "disposition": {"type": "text"},
+            "penalty": {"type": "double"},
+            "respondent": {"type": "text"},
+        }
+    },
+    "open_date": {"type": "date", "format": "dateOptionalTime"},
+    "close_date": {"type": "date", "format": "dateOptionalTime"},
+}
+
+ADR_MAPPINGS = {
+    "type": {"type": "keyword"},
+    "doc_id": {"type": "keyword"},
+    "no": {"type": "keyword"},
+    "name": {"type": "text", "analyzer": "english"},
+    "published_flg": {"type": "boolean"},
+    "commission_votes": {
+        "properties": {
+            "vote_date": {"type": "date", "format": "dateOptionalTime"},
+            "action": {"type": "text"},
+            "commissioner_name": {"type": "text"},
+            "vote_type": {"type": "text"},
         }
     },
     "documents": CASE_DOCUMENT_MAPPINGS,
@@ -265,7 +313,8 @@ ALL_MAPPINGS = {}
 ALL_MAPPINGS.update(ADMIN_FINES)
 ALL_MAPPINGS.update(ADVISORY_OPINIONS)
 ALL_MAPPINGS.update(CITATIONS)
-ALL_MAPPINGS.update(MUR_ADR_MAPPINGS)
+ALL_MAPPINGS.update(ADR_MAPPINGS)
+ALL_MAPPINGS.update(MUR_MAPPINGS)
 ALL_MAPPINGS.update(REGULATIONS)
 ALL_MAPPINGS.update(STATUTES)
 ALL_MAPPINGS.update(SORT_MAPPINGS)
