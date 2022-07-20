@@ -142,7 +142,7 @@ def cf_startup():
     """Migrate schemas on `cf push`."""
     check_config()
     if env.index == "0":
-        subprocess.Popen(["python", "manage.py", "refresh_materialized"])
+        subprocess.Popen(["python", "cli.py", "refresh_materialized"])
 
 
 def slack_message(message):

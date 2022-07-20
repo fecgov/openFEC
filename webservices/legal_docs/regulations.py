@@ -11,7 +11,7 @@ from .es_management import (  # noqa
 )
 import json
 
-logger = logging.getLogger("manager")
+logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line
 # logger.setLevel(logging.DEBUG)
