@@ -85,6 +85,7 @@ class CommitteeHistory(BaseCommittee):
     former_candidate_election_year = db.Column(db.Integer, doc=docs.CANDIDATE_ELECTION_YEAR)
     convert_to_pac_flag = db.Column(db.Boolean, doc=docs.CONVERT_TO_PAC_FLAG)
     sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
+    committee_label = db.Column(db.Text, doc=docs.COMMITTEE_LABEL)
 
     jfc_committee = db.relationship(
         'JFCCommittee',
