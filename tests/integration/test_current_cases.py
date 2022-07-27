@@ -109,6 +109,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'close_date': None,
             'open_date': None,
             'url': '/legal/alternative-dispute-resolution/1/',
+            'complainant': [],
             'sort1': -1,
             'sort2': None,
         }
@@ -119,6 +120,37 @@ class TestLoadCurrentCases(BaseTestCase):
             adr_subject,
             expected_adr['published_flg'],
             'ADR',
+        )
+
+        # create entity
+        entity_id = 1
+        first_name = "Commander"
+        last_name = "Data"
+        middle_name, prefix, suffix, type = ('', '', '', '')
+        name = "Commander Data"
+        pg_date = '2022-07-27'
+        self.create_entity(
+            entity_id,
+            first_name,
+            last_name,
+            middle_name,
+            prefix,
+            suffix,
+            type,
+            name,
+            pg_date,
+        )
+
+        # create complainant
+        player_id = 1
+        role_id = 1
+        case_id = 1
+        self.create_complainant(
+            player_id,
+            entity_id,
+            case_id,
+            role_id,
+            pg_date,
         )
         actual_adr = next(get_cases('ADR'))
 
@@ -742,6 +774,19 @@ class TestLoadCurrentCases(BaseTestCase):
             vote_date,
             action,
             case_id,
+            pg_date,
+        )
+
+    def create_complainant(
+        self, player_id, entity_id, case_id, role_id, pg_date
+    ):
+        self.connection.execute(
+            "INSERT INTO fecmur.players (player_id, entity_id, case_id, role_id, pg_date) "
+            "VALUES (%s, %s, %s, %s, %s)",
+            player_id,
+            entity_id,
+            case_id,
+            role_id,
             pg_date,
         )
 

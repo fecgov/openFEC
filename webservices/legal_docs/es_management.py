@@ -246,6 +246,7 @@ ADR_MAPPINGS = {
     "no": {"type": "keyword"},
     "name": {"type": "text", "analyzer": "english"},
     "published_flg": {"type": "boolean"},
+    "complainant": {"type": "text"},
     "commission_votes": {
         "properties": {
             "vote_date": {"type": "date", "format": "dateOptionalTime"},

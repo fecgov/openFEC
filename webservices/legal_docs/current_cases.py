@@ -20,7 +20,7 @@ import json
 logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 ALL_CASES = """
     SELECT
@@ -185,7 +185,14 @@ ADR_COMMISSION_VOTES = """
     AND e.entity_id =  v.entity_id
     ORDER BY c.vote_date desc;
 """
-
+ADR_COMPLAINANT = """
+   SELECT name as complainant_name
+   FROM fecmur.players 
+   JOIN fecmur.role USING (role_id)
+   JOIN fecmur.entity USING (entity_id)
+   WHERE  players.case_id = %s
+   AND players.role_id IN (100095)
+"""
 
 AF_COMMISSION_VOTES = """
     SELECT action_date as vote_date, action from fecmur.af_case
@@ -320,7 +327,8 @@ def get_single_case(case_type, case_no, bucket):
                 "sort2": sort2,
             }
             if case_type == "ADR":
-                case["commission_votes"] = get_ADR_commission_votes(case_type, case_id)
+                case["commission_votes"] = get_adr_commission_votes(case_id)
+                case["complainant"] = get_adr_complainant(case_id)
             else: 
                 case["commission_votes"] = get_commission_votes(case_type, case_id)
             case["documents"] = get_documents(case_id, bucket)
@@ -422,15 +430,21 @@ def get_commission_votes(case_type, case_id):
             commission_votes.append({"vote_date": row["vote_date"], "action": row["action"]})
         return commission_votes
 
-def get_ADR_commission_votes(case_type, case_id):
+def get_adr_commission_votes(case_id):
     with db.engine.connect() as conn:
-        if case_type == "ADR":
-            rs = conn.execute(ADR_COMMISSION_VOTES, case_id)
+        rs = conn.execute(ADR_COMMISSION_VOTES, case_id)
         commission_votes = []
         for row in rs:
             commission_votes.append({"vote_date": row["vote_date"], "action": row["action"], "commissioner_name": row["commissioner_name"], "vote_type": row["vote_type"]})
         return commission_votes
 
+def get_adr_complainant(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(ADR_COMPLAINANT, case_id)
+        complainant = []
+        for row in rs:
+            complainant.append(row["complainant_name"])
+        return complainant
 
 def get_participants(case_id):
     participants = {}
