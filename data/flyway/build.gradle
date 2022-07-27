@@ -6,8 +6,8 @@ repositories {
 }
 
 dependencies {
-    implementation group: "org.flywaydb", name: "flyway-gradle-plugin", version: "8.5.13"
-    implementation(group: "org.flywaydb", name: "flyway-commandline", version: "8.5.13") {
+    implementation group: "org.flywaydb", name: "flyway-gradle-plugin", version: "9.0.2"
+    implementation(group: "org.flywaydb", name: "flyway-commandline", version: "9.0.2") {
         exclude group: "com.microsoft.sqlserver", module: "msql-jdbc"
         exclude group: "com.h2database", module: "h2"
         exclude group: "com.pivotal.jdbc", module: "greenplumdriver"
@@ -21,7 +21,7 @@ dependencies {
         exclude group: "com.google.protobuf", module: "protobuf-java"
         exclude group: "com.google.guava", module: "guava"
         constraints {
-	       implementation("org.postgresql:postgresql:42.2.25.jre6")
+	       implementation("org.postgresql:postgresql:42.3.3.jar")
         }
     }
 }
