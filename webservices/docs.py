@@ -412,6 +412,12 @@ PARTY_TYPE_FULL = '''
 Description of the type of party the committee is, only if applicable
 '''
 
+HOUSE_PERSONAL_FUNDS = 'House personal funds'
+
+SENATE_PERSONAL_FUNDS = 'Senate personal funds'
+
+OPPOSITION_PERSONAL_FUNDS = 'Opposition personal funds'
+
 TREASURER_NAME = 'Name of the Committee\'s treasurer. If multiple treasurers for the \
 committee, the most recent treasurer will be shown.'
 
@@ -551,33 +557,50 @@ A unique identifier assigned to each candidate registered with the FEC.
 If a person runs for several offices, that person will have separate candidate IDs for each office. This is a filter for Leadership PAC sponsor.
 '''
 
-bank_depository_nm = '''
+PREVIOUS_FILE_NUMBER = '''
+Previous filing ID number
+'''
+
+AMENDMENT_VERSION = '''
+Amendment version
+'''
+
+BANK_DEPOSITORY_NM = '''
 Primary bank or depository in which the committee deposits funds, holds accounts, rents safety deposit boxes or maintains funds.
 '''
 
-bank_depository_st1 = '''
+BANK_DEPOSITORY_ST1 = '''
 Street of bank or depository as reported on their Form 1.
 '''
 
-bank_depository_st2 = '''
+BANK_DEPOSITORY_ST2 = '''
 Second line of the street of bank or depository as reported on the Form 1
 '''
 
-bank_depository_city = '''
+BANK_DEPOSITORY_CITY = '''
 City of bank or depository as reported on the Form 1
 '''
 
-bank_depository_st = '''
+BANK_DEPOSITORY_ST = '''
 State of bank or depository as reported on the Form 1
 '''
 
-bank_depository_zip = '''
+BANK_DEPOSITORY_ZIP = '''
 Zip code of bank or depository as reported on the Form 1
 '''
 
-additional_bank_names = '''
+ADDITIONAL_BANK_NAMES = '''
 Additional banks or depositories in which the committee deposits funds, holds accounts, rents safety deposit boxes or maintains funds.
 '''
+
+FILER_NAME_TEXT = '''
+Keyword search for filer name
+'''
+
+PRIMARY_GENERAL_INDICATOR = '''
+Primary general indicator
+'''
+
 # ======== committee end ===========
 
 
@@ -733,6 +756,10 @@ HTML link to the filing.
 
 FEC_URL = '''
 fec link to the filing.
+'''
+
+PDF_URL = '''
+pdf link to the filing
 '''
 
 TWO_YEAR_TRANSACTION_PERIOD = '''
@@ -1508,6 +1535,13 @@ def add_period(var):
 def add_ytd(var):
     return var + ' total for the year to date'
 
+
+TOTAL_RECEIPTS = 'Total receipts'
+TOTAL_INDIVIDUAL_CONTRIBUTIONS = 'Total individual contributions'
+NET_DONATIONS = 'Net donations'
+TOTAL_DISBURSEMENTS = 'Total disbursements'
+TOTAL_INDEPENDENT_EXPENDITURES = 'Total independent expenditures'
+TOTAL_COMMUNICATION_COST = 'Total communications cost'
 
 # shared
 CASH_ON_HAND_BEGIN_PERIOD = 'Balance for the committee at the start of the two-year period'
