@@ -352,7 +352,7 @@ def get_single_case(case_type, case_no, bucket):
                 case["commission_votes"] = get_adr_commission_votes(case_id)
                 case["complainant"] = get_adr_complainant(case_id)
                 case["non_monetary_terms"] = get_adr_non_monetary_terms(case_id)
-                # case["non_monetary_terms_respondents"] = get_adr_non_monetary_terms_respondents(case_id)
+                case["non_monetary_terms_respondents"] = get_adr_non_monetary_terms_respondents(case_id)
             else: 
                 case["commission_votes"] = get_commission_votes(case_type, case_id)
             case["documents"] = get_documents(case_id, bucket)
