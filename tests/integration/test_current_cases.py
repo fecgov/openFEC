@@ -93,6 +93,9 @@ class TestLoadCurrentCases(BaseTestCase):
     @patch('webservices.legal_docs.current_cases.get_bucket')
     def test_simple_adr(self, get_bucket):
         adr_subject = 'Personal use'
+        expected_term_types = [
+            "Attend FEC seminar"
+        ]
         expected_adr = {
             "type": "adrs",
             'no': '1',
@@ -102,6 +105,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'published_flg': True,
             'participants': [],
             'non_monetary_terms': [],
+            # 'non_monetary_terms': expected_term_types,
             'subjects': [adr_subject],
             'respondents': [],
             'documents': [],
@@ -142,15 +146,6 @@ class TestLoadCurrentCases(BaseTestCase):
             pg_date,
         )
 
-        # create non-monetary-terms
-        # term_id = 1,
-        # term_description = "File amended reports",
-        # self.create_non_monetary_term(
-        #     term_id,
-        #     term_description,
-        #     pg_date,
-        # )
-
         # create complainant
         player_id = 1
         role_id = 1
@@ -162,9 +157,30 @@ class TestLoadCurrentCases(BaseTestCase):
             role_id,
             pg_date,
         )
+
+        # create settlement
+        settlement_id = 1
+        initial_amount = 0
+        final_amount = 50000
+        amount_received, settlement_type = (0, '')
+        self.create_settlement(
+            settlement_id,
+            case_id,
+            initial_amount,
+            final_amount,
+            amount_received,
+            settlement_type,
+            pg_date,
+        )
+
+        # self.create_non_monetary_term(
+        #         1, expected_adr['non_monetary_terms'], pg_date
+        #     )
+
         actual_adr = next(get_cases('ADR'))
 
         assert actual_adr == expected_adr
+        # assert actual_adr["non_monetary_terms"] == expected_term_types
 
     @patch('webservices.legal_docs.current_cases.get_bucket')
     def test_admin_fine(self, get_bucket):
@@ -822,7 +838,7 @@ class TestLoadCurrentCases(BaseTestCase):
             term_description,
             pg_date,
         )
-
+  
     def clear_test_data(self):
         tables = [
             "violations",
