@@ -1,5 +1,6 @@
 import datetime
-
+import sqlalchemy as sa
+from webservices import rest
 from tests import factories
 from tests.common import ApiBaseTest
 from webservices.rest import api
@@ -211,26 +212,27 @@ class TestFilings(ApiBaseTest):
         self.assertEqual(results[0]['document_description'], 'RFAI: report 2004')
 
 
+# Test for endpoint:/efile/filings/ under tag:efiling (filings.EFilingsView)
 class TestEfileFiles(ApiBaseTest):
     def test_filter_date_efile(self):
         [
             factories.EFilingsFactory(
-                committee_id='C010',
+                committee_id="C010",
                 beginning_image_number=2,
                 filed_date=datetime.date(2012, 1, 1),
             ),
             factories.EFilingsFactory(
-                committee_id='C011',
+                committee_id="C011",
                 beginning_image_number=3,
                 filed_date=datetime.date(2013, 1, 1),
             ),
             factories.EFilingsFactory(
-                committee_id='C012',
+                committee_id="C012",
                 beginning_image_number=4,
                 filed_date=datetime.date(2014, 1, 1),
             ),
             factories.EFilingsFactory(
-                committee_id='C013',
+                committee_id="C013",
                 beginning_image_number=5,
                 filed_date=datetime.date(2015, 1, 1),
             ),
@@ -239,12 +241,12 @@ class TestEfileFiles(ApiBaseTest):
         min_date = datetime.date(2013, 1, 1)
         results = self._results(api.url_for(EFilingsView, min_receipt_date=min_date))
         self.assertTrue(
-            all(each for each in results if each['filed_date'] >= min_date.isoformat())
+            all(each for each in results if each["filed_date"] >= min_date.isoformat())
         )
         max_date = datetime.date(2014, 1, 1)
         results = self._results(api.url_for(EFilingsView, max_receipt_date=max_date))
         self.assertTrue(
-            all(each for each in results if each['filed_date'] <= max_date.isoformat())
+            all(each for each in results if each["filed_date"] <= max_date.isoformat())
         )
         results = self._results(
             api.url_for(
@@ -255,7 +257,7 @@ class TestEfileFiles(ApiBaseTest):
             all(
                 each
                 for each in results
-                if min_date.isoformat() <= each['filed_date'] <= max_date.isoformat()
+                if min_date.isoformat() <= each["filed_date"] <= max_date.isoformat()
             )
         )
 
@@ -263,12 +265,12 @@ class TestEfileFiles(ApiBaseTest):
 
         [
             factories.EFilingsFactory(
-                committee_id='C013',
+                committee_id="C013",
                 beginning_image_number=5,
                 filed_date=datetime.date(2015, 1, 1),
             ),
             factories.EFilingsFactory(
-                committee_id='C014',
+                committee_id="C014",
                 beginning_image_number=6,
                 filed_date=datetime.date(2015, 1, 2),
             ),
@@ -284,19 +286,19 @@ class TestEfileFiles(ApiBaseTest):
 
     def test_efilings(self):
         """ Check filings returns in general endpoint"""
-        factories.EFilingsFactory(committee_id='C001')
-        factories.EFilingsFactory(committee_id='C002')
+        factories.EFilingsFactory(committee_id="C001")
+        factories.EFilingsFactory(committee_id="C002")
 
         results = self._results(api.url_for(EFilingsView))
         self.assertEqual(len(results), 2)
 
     def test_committee_efilings(self):
         """ Check filing returns with a specified committee id"""
-        committee_id = 'C8675309'
+        committee_id = "C8675309"
         factories.EFilingsFactory(committee_id=committee_id)
 
         results = self._results(api.url_for(EFilingsView, committee_id=committee_id))
-        self.assertEqual(results[0]['committee_id'], committee_id)
+        self.assertEqual(results[0]["committee_id"], committee_id)
 
     def test_file_number_efilings(self):
         """ Check filing returns with a specified file number"""
@@ -304,4 +306,38 @@ class TestEfileFiles(ApiBaseTest):
         factories.EFilingsFactory(file_number=file_number)
 
         results = self._results(api.url_for(EFilingsView, file_number=file_number))
-        self.assertEqual(results[0]['file_number'], file_number)
+        self.assertEqual(results[0]["file_number"], file_number)
+
+    def test_fulltext_keyword_search(self):
+        [
+            factories.EFilingsFactory(
+                committee_id="C01",
+                committee_name="Danielle",
+            ),
+            factories.EFilingsFactory(
+                committee_id="C02",
+                committee_name="Dana",
+            ),
+        ]
+
+        factories.CommitteeSearchFactory(
+            id="C01", fulltxt=sa.func.to_tsvector("Danielle")
+        )
+        factories.CommitteeSearchFactory(
+            id="C02", fulltxt=sa.func.to_tsvector("Dana")
+        )
+        rest.db.session.flush()
+        results = self._results(api.url_for(EFilingsView, q="Danielle"))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["committee_id"], "C01")
+
+        results = self._results(api.url_for(EFilingsView, q="dan"))
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results[0]["committee_id"], "C01")
+        self.assertEqual(results[1]["committee_id"], "C02")
+
+    def test_invalid_keyword(self):
+        response = self.app.get(
+            api.url_for(EFilingsView, q="ab")
+        )
+        self.assertEqual(response.status_code, 422)

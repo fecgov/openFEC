@@ -392,6 +392,9 @@ PAC_PARTY_TYPE = 'The one-letter type code of a PAC/Party organization:\n\
         - X party, nonqualified\n\
         - Y party, qualified\n\
 '
+COMMITTEE_LABEL = '''
+Display the label of committee based on committee type, designation and organization type
+'''
 
 LEADERSHIP_PAC_INDICATE = '''
 Indicates if the committee is a leadership PAC
