@@ -254,7 +254,9 @@ ADR_MAPPINGS = {
             "commissioner_name": {"type": "text"},
             "vote_type": {"type": "text"},
         }
-    },
+    }, 
+    "non_monetary_terms": {"type": "text"},
+    "non_monetary_terms_respondents": {"type": "text"},  
     "documents": CASE_DOCUMENT_MAPPINGS,
     "url": {"type": "text", "index": False},
     "mur_type": {"type": "keyword"},

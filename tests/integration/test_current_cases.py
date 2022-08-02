@@ -101,6 +101,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'doc_id': 'adr_1',
             'published_flg': True,
             'participants': [],
+            'non_monetary_terms': [],
             'subjects': [adr_subject],
             'respondents': [],
             'documents': [],
@@ -140,6 +141,15 @@ class TestLoadCurrentCases(BaseTestCase):
             name,
             pg_date,
         )
+
+        # create non-monetary-terms
+        # term_id = 1,
+        # term_description = "File amended reports",
+        # self.create_non_monetary_term(
+        #     term_id,
+        #     term_description,
+        #     pg_date,
+        # )
 
         # create complainant
         player_id = 1
@@ -802,6 +812,17 @@ class TestLoadCurrentCases(BaseTestCase):
             dates,
         )
 
+    def create_non_monetary_term(
+        self, term_id, term_description, pg_date
+    ):
+        self.connection.execute(
+            "INSERT INTO fecmur.non_monetary_term (term_id, term_description, pg_date) "
+            "VALUES (%s, %s, %s)",
+            term_id,
+            term_description,
+            pg_date,
+        )
+
     def clear_test_data(self):
         tables = [
             "violations",
@@ -819,6 +840,7 @@ class TestLoadCurrentCases(BaseTestCase):
             "role",
             "af_case",
             "af_case_disposition",
+            "non_monetary_term",
         ]
         for table in tables:
             self.connection.execute("DELETE FROM fecmur.{}".format(table))
