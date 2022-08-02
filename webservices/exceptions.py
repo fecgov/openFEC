@@ -7,6 +7,9 @@ from form F3X line number 16.\
 IMAGE_NUMBER_ERROR = """Invalid image_number detected. A valid image_number is numeric only.\
 """
 
+KEYWORD_LENGTH_ERROR = """Invalid keyword, the keyword must be at least 3 characters in length.\
+"""
+
 
 class ApiError(Exception):
     status_code = 400

@@ -94,6 +94,8 @@ class TestFilings(ApiBaseTest):
             factories.FilingsFactory(report_year=1999),
             factories.FilingsFactory(request_type='5'),
             factories.FilingsFactory(state='MD'),
+            factories.FilingsFactory(filer_name_text="'action':3 'abc':2 'committee':4 'international':1"),
+            factories.FilingsFactory(filer_name_text="'action':3 'xyz':2 'committee':4 'international':1"),
         ]
 
         filter_fields = (
@@ -113,6 +115,7 @@ class TestFilings(ApiBaseTest):
             ('request_type', '5'),
             ('state', 'MD'),
             ('candidate_id', 'H0001'),
+            ('filer_name_text', 'action'),
         )
 
         # checking one example from each field
@@ -210,6 +213,12 @@ class TestFilings(ApiBaseTest):
         results = self._results(api.url_for(FilingsView, committee_id='C007'))
 
         self.assertEqual(results[0]['document_description'], 'RFAI: report 2004')
+
+    def test_invalid_keyword(self):
+        response = self.app.get(
+            api.url_for(FilingsList, filer_name_text="ab")
+        )
+        self.assertEqual(response.status_code, 422)
 
 
 # Test for endpoint:/efile/filings/ under tag:efiling (filings.EFilingsView)
@@ -327,17 +336,17 @@ class TestEfileFiles(ApiBaseTest):
             id="C02", fulltxt=sa.func.to_tsvector("Dana")
         )
         rest.db.session.flush()
-        results = self._results(api.url_for(EFilingsView, q="Danielle"))
+        results = self._results(api.url_for(EFilingsView, filer_name_text="Danielle"))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["committee_id"], "C01")
 
-        results = self._results(api.url_for(EFilingsView, q="dan"))
+        results = self._results(api.url_for(EFilingsView, filer_name_text="dan"))
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0]["committee_id"], "C01")
         self.assertEqual(results[1]["committee_id"], "C02")
 
     def test_invalid_keyword(self):
         response = self.app.get(
-            api.url_for(EFilingsView, q="ab")
+            api.url_for(EFilingsView, filer_name_text="ab")
         )
         self.assertEqual(response.status_code, 422)

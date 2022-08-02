@@ -77,6 +77,18 @@ class ImageNumber(fields.Str):
                 status_code=422)
 
 
+class Keyword(fields.Str):
+
+    def _validate(self, value):
+        VALID_KEYWORD_LENGTH = 3
+        super()._validate(value)
+        if len(value) < VALID_KEYWORD_LENGTH:  # noqa
+            raise exceptions.ApiError(
+                exceptions.KEYWORD_LENGTH_ERROR,
+                status_code=422,
+            )
+
+
 election_full = fields.Bool(missing=True, description=docs.ELECTION_FULL)
 
 paging = {
@@ -362,6 +374,7 @@ filings = {
         IStr(validate=validate.OneOf(['', 'N', 'A', 'T', 'C', 'M', 'S'])),
         description=docs.AMENDMENT_INDICATOR),
     'form_category': fields.List(IStr, description=docs.FORM_CATEGORY),
+    'filer_name_text': fields.List(Keyword, description=docs.FILER_NAME_TEXT),
 }
 
 efilings = {
@@ -369,7 +382,7 @@ efilings = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'min_receipt_date': fields.Date(description=docs.MIN_RECEIPT_DATE),
     'max_receipt_date': fields.Date(description=docs.MAX_RECEIPT_DATE),
-    'q': fields.List(fields.Str, description=docs.COMMITTEE_NAME),
+    'filer_name_text': fields.List(Keyword, description=docs.FILER_NAME_TEXT),
 }
 
 reports = {

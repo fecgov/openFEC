@@ -879,7 +879,7 @@ BaseFilingsSchema = make_schema(
         'sub_id': ma.fields.Str(),
         'fec_file_id': ma.fields.Str(),
     },
-    options={'exclude': ('committee', )},
+    options={'exclude': ('committee', 'filer_name_text')},
 )
 
 

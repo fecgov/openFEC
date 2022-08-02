@@ -76,7 +76,9 @@ class BaseFilings(ApiResource):
         query = super().build_query(**kwargs)
         return query
 
-
+# use for two endpoints: under tag:filings
+# `/committee/<committee_id>/filings/`
+# `/candidate/<candidate_id>/filings/`
 class FilingsView(BaseFilings):
 
     def build_query(self, committee_id=None, candidate_id=None, **kwargs):
@@ -88,18 +90,23 @@ class FilingsView(BaseFilings):
         return query
 
 
+# use for endpoint:`/filings/` under tag:filing
+# sample: http://127.0.0.1:5000/v1/filings/?filer_name_text=san
 class FilingsList(BaseFilings):
 
     filter_multi_fields = BaseFilings.filter_multi_fields + [
         ("committee_id", models.Filings.committee_id),
         ("candidate_id", models.Filings.candidate_id),
     ]
+    filter_fulltext_fields = [("filer_name_text", models.Filings.filer_name_text),]
 
     @property
     def args(self):
         return utils.extend(super().args, args.entities)
 
+
 # use for endpoint:/efile/filings/ under tag:efiling
+# sample: http://127.0.0.1:5000/v1/efile/filings/?filer_name_text=san
 @doc(
     tags=["efiling"],
     description=docs.EFILE_FILES,
@@ -117,7 +124,7 @@ class EFilingsView(ApiResource):
     filter_range_fields = [
         (("min_receipt_date", "max_receipt_date"), models.EFilings.filed_date),
     ]
-    filter_fulltext_fields = [("q", models.CommitteeSearch.fulltxt)]
+    filter_fulltext_fields = [("filer_name_text", models.CommitteeSearch.fulltxt)]
 
     @property
     def args(self):
@@ -131,16 +138,9 @@ class EFilingsView(ApiResource):
         )
 
     def build_query(self, **kwargs):
-        VALID_KEYWORD_LENGTH = 3
         query = super().build_query(**kwargs)
 
-        if kwargs.get("q"):
-            for keyword in kwargs["q"]:
-                if len(keyword) < VALID_KEYWORD_LENGTH:  # noqa
-                    raise exceptions.ApiError(
-                        "Invalid keyword, the keyword must be at least 3 characters in length.",
-                        status_code=422,
-                    )
+        if kwargs.get("filer_name_text"):
             query = query.join(
                 models.CommitteeSearch,
                 self.model.committee_id == models.CommitteeSearch.id,
