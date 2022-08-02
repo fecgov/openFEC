@@ -194,6 +194,28 @@ ADR_COMPLAINANT = """
    AND players.role_id IN (100095)
 """
 
+ADR_NON_MONETARY_TERMS = """
+    SELECT DISTINCT nt.term_description, nt.term_id
+    FROM fecmur.case c, fecmur.SETTLEMENT s, fecmur.RELATEDOBJECTS r, fecmur.NON_MONETARY_TERM NT
+    WHERE c.case_id  = %s
+    AND c.case_id = s.case_id
+    AND UPPER (SETTLEMENT_TYPE) LIKE 'PENALTY'
+    AND r.RELATION_ID = 8
+    AND r.MASTER_KEY = s.settlement_id
+    AND R.DETAIL_KEY = NT.TERM_ID
+"""
+
+ADR_NON_MONETARY_TERMS_RESPONDENTS = """
+    SELECT detail_key AS entity_id, master_key AS settlement_id, fecmur.entity.name
+    FROM fecmur.relatedobjects
+    INNER JOIN fecmur.entity 
+        ON fecmur.entity.entity_id  = fecmur.relatedobjects.detail_key    
+    INNER JOIN fecmur.settlement
+        ON fecmur.relatedobjects.master_key = fecmur.settlement.settlement_id
+    WHERE relation_id = 1
+    AND fecmur.settlement.case_id = %s
+"""
+
 AF_COMMISSION_VOTES = """
     SELECT action_date as vote_date, action from fecmur.af_case
     WHERE case_id = %s
@@ -329,6 +351,8 @@ def get_single_case(case_type, case_no, bucket):
             if case_type == "ADR":
                 case["commission_votes"] = get_adr_commission_votes(case_id)
                 case["complainant"] = get_adr_complainant(case_id)
+                case["non_monetary_terms"] = get_adr_non_monetary_terms(case_id)
+                # case["non_monetary_terms_respondents"] = get_adr_non_monetary_terms_respondents(case_id)
             else: 
                 case["commission_votes"] = get_commission_votes(case_type, case_id)
             case["documents"] = get_documents(case_id, bucket)
@@ -437,6 +461,24 @@ def get_adr_commission_votes(case_id):
         for row in rs:
             commission_votes.append({"vote_date": row["vote_date"], "action": row["action"], "commissioner_name": row["commissioner_name"], "vote_type": row["vote_type"]})
         return commission_votes
+
+def get_adr_non_monetary_terms(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(ADR_NON_MONETARY_TERMS, case_id)
+        non_monetary_terms = []
+        for row in rs:
+            non_monetary_terms.append(row["term_description"])
+            # non_monetary_terms.append({"description": row["term_descrption"], "action": row["action"], "commissioner_name": row["commissioner_name"], "vote_type": row["vote_type"]})
+        return non_monetary_terms
+
+def get_adr_non_monetary_terms_respondents(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(ADR_NON_MONETARY_TERMS_RESPONDENTS, case_id)
+        non_monetary_terms_repondents = []
+        for row in rs:
+            # non_monetary_terms_repondents.append({"repondent_name": row["name"]})
+            non_monetary_terms_repondents.append(row["name"])
+        return non_monetary_terms_repondents
 
 def get_adr_complainant(case_id):
     with db.engine.connect() as conn:
