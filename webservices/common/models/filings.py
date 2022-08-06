@@ -4,7 +4,7 @@ from webservices import docs, utils
 from webservices.common.models.dates import ReportType
 from webservices.common.models.dates import clean_report_type
 from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin, FecFileNumberMixin
-
+from webservices import exceptions
 
 class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     __tablename__ = 'ofec_filings_all_mv'
@@ -99,11 +99,15 @@ class EfilingsAmendments(db.Model):
     previous_file_number = db.Column('previd', db.Numeric, doc=docs.PREVIOUS_FILE_NUMBER)
 
     def next_in_chain(self, file_number):
-        if len(self.longest_chain) > 0 and self.depth <= len(self.longest_chain) - 1:
-            index = self.longest_chain.index(file_number)
-            return self.longest_chain[index + 1]
-        else:
-            return 0
+        try:
+            if len(self.longest_chain) > 0 and self.depth <= len(self.longest_chain) - 1:
+                index = self.longest_chain.index(file_number)
+                return self.longest_chain[index + 1]
+            else:
+                return 0
+        except Exception as ex:
+            raise exceptions.ApiError(
+                exceptions. NEXT_IN_CHAIN_DATA_ERROR, status_code=400)
 
 
 class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.Model):

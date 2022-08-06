@@ -7,6 +7,10 @@ from webservices.rest import api
 from webservices.resources.filings import FilingsView, FilingsList, EFilingsView
 
 
+# Test 3 endpoints:
+# `/filings/` under tag:filing (filings.FilingsList)
+# `/committee/<committee_id>/filings/` under tag:filing (filings.FilingsView)
+# `/candidate/<candidate_id>/filings/` under tag:filing (filings.FilingsView)
 class TestFilings(ApiBaseTest):
     def test_committee_filings(self):
         """ Check filing returns with a specified committee id"""
