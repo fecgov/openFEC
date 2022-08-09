@@ -216,6 +216,20 @@ ADR_NON_MONETARY_TERMS_RESPONDENTS = """
     AND fecmur.settlement.case_id = %s
 """
 
+ADR_CITATIONS = """
+    SELECT distinct VIOLATIONS.statutory_citation, VIOLATIONS.regulatory_citation, entity.name, entity.entity_id
+    FROM  fecmur.VIOLATIONS, fecmur.ENTITY
+    WHERE VIOLATIONS.case_id = %s
+    AND VIOLATIONS.ENTITY_ID = ENTITY.ENTITY_ID
+    AND (case when trim(VIOLATIONS.STAGE) = '' or VIOLATIONS.STAGE is null then 'None'
+		     else upper(VIOLATIONS.STAGE)
+	end ) in (select case when trim(STAGE_ORDER.STAGE) = '' or STAGE_ORDER.STAGE is null then 'None'
+		                  else upper(STAGE_ORDER.STAGE)
+			         end
+			  from fecmur.STAGE_ORDER)
+    ORDER BY entity.name
+"""
+
 AF_COMMISSION_VOTES = """
     SELECT action_date as vote_date, action from fecmur.af_case
     WHERE case_id = %s
@@ -353,6 +367,7 @@ def get_single_case(case_type, case_no, bucket):
                 case["complainant"] = get_adr_complainant(case_id)
                 case["non_monetary_terms"] = get_adr_non_monetary_terms(case_id)
                 case["non_monetary_terms_respondents"] = get_adr_non_monetary_terms_respondents(case_id)
+                case["citations"] = get_adr_citations(case_id)
             else: 
                 case["commission_votes"] = get_commission_votes(case_type, case_id)
             case["documents"] = get_documents(case_id, bucket)
@@ -479,6 +494,19 @@ def get_adr_non_monetary_terms_respondents(case_id):
             # non_monetary_terms_repondents.append({"repondent_name": row["name"]})
             non_monetary_terms_repondents.append(row["name"])
         return non_monetary_terms_repondents
+
+def get_adr_citations(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(ADR_CITATIONS, case_id)
+        citations = []
+        for row in rs:
+            citations.append({
+                "type": "statues",
+                "text": row["statutory_citation"]})
+            citations.append({
+                "type": "regulation",
+                 "text": row["regulatory_citation"]})
+        return citations
 
 def get_adr_complainant(case_id):
     with db.engine.connect() as conn:
