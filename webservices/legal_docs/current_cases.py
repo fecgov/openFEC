@@ -498,14 +498,9 @@ def get_adr_non_monetary_terms_respondents(case_id):
 def get_adr_citations(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(ADR_CITATIONS, case_id)
-        citations = []
         for row in rs:
-            citations.append({
-                "type": "statues",
-                "text": row["statutory_citation"]})
-            citations.append({
-                "type": "regulation",
-                 "text": row["regulatory_citation"]})
+            citations = parse_statutory_citations(row["statutory_citation"], case_id, row["name"])
+            citations.extend(parse_regulatory_citations(row["regulatory_citation"], case_id, row["name"]))
         return citations
 
 def get_adr_complainant(case_id):
@@ -523,8 +518,7 @@ def get_participants(case_id):
         for row in rs:
             participants[row["entity_id"]] = {
                 "name": row["name"],
-                "role": row["role"],
-                "citations": defaultdict(list)
+                "role": row["role"]
             }
     return participants
 
