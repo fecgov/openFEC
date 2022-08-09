@@ -10,6 +10,9 @@ IMAGE_NUMBER_ERROR = """Invalid image_number detected. A valid image_number is n
 KEYWORD_LENGTH_ERROR = """Invalid keyword, the keyword must be at least 3 characters in length.\
 """
 
+NEXT_IN_CHAIN_DATA_ERROR = """next_in_chain data error, please contact apiinfo@fec.gov.\
+"""
+
 
 class ApiError(Exception):
     status_code = 400

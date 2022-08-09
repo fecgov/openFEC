@@ -18,6 +18,8 @@ from webservices.resources.reports import (
 )
 
 
+# Test endpoint:
+# '/reports/<string:entity_type>/' under tag:'financial' (reports.ReportsView)
 class TestReports(ApiBaseTest):
     def _check_committee_ids(self, results, positives=None, negatives=None):
         ids = [each['committee_id'] for each in results]
@@ -25,21 +27,6 @@ class TestReports(ApiBaseTest):
             self.assertIn(positive.committee_id, ids)
         for negative in negatives or []:
             self.assertNotIn(negative.committee_id, ids)
-
-    def test_reports_by_committee_id(self):
-        committee = factories.CommitteeFactory(committee_type='P')
-        committee_id = committee.committee_id
-        factories.CommitteeHistoryFactory(
-            committee_id=committee_id, committee_type='P',
-        )
-        committee_report = factories.ReportsPresidentialFactory(
-            committee_id=committee_id
-        )
-        other_report = factories.ReportsPresidentialFactory()
-        results = self._results(
-            api.url_for(CommitteeReportsView, committee_id=committee_id)
-        )
-        self._check_committee_ids(results, [committee_report], [other_report])
 
     def test_reports_by_entity_type(self):
         presidential_report = factories.ReportsPresidentialFactory()
@@ -74,7 +61,7 @@ class TestReports(ApiBaseTest):
             ('house-senate', factories.ReportsHouseSenateFactory),
             ('presidential', factories.ReportsPresidentialFactory),
             ('pac-party', factories.ReportsPacPartyFactory),
-            ('ie-only', factories.ReportsIEOnlyFactory),
+            # TODO after finish CommitteeReportsIEOnly, add baack('ie-only', factories.ReportsIEOnlyFactory),
         ]
 
         for category, factory in params:
@@ -82,7 +69,6 @@ class TestReports(ApiBaseTest):
                 factory(is_amended=False),
                 factory(is_amended=True),
             ]
-
             results = self._results(api.url_for(ReportsView, entity_type=category))
             self.assertEqual(len(results), 2)
 
@@ -123,6 +109,53 @@ class TestReports(ApiBaseTest):
             [presidential_report_2016],
             [presidential_report_2012, house_report_2016],
         )
+
+    # TODO: After finish add filer_name_text filter in to CommitteeReportsIEOnly
+    # def test_ie_only(self):
+    #     number = 12345678902
+    #     report = factories.ReportsIEOnlyFactory(
+    #         beginning_image_number=number,
+    #         independent_contributions_period=200,
+    #         independent_expenditures_period=100,
+    #     )
+    #     results = self._results(
+    #         api.url_for(
+    #             ReportsView, entity_type='ie-only', beginning_image_number=number,
+    #         )
+    #     )
+    #     result = results[0]
+    #     for key in [
+    #         'report_form',
+    #         'independent_contributions_period',
+    #         'independent_expenditures_period',
+    #     ]:
+    #         self.assertEqual(result[key], getattr(report, key))
+
+
+# Test endpoint:
+# '/committee/<string:committee_id>/reports/' under tag:'financial' (reports.CommitteeReportsView)
+class TestCommitteeReports(ApiBaseTest):
+    def _check_committee_ids(self, results, positives=None, negatives=None):
+        ids = [each['committee_id'] for each in results]
+        for positive in positives or []:
+            self.assertIn(positive.committee_id, ids)
+        for negative in negatives or []:
+            self.assertNotIn(negative.committee_id, ids)
+
+    def test_reports_by_committee_id(self):
+        committee = factories.CommitteeFactory(committee_type='P')
+        committee_id = committee.committee_id
+        factories.CommitteeHistoryFactory(
+            committee_id=committee_id, committee_type='P',
+        )
+        committee_report = factories.ReportsPresidentialFactory(
+            committee_id=committee_id
+        )
+        other_report = factories.ReportsPresidentialFactory()
+        results = self._results(
+            api.url_for(CommitteeReportsView, committee_id=committee_id)
+        )
+        self._check_committee_ids(results, [committee_report], [other_report])
 
     def test_reports_sort(self):
         committee = factories.CommitteeFactory(committee_type='H')
@@ -273,26 +306,6 @@ class TestReports(ApiBaseTest):
         )
         self.assertTrue(all(each['report_type'] in ['Q2', 'TER'] for each in results))
 
-    def test_ie_only(self):
-        number = 12345678902
-        report = factories.ReportsIEOnlyFactory(
-            beginning_image_number=number,
-            independent_contributions_period=200,
-            independent_expenditures_period=100,
-        )
-        results = self._results(
-            api.url_for(
-                ReportsView, entity_type='ie-only', beginning_image_number=number,
-            )
-        )
-        result = results[0]
-        for key in [
-            'report_form',
-            'independent_contributions_period',
-            'independent_expenditures_period',
-        ]:
-            self.assertEqual(result[key], getattr(report, key))
-
     def test_ie_committee(self):
         committee = factories.CommitteeFactory(committee_type='I')
         committee_id = committee.committee_id
@@ -387,6 +400,10 @@ class TestReports(ApiBaseTest):
         self.assertIn('not found', data['message'].lower())
 
 
+# Test 3 endpoints:
+# '/efile/reports/presidential/' under tag:'efiling' (reports.EFilingPresidentialSummaryView)
+# '/efile/reports/house-senate/' under tag:'efiling' (reports.EFilingHouseSenateSummaryView)
+# '/efile/reports/pac-party/' under tag:'efiling' (reports.EFilingPacPartySummaryView)
 class TestEFileReports(ApiBaseTest):
     def _check_committee_ids(self, results, positives=None, negatives=None):
         ids = [each['committee_id'] for each in results]
