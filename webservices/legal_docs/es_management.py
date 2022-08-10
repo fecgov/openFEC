@@ -257,7 +257,6 @@ ADR_MAPPINGS = {
     }, 
     "non_monetary_terms": {"type": "text"},
     "non_monetary_terms_respondents": {"type": "text"},  
-    "citations" : CITATIONS,
     "documents": CASE_DOCUMENT_MAPPINGS,
     "url": {"type": "text", "index": False},
     "mur_type": {"type": "keyword"},
@@ -265,24 +264,15 @@ ADR_MAPPINGS = {
     "election_cycles": {"type": "long"},
     "participants": {
         "properties": {
-            "citations": {"type": "object"},
             "name": {"type": "text"},
             "role": {"type": "text"},
         }
     },
     "respondents": {"type": "text"},
-    "dispositions": {
+    "adr_dispositions": {
         "type": "nested",
         "properties": {
-            "citations": {
-                "type": "nested",
-                "properties": {
-                    "text": {"type": "text"},
-                    "title": {"type": "text"},
-                    "type": {"type": "text"},
-                    "url": {"type": "text"},
-                }
-            },
+            "case_status": {"type": "text"},
             "disposition": {"type": "text"},
             "penalty": {"type": "double"},
             "respondent": {"type": "text"},
