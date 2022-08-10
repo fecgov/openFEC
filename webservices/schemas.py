@@ -802,6 +802,7 @@ ScheduleESchema = make_schema(
     options={
         'exclude': (
             'payee_name_text',
+            'spender_name_text',
         ),
         'relationships': [
             Relationship(
