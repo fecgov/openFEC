@@ -1,6 +1,7 @@
 import logging
 import re
 from collections import defaultdict
+
 from webservices.rest import db
 from webservices.utils import (
     extend,
@@ -367,9 +368,8 @@ def get_single_case(case_type, case_no, bucket):
                 case["non_monetary_terms"] = get_adr_non_monetary_terms(case_id)
                 case["non_monetary_terms_respondents"] = get_adr_non_monetary_terms_respondents(case_id)
                 case["citations"] = get_adr_citations(case_id)
-                case["adr_dispositions"] = get_adr_dispositions(case_id)
             else: 
-                case["commission_votes"] = get_commission_votes(case_type, case_id)       
+                case["commission_votes"] = get_commission_votes(case_type, case_id)
             case["documents"] = get_documents(case_id, bucket)
             case["url"] = "/legal/{0}/{1}/".format(get_full_name(case_type), row["case_no"])
             if case_type == "AF":
@@ -377,12 +377,14 @@ def get_single_case(case_type, case_no, bucket):
                 return case
             if case_type == "MUR":
                 case["mur_type"] = "current"
-                case["dispositions"] = get_dispositions(case_id)
             case["subjects"] = get_subjects(case_id)
             case["election_cycles"] = get_election_cycles(case_id)
             participants = get_participants(case_id)
             case["participants"] = list(participants.values())
             case["respondents"] = get_sorted_respondents(case["participants"])
+
+            case["dispositions"] = get_dispositions(case_id)
+
             case["open_date"], case["close_date"] = get_open_and_close_dates(case_id)
             return case
         else:
@@ -431,33 +433,19 @@ def get_open_and_close_dates(case_id):
         open_date, close_date = rs.fetchone()
     return open_date, close_date
 
+
 def get_dispositions(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(DISPOSITION_DATA.format(case_id))
         disposition_data = []
         for row in rs:
+            case_status = adr_dispostion_status.get(row["event_name"])
             citations = parse_statutory_citations(row["statutory_citation"], case_id, row["name"])
             citations.extend(parse_regulatory_citations(row["regulatory_citation"], case_id, row["name"]))
             disposition_data.append({"disposition": row["event_name"], "penalty": row["final_amount"],
-                "respondent": row["name"], "citations": citations})
+                "respondent": row["name"], "citations": citations, "case_status": case_status})
 
         return disposition_data
-
-def get_adr_dispositions(case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(DISPOSITION_DATA.format(case_id))
-        adr_dispositions = []
-        for row in rs:
-            disposition_status = row["event_name"]
-            result = [val for key, val in adr_disposition_status.items() if disposition_status in key]
-            if result:
-                case_status = adr_disposition_status.get(disposition_status)
-            else:
-                case_status = "No status found"
-            adr_dispositions.append({"disposition": row["event_name"], "case_status": case_status, "penalty": row["final_amount"],
-                "respondent": row["name"]})
-
-        return adr_dispositions
 
 
 def get_af_dispositions(case_id):
@@ -496,6 +484,7 @@ def get_adr_non_monetary_terms(case_id):
         non_monetary_terms = []
         for row in rs:
             non_monetary_terms.append(row["term_description"])
+            # non_monetary_terms.append({"description": row["term_descrption"], "action": row["action"], "commissioner_name": row["commissioner_name"], "vote_type": row["vote_type"]})
         return non_monetary_terms
 
 def get_adr_non_monetary_terms_respondents(case_id):
@@ -503,11 +492,11 @@ def get_adr_non_monetary_terms_respondents(case_id):
         rs = conn.execute(ADR_NON_MONETARY_TERMS_RESPONDENTS, case_id)
         non_monetary_terms_repondents = []
         for row in rs:
+            # non_monetary_terms_repondents.append({"repondent_name": row["name"]})
             non_monetary_terms_repondents.append(row["name"])
         return non_monetary_terms_repondents
 
 def get_adr_citations(case_id):
-    citations = []
     with db.engine.connect() as conn:
         rs = conn.execute(ADR_CITATIONS, case_id)
         for row in rs:
@@ -690,10 +679,9 @@ def get_sort_fields(case_no):
     match = CASE_NO_REGEX.match(case_no)
     return -int(match.group("serial")), None
 
-#  Disposition mappings to show the final status of ADR case. This status will be shown in a new column, called case_status
-adr_disposition_status = {
+adr_dispostion_status = {
     'Dismissed': 'Case Dismissed',
-    'Settlement Agreement - Complaint Unsubstantiated': 'Negotiated Settlement Approved',
+    'Settlement Agreement - Complaint Unsubstantiated ': 'Negotiated Settlement Approved',
     'Dismissed - Agreement Rejected': 'Negotiated Settlement Rejected by Commission',
     'Dismissed - Failed to Approve': 'Case Dismissed'
 }
