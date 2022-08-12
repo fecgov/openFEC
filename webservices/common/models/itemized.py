@@ -632,6 +632,7 @@ class ScheduleE(PdfMixin, BaseItemized):
     schedule_type = db.Column('schedule_type', db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     pdf_url = db.Column(db.String)
+    spender_name_text = db.Column(TSVECTOR)
 
 
 class ScheduleEEfile(BaseRawItemized):

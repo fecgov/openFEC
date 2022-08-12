@@ -597,6 +597,10 @@ FILER_NAME_TEXT = '''
 Keyword search for filer name
 '''
 
+SPENDER_NAME_TEXT = '''
+Keyword search for spender name
+'''
+
 PRIMARY_GENERAL_INDICATOR = '''
 Primary general indicator
 '''

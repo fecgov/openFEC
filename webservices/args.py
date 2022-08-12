@@ -922,7 +922,7 @@ schedule_e = {
     'min_filing_date': fields.Date(description=docs.MIN_FILED_DATE),
     'max_filing_date': fields.Date(description=docs.MAX_FILED_DATE),
     'most_recent': fields.Bool(description=docs.MOST_RECENT_IE),
-
+    'spender_name_text': fields.List(Keyword, description=docs.SPENDER_NAME_TEXT),
 }
 
 schedule_e_efile = {
