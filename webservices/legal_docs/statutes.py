@@ -10,7 +10,7 @@ from .es_management import (  # noqa
     DOCS_ALIAS,
 )
 
-logger = logging.getLogger("manager")
+logger = logging.getLogger(__name__)
 
 
 def get_xml_tree_from_url(url):

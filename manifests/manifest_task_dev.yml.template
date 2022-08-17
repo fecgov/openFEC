@@ -3,7 +3,7 @@ applications:
 - name: <name>-kill-<date>
   memory: 1024M
   disk_quota: 1024M
-  command: "(<put your command here> && echo SUCCESS || echo FAIL) && sleep infinity"  # "(python manage.py refresh_materialized && echo SUCCESS || echo FAIL) && sleep infinity"
+  command: "(<put your command here> && echo SUCCESS || echo FAIL) && sleep infinity"  # "(python cli.py refresh_materialized && echo SUCCESS || echo FAIL) && sleep infinity"
   no-route: true
   path: ../
   stack: cflinuxfs3

@@ -200,18 +200,29 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
 #### Run locally
 Follow these steps every time you want to work on this project locally.
 
-1. If you are using the legal search portion of the site, you will need Elastic Search running.
+1. Set the FLASK_APP environment variable to specify how to load the application. Flask is used when running the project locally, so you will want to turn the debugger on as well. If you'd like to run in  development mode (reloader will trigger whenever your code or imported modules change and debugger is on by default) you can set FLASK_ENV=development. Pyenv-dotenv should set these for you automatically by reading .flaskenv. 
+   ```
+   export FLASK_APP=webservices.rest
+   export FLASK_DEBUG=1
+   ```
+
+2. If you are using the legal search portion of the site, you will need Elastic Search running.
 Navigate to the installation folder (eg., `elasticsearch-7.4`) and run:
 
-```
-cd bin
-./elasticsearch
-```
+   ```
+   cd bin
+   ./elasticsearch
+   ```
 
 2. Start the web server:
 
    ```
-   ./manage.py runserver
+   flask run
+   ```
+   or
+
+   ```
+   python cli.py run
    ```
 
 3. View your local version of the site at [http://localhost:5000](http://localhost:5000).
@@ -396,7 +407,7 @@ To accomplish this, follow these steps:
 
    ```
    name: one-off-app-name
-   command: "<your command here, e.g., python manage.py refresh_materialized> && sleep infinity"
+   command: "<your command here, e.g., python cli.py refresh_materialized> && sleep infinity"
    no-route: true
    ```
 
@@ -572,7 +583,7 @@ The materialized views are manually refreshed when something needs to be removed
 * Run this command:
     
     ```
-    cf run-task api 'python manage.py refresh_materialized' --name refresh
+    cf run-task api 'python cli.py refresh_materialized' --name refresh
     ```
 * Check status of task:
 
@@ -593,37 +604,37 @@ There are some management commands to manage (display, create, delete, restore) 
 More information is available by invoking each of these commands with a `--help` option. These commands can be run as [tasks](https://docs.cloudfoundry.org/devguide/using-tasks.html) on `cloud.gov`, e.g.,
 #### Display, Configure and Delete a repository
 ```
-cf run-task api --command "python manage.py display_repositories" -m 2G --name display_repositories
+cf run-task api --command "python cli.py display_repositories" -m 2G --name display_repositories
 ```
 ```
-cf run-task api --command "python manage.py configure_snapshot_repository -r <repository_name>" -m 4G --name configure_docs_snapshot_repository
+cf run-task api --command "python cli.py configure_snapshot_repository <repository_name>" -m 4G --name configure_docs_snapshot_repository
 ```
 ```
-cf run-task api --command "python manage.py delete_repository -r <repository_name>" -m 4G --name delete_repository
+cf run-task api --command "python cli.py delete_repository <repository_name>" -m 4G --name delete_repository
 ```
 #### Display, Create and Delete an index
 We have two indexes for FEC legal documents, one is used for current legal documents, another is used for archived MURs.
 ```
-cf run-task api --command "python manage.py display_index_alias" -m 2G --name display_index_alias
+cf run-task api --command "python cli.py display_index_alias" -m 2G --name display_index_alias
 ```
 ```
-cf run-task api --command "python manage.py create_index -i <index_name> -a [alias_name1,alias_name2]" -m 2G --name create_index
+cf run-task api --command "python cli.py create_index <index_name> [alias_name1,alias_name2]" -m 2G --name create_index
 ```
 ```
-cf run-task api --command "python manage.py delete_index -i <index_name>" -m 2G --name delete_index
+cf run-task api --command "python cli.py delete_index <index_name>" -m 2G --name delete_index
 ```
 #### Reloading all current legal documents with no downtime (excludes archived MURs)
 ```
-cf run-task api --command "python manage.py refresh_current_legal_docs_zero_downtime" -m 4G --name refresh_data
+cf run-task api --command "python cli.py refresh_current_legal_docs_zero_downtime" -m 4G --name refresh_data
 ```
 This command is typically used when there is a schema change. A staging index (DOCS_STAGING_INDEX) is built and populated in the background. When ready, the staging index is moved to the current index (DOCS_INDEX) with no downtime.
 
 #### Initialize the current legal documents and archived MURs (with downtime)
 ```
-cf run-task api --command "python manage.py initialize_current_legal_docs" -m 4G --name initialize_docs_data
+cf run-task api --command "python cli.py initialize_current_legal_docs" -m 4G --name initialize_docs_data
 ```
 ```
-cf run-task api --command "python manage.py initialize_archived_mur_docs" -m 4G --name initialize_arch_mur_data
+cf run-task api --command "python cli.py initialize_archived_mur_docs" -m 4G --name initialize_arch_mur_data
 ```
 These commands are used to reload all legal docs with downtime (approximately two hours).
 
@@ -634,37 +645,37 @@ cf logs api | grep <some key word>
 ```
 #### Loading advisory opinions [beginning with FROM_AO_NO through newest AO]
 ```
-cf run-task api --command "python manage.py load_advisory_opinions [-f FROM_AO_NO]" -m 4G --name load_advisory_opinions
+cf run-task api --command "python cli.py load_advisory_opinions [FROM_AO_NO]" -m 4G --name load_advisory_opinions
 ```
 #### Loading current MURs (type=murs and mur_type=current) [only one MUR_NO]
 ```
-cf run-task api --command "python manage.py load_current_murs [-s MUR_NO]" -m 4G --name load_current_murs
+cf run-task api --command "python cli.py load_current_murs [MUR_NO]" -m 4G --name load_current_murs
 ```
 #### Loading ADRs [only one ADR_NO]
 ```
-cf run-task api --command "python manage.py load_adrs [-s ADR_NO]"  -m 4G --name load_adrs
+cf run-task api --command "python cli.py load_adrs [ADR_NO]"  -m 4G --name load_adrs
 ```
 #### Loading Admin Fines [only one AF_NO]
 ```
-cf run-task api --command "python manage.py load_admin_fines [-s AF_NO]" --name load_admin_fines
+cf run-task api --command "python cli.py load_admin_fines [AF_NO]" --name load_admin_fines
 ```
 #### Loading regulations
 ```
-cf run-task api --command "python manage.py load_regulations" --name load_regulations
+cf run-task api --command "python cli.py load_regulations" --name load_regulations
 ```
 This command requires that the environment variable `FEC_EREGS_API` is set to the API endpoint of a valid `eregs` instance.
 #### Loading statutes
 ```
-cf run-task api --command "python manage.py load_statutes" --name load_statutes
+cf run-task api --command "python cli.py load_statutes" --name load_statutes
 ```
 #### Loading archived murs(type=murs and mur_type=archived)
 (load one arch_mur):
 ```
-cf run-task api --command "python manage.py load_archived_murs [-m MUR_NO]" --name upload_one_arch_mur
+cf run-task api --command "python cli.py load_archived_murs [MUR_NO]" --name upload_one_arch_mur
 ```
 (load all arch_mur):
 ```
-cf run-task api --command "python manage.py load_archived_murs" --name upload_arch_mur
+cf run-task api --command "python cli.py load_archived_murs" --name upload_arch_mur
 ```
 ### Production stack
 The OpenFEC API is a Flask application deployed using the gunicorn WSGI server behind

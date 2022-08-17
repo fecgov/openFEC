@@ -280,7 +280,7 @@ def create_sample_db(ctx):
 
     print("Refreshing materialized views...")
     os.environ["SQLA_CONN"] = db_conn  # SQLA_CONN is used by manage.py tasks
-    subprocess.check_call(['python', 'manage.py', 'refresh_materialized'])
+    subprocess.check_call(['python', 'cli.py', 'refresh_materialized'])
     print("Materialized views refreshed")
 
 
