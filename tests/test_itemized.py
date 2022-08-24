@@ -1230,6 +1230,9 @@ class TestScheduleB(ApiBaseTest):
             assert results[0][column.key] == values[0]
 
 
+# Test endpoints:
+# /schedules/schedule_e/ (sched_e.ScheduleEView)
+# /schedules/schedule_e/efile/ (sched_e.ScheduleEEfileView)
 class TestScheduleE(ApiBaseTest):
     kwargs = {'two_year_transaction_period': 2016}
 
@@ -1373,6 +1376,24 @@ class TestScheduleE(ApiBaseTest):
         [factories.ScheduleEFactory(payee_name=payee) for payee in payee_names]
         results = self._results(api.url_for(ScheduleEView, payee_name='test'))
         self.assertEqual(len(results), len(payee_names))
+
+    def test_filter_sched_e_spender_name_text(self):
+        [
+            factories.ScheduleEFactory(
+                committee_id='C001', spender_name_text="'action':3 'abc':2 'committee':4 'international':1",
+            ),
+            factories.ScheduleEFactory(
+                committee_id='C002', spender_name_text="'action':3 'xyz':2 'committee':4 'international':1",
+            ),
+        ]
+        results = self._results(
+            api.url_for(ScheduleEView, spender_name_text='action', **self.kwargs)
+        )
+        self.assertEqual(len(results), 2)
+        results = self._results(
+            api.url_for(ScheduleEView, spender_name_text='abc', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
 
     def test_schedule_e_filter_fulltext_fail(self):
         """

@@ -11,6 +11,7 @@ from webservices.common import views
 from webservices.common.views import ItemizedResource
 
 
+# Use for endpoint `/schedules/schedule_e/` under tag: independent expenditure
 @doc(
     tags=['independent expenditures'],
     description=docs.SCHEDULE_E,
@@ -48,6 +49,7 @@ class ScheduleEView(ItemizedResource):
     ]
     filter_fulltext_fields = [
         ('payee_name', models.ScheduleE.payee_name_text),
+        ('spender_name_text', models.ScheduleE.spender_name_text),
     ]
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleE.expenditure_date),
@@ -114,6 +116,7 @@ class ScheduleEView(ItemizedResource):
         return query
 
 
+# Use for endpoint `/schedules/schedule_e/efile/` under tag: independent expenditure
 @doc(
     tags=['independent expenditures'],
     description=docs.EFILING_TAG,

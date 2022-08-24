@@ -3,7 +3,7 @@ from webservices import docs, utils
 from .base import db, BaseModel
 
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 
 from webservices.common.models.dates import ReportType
 from sqlalchemy.ext.declarative import declared_attr
@@ -236,6 +236,7 @@ class CommitteeReports(FecFileNumberMixin, PdfMixin, CsvMixin, BaseModel):
     fec_url = db.Column(db.String, doc=docs.FEC_URL)
     html_url = db.Column(db.String, doc=docs.HTML_URL)
     most_recent = db.Column('most_recent', db.Boolean, doc=docs.MOST_RECENT)
+    filer_name_text = db.Column(TSVECTOR, doc=docs.FILER_NAME_TEXT)
 
     @property
     def document_description(self):

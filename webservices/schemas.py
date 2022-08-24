@@ -482,7 +482,7 @@ make_reports_schema = functools.partial(
         'end_image_number': ma.fields.Str(),
         'fec_file_id': ma.fields.Str(),
     },
-    options={'exclude': ('idx', 'committee')},
+    options={'exclude': ('idx', 'committee' , 'filer_name_text')},
 )
 
 augment_models(
@@ -802,6 +802,7 @@ ScheduleESchema = make_schema(
     options={
         'exclude': (
             'payee_name_text',
+            'spender_name_text',
         ),
         'relationships': [
             Relationship(
@@ -879,7 +880,7 @@ BaseFilingsSchema = make_schema(
         'sub_id': ma.fields.Str(),
         'fec_file_id': ma.fields.Str(),
     },
-    options={'exclude': ('committee', )},
+    options={'exclude': ('committee', 'filer_name_text')},
 )
 
 

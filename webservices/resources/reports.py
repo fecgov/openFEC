@@ -124,6 +124,12 @@ def get_match_filters():
     return filter_match_fields
 
 
+# Use for endpoint '/reports/<string:entity_type>/' under tag:'financial'
+# Sample urls:
+# http://127.0.0.1:5000/v1/reports/presidential/?filer_name_text=bid
+# http://127.0.0.1:5000/v1/reports/house-senate/?filer_name_text=bid
+# http://127.0.0.1:5000/v1/reports/pac-party/filer_name_text=bid
+# TODO http://127.0.0.1:5000/v1/reports/ie-only/filer_name_text=bid
 @doc(
     tags=['financial'],
     description=docs.REPORTS,
@@ -166,6 +172,8 @@ class ReportsView(views.ApiResource):
             ('beginning_image_number', reports_class.beginning_image_number),
         ]
 
+        filter_fulltext_fields = [("filer_name_text", reports_class.filer_name_text),]
+
         if hasattr(reports_class, 'committee'):
             query = reports_class.query.outerjoin(reports_class.committee).options(
                 sa.orm.contains_eager(reports_class.committee)
@@ -185,9 +193,11 @@ class ReportsView(views.ApiResource):
         query = filters.filter_range(query, kwargs, get_range_filters())
         query = filters.filter_match(query, kwargs, get_match_filters())
         query = filters.filter_multi(query, kwargs, filter_multi_fields)
+        query = filters.filter_fulltext(query, kwargs, filter_fulltext_fields)
         return query, reports_class, reports_schema
 
 
+# Use for '/committee/<string:committee_id>/reports/' under tag:'financial'
 @doc(
     tags=['financial'],
     description=docs.REPORTS,
@@ -254,6 +264,9 @@ class CommitteeReportsView(views.ApiResource):
             return reports_type_map.get(committee_type)
 
 
+# Use for '/efile/reports/house-senate/' under tag:'efiling'
+# Sample url:
+# http://127.0.0.1:5000/v1/efile/reports/house-senate/?filer_name_text=san
 @doc(
     tags=['efiling'], description=docs.EFILE_REPORTS,
 )
@@ -270,6 +283,7 @@ class EFilingHouseSenateSummaryView(views.ApiResource):
         ('file_number', model.file_number),
         ('committee_id', model.committee_id),
     ]
+    filter_fulltext_fields = [("filer_name_text", models.CommitteeSearch.fulltxt)]
 
     @property
     def args(self):
@@ -281,11 +295,24 @@ class EFilingHouseSenateSummaryView(views.ApiResource):
             ),
         )
 
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+
+        if kwargs.get("filer_name_text"):
+            query = query.join(
+                models.CommitteeSearch,
+                self.model.committee_id == models.CommitteeSearch.id,
+            ).distinct()
+        return query
+
     @property
     def index_column(self):
         return self.model.file_number
 
 
+# Use for '/efile/reports/presidential/' under tag:'efiling'
+# Sample url:
+# http://127.0.0.1:5000/v1/efile/reports/presidential/?filer_name_text=bid
 @doc(
     tags=['efiling'], description=docs.EFILE_REPORTS,
 )
@@ -302,6 +329,7 @@ class EFilingPresidentialSummaryView(views.ApiResource):
         ('file_number', model.file_number),
         ('committee_id', model.committee_id),
     ]
+    filter_fulltext_fields = [("filer_name_text", models.CommitteeSearch.fulltxt)]
 
     @property
     def args(self):
@@ -313,11 +341,24 @@ class EFilingPresidentialSummaryView(views.ApiResource):
             ),
         )
 
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+
+        if kwargs.get("filer_name_text"):
+            query = query.join(
+                models.CommitteeSearch,
+                self.model.committee_id == models.CommitteeSearch.id,
+            ).distinct()
+        return query
+
     @property
     def index_column(self):
         return self.model.file_number
 
 
+# Use for '/efile/reports/pac-party/' under tag:'efiling'
+# Sample url:
+# http://127.0.0.1:5000/v1/efile/reports/pac-party/?filer_name_text=san
 @doc(
     tags=['efiling'], description=docs.EFILE_REPORTS,
 )
@@ -334,6 +375,7 @@ class EFilingPacPartySummaryView(views.ApiResource):
         ('file_number', model.file_number),
         ('committee_id', model.committee_id),
     ]
+    filter_fulltext_fields = [("filer_name_text", models.CommitteeSearch.fulltxt)]
 
     @property
     def args(self):
@@ -344,6 +386,16 @@ class EFilingPacPartySummaryView(views.ApiResource):
                 default='-receipt_date', validator=args.IndexValidator(self.model),
             ),
         )
+
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+
+        if kwargs.get("filer_name_text"):
+            query = query.join(
+                models.CommitteeSearch,
+                self.model.committee_id == models.CommitteeSearch.id,
+            ).distinct()
+        return query
 
     @property
     def index_column(self):
