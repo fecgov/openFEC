@@ -9,19 +9,18 @@ jobs:
       # use `-browsers` prefix for selenium tests, e.g. `<image_name>-browsers`
 
       # Python
-      - image: circleci/python:3.8.12-buster
+      - image: cimg/python:3.8
         environment:
           TZ: America/New_York
           SQLA_TEST_CONN: postgresql://postgres@0.0.0.0/cfdm_unit_test
 
       # PostgreSQL
-      - image: circleci/postgres:13.5
+      - image: cimg/postgres:13.5
         environment:
           POSTGRES_USER: postgres
           POSTGRES_HOST_AUTH_METHOD: "trust"
           POSTGRES_DB: cfdm_unit_test
 
-    working_directory: ~/repo
 
     steps:
       - checkout
@@ -66,13 +65,13 @@ jobs:
       - run:
           name: Install Python dependencies
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
+            python3 -m venv .env
+            . .env/bin/activate
             pip install -r requirements.txt
 
       - save_cache:
           paths:
-            - ./venv
+            - ./.env
             - ./node_modules
           key: v2-fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "package.json" }}
 
@@ -83,13 +82,13 @@ jobs:
       - run:
           name: Run tests
           command: |
-            . venv/bin/activate
+            . .env/bin/activate
             pytest
 
       - run:
           name: Perform post-test checks
           command: |
-            . venv/bin/activate
+            . .env/bin/activate
             codecov
 
       - store_artifacts:
@@ -119,6 +118,6 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
             [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-            . venv/bin/activate
+            . .env/bin/activate
             nvm use default
             invoke deploy --branch $CIRCLE_BRANCH --login True --yes --migrate-database
