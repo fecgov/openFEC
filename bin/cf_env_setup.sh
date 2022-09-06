@@ -3,7 +3,7 @@
 # This is a convenience script to setup the app container environment to match
 # what was uploaded with the buildpack when you SSH into an app container.
 # This must be run if you want to interact with the application and run
-# anything as you'd expect, e.g., ./manage.py showmigrations for a Python app
+# anything as you'd expect, e.g., ./cli.py showmigrations for a Python app
 # built with Django.
 
 # This script is built using the commands and information outlined here:

@@ -375,12 +375,12 @@ def create_index(index_name=None, aliases_name=None):
     b)create_index(ARCHIVED_MURS_INDEX, (ARCHIVED_MURS_ALIAS + "," + SEARCH_ALIAS))
 
     How to run locally:
-    a) python manage.py create_index
-    b) python manage.py create_index -i archived_murs -a archived_murs_index,docs_search
+    a) python cli.py create_index
+    b) python  cli.py create_index archived_murs archived_murs_index,docs_search
 
     How to call task command:
-    a) cf run-task api --command "python manage.py create_index" -m 2G --name create_index
-    b) cf run-task api --command "python manage.py create_index -i archived_murs -a archived_murs_index,docs_search" -m 2G --name create_index
+    a) cf run-task api --command "python cli.py create_index" -m 2G --name create_index
+    b) cf run-task api --command "python cli.py create_index archived_murs archived_murs_index,docs_search" -m 2G --name create_index
     """
     index_name = index_name or DOCS_INDEX
     aliases_list = []
@@ -444,10 +444,10 @@ def display_index_alias():
     Returns all indices and aliases.
 
     How to run locally:
-        python manage.py display_index_alias
+        python cli.py display_index_alias
 
     How to call task command:
-        cf run-task api --command "display_index_alias" -m 2G --name display_index_alias
+        cf run-task api --command "python cli.py display_index_alias" -m 2G --name display_index_alias
     """
     es_client = create_es_client()
     indices = es_client.cat.indices(format="JSON")
@@ -464,10 +464,10 @@ def display_mappings():
     Returns all index mappings.
 
     How to run locally:
-        python manage.py display_mappings
+        python cli.py display_mappings
 
     How to call task command:
-        cf run-task api --command "display_mappings" -m 2G --name display_mappings
+        cf run-task api --command "python cli.py display_mappings" -m 2G --name display_mappings
     """
     es_client = create_es_client()
     indices = es_client.cat.indices(format="JSON")
@@ -488,12 +488,12 @@ def delete_index(index_name=None):
     b)delete_index(ARCHIVED_MURS_INDEX)
 
     How to run locally:
-    a) python manage.py delete_index -i docs
-    b) python manage.py delete_index -i archived_murs
+    a) python cli.py delete_index docs
+    b) python cli.py delete_index archived_murs
 
     How to call task command:
-    a) cf run-task api --command "python manage.py delete_index -i docs" -m 2G --name delete_index
-    b) cf run-task api --command "python manage.py delete_index -i archived_murs" -m 2G --name delete_index
+    a) cf run-task api --command "python cli.py delete_index docs" -m 2G --name delete_index
+    b) cf run-task api --command "python cli.py delete_index archived_murs" -m 2G --name delete_index
     """
     # TODO: check if DOCS_INDEX exist before deleting.
     es_client = create_es_client()
@@ -678,8 +678,8 @@ def configure_snapshot_repository(repository_name=DOCS_REPOSITORY_NAME):
     This needs to get re-run when s3 credentials change for each api app deployment.
 
     How to call task command:
-    cf run-task api --command "python manage.py configure_snapshot_repository -r repository_docs" -m 2G --name configure_snapshot_repository_docs
-    cf run-task api --command "python manage.py configure_snapshot_repository -r repository_archived_murs" -m 2G --name configure_snapshot_repository_arch_mur
+    cf run-task api --command "python cli.py configure_snapshot_repository repository_docs" -m 2G --name configure_snapshot_repository_docs
+    cf run-task api --command "python cli.py configure_snapshot_repository repository_archived_murs" -m 2G --name configure_snapshot_repository_arch_mur
     """
     es_client = create_es_client()
     logger.info(" Configuring snapshot repository: {0}".format(repository_name))
@@ -713,7 +713,7 @@ def delete_repository(repository_name=None):
     Delete a s3 repository.
 
     How to call task command:
-    cf run-task api --command "python manage.py delete_repository -r repository_test" -m 2G --name delete_repository
+    cf run-task api --command "python cli.py delete_repository repository_test" -m 2G --name delete_repository
     """
     if repository_name:
         try:
@@ -733,7 +733,7 @@ def display_repositories():
     Returns all the repositories.
 
     How to call task command:
-    cf run-task api --command "python manage.py display_repositories" -m 2G --name display_repositories
+    cf run-task api --command "python cli.py display_repositories" -m 2G --name display_repositories
     """
 
     es_client = create_es_client()
@@ -754,9 +754,9 @@ def create_es_snapshot(repository_name=None, snapshot_name="auto_backup", index_
     Create elasticsearch shapshot of specific 'index_name'(=index1,index2...) in 'repository_name'.
 
     How to call task command:
-    ex1: cf run-task api --command "python manage.py create_es_snapshot -r repository_docs -i docs" -m 2G --name snapshot_docs
-    ex1: cf run-task api --command "python manage.py create_es_snapshot -r repository_archived_murs -i archived_murs -m 2G --name snapshot_archived_murs
-    ex3: cf run-task api --command "python manage.py create_es_snapshot -i docs,archived_murs" -m 2G --name create_snapshot_2index
+    ex1: cf run-task api --command "python cli.py create_es_snapshot repository_docs docs" -m 2G --name snapshot_docs
+    ex1: cf run-task api --command "python cli.py create_es_snapshot repository_archived_murs archived_murs" -m 2G --name snapshot_archived_murs
+    ex3: cf run-task api --command "python cli.py create_es_snapshot docs archived_murs" -m 2G --name create_snapshot_2index
     """
     es_client = create_es_client()
     index_name_list = []
@@ -792,8 +792,8 @@ def delete_snapshot(repository_name=None, snapshot_name=None):
     Delete a snapshot.
 
     How to call task command:
-    ex1: cf run-task api --command "python manage.py delete_snapshot -r repository_docs -s docs_202010272134_auto_backup" -m 2G --name delete_snapshot
-    ex2: cf run-task api --command "python manage.py delete_snapshot -s docs_202010272132_auto_backup" -m 2G --name delete_snapshot
+    ex1: cf run-task api --command "python cli.py delete_snapshot repository_docs docs_202010272134_auto_backup" -m 2G --name delete_snapshot
+    ex2: cf run-task api --command "python cli.py delete_snapshot docs_202010272132_auto_backup" -m 2G --name delete_snapshot
     """
     if repository_name and snapshot_name:
         configure_snapshot_repository(repository_name)
@@ -817,7 +817,7 @@ def restore_es_snapshot(repository_name=None, snapshot_name=None, index_name=Non
     -Default to most recent snapshot, optionally specify `snapshot_name`
 
     How to call task command:
-    ex: cf run-task api --command "python manage.py restore_es_snapshot -r repository_docs -s docs_202010272132_auto_backup -i docs" -m 2G --name restore_es_snapshot
+    ex: cf run-task api --command "python cli.py restore_es_snapshot repository_docs docs_202010272132_auto_backup docs" -m 2G --name restore_es_snapshot
     """
     es_client = create_es_client()
 
@@ -870,8 +870,8 @@ def restore_es_snapshot_downtime(repository_name=None, snapshot_name=None, index
     -Default to most recent snapshot, optionally specify `snapshot_name`
 
     How to call task command:
-    ex: cf run-task api --command "python manage.py restore_es_snapshot_downtime -r repository_docs -s docs_202010272130_auto_backup -i docs" -m 2G --name restore_es_snapshot_downtime
-    ex: cf run-task api --command "python manage.py restore_es_snapshot_downtime -r repository_archived_murs -s archived_murs_202010272130_auto_backup -i archived_murs" -m 2G --name restore_es_snapshot_downtime
+    ex: cf run-task api --command "python cli.py restore_es_snapshot_downtime repository_docs docs_202010272130_auto_backup docs" -m 2G --name restore_es_snapshot_downtime
+    ex: cf run-task api --command "python cli.py restore_es_snapshot_downtime repository_archived_murs archived_murs_202010272130_auto_backup archived_murs" -m 2G --name restore_es_snapshot_downtime
     """
     es_client = create_es_client()
 
@@ -919,8 +919,8 @@ def display_snapshots(repository_name=None):
     Returns all the snapshots in the repository.
 
     How to call task command:
-    ex1: cf run-task api --command "python manage.py display_snapshots -r repository_docs" -m 2G --name display_snapshots
-    ex2: cf run-task api --command "python manage.py display_snapshots -r repository_archived_murs" -m 2G --name display_snapshots
+    ex1: cf run-task api --command "python cli.py display_snapshots repository_docs" -m 2G --name display_snapshots
+    ex2: cf run-task api --command "python cli.py display_snapshots repository_archived_murs" -m 2G --name display_snapshots
     """
     es_client = create_es_client()
     repository_name = repository_name or DOCS_REPOSITORY_NAME
@@ -940,8 +940,8 @@ def display_snapshot_detail(repository_name=None, snapshot_name=None):
     Returns all the snapshot detail (include uuid) in the repository.
 
     How to call task command:
-    ex1: cf run-task api --command "python manage.py display_snapshot_detail -s docs_202010*" -m 2G --name display_snapshot
-    ex2: cf run-task api --command "python manage.py display_snapshot_detail -r repository_archived_murs -s archived_murs*" -m 2G --name display_snapshot_detail
+    ex1: cf run-task api --command "python cli.py display_snapshot_detail repository_name docs_202010*" -m 2G --name display_snapshot
+    ex2: cf run-task api --command "python cli.py display_snapshot_detail repository_archived_murs archived_murs*" -m 2G --name display_snapshot_detail
     """
     es_client = create_es_client()
     repository_name = repository_name or DOCS_REPOSITORY_NAME
@@ -961,7 +961,7 @@ def display_snapshot_detail(repository_name=None, snapshot_name=None):
 def delete_doctype_from_es(index_name=None, doc_type=None):
     """
     Deletes all records with the given `doc_type` from Elasticsearch
-    Ex: cf run-task api --command "python manage.py delete_doctype_from_es -i docs -d adrs" -m 2G --name delete_adrs
+    Ex: cf run-task api --command "python cli.py delete_doctype_from_es docs adrs" -m 2G --name delete_adrs
     """
     body = {"query": {"match": {"type": doc_type}}}
 
@@ -977,8 +977,8 @@ def delete_doctype_from_es(index_name=None, doc_type=None):
 def delete_single_doctype_from_es(index_name=None, doc_type=None, num_doc_id=None):
     """
     Deletes single record with the given `doc_type` and `doc_id` from Elasticsearch
-    Ex: cf run-task api --command "python manage.py delete_single_doctype_from_es -i docs -d admin_fines -n af_4201" -m 2G --name delete_one_af
-        cf run-task api --command "python manage.py delete_single_doctype_from_es -i docs -d advisory_opinions -n advisory_opinions_2021-08" -m 2G --name delete_one_ao
+    Ex: cf run-task api --command "python cli.py delete_single_doctype_from_es docs admin_fines af_4201" -m 2G --name delete_one_af
+        cf run-task api --command "python cli.py delete_single_doctype_from_es docs advisory_opinions advisory_opinions_2021-08" -m 2G --name delete_one_ao
     """
     body = {"query": {
         "bool": {
