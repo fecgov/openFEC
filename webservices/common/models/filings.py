@@ -6,6 +6,7 @@ from webservices.common.models.dates import clean_report_type
 from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin, FecFileNumberMixin
 from webservices import exceptions
 
+
 class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     __tablename__ = 'ofec_filings_all_mv'
 
