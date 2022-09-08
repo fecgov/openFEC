@@ -6,6 +6,7 @@ from webservices.common.models.dates import clean_report_type
 from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin, FecFileNumberMixin
 from webservices import exceptions
 
+
 class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     __tablename__ = 'ofec_filings_all_mv'
 
@@ -25,7 +26,8 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     report_type = db.Column(db.String, index=True, doc=docs.REPORT_TYPE)
     document_type = db.Column(db.String, index=True, doc=docs.DOC_TYPE)
     document_type_full = db.Column(db.String, doc=docs.DOC_TYPE)
-    report_type_full = db.Column(db.String, doc=docs.REPORT_TYPE)
+    report_type_full_text = db.Column('report_type_full', db.String, doc=docs.REPORT_TYPE)
+    # report_type_full = db.Column(db.String, doc=docs.REPORT_TYPE)
     beginning_image_number = db.Column(db.BigInteger, index=True, doc=docs.BEGINNING_IMAGE_NUMBER)
     ending_image_number = db.Column(db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
     pages = db.Column(db.Integer, doc=docs.PAGES)
@@ -85,6 +87,14 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
             self.report_type_full,
             self.document_type_full,
             self.form_type,
+        )
+
+    @property
+    def report_type_full(self):
+        return utils.report_type__description(
+            self.report_type,
+            self.form_type,
+            self.report_type_full_text,
         )
 
 
