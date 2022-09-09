@@ -172,7 +172,7 @@ class ReportsView(views.ApiResource):
             ('beginning_image_number', reports_class.beginning_image_number),
         ]
 
-        filter_fulltext_fields = [("filer_name_text", reports_class.filer_name_text),]
+        filter_fulltext_fields = [("q_filer", reports_class.filer_name_text), ]
 
         if hasattr(reports_class, 'committee'):
             query = reports_class.query.outerjoin(reports_class.committee).options(
@@ -283,7 +283,7 @@ class EFilingHouseSenateSummaryView(views.ApiResource):
         ('file_number', model.file_number),
         ('committee_id', model.committee_id),
     ]
-    filter_fulltext_fields = [("filer_name_text", models.CommitteeSearch.fulltxt)]
+    filter_fulltext_fields = [("q_filer", models.CommitteeSearch.fulltxt)]
 
     @property
     def args(self):
@@ -298,7 +298,7 @@ class EFilingHouseSenateSummaryView(views.ApiResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
 
-        if kwargs.get("filer_name_text"):
+        if kwargs.get("q_filer"):
             query = query.join(
                 models.CommitteeSearch,
                 self.model.committee_id == models.CommitteeSearch.id,
@@ -329,7 +329,7 @@ class EFilingPresidentialSummaryView(views.ApiResource):
         ('file_number', model.file_number),
         ('committee_id', model.committee_id),
     ]
-    filter_fulltext_fields = [("filer_name_text", models.CommitteeSearch.fulltxt)]
+    filter_fulltext_fields = [("q_filer", models.CommitteeSearch.fulltxt)]
 
     @property
     def args(self):
@@ -344,7 +344,7 @@ class EFilingPresidentialSummaryView(views.ApiResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
 
-        if kwargs.get("filer_name_text"):
+        if kwargs.get("q_filer"):
             query = query.join(
                 models.CommitteeSearch,
                 self.model.committee_id == models.CommitteeSearch.id,
@@ -375,7 +375,7 @@ class EFilingPacPartySummaryView(views.ApiResource):
         ('file_number', model.file_number),
         ('committee_id', model.committee_id),
     ]
-    filter_fulltext_fields = [("filer_name_text", models.CommitteeSearch.fulltxt)]
+    filter_fulltext_fields = [("q_filer", models.CommitteeSearch.fulltxt)]
 
     @property
     def args(self):
@@ -390,7 +390,7 @@ class EFilingPacPartySummaryView(views.ApiResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
 
-        if kwargs.get("filer_name_text"):
+        if kwargs.get("q_filer"):
             query = query.join(
                 models.CommitteeSearch,
                 self.model.committee_id == models.CommitteeSearch.id,

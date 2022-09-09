@@ -5,9 +5,7 @@ from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common.views import ApiResource
-from webservices.common import counts
 from webservices.common import models
-from webservices import exceptions
 
 
 @doc(
@@ -98,7 +96,7 @@ class FilingsList(BaseFilings):
         ("committee_id", models.Filings.committee_id),
         ("candidate_id", models.Filings.candidate_id),
     ]
-    filter_fulltext_fields = [("filer_name_text", models.Filings.filer_name_text),]
+    filter_fulltext_fields = [("q_filer", models.Filings.filer_name_text), ]
 
     @property
     def args(self):
@@ -124,7 +122,7 @@ class EFilingsView(ApiResource):
     filter_range_fields = [
         (("min_receipt_date", "max_receipt_date"), models.EFilings.filed_date),
     ]
-    filter_fulltext_fields = [("filer_name_text", models.CommitteeSearch.fulltxt)]
+    filter_fulltext_fields = [("q_filer", models.CommitteeSearch.fulltxt)]
 
     @property
     def args(self):
@@ -140,7 +138,7 @@ class EFilingsView(ApiResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
 
-        if kwargs.get("filer_name_text"):
+        if kwargs.get("q_filer"):
             query = query.join(
                 models.CommitteeSearch,
                 self.model.committee_id == models.CommitteeSearch.id,

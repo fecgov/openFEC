@@ -1380,18 +1380,22 @@ class TestScheduleE(ApiBaseTest):
     def test_filter_sched_e_spender_name_text(self):
         [
             factories.ScheduleEFactory(
-                committee_id='C001', spender_name_text="'action':3 'abc':2 'committee':4 'international':1",
+                committee_id='C001', spender_name_text=sa.func.to_tsvector('international abc action committee C001'),
             ),
             factories.ScheduleEFactory(
-                committee_id='C002', spender_name_text="'action':3 'xyz':2 'committee':4 'international':1",
+                committee_id='C002', spender_name_text=sa.func.to_tsvector('international xyz action committee C002'),
             ),
         ]
         results = self._results(
-            api.url_for(ScheduleEView, spender_name_text='action', **self.kwargs)
+            api.url_for(ScheduleEView, q_spender='action', **self.kwargs)
         )
         self.assertEqual(len(results), 2)
         results = self._results(
-            api.url_for(ScheduleEView, spender_name_text='abc', **self.kwargs)
+            api.url_for(ScheduleEView, q_spender='abc', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+        results = self._results(
+            api.url_for(ScheduleEView, q_spender='C001', **self.kwargs)
         )
         self.assertEqual(len(results), 1)
 

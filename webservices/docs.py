@@ -594,11 +594,11 @@ Additional banks or depositories in which the committee deposits funds, holds ac
 '''
 
 FILER_NAME_TEXT = '''
-Keyword search for filer name
+Keyword search for filer name or ID
 '''
 
 SPENDER_NAME_TEXT = '''
-Keyword search for spender name
+Keyword search for spender name or ID
 '''
 
 PRIMARY_GENERAL_INDICATOR = '''
