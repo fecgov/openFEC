@@ -208,7 +208,7 @@ class TestFilings(ApiBaseTest):
     def test_regex(self):
         """ Getting rid of extra text that comes in the tables."""
         factories.FilingsFactory(
-            report_type_full='report    {more information than we want}',
+            report_type_full_original='report    {more information than we want}',
             committee_id='C007',
             form_type='RFAI',
             report_year=2004,

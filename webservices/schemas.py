@@ -482,7 +482,7 @@ make_reports_schema = functools.partial(
         'end_image_number': ma.fields.Str(),
         'fec_file_id': ma.fields.Str(),
     },
-    options={'exclude': ('idx', 'committee' , 'filer_name_text')},
+    options={'exclude': ('idx', 'committee', 'filer_name_text')},
 )
 
 augment_models(
@@ -879,8 +879,9 @@ BaseFilingsSchema = make_schema(
         'csv_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
         'fec_file_id': ma.fields.Str(),
+        'report_type_full': ma.fields.Str(),
     },
-    options={'exclude': ('committee', 'filer_name_text')},
+    options={'exclude': ('committee', 'filer_name_text', 'report_type_full_original',)},
 )
 
 
