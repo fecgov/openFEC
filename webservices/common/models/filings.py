@@ -26,7 +26,7 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     report_type = db.Column(db.String, index=True, doc=docs.REPORT_TYPE)
     document_type = db.Column(db.String, index=True, doc=docs.DOC_TYPE)
     document_type_full = db.Column(db.String, doc=docs.DOC_TYPE)
-    report_type_full = db.Column(db.String, doc=docs.REPORT_TYPE)
+    report_type_full_original = db.Column('report_type_full', db.String, doc=docs.REPORT_TYPE)
     beginning_image_number = db.Column(db.BigInteger, index=True, doc=docs.BEGINNING_IMAGE_NUMBER)
     ending_image_number = db.Column(db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
     pages = db.Column(db.Integer, doc=docs.PAGES)
@@ -78,6 +78,14 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     bank_depository_zip = db.Column(db.String, doc=docs.BANK_DEPOSITORY_ZIP)
     additional_bank_names = db.Column(ARRAY(db.String), doc=docs.ADDITIONAL_BANK_NAMES)
     filer_name_text = db.Column(TSVECTOR, doc=docs.FILER_NAME_TEXT)
+
+    @property
+    def report_type_full(self):
+        return utils.report_type_full(
+            self.report_type,
+            self.form_type,
+            self.report_type_full_original,
+        )
 
     @property
     def document_description(self):

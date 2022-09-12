@@ -578,3 +578,12 @@ def get_percentage(numerators, denominators):
     except Exception as exception:
         logger.debug(exception, False)
         return None
+
+
+def report_type_full(report_type, form_type, report_type_full_original):
+    if form_type in ('F5', 'F24') and report_type in ('24', '48'):
+        return report_type + "-HOUR REPORT OF INDEPENDENT EXPENDITURES"
+    elif form_type == 'F6':
+        return "48-HOUR NOTICE OF CONTRIBUTIONS OR LOANS RECEIVED"
+    else:
+        return report_type_full_original
