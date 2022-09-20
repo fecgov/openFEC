@@ -49,7 +49,7 @@ class ScheduleEView(ItemizedResource):
     ]
     filter_fulltext_fields = [
         ('payee_name', models.ScheduleE.payee_name_text),
-        ('spender_name_text', models.ScheduleE.spender_name_text),
+        ('q_spender', models.ScheduleE.spender_name_text),
     ]
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleE.expenditure_date),
