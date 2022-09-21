@@ -18,14 +18,14 @@ logger = logging.getLogger(__name__)
 RECENTLY_MODIFIED_AOS = """
     SELECT ao_no, pg_date
     FROM aouser.aos_with_parsed_numbers
-    WHERE pg_date >= NOW() - '8 hour'::INTERVAL
+    WHERE pg_date >= NOW() - '10 hour'::INTERVAL
     ORDER BY ao_year, ao_serial;
 """
 
 RECENTLY_MODIFIED_CASES = """
     SELECT case_no, case_type, pg_date, published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
-    WHERE pg_date >= NOW() - '8 hour'::INTERVAL
+    WHERE pg_date >= NOW() - '10 hour'::INTERVAL
     ORDER BY case_serial;
 """
 
