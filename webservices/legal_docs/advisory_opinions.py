@@ -21,13 +21,15 @@ logger = logging.getLogger(__name__)
 
 ALL_AOS = """
     SELECT
-        ao_parsed.ao_id,
-        ao_parsed.ao_no,
-        ao_parsed.name,
-        ao_parsed.summary,
-        ao_parsed.req_date,
-        ao_parsed.issue_date,
-        ao.stage
+        ao_parsed.ao_id as ao_id,
+        ao_parsed.ao_no as ao_no,
+        ao_parsed.ao_year as ao_year,
+        ao_parsed.ao_serial as ao_serial,
+        ao_parsed.name as name,
+        ao_parsed.summary as summary,
+        ao_parsed.req_date as req_date,
+        ao_parsed.issue_date as issue_date,
+        ao.stage as stage
     FROM aouser.aos_with_parsed_numbers ao_parsed
     INNER JOIN aouser.ao ao
         ON ao_parsed.ao_id = ao.ao_id
@@ -36,7 +38,7 @@ ALL_AOS = """
         OR
         (ao_parsed.ao_year > %s)
     )
-    ORDER BY ao_parsed.ao_year, ao_parsed.ao_serial
+    ORDER BY ao_parsed.ao_year desc, ao_parsed.ao_serial desc
 """
 
 AO_ENTITIES = """
@@ -173,6 +175,9 @@ def get_advisory_opinions(from_ao_no):
             ao = {
                 "type": AO_DOC_TYPE,
                 "no": row["ao_no"],
+                "ao_no": row["ao_no"],
+                "ao_year": row["ao_year"],
+                "ao_serial": row["ao_serial"],
                 "doc_id": "{0}_{1}".format(AO_DOC_TYPE, row["ao_no"]),
                 "name": row["name"],
                 "summary": row["summary"],

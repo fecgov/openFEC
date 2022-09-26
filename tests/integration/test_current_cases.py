@@ -32,6 +32,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'mur_type': 'current',
             'election_cycles': [2016],
             'doc_id': 'mur_1',
+            'case_serial': 1,
             'published_flg': True,
             'participants': [],
             'subjects': [mur_subject],
@@ -66,6 +67,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'mur_type': 'current',
             'election_cycles': [2016],
             'doc_id': 'mur_101',
+            'case_serial': 101,
             'published_flg': False,
             'participants': [],
             'subjects': [mur_subject],
@@ -100,6 +102,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'name': 'Simple ADR',
             'election_cycles': [2016],
             'doc_id': 'adr_1',
+            'case_serial': 1,
             'published_flg': True,
             'participants': [],
             'non_monetary_terms': [],
@@ -186,6 +189,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'no': '1',
             'name': 'Big Admin Fine',
             'doc_id': 'af_1',
+            'case_serial': 1,
             'published_flg': True,
             'documents': [],
             'commission_votes': [{'action': None, 'vote_date': None}],
@@ -268,6 +272,7 @@ class TestLoadCurrentCases(BaseTestCase):
         expected_mur = {
             "type": "murs",
             'no': '1',
+            'case_serial': 1,
             'name': 'MUR with participants',
             'mur_type': 'current',
             'published_flg': True,
@@ -446,6 +451,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'participants': [],
             'no': '1',
             'doc_id': 'mur_1',
+            'case_serial': 1,
             'published_flg': True,
             'mur_type': 'current',
             'name': 'Open Elections LLC',
@@ -468,6 +474,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'mur_type': 'current',
             'election_cycles': [2016],
             'doc_id': 'mur_1',
+            'case_serial': 1,
             'published_flg': True,
             'participants': [],
             'subjects': [mur_subject],
@@ -488,6 +495,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'mur_type': 'current',
             'election_cycles': [2016],
             'doc_id': 'mur_2',
+            'case_serial': 2,
             'published_flg': True,
             'participants': [],
             'subjects': [mur_subject],
@@ -508,6 +516,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'mur_type': 'current',
             'election_cycles': [2016],
             'doc_id': 'mur_3',
+            'case_serial': 3,
             'published_flg': True,
             'participants': [],
             'subjects': [mur_subject],
@@ -544,9 +553,9 @@ class TestLoadCurrentCases(BaseTestCase):
         )
 
         gen = get_cases('MUR')
-        assert (next(gen)) == expected_mur1
-        assert (next(gen)) == expected_mur2
         assert (next(gen)) == expected_mur3
+        assert (next(gen)) == expected_mur2
+        assert (next(gen)) == expected_mur1
 
         actual_murs = [mur for mur in get_cases('MUR', '2')]
         assert actual_murs == [expected_mur2]
