@@ -43,9 +43,9 @@ jobs:
 
       - restore_cache:
           keys:
-          - v2-fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "package.json" }}
+          - v3-fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
-          - v2-fec-api-dependencies-
+          - v3-fec-api-dependencies-
 
       - run:
           name: Install node dependencies
@@ -73,7 +73,7 @@ jobs:
           paths:
             - ./.env
             - ./node_modules
-          key: v2-fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "package.json" }}
+          key: v3-fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "package.json" }}
 
       - run:
           name: Ensure database is available
