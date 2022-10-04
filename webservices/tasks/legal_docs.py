@@ -16,16 +16,16 @@ from webservices.tasks.utils import get_app_name
 logger = logging.getLogger(__name__)
 
 RECENTLY_MODIFIED_AOS = """
-    SELECT ao_no, pg_date
+    SELECT /* celery_legal_ao_5 */ ao_no, pg_date
     FROM aouser.aos_with_parsed_numbers
-    WHERE pg_date >= NOW() - '8 hour'::INTERVAL
+    WHERE pg_date >= NOW() - '10 hours + 5 minutes'::INTERVAL
     ORDER BY ao_year, ao_serial;
 """
 
 RECENTLY_MODIFIED_CASES = """
-    SELECT case_no, case_type, pg_date, published_flg
+    SELECT /* celery_legal_case_5 */ case_no, case_type, pg_date, published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
-    WHERE pg_date >= NOW() - '8 hour'::INTERVAL
+    WHERE pg_date >= NOW() - '10 hours + 5 minutes'::INTERVAL
     ORDER BY case_serial;
 """
 
@@ -37,11 +37,11 @@ DAILY_MODIFIED_AOS = """
     ORDER BY ao_year, ao_serial;
 """
 
-# for send_alert_daily_modified_legal_case(): during 6am-7pm(EST) (13 hours)
+# for send_alert_daily_modified_legal_case():  during 19:55pm-19:55pm(EST) (24 hours)
 DAILY_MODIFIED_CASES_SEND_ALERT = """
     SELECT case_no, case_type, pg_date, published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
-    WHERE pg_date >= NOW() - '13 hour'::INTERVAL
+    WHERE pg_date >= NOW() - '24 hour'::INTERVAL
     ORDER BY case_serial;
 """
 
