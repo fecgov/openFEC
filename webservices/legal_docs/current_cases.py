@@ -177,7 +177,7 @@ MUR_COMMISSION_VOTES = """
     ORDER BY vote_date desc;
 """
 ADR_COMMISSION_VOTES = """
-    SELECT c.vote_date , c."action", e.name as commissioner_name,  v.vote_type  
+    SELECT DISTINCT c."action", c.vote_date , e.name as commissioner_name,  v.vote_type  
     FROM fecmur.COMMISSION c, fecmur.votes v, fecmur.entity e
     WHERE c.CASE_ID = %s
     AND c.commission_id = v.commission_id
@@ -216,7 +216,7 @@ ADR_NON_MONETARY_TERMS_RESPONDENTS = """
 """
 
 ADR_CITATIONS = """
-    SELECT distinct VIOLATIONS.statutory_citation, VIOLATIONS.regulatory_citation, entity.name, entity.entity_id
+    SELECT DISTINCT VIOLATIONS.statutory_citation, VIOLATIONS.regulatory_citation, entity.name, entity.entity_id
     FROM  fecmur.VIOLATIONS, fecmur.ENTITY
     WHERE VIOLATIONS.case_id = %s
     AND VIOLATIONS.ENTITY_ID = ENTITY.ENTITY_ID
