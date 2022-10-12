@@ -419,6 +419,7 @@ reports = {
         IStr(validate=validate.OneOf(['', 'N', 'A', 'T', 'C', 'M', 'S'])),
         description=docs.AMENDMENT_INDICATOR),
     'q_filer': fields.List(Keyword, description=docs.FILER_NAME_TEXT),
+    'q_spender': fields.List(Keyword, description=docs.SPENDER_NAME_TEXT),
 }
 
 committee_reports = {

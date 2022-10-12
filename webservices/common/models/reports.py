@@ -468,6 +468,7 @@ class CommitteeReportsIEOnly(PdfMixin, BaseModel):
 
     beginning_image_number = db.Column(db.BigInteger)
     committee_id = db.Column(db.String)
+    committee_name = db.Column(db.String)
     cycle = db.Column(db.Integer)
     coverage_start_date = db.Column(db.DateTime(), index=True)
     coverage_end_date = db.Column(db.DateTime(), index=True)
@@ -483,6 +484,7 @@ class CommitteeReportsIEOnly(PdfMixin, BaseModel):
     receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
     means_filed = db.Column(db.String, doc=docs.MEANS_FILED)
     fec_url = db.Column(db.String)
+    spender_name_text = db.Column(TSVECTOR, doc=docs.SPENDER_NAME_TEXT)
 
 
 class BaseFilingSummary(db.Model):

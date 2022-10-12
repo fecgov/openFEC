@@ -126,10 +126,10 @@ def get_match_filters():
 
 # Use for endpoint '/reports/<string:entity_type>/' under tag:'financial'
 # Sample urls:
-# http://127.0.0.1:5000/v1/reports/presidential/?filer_name_text=bid
-# http://127.0.0.1:5000/v1/reports/house-senate/?filer_name_text=bid
-# http://127.0.0.1:5000/v1/reports/pac-party/filer_name_text=bid
-# TODO http://127.0.0.1:5000/v1/reports/ie-only/filer_name_text=bid
+# http://127.0.0.1:5000/v1/reports/presidential/?q_filer=bid
+# http://127.0.0.1:5000/v1/reports/house-senate/?q_filer=bid
+# http://127.0.0.1:5000/v1/reports/pac-party/q_filer=bid
+# http://127.0.0.1:5000/v1/reports/ie-only/q_spender=bid
 @doc(
     tags=['financial'],
     description=docs.REPORTS,
@@ -172,7 +172,10 @@ class ReportsView(views.ApiResource):
             ('beginning_image_number', reports_class.beginning_image_number),
         ]
 
-        filter_fulltext_fields = [("q_filer", reports_class.filer_name_text), ]
+        if entity_type == 'ie-only':
+            filter_fulltext_fields = [("q_spender", reports_class.spender_name_text), ]
+        else:
+            filter_fulltext_fields = [("q_filer", reports_class.filer_name_text), ]
 
         if hasattr(reports_class, 'committee'):
             query = reports_class.query.outerjoin(reports_class.committee).options(
