@@ -1498,7 +1498,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             party="DEM",
         )
         factories.CandidateTotalFactory(
-            candidate_id="S11",
+            candidate_id="S119",
             is_election=False,  # data for two-year period (not candidate election year)
             cycle=2014,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
             receipts=400,
@@ -1516,7 +1516,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             party="DEM",
         )
         factories.CandidateTotalFactory(
-            candidate_id="S11",
+            candidate_id="S119",
             is_election=False,  # data for two-year period (not candidate election year)
             cycle=2016,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
             receipts=600,
@@ -1585,6 +1585,22 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             state="CA",
             district="00",
             party="REP",
+        )
+
+        factories.ElectionsListFactory(
+            office='H', state='CA', district='01', incumbent_id='H11', cycle=2016
+        )
+
+        factories.ElectionsListFactory(
+            office='H', state='CA', district='02', incumbent_id='H22', cycle=2016
+        )
+
+        factories.ElectionsListFactory(
+            office='H', state='VA', district='01', incumbent_id='H33', cycle=2016
+        )
+
+        factories.ElectionsListFactory(
+            office='S', state='CA', district='00', incumbent_id='S11', cycle=2016
         )
 
     def test_base(self):

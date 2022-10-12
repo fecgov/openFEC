@@ -14,6 +14,7 @@ from webservices.common.models import (
     CandidateCommitteeLink,
     ScheduleABySize,
     ScheduleAByState,
+    ElectionsList,
     db,
 )
 
@@ -506,6 +507,12 @@ class CandidateTotalAggregateView(ApiResource):
 
             # remove district=null
             query = query.filter(~total.district.is_(None))
+            query = query.filter(
+                models.ElectionsList.cycle == total.election_year,
+                models.ElectionsList.state == total.state,
+                models.ElectionsList.office == total.office,
+                models.ElectionsList.district == total.district, 
+            )
             query = query.group_by(
                 total.election_year, total.office, total.state, total.district,
             )
