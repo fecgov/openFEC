@@ -93,9 +93,7 @@ class TestLoadCurrentCases(BaseTestCase):
     @patch('webservices.legal_docs.current_cases.get_bucket')
     def test_simple_adr(self, get_bucket):
         adr_subject = 'Personal use'
-        # expected_term_types = [
-        #     "Attend FEC seminar"
-        # ]
+
         expected_adr = {
             "type": "adrs",
             'no': '1',
@@ -106,7 +104,6 @@ class TestLoadCurrentCases(BaseTestCase):
             'participants': [],
             'non_monetary_terms': [],
             'non_monetary_terms_respondents': ['Commander Data'],
-            # 'non_monetary_terms': expected_term_types,
             'subjects': [adr_subject],
             'respondents': [],
             'documents': [],
@@ -116,6 +113,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'open_date': None,
             'url': '/legal/alternative-dispute-resolution/1/',
             'complainant': [],
+            'case_status': [],
             'citations': [],
             'sort1': -1,
             'sort2': None,
@@ -175,14 +173,9 @@ class TestLoadCurrentCases(BaseTestCase):
             pg_date,
         )
 
-        # self.create_non_monetary_term(
-        #         1, "Attend FEC seminar", pg_date
-        #     )
-
         actual_adr = next(get_cases('ADR'))
 
         assert actual_adr == expected_adr
-        # assert actual_adr["non_monetary_terms"] == expected_term_types
 
     @patch('webservices.legal_docs.current_cases.get_bucket')
     def test_admin_fine(self, get_bucket):

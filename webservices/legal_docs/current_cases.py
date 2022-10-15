@@ -19,7 +19,7 @@ import json
 logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line
-logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.DEBUG)
 
 ALL_CASES = """
     SELECT
@@ -235,6 +235,14 @@ AF_COMMISSION_VOTES = """
     ORDER BY action_date desc;
 """
 
+""" For ADR's populate case_status based on event_name""" 
+adr_case_status_map = {
+    'Dismissed': 'Case Dismissed',
+    'Settlement Agreement - Complaint Unsubstantiated': 'Negotiated Settlement Approved',
+    'Dismissed - Agreement Rejected': 'Negotiated Settlement Rejected by Commission',
+    'Dismissed - Failed to Approve': 'Case Dismissed'
+}
+
 STATUTE_REGEX = re.compile(r"(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)")
 REGULATION_REGEX = re.compile(r"(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?")
 CASE_NO_REGEX = re.compile(r"(?P<serial>\d+)")
@@ -368,6 +376,7 @@ def get_single_case(case_type, case_no, bucket):
                 case["non_monetary_terms_respondents"] = get_adr_non_monetary_terms_respondents(case_id)
                 case["citations"] = get_adr_citations(case_id)
                 case["adr_dispositions"] = get_adr_dispositions(case_id)
+                case["case_status"] = get_adr_case_status(case_id)
             else: 
                 case["commission_votes"] = get_commission_votes(case_type, case_id)       
             case["documents"] = get_documents(case_id, bucket)
@@ -448,17 +457,22 @@ def get_adr_dispositions(case_id):
         rs = conn.execute(DISPOSITION_DATA.format(case_id))
         adr_dispositions = []
         for row in rs:
-            disposition_status = row["event_name"]
-            result = [val for key, val in adr_disposition_status.items() if disposition_status in key]
-            if result:
-                case_status = adr_disposition_status.get(disposition_status)
-            else:
-                case_status = "No status found"
-            adr_dispositions.append({"disposition": row["event_name"], "case_status": case_status, "penalty": row["final_amount"],
+            adr_dispositions.append({"disposition": row["event_name"], "penalty": row["final_amount"],
                 "respondent": row["name"]})
 
         return adr_dispositions
 
+def get_adr_case_status(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(DISPOSITION_DATA.format(case_id))
+        case_status = []
+        for row in rs:
+            disposition_description = row["event_name"]
+            if adr_case_status_map.get(disposition_description) is not None:
+                case_status = adr_case_status_map.get(disposition_description)
+            else:
+                case_status = "No status found"
+        return case_status
 
 def get_af_dispositions(case_id):
     with db.engine.connect() as conn:
@@ -469,6 +483,7 @@ def get_af_dispositions(case_id):
                 "disposition_date": row["dates"], "amount": row["amount"]})
 
         return disposition_data
+
 
 
 def get_commission_votes(case_type, case_id):
@@ -690,10 +705,4 @@ def get_sort_fields(case_no):
     match = CASE_NO_REGEX.match(case_no)
     return -int(match.group("serial")), None
 
-#  Disposition mappings to show the final status of ADR case. This status will be shown in a new column, called case_status
-adr_disposition_status = {
-    'Dismissed': 'Case Dismissed',
-    'Settlement Agreement - Complaint Unsubstantiated': 'Negotiated Settlement Approved',
-    'Dismissed - Agreement Rejected': 'Negotiated Settlement Rejected by Commission',
-    'Dismissed - Failed to Approve': 'Case Dismissed'
-}
+

@@ -269,10 +269,10 @@ ADR_MAPPINGS = {
         }
     },
     "respondents": {"type": "text"},
+    "case_status": {"type": "text"},
     "adr_dispositions": {
         "type": "nested",
         "properties": {
-            "case_status": {"type": "text"},
             "disposition": {"type": "text"},
             "penalty": {"type": "double"},
             "respondent": {"type": "text"},
