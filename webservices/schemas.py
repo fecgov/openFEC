@@ -482,7 +482,7 @@ make_reports_schema = functools.partial(
         'end_image_number': ma.fields.Str(),
         'fec_file_id': ma.fields.Str(),
     },
-    options={'exclude': ('idx', 'committee', 'filer_name_text')},
+    options={'exclude': ('idx', 'committee', 'filer_name_text', 'spender_name_text')},
 )
 
 augment_models(

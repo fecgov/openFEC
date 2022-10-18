@@ -61,7 +61,7 @@ class TestReports(ApiBaseTest):
             ('house-senate', factories.ReportsHouseSenateFactory),
             ('presidential', factories.ReportsPresidentialFactory),
             ('pac-party', factories.ReportsPacPartyFactory),
-            # TODO after finish CommitteeReportsIEOnly, add baack('ie-only', factories.ReportsIEOnlyFactory),
+            ('ie-only', factories.ReportsIEOnlyFactory),
         ]
 
         for category, factory in params:
@@ -110,26 +110,25 @@ class TestReports(ApiBaseTest):
             [presidential_report_2012, house_report_2016],
         )
 
-    # TODO: After finish add filer_name_text filter in to CommitteeReportsIEOnly
-    # def test_ie_only(self):
-    #     number = 12345678902
-    #     report = factories.ReportsIEOnlyFactory(
-    #         beginning_image_number=number,
-    #         independent_contributions_period=200,
-    #         independent_expenditures_period=100,
-    #     )
-    #     results = self._results(
-    #         api.url_for(
-    #             ReportsView, entity_type='ie-only', beginning_image_number=number,
-    #         )
-    #     )
-    #     result = results[0]
-    #     for key in [
-    #         'report_form',
-    #         'independent_contributions_period',
-    #         'independent_expenditures_period',
-    #     ]:
-    #         self.assertEqual(result[key], getattr(report, key))
+    def test_ie_only(self):
+        number = 12345678902
+        report = factories.ReportsIEOnlyFactory(
+            beginning_image_number=number,
+            independent_contributions_period=200,
+            independent_expenditures_period=100,
+        )
+        results = self._results(
+            api.url_for(
+                ReportsView, entity_type='ie-only', beginning_image_number=number,
+            )
+        )
+        result = results[0]
+        for key in [
+            'report_form',
+            'independent_contributions_period',
+            'independent_expenditures_period',
+        ]:
+            self.assertEqual(result[key], getattr(report, key))
 
 
 # Test endpoint:
