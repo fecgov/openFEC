@@ -1,7 +1,6 @@
 import logging
 import re
 from collections import defaultdict
-
 from webservices.rest import db
 from webservices.utils import (
     extend,
@@ -172,10 +171,62 @@ DISPOSITION_DATA = """
     ORDER BY fecmur.event.event_name ASC, fecmur.settlement.final_amount DESC NULLS LAST, event_date DESC;
 """
 
-MUR_ADR_COMMISSION_VOTES = """
+MUR_COMMISSION_VOTES = """
     SELECT vote_date, action from fecmur.commission
     WHERE case_id = %s
     ORDER BY vote_date desc;
+"""
+ADR_COMMISSION_VOTES = """
+    SELECT DISTINCT c."action", c.vote_date , e.name as commissioner_name,  v.vote_type  
+    FROM fecmur.COMMISSION c, fecmur.votes v, fecmur.entity e
+    WHERE c.CASE_ID = %s
+    AND c.commission_id = v.commission_id
+    AND e.entity_id =  v.entity_id
+    ORDER BY c.vote_date desc;
+"""
+ADR_COMPLAINANT = """
+   SELECT name as complainant_name
+   FROM fecmur.players 
+   JOIN fecmur.role USING (role_id)
+   JOIN fecmur.entity USING (entity_id)
+   WHERE  players.case_id = %s
+   AND players.role_id IN (100095)
+"""
+
+ADR_NON_MONETARY_TERMS = """
+    SELECT DISTINCT nt.term_description, nt.term_id
+    FROM fecmur.case c, fecmur.SETTLEMENT s, fecmur.RELATEDOBJECTS r, fecmur.NON_MONETARY_TERM NT
+    WHERE c.case_id  = %s
+    AND c.case_id = s.case_id
+    AND UPPER (SETTLEMENT_TYPE) LIKE 'PENALTY'
+    AND r.RELATION_ID = 8
+    AND r.MASTER_KEY = s.settlement_id
+    AND R.DETAIL_KEY = NT.TERM_ID
+"""
+
+ADR_NON_MONETARY_TERMS_RESPONDENTS = """
+    SELECT detail_key AS entity_id, master_key AS settlement_id, fecmur.entity.name
+    FROM fecmur.relatedobjects
+    INNER JOIN fecmur.entity 
+        ON fecmur.entity.entity_id  = fecmur.relatedobjects.detail_key    
+    INNER JOIN fecmur.settlement
+        ON fecmur.relatedobjects.master_key = fecmur.settlement.settlement_id
+    WHERE relation_id = 1
+    AND fecmur.settlement.case_id = %s
+"""
+
+ADR_CITATIONS = """
+    SELECT DISTINCT VIOLATIONS.statutory_citation, VIOLATIONS.regulatory_citation, entity.name, entity.entity_id
+    FROM  fecmur.VIOLATIONS, fecmur.ENTITY
+    WHERE VIOLATIONS.case_id = %s
+    AND VIOLATIONS.ENTITY_ID = ENTITY.ENTITY_ID
+    AND (case when trim(VIOLATIONS.STAGE) = '' or VIOLATIONS.STAGE is null then 'None'
+		     else upper(VIOLATIONS.STAGE)
+	end ) in (select case when trim(STAGE_ORDER.STAGE) = '' or STAGE_ORDER.STAGE is null then 'None'
+		                  else upper(STAGE_ORDER.STAGE)
+			         end
+			  from fecmur.STAGE_ORDER)
+    ORDER BY entity.name
 """
 
 AF_COMMISSION_VOTES = """
@@ -183,6 +234,14 @@ AF_COMMISSION_VOTES = """
     WHERE case_id = %s
     ORDER BY action_date desc;
 """
+
+""" For ADR's populate case_status based on event_name""" 
+adr_case_status_map = {
+    'Dismissed': 'Case Dismissed',
+    'Settlement Agreement - Complaint Unsubstantiated': 'Negotiated Settlement Approved',
+    'Dismissed - Agreement Rejected': 'Negotiated Settlement Rejected by Commission',
+    'Dismissed - Failed to Approve': 'Case Dismissed'
+}
 
 STATUTE_REGEX = re.compile(r"(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)")
 REGULATION_REGEX = re.compile(r"(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?")
@@ -310,7 +369,16 @@ def get_single_case(case_type, case_no, bucket):
                 "sort1": sort1,
                 "sort2": sort2,
             }
-            case["commission_votes"] = get_commission_votes(case_type, case_id)
+            if case_type == "ADR":
+                case["commission_votes"] = get_adr_commission_votes(case_id)
+                case["complainant"] = get_adr_complainant(case_id)
+                case["non_monetary_terms"] = get_adr_non_monetary_terms(case_id)
+                case["non_monetary_terms_respondents"] = get_adr_non_monetary_terms_respondents(case_id)
+                case["citations"] = get_adr_citations(case_id)
+                case["adr_dispositions"] = get_adr_dispositions(case_id)
+                case["case_status"] = get_adr_case_status(case_id)
+            else: 
+                case["commission_votes"] = get_commission_votes(case_type, case_id)       
             case["documents"] = get_documents(case_id, bucket)
             case["url"] = "/legal/{0}/{1}/".format(get_full_name(case_type), row["case_no"])
             if case_type == "AF":
@@ -318,14 +386,12 @@ def get_single_case(case_type, case_no, bucket):
                 return case
             if case_type == "MUR":
                 case["mur_type"] = "current"
+                case["dispositions"] = get_dispositions(case_id)
             case["subjects"] = get_subjects(case_id)
             case["election_cycles"] = get_election_cycles(case_id)
             participants = get_participants(case_id)
             case["participants"] = list(participants.values())
             case["respondents"] = get_sorted_respondents(case["participants"])
-
-            case["dispositions"] = get_dispositions(case_id)
-
             case["open_date"], case["close_date"] = get_open_and_close_dates(case_id)
             return case
         else:
@@ -374,7 +440,6 @@ def get_open_and_close_dates(case_id):
         open_date, close_date = rs.fetchone()
     return open_date, close_date
 
-
 def get_dispositions(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(DISPOSITION_DATA.format(case_id))
@@ -387,6 +452,27 @@ def get_dispositions(case_id):
 
         return disposition_data
 
+def get_adr_dispositions(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(DISPOSITION_DATA.format(case_id))
+        adr_dispositions = []
+        for row in rs:
+            adr_dispositions.append({"disposition": row["event_name"], "penalty": row["final_amount"],
+                "respondent": row["name"]})
+
+        return adr_dispositions
+
+def get_adr_case_status(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(DISPOSITION_DATA.format(case_id))
+        case_status = []
+        for row in rs:
+            disposition_description = row["event_name"]
+            if adr_case_status_map.get(disposition_description) is not None:
+                case_status = adr_case_status_map.get(disposition_description)
+            else:
+                case_status = "No status found"
+        return case_status
 
 def get_af_dispositions(case_id):
     with db.engine.connect() as conn:
@@ -399,17 +485,58 @@ def get_af_dispositions(case_id):
         return disposition_data
 
 
+
 def get_commission_votes(case_type, case_id):
     with db.engine.connect() as conn:
         if case_type == "AF":
             rs = conn.execute(AF_COMMISSION_VOTES, case_id)
-        else:
-            rs = conn.execute(MUR_ADR_COMMISSION_VOTES, case_id)
+        elif case_type == "MUR":
+            rs = conn.execute(MUR_COMMISSION_VOTES, case_id)
         commission_votes = []
         for row in rs:
             commission_votes.append({"vote_date": row["vote_date"], "action": row["action"]})
         return commission_votes
 
+def get_adr_commission_votes(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(ADR_COMMISSION_VOTES, case_id)
+        commission_votes = []
+        for row in rs:
+            commission_votes.append({"vote_date": row["vote_date"], "action": row["action"], "commissioner_name": row["commissioner_name"], "vote_type": row["vote_type"]})
+        return commission_votes
+
+def get_adr_non_monetary_terms(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(ADR_NON_MONETARY_TERMS, case_id)
+        non_monetary_terms = []
+        for row in rs:
+            non_monetary_terms.append(row["term_description"])
+        return non_monetary_terms
+
+def get_adr_non_monetary_terms_respondents(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(ADR_NON_MONETARY_TERMS_RESPONDENTS, case_id)
+        non_monetary_terms_repondents = []
+        for row in rs:
+            non_monetary_terms_repondents.append(row["name"])
+        return non_monetary_terms_repondents
+
+def get_adr_citations(case_id):
+    citations = []
+    with db.engine.connect() as conn:
+        rs = conn.execute(ADR_CITATIONS, case_id)
+        for row in rs:
+            citations = parse_statutory_citations(row["statutory_citation"], case_id, row["name"])
+            citations.extend(parse_regulatory_citations(row["regulatory_citation"], case_id, row["name"]))
+        return citations
+
+def get_adr_complainant(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(ADR_COMPLAINANT, case_id)
+        complainant = []
+        for row in rs:
+            complainant.append(row["complainant_name"])
+        return complainant
 
 def get_participants(case_id):
     participants = {}
@@ -418,8 +545,7 @@ def get_participants(case_id):
         for row in rs:
             participants[row["entity_id"]] = {
                 "name": row["name"],
-                "role": row["role"],
-                "citations": defaultdict(list)
+                "role": row["role"]
             }
     return participants
 
@@ -578,3 +704,5 @@ def remove_reclassification_notes(statutory_citation):
 def get_sort_fields(case_no):
     match = CASE_NO_REGEX.match(case_no)
     return -int(match.group("serial")), None
+
+
