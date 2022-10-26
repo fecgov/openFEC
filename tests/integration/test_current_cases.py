@@ -93,6 +93,7 @@ class TestLoadCurrentCases(BaseTestCase):
     @patch('webservices.legal_docs.current_cases.get_bucket')
     def test_simple_adr(self, get_bucket):
         adr_subject = 'Personal use'
+
         expected_adr = {
             "type": "adrs",
             'no': '1',
@@ -101,14 +102,19 @@ class TestLoadCurrentCases(BaseTestCase):
             'doc_id': 'adr_1',
             'published_flg': True,
             'participants': [],
+            'non_monetary_terms': [],
+            'non_monetary_terms_respondents': ['Commander Data'],
             'subjects': [adr_subject],
             'respondents': [],
             'documents': [],
             'commission_votes': [],
-            'dispositions': [],
+            'adr_dispositions': [],
             'close_date': None,
             'open_date': None,
             'url': '/legal/alternative-dispute-resolution/1/',
+            'complainant': [],
+            'case_status': [],
+            'citations': [],
             'sort1': -1,
             'sort2': None,
         }
@@ -120,6 +126,53 @@ class TestLoadCurrentCases(BaseTestCase):
             expected_adr['published_flg'],
             'ADR',
         )
+
+        # create entity
+        entity_id = 1
+        first_name = "Commander"
+        last_name = "Data"
+        middle_name, prefix, suffix, type = ('', '', '', '')
+        name = "Commander Data"
+        pg_date = '2022-07-27'
+        self.create_entity(
+            entity_id,
+            first_name,
+            last_name,
+            middle_name,
+            prefix,
+            suffix,
+            type,
+            name,
+            pg_date,
+        )
+
+        # create complainant
+        player_id = 1
+        role_id = 1
+        case_id = 1
+        self.create_complainant(
+            player_id,
+            entity_id,
+            case_id,
+            role_id,
+            pg_date,
+        )
+
+        # create settlement
+        settlement_id = 1
+        initial_amount = 0
+        final_amount = 50000
+        amount_received, settlement_type = (0, '')
+        self.create_settlement(
+            settlement_id,
+            case_id,
+            initial_amount,
+            final_amount,
+            amount_received,
+            settlement_type,
+            pg_date,
+        )
+
         actual_adr = next(get_cases('ADR'))
 
         assert actual_adr == expected_adr
@@ -745,6 +798,19 @@ class TestLoadCurrentCases(BaseTestCase):
             pg_date,
         )
 
+    def create_complainant(
+        self, player_id, entity_id, case_id, role_id, pg_date
+    ):
+        self.connection.execute(
+            "INSERT INTO fecmur.players (player_id, entity_id, case_id, role_id, pg_date) "
+            "VALUES (%s, %s, %s, %s, %s)",
+            player_id,
+            entity_id,
+            case_id,
+            role_id,
+            pg_date,
+        )
+
     def create_af_case_disposition(
         self, case_id, amount, description, dates
     ):
@@ -755,6 +821,17 @@ class TestLoadCurrentCases(BaseTestCase):
             amount,
             description,
             dates,
+        )
+
+    def create_non_monetary_term(
+        self, term_id, term_description, pg_date
+    ):
+        self.connection.execute(
+            "INSERT INTO fecmur.non_monetary_term (term_id, term_description, pg_date) "
+            "VALUES (%s, %s, %s)",
+            term_id,
+            term_description,
+            pg_date,
         )
 
     def clear_test_data(self):
@@ -774,6 +851,7 @@ class TestLoadCurrentCases(BaseTestCase):
             "role",
             "af_case",
             "af_case_disposition",
+            "non_monetary_term",
         ]
         for table in tables:
             self.connection.execute("DELETE FROM fecmur.{}".format(table))
