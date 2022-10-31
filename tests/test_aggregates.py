@@ -1373,8 +1373,30 @@ class TestCandidateTotalsByOfficeByParty(ApiBaseTest):
 class TestCandidatesTotalsAggregates(ApiBaseTest):
     def setUp(self):
         super().setUp()
+        factories.ElectionsListFactory(
+            cycle=2016, state='CA', office='H', district='01'
+        )
+        factories.ElectionsListFactory(
+            cycle=2016, state='CA', office='H', district='02'
+        )
+        factories.ElectionsListFactory(
+            cycle=2016, state='NY', office='H', district='01'
+        )
+        factories.ElectionsListFactory(
+            cycle=2016, state='CA', office='S', district='00'
+        )
+        factories.ElectionsListFactory(
+            cycle=2022, state='CA', office='S', district='00'
+        )
+        factories.ElectionsListFactory(
+            cycle=2010, state='NY', office='S', district='00'
+        )
+        factories.ElectionsListFactory(
+            cycle=2016, state='NY', office='S', district='00'
+        )
+
         factories.CandidateTotalFactory(
-            candidate_id="H11",
+            candidate_id="HCA01",
             is_election=True,
             receipts=1000,
             disbursements=1000,
@@ -1392,7 +1414,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             party="DEM",
         )
         factories.CandidateTotalFactory(
-            candidate_id="H11",
+            candidate_id="HCA01",
             is_election=False,
             receipts=1000,
             disbursements=1000,
@@ -1410,7 +1432,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             party="DEM",
         )
         factories.CandidateTotalFactory(
-            candidate_id="H22",
+            candidate_id="HCA02",
             is_election=True,
             receipts=2000,
             disbursements=2000,
@@ -1428,7 +1450,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             party="DEM",
         )
         factories.CandidateTotalFactory(
-            candidate_id="H33",
+            candidate_id="HNY01",
             is_election=True,
             receipts=3300,
             disbursements=3300,
@@ -1440,16 +1462,16 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             other_political_committee_contributions=3300,
             cash_on_hand_end_period=3300,
             debts_owed_by_committee=3300,
-            state="VA",
+            state="NY",
             district="01",
             party="REP",
         )
         factories.CandidateTotalFactory(
-            candidate_id="H44",
+            candidate_id="HNY13",
             is_election=True,
             receipts=4000,
             disbursements=4000,
-            election_year=2018,
+            election_year=2016,
             office="H",
             candidate_inactive=False,  # is_active_candidate=True
             individual_itemized_contributions=4000,
@@ -1457,13 +1479,13 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             other_political_committee_contributions=4000,
             cash_on_hand_end_period=4000,
             debts_owed_by_committee=4000,
-            state="VA",
-            district="01",
+            state="NY",
+            district="13",
             party="REP",
         )
 
         factories.CandidateTotalFactory(
-            candidate_id="S11",
+            candidate_id="SCA01",
             is_election=True,  # candidate election year
             receipts=100,
             disbursements=100,
@@ -1480,7 +1502,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             party="DEM",
         )
         factories.CandidateTotalFactory(
-            candidate_id="S11",
+            candidate_id="SCA01",
             is_election=False,  # data for two-year period (not candidate election year)
             cycle=2012,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
             receipts=200,
@@ -1498,7 +1520,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             party="DEM",
         )
         factories.CandidateTotalFactory(
-            candidate_id="S119",
+            candidate_id="SNY01",
             is_election=False,  # data for two-year period (not candidate election year)
             cycle=2014,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
             receipts=400,
@@ -1511,12 +1533,12 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             other_political_committee_contributions=400,
             cash_on_hand_end_period=400,
             debts_owed_by_committee=400,
-            state="VA",
+            state="NY",
             district="00",
             party="DEM",
         )
         factories.CandidateTotalFactory(
-            candidate_id="S119",
+            candidate_id="SNY01",
             is_election=False,  # data for two-year period (not candidate election year)
             cycle=2016,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
             receipts=600,
@@ -1529,13 +1551,32 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             other_political_committee_contributions=600,
             cash_on_hand_end_period=600,
             debts_owed_by_committee=600,
-            state="VA",
+            state="NY",
             district="00",
             party="DEM",
         )
         factories.CandidateTotalFactory(
-            candidate_id="S22",
+            candidate_id="SNY01",
+            is_election=True,  # data for two-year period (not candidate election year)
+            cycle=2016,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
+            receipts=1000,
+            disbursements=1000,
+            election_year=2016,
+            office="S",
+            candidate_inactive=False,  # is_active_candidate=True
+            individual_itemized_contributions=1000,
+            transfers_from_other_authorized_committee=1000,
+            other_political_committee_contributions=1000,
+            cash_on_hand_end_period=1000,
+            debts_owed_by_committee=1000,
+            state="NY",
+            district="00",
+            party="DEM",
+        )
+        factories.CandidateTotalFactory(
+            candidate_id="SVA02",  # not exist in election list
             is_election=True,  # candidate election year
+            cycle=2010,
             receipts=700,
             disbursements=700,
             election_year=2010,
@@ -1552,11 +1593,12 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
         )
 
         factories.CandidateTotalFactory(
-            candidate_id="S33",
+            candidate_id="SCA03",
             is_election=True,  # candidate election year
+            cycle=2016,
             receipts=800,
             disbursements=800,
-            election_year=2016,
+            election_year=2018,
             office="S",
             candidate_inactive=False,  # is_active_candidate=True
             individual_itemized_contributions=800,
@@ -1570,8 +1612,9 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
         )
 
         factories.CandidateTotalFactory(
-            candidate_id="S44",
+            candidate_id="SCA04",
             is_election=True,  # candidate election year
+            cycle=2022,
             receipts=90,
             disbursements=90,
             election_year=2022,
@@ -1587,104 +1630,74 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             party="REP",
         )
 
-        factories.ElectionsListFactory(
-            office='H', state='CA', district='01', incumbent_id='H11', cycle=2016
-        )
-
-        factories.ElectionsListFactory(
-            office='H', state='CA', district='02', incumbent_id='H22', cycle=2016
-        )
-
-        factories.ElectionsListFactory(
-            office='H', state='VA', district='01', incumbent_id='H33', cycle=2016
-        )
-
-        factories.ElectionsListFactory(
-            office='S', state='CA', district='00', incumbent_id='S11', cycle=2016
-        )
-
     def test_base(self):
         # without any paramenter, group by election_year only
-        # return four rows (election_year: 2010, 2016, 2018, 2022)
+        # return  rows (election_year:  2016, 2022)
         results = self._results(api.url_for(
-            CandidateTotalAggregateView,)
+            CandidateTotalAggregateView, sort='-election_year')
         )
-        assert len(results) == 4
+        assert len(results) == 2
+        self.assertEqual(results[0]['election_year'], 2022)
 
     def test_aggregate_by_office(self):
         # aggregate_by=office, election_full default=true
         # group by election_year, office.
-        # return five rows (2022/S, 2018/S, 2016/H, 2016/S, 2010/S)
+        # return  rows (2016/H, 2022/S, 2016/S)
         results = self._results(api.url_for(
             CandidateTotalAggregateView,
             aggregate_by="office",)
         )
-        assert len(results) == 5
+        assert len(results) == 3
 
     def test_aggregate_by_office_state(self):
         # aggregate_by=office-state, is_active_candidate=True, election_year=2016, election_full default=true
         # group by election_year, office, state.
-        # return three rows (2016/H/CA, 2016/H/VA, 2016/S/CA)
+        # return  rows (2016/H/CA, 2016/H/NY, 2016/S/CA, 2016/S/NY)
         results = self._results(api.url_for(
             CandidateTotalAggregateView,
             aggregate_by="office-state",
             is_active_candidate=True,
             election_year=2016,)
         )
-        assert len(results) == 3
+        assert len(results) == 4
 
     def test_aggregate_by_office_state_district(self):
         # aggregate_by=office-state-district, is_active_candidate=True, election_year=2016, election_full default=true
         # group by election_year, office, state, district.
-        # return four rows (2016/H/CA/01, 2016/H/CA/02,2016/H/VA/01, 2016/S/CA/00)
+        # return  rows (2016/H/CA/01, 2016/H/CA/02, 2016/H/NY/01, 2016/S/CA/00, 2016/S/NY/00)
         results = self._results(api.url_for(
             CandidateTotalAggregateView,
             aggregate_by="office-state-district",
             is_active_candidate=True,
             election_year=2016,)
         )
-        assert len(results) == 4
+        assert len(results) == 5
 
     def test_aggregate_by_office_party(self):
         # aggregate_by=office-party, is_active_candidate=True, election_year=2016, election_full default=true
         # group by election_year, office, party.
-        # return four rows (2016/H/DEM, 2016/H/REP, 2016/S/DEM, 2016/S/REP)
+        # return  rows (2016/H/DEM, 2016/H/REP, 2016/S/DEM,)
         results = self._results(api.url_for(
             CandidateTotalAggregateView,
             aggregate_by="office-party",
             is_active_candidate=True,
             election_year=2016,)
         )
-        assert len(results) == 4
+        assert len(results) == 3
 
     def test_filter_by_office(self):
         # aggregate_by=office, office=H, is_active_candidate=True, election_full default=true
-        # return two rows: (2016/H, 2018/H)
-        # row 1: 2018/total=4000
-        # row 2: 2016/total=1000+2000+3300=6300
+        # return rows: (2016/H,)
+        # row: 2016/H/total=1000+2000+3300=6300.
         results = self._results(api.url_for(
             CandidateTotalAggregateView,
             aggregate_by="office",
             is_active_candidate=True,
             office="H",)
         )
-        assert len(results) == 2
+        assert len(results) == 1
         assert_dicts_subset(
             results[0],
-            {
-                "election_year": 2018,
-                "office": "H",
-                "total_receipts": 4000,
-                "total_disbursements": 4000,
-                "total_individual_itemized_contributions": 4000,
-                "total_transfers_from_other_authorized_committee": 4000,
-                "total_other_political_committee_contributions": 4000,
-                "total_cash_on_hand_end_period": 4000,
-                "total_debts_owed_by_committee": 4000,
-            },
-        )
-        assert_dicts_subset(
-            results[1],
             {
                 "election_year": 2016,
                 "office": "H",
@@ -1699,10 +1712,10 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
         )
 
         # aggregate_by="office-state", office=S, is_active_candidate=True, election_full default=true
-        # return three rows: (2022/S/VA, 2016/S/CA, 2010/S/VA)
+        # return rows: (2022/S/CA, 2016/S/CA, 2016/S/NY)
         # row 1: 2022/total=90
-        # row 2: 2016/total=100+800=900
-        # row 3: 2010/total=700
+        # row 2: 2016/total=100
+        # row 3: 2016/total=1000
         results = self._results(api.url_for(
             CandidateTotalAggregateView,
             aggregate_by="office-state",
@@ -1715,6 +1728,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             {
                 "election_year": 2022,
                 "office": "S",
+                "state": "CA",
                 "total_receipts": 90,
                 "total_disbursements": 90,
                 "total_individual_itemized_contributions": 90,
@@ -1729,27 +1743,29 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             {
                 "election_year": 2016,
                 "office": "S",
-                "total_receipts": 900,
-                "total_disbursements": 900,
-                "total_individual_itemized_contributions": 900,
-                "total_transfers_from_other_authorized_committee": 900,
-                "total_other_political_committee_contributions": 900,
-                "total_cash_on_hand_end_period": 900,
-                "total_debts_owed_by_committee": 900,
+                "state": "CA",
+                "total_receipts": 100,
+                "total_disbursements": 100,
+                "total_individual_itemized_contributions": 100,
+                "total_transfers_from_other_authorized_committee": 100,
+                "total_other_political_committee_contributions": 100,
+                "total_cash_on_hand_end_period": 100,
+                "total_debts_owed_by_committee": 100,
             },
         )
         assert_dicts_subset(
             results[2],
             {
-                "election_year": 2010,
+                "election_year": 2016,
                 "office": "S",
-                "total_receipts": 700,
-                "total_disbursements": 700,
-                "total_individual_itemized_contributions": 700,
-                "total_transfers_from_other_authorized_committee": 700,
-                "total_other_political_committee_contributions": 700,
-                "total_cash_on_hand_end_period": 700,
-                "total_debts_owed_by_committee": 700,
+                "state": "NY",
+                "total_receipts": 1000,
+                "total_disbursements": 1000,
+                "total_individual_itemized_contributions": 1000,
+                "total_transfers_from_other_authorized_committee": 1000,
+                "total_other_political_committee_contributions": 1000,
+                "total_cash_on_hand_end_period": 1000,
+                "total_debts_owed_by_committee": 1000,
             },
         )
 
@@ -1763,7 +1779,8 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             aggregate_by="office-party",
             office='H',
             is_active_candidate=True,
-            election_year=2016,)
+            election_year=2016,
+            sort='party')
         )
         assert len(results) == 2
         assert_dicts_subset(
@@ -1800,7 +1817,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
     def test_filter_by_election_year(self):
         # aggregate_by=office, office=S, election_full default=true, election_year=2016
         # return one rows:
-        # row 1: 2016/total=100+800=900
+        # row 1: 2016/CA+NY/total=100+1000=1100
         results = self._results(api.url_for(
             CandidateTotalAggregateView,
             aggregate_by="office",
@@ -1814,13 +1831,13 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             {
                 "election_year": 2016,
                 "office": "S",
-                "total_receipts": 900,
-                "total_disbursements": 900,
-                "total_individual_itemized_contributions": 900,
-                "total_transfers_from_other_authorized_committee": 900,
-                "total_other_political_committee_contributions": 900,
-                "total_cash_on_hand_end_period": 900,
-                "total_debts_owed_by_committee": 900,
+                "total_receipts": 1100,
+                "total_disbursements": 1100,
+                "total_individual_itemized_contributions": 1100,
+                "total_transfers_from_other_authorized_committee": 1100,
+                "total_other_political_committee_contributions": 1100,
+                "total_cash_on_hand_end_period": 1100,
+                "total_debts_owed_by_committee": 1100,
             },
         )
 
@@ -1862,9 +1879,8 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
 
     def test_sort_by_election_year(self):
         # aggregate_by=office, office=H, election_full=true, is_active_candidate=true
-        # return two rows:
-        # row 1: 2018/total=4000
-        # row 2: 2016/total=1000+2000+3300=6300
+        # return rows:
+        # row 1: 2016/total=6300
         results = self._results(api.url_for(
             CandidateTotalAggregateView,
             aggregate_by="office",
@@ -1872,22 +1888,9 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             election_full=True,  # =is_eleciton
             is_active_candidate=True,)
         )
-        assert len(results) == 2
+        assert len(results) == 1
         assert_dicts_subset(
             results[0],
-            {
-                "election_year": 2018,
-                "total_receipts": 4000,
-                "total_disbursements": 4000,
-                "total_individual_itemized_contributions": 4000,
-                "total_transfers_from_other_authorized_committee": 4000,
-                "total_other_political_committee_contributions": 4000,
-                "total_cash_on_hand_end_period": 4000,
-                "total_debts_owed_by_committee": 4000,
-            },
-        )
-        assert_dicts_subset(
-            results[1],
             {
                 "election_year": 2016,
                 "total_receipts": 6300,
@@ -1917,9 +1920,9 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
 
         # case2: aggregate_by=office, office=S, election_full default =true,
         # is_active_candidate=true,max_election_cycle=2016
-        # return two rows:
+        # return rows:
         # row 1: 2016
-        # row 2: 2010
+
         results = self._results(api.url_for(
             CandidateTotalAggregateView,
             aggregate_by="office",
@@ -1927,13 +1930,13 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             is_active_candidate=True,
             max_election_cycle=2016,)
         )
-        assert len(results) == 2
+        assert len(results) == 1
         # case3: aggregate_by=office ,office=S, election_full default=true,
-        # is_active_candidate=true,min_election_cycle=2016,max_election_cycle=2022
+        # is_active_candidate=true,min_election_cycle=2010,max_election_cycle=2022
         # return two rows:
         # row 1: 2022
         # row 2: 2016
-        # row 3: 2010
+
         results = self._results(api.url_for(
             CandidateTotalAggregateView,
             aggregate_by="office",
@@ -1942,7 +1945,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             min_election_cycle=2010,
             max_election_cycle=2022,)
         )
-        assert len(results) == 3
+        assert len(results) == 2
 
     def test_filter_by_state(self):
         # aggregate_by=office-state, office=H, state=CA
