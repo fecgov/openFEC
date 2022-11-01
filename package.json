@@ -16,7 +16,7 @@
   "dependencies": {
     "@braintree/sanitize-url": "^6.0.0",
     "immutable": "^3.8.2",
-    "minimist":"^1.2.6",
+    "minimist":"^1.2.7",
     "prop-types": "^15.6.2",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
