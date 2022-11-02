@@ -31,6 +31,9 @@ class CandidateNameSearch(utils.Resource):
         return {'results': query.all()}
 
 
+# search committee full text name
+# model class: CommitteeSearch
+# use for endpoint:'/names/committees/'
 @doc(
     tags=['search'],
     description=docs.NAME_SEARCH,

@@ -1,10 +1,13 @@
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
-
+from sqlalchemy.ext.declarative import declared_attr
 from webservices import docs
 
 from .base import db, BaseModel
 
 
+# search committee full text name
+# resource class: CommitteeNameSearch
+# use for endpoint:'/names/committees/'
 class CommitteeSearch(BaseModel):
     __tablename__ = 'ofec_committee_fulltext_mv'
 
@@ -51,6 +54,9 @@ class BaseConcreteCommittee(BaseCommittee):
     sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
 
 
+# return committee list
+# resource class: CommitteeList
+# use for endpoint:'/committees/'
 class Committee(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
     __tablename__ = 'ofec_committee_detail_mv'
@@ -64,6 +70,21 @@ class Committee(BaseConcreteCommittee):
     )
 
 
+# return committee history
+# no resource class
+# use for endpoints:
+# '/schedules/schedule_a/'
+# '/schedules/schedule_b/'
+# '/schedules/schedule_c/'
+# '/schedules/schedule_d/'
+# '/schedules/schedule_e/'
+# '/schedules/schedule_f/'
+# '/schedules/schedule_h4/'
+# '/reports/presidential/'
+# '/reports/house-senate/'
+# '/reports/pac-party/'
+# '/filings/'
+# '/totals/'
 class CommitteeHistory(BaseCommittee):
     __tablename__ = 'ofec_committee_history_mv'
 
@@ -87,16 +108,38 @@ class CommitteeHistory(BaseCommittee):
     sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
     committee_label = db.Column(db.Text, doc=docs.COMMITTEE_LABEL)
 
-    jfc_committee = db.relationship(
-        'JFCCommittee',
-        primaryjoin='''and_(
-                    CommitteeHistory.committee_id == foreign(JFCCommittee.committee_id), 
-                    JFCCommittee.most_recent_filing_flag == 'Y',
-                )''',
-        lazy='joined'
+
+
+# return committee history profile
+# resource class: CommitteeHistoryProfileView
+# use for endpoints:
+# '/committee/<string:committee_id>/history/'
+# '/committee/<string:committee_id>/history/<int:cycle>/'
+# '/candidate/<string:candidate_id>/committees/history/'
+# '/candidate/<string:candidate_id>/committees/history/<int:cycle>/'
+class CommitteeHistoryProfile(CommitteeHistory):
+    __tablename__ = 'ofec_committee_history_mv'
+    __table_args__ = {'extend_existing': True}
+
+    @declared_attr
+    def jfc_committee(self):
+        return db.relationship(
+            "JFCCommittee",
+            primaryjoin='''and_(
+                        CommitteeHistory.committee_id == foreign(JFCCommittee.committee_id),
+                        JFCCommittee.most_recent_filing_flag == 'Y',
+                        JFCCommittee.joint_committee_id != None,
+                    )''',
+            lazy="joined",
+            uselist=True,
     )
 
 
+# return one committee detail information
+# resource class:CommitteeView
+# use for endpoints:
+# '/committee/<string:committee_id>/'
+# '/candidate/<string:candidate_id>/committees/'
 class CommitteeDetail(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
     __tablename__ = 'ofec_committee_detail_mv'
@@ -141,6 +184,13 @@ class CommitteeDetail(BaseConcreteCommittee):
     custodian_zip = db.Column(db.String(9), doc=docs.CUSTODIAN_ZIP)
 
 
+# return JFC committee information
+# no resource class
+# use for endpoints:
+# '/committee/<string:committee_id>/history/'
+# '/committee/<string:committee_id>/history/<int:cycle>/'
+# '/candidate/<string:candidate_id>/committees/history/'
+# '/candidate/<string:candidate_id>/committees/history/<int:cycle>/'
 class JFCCommittee(BaseModel):
     __tablename__ = 'fec_form_1s_vw'
 
