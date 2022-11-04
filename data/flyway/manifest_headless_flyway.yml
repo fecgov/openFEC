@@ -7,7 +7,7 @@ applications:
   command: /home/vcap/app/flyway/bin/run.sh && echo SUCCESS && sleep infinity
   path: build/distributions/flyway.zip
   env:
-      CLASSPATH: app/gradle/lib/flyway-commandline-9.2.0.jar:app/gradle/lib/flyway-core-9.2.0.jar
+      CLASSPATH: app/gradle/lib/flyway-commandline-9.7.0.jar:app/gradle/lib/flyway-core-9.7.0.jar
       JAVA_HOME: /home/vcap/app/.java-buildpack/open_jdk_jre
   services:
       - fec-flyway-creds
