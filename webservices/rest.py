@@ -318,7 +318,7 @@ api.add_resource(
     '/candidate/<string:candidate_id>/committees/',
 )
 api.add_resource(
-    committees.CommitteeHistoryView,
+    committees.CommitteeHistoryProfileView,
     '/committee/<string:committee_id>/history/',
     '/committee/<string:committee_id>/history/<int:cycle>/',
     '/candidate/<string:candidate_id>/committees/history/',
@@ -466,7 +466,7 @@ apidoc.register(candidates.CandidateSearch, blueprint='v1')
 apidoc.register(candidates.CandidateHistoryView, blueprint='v1')
 apidoc.register(committees.CommitteeView, blueprint='v1')
 apidoc.register(committees.CommitteeList, blueprint='v1')
-apidoc.register(committees.CommitteeHistoryView, blueprint='v1')
+apidoc.register(committees.CommitteeHistoryProfileView, blueprint='v1')
 apidoc.register(reports.ReportsView, blueprint='v1')
 apidoc.register(reports.CommitteeReportsView, blueprint='v1')
 apidoc.register(reports.EFilingHouseSenateSummaryView, blueprint='v1')
