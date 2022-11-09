@@ -113,6 +113,13 @@ class CommitteeHistoryFactory(BaseCommitteeFactory):
     cycle = 2016
 
 
+class CommitteeHistoryProfileFactory(CommitteeHistoryFactory):
+    class Meta:
+        model = models.CommitteeHistoryProfile
+
+    cycle = 2016
+
+
 class CommitteeTotalsHouseSenateFactory(BaseCommitteeFactory):
     class Meta:
         model = models.CommitteeTotalsHouseSenate

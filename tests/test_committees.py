@@ -10,7 +10,7 @@ from webservices.rest import db
 from webservices.rest import api
 from webservices.resources.committees import CommitteeList
 from webservices.resources.committees import CommitteeView
-from webservices.resources.committees import CommitteeHistoryView
+from webservices.resources.committees import CommitteeHistoryProfileView
 from webservices.resources.candidates import CandidateView
 
 
@@ -456,32 +456,32 @@ class CommitteeFormatTest(ApiBaseTest):
 #  '/committee/<string:committee_id>/history/<int:cycle>/',
 #  '/candidate/<string:candidate_id>/committees/history/',
 #  '/candidate/<string:candidate_id>/committees/history/<int:cycle>/',
-class TestCommitteeHistory(ApiBaseTest):
+class TestCommitteeHistoryProfile(ApiBaseTest):
     def setUp(self):
         super().setUp()
         self.candidate = factories.CandidateDetailFactory()
         self.committees = [factories.CommitteeDetailFactory() for _ in range(8)]
         self.histories = [
-            factories.CommitteeHistoryFactory(
+            factories.CommitteeHistoryProfileFactory(
                 committee_id=self.committees[0].committee_id,
                 cycle=2010,
                 designation="P",
                 is_active=True,
             ),
-            factories.CommitteeHistoryFactory(
+            factories.CommitteeHistoryProfileFactory(
                 committee_id=self.committees[1].committee_id,
                 cycle=2012,
                 designation="P",
                 is_active=True,
             ),
-            factories.CommitteeHistoryFactory(
+            factories.CommitteeHistoryProfileFactory(
                 committee_id=self.committees[2].committee_id,
                 cycle=2014,
                 designation="P",
                 is_active=True,
             ),
             # Candidate PCC converted to PAC in 2016
-            factories.CommitteeHistoryFactory(
+            factories.CommitteeHistoryProfileFactory(
                 committee_id=self.committees[2].committee_id,
                 cycle=2016,
                 designation="P",
@@ -491,20 +491,20 @@ class TestCommitteeHistory(ApiBaseTest):
                 former_candidate_election_year=2016,
                 former_committee_name="Used to be PCC but I'm a PAC now committeee"
             ),
-            factories.CommitteeHistoryFactory(
+            factories.CommitteeHistoryProfileFactory(
                 committee_id=self.committees[3].committee_id,
                 cycle=2014,
                 designation="A",
                 is_active=False,
             ),
-            factories.CommitteeHistoryFactory(
+            factories.CommitteeHistoryProfileFactory(
                 committee_id=self.committees[4].committee_id,
                 cycle=2014,
                 designation="J",
                 is_active=False,
             ),
             # test leadership pac with same committees[5], different cycle.
-            factories.CommitteeHistoryFactory(
+            factories.CommitteeHistoryProfileFactory(
                 committee_id=self.committees[5].committee_id,
                 cycle=2006,
                 committee_type="P",
@@ -512,21 +512,21 @@ class TestCommitteeHistory(ApiBaseTest):
                 is_active=True,
             ),
             # test leadership pac with same committees[5], different cycle.
-            factories.CommitteeHistoryFactory(
+            factories.CommitteeHistoryProfileFactory(
                 committee_id=self.committees[5].committee_id,
                 cycle=2008,
                 committee_type="P",
                 designation="D",
                 is_active=True,
             ),
-            factories.CommitteeHistoryFactory(
+            factories.CommitteeHistoryProfileFactory(
                 committee_id=self.committees[6].committee_id,
                 cycle=2020,
                 designation="D",
                 is_active=True,
                 sponsor_candidate_ids=["H003", "H004"]
             ),
-            factories.CommitteeHistoryFactory(
+            factories.CommitteeHistoryProfileFactory(
                 committee_id=self.committees[7].committee_id,
                 cycle=2022,
                 designation="J",
@@ -608,7 +608,7 @@ class TestCommitteeHistory(ApiBaseTest):
     def test_is_active(self):
         results = self._results(
             api.url_for(
-                CommitteeHistoryView,
+                CommitteeHistoryProfileView,
                 committee_id=self.committees[4].committee_id,
                 cycle=2014,
                 election_full=False,
@@ -619,7 +619,7 @@ class TestCommitteeHistory(ApiBaseTest):
 
         results = self._results(
             api.url_for(
-                CommitteeHistoryView,
+                CommitteeHistoryProfileView,
                 committee_id=self.committees[2].committee_id,
                 cycle=2014,
                 election_full=False,
@@ -631,7 +631,7 @@ class TestCommitteeHistory(ApiBaseTest):
     def test_candidate_cycle(self):
         results = self._results(
             api.url_for(
-                CommitteeHistoryView,
+                CommitteeHistoryProfileView,
                 candidate_id=self.candidate.candidate_id,
                 cycle=2012,
                 election_full=False,
@@ -644,7 +644,7 @@ class TestCommitteeHistory(ApiBaseTest):
     def test_election_full(self):
         results = self._results(
             api.url_for(
-                CommitteeHistoryView,
+                CommitteeHistoryProfileView,
                 candidate_id=self.candidate.candidate_id,
                 cycle=2012,
                 election_full=True,
@@ -660,7 +660,7 @@ class TestCommitteeHistory(ApiBaseTest):
     def test_designation(self):
         results = self._results(
             api.url_for(
-                CommitteeHistoryView,
+                CommitteeHistoryProfileView,
                 candidate_id=self.candidate.candidate_id,
                 designation=["P", "A"],
             )
@@ -671,7 +671,7 @@ class TestCommitteeHistory(ApiBaseTest):
     def test_ledership_pac_committees(self):
         results = self._results(
             api.url_for(
-                CommitteeHistoryView,
+                CommitteeHistoryProfileView,
                 candidate_id=self.candidate.candidate_id,
                 cycle=2008,
                 election_full=True,
@@ -687,7 +687,7 @@ class TestCommitteeHistory(ApiBaseTest):
         """Where PCC converted to PAC in 2016, still show committee history."""
         results = self._results(
             api.url_for(
-                CommitteeHistoryView,
+                CommitteeHistoryProfileView,
                 candidate_id=self.candidate.candidate_id,
                 cycle=2016,
                 election_full=True
@@ -701,7 +701,7 @@ class TestCommitteeHistory(ApiBaseTest):
         lower_candidate = factories.CandidateDetailFactory(candidate_id="H01")
         lower_committee_1 = factories.CommitteeDetailFactory(committee_id="ID01")
         [
-            factories.CommitteeHistoryFactory(
+            factories.CommitteeHistoryProfileFactory(
                 committee_id=lower_committee_1.committee_id,
                 cycle=2014,
                 designation="J",
@@ -733,7 +733,7 @@ class TestCommitteeHistory(ApiBaseTest):
 
         results = self._results(
             api.url_for(
-                CommitteeHistoryView,
+                CommitteeHistoryProfileView,
                 committee_id="id01",
                 cycle=2014,
                 election_full=False,
@@ -744,7 +744,7 @@ class TestCommitteeHistory(ApiBaseTest):
 
         results = self._results(
             api.url_for(
-                CommitteeHistoryView,
+                CommitteeHistoryProfileView,
                 candidate_id="h01",
                 cycle=2014,
                 election_full=False,
@@ -756,7 +756,7 @@ class TestCommitteeHistory(ApiBaseTest):
     def test_sponsor_candidate_ids(self):
         result = self._results(
             api.url_for(
-                CommitteeHistoryView,
+                CommitteeHistoryProfileView,
                 committee_id=self.committees[6].committee_id,
             )
         )
@@ -768,19 +768,22 @@ class TestCommitteeHistory(ApiBaseTest):
             committee_id=self.committees[7].committee_id,
             joint_committee_name="JFC_001",
             most_recent_filing_flag='Y',
+            joint_committee_id="C009",
         )
         factories.JFCCommitteeFactory(
             committee_id=self.committees[7].committee_id,
             joint_committee_name="JFC_old",
             most_recent_filing_flag='N',
+            joint_committee_id="C009",
         )
         factories.JFCCommitteeFactory(
             committee_id=self.committees[7].committee_id,
             joint_committee_name="JFC_002",
             most_recent_filing_flag='Y',
+            joint_committee_id="C009",
         )
         results = self._results(
-            api.url_for(CommitteeHistoryView, committee_id=self.committees[7].committee_id)
+            api.url_for(CommitteeHistoryProfileView, committee_id=self.committees[7].committee_id)
         )
 
         self.assertEqual(len(results), 1)
