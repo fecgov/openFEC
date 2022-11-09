@@ -404,6 +404,7 @@ register_schema(CommitteePageSchema)
 # create JFC committee schema
 JFCCommitteeSchema = make_schema(
     models.JFCCommittee,
+    class_name='JFCCommitteeSchema',
     options={'exclude': ('idx', 'committee_id', 'most_recent_filing_flag', )},
 )
 # End create JFC committee schema
@@ -420,6 +421,7 @@ augment_models(
     make_committees_schema,
     models.CommitteeHistory,
     models.CommitteeDetail,
+    models.CommitteeHistoryProfile,
 )
 
 

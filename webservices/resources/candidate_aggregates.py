@@ -14,7 +14,6 @@ from webservices.common.models import (
     CandidateCommitteeLink,
     ScheduleABySize,
     ScheduleAByState,
-    ElectionsList,
     db,
 )
 
@@ -422,14 +421,19 @@ class CandidateTotalAggregateView(ApiResource):
         )
 
         # remove election_year=null
-        query = query.filter(~total.election_year.is_(None))
-
+        query = query.filter(total.election_year.isnot(None))
+        query = query.filter(
+            models.ElectionsList.cycle == total.election_year,
+            models.ElectionsList.office == total.office,
+            models.ElectionsList.state == total.state,
+            models.ElectionsList.district == total.district
+        )
+        
         if kwargs.get("election_year"):
             query = query.filter(
                 total.election_year.in_(kwargs["election_year"])
             )
-
-        # is_active_candidate=true  //only show active candidate totals
+        # # is_active_candidate=true  //only show active candidate totals
         # is_active_candidate=false //only show inactive candidate totals
         # is_active_candidate=not specified //show full totals of both active and inactive
         if kwargs.get("is_active_candidate"):
@@ -456,7 +460,7 @@ class CandidateTotalAggregateView(ApiResource):
 
         if kwargs.get("office"):
             query = query.filter(total.office == kwargs["office"])
-
+            
         if kwargs.get("state"):
             query = query.filter(total.state.in_(kwargs["state"]))
 
@@ -506,13 +510,7 @@ class CandidateTotalAggregateView(ApiResource):
             )
 
             # remove district=null
-            query = query.filter(~total.district.is_(None))
-            query = query.filter(
-                models.ElectionsList.cycle == total.election_year,
-                models.ElectionsList.state == total.state,
-                models.ElectionsList.office == total.office,
-                models.ElectionsList.district == total.district, 
-            )
+            query = query.filter(total.district.isnot(None))
             query = query.group_by(
                 total.election_year, total.office, total.state, total.district,
             )
