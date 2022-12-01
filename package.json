@@ -14,7 +14,7 @@
     "format:lint": "npm run format && npm run lint"
   },
   "dependencies": {
-    "@braintree/sanitize-url": "^6.0.0",
+    "@braintree/sanitize-url": "^6.0.2",
     "immutable": "^3.8.2",
     "minimist":"^1.2.6",
     "prop-types": "^15.6.2",
