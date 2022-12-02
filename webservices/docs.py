@@ -265,7 +265,7 @@ an odd year and is named for its ending, even year.
 
 COMMITTEE_CYCLES_HAS_FINANCIAL = '''
 A two year election cycle that the committee was active- (after original registration
-date but before expiration date in Form 1s), and the commitee files the financial reports
+date but before expiration date in Form 1s), and the committee files the financial reports
 ('F3', 'F3X', 'F3P', 'F3L', 'F4', 'F5', 'F7', 'F13') during this cycle.
 '''
 
