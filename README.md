@@ -575,7 +575,7 @@ The production and staging environments use relational database service (RDS) in
 Incrementally-updated aggregates and materialized views are updated nightly; see
 `webservices/tasks/refresh.py` for details. When the nightly update finishes, logs and error reports are slacked to the team.
 
-### Refreshing materialized views (excluding schedules)
+### Refreshing materialized views (excluding nightly mv refresh job)
 The materialized views are manually refreshed when something needs to be removed or updated on the website (data section) on-demand. 
 
 * Log in to CloudFoundry ([Resource](https://docs.cloudfoundry.org/devguide/using-tasks.html))
@@ -583,7 +583,7 @@ The materialized views are manually refreshed when something needs to be removed
 * Run this command:
     
     ```
-    cf run-task api 'python cli.py refresh_materialized' --name refresh
+    cf run-task api --command "python cli.py refresh_materialized" --name refresh_mv
     ```
 * Check status of task:
 
