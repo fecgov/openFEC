@@ -25,8 +25,9 @@ def filter_year(model, query, years):
     )  # noqa
 
 
-# use for this endpoint:(to get committee list)
-#  '/committees/'
+# return committee list
+# model class: Committee, CommitteeSearch
+# use for endpoint:'/committees/'
 @doc(
     tags=["committee"],
     description=docs.COMMITTEE_LIST,
@@ -106,9 +107,11 @@ class CommitteeList(ApiResource):
         return query
 
 
-# use for these endpoints:(return one committee detail information)
-#  '/committee/<string:committee_id>/',
-#  '/candidate/<string:candidate_id>/committees/',
+# return one committee detail information
+# model class:CommitteeDetail, CandidateCommitteeLink
+# use for endpoints:
+# '/committee/<string:committee_id>/'
+# '/candidate/<string:candidate_id>/committees/'
 @doc(
     tags=["committee"],
     description=docs.COMMITTEE_DETAIL,
@@ -162,11 +165,14 @@ class CommitteeView(ApiResource):
         return query
 
 
-# use for these endpoints:(return committee history)
-#  '/committee/<string:committee_id>/history/',
-#  '/committee/<string:committee_id>/history/<int:cycle>/',
-#  '/candidate/<string:candidate_id>/committees/history/',
-#  '/candidate/<string:candidate_id>/committees/history/<int:cycle>/',
+# return committee history profile
+# model classes: CommitteeHistoryProfile, JFCCommittee,
+# CandidateCommitteeLink, CandidateCommitteeAlternateLink
+# use for endpoints:
+# '/committee/<string:committee_id>/history/'
+# '/committee/<string:committee_id>/history/<int:cycle>/'
+# '/candidate/<string:candidate_id>/committees/history/'
+# '/candidate/<string:candidate_id>/committees/history/<int:cycle>/'
 @doc(
     tags=["committee"],
     description=docs.COMMITTEE_HISTORY,
@@ -176,14 +182,17 @@ class CommitteeView(ApiResource):
         "cycle": {"description": docs.COMMITTEE_CYCLE},
     },
 )
-class CommitteeHistoryView(ApiResource):
+class CommitteeHistoryProfileView(ApiResource):
 
-    model = models.CommitteeHistory
-    schema = schemas.CommitteeHistorySchema
-    page_schema = schemas.CommitteeHistoryPageSchema
+    model = models.CommitteeHistoryProfile
+    schema = schemas.CommitteeHistoryProfileSchema
+    page_schema = schemas.CommitteeHistoryProfilePageSchema
+    query_options = [
+        sa.orm.joinedload(models.CommitteeHistoryProfile.jfc_committee),
+    ]
 
     filter_multi_fields = [
-        ("designation", models.CommitteeHistory.designation),
+        ("designation", models.CommitteeHistoryProfile.designation),
     ]
 
     @property
@@ -204,7 +213,7 @@ class CommitteeHistoryView(ApiResource):
             # use for
             # '/committee/<string:committee_id>/history/',
             # '/committee/<string:committee_id>/history/<int:cycle>/',
-            query = query.filter(models.CommitteeHistory.committee_id == committee_id.upper())
+            query = query.filter(models.CommitteeHistoryProfile.committee_id == committee_id.upper())
 
         elif candidate_id:
             # use for
@@ -215,22 +224,22 @@ class CommitteeHistoryView(ApiResource):
             query_regular = query.join(
                 models.CandidateCommitteeLink,
                 sa.and_(
-                    models.CandidateCommitteeLink.committee_id == models.CommitteeHistory.committee_id,
-                    models.CandidateCommitteeLink.fec_election_year == models.CommitteeHistory.cycle,
+                    models.CandidateCommitteeLink.committee_id == models.CommitteeHistoryProfile.committee_id,
+                    models.CandidateCommitteeLink.fec_election_year == models.CommitteeHistoryProfile.cycle,
                 ),
             ).filter(
                 models.CandidateCommitteeLink.candidate_id == candidate_id.upper(),
             )
 
             # 2) query for PCC to PAC conversion
-            query_pcc_converted = query.filter(models.CommitteeHistory.former_candidate_id == candidate_id.upper())
+            query_pcc_converted = query.filter(models.CommitteeHistoryProfile.former_candidate_id == candidate_id.upper())
 
             # 3) query for Leadership PAC committees
             query_leadership_pac = query.join(
                 models.CandidateCommitteeAlternateLink,
                 sa.and_(
-                    models.CandidateCommitteeAlternateLink.committee_id == models.CommitteeHistory.committee_id,
-                    models.CandidateCommitteeAlternateLink.fec_election_year == models.CommitteeHistory.cycle,
+                    models.CandidateCommitteeAlternateLink.committee_id == models.CommitteeHistoryProfile.committee_id,
+                    models.CandidateCommitteeAlternateLink.fec_election_year == models.CommitteeHistoryProfile.cycle,
                 ),
             ).filter(
                 models.CandidateCommitteeAlternateLink.candidate_id == candidate_id.upper(),
@@ -248,45 +257,45 @@ class CommitteeHistoryView(ApiResource):
                 query_regular = query_regular.filter(
                     models.CandidateCommitteeLink.election_yr_to_be_included == cycle,
                 ).order_by(
-                    models.CommitteeHistory.committee_id,
-                    sa.desc(models.CommitteeHistory.cycle),
+                    models.CommitteeHistoryProfile.committee_id,
+                    sa.desc(models.CommitteeHistoryProfile.cycle),
                 ).distinct(
                     # inside one candidate election year (election_yr_to_be_included),
                     # remove duplicate committee(s), mostly for Presidental and Senate candidate.
-                    models.CommitteeHistory.committee_id,
+                    models.CommitteeHistoryProfile.committee_id,
                 )
 
                 # ====build query_leadership_pac
                 query_leadership_pac = query_leadership_pac.filter(
                     models.CandidateCommitteeAlternateLink.candidate_election_year == cycle,
                 ).order_by(
-                    models.CommitteeHistory.committee_id,
-                    sa.desc(models.CommitteeHistory.cycle),
+                    models.CommitteeHistoryProfile.committee_id,
+                    sa.desc(models.CommitteeHistoryProfile.cycle),
                 ).distinct(
                     # inside one candidate election year,
                     # remove duplicate committee(s), mostly for Presidental and Senate candidate.
-                    models.CommitteeHistory.committee_id,
+                    models.CommitteeHistoryProfile.committee_id,
                 )
 
                 # ====build query_pcc_converted
                 query_pcc_converted = query_pcc_converted.filter(
-                    models.CommitteeHistory.former_candidate_election_year == cycle,
+                    models.CommitteeHistoryProfile.former_candidate_election_year == cycle,
                 ).order_by(
-                    models.CommitteeHistory.committee_id,
-                    sa.desc(models.CommitteeHistory.cycle),
+                    models.CommitteeHistoryProfile.committee_id,
+                    sa.desc(models.CommitteeHistoryProfile.cycle),
                 ).distinct(
                     # inside one candidate election year,
                     # remove duplicate committee(s), mostly for Presidental and Senate candidate.
-                    models.CommitteeHistory.committee_id,
+                    models.CommitteeHistoryProfile.committee_id,
                 )
 
                 # union three queries: query_regular + query_leadership_pac + query_pcc_converted
                 query = query_regular.union(query_leadership_pac, query_pcc_converted).order_by(
-                    models.CommitteeHistory.committee_id,
-                    sa.desc(models.CommitteeHistory.cycle),
+                    models.CommitteeHistoryProfile.committee_id,
+                    sa.desc(models.CommitteeHistoryProfile.cycle),
                 )
             else:
                 # for election_full=false
-                query = query.filter(models.CommitteeHistory.cycle == cycle)
-
+                query = query.filter(models.CommitteeHistoryProfile.cycle == cycle)
         return query
+

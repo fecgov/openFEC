@@ -6,7 +6,7 @@ import manage
 from tests.common import BaseTestCase
 from webservices import rest, __API_VERSION__
 from webservices.rest import db
-from webservices.resources.committees import CommitteeHistoryView
+from webservices.resources.committees import CommitteeHistoryProfileView
 
 
 @pytest.mark.usefixtures("migrate_db")
@@ -104,7 +104,7 @@ class CommitteeTestCase(BaseTestCase):
         }
 
         committee_api = self._results(
-            rest.api.url_for(CommitteeHistoryView, **params_cmte)
+            rest.api.url_for(CommitteeHistoryProfileView, **params_cmte)
         )
         self.check_nulls_in_array_column(committee_api, array_column='cycles')
         self.check_nulls_in_array_column(
