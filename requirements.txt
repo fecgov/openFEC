@@ -1,56 +1,54 @@
 apispec==0.39.0
-certifi==2020.11.8
-cfenv==0.5.2
-defusedxml==0.6.0
-elasticsearch==7.6.0
-elasticsearch-dsl==7.3.0
-Flask==2.1.2
-Flask-Cors==3.0.9
-Flask-RESTful==0.3.9
-Flask-SQLAlchemy==2.4.1
-gevent==21.12.0
-gunicorn==19.10.0
-GitPython==3.1.27
-icalendar==4.0.2
-invoke==0.15.0
-kombu==5.2.4 # Starting from celery 5.x release, the minimum required version is Kombu 5.x
-networkx==2.6.2
-prance[osv]>=0.19
-psycopg2-binary==2.9.1
-python-dateutil==2.8.1
-python-dotenv>=0.20.0 # Sets variable defaults in .flaskenv file
-requests==2.25.1
-requests-aws4auth==1.0
-setuptools==65.1.1 # Pinned to fix the deploy errors caused by the latest setuptool version 65.3.0
-sqlalchemy-postgres-copy==0.3.0
-SQLAlchemy==1.3.19
-ujson==5.4.0 # decoding CSP violation reported
-vine==5.0.0 # previosly pinned to 1.3.0 to fix amqp dependency, which is a dependency of kombu
-webargs==5.5.3
-werkzeug==2.0.0
-
-# Marshalling
-flask-apispec==0.7.0
-git+https://github.com/fecgov/marshmallow-pagination@master
-marshmallow==2.16.3
-marshmallow-sqlalchemy==0.15.0
-
-# Data export
-smart_open==1.8.0
 
 # Task queue
 celery==5.2.2 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
 celery-once==3.0.0
-redis==4.2.2
+certifi==2020.11.8
+cfenv==0.5.2
 
 # testing and build in circle
 codecov==2.1.7
+defusedxml==0.6.0
+elasticsearch==7.6.0
+elasticsearch-dsl==7.3.0
 factory_boy==2.8.1
-flake8==6.0.0 
+Flask==2.1.2
+
+# Marshalling
+flask-apispec==0.7.0
+Flask-Cors==3.0.9
+Flask-RESTful==0.3.9
+Flask-SQLAlchemy==2.4.1
+gevent==21.12.0
+git+https://github.com/fecgov/marshmallow-pagination@master
+GitPython==3.1.27
+gunicorn==19.10.0
+icalendar==4.0.2
 importlib-metadata==3.10.1 #pinned to fix the pytest deprecation warning: SelectableGroups dict interface
+invoke==0.15.0
 jsonschema==3.2.0 #pinned to fix the pytest deprecation warning inside jsonschema/validators.py
+kombu==5.2.4 # Starting from celery 5.x release, the minimum required version is Kombu 5.x
+marshmallow==2.16.3
+marshmallow-sqlalchemy==0.15.0
+networkx==2.6.2
 nplusone==0.8.0
+prance[osv]>=0.19
+psycopg2-binary==2.9.1
 pytest==5.2.0
 pytest-cov==3.0.0
-pytest-flake8==1.1.0
+python-dateutil==2.8.1
+python-dotenv>=0.20.0 # Sets variable defaults in .flaskenv file
+redis==4.2.2
+requests==2.25.1
+requests-aws4auth==1.0
+setuptools==65.1.1 # Pinned to fix the deploy errors caused by the latest setuptool version 65.3.0
+
+# Data export
+smart_open==1.8.0
+SQLAlchemy==1.3.19
+sqlalchemy-postgres-copy==0.3.0
+ujson==5.4.0 # decoding CSP violation reported
+vine==5.0.0 # previosly pinned to 1.3.0 to fix amqp dependency, which is a dependency of kombu
+webargs==5.5.3
 webtest==2.0.34
+werkzeug==2.0.0
