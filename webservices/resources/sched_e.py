@@ -69,9 +69,6 @@ class ScheduleEView(ItemizedResource):
         'committee_id',
         'candidate_id',
     ]
-    union_all_fields = [
-        'committee_id'
-    ]
     use_pk_for_count = True
     query_options = [
         sa.orm.joinedload(models.ScheduleE.candidate),
