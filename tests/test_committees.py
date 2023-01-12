@@ -493,9 +493,12 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
             ),
             factories.CommitteeHistoryProfileFactory(
                 committee_id=self.committees[3].committee_id,
-                cycle=2014,
+                cycle=2016,
                 designation="A",
                 is_active=False,
+                former_candidate_id=self.candidate.candidate_id,
+                former_candidate_election_year=2016,
+                former_committee_name="Used to be PCC but I'm a PAC now committeee"
             ),
             factories.CommitteeHistoryProfileFactory(
                 committee_id=self.committees[4].committee_id,
@@ -665,7 +668,7 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
                 designation=["P", "A"],
             )
         )
-        assert len(results) == 4
+        assert len(results) == 3
         assert "J" not in [committee.get("designation") for committee in results]
 
     def test_ledership_pac_committees(self):
@@ -694,7 +697,7 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
             )
         )
 
-        assert len(results) == 1
+        assert len(results) == 2
         assert results[0].get("former_candidate_id") == self.candidate.candidate_id
 
     def test_case_insensitivity(self):

@@ -100,14 +100,7 @@ class CommitteeHistory(BaseCommittee):
     cycles_has_activity = db.Column(ARRAY(db.Integer), doc=docs.COMMITTEE_CYCLES_HAS_ACTIVITY)
     last_cycle_has_activity = db.Column(db.Integer, doc=docs.COMMITTEE_LAST_CYCLE_HAS_ACTIVITY)
     is_active = db.Column(db.Boolean, doc=docs.IS_COMMITTEE_ACTIVE)
-    former_committee_name = db.Column(db.String(200), doc=docs.COMMITTEE_NAME)
-    former_candidate_id = db.Column(db.String(9), doc=docs.CANDIDATE_ID)
-    former_candidate_name = db.Column(db.String(90), doc=docs.CANDIDATE_NAME)
-    former_candidate_election_year = db.Column(db.Integer, doc=docs.CANDIDATE_ELECTION_YEAR)
-    convert_to_pac_flag = db.Column(db.Boolean, doc=docs.CONVERT_TO_PAC_FLAG)
-    sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
-    committee_label = db.Column(db.Text, doc=docs.COMMITTEE_LABEL)
-
+    
 
 
 # return committee history profile
@@ -120,6 +113,14 @@ class CommitteeHistory(BaseCommittee):
 class CommitteeHistoryProfile(CommitteeHistory):
     __tablename__ = 'ofec_committee_history_mv'
     __table_args__ = {'extend_existing': True}
+    
+    former_committee_name = db.Column(db.String(200), doc=docs.COMMITTEE_NAME)
+    former_candidate_id = db.Column(db.String(9), doc=docs.CANDIDATE_ID)
+    former_candidate_name = db.Column(db.String(90), doc=docs.CANDIDATE_NAME)
+    former_candidate_election_year = db.Column(db.Integer, doc=docs.CANDIDATE_ELECTION_YEAR)
+    convert_to_pac_flag = db.Column(db.Boolean, doc=docs.CONVERT_TO_PAC_FLAG)
+    sponsor_candidate_ids = db.Column(ARRAY(db.Text), doc=docs.SPONSOR_CANDIDATE_ID)
+    committee_label = db.Column(db.Text, doc=docs.COMMITTEE_LABEL)
 
     @declared_attr
     def jfc_committee(self):
