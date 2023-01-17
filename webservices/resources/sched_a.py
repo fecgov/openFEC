@@ -86,9 +86,6 @@ class ScheduleAView(ItemizedResource):
         'contributor_employer',
         'contributor_occupation',
     ]
-    union_all_fields = [
-        'committee_id',
-    ]
     secondary_index_options = [
         'committee_id',
         'contributor_id',
