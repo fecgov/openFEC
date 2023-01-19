@@ -6,7 +6,6 @@ from webservices.common.models.dates import clean_report_type
 from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin, FecFileNumberMixin
 from webservices import exceptions
 
-
 class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     __tablename__ = 'ofec_filings_all_mv'
 
@@ -173,11 +172,11 @@ class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.M
     @property
     def pdf_url(self):
         image_number = str(self.beginning_image_number)
-        return 'https://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(image_number[-3:], image_number)
+        return utils.DOCQUERY_URL + '/pdf/{0}/{1}/{1}.pdf'.format(image_number[-3:], image_number)
 
     @property
     def html_url(self):
-        return 'https://docquery.fec.gov/cgi-bin/forms/{0}/{1}/'.format(self.committee_id, self.file_number)
+        return utils.DOCQUERY_URL + '/cgi-bin/forms/{0}/{1}/'.format(self.committee_id, self.file_number)
 
 
 # TODO: add index on committee id and filed_date

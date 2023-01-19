@@ -2,11 +2,11 @@
 
 * Zip codes to congressional districts
     * data/natl_zccd_delim.csv
-    * http://www2.census.gov/geo/relfiles/cdsld13/natl/natl_zccd_delim.txt
-    * DC http://www.zipcodesdirectory.com/zip-codes/washington-dc.php
-    * Puerto Rico http://www.topuertorico.org/reference/zipcodes.shtml
-    * Guam http://www.zipcodelist.org/home/guam-zip-code-list
-    * American Samoa http://www.zipcodelist.org/home/american-samoa-zip-code-list
+    * https://www2.census.gov/geo/relfiles/cdsld13/natl/natl_zccd_delim.txt
+    * DC https://www.zipcodesdirectory.com/zip-codes/washington-dc.php
+    * Puerto Rico https://www.topuertorico.org/reference/zipcodes.shtml
+    * Guam https://www.zipcodelist.org/home/guam-zip-code-list
+    * American Samoa https://www.zipcodelist.org/home/american-samoa-zip-code-list
 
 * FIPS state codes
     * data/fips_stats.csv

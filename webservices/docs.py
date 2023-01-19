@@ -126,8 +126,8 @@ stays the same. If the same person runs for multiple offices — for example, a 
 candidate runs for a Senate office — that candidate will get a unique ID for each office.
 
 The candidate endpoints primarily use data from FEC registration
-[Form 1](http://www.fec.gov/pdf/forms/fecfrm1.pdf) for committee information and
-[Form 2](http://www.fec.gov/pdf/forms/fecfrm2.pdf) for candidate information.
+[Form 1](https://www.fec.gov/pdf/forms/fecfrm1.pdf) for committee information and
+[Form 2](https://www.fec.gov/pdf/forms/fecfrm2.pdf) for candidate information.
 '''
 
 CANDIDATE_DETAIL = '''
@@ -702,11 +702,11 @@ also incorporate any changes made by committees, if any report covering the peri
 Information is made available on the API as soon as it's processed. Keep in mind, complex
 paper filings take longer to process.
 
-The financial endpoints use data from FEC [form 5](http://www.fec.gov/pdf/forms/fecfrm5.pdf),
+The financial endpoints use data from FEC [form 5](https://www.fec.gov/pdf/forms/fecfrm5.pdf),
 for independent expenditors; or the summary and detailed summary pages of the FEC
-[Form 3](http://www.fec.gov/pdf/forms/fecfrm3.pdf), for House and Senate committees;
-[Form 3X](http://www.fec.gov/pdf/forms/fecfrm3x.pdf), for PACs and parties;
-and [Form 3P](http://www.fec.gov/pdf/forms/fecfrm3p.pdf), for presidential committees.
+[Form 3](https://www.fec.gov/pdf/forms/fecfrm3.pdf), for House and Senate committees;
+[Form 3X](https://www.fec.gov/pdf/forms/fecfrm3x.pdf), for PACs and parties;
+and [Form 3P](https://www.fec.gov/pdf/forms/fecfrm3p.pdf), for presidential committees.
 '''
 
 WIP_TAG = '''
@@ -1278,7 +1278,7 @@ The maximum date the report is due.(MM/DD/YYYY or YYYY-MM-DD)
 
 COMMUNICATION_TAG = '''
 Reports of communication costs by corporations and membership organizations
-from the FEC [F7 forms](http://www.fec.gov/pdf/forms/fecform7.pdf).
+from the FEC [F7 forms](https://www.fec.gov/pdf/forms/fecform7.pdf).
 '''
 ELECTIONEERING = '''
 An electioneering communication is any broadcast, cable or satellite communication that fulfills \
