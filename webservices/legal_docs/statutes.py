@@ -38,7 +38,7 @@ def get_title_52_statutes():
         "https://uscode.house.gov/download/"
         "releasepoints/us/pl/114/219/xml_usc52@114-219.zip"
     )
-    tag_name = "{{https://xml.house.gov/schemas/uslm/1.0}}{0}"
+    tag_name = "{{http://xml.house.gov/schemas/uslm/1.0}}{0}"
     section_count = 0
     for subtitle in title_parsed.iter(tag_name.format("subtitle")):
         if subtitle.attrib["identifier"] == "/us/usc/t52/stIII":
@@ -85,7 +85,7 @@ def get_title_26_statutes():
         "https://uscode.house.gov/download/"
         "releasepoints/us/pl/114/219/xml_usc26@114-219.zip"
     )
-    tag_name = "{{https://xml.house.gov/schemas/uslm/1.0}}{0}"
+    tag_name = "{{http://xml.house.gov/schemas/uslm/1.0}}{0}"
     section_count = 0
     for subtitle in title_parsed.iter(tag_name.format("subtitle")):
         if subtitle.attrib["identifier"] == "/us/usc/t26/stH":
