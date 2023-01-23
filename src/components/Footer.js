@@ -42,7 +42,7 @@ const Footer = () => (
         </p>
 
         <a href="mailto:apiinfo@fec.gov">
-          <button className="button--standard button--envelope">
+          <button className="button--standard button--envelope" type="button">
             Email FEC API Info
           </button>
         </a>
