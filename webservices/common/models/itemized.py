@@ -515,7 +515,7 @@ class ScheduleD(PdfMixin, BaseItemized):
     amount_incurred_period = db.Column('amt_incurred_per', db.Float)
     payment_period = db.Column('pymt_per', db.Float)
     candidate_id = db.Column('cand_id', db.String, doc=docs.CANDIDATE_ID)
-    canidate_name = db.Column('cand_nm', db.String, doc=docs.CANDIDATE_NAME)
+    candidate_name = db.Column('cand_nm', db.String, doc=docs.CANDIDATE_NAME)
     candidate_first_name = db.Column('cand_nm_first', db.String)
     candidate_last_name = db.Column('cand_nm_last', db.String)
     candidate_office = db.Column('cand_office', db.String)
