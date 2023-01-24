@@ -25,18 +25,20 @@ ALL_CASES = """
     SELECT
         case_id,
         case_no,
+        case_serial,
         name,
         case_type,
         published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
     WHERE case_type = %s
-    ORDER BY case_serial
+    ORDER BY case_serial desc
 """
 
 SINGLE_CASE = """
     SELECT DISTINCT
         case_id,
         case_no,
+        case_serial,
         name,
         case_type,
         published_flg
@@ -237,10 +239,10 @@ AF_COMMISSION_VOTES = """
 
 """ For ADR's populate case_status based on event_name""" 
 adr_case_status_map = {
-    'Dismissed': 'Case Dismissed',
-    'Settlement Agreement - Complaint Unsubstantiated': 'Negotiated Settlement Approved',
-    'Dismissed - Agreement Rejected': 'Negotiated Settlement Rejected by Commission',
-    'Dismissed - Failed to Approve': 'Case Dismissed'
+    "Dismissed": "Case Dismissed",
+    "Settlement Agreement - Complaint Unsubstantiated": "Negotiated Settlement Approved",
+    "Dismissed - Agreement Rejected": "Negotiated Settlement Rejected by Commission",
+    "Dismissed - Failed to Approve": "Case Dismissed"
 }
 
 STATUTE_REGEX = re.compile(r"(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)")
@@ -364,6 +366,7 @@ def get_single_case(case_type, case_no, bucket):
                 "type": get_es_type(case_type),
                 "doc_id": "{0}_{1}".format(case_type.lower(), row["case_no"]),
                 "no": row["case_no"],
+                "case_serial": row["case_serial"],
                 "name": row["name"],
                 "published_flg": row["published_flg"],
                 "sort1": sort1,

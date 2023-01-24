@@ -29,6 +29,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         expected_ao = {
             "type": "advisory_opinions",
             "no": "2017-01",
+            "ao_no": "2017-01",
+            "ao_year": 2017,
+            "ao_serial": 1,
             "doc_id": "advisory_opinions_2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
@@ -330,6 +333,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         expected_ao1 = {
             "type": "advisory_opinions",
             "no": "2015-01",
+            "ao_no": "2015-01",
+            "ao_year": 2015,
+            "ao_serial": 1,
             "doc_id": "advisory_opinions_2015-01",
             "name": "AO name1",
             "summary": "AO summary1",
@@ -351,8 +357,11 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "entities": [],
         }
         expected_ao2 = {
-            "no": "2015-02",
             "type": "advisory_opinions",
+            "no": "2015-02",
+            "ao_no": "2015-02",
+            "ao_year": 2015,
+            "ao_serial": 2,
             "doc_id": "advisory_opinions_2015-02",
             "name": "An AO name2",
             "summary": "An AO summary2",
@@ -376,6 +385,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         expected_ao3 = {
             "type": "advisory_opinions",
             "no": "2016-01",
+            "ao_no": "2016-01",
+            "ao_year": 2016,
+            "ao_serial": 1,
             "doc_id": "advisory_opinions_2016-01",
             "name": "An AO name3",
             "summary": "An AO summary3",
@@ -401,13 +413,13 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         self.create_ao(3, expected_ao3)
 
         gen = get_advisory_opinions(None)
-        assert (next(gen)) == expected_ao1
-        assert (next(gen)) == expected_ao2
         assert (next(gen)) == expected_ao3
+        assert (next(gen)) == expected_ao2
+        assert (next(gen)) == expected_ao1
 
         gen = get_advisory_opinions('2015-02')
-        assert (next(gen)) == expected_ao2
         assert (next(gen)) == expected_ao3
+        assert (next(gen)) == expected_ao2
 
     def create_document(self, ao_id, document, filename='201801_C.pdf'):
         self.connection.execute(
