@@ -35,7 +35,7 @@ def get_title_52_statutes():
 
     # TO DO: check if DOCS_ALIAS exist before uploading.
     title_parsed = get_xml_tree_from_url(
-        "http://uscode.house.gov/download/"
+        "https://uscode.house.gov/download/"
         "releasepoints/us/pl/114/219/xml_usc52@114-219.zip"
     )
     tag_name = "{{http://xml.house.gov/schemas/uslm/1.0}}{0}"
@@ -82,7 +82,7 @@ def get_title_26_statutes():
 
     # TO DO: check if DOCS_ALIAS exist before uploading.
     title_parsed = get_xml_tree_from_url(
-        "http://uscode.house.gov/download/"
+        "https://uscode.house.gov/download/"
         "releasepoints/us/pl/114/219/xml_usc26@114-219.zip"
     )
     tag_name = "{{http://xml.house.gov/schemas/uslm/1.0}}{0}"
