@@ -48,7 +48,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
     * The latest long term support (LTS) or stable release of Node.js (which includes npm)
     * PostgreSQL (the latest 10 release).
          * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
-         * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
+         * Read a [Windows tutorial](https://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](https://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
     * Elastic Search 7.x (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/_installation.html))
     * Flyway 9.10.1 ([download](https://flywaydb.org/documentation/usage/commandline/))
@@ -228,7 +228,7 @@ Navigate to the installation folder (eg., `elasticsearch-7.4`) and run:
 3. View your local version of the site at [http://localhost:5000](http://localhost:5000).
 
 #### Task queue
-We use [Celery](http://www.celeryproject.org/) to schedule periodic tasks— for example, refreshing materialized views and updating incremental aggregates. We use [Redis](https://redis.io/) as the Celery message broker.
+We use [Celery](https://www.celeryproject.org/) to schedule periodic tasks— for example, refreshing materialized views and updating incremental aggregates. We use [Redis](https://redis.io/) as the Celery message broker.
 
 To work with Celery and Redis locally, install Redis and start a Redis server. By default,
 we connect to Redis at `redis://localhost:6379`; if Redis is running at a different URL,
@@ -335,7 +335,7 @@ To deploy to Cloud Foundry, run:
 invoke deploy
 ```
 
-[Learn more about Invoke](http://www.pyinvoke.org/).
+[Learn more about Invoke](https://www.pyinvoke.org/).
 
 The `deploy` task will detect the appropriate Cloud Foundry space based the current branch. You can override this with the optional `--space` flag. For example:
 

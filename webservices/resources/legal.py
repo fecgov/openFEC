@@ -157,12 +157,24 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .index("docs_search")
         .sort("sort1", "sort2")
     )
+
     logger.debug("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return query
 
 
 def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     query = generic_query_builder(None, type_, from_hit, hits_returned, **kwargs)
+
+    # sorting works in all three cases: ('murs','admin_fines','adrs').
+    # so far only be able to sort by 'case_no', default sort is descending order.
+    # descending order: 'sort=-case_no'; ascending order; sort=case_no
+    # https://fec-dev-api.app.cloud.gov/v1/legal/search/?type=murs&sort=-case_no
+    # https://fec-dev-api.app.cloud.gov/v1/legal/search/?type=murs&sort=case_no
+    if kwargs.get("sort"):
+        if kwargs.get("sort").upper() == "CASE_NO":
+            query = query.sort({"case_serial" : {"order" : "asc"}})
+        else:
+            query = query.sort({"case_serial" : {"order" : "desc"}})
 
     should_query = [
         get_case_document_query(q, **kwargs),
@@ -437,6 +449,17 @@ def apply_adr_specific_query_params(query, **kwargs):
 def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     # Only pass query string to document list below
     query = generic_query_builder(None, type_, from_hit, hits_returned, **kwargs)
+
+    # so far only be able to sort by 'ao_no', default sort is descending order.
+    # descending order: 'sort=-ao_no'; ascending order; sort=ao_no
+    # https://fec-dev-api.app.cloud.gov/v1/legal/search/?type=advisory_opinions&sort=-ao_no
+    # https://fec-dev-api.app.cloud.gov/v1/legal/search/?type=advisory_opinions&sort=ao_no
+
+    if kwargs.get("sort"):
+        if kwargs.get("sort").upper() == "AO_NO":
+            query = query.sort({"ao_no" : {"order" : "asc"}})
+        else:
+            query = query.sort({"ao_no" : {"order" : "desc"}})
 
     should_query = [
         get_ao_document_query(q, **kwargs),

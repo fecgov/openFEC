@@ -193,7 +193,7 @@ def make_multi_sort_args(default=None, validator=None, default_hide_null=False,
         default_nulls_only=False, default_sort_nulls_last=False):
     args = make_sort_args(default, validator, default_hide_null, default_nulls_only, default_sort_nulls_last)
     args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True,
-        description='Provide a field to sort by. Use - for descending order.',)
+        description=docs.SORT)
     return args
 
 
@@ -264,6 +264,7 @@ legal_universal_search = {
     'af_min_fd_date': fields.Date(required=False, description=docs.AF_MIN_FD_DATE),
     'af_max_fd_date': fields.Date(required=False, description=docs.AF_MAX_FD_DATE),
     'af_fd_fine_amount': fields.Int(IStr, required=False, description=docs.AF_FD_FINE_AMOUNT),
+    'sort':fields.Str(IStr, required=False, description=docs.SORT),
 }
 
 candidate_detail = {

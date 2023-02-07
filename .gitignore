@@ -69,3 +69,6 @@ static/swagger-ui/js
 
 # Pytest cache
 .pytest_cache/
+
+# Pycharm
+.idea
