@@ -17,8 +17,7 @@ import os
 import random
 import resource
 
-import locust
-from locust import between
+from locust import between, HttpUser, task, TaskSet, user
 
 
 # Avoid "Too many open files" error
@@ -217,7 +216,7 @@ def get_random_date():
     return "{y}-{m}-{d}".format(y=str(year), m=str(month), d=str(date))
 
 
-class Tasks(locust.TaskSet):
+class Tasks(TaskSet):
     def on_start(self):
         self.candidates = self.fetch_ids("candidates", "candidate_id")
         self.committees = self.fetch_ids("committees", "committee_id")
@@ -228,12 +227,12 @@ class Tasks(locust.TaskSet):
         print("*********fetch_ids response:{}".format(resp))
         return [result[key] for result in resp.json()["results"]]
 
-    @locust.task
+    @task
     def load_home(self):
         params = {"api_key": API_KEY}
         self.client.get("", name="home", params=params)
 
-    @locust.task
+    @task
     def test_download(self):
         """
         a quick test on downlaod api. this test need to generate a aynamic query
@@ -262,19 +261,19 @@ class Tasks(locust.TaskSet):
             json=payload,
         )
 
-    @locust.task
+    @task
     def load_candidates_search(self, term=None):
         term = term or random.choice(CANDIDATES)
         params = {"api_key": API_KEY, "sort": "-receipts", "q": term}
         self.client.get("candidates/search", name="candidate_search", params=params)
 
-    @locust.task
+    @task
     def load_committees_search(self, term=None):
         term = term or random.choice(CANDIDATES)
         params = {"api_key": API_KEY, "sort": "-receipts", "q": term}
         self.client.get("committees", name="committee_search", params=params)
 
-    @locust.task
+    @task
     def load_candidates_table(self):
         params = {
             "cycle": [random.choice(CYCLES) for _ in range(3)],
@@ -282,7 +281,7 @@ class Tasks(locust.TaskSet):
         }
         self.client.get("candidates", name="candidates_table", params=params)
 
-    @locust.task
+    @task
     def load_committees_table(self):
         params = {
             "cycle": [random.choice(CYCLES) for _ in range(3)],
@@ -290,7 +289,7 @@ class Tasks(locust.TaskSet):
         }
         self.client.get("committees", name="committees_table", params=params)
 
-    @locust.task
+    @task
     def load_candidate_detail(self, candidate_id=None):
         params = {"api_key": API_KEY}
         candidate_id = candidate_id or random.choice(self.candidates)
@@ -300,7 +299,7 @@ class Tasks(locust.TaskSet):
             params=params,
         )
 
-    @locust.task
+    @task
     def load_committee_detail(self, committee_id=None):
         params = {"api_key": API_KEY}
         committee_id = committee_id or random.choice(self.committees)
@@ -310,7 +309,7 @@ class Tasks(locust.TaskSet):
             params=params,
         )
 
-    @locust.task
+    @task
     def load_candidate_totals(self, candidate_id=None):
         params = {"api_key": API_KEY}
         candidate_id = candidate_id or random.choice(self.candidates)
@@ -320,7 +319,7 @@ class Tasks(locust.TaskSet):
             params=params,
         )
 
-    @locust.task
+    @task
     def load_committee_totals(self, committee_id=None):
         params = {"api_key": API_KEY}
         committee_id = committee_id or random.choice(self.committees)
@@ -330,13 +329,13 @@ class Tasks(locust.TaskSet):
             params=params,
         )
 
-    @locust.task
+    @task
     def load_schedule_a_small(self):
         params = random.choice(small_records_sched_a)
         params["api_key"] = API_KEY
         self.client.get("schedules/schedule_a/", name="schedule_a_small", params=params)
 
-    @locust.task
+    @task
     def load_schedule_a_medium(self):
         params = random.choice(medium_records_sched_a)
         params["api_key"] = API_KEY
@@ -344,7 +343,7 @@ class Tasks(locust.TaskSet):
             "schedules/schedule_a/", name="schedule_a_medium", params=params
         )
 
-    @locust.task
+    @task
     def load_schedule_a_large(self):
         params = random.choice(large_records_sched_a)
         params["api_key"] = API_KEY
@@ -352,7 +351,7 @@ class Tasks(locust.TaskSet):
             "schedules/schedule_a/", name="load_schedule_a_large", params=params
         )
 
-    @locust.task
+    @task
     def load_schedule_a_problematic(self):
         params = random.choice(poor_performance_a)
         params["api_key"] = API_KEY
@@ -360,7 +359,7 @@ class Tasks(locust.TaskSet):
             "schedules/schedule_a/", name="load_schedule_a_problematic", params=params
         )
 
-    @locust.task
+    @task
     def load_schedule_b_problematic(self):
         params = random.choice(poor_performance_b)
         params["api_key"] = API_KEY
@@ -368,42 +367,42 @@ class Tasks(locust.TaskSet):
             "schedules/schedule_b/", name="load_schedule_b_problematic", params=params
         )
 
-    @locust.task
+    @task
     def load_audit_category(self):
         params = {"api_key": API_KEY}
         self.client.get("audit-category/", name="load_audit_category", params=params)
 
-    @locust.task
+    @task
     def load_filings(self):
         params = {"api_key": API_KEY}
         self.client.get("filings/", name="load_filings", params=params)
 
-    @locust.task
+    @task
     def load_totals(self):
         params = {"api_key": API_KEY}
         self.client.get("totals/P/", name="load_totals", params=params)
 
-    @locust.task
+    @task
     def load_reports(self):
         params = {"api_key": API_KEY}
         self.client.get("reports/P/", name="load_reports", params=params)
 
-    @locust.task
+    @task
     def load_legal_documents_search(self, term=None):
         params = {"q": term, "api_key": API_KEY}
         self.client.get("legal/search", name="legal_search", params=params)
 
-    @locust.task
+    @task
     def get_docs_mur(self):
         params = {"api_key": API_KEY}
         self.client.get("legal/docs/murs/7074", name="get_docs_mur", params=params)
 
-    @locust.task
+    @task
     def get_docs_adr(self):
         params = {"api_key": API_KEY}
         self.client.get("legal/docs/adrs/668", name="get_docs_adr", params=params)
 
-    @locust.task
+    @task
     def get_docs_admin_fine(self):
         params = {"api_key": API_KEY}
         self.client.get(
@@ -411,14 +410,14 @@ class Tasks(locust.TaskSet):
         )
 
     # archived mur #179
-    @locust.task
+    @task
     def get_docs_archived_mur(self):
         params = {"api_key": API_KEY}
         self.client.get(
             "legal/docs/murs/179", name="get_docs_archived_mur", params=params
         )
 
-    @locust.task
+    @task
     def get_docs_advisory_opinions(self):
         params = {"api_key": API_KEY}
         self.client.get(
@@ -426,6 +425,6 @@ class Tasks(locust.TaskSet):
         )
 
 
-class Swarm(locust.HttpLocust):
-    task_set = Tasks
+class Swarm(user.HttpUser):
+    tasks = [Tasks]
     wait_time = between(5000, 50000)
