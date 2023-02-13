@@ -224,7 +224,6 @@ class Tasks(TaskSet):
     def fetch_ids(self, endpoint, key):
         params = {"api_key": API_KEY}
         resp = self.client.get(endpoint, name="preload_ids", params=params)
-        print("*********fetch_ids response:{}".format(resp))
         return [result[key] for result in resp.json()["results"]]
 
     @task
