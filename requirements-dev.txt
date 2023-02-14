@@ -11,3 +11,4 @@ pre-commit==2.21.0 #client-side hook triggered by operations like git commit
 pip-tools==4.2.0
 #locust
 locust==2.14.2
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
