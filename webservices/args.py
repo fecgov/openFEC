@@ -222,7 +222,10 @@ legal_universal_search = {
     'q': fields.Str(required=False, description=docs.TEXT_SEARCH),
     'from_hit': fields.Int(required=False, description=docs.FROM_HIT),
     'hits_returned': fields.Int(required=False, description=docs.HITS_RETURNED),
-    'type': fields.Str(required=False, description=docs.LEGAL_DOC_TYPE),
+    'type': fields.Str(
+            validate=validate.OneOf(["admin_fines", "adrs", "advisory_opinions",
+                                     "murs", "regulations", "statutes"]),
+            description=docs.LEGAL_DOC_TYPE),
 
     'ao_no': fields.List(IStr, required=False, description=docs.AO_NUMBER),
     'ao_name': fields.List(IStr, required=False, description=docs.AO_NAME),
@@ -262,7 +265,8 @@ legal_universal_search = {
             ['1', '2', '3', '4', '5', '6', '1001', '1002', '1003', '1004', '1005', '1006', '2001'])),
         description=docs.CASE_DOCUMENT_CATEGORY_DESCRIPTION),
 
-    'mur_type': fields.Str(required=False, description=docs.MUR_TYPE),
+    'mur_type': fields.Str(
+        required=False, validate=validate.OneOf(["archived", "current"]), description=docs.MUR_TYPE),
 
     'af_name': fields.List(IStr, required=False, description=docs.AF_NAME),
     'af_committee_id': fields.Str(IStr, required=False, description=docs.AF_COMMITTEE_ID),

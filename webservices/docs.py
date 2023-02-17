@@ -1967,14 +1967,9 @@ LEGAL_DOC_NO = '''
 Document number to fetch
 '''
 
-LEGAL_DOC_TYPE = 'Legal Document type to refine search by\n\
-    - admin_fines\n\
-    - adrs\n\
-    - advisory_opinions\n\
-    - murs\n\
-    - regulations\n\
-    - statutes\n\
-'
+LEGAL_DOC_TYPE = '''
+Choose a legal document type
+'''
 
 TEXT_SEARCH = '''
 Text to search legal documents for

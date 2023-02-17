@@ -220,7 +220,6 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
 
 def get_case_document_query(q, **kwargs):
-    print("Inside get_case_document_query...")
     combined_query = []
     category_queries = []
     if kwargs.get("case_doc_category_id"):
