@@ -1968,11 +1968,12 @@ Document number to fetch
 '''
 
 LEGAL_DOC_TYPE = 'Legal Document type to refine search by\n\
-    - statutes\n\
-    - regulations\n\
+    - admin_fines\n\
+    - adrs\n\
     - advisory_opinions\n\
     - murs\n\
-    - admin_fines\n\
+    - regulations\n\
+    - statutes\n\
 '
 
 TEXT_SEARCH = '''
