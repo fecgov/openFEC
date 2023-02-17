@@ -160,9 +160,11 @@ class IndicesValidator(IndexValidator):
                 )
 
 
-def make_sort_args(default=None, validator=None, default_hide_null=False,
+def make_sort_args(
+    default=None, validator=None, default_hide_null=False,
         default_nulls_only=False, default_sort_nulls_last=False, show_nulls_last_arg=True,
         additional_description=''):
+
     args = {
         'sort': fields.Str(
             missing=default,
@@ -189,10 +191,13 @@ def make_sort_args(default=None, validator=None, default_hide_null=False,
     return args
 
 
-def make_multi_sort_args(default=None, validator=None, default_hide_null=False,
+def make_multi_sort_args(
+    default=None, validator=None, default_hide_null=False,
         default_nulls_only=False, default_sort_nulls_last=False):
+
     args = make_sort_args(default, validator, default_hide_null, default_nulls_only, default_sort_nulls_last)
-    args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True,
+    args['sort'] = fields.List(
+        fields.Str, missing=default, validate=validator, required=False, allow_none=True,
         description=docs.SORT)
     return args
 
@@ -225,13 +230,15 @@ legal_universal_search = {
     'ao_max_issue_date': fields.Date(description=docs.AO_MAX_ISSUE_DATE),
     'ao_min_request_date': fields.Date(description=docs.AO_MIN_REQUEST_DATE),
     'ao_max_request_date': fields.Date(description=docs.AO_MAX_REQUEST_DATE),
-    'ao_category': fields.List(IStr(validate=validate.OneOf(['F', 'V', 'D', 'R', 'W', 'C', 'S'])),
-                                    description=docs.AO_CATEGORY),
+    'ao_category': fields.List(
+        IStr(validate=validate.OneOf(['F', 'V', 'D', 'R', 'W', 'C', 'S'])),
+        description=docs.AO_CATEGORY),
     'ao_is_pending': fields.Bool(description=docs.AO_IS_PENDING),
     'ao_status': fields.Str(description=docs.AO_STATUS),
     'ao_requestor': fields.Str(description=docs.AO_REQUESTOR),
-    'ao_requestor_type': fields.List(fields.Integer(validate=validate.OneOf(range(1, 17))),
-                                            description=docs.AO_REQUESTOR_TYPE),
+    'ao_requestor_type': fields.List(
+        fields.Integer(validate=validate.OneOf(range(1, 17))),
+        description=docs.AO_REQUESTOR_TYPE),
     'ao_regulatory_citation': fields.List(IStr, required=False, description=docs.REGULATORY_CITATION),
     'ao_statutory_citation': fields.List(IStr, required=False, description=docs.STATUTORY_CITATION),
     'ao_citation_require_all': fields.Bool(description=docs.CITATION_REQUIRE_ALL),
@@ -250,8 +257,10 @@ legal_universal_search = {
     'case_citation_require_all': fields.Bool(description=docs.CITATION_REQUIRE_ALL),
 
     # case_doc_category_id is the key of case_document_category
-    'case_doc_category_id': fields.List(IStr(validate=validate.OneOf(['1', '2', '3', '4', '5', '6'])),
-                                    description=docs.CASE_DOCUMENT_CATEGORY_DESCRIPTION),
+    'case_doc_category_id': fields.List(IStr(
+        validate=validate.OneOf(
+            ['1', '2', '3', '4', '5', '6', '1001', '1002', '1003', '1004', '1005', '1006', '2001'])),
+        description=docs.CASE_DOCUMENT_CATEGORY_DESCRIPTION),
 
     'mur_type': fields.Str(required=False, description=docs.MUR_TYPE),
 
@@ -264,7 +273,7 @@ legal_universal_search = {
     'af_min_fd_date': fields.Date(required=False, description=docs.AF_MIN_FD_DATE),
     'af_max_fd_date': fields.Date(required=False, description=docs.AF_MAX_FD_DATE),
     'af_fd_fine_amount': fields.Int(IStr, required=False, description=docs.AF_FD_FINE_AMOUNT),
-    'sort':fields.Str(IStr, required=False, description=docs.SORT),
+    'sort': fields.Str(IStr, required=False, description=docs.SORT),
 }
 
 candidate_detail = {
@@ -897,7 +906,8 @@ entities = {
 }
 
 schedule_e = {
-    'candidate_office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])),
+    'candidate_office': fields.List(fields.Str(
+        validate=validate.OneOf(['', 'H', 'S', 'P'])),
         description=docs.OFFICE),
     'candidate_party': fields.List(IStr, description=docs.PARTY),
     'candidate_office_state': fields.List(IStr, description=docs.STATE_GENERIC),
@@ -906,17 +916,21 @@ schedule_e = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'filing_form': fields.List(IStr, description=docs.FORM_TYPE),
-    'last_expenditure_date': fields.Date(missing=None,
+    'last_expenditure_date': fields.Date(
+        missing=None,
         description=docs.LAST_EXPENDITURE_DATE),
-    'last_expenditure_amount': fields.Float(missing=None,
+    'last_expenditure_amount': fields.Float(
+        missing=None,
         description=docs.LAST_EXPENDITURE_AMOUNT),
-    'last_office_total_ytd': fields.Float(missing=None,
+    'last_office_total_ytd': fields.Float(
+        missing=None,
         description=docs.LAST_OFFICE_TOTAL_YTD),
     'payee_name': fields.List(fields.Str, description=docs.PAYEE_NAME),
     'support_oppose_indicator': fields.List(
         IStr(validate=validate.OneOf(['S', 'O'])),
         description=docs.SUPPORT_OPPOSE_INDICATOR),
-    'last_support_oppose_indicator': fields.Str(missing=None,
+    'last_support_oppose_indicator': fields.Str(
+        missing=None,
         description=docs.LAST_SUPPOSE_OPPOSE_INDICATOR),
     'is_notice': fields.List(fields.Bool, description=docs.IS_NOTICE),
     'min_dissemination_date': fields.Date(description=docs.DISSEMINATION_MIN_DATE),
