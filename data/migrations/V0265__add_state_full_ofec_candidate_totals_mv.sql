@@ -201,7 +201,7 @@ WITH totals AS (
     cand.state,
     cand.district,
     cand.district_number,
-    expand_state(cand.state::text) AS state_full
+    COALESCE(expand_state(cand.state::text), 'Other') AS state_full
    FROM ofec_candidate_history_with_future_election_vw cand
      LEFT JOIN combined_totals totals ON cand.candidate_id::text = totals.candidate_id::text AND cand.two_year_period = totals.cycle
 WITH DATA;
