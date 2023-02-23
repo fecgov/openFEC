@@ -1,4 +1,3 @@
-from webservices.env import env
 
 
 """Narrative API documentation."""
@@ -258,8 +257,9 @@ filer. Use the `committee_id` to find the most recent information about the comm
 '''
 
 COMMITTEE_HISTORY = '''
-Explore a filer's characteristics over time. This can be particularly useful if the
-committees change treasurers, designation, or `committee_type`.
+Explore a filer's characteristics over time. This can \
+be particularly useful if the committees change \
+treasurers, designation, or `committee_type`.
 '''
 
 COMMITTEE_CYCLE = '''
@@ -558,8 +558,9 @@ True indicates that a committee is active.
 '''
 
 SPONSOR_CANDIDATE_ID = '''
-A unique identifier assigned to each candidate registered with the FEC.
-If a person runs for several offices, that person will have separate candidate IDs for each office. This is a filter for Leadership PAC sponsor.
+A unique identifier assigned to each candidate registered with the FEC. \
+If a person runs for several offices, that person will have separate \
+candidate IDs for each office. This is a filter for Leadership PAC sponsor.
 '''
 
 PREVIOUS_FILE_NUMBER = '''
@@ -571,7 +572,8 @@ Amendment version
 '''
 
 BANK_DEPOSITORY_NM = '''
-Primary bank or depository in which the committee deposits funds, holds accounts, rents safety deposit boxes or maintains funds.
+Primary bank or depository in which the committee deposits funds,\
+holds accounts, rents safety deposit boxes or maintains funds.
 '''
 
 BANK_DEPOSITORY_ST1 = '''
@@ -595,7 +597,8 @@ Zip code of bank or depository as reported on the Form 1
 '''
 
 ADDITIONAL_BANK_NAMES = '''
-Additional banks or depositories in which the committee deposits funds, holds accounts, rents safety deposit boxes or maintains funds.
+Additional banks or depositories in which the committee deposits funds,\
+ holds accounts, rents safety deposit boxes or maintains funds.
 '''
 
 FILER_NAME_TEXT = '''
@@ -797,16 +800,18 @@ SCHEDULE_A_TAG = '''
 This collection of endpoints includes Schedule A records reported by a committee. \
 Schedule A records describe itemized receipts, including contributions from individuals. \
 If you are interested in contributions from individuals, use the /schedules/schedule_a/ endpoint. \
-For a more complete description of all Schedule A records visit
+For a more complete description of all Schedule A records visit \
 [About receipts data](https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/). \
-If you are interested in our "is_individual" methodology visit
+If you are interested in our "is_individual" methodology visit \
 our [methodology page](https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/).\n
 
 
 Schedule A is also available as a database dump file that is updated weekly on Sunday.
-The database dump files are here: https://www.fec.gov/files/bulk-downloads/index.html?prefix=bulk-downloads/data-dump/schedules/.
-The instructions are here: https://www.fec.gov/files//bulk-downloads/data-dump/schedules/README.txt.
-We cannot provide help with restoring the database dump files, but you can refer to this community led [group](https://groups.google.com/forum/#!forum/fec-data) for discussion.
+The database dump files are \
+here: https://www.fec.gov/files/bulk-downloads/index.html?prefix=bulk-downloads/data-dump/schedules/. \
+The instructions are here: https://www.fec.gov/files//bulk-downloads/data-dump/schedules/README.txt. \
+We cannot provide help with restoring the database dump files, but you can refer to \
+this community led [group](https://groups.google.com/forum/#!forum/fec-data) for discussion.
 '''
 
 SCHEDULE_A = '''
@@ -815,8 +820,10 @@ This description is for both ​`/schedules​/schedule_a​/` and ​ `/schedul
 This endpoint provides itemized receipts. Schedule A records describe itemized receipts, \
 including contributions from individuals. If you are interested in contributions from an \
 individual, use the `/schedules/schedule_a/` endpoint. For a more complete description of all \
-Schedule A records visit [About receipts data](https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/). \
-If you are interested in our "is_individual" methodology visit our [methodology page](https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/).
+Schedule A records visit \
+[About receipts data](https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/). \
+If you are interested in our "is_individual" methodology visit our \
+[methodology page](https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/methodology/). \
 
 ​The `/schedules​/schedule_a​/` endpoint is not paginated by page number. This endpoint uses keyset \
 pagination to improve query performance and these indices are required to properly page through \
@@ -1421,7 +1428,8 @@ REPORT_TYPE = BASE_REPORT_TYPE + '\
     - MSY Monthly Semi-Annual (YE)\n\
 '
 
-REQUEST_TYPE = 'Requests for additional information (RFAIs) sent to filers. The request type is based on the type of document filed:\n\
+REQUEST_TYPE = '''
+Requests for additional information (RFAIs) sent to filers. The request type is based on the type of document filed:\n\
     - 1 Statement of Organization\n\
     - 2 Report of Receipts and Expenditures (Form 3 and 3X)\n\
     - 3 Second Notice - Reports\n\
@@ -1431,7 +1439,7 @@ REQUEST_TYPE = 'Requests for additional information (RFAIs) sent to filers. The 
     - 7 Failure to File\n\
     - 8 From Public Disclosure\n\
     - 9 From Multi Candidate Status\n\
-'
+'''
 
 REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. ' + REPORT_TYPE
 
@@ -1459,10 +1467,6 @@ CANDIDATE_MAX_FIRST_FILE_DATE = 'Selects all candidates whose first filing was r
 
 # schedules
 MEMO_CODE = "'X' indicates that the amount is NOT to be included in the itemization total."
-
-
-
-
 
 # schedule A
 CONTRIBUTOR_ID = 'The FEC identifier should be represented here if the contributor is registered with the FEC.'
@@ -1963,13 +1967,9 @@ LEGAL_DOC_NO = '''
 Document number to fetch
 '''
 
-LEGAL_DOC_TYPE = 'Legal Document type to refine search by\n\
-    - statutes\n\
-    - regulations\n\
-    - advisory_opinions\n\
-    - murs\n\
-    - admin_fines\n\
-'
+LEGAL_DOC_TYPE = '''
+Choose a legal document type
+'''
 
 TEXT_SEARCH = '''
 Text to search legal documents for
@@ -2079,14 +2079,22 @@ CASE_MAX_CLOSE_DATE = '''
 The latest date closed of case
 '''
 
-CASE_DOCUMENT_CATEGORY_DESCRIPTION = 'Select one or more case_doc_category_id to filter by corresponding CASE_DOCUMENT_CATEGORY:\n\
-        - 1 - Conciliation Agreements\n\
-        - 2 - Complaint, Responses, Designation of Counsel and Extensions of Timee\n\
+CASE_DOCUMENT_CATEGORY_DESCRIPTION = '''
+Select one or more case_doc_category_id to filter by corresponding CASE_DOCUMENT_CATEGORY:\n\
+        - 1 - Conciliation and Settlement Agreements\n\
+        - 2 - Complaint, Responses, Designation of Counsel and Extensions of Time\n\
         - 3 - General Counsel Reports, Briefs, Notifications and Responses\n\
         - 4 - Certifications\n\
-        - 5 - Civil Penalties, Disgorgements and Other Payments\n\
-        - 6 - Statements of Reasons \n\
-'
+        - 5 - Civil Penalties, Disgorgements, Other Payments and Letters of Compliance\n\
+        - 6 - Statement of Reasons \n\
+        - 1001 - ADR Settlement Agreements\n\
+        - 1002 - Complaint, Responses, Designation of Counsel and Extensions of Time\n\
+        - 1003 - ADR Memoranda, Notifications and Responses\n\
+        - 1004 - Certifications\n\
+        - 1005 - Civil Penalties, Disgorgements, Other Payments and Letters of Compliance\n\
+        - 1006 - Statement of Reasons \n\
+        - 2001 - Administrative Fine Case\n\
+'''
 
 MUR_TYPE = '''
 Type of MUR : current or archived

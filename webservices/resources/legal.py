@@ -172,9 +172,9 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     # https://fec-dev-api.app.cloud.gov/v1/legal/search/?type=murs&sort=case_no
     if kwargs.get("sort"):
         if kwargs.get("sort").upper() == "CASE_NO":
-            query = query.sort({"case_serial" : {"order" : "asc"}})
+            query = query.sort({"case_serial": {"order": "asc"}})
         else:
-            query = query.sort({"case_serial" : {"order" : "desc"}})
+            query = query.sort({"case_serial": {"order": "desc"}})
 
     should_query = [
         get_case_document_query(q, **kwargs),
@@ -185,6 +185,7 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_clauses = []
     if kwargs.get("case_no"):
         must_clauses.append(Q("terms", no=kwargs.get("case_no")))
+
     if kwargs.get("case_document_category"):
         must_clauses = [
             Q("terms", documents__category=kwargs.get("case_document_category"))
@@ -201,12 +202,23 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         return apply_adr_specific_query_params(query, **kwargs)
 
 # Select one or more case_doc_category_id to filter by corresponding case_document_category
-# - 1 - Conciliation Agreements
-# - 2 - Complaint, Responses, Designation of Counsel and Extensions of Timee
+# - 1 - Conciliation and Settlement Agreements
+# - 2 - Complaint, Responses, Designation of Counsel and Extensions of Time
 # - 3 - General Counsel Reports, Briefs, Notifications and Responses
 # - 4 - Certifications
-# - 5 - Civil Penalties, Disgorgements and Other Payments
-# - 6 - Statements of Reasons
+# - 5 - Civil Penalties, Disgorgements, Other Payments and Letters of Compliance
+# - 6 - Statement of Reasons
+# ADR document categories
+# - 1001 - ADR Settlement Agreements
+# - 1002 - Complaint, Responses, Designation of Counsel and Extensions of Time
+# - 1003 - ADR Memoranda, Notifications and Responses
+# - 1004 - Certifications
+# - 1005 - Civil Penalties, Disgorgements, Other Payments and Letters of Compliance
+# - 1006 - Statement of Reasons
+# AF document category
+# - 2001 - Administrative Fine Case
+
+
 def get_case_document_query(q, **kwargs):
     combined_query = []
     category_queries = []
@@ -311,7 +323,8 @@ def apply_mur_specific_query_params(query, **kwargs):
     logger.debug("apply_mur_adr_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     if kwargs.get("case_regulatory_citation") or kwargs.get("case_statutory_citation"):
-        return case_apply_citation_params(query,
+        return case_apply_citation_params(
+            query,
             kwargs.get("case_regulatory_citation"),
             kwargs.get("case_statutory_citation"),
             kwargs.get("case_citation_require_all"), **kwargs)
@@ -457,9 +470,9 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
     if kwargs.get("sort"):
         if kwargs.get("sort").upper() == "AO_NO":
-            query = query.sort({"ao_no" : {"order" : "asc"}})
+            query = query.sort({"ao_no": {"order": "asc"}})
         else:
-            query = query.sort({"ao_no" : {"order" : "desc"}})
+            query = query.sort({"ao_no": {"order": "desc"}})
 
     should_query = [
         get_ao_document_query(q, **kwargs),
