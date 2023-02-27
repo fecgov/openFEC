@@ -493,8 +493,11 @@ class CandidateTotalAggregateView(ApiResource):
             query = query.add_columns(
                 total.state.label("state")
             )
+            query = query.add_columns(
+                total.state_full.label("state_full")
+            )
             query = query.group_by(
-                total.election_year, total.office, total.state
+                total.election_year, total.office, total.state, total.state_full
             )
 
         # aggregate by election_year, office, state, district
@@ -506,13 +509,16 @@ class CandidateTotalAggregateView(ApiResource):
                 total.state.label("state")
             )
             query = query.add_columns(
+                total.state_full.label("state_full")
+            )
+            query = query.add_columns(
                 total.district.label("district")
             )
 
             # remove district=null
             query = query.filter(total.district.isnot(None))
             query = query.group_by(
-                total.election_year, total.office, total.state, total.district,
+                total.election_year, total.office, total.state, total.district, total.state_full
             )
 
         # aggregate by election_year, office, party
