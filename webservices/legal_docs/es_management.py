@@ -1,7 +1,7 @@
 import logging
-import elasticsearch
 import datetime
 import json
+import time
 
 from webservices.utils import (
     create_es_client,
@@ -16,26 +16,37 @@ logger = logging.getLogger(__name__)
 # for debug, uncomment this line
 # logger.setLevel(logging.DEBUG)
 
-DOCS_REPOSITORY_NAME = "repository_docs"
-ARCHIVED_MURS_REPOSITORY_NAME = "repository_archived_murs"
-DOCS_INDEX = "docs"
-DOCS_ALIAS = "docs_alias"
-SEARCH_ALIAS = "docs_search"
-ARCHIVED_MURS_INDEX = "archived_murs"
-ARCHIVED_MURS_ALIAS = "archived_murs_alias"
-DOCS_STAGING_INDEX = "docs_staging"
+CASE_INDEX = "case_index"
+CASE_ALIAS = "case_alias"
+CASE_SWAP_INDEX = "case_swap_index"
+CASE_REPO = "case_repo"
+CASE_SNAPSHOT = "case_snapshot"
 
+AO_INDEX = "ao_index"
+AO_ALIAS = "ao_alias"
+AO_SWAP_INDEX = "ao_swap_index"
+AO_REPO = "ao_repo"
+AO_SNAPSHOT = "ao_snapshot"
+
+ARCH_MUR_INDEX = "arch_mur_index"
+ARCH_MUR_ALIAS = "arch_mur_alias"
+ARCH_MUR_SWAP_INDEX = "arch_mur_swap_index"
+ARCH_MUR_REPO = "arch_mur_repo"
+ARCH_MUR_SNAPSHOT = "arch_mur_snapshot"
+
+SEARCH_ALIAS = "search_alias"
 S3_BACKUP_DIRECTORY = "es-backups"
 S3_PRIVATE_SERVICE_INSTANCE_NAME = "fec-s3-snapshot"
 
+DOCS_PATH = "docs"
 
-# ==== start define mapping for index: DOCS_INDEX
-SORT_MAPPINGS = {
+SORT_MAPPING = {
     "sort1": {"type": "integer"},
     "sort2": {"type": "integer"},
 }
 
-CASE_DOCUMENT_MAPPINGS = {
+# ==== start define XXXX_MAPPING for index: XXXX_INDEX
+CASE_DOCUMENT_MAPPING = {
     "type": "nested",
     "properties": {
         "document_id": {"type": "long"},
@@ -52,7 +63,7 @@ CASE_DOCUMENT_MAPPINGS = {
     },
 }
 
-ADMIN_FINES = {
+ADMIN_FINE_MAPPING = {
     "type": {"type": "keyword"},
     "doc_id": {"type": "keyword"},
     "no": {"type": "keyword"},
@@ -65,7 +76,7 @@ ADMIN_FINES = {
             "action": {"type": "text"},
         }
     },
-    "documents": CASE_DOCUMENT_MAPPINGS,
+    "documents": CASE_DOCUMENT_MAPPING,
     "url": {"type": "text", "index": False},
     "committee_id": {"type": "text"},
     "report_year": {"type": "keyword"},
@@ -125,80 +136,13 @@ ADMIN_FINES = {
     },
 }
 
-ADVISORY_OPINIONS = {
-    "type": {"type": "keyword"},
-    "no": {"type": "keyword"},
-    "ao_no": {"type": "keyword"},
-    "ao_serial": {"type": "integer"},
-    "ao_year": {"type": "integer"},
-    "doc_id": {"type": "keyword"},
-    "name": {"type": "text", "analyzer": "english"},
-    "summary": {"type": "text", "analyzer": "english"},
-    "request_date": {"type": "date", "format": "dateOptionalTime"},
-    "issue_date": {"type": "date", "format": "dateOptionalTime"},
-    "is_pending": {"type": "boolean"},
-    "status": {"type": "text"},
-    "ao_citations": {
-        "properties": {
-            "name": {"type": "text"},
-            "no": {"type": "text"},
-        }
-    },
-    "aos_cited_by": {
-        "properties": {
-            "name": {"type": "text"},
-            "no": {"type": "text"},
-        }
-    },
-    "statutory_citations": {
-        "type": "nested",
-        "properties": {
-            "title": {"type": "long"},
-            "section": {"type": "text"},
-        },
-    },
-    "regulatory_citations": {
-        "type": "nested",
-        "properties": {
-            "part": {"type": "long"},
-            "title": {"type": "long"},
-            "section": {"type": "long"},
-        },
-    },
-    "documents": {
-        "type": "nested",
-        "properties": {
-            "document_id": {"type": "long"},
-            "category": {"type": "keyword"},
-            "description": {"type": "text"},
-            "text": {
-                "type": "text",
-                "term_vector": "with_positions_offsets",
-            },
-            "date": {"type": "date", "format": "dateOptionalTime"},
-            "url": {"type": "text", "index": False},
-        },
-    },
-    "requestor_names": {"type": "text"},
-    "requestor_types": {"type": "keyword"},
-    "commenter_names": {"type": "text"},
-    "representative_names": {"type": "text"},
-    "entities": {
-        "properties": {
-            "role": {"type": "keyword"},
-            "name": {"type": "text"},
-            "type": {"type": "text"},
-        },
-    },
-}
-
-CITATIONS = {
+CITATION_MAPPING = {
     "type": {"type": "keyword"},
     "citation_type": {"type": "keyword"},
     "citation_text": {"type": "text"},
 }
 
-MUR_MAPPINGS = {
+MUR_MAPPING = {
     "type": {"type": "keyword"},
     "doc_id": {"type": "keyword"},
     "no": {"type": "keyword"},
@@ -211,7 +155,7 @@ MUR_MAPPINGS = {
             "action": {"type": "text"},
         }
     },
-    "documents": CASE_DOCUMENT_MAPPINGS,
+    "documents": CASE_DOCUMENT_MAPPING,
     "url": {"type": "text", "index": False},
     "mur_type": {"type": "keyword"},
     "subjects": {"type": "text"},
@@ -245,7 +189,7 @@ MUR_MAPPINGS = {
     "close_date": {"type": "date", "format": "dateOptionalTime"},
 }
 
-ADR_MAPPINGS = {
+ADR_MAPPING = {
     "type": {"type": "keyword"},
     "doc_id": {"type": "keyword"},
     "no": {"type": "keyword"},
@@ -260,10 +204,10 @@ ADR_MAPPINGS = {
             "commissioner_name": {"type": "text"},
             "vote_type": {"type": "text"},
         }
-    }, 
+    },
     "non_monetary_terms": {"type": "text"},
-    "non_monetary_terms_respondents": {"type": "text"},  
-    "documents": CASE_DOCUMENT_MAPPINGS,
+    "non_monetary_terms_respondents": {"type": "text"},
+    "documents": CASE_DOCUMENT_MAPPING,
     "url": {"type": "text", "index": False},
     "mur_type": {"type": "keyword"},
     "subjects": {"type": "text"},
@@ -288,7 +232,7 @@ ADR_MAPPINGS = {
     "close_date": {"type": "date", "format": "dateOptionalTime"},
 }
 
-REGULATIONS = {
+REGULATION_MAPPING = {
     "type": {"type": "keyword"},
     "doc_id": {"type": "keyword"},
     "name": {"type": "text", "analyzer": "english"},
@@ -297,7 +241,7 @@ REGULATIONS = {
     "url": {"type": "text", "index": False},
 }
 
-STATUTES = {
+STATUTE_MAPPING = {
     "type": {"type": "keyword"},
     "doc_id": {"type": "keyword"},
     "name": {"type": "text", "analyzer": "english"},
@@ -309,21 +253,94 @@ STATUTES = {
     "url": {"type": "text", "index": False},
 }
 
-ALL_MAPPINGS = {}
-ALL_MAPPINGS.update(ADMIN_FINES)
-ALL_MAPPINGS.update(ADVISORY_OPINIONS)
-ALL_MAPPINGS.update(CITATIONS)
-ALL_MAPPINGS.update(ADR_MAPPINGS)
-ALL_MAPPINGS.update(MUR_MAPPINGS)
-ALL_MAPPINGS.update(REGULATIONS)
-ALL_MAPPINGS.update(STATUTES)
-ALL_MAPPINGS.update(SORT_MAPPINGS)
+ALL_MAPPING = {}
+ALL_MAPPING.update(ADMIN_FINE_MAPPING)
+ALL_MAPPING.update(CITATION_MAPPING)
+ALL_MAPPING.update(ADR_MAPPING)
+ALL_MAPPING.update(MUR_MAPPING)
+ALL_MAPPING.update(REGULATION_MAPPING)
+ALL_MAPPING.update(STATUTE_MAPPING)
+ALL_MAPPING.update(SORT_MAPPING)
 
-MAPPINGS = {"properties": ALL_MAPPINGS}
-# ==== end define mapping for index: DOCS_INDEX
+CASE_MAPPING = {"properties": ALL_MAPPING}
+# ==== end define CASE_MAPPING for index: CASE_INDEX
 
-# ==== start define mapping for index: ARCHIVED_MURS_INDEX
-ARCH_MUR_DOCUMENT_MAPPINGS = {
+# ==== start define AO_MAPPING for index: AO_INDEX
+AO_MAPPING = {
+    "dynamic": "false",
+    "properties": {
+        "type": {"type": "keyword"},
+        "no": {"type": "keyword"},
+        "ao_no": {"type": "keyword"},
+        "ao_serial": {"type": "integer"},
+        "ao_year": {"type": "integer"},
+        "doc_id": {"type": "keyword"},
+        "name": {"type": "text", "analyzer": "english"},
+        "summary": {"type": "text", "analyzer": "english"},
+        "request_date": {"type": "date", "format": "dateOptionalTime"},
+        "issue_date": {"type": "date", "format": "dateOptionalTime"},
+        "is_pending": {"type": "boolean"},
+        "status": {"type": "text"},
+        "ao_citations": {
+            "properties": {
+                "name": {"type": "text"},
+                "no": {"type": "text"},
+            }
+        },
+        "aos_cited_by": {
+            "properties": {
+                "name": {"type": "text"},
+                "no": {"type": "text"},
+            }
+        },
+        "statutory_citations": {
+            "type": "nested",
+            "properties": {
+                "title": {"type": "long"},
+                "section": {"type": "text"},
+            },
+        },
+        "regulatory_citations": {
+            "type": "nested",
+            "properties": {
+                "part": {"type": "long"},
+                "title": {"type": "long"},
+                "section": {"type": "long"},
+            },
+        },
+        "documents": {
+            "type": "nested",
+            "properties": {
+                "document_id": {"type": "long"},
+                "category": {"type": "keyword"},
+                "description": {"type": "text"},
+                "text": {
+                    "type": "text",
+                    "term_vector": "with_positions_offsets",
+                },
+                "date": {"type": "date", "format": "dateOptionalTime"},
+                "url": {"type": "text", "index": False},
+            },
+        },
+        "requestor_names": {"type": "text"},
+        "requestor_types": {"type": "keyword"},
+        "commenter_names": {"type": "text"},
+        "representative_names": {"type": "text"},
+        "entities": {
+            "properties": {
+                "role": {"type": "keyword"},
+                "name": {"type": "text"},
+                "type": {"type": "text"},
+            },
+        },
+        "sort1": {"type": "integer"},
+        "sort2": {"type": "integer"},
+    }
+}
+# ==== end define AO_MAPPING for index: AO_INDEX
+
+# ==== start define ARCH_MUR_MAPPING for index: ARCH_MUR_INDEX
+ARCH_MUR_DOCUMENT_MAPPING = {
     "type": "nested",
     "properties": {
         "document_id": {"type": "integer"},
@@ -336,7 +353,7 @@ ARCH_MUR_DOCUMENT_MAPPINGS = {
     },
 }
 
-ARCH_MUR_SUBJECT_MAPPINGS = {
+ARCH_MUR_SUBJECT_MAPPING = {
     "properties": {
         "text": {"type": "text"},
         "children": {
@@ -352,7 +369,7 @@ ARCH_MUR_SUBJECT_MAPPINGS = {
     }
 }
 
-ARCH_MUR_CITATION_MAPPINGS = {
+ARCH_MUR_CITATION_MAPPING = {
     "properties": {
         "us_code": {
             "properties": {"text": {"type": "text"}, "url": {"type": "text"}}
@@ -363,7 +380,7 @@ ARCH_MUR_CITATION_MAPPINGS = {
     }
 }
 
-ARCH_MUR_MAPPINGS = {
+ARCH_MUR_MAPPING = {
     "dynamic": "false",
     "properties": {
         "type": {"type": "keyword"},
@@ -377,17 +394,16 @@ ARCH_MUR_MAPPINGS = {
         "url": {"type": "text", "index": False},
         "complainants": {"type": "text"},
         "respondent": {"type": "text"},
-        "documents": ARCH_MUR_DOCUMENT_MAPPINGS,
-        "citations": ARCH_MUR_CITATION_MAPPINGS,
-        "subject": ARCH_MUR_SUBJECT_MAPPINGS,
+        "documents": ARCH_MUR_DOCUMENT_MAPPING,
+        "citations": ARCH_MUR_CITATION_MAPPING,
+        "subject": ARCH_MUR_SUBJECT_MAPPING,
         "sort1": {"type": "integer"},
-        "sort2": {"type": "integer"}
+        "sort2": {"type": "integer"},
     }
 }
+# ==== end define ARCH_MUR_MAPPING for index: ARCH_MUR_INDEX
 
-# ==== end define mapping for index: ARCHIVED_MURS_INDEX
-
-ANALYZER_SETTINGS = {
+ANALYZER_SETTING = {
     "analysis": {
         "analyzer": {
             "default": {
@@ -398,106 +414,92 @@ ANALYZER_SETTINGS = {
     "highlight.max_analyzed_offset": 60000000,
 }
 
+# SEARCH_ALIAS is used for legal/search endpoint
+# XXXX_ALIAS is used for load data to XXXX_INDEX on Elasticsearch
+INDEX_DICT = {
+    CASE_INDEX: (CASE_MAPPING, CASE_ALIAS, SEARCH_ALIAS, CASE_SWAP_INDEX,
+                 CASE_REPO, CASE_SNAPSHOT),
+    AO_INDEX: (AO_MAPPING, AO_ALIAS, SEARCH_ALIAS, AO_SWAP_INDEX,
+               AO_REPO, AO_SNAPSHOT),
+    ARCH_MUR_INDEX: (ARCH_MUR_MAPPING, ARCH_MUR_ALIAS, SEARCH_ALIAS, ARCH_MUR_SWAP_INDEX,
+                     ARCH_MUR_REPO, ARCH_MUR_SNAPSHOT),
+    CASE_SWAP_INDEX: (CASE_MAPPING, "", "", "", "", ""),
+    AO_SWAP_INDEX: (AO_MAPPING, "", "", "", "", ""),
+    ARCH_MUR_SWAP_INDEX: (ARCH_MUR_MAPPING, "", "", "", "", ""),
+}
 
-# =========== start index management =============
-def create_index(index_name=None, aliases_name=None):
+
+def create_index(index_name=None):
     """
-    Initialize Elasticsearch for storing legal documents:
+    Creating an index for storing legal documents on Elasticsearch.
+    - 'INDEX_DICT' description:
+    1) CASE_INDEX include DOCUMENT_TYPE=('statutes','regulations','murs','adrs','admin_fines')
+    'murs' means current mur only.
+    2) AO_INDEX include DOCUMENT_TYPE=('advisory_opinions')
+    3) ARCH_MUR_INDEX include DOCUMENT_TYPE=('murs'), archived mur only
 
-    1)DOCS_INDEX: ('statutes','regulations','advisory_opinions','murs','adrs','admin_fines')
-    if the DOCS_INDEX already exists, delete it.
-    -create the DOCS_INDEX
-    -set up the alias DOCS_ALIAS to point to the DOCS_INDEX.
-    -set up the alias SEARCH_ALIAS to point to the DOCS_INDEX.
+    -Two aliases will be created under each index: XXXX_ALIAS and SEARCH_ALIAS
+    a) XXXX_ALIAS is used for reload data to XXXX_INDEX on Elasticsearch
+    b) SEARCH_ALIAS is used for legal/search endpoint
 
-    How to call this command:
-    create_index(DOCS_INDEX, (DOCS_ALIAS + "," + SEARCH_ALIAS))
+    -How to call this function in python code:
+    a) create_index(CASE_INDEX)
+    b) create_index(AO_INDEX)
+    c) create_index(ARCH_MUR_INDEX)
 
-    2)ARCHIVED_MURS_INDEX: ('archived_murs')
-    if the ARCHIVED_MURS_INDEX already exists, delete it.
-    -create the ARCHIVED_MURS_INDEX.
-    -set up the alias ARCHIVED_MURS_ALIAS to point to the ARCHIVED_MURS_INDEX.
-    -set up the alias SEARCH_ALIAS to point the ARCHIVED_MURS_INDEX.
-    allowing the legal search to work across both current and archived MURs.
+    -How to run command from terminal:
+    a) python cli.py create_index case_index (or 'python cli.py create_index')
+    b) python cli.py create_index ao_index
+    c) python cli.py create_index arch_mur_index
 
-    How to call this command in python:
-    a)create_index()
-    b)create_index(ARCHIVED_MURS_INDEX, (ARCHIVED_MURS_ALIAS + "," + SEARCH_ALIAS))
+    -How to call task command:
+    a) cf run-task api --command "python cli.py create_index" -m 2G --name create_case_index
+    b) cf run-task api --command "python cli.py create_index ao_index" -m 2G --name create_ao_index
+    b) cf run-task api --command "python cli.py create_index arch_mur_index" -m 2G --name create_arch_mur_index
 
-    How to run locally:
-    a) python cli.py create_index
-    b) python  cli.py create_index archived_murs archived_murs_index,docs_search
-
-    How to call task command:
-    a) cf run-task api --command "python cli.py create_index" -m 2G --name create_index
-    b) cf run-task api --command "python cli.py create_index archived_murs archived_murs_index,docs_search" -m 2G --name create_index
+    -This function won't allow to create any other index that is not in 'INDEX_DICT'.
     """
-    index_name = index_name or DOCS_INDEX
-    aliases_list = []
+    index_name = index_name or CASE_INDEX
     body = {}
     aliases = {}
-    body.update({"mappings": MAPPINGS})
-    body.update({"settings": ANALYZER_SETTINGS})
+    body.update({"settings": ANALYZER_SETTING})
 
-    if index_name == DOCS_INDEX:
-        # by default, use DOCS_INDEX and SEARCH_ALIAS, DOCS_ALIAS
-        aliases_list = [SEARCH_ALIAS, DOCS_ALIAS]
-        for alias in aliases_list:
-            aliases.update({alias: {}})
+    if index_name in INDEX_DICT.keys():
+        # Before creating index, delete this index and corresponding aliases first.
+        delete_index(index_name)
 
-        logger.debug(" aliases under index '" + DOCS_INDEX + "' = " + json.dumps(
-            aliases, indent=3, cls=DateTimeEncoder))
-        body.update({"aliases": aliases})
+        mapping, alias1, alias2 = INDEX_DICT.get(index_name)[:3]
+        body.update({"mappings": mapping})
 
-    elif index_name == ARCHIVED_MURS_INDEX:
-        # by default, use ARCHIVED_MURS_INDEX and SEARCH_ALIAS, ARCHIVED_MURS_ALIAS
-        aliases_list = [SEARCH_ALIAS, ARCHIVED_MURS_ALIAS]
-        for alias in aliases_list:
-            aliases.update({alias: {}})
-
-        logger.debug(" aliases under index '" + ARCHIVED_MURS_INDEX + "' = " + json.dumps(
-            aliases, indent=3, cls=DateTimeEncoder))
-        body.update({"aliases": aliases})
-
-    else:
-        if aliases_name:
-            aliases_list = aliases_name.split(",")
-            aliases = {}
-            for alias in aliases_list:
-                aliases.update({alias: {}})
-
-            logger.debug(" aliases =" + json.dumps(aliases, indent=3, cls=DateTimeEncoder))
+        if alias1 and alias2:
+            aliases.update({alias1: {}})
+            aliases.update({alias2: {}})
             body.update({"aliases": aliases})
 
-    es_client = create_es_client()
-    delete_index(index_name)
-
-    logger.info(" Creating index '{0}'...".format(index_name))
-    es_client.indices.create(
-        index=index_name,
-        body=body,
-    )
-
-    if aliases_list:
-        logger.info(
-            " The index '{0}' with aliases=[{1}] is created successfully.".format(
-                index_name, "".join(alias + "," for alias in aliases_list)
-            )
+        es_client = create_es_client()
+        logger.info(" Creating index '{0}'...".format(index_name))
+        es_client.indices.create(
+            index=index_name,
+            body=body,
         )
-
-    else:
         logger.info(" The index '{0}' is created successfully.".format(index_name))
+        if alias1 and alias2:
+            logger.info(" The aliases for index '{0}': {1}, {2} are created successfully.".format(
+                index_name,
+                alias1,
+                alias2))
+    else:
+        logger.info(" Invalid index '{0}'.".format(index_name))
 
 
 def display_index_alias():
     """
-    Returns all indices and aliases.
+    Display all indices and aliases on Elasticsearch.
+    -How to run from terminal:
+    'python cli.py display_index_alias'
 
-    How to run locally:
-        python cli.py display_index_alias
-
-    How to call task command:
-        cf run-task api --command "python cli.py display_index_alias" -m 2G --name display_index_alias
+    -How to call task command:
+    cf run-task api --command "python cli.py display_index_alias" -m 2G --name display_index_alias
     """
     es_client = create_es_client()
     indices = es_client.cat.indices(format="JSON")
@@ -509,87 +511,75 @@ def display_index_alias():
             json.dumps(es_client.indices.get_alias(index=row["index"]), indent=3)))
 
 
-def display_mappings():
+def display_mapping(index_name=None):
     """
-    Returns all index mappings.
+    Display the index mapping.
+    -How to run from terminal:
+    a) python cli.py display_mapping case_index (or 'python cli.py display_mapping')
+    b) python cli.py display_mapping ao_index
+    c) python cli.py display_mapping arch_mur_index
 
-    How to run locally:
-        python cli.py display_mappings
+    -How to call task command:
+    a) cf run-task api --command "python cli.py display_mapping case_index" -m 2G --name display_case_index_mapping
+    b) cf run-task api --command "python cli.py display_mapping ao_index" -m 2G --name display_ao_index_mapping
+    c) cf run-task api --command "python cli.py display_mapping arch_mur_index" -m 2G
+    --name display_arch_mur_index_mapping
+    """
+    index_name = index_name or CASE_INDEX
+    es_client = create_es_client()
+    logger.info(" The mapping for index '{0}': \n{1}".format(
+        index_name,
+        json.dumps(es_client.indices.get_mapping(index=index_name), indent=3)))
 
-    How to call task command:
-        cf run-task api --command "python cli.py display_mappings" -m 2G --name display_mappings
+
+def delete_index(index_name):
+    """
+    Delete an index,the argument 'index_name' is required
+    -How to call this function in python code:
+    a) delete_index(CASE_INDEX)
+    b) delete_index(AO_INDEX)
+    c) delete_index(ARCH_MUR_INDEX)
+
+    -How to run from terminal:
+    a) python cli.py delete_index case_index
+    b) python cli.py delete_index ao_index
+    c) python cli.py delete_index arch_mur_index
+
+    -How to call task command:
+    a) cf run-task api --command "python cli.py delete_index case_index" -m 2G --name delete_case_index
+    b) cf run-task api --command "python cli.py delete_index ao_index" -m 2G --name delete_ao_index
+    c) cf run-task api --command "python cli.py delete_index arch_mur_index" -m 2G --name delete_arch_mur_index
     """
     es_client = create_es_client()
-    indices = es_client.cat.indices(format="JSON")
-
-    for row in indices:
-        logger.info(" The mapping for index '{0}': \n{1}".format(
-            row["index"],
-            json.dumps(es_client.indices.get_mapping(index=row["index"]), indent=3)))
-
-
-def delete_index(index_name=None):
-    """
-    Delete an index.
-    This is usually done in preparation for restoring indexes from a snapshot backup.
-
-    How to call this command in python:
-    a)delete_index()
-    b)delete_index(ARCHIVED_MURS_INDEX)
-
-    How to run locally:
-    a) python cli.py delete_index docs
-    b) python cli.py delete_index archived_murs
-
-    How to call task command:
-    a) cf run-task api --command "python cli.py delete_index docs" -m 2G --name delete_index
-    b) cf run-task api --command "python cli.py delete_index archived_murs" -m 2G --name delete_index
-    """
-    # TODO: check if DOCS_INDEX exist before deleting.
-    es_client = create_es_client()
-    index_name = index_name or DOCS_INDEX
-    try:
-        logger.info(" Deleting index '{0}'...".format(index_name))
-        es_client.indices.delete(index_name)
-        logger.info(" The index '{0}' is deleted successfully.".format(index_name))
-    except elasticsearch.exceptions.NotFoundError:
-        pass
-
-    # TODO: check if DOCS_INDEX exist before deleting. use exists_alias()
-    if index_name == DOCS_INDEX:
+    logger.info(" Checking if index '{0}' already exist...".format(index_name))
+    if es_client.indices.exists(index=index_name):
         try:
-            logger.info(" Deleting alias '{0}' under index '{1}' ...".format(DOCS_ALIAS, DOCS_INDEX))
-            es_client.indices.delete(DOCS_ALIAS)
-            logger.info(" The alias '{0}' is deleted successfully.".format(DOCS_ALIAS))
+            logger.info(" Deleting index '{0}'...".format(index_name))
+            es_client.indices.delete(index_name)
+            # sleep 120 second (2 mins)
+            time.sleep(120)
+            logger.info(" The index '{0}' is deleted successfully.".format(index_name))
         except Exception:
             pass
-
-    if index_name == ARCHIVED_MURS_INDEX:
-        try:
-            logger.info(" Deleting alias '{0}' under index '{1}'...".format(
-                ARCHIVED_MURS_ALIAS, ARCHIVED_MURS_INDEX))
-            es_client.indices.delete(ARCHIVED_MURS_ALIAS)
-            logger.info(" The alias '{0}' is deleted successfully.".format(ARCHIVED_MURS_ALIAS))
-        except Exception:
-            pass
+    else:
+        logger.info(" The index '{0}' is not found.".format(index_name))
 
 
-def move_alias(original_index=None, original_alias=None, staging_index=None):
+def switch_alias(original_index=None, original_alias=None, swapping_index=None):
     """
-    1) After creating docs_staging index using this command:create_index(DOCS_STAGING_INDEX)
-    2) Move the alias docs_index to point to `docs_staging` instead of `docs`.
+    1) After create swapping_index(=XXXX_SWAP_INDEX)
+    2) Switch the original_alias to point to swapping_index instead of original_index.
 
-    How to call this command:
-        move_alias(DOCS_INDEX, DOCS_ALIAS, DOCS_STAGING_INDEX)
+    -How to call this function in Python code:
+    a) switch_alias(index_name, INDEX_DICT.get(index_name)[1], INDEX_DICT.get(index_name)[3])
     """
-    original_index = original_index or DOCS_INDEX
-    original_alias = original_alias or DOCS_ALIAS
-    staging_index = staging_index or DOCS_STAGING_INDEX
+    original_index = original_index or CASE_INDEX
+    original_alias = original_alias or INDEX_DICT.get(original_index)[1]
+    swapping_index = swapping_index or INDEX_DICT.get(original_index)[3]
 
     es_client = create_es_client()
-
-    # Remove original_alias from original_index
-    logger.info(" Removing alias '{0}' from '{1}'...".format(
+    # 1) Remove original_alias from original_index
+    logger.info(" Removing original_alias '{0}' from original_index '{1}'...".format(
         original_alias, original_index)
     )
     try:
@@ -600,139 +590,126 @@ def move_alias(original_index=None, original_alias=None, staging_index=None):
                 ]
             }
         )
-        logger.info(" Removed alias '{0}' from '{1}' successfully.".format(
+        logger.info(" Removed original_alias '{0}' from original_index '{1}' successfully.".format(
             original_alias, original_index)
         )
     except Exception:
         pass
 
-    # Add original_alias to staging_index
-    logger.info(" Adding alias '{0}' to point to '{1}'...".format(
-        original_alias, staging_index)
+    # 2) Switch original_alias to swapping_index
+    logger.info(" Switching original_alias '{0}' to swapping_index '{1}'...".format(
+        original_alias, swapping_index)
     )
     es_client.indices.update_aliases(
         body={
             "actions": [
-                {"add": {"index": staging_index, "alias": original_alias}},
+                {"add": {"index": swapping_index, "alias": original_alias}},
             ]
         }
     )
-    logger.info(" Added alias '{0}' to point to '{1}' successfully.".format(
-        original_alias, staging_index)
+    logger.info(" Switched original_alias '{0}' to swapping_index '{1}' successfully.".format(
+        original_alias, swapping_index)
     )
 
 
-def restore_from_staging_index():
+def restore_from_swapping_index(index_name=None):
     """
-    A 4-step process:
-    1. Move the alias docs_search to point to DOCS_STAGING_INDEX instead of DOCS_INDEX.
-    2. Reinitialize the index DOCS_INDEX.
-    3. Reindex DOCS_STAGING_INDEX to DOCS_INDEX
-    4. Move DOCS_ALIAS and SEARCH_ALIAS aliases to point to the DOCS_INDEX.
-       Delete index DOCS_STAGING_INDEX.
+    1. Swith the SEARCH_ALIAS to point to XXXX_SWAP_INDEX instead of index_name(original_index).
+    2. Re-create original_index (XXXX_INDEX)
+    3. Re-index XXXX_INDEX based on XXXX_SWAP_INDEX
+    4. Switch aliases (XXXX_ALIAS,SEARCH_ALIAS) point back to XXXX_INDEX
+    5. Delete XXXX_SWAP_INDEX
     """
+    index_name = index_name or CASE_INDEX
+    swapping_index = INDEX_DICT.get(index_name)[3]
     es_client = create_es_client()
 
-    # Remove SEARCH_ALIAS from DOCS_INDEX
-    logger.info(" Removing alias '{0}' from '{1}'...".format(
-        SEARCH_ALIAS, DOCS_INDEX)
-    )
+    # 1) Swith the SEARCH_ALIAS to point to XXXX_SWAP_INDEX instead of index_name(original_index).
+    switch_alias(index_name, SEARCH_ALIAS, swapping_index)
+
+    # 2) Re-create original_index (XXXX_INDEX)
+    create_index(index_name)
+
+    # 3) Re-index XXXX_INDEX based on XXXX_SWAP_INDEX
     try:
-        es_client.indices.update_aliases(
-            body={
-                "actions": [
-                    {"remove": {"index": DOCS_INDEX, "alias": SEARCH_ALIAS}},
-                ]
-            }
+        logger.info(" Reindexing all documents from index '{0}' to index '{1}'...".format(
+            swapping_index, index_name)
         )
-        logger.info(" Removed alias '{0}' from '{1}' successfully.".format(
-            SEARCH_ALIAS, DOCS_INDEX)
-        )
-    except Exception:
-        pass
-
-    # Add SEARCH_ALIAS points to DOCS_STAGING_INDEX
-    logger.info(" Adding alias '{0}' to point to '{1}'...".format(
-        SEARCH_ALIAS, DOCS_STAGING_INDEX)
-    )
-    es_client.indices.update_aliases(
-        body={
-            "actions": [
-                {"add": {"index": DOCS_STAGING_INDEX, "alias": SEARCH_ALIAS}},
-            ]
+        body = {
+            "source": {"index": swapping_index},
+            "dest": {"index": index_name}
         }
-    )
-    logger.info(" Added alias '{0}' to point to '{1}' successfully.".format(
-        SEARCH_ALIAS, DOCS_STAGING_INDEX)
-    )
+        es_client.reindex(
+            body=body,
+            wait_for_completion=True,
+            request_timeout=1500
+        )
+    except Exception as e:
+        logger.error(" Reindex exception error = {0}".format(e.args))
 
-    delete_index(DOCS_INDEX)
-
-    # Create index 'DOCS_INDEX' with SEARCH_ALIAS, DOCS_ALIAS
-    create_index()
-
-    logger.info(" Reindexing all documents from index '{0}' to index '{1}'...".format(
-        DOCS_STAGING_INDEX, DOCS_INDEX)
-    )
-    body = {
-        "source": {"index": DOCS_STAGING_INDEX},
-        "dest": {"index": DOCS_INDEX}
-    }
-    es_client.reindex(
-        body=body,
-        wait_for_completion=True,
-        request_timeout=1500
-    )
+    # sleep 30 second (0.5 min)
+    time.sleep(30)
     logger.info(" Reindexed all documents from index '{0}' to index '{1}' successfully.".format(
-        DOCS_STAGING_INDEX, DOCS_INDEX)
+        swapping_index, index_name)
     )
-    move_aliases_to_docs_index()
+    switch_aliases_to_original_index(index_name)
 
 
-def move_aliases_to_docs_index():
+def switch_aliases_to_original_index(index_name=None):
     """
-    Move DOCS_ALIAS and SEARCH_ALIAS aliases to point to the DOCS_INDEX.
-    Delete index DOCS_STAGING_INDEX.
+    1. Switch aliases (XXXX_ALIAS,SEARCH_ALIAS) point back to XXXX_INDEX
+    2. Delete XXXX_SWAP_INDEX
     """
+    index_name = index_name or CASE_INDEX
+    swapping_index = INDEX_DICT.get(index_name)[3]
     es_client = create_es_client()
 
-    logger.info(" Moving aliases '{0}' and '{1}' to point to 'docs'...".format(
-        DOCS_ALIAS, SEARCH_ALIAS)
+    logger.info(" Moving aliases '{0}' and '{1}' to point to {2}...".format(
+        INDEX_DICT.get(index_name)[1], SEARCH_ALIAS, index_name)
     )
     es_client.indices.update_aliases(
         body={
             "actions": [
-                {"remove": {"index": DOCS_STAGING_INDEX, "alias": DOCS_ALIAS}},
-                {"remove": {"index": DOCS_STAGING_INDEX, "alias": SEARCH_ALIAS}},
-                {"add": {"index": DOCS_INDEX, "alias": DOCS_ALIAS}},
-                {"add": {"index": DOCS_INDEX, "alias": SEARCH_ALIAS}},
+                {"remove": {"index": swapping_index, "alias": INDEX_DICT.get(index_name)[1]}},
+                {"remove": {"index": swapping_index, "alias": SEARCH_ALIAS}},
+                {"add": {"index": index_name, "alias": INDEX_DICT.get(index_name)[1]}},
+                {"add": {"index": index_name, "alias": SEARCH_ALIAS}},
             ]
         }
     )
-    logger.info(" Moved aliases '{0}' and '{1}' to point to 'docs' successfully.".format(
-        DOCS_ALIAS, SEARCH_ALIAS)
+    logger.info(" Moved aliases '{0}' and '{1}' to point to '{2}' successfully.".format(
+        INDEX_DICT.get(index_name)[1], SEARCH_ALIAS, index_name)
     )
 
-    logger.info(" Deleting index '{0}'...".format(DOCS_STAGING_INDEX))
-    es_client.indices.delete(DOCS_STAGING_INDEX)
-    logger.info(" Deleted index '{0}' successfully.".format(DOCS_STAGING_INDEX))
-    logger.info(" Task refresh_current_legal_docs_zero_downtime has been completed successfully !!!")
+    # sleep 60 second (1 min)
+    time.sleep(60)
+
+    logger.info(" Deleting index '{0}'...".format(swapping_index))
+    es_client.indices.delete(swapping_index)
+    logger.info(" Deleted swapping index '{0}' successfully.".format(swapping_index))
+    logger.info(" Task refresh_legal_data_zero_downtime has been completed successfully !!!")
 
 # =========== end index management =============
 
 
 # =========== start repository management =============
-def configure_snapshot_repository(repository_name=DOCS_REPOSITORY_NAME):
+def configure_snapshot_repository(repo_name=None):
     """
-    Configure a s3 repository to store the snapshots, default repository_name = DOCS_REPOSITORY_NAME
+    Configure a s3 repository to store the snapshots, default repository_name = CASE_REPO
     This needs to get re-run when s3 credentials change for each api app deployment.
 
     How to call task command:
-    cf run-task api --command "python cli.py configure_snapshot_repository repository_docs" -m 2G --name configure_snapshot_repository_docs
-    cf run-task api --command "python cli.py configure_snapshot_repository repository_archived_murs" -m 2G --name configure_snapshot_repository_arch_mur
+    ex1: cf run-task api --command "python cli.py configure_snapshot_repository case_repo" -m 2G
+    --name configure_snapshot_repository
+    ex2: cf run-task api --command "python cli.py configure_snapshot_repository ao_repo" -m 2G
+    --name configure_snapshot_repository_ao
+    ex3: cf run-task api --command "python cli.py configure_snapshot_repository arch_mur_repo" -m 2G
+    --name configure_snapshot_repository_arch_mur
     """
+    repo_name = repo_name or CASE_REPO
     es_client = create_es_client()
-    logger.info(" Configuring snapshot repository: {0}".format(repository_name))
+
+    logger.info(" Configuring snapshot repository: {0}".format(repo_name))
     credentials = get_service_instance_credentials(get_service_instance(
         S3_PRIVATE_SERVICE_INSTANCE_NAME))
 
@@ -749,38 +726,38 @@ def configure_snapshot_repository(repository_name=DOCS_REPOSITORY_NAME):
             },
         }
         es_client.snapshot.create_repository(
-            repository=repository_name,
+            repository=repo_name,
             body=body,
         )
-        logger.info(" Configured snapshot repository: {0} successfully.".format(repository_name))
+        logger.info(" Configured snapshot repository: {0} successfully.".format(repo_name))
 
     except Exception as err:
         logger.error(" Error occured in configure_snapshot_repository.{0}".format(err))
 
 
-def delete_repository(repository_name=None):
+def delete_repository(repo_name):
     """
     Delete a s3 repository.
 
     How to call task command:
-    cf run-task api --command "python cli.py delete_repository repository_test" -m 2G --name delete_repository
+     ex1: cf run-task api --command "python cli.py delete_repository repository_test" -m 2G --name delete_repository
     """
-    if repository_name:
+    if repo_name:
         try:
             es_client = create_es_client()
-            es_client.snapshot.delete_repository(repository=repository_name)
-            logger.info(" Deleted snapshot repository: {0} successfully.".format(repository_name))
+            es_client.snapshot.delete_repository(repository=repo_name)
+            logger.info(" Deleted snapshot repository: {0} successfully.".format(repo_name))
         except Exception as err:
             logger.error(" Error occured in delete_repository.{0}".format(err))
     else:
-        logger.info(" Please input a snapshot repository name.")
+        logger.info(" Please input a s3 repository name.")
 
     display_repositories()
 
 
 def display_repositories():
     """
-    Returns all the repositories.
+    Show all repositories.
 
     How to call task command:
     cf run-task api --command "python cli.py display_repositories" -m 2G --name display_repositories
@@ -799,109 +776,122 @@ def display_repositories():
 
 # =========== start snapshot management =============
 
-def create_es_snapshot(repository_name=None, snapshot_name="auto_backup", index_name=None):
+def create_es_snapshot(index_name):
     """
-    Create elasticsearch shapshot of specific 'index_name'(=index1,index2...) in 'repository_name'.
+    Create elasticsearch shapshot of specific XXXX_INDEX in XXXX_REPO.
 
     How to call task command:
-    ex1: cf run-task api --command "python cli.py create_es_snapshot repository_docs docs" -m 2G --name snapshot_docs
-    ex1: cf run-task api --command "python cli.py create_es_snapshot repository_archived_murs archived_murs" -m 2G --name snapshot_archived_murs
-    ex3: cf run-task api --command "python cli.py create_es_snapshot docs archived_murs" -m 2G --name create_snapshot_2index
+    ex1: cf run-task api --command "python cli.py create_es_snapshot case_index" -m 2G
+    --name create_snapshot_case
+    ex2: cf run-task api --command "python cli.py create_es_snapshot ao_index" -m 2G
+    --name create_snapshot_ao
+    ex3: cf run-task api --command "python cli.py create_es_snapshot arch_mur_index" -m 2G
+    --name create_snapshot_arch_mur
     """
-    es_client = create_es_client()
-    index_name_list = []
-    if index_name:
-        index_name_list = index_name.split(',')
+    index_name = index_name or CASE_INDEX
+    if index_name in INDEX_DICT.keys():
+        repo_name = INDEX_DICT.get(index_name)[4]
+        prefix_snapshot = INDEX_DICT.get(index_name)[5]
+        index_name_list = [index_name]
+        es_client = create_es_client()
+        body = {
+            "indices": index_name_list,
+        }
+        configure_snapshot_repository(repo_name)
+        snapshot_name = "{0}_{1}".format(
+            prefix_snapshot, datetime.datetime.today().strftime("%Y%m%d%H%M")
+        )
+        logger.info(" Creating snapshot {0} ...".format(snapshot_name))
+        result = es_client.snapshot.create(
+            repository=repo_name,
+            snapshot=snapshot_name,
+            body=body,
+        )
+        if result.get("accepted"):
+            logger.info(" The snapshot: {0} is created successfully.".format(snapshot_name))
+        else:
+            logger.error(" Unable to create snapshot: {0}".format(snapshot_name))
     else:
-        index_name_list = [DOCS_INDEX]
-
-    body = {
-        "indices": index_name_list,
-    }
-
-    repository_name = repository_name or DOCS_REPOSITORY_NAME
-    configure_snapshot_repository(repository_name)
-
-    snapshot_name = "{0}_{1}_{2}".format(
-        index_name_list[0], datetime.datetime.today().strftime("%Y%m%d%H%M"), snapshot_name
-    )
-    logger.info(" Creating snapshot {0} ...".format(snapshot_name))
-    result = es_client.snapshot.create(
-        repository=repository_name,
-        snapshot=snapshot_name,
-        body=body,
-    )
-    if result.get("accepted"):
-        logger.info(" The snapshot: {0} is created successfully.".format(snapshot_name))
-    else:
-        logger.error(" Unable to create snapshot: {0}".format(snapshot_name))
+        logger.info(" Invalid index '{0}', no snapshot created.".format(index_name))
 
 
-def delete_snapshot(repository_name=None, snapshot_name=None):
+def delete_snapshot(repo_name, snapshot_name):
     """
     Delete a snapshot.
 
     How to call task command:
-    ex1: cf run-task api --command "python cli.py delete_snapshot repository_docs docs_202010272134_auto_backup" -m 2G --name delete_snapshot
-    ex2: cf run-task api --command "python cli.py delete_snapshot docs_202010272132_auto_backup" -m 2G --name delete_snapshot
+    ex1: cf run-task api --command "python cli.py delete_snapshot case_repo case_snapshot_202010272134" -m 2G
+    --name delete_snapshot_case
+    ex2: cf run-task api --command "python cli.py delete_snapshot ao_repo ao_snapshot_202010272132" -m 2G
+    --name delete_snapshot_ao
+    ex3: cf run-task api --command "python cli.py delete_snapshot arch_mur_repo arch_mur_snapshot_202010272132" -m 2G
+    --name delete_snapshot_arch_mur
     """
-    if repository_name and snapshot_name:
-        configure_snapshot_repository(repository_name)
+    if repo_name and snapshot_name:
+        configure_snapshot_repository(repo_name)
         try:
-            logger.info(" Deleting snapshot {0} from {1} ...".format(snapshot_name, repository_name))
+            logger.info(" Deleting snapshot {0} from {1} ...".format(snapshot_name, repo_name))
             es_client = create_es_client()
-            es_client.snapshot.delete(repository=repository_name, snapshot=snapshot_name)
-            logger.info(" The snapshot {0} from {1} is deleted successfully.".format(snapshot_name, repository_name))
+            es_client.snapshot.delete(repository=repo_name, snapshot=snapshot_name)
+            logger.info(" The snapshot {0} from {1} is deleted successfully.".format(snapshot_name, repo_name))
         except Exception as err:
             logger.error(" Error occured in delete_snapshot.{0}".format(err))
     else:
         logger.info(" Please provide both snapshot and repository names.")
 
 
-def restore_es_snapshot(repository_name=None, snapshot_name=None, index_name=None):
+def restore_es_snapshot(repo_name=None, snapshot_name=None, index_name=None):
     """
     Restore elasticsearch from snapshot in the event of catastrophic failure at the infrastructure layer or user error.
-    This command restores 'docs' index snapshot only.
+    This command restores 'index_name' snapshot only.
 
-    -Delete DOCS_INDEX
+    -Delete CASE_INDEX
     -Default to most recent snapshot, optionally specify `snapshot_name`
 
     How to call task command:
-    ex: cf run-task api --command "python cli.py restore_es_snapshot repository_docs docs_202010272132_auto_backup docs" -m 2G --name restore_es_snapshot
+    ex1: cf run-task api --command "python cli.py restore_es_snapshot case_repo case_snapshot_202010272132 case_index"
+    -m 2G --name restore_es_snapshot_case
+    ex2: cf run-task api --command "python cli.py restore_es_snapshot ao_repo ao_snapshot_202010272132 ao_index"
+    -m 2G --name restore_es_snapshot_ao
+    ex3: cf run-task api --command "python cli.py restore_es_snapshot arch_mur_repo
+    arch_mur_snapshot_202010272132 arch_mur_index" -m 2G --name restore_es_snapshot_arch_mur
     """
     es_client = create_es_client()
 
-    repository_name = repository_name or DOCS_REPOSITORY_NAME
-    configure_snapshot_repository(repository_name)
+    repo_name = repo_name or CASE_REPO
+    configure_snapshot_repository(repo_name)
 
-    index_name = index_name or DOCS_INDEX
-
-    most_recent_snapshot_name = get_most_recent_snapshot(repository_name)
+    index_name = index_name or CASE_INDEX
+    swapping_index = INDEX_DICT.get(index_name)[3]
+    most_recent_snapshot_name = get_most_recent_snapshot(repo_name)
     snapshot_name = snapshot_name or most_recent_snapshot_name
 
     if es_client.indices.exists(index_name):
         logger.info(
-            " Found '{0}' index. Creating staging index for zero-downtime restore".format(index_name)
+            " Found '{0}' index. Creating swapping index for zero-downtime restore".format(index_name)
         )
-        # Create docs_staging index
-        create_index(DOCS_STAGING_INDEX)
+        # Create XXXX_SWAP_INDEX
+        create_index(swapping_index)
 
-        # Move the alias docs_index to point to `docs_staging` instead of `docs`
-        move_alias(DOCS_INDEX, DOCS_ALIAS, DOCS_STAGING_INDEX)
+        # Move the alias `XXXX_ALIAS` to point to `XXXX_SWAP_INDEX` instead of `XXXX_INDEX`
+        switch_alias(index_name, INDEX_DICT.get(index_name)[1], swapping_index)
 
     delete_index(index_name)
 
     logger.info(" Retrieving snapshot: {0}".format(snapshot_name))
     body = {"indices": index_name}
     result = es_client.snapshot.restore(
-        repository=repository_name,
+        repository=repo_name,
         snapshot=snapshot_name,
         body=body,
     )
+    time.sleep(20)
     if result.get("accepted"):
         logger.info(" The snapshot: {0} is restored successfully.".format(snapshot_name))
-        if es_client.indices.exists(DOCS_STAGING_INDEX):
-            move_aliases_to_docs_index()
+        if es_client.indices.exists(swapping_index):
+            # 1. Switch aliases (XXXX_ALIAS,SEARCH_ALIAS) point back to XXXX_INDEX
+            # 2. Delete XXXX_SWAP_INDEX
+            switch_aliases_to_original_index(index_name)
     else:
         logger.error(" Unable to restore snapshot: {0}".format(snapshot_name))
         logger.info(
@@ -911,7 +901,7 @@ def restore_es_snapshot(repository_name=None, snapshot_name=None, index_name=Non
         )
 
 
-def restore_es_snapshot_downtime(repository_name=None, snapshot_name=None, index_name=None):
+def restore_es_snapshot_downtime(repo_name=None, snapshot_name=None, index_name=None):
     """
     Restore elasticsearch from snapshot with downtime
 
@@ -920,18 +910,22 @@ def restore_es_snapshot_downtime(repository_name=None, snapshot_name=None, index
     -Default to most recent snapshot, optionally specify `snapshot_name`
 
     How to call task command:
-    ex: cf run-task api --command "python cli.py restore_es_snapshot_downtime repository_docs docs_202010272130_auto_backup docs" -m 2G --name restore_es_snapshot_downtime
-    ex: cf run-task api --command "python cli.py restore_es_snapshot_downtime repository_archived_murs archived_murs_202010272130_auto_backup archived_murs" -m 2G --name restore_es_snapshot_downtime
+    ex1: cf run-task api --command "python cli.py restore_es_snapshot_downtime
+    case_repo case_snapshot_202010272130 case_index" -m 2G --name restore_es_snapshot_downtime_case
+    ex2: cf run-task api --command "python cli.py restore_es_snapshot_downtime
+    ao_repo ao_snapshot_202010272130 ao_index" -m 2G --name restore_es_snapshot_downtime_ao
+    ex3: cf run-task api --command "python cli.py restore_es_snapshot_downtime
+    arch_mur_repo arch_mur_snapshot_202010272130 arch_mur_index" -m 2G --name restore_es_snapshot_downtime_arch_mur
     """
     es_client = create_es_client()
 
-    repository_name = repository_name or DOCS_REPOSITORY_NAME
-    configure_snapshot_repository(repository_name)
+    repo_name = repo_name or CASE_REPO
+    configure_snapshot_repository(repo_name)
 
-    index_name = index_name or DOCS_INDEX
+    index_name = index_name or CASE_INDEX
 
     if not snapshot_name:
-        most_recent_snapshot_name = get_most_recent_snapshot(repository_name)
+        most_recent_snapshot_name = get_most_recent_snapshot(repo_name)
         snapshot_name = most_recent_snapshot_name
 
     delete_index(index_name)
@@ -939,44 +933,52 @@ def restore_es_snapshot_downtime(repository_name=None, snapshot_name=None, index
     logger.info(" Restoring snapshot: '{0}'...".format(snapshot_name))
     body = {"indices": index_name}
     result = es_client.snapshot.restore(
-        repository=repository_name,
+        repository=repo_name,
         snapshot=snapshot_name,
         body=body,
     )
+    time.sleep(20)
     if result.get("accepted"):
         logger.info(" Restored snapshot: '{0}' successfully.".format(snapshot_name))
     else:
         logger.error(" Unable to restore snapshot: {0}".format(snapshot_name))
 
 
-def get_most_recent_snapshot(repository_name=None):
+def get_most_recent_snapshot(repo_name=None):
     """
     Get the list of snapshots (sorted by date, ascending) and
     return most recent snapshot name
     """
     es_client = create_es_client()
 
-    repository_name = repository_name or DOCS_REPOSITORY_NAME
-    logger.info(" Retreiving most recent snapshot...")
-    snapshot_list = es_client.snapshot.get(repository=repository_name, snapshot="*").get(
+    repo_name = repo_name or CASE_REPO
+    logger.info(" Retreiving the most recent snapshot...")
+    snapshot_list = es_client.snapshot.get(repository=repo_name, snapshot="*").get(
         "snapshots"
     )
     return snapshot_list.pop().get("snapshot")
 
 
-def display_snapshots(repository_name=None):
+def display_snapshots(repo_name=None):
     """
-    Returns all the snapshots in the repository.
+    TO List: currently it shows all the snapshots in all the repo.
+    Show all the snapshots in the XXXX_REPO.
 
     How to call task command:
-    ex1: cf run-task api --command "python cli.py display_snapshots repository_docs" -m 2G --name display_snapshots
-    ex2: cf run-task api --command "python cli.py display_snapshots repository_archived_murs" -m 2G --name display_snapshots
+    ex1: cf run-task api --command "python cli.py display_snapshots case_repo" -m 2G
+    --name display_snapshots_case
+    ex2: cf run-task api --command "python cli.py display_snapshots ao_repo" -m 2G
+    --name display_snapshots_ao
+    ex3: cf run-task api --command "python cli.py display_snapshots arch_mur_repo" -m 2G
+    --name display_snapshots_arch_mur
     """
     es_client = create_es_client()
-    repository_name = repository_name or DOCS_REPOSITORY_NAME
-    configure_snapshot_repository(repository_name)
+
+    repo_name = repo_name or CASE_REPO
+    repo_list = [repo_name]
+    configure_snapshot_repository(repo_name)
     result = es_client.cat.snapshots(
-        repository=repository_name,
+        repository=repo_list,
         format="JSON",
         v=True,
         s="id",
@@ -985,20 +987,24 @@ def display_snapshots(repository_name=None):
     logger.info(" Snapshot list=" + json.dumps(result, indent=3, cls=DateTimeEncoder))
 
 
-def display_snapshot_detail(repository_name=None, snapshot_name=None):
+def display_snapshot_detail(repo_name=None, snapshot_name=None):
     """
     Returns all the snapshot detail (include uuid) in the repository.
 
     How to call task command:
-    ex1: cf run-task api --command "python cli.py display_snapshot_detail repository_name docs_202010*" -m 2G --name display_snapshot
-    ex2: cf run-task api --command "python cli.py display_snapshot_detail repository_archived_murs archived_murs*" -m 2G --name display_snapshot_detail
+    ex1: cf run-task api --command "python cli.py display_snapshot_detail case_repo case_snapshot_202010*"
+    -m 2G --name display_snapshot_detail_case
+    ex2: cf run-task api --command "python cli.py display_snapshot_detail ao_repo ao_snapshot_202010*"
+    -m 2G --name display_snapshot_detail_ao
+    ex3: cf run-task api --command "python cli.py display_snapshot_detail arch_mur_repo arch_mur*"
+    -m 2G --name display_snapshot_detail_arch_mur
     """
     es_client = create_es_client()
-    repository_name = repository_name or DOCS_REPOSITORY_NAME
+    repo_name = repo_name or CASE_REPO
     snapshot_name = snapshot_name or "*"
-    configure_snapshot_repository(repository_name)
+    configure_snapshot_repository(repo_name)
     result = es_client.snapshot.get(
-        repository=repository_name,
+        repository=repo_name,
         snapshot=snapshot_name
     )
     logger.info(" Snapshot details =" + json.dumps(result, indent=3, cls=DateTimeEncoder))
@@ -1011,7 +1017,8 @@ def display_snapshot_detail(repository_name=None, snapshot_name=None):
 def delete_doctype_from_es(index_name=None, doc_type=None):
     """
     Deletes all records with the given `doc_type` from Elasticsearch
-    Ex: cf run-task api --command "python cli.py delete_doctype_from_es docs adrs" -m 2G --name delete_adrs
+    Ex: cf run-task api --command "python cli.py delete_doctype_from_es docs adrs" -m 2G
+    --name delete_adrs
     """
     body = {"query": {"match": {"type": doc_type}}}
 
@@ -1027,8 +1034,10 @@ def delete_doctype_from_es(index_name=None, doc_type=None):
 def delete_single_doctype_from_es(index_name=None, doc_type=None, num_doc_id=None):
     """
     Deletes single record with the given `doc_type` and `doc_id` from Elasticsearch
-    Ex: cf run-task api --command "python cli.py delete_single_doctype_from_es docs admin_fines af_4201" -m 2G --name delete_one_af
-        cf run-task api --command "python cli.py delete_single_doctype_from_es docs advisory_opinions advisory_opinions_2021-08" -m 2G --name delete_one_ao
+    Ex: cf run-task api --command "python cli.py delete_single_doctype_from_es docs
+    admin_fines af_4201" -m 2G --name delete_one_af
+        cf run-task api --command "python cli.py delete_single_doctype_from_es docs
+        advisory_opinions advisory_opinions_2021-08" -m 2G --name delete_one_ao
     """
     body = {"query": {
         "bool": {

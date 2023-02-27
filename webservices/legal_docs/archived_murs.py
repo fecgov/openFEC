@@ -11,8 +11,7 @@ from webservices.utils import (
 from .reclassify_statutory_citation import reclassify_statutory_citation
 import json
 from .es_management import (  # noqa
-    ARCHIVED_MURS_INDEX,
-    ARCHIVED_MURS_ALIAS,
+    ARCH_MUR_ALIAS,
 )
 
 logger = logging.getLogger(__name__)
@@ -130,16 +129,16 @@ def load_archived_murs(mur_no=None):
     """
     Reads data for Archived MURs from a Postgres database (under schema:mur_arch),
     assembles a JSON document corresponding to the mur, and indexes this document
-    in Elasticsearch in the alias ARCHIVED_MURS_ALIAS of ARCHIVED_MURS_INDEX with a type=`murs` and mur_type=`archived`.
+    in Elasticsearch in the alias ARCH_MUR_ALIAS of ARCH_MUR_INDEX with a type=`murs` and mur_type=`archived`.
     """
-    # TO DO: check if ARCHIVED_MURS_ALIAS exist before uploading.
+    # TO DO: check if ARCH_MUR_ALIAS exist before uploading.
     es_client = create_es_client()
     mur_count = 0
     for mur in get_murs(mur_no):
         if mur is not None:
             try:
                 logger.info("Loading archived MUR No: {0}".format(mur["no"]))
-                es_client.index(ARCHIVED_MURS_ALIAS, mur, id=mur["doc_id"])
+                es_client.index(ARCH_MUR_ALIAS, mur, id=mur["doc_id"])
                 mur_count += 1
                 logger.info("{0} Archived Mur(s) loaded".format(mur_count))
             except Exception as err:
@@ -234,10 +233,10 @@ def get_citations_arch_mur(mur_id):
         for row in rs:
             if row["cite"]:
                 us_code_match = re.match(
-                    "(?P<title>[0-9]+) U\.S\.C\. (?P<section>[0-9a-z-]+)(?P<paragraphs>.*)", row["cite"])
+                    r"(?P<title>[0-9]+) U\.S\.C\. (?P<section>[0-9a-z-]+)(?P<paragraphs>.*)", row["cite"])
 
                 regulation_match = re.match(
-                    "(?P<title>[0-9]+) C\.F\.R\. (?P<part>[0-9]+)(?:\.(?P<section>[0-9]+))?", row["cite"])
+                    r"(?P<title>[0-9]+) C\.F\.R\. (?P<part>[0-9]+)(?:\.(?P<section>[0-9]+))?", row["cite"])
 
                 if us_code_match:
                     us_code_title, us_code_section = reclassify_statutory_citation(
@@ -302,7 +301,7 @@ def get_documents(mur_id):
 def extract_pdf_text(mur_no=None):
     """
     1)Reads "text" and "documents" object data for Archived MURs from Elasticsearch,
-    under index: ARCHIVED_MURS_INDEX and type of `murs`
+    under index: ARCH_MUR_INDEX and type of `murs`
     2)Assembles a JSON document corresponding to the archived murs,
     3)Insert the JSON document into Postgres database table: mur_arch.documents
     4)Run this command carefully, backup mur_arch.documents table first
@@ -327,7 +326,7 @@ def extract_pdf_text(mur_no=None):
                 "documents.text"
             ])
             .extra(size=each_fetch_size, from_=from_no)
-            .index(ARCHIVED_MURS_ALIAS)
+            .index(ARCH_MUR_ALIAS)
             .doc_type("murs")
             .sort("no")
             .execute()
@@ -340,7 +339,7 @@ def extract_pdf_text(mur_no=None):
     results = {"all_mur_docs": all_results}
     logger.debug("all_mur_docs = " + json.dumps(results, indent=3, cls=DateTimeEncoder))
 
-    logger.info("Get {0} archived mur(s) from elasticserch index: \"ARCHIVED_MURS_INDEX\"".format(
+    logger.info("Get {0} archived mur(s) from elasticserch index: \"ARCH_MUR_INDEX\"".format(
         str(len(results["all_mur_docs"]))))
 
     if results and results.get("all_mur_docs"):

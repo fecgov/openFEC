@@ -1,7 +1,7 @@
 ---
 applications:
   - name: api
-    instances: 1
+    instances: 2
     memory: 2G
     disk_quota: 1G
     stack: cflinuxfs3

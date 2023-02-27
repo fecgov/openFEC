@@ -11,6 +11,9 @@ from webservices.utils import (
     Resource,
     DateTimeEncoder,
 )
+from webservices.legal_docs.es_management import (  # noqa
+    SEARCH_ALIAS,
+)
 from webservices.utils import use_kwargs
 from elasticsearch import RequestError
 from webservices.exceptions import ApiError
@@ -66,7 +69,7 @@ class GetLegalDocument(Resource):
             .query("bool", must=[Q("term", no=no), Q("term", type=doc_type)])
             .source(exclude="documents.text")
             .extra(size=200)
-            .index("docs_search")
+            .index(SEARCH_ALIAS)
             .execute()
         )
 
@@ -154,7 +157,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .highlight_options(require_field_match=False)
         .source(exclude=["text", "documents.text", "sort1", "sort2"])
         .extra(size=hits_returned, from_=from_hit)
-        .index("docs_search")
+        .index(SEARCH_ALIAS)
         .sort("sort1", "sort2")
     )
 
@@ -740,7 +743,7 @@ class GetLegalCitation(Resource):
                 minimum_should_match=1,
             )
             .extra(size=10)
-            .index("docs_search")
+            .index(SEARCH_ALIAS)
         )
 
         es_results = query.execute()
