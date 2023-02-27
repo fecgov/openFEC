@@ -1369,6 +1369,7 @@ class CandidateTotalAggregateSchema(ma.Schema):
     state = ma.fields.Str()
     district = ma.fields.Str()
     district_number = ma.fields.Int()
+    state_full = ma.fields.Str()
 
 
 augment_schemas(CandidateTotalAggregateSchema)

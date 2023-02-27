@@ -1412,6 +1412,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             state="CA",
             district="01",
             party="DEM",
+            state_full='California'
         )
         factories.CandidateTotalFactory(
             candidate_id="HCA01",
@@ -1430,6 +1431,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             state="CA",
             district="01",
             party="DEM",
+            state_full='California'
         )
         factories.CandidateTotalFactory(
             candidate_id="HCA02",
@@ -1448,6 +1450,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             state="CA",
             district="02",
             party="DEM",
+            state_full='California'
         )
         factories.CandidateTotalFactory(
             candidate_id="HNY01",
@@ -1465,6 +1468,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             state="NY",
             district="01",
             party="REP",
+            state_full='New York'
         )
         factories.CandidateTotalFactory(
             candidate_id="HNY13",
@@ -1482,6 +1486,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             state="NY",
             district="13",
             party="REP",
+            state_full='New York'
         )
 
         factories.CandidateTotalFactory(
@@ -1500,6 +1505,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             state="CA",
             district="00",
             party="DEM",
+            state_full='California'
         )
         factories.CandidateTotalFactory(
             candidate_id="SCA01",
@@ -1518,6 +1524,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             state="CA",
             district="00",
             party="DEM",
+            state_full='California'
         )
         factories.CandidateTotalFactory(
             candidate_id="SNY01",
@@ -1536,6 +1543,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             state="NY",
             district="00",
             party="DEM",
+            state_full='New York'
         )
         factories.CandidateTotalFactory(
             candidate_id="SNY01",
@@ -1554,6 +1562,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             state="NY",
             district="00",
             party="DEM",
+            state_full='New York'
         )
         factories.CandidateTotalFactory(
             candidate_id="SNY01",
@@ -1572,6 +1581,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             state="NY",
             district="00",
             party="DEM",
+            state_full='New York'
         )
         factories.CandidateTotalFactory(
             candidate_id="SVA02",  # not exist in election list
@@ -1590,6 +1600,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             state="VA",
             district="00",
             party="REP",
+            state_full='Virginia'
         )
 
         factories.CandidateTotalFactory(
@@ -1609,6 +1620,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             state="CA",
             district="00",
             party="REP",
+            state_full='California'
         )
 
         factories.CandidateTotalFactory(
@@ -1628,6 +1640,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             state="CA",
             district="00",
             party="REP",
+            state_full='California'
         )
 
     def test_base(self):
@@ -1729,6 +1742,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "election_year": 2022,
                 "office": "S",
                 "state": "CA",
+                "state_full": "California",
                 "total_receipts": 90,
                 "total_disbursements": 90,
                 "total_individual_itemized_contributions": 90,
@@ -1745,6 +1759,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "office": "S",
                 "state": "CA",
                 "total_receipts": 100,
+                "state_full": "California",
                 "total_disbursements": 100,
                 "total_individual_itemized_contributions": 100,
                 "total_transfers_from_other_authorized_committee": 100,
@@ -1759,6 +1774,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "election_year": 2016,
                 "office": "S",
                 "state": "NY",
+                "state_full": "New York",
                 "total_receipts": 1000,
                 "total_disbursements": 1000,
                 "total_individual_itemized_contributions": 1000,
@@ -1903,6 +1919,72 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
             },
         )
 
+    def test_sort_by_state_full(self):
+        # aggregate_by="office-state", office=S, is_active_candidate=True, election_full default=true
+        # return rows: (2016/S/NY, 2016/S/CA, 2022/S/CA)
+        # row 1: 2016/total=1000
+        # row 2: 2016/total=100
+        # row 3: 2022/total=90
+
+        results = self._results(api.url_for(
+            CandidateTotalAggregateView,
+            aggregate_by="office-state",
+            office="S",
+            is_active_candidate=True,
+            sort="-state_full")
+        )
+        assert len(results) == 3
+        assert_dicts_subset(
+            results[0],
+            {
+                "election_year": 2016,
+                "office": "S",
+                "state": "NY",
+                "state_full": "New York",
+                "total_receipts": 1000,
+                "total_disbursements": 1000,
+                "total_individual_itemized_contributions": 1000,
+                "total_transfers_from_other_authorized_committee": 1000,
+                "total_other_political_committee_contributions": 1000,
+                "total_cash_on_hand_end_period": 1000,
+                "total_debts_owed_by_committee": 1000,
+
+            },
+        )
+        assert_dicts_subset(
+            results[1],
+            {
+                "election_year": 2016,
+                "office": "S",
+                "state": "CA",
+                "state_full": "California",
+                "total_receipts": 100,
+                "total_disbursements": 100,
+                "total_individual_itemized_contributions": 100,
+                "total_transfers_from_other_authorized_committee": 100,
+                "total_other_political_committee_contributions": 100,
+                "total_cash_on_hand_end_period": 100,
+                "total_debts_owed_by_committee": 100,
+            },
+        )
+        assert_dicts_subset(
+            results[2],
+            {
+                "election_year": 2022,
+                "office": "S",
+                "state": "CA",
+                "state_full": "California",
+                "total_receipts": 90,
+                "total_disbursements": 90,
+                "total_individual_itemized_contributions": 90,
+                "total_transfers_from_other_authorized_committee": 90,
+                "total_other_political_committee_contributions": 90,
+                "total_cash_on_hand_end_period": 90,
+                "total_debts_owed_by_committee": 90,
+
+            },
+        )
+
     def test_filter_by_min_max_election_cycle(self):
         # case1: aggregate_by=office, office=S, election_full default=true,
         # is_active_candidate=true, min_election_cycle=2016
@@ -1974,6 +2056,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_cash_on_hand_end_period": 3000,
                 "total_debts_owed_by_committee": 3000,
                 "state": "CA",
+                "state_full": "California"
             },
         )
 
@@ -2005,6 +2088,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_debts_owed_by_committee": 1000,
                 "state": "CA",
                 "district": "01",
+                "state_full": "California",
             },
         )
 
