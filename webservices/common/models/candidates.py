@@ -207,6 +207,7 @@ class CandidateTotal(db.Model):
     state = db.Column(db.String(2), index=True, doc=docs.STATE)
     district = db.Column(db.String(2), index=True, doc=docs.DISTRICT)
     district_number = db.Column(db.Integer, index=True, doc=docs.DISTRICT)
+    state_full = db.Column(db.String(50), index=True, doc=docs.STATE)
 
 
 class CandidateElection(db.Model):
