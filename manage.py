@@ -110,6 +110,7 @@ def refresh_materialized(concurrent=True):
         "totals_ie": ["ofec_totals_ie_only_mv"],
         "totals_presidential": ["ofec_totals_presidential_mv"],
         "sched_b_by_recipient": ["ofec_sched_b_aggregate_recipient_mv"],
+        "totals_inaugural_donations": ["ofec_totals_inaugural_donations_mv"]
     }
 
     graph = flow.get_graph()
