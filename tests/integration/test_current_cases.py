@@ -269,35 +269,35 @@ class TestLoadCurrentCases(BaseTestCase):
     def test_mur_with_participants_and_documents(self, get_bucket, get_credential):
         case_id = 1
         mur_subject = 'Fraudulent misrepresentation'
+        filename = "Some File.pdf"
+        expected_document = {
+            "document_id": 1,
+            "case_id": 1,
+            "filename": "Some File.pdf",
+            "category": "Statement of Reasons",
+            "date": datetime(2017, 2, 9, 0, 0),
+            "ocrtext": "Some Text",
+            "text": "Some Text",
+            "description": "Some Description",
+            "doc_order_id": 5
+        }
         expected_mur = {
             "type": "murs",
-            'no': '1',
+            'no': 1,
             'case_serial': 1,
             'name': 'MUR with participants',
             'mur_type': 'current',
             'published_flg': True,
             'election_cycles': [2016],
-            'doc_id': 'mur_1',
+            'doc_id': 1,
             'subjects': [mur_subject],
             'respondents': ["Bilbo Baggins", "Thorin Oakenshield"],
+            "documents": [expected_document],
         }
         participants = [
             ("Complainant", "Gollum"),
             ("Respondent", "Bilbo Baggins"),
             ("Respondent", "Thorin Oakenshield"),
-        ]
-        filename = "Some File.pdf"
-        documents = [
-            (
-                'A Category',
-                'Some text',
-                'legal/murs/{0}/{1}'.format('1', filename.replace(' ', '-')),
-            ),
-            (
-                'Another Category',
-                'Different text',
-                'legal/murs/{0}/{1}'.format('1', filename.replace(' ', '-')),
-            ),
         ]
 
         self.create_case(
@@ -310,23 +310,18 @@ class TestLoadCurrentCases(BaseTestCase):
         for entity_id, participant in enumerate(participants):
             role, name = participant
             self.create_participant(case_id, entity_id, role, name)
-        for document_id, document in enumerate(documents):
-            category, ocrtext, url = document
-            self.create_document(case_id, document_id, category, ocrtext, filename)
+        self.create_document(1, expected_document, filename)
 
         actual_mur = next(get_cases('MUR'))
 
-        # ?? to do list:
-        # for key in expected_mur:
-        #     assert actual_mur[key] == expected_mur[key]
+        actual_document = actual_mur["documents"]
+        for i, actual_doc in enumerate(actual_document):
+            for j, expected_doc in enumerate(expected_document):
+                assert actual_document[actual_doc] == expected_document[expected_doc]
 
         assert participants == [
             (p['role'], p['name']) for p in actual_mur['participants']
         ]
-
-        # assert [(d[0], d[1], len(d[1])) for d in documents] == [
-        #     (d['category'], d['text'], d['length']) for d in actual_mur['documents']
-        # ]
 
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
     @patch('webservices.legal_docs.current_cases.get_bucket')
@@ -686,19 +681,20 @@ class TestLoadCurrentCases(BaseTestCase):
             regulatory_citation,
         )
 
-    def create_document(
-        self, case_id, document_id, category, ocrtext, filename='129812.pdf'
-    ):
+    def create_document(self, case_id, document, filename='201801_C.pdf'):
         self.connection.execute(
-            "INSERT INTO fecmur.document (document_id, doc_order_id, case_id, category, ocrtext, fileimage, filename) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            document_id,
-            document_id,
+            """
+            INSERT INTO fecmur.document
+            (document_id, case_id, filename, category, document_date, ocrtext, description, doc_order_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+            document["document_id"],
             case_id,
-            category,
-            ocrtext,
-            ocrtext,
             filename,
+            document["category"],
+            document["date"],
+            document["text"],
+            document["description"],
+            document["doc_order_id"],
         )
 
     def create_calendar_event(self, entity_id, event_date, event_id, case_id):

@@ -431,16 +431,16 @@ INDEX_DICT = {
 
 def create_index(index_name=None):
     """
-    Creating an index for storing legal documents on Elasticsearch.
+    Creating an index for storing legal data on Elasticsearch based on 'INDEX_DICT'.
     - 'INDEX_DICT' description:
-    1) CASE_INDEX include DOCUMENT_TYPE=('statutes','regulations','murs','adrs','admin_fines')
+    1) CASE_INDEX includes DOCUMENT_TYPE=('statutes','regulations','murs','adrs','admin_fines')
     'murs' means current mur only.
-    2) AO_INDEX include DOCUMENT_TYPE=('advisory_opinions')
-    3) ARCH_MUR_INDEX include DOCUMENT_TYPE=('murs'), archived mur only
+    2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions')
+    3) ARCH_MUR_INDEX includes DOCUMENT_TYPE=('murs'), archived mur only
 
     -Two aliases will be created under each index: XXXX_ALIAS and SEARCH_ALIAS
-    a) XXXX_ALIAS is used for reload data to XXXX_INDEX on Elasticsearch
-    b) SEARCH_ALIAS is used for legal/search endpoint
+    a) XXXX_ALIAS is used for load data to XXXX_INDEX on Elasticsearch
+    b) SEARCH_ALIAS is used for '/legal/search/' endpoint
 
     -How to call this function in python code:
     a) create_index(CASE_INDEX)
@@ -534,7 +534,7 @@ def display_mapping(index_name=None):
 
 def delete_index(index_name):
     """
-    Delete an index,the argument 'index_name' is required
+    Delete an index, the argument 'index_name' is required
     -How to call this function in python code:
     a) delete_index(CASE_INDEX)
     b) delete_index(AO_INDEX)
@@ -571,7 +571,7 @@ def switch_alias(original_index=None, original_alias=None, swapping_index=None):
     2) Switch the original_alias to point to swapping_index instead of original_index.
 
     -How to call this function in Python code:
-    a) switch_alias(index_name, INDEX_DICT.get(index_name)[1], INDEX_DICT.get(index_name)[3])
+    a) switch_alias(index_name, original_alias, swapping_index)
     """
     original_index = original_index or CASE_INDEX
     original_alias = original_alias or INDEX_DICT.get(original_index)[1]
@@ -619,6 +619,9 @@ def restore_from_swapping_index(index_name=None):
     3. Re-index XXXX_INDEX based on XXXX_SWAP_INDEX
     4. Switch aliases (XXXX_ALIAS,SEARCH_ALIAS) point back to XXXX_INDEX
     5. Delete XXXX_SWAP_INDEX
+
+    -How to call this function in Python code:
+    a) restore_from_swapping_index(index_name)
     """
     index_name = index_name or CASE_INDEX
     swapping_index = INDEX_DICT.get(index_name)[3]
@@ -659,6 +662,9 @@ def switch_aliases_to_original_index(index_name=None):
     """
     1. Switch aliases (XXXX_ALIAS,SEARCH_ALIAS) point back to XXXX_INDEX
     2. Delete XXXX_SWAP_INDEX
+
+    -How to call this function in Python code:
+    a) switch_aliases_to_original_index(index_name)
     """
     index_name = index_name or CASE_INDEX
     swapping_index = INDEX_DICT.get(index_name)[3]
@@ -687,8 +693,9 @@ def switch_aliases_to_original_index(index_name=None):
     logger.info(" Deleting index '{0}'...".format(swapping_index))
     es_client.indices.delete(swapping_index)
     logger.info(" Deleted swapping index '{0}' successfully.".format(swapping_index))
-    logger.info(" Task refresh_legal_data_zero_downtime has been completed successfully !!!")
-
+    logger.info(" Task update_mapping_and_reload_legal_data on '{0}' has been completed successfully !!!".format(
+        index_name)
+    )
 # =========== end index management =============
 
 
@@ -737,10 +744,10 @@ def configure_snapshot_repository(repo_name=None):
 
 def delete_repository(repo_name):
     """
-    Delete a s3 repository.
+    Delete a s3 snapshot repository.
 
     How to call task command:
-     ex1: cf run-task api --command "python cli.py delete_repository repository_test" -m 2G --name delete_repository
+     ex1: cf run-task api --command "python cli.py delete_repository repository_name" -m 2G --name delete_repository
     """
     if repo_name:
         try:
@@ -778,7 +785,8 @@ def display_repositories():
 
 def create_es_snapshot(index_name):
     """
-    Create elasticsearch shapshot of specific XXXX_INDEX in XXXX_REPO.
+    Create elasticsearch snapshot of specific XXXX_INDEX in XXXX_REPO.
+    snapshot name likes: case_snapshot_202303091720, ao_snapshot_202303091728
 
     How to call task command:
     ex1: cf run-task api --command "python cli.py create_es_snapshot case_index" -m 2G
@@ -842,10 +850,11 @@ def delete_snapshot(repo_name, snapshot_name):
 
 def restore_es_snapshot(repo_name=None, snapshot_name=None, index_name=None):
     """
-    Restore elasticsearch from snapshot in the event of catastrophic failure at the infrastructure layer or user error.
+    Restore legal data on elasticsearch from a snapshot in the event of catastrophic failure
+    at the infrastructure layer or user error.
     This command restores 'index_name' snapshot only.
 
-    -Delete CASE_INDEX
+    -Delete index_name
     -Default to most recent snapshot, optionally specify `snapshot_name`
 
     How to call task command:
@@ -961,8 +970,8 @@ def get_most_recent_snapshot(repo_name=None):
 
 def display_snapshots(repo_name=None):
     """
-    TO List: currently it shows all the snapshots in all the repo.
-    Show all the snapshots in the XXXX_REPO.
+    Currently it shows all the snapshots in all the repo.
+    The argument 'repo_name' won't affect,
 
     How to call task command:
     ex1: cf run-task api --command "python cli.py display_snapshots case_repo" -m 2G
@@ -990,11 +999,13 @@ def display_snapshots(repo_name=None):
 def display_snapshot_detail(repo_name=None, snapshot_name=None):
     """
     Returns all the snapshot detail (include uuid) in the repository.
+    Currently it shows all the snapshots in all the repo.
+    The argument 'repo_name' won't affect, snapshot_name can use '*' wild card.
 
     How to call task command:
-    ex1: cf run-task api --command "python cli.py display_snapshot_detail case_repo case_snapshot_202010*"
+    ex1: cf run-task api --command "python cli.py display_snapshot_detail case_repo case_snapshot_2023*"
     -m 2G --name display_snapshot_detail_case
-    ex2: cf run-task api --command "python cli.py display_snapshot_detail ao_repo ao_snapshot_202010*"
+    ex2: cf run-task api --command "python cli.py display_snapshot_detail ao_repo ao_snapshot_2023*"
     -m 2G --name display_snapshot_detail_ao
     ex3: cf run-task api --command "python cli.py display_snapshot_detail arch_mur_repo arch_mur*"
     -m 2G --name display_snapshot_detail_arch_mur

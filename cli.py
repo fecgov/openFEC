@@ -92,11 +92,6 @@ def create_index_cli(index_name):
     legal_docs.create_index(index_name)
 
 
-@app.cli.command('restore_from_staging_index')
-def restore_from_staging_index_cli():
-    legal_docs.restore_from_staging_index()
-
-
 @app.cli.command('delete_index')
 @click.argument('index_name', required=True)
 def delete_index_cli(index_name):
@@ -120,10 +115,10 @@ def initialize_legal_data_cli(index_name):
     legal_docs.initialize_legal_data(index_name)
 
 
-@app.cli.command('refresh_legal_data_zero_downtime')
+@app.cli.command('update_mapping_and_reload_legal_data')
 @click.argument('index_name', default=None, required=False)
-def refresh_legal_data_zero_downtime(index_name):
-    legal_docs.refresh_legal_data_zero_downtime(index_name)
+def update_mapping_and_reload_legal_data_cli(index_name):
+    legal_docs.update_mapping_and_reload_legal_data(index_name)
 
 
 @app.cli.command('configure_snapshot_repository')
@@ -133,7 +128,7 @@ def configure_snapshot_repository_cli(repo_name):
 
 
 @app.cli.command('delete_repository')
-@click.argument('repo_name', default=None, required=False)
+@click.argument('repo_name', required=True)
 def delete_repository_cli(repo_name):
     legal_docs.delete_repository(repo_name)
 

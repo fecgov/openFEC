@@ -232,7 +232,8 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
             # Check if there are active deployments
             app_guid = ctx.run('cf app {} --guid'.format(app), hide=True, warn=True)
             app_guid_formatted = app_guid.stdout.strip()
-            status = ctx.run('cf curl "/v3/deployments?app_guids={}&status_values=ACTIVE"'.format(app_guid_formatted), hide=True, warn=True)
+            status = ctx.run('cf curl "/v3/deployments?app_guids={}&status_values=ACTIVE"'.format(
+                app_guid_formatted), hide=True, warn=True)
             active_deployments = json.loads(status.stdout).get("pagination").get("total_results")
             # Try to roll back
             if active_deployments > 0:
@@ -252,6 +253,7 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False, migrate_database
 
     # Needed for CircleCI
     return sys.exit(0)
+
 
 @task
 def create_sample_db(ctx):

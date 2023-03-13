@@ -600,43 +600,48 @@ The materialized views are manually refreshed when something needs to be removed
 ### Managing Elasticsearch
 Reference Wiki [Elasticsearch 7.x.0 management instruction](https://github.com/fecgov/openFEC/wiki/Elasticsearch-7.x.0-management-instruction)
 
-There are some management commands to manage (display, create, delete, restore) repository, index and snapshot on Elasticsearch.
-More information is available by invoking each of these commands with a `--help` option. These commands can be run as [tasks](https://docs.cloudfoundry.org/devguide/using-tasks.html) on `cloud.gov`, e.g.,
+There are some management commands to manage (display, create, delete, restore...) repository, index and snapshot on Elasticsearch.
+More information is available by invoking each of these commands with a `--help` option. These commands can be run as [cf tasks](https://docs.cloudfoundry.org/devguide/using-tasks.html) on `cloud.gov`, e.g.,
 #### Display, Configure and Delete a repository
 ```
 cf run-task api --command "python cli.py display_repositories" -m 2G --name display_repositories
 ```
 ```
-cf run-task api --command "python cli.py configure_snapshot_repository <repository_name>" -m 4G --name configure_docs_snapshot_repository
+cf run-task api --command "python cli.py configure_snapshot_repository <repo_name>" -m 4G --name configure_snapshot_repository
 ```
 ```
-cf run-task api --command "python cli.py delete_repository <repository_name>" -m 4G --name delete_repository
+cf run-task api --command "python cli.py delete_repository <repo_name>" -m 4G --name delete_repository
 ```
 #### Display, Create and Delete an index
-We have two indexes for FEC legal documents, one is used for current legal documents, another is used for archived MURs.
+We have three indexes for FEC legal documents, that are defined in INDEX_DICT
+    1) CASE_INDEX includes DOCUMENT_TYPE=('statutes','regulations','murs','adrs','admin_fines')
+    current mur only.
+    2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions')
+    3) ARCH_MUR_INDEX includes DOCUMENT_TYPE=('murs'), archived mur only
+
 ```
 cf run-task api --command "python cli.py display_index_alias" -m 2G --name display_index_alias
 ```
 ```
-cf run-task api --command "python cli.py create_index <index_name> [alias_name1,alias_name2]" -m 2G --name create_index
+cf run-task api --command "python cli.py create_index <index_name>" -m 2G --name create_index
 ```
 ```
 cf run-task api --command "python cli.py delete_index <index_name>" -m 2G --name delete_index
 ```
-#### Reloading all current legal documents with no downtime (excludes archived MURs)
 ```
-cf run-task api --command "python cli.py refresh_current_legal_docs_zero_downtime" -m 4G --name refresh_data
+cf run-task api --command "python cli.py display_mapping <index_name>" -m 2G --name display_mapping
 ```
-This command is typically used when there is a schema change. A staging index (DOCS_STAGING_INDEX) is built and populated in the background. When ready, the staging index is moved to the current index (DOCS_INDEX) with no downtime.
+#### When mapping change, update mapping and reload legal data with short downtime(<5 mins) by an index
+```
+cf run-task api --command "python cli.py update_mapping_and_reload_legal_data <index_name>" -m 4G --name update_mapping_and_reload_legal_data
+```
+This command is typically used when there is a schema change. A swapping index (XXXX_SWAP_INDEX) is built and populated in the background. When ready, the swapping index is moved to the current index (XXXX_INDEX) with short downtime)<5 mins>.
 
-#### Initialize the current legal documents and archived MURs (with downtime)
+#### Initialize the legal documents with downtime (15mins ~ 2+ hours)by an index
 ```
-cf run-task api --command "python cli.py initialize_current_legal_docs" -m 4G --name initialize_docs_data
+cf run-task api --command "python cli.py initialize_legal_data <index_name>" -m 4G --name initialize_legal_data
 ```
-```
-cf run-task api --command "python cli.py initialize_archived_mur_docs" -m 4G --name initialize_arch_mur_data
-```
-These commands are used to reload all legal docs with downtime (approximately two hours).
+This command is used to initialize the legal data with downtime (15mins ~ 2+ hours) by an index.
 
 ### Upload individual legal documents
 The progress of these tasks can be monitored using, e.g.,

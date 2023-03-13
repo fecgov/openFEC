@@ -25,12 +25,8 @@ from .regulations import (  # noqa
 from .es_management import (  # noqa
     INDEX_DICT,
     CASE_INDEX,
-    CASE_ALIAS,
-    SEARCH_ALIAS,
     ARCH_MUR_INDEX,
-    ARCH_MUR_ALIAS,
     AO_INDEX,
-    AO_ALIAS,
     create_index,
     delete_index,
     display_index_alias,
@@ -64,14 +60,15 @@ logger.setLevel("WARN")
 
 def initialize_legal_data(index_name=None):
     """
-    - Create a XXXX_INDEX on Elasticsearch
+    When first time load legal data, run this command with downtime (15mins ~ 2+ hours)
+    - Create a XXXX_INDEX on Elasticsearch based on 'INDEX_DICT'.
     'INDEX_DICT' description:
-    1) CASE_INDEX include DOCUMENT_TYPE=('statutes','regulations','murs','adrs','admin_fines')
+    1) CASE_INDEX includes DOCUMENT_TYPE=('statutes','regulations','murs','adrs','admin_fines')
     'murs' means current mur only.
-    2) AO_INDEX include DOCUMENT_TYPE=('advisory_opinions')
-    3) ARCH_MUR_INDEX include DOCUMENT_TYPE=('murs'), archived mur only
+    2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions')
+    3) ARCH_MUR_INDEX includes DOCUMENT_TYPE=('murs'), archived mur only
 
-    - Loads legal documents to XXXX_INDEX (a brief outage)
+    - Loads legal data to XXXX_INDEX
 
     - How to call task command:
     a) cf run-task api --command "python cli.py initialize_legal_data case_index" -m 4G --name init_case_data
@@ -95,25 +92,27 @@ def initialize_legal_data(index_name=None):
         logger.info(" Invalid index '{0}', unable to initialize this index.".format(index_name))
 
 
-def refresh_legal_data_zero_downtime(index_name=None):
+def update_mapping_and_reload_legal_data(index_name=None):
     """
+    When mapping change, run this command with short downtime(<5 mins)
+
     Eight steps process:
     1. Create a XXXX_SWAP_INDEX
     2. Switch original_alias(XXXX_ALIAS) point to XXXX_SWAP_INDEX
     3. Load the legal data into original_alias(==XXXX_SWAP_INDEX)
-    4. Swith the SEARCH_ALIAS point to XXXX_SWAP_INDEX
+    4. Switch the SEARCH_ALIAS point to XXXX_SWAP_INDEX
     5. Re-create original_index (XXXX_INDEX)
     6. Re-index XXXX_INDEX based on XXXX_SWAP_INDEX
     7. Switch aliases (XXXX_ALIAS,SEARCH_ALIAS) point back to XXXX_INDEX
     8. Delete XXXX_SWAP_INDEX
 
     -How to call task command:
-    a) cf run-task api --command "python cli.py refresh_legal_data_zero_downtime case_index" -m 4G
-    --name refresh_case_data
-    b) cf run-task api --command "python cli.py refresh_legal_data_zero_downtime ao_index" -m 4G
-    --name refresh_ao_data
-    c) cf run-task api --command "python cli.py refresh_legal_data_zero_downtime arch_mur_index" -m 4G
-    --name refresh_arch_mur_data
+    a) cf run-task api --command "python cli.py update_mapping_and_reload_legal_data case_index" -m 4G
+    --name update_mapping_reload_data_case
+    b) cf run-task api --command "python cli.py update_mapping_and_reload_legal_data ao_index" -m 4G
+    --name update_mapping_reload_data_ao
+    c) cf run-task api --command "python cli.py update_mapping_and_reload_legal_data arch_mur_index" -m 4G
+    --name update_mapping_reload_data_arch_mur
     """
 
     index_name = index_name or CASE_INDEX
