@@ -347,3 +347,26 @@ class ScheduleAByStateRecipientTotalsView(ApiResource):
     @property
     def index_column(self):
         return self.model.idx
+
+@doc(
+    tags=['financial'], description=docs.TOTALS_INAUGURAL_DONATIONS
+)
+# used for endpoint:'/totals/inaugural_committees/by_contributor/'
+class InauguralDonationsView(ApiResource):
+    model = models.InauguralDonations
+    schema = schemas.InauguralDonationsSchema
+    page_schema = schemas.InauguralDonationsPageSchema
+
+    filter_multi_fields = [
+       ('committee_id', model.committee_id),
+       ('cycle', model.cycle),
+       ('contributor_name', model.contributor_name)
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+             args.paging,
+             args.Inaugural_donations_by_contributor,
+             args.make_multi_sort_args(default=['-total_donation'])
+        )

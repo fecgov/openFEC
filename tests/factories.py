@@ -614,3 +614,9 @@ class JFCCommitteeFactory(BaseFactory):
         model = models.JFCCommittee
 
     idx = factory.Sequence(lambda n: n)
+
+
+class TotalsInauguralDonationsFactory(BaseFactory):
+    class Meta:
+        model = models.InauguralDonations
+

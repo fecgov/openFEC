@@ -346,3 +346,12 @@ class CommitteeTotalsPerCycle(CommitteeTotals):
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
     net_operating_expenditures = db.Column('last_net_operating_expenditures', db.Numeric(30, 2))
     net_contributions = db.Column('last_net_contributions', db.Numeric(30, 2))
+
+# used for endpoint:'/totals/inaugural_committees/by_contributor/'
+class InauguralDonations(db.Model):
+    __tablename__ = 'ofec_totals_inaugural_donations_mv'
+
+    committee_id = db.Column(db.String, primary_key=True, index=True, doc=docs.COMMITTEE_ID)
+    contributor_name = db.Column(db.String(100), primary_key=True, index=True, doc=docs.CONTRIBUTOR_NAME)
+    cycle = db.Column(db.Numeric(4), primary_key=True, index=True, doc=docs.COMMITTEE_CYCLE)
+    total_donation = db.Column(db.Numeric(30, 2))
