@@ -58,26 +58,23 @@ logger = logging.getLogger("botocore")
 logger.setLevel("WARN")
 
 
-def initialize_legal_data(index_name=None):
+def reload_all_data_by_index(index_name=None):
     """
-    When first time load legal data, run this command with downtime (15mins ~ 2+ hours)
-    - Create a XXXX_INDEX on Elasticsearch based on 'INDEX_DICT'.
+    - Reload all legal data by specify 'XXXX_INDEX'(15mins ~ 2+ hours) without downtime.
     'INDEX_DICT' description:
     1) CASE_INDEX includes DOCUMENT_TYPE=('statutes','regulations','murs','adrs','admin_fines')
     'murs' means current mur only.
     2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions')
     3) ARCH_MUR_INDEX includes DOCUMENT_TYPE=('murs'), archived mur only
 
-    - Loads legal data to XXXX_INDEX
-
     - How to call task command:
-    a) cf run-task api --command "python cli.py initialize_legal_data case_index" -m 4G --name init_case_data
-    b) cf run-task api --command "python cli.py initialize_legal_data ao_index" -m 4G --name init_ao_data
-    c) cf run-task api --command "python cli.py initialize_legal_data arch_mur_index" -m 4G --name init_arch_mur_data
+    a) cf run-task api --command "python cli.py reload_all_data_by_index case_index" -m 4G --name reload_all_data_case
+    b) cf run-task api --command "python cli.py reload_all_data_by_index ao_index" -m 4G --name reload_all_data_ao
+    c) cf run-task api --command "python cli.py reload_all_data_by_index arch_mur_index" -m 4G
+    --name reload_all_data_arch_mur
     """
     index_name = index_name or CASE_INDEX
     if index_name in INDEX_DICT.keys():
-        create_index(index_name)
         if index_name == CASE_INDEX:
             load_current_murs()
             load_adrs()
@@ -88,6 +85,29 @@ def initialize_legal_data(index_name=None):
             load_advisory_opinions()
         elif index_name == ARCH_MUR_INDEX:
             load_archived_murs()
+    else:
+        logger.info(" Invalid index '{0}', unable to reload this index.".format(index_name))
+
+
+def initialize_legal_data(index_name=None):
+    """
+    When first time load legal data, run this command with downtime (15mins ~ 2+ hours)
+    - Create a XXXX_INDEX on Elasticsearch based on 'INDEX_DICT'.
+    'INDEX_DICT' description:
+    1) CASE_INDEX includes DOCUMENT_TYPE=('statutes','regulations','murs','adrs','admin_fines')
+    'murs' means current mur only.
+    2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions')
+    3) ARCH_MUR_INDEX includes DOCUMENT_TYPE=('murs'), archived mur only
+    - Loads legal data to XXXX_INDEX
+    - How to call task command:
+    a) cf run-task api --command "python cli.py initialize_legal_data case_index" -m 4G --name init_case_data
+    b) cf run-task api --command "python cli.py initialize_legal_data ao_index" -m 4G --name init_ao_data
+    c) cf run-task api --command "python cli.py initialize_legal_data arch_mur_index" -m 4G --name init_arch_mur_data
+    """
+    index_name = index_name or CASE_INDEX
+    if index_name in INDEX_DICT.keys():
+        create_index(index_name)
+        reload_all_data_by_index(index_name)
     else:
         logger.info(" Invalid index '{0}', unable to initialize this index.".format(index_name))
 

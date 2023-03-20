@@ -109,6 +109,12 @@ def display_mapping_cli(index_name):
     legal_docs.display_mapping(index_name)
 
 
+@app.cli.command('reload_all_data_by_index')
+@click.argument('index_name', default=None, required=False)
+def reload_all_data_by_index_cli(index_name):
+    legal_docs.reload_all_data_by_index(index_name)
+
+
 @app.cli.command('initialize_legal_data')
 @click.argument('index_name', default=None, required=False)
 def initialize_legal_data_cli(index_name):
