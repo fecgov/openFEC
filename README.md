@@ -643,6 +643,11 @@ cf run-task api --command "python cli.py initialize_legal_data <index_name>" -m 
 ```
 This command is used to initialize the legal data with downtime (15mins ~ 2+ hours) by an index.
 
+### Reload all legal data by specify 'index_name'(15mins ~ 2+ hours) without downtime.
+```
+cf run-task api --command "python cli.py reload_all_data_by_index ao_index" -m 4G --name reload_all_data_by_index_ao
+```
+
 ### Upload individual legal documents
 The progress of these tasks can be monitored using, e.g.,
 ```

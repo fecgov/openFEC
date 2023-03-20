@@ -60,7 +60,7 @@ logger.setLevel("WARN")
 
 def reload_all_data_by_index(index_name=None):
     """
-    - Reload all legal data by specify 'XXXX_INDEX'(15mins ~ 2+ hours) without downtime.
+    - Reload all legal data by specify 'XXXX_INDEX' (it takes 15mins ~ 2+ hours) without downtime.
     'INDEX_DICT' description:
     1) CASE_INDEX includes DOCUMENT_TYPE=('statutes','regulations','murs','adrs','admin_fines')
     'murs' means current mur only.
