@@ -62,9 +62,9 @@ def reload_all_data_by_index(index_name=None):
     """
     - Reload all legal data by specify 'XXXX_INDEX' (it takes 15mins ~ 2+ hours) without downtime.
     'INDEX_DICT' description:
-    1) CASE_INDEX includes DOCUMENT_TYPE=('statutes','regulations','murs','adrs','admin_fines')
+    1) CASE_INDEX includes DOCUMENT_TYPE=('murs','adrs','admin_fines')
     'murs' means current mur only.
-    2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions')
+    2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions','statutes','regulations')
     3) ARCH_MUR_INDEX includes DOCUMENT_TYPE=('murs'), archived mur only
 
     - How to call task command:
@@ -79,10 +79,10 @@ def reload_all_data_by_index(index_name=None):
             load_current_murs()
             load_adrs()
             load_admin_fines()
-            load_statutes()
-            load_regulations()
         elif index_name == AO_INDEX:
             load_advisory_opinions()
+            load_statutes()
+            load_regulations()
         elif index_name == ARCH_MUR_INDEX:
             load_archived_murs()
     else:
@@ -94,9 +94,9 @@ def initialize_legal_data(index_name=None):
     When first time load legal data, run this command with downtime (15mins ~ 2+ hours)
     - Create a XXXX_INDEX on Elasticsearch based on 'INDEX_DICT'.
     'INDEX_DICT' description:
-    1) CASE_INDEX includes DOCUMENT_TYPE=('statutes','regulations','murs','adrs','admin_fines')
+    1) CASE_INDEX includes DOCUMENT_TYPE=('murs','adrs','admin_fines')
     'murs' means current mur only.
-    2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions')
+    2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions','statutes','regulations')
     3) ARCH_MUR_INDEX includes DOCUMENT_TYPE=('murs'), archived mur only
     - Loads legal data to XXXX_INDEX
     - How to call task command:
@@ -134,7 +134,6 @@ def update_mapping_and_reload_legal_data(index_name=None):
     c) cf run-task api --command "python cli.py update_mapping_and_reload_legal_data arch_mur_index" -m 4G
     --name update_mapping_reload_data_arch_mur
     """
-
     index_name = index_name or CASE_INDEX
     if index_name in INDEX_DICT.keys():
         # 1) Create 'XXXX_SWAP_INDEX'
@@ -143,18 +142,8 @@ def update_mapping_and_reload_legal_data(index_name=None):
         # 2) Switch the XXXX_ALIAS to point to XXXX_SWAP_INDEX instead of XXXX_INDEX.
         switch_alias(index_name, INDEX_DICT.get(index_name)[1], INDEX_DICT.get(index_name)[3])
 
-        # 3) Load legal data to original_alias that points to XXXX_SWAP_INDEX now
-        if index_name == CASE_INDEX:
-            load_current_murs()
-            load_adrs()
-            load_admin_fines()
-            load_statutes()
-            load_regulations()
-
-        elif index_name == AO_INDEX:
-            load_advisory_opinions()
-        elif index_name == ARCH_MUR_INDEX:
-            load_archived_murs()
+        # 3) Load legal data to original_alias(XXXX_ALIAS) that points to XXXX_SWAP_INDEX now
+        reload_all_data_by_index(index_name)
 
         # 4) Restore data from XXXX_SWAP_INDEX
         restore_from_swapping_index(index_name)

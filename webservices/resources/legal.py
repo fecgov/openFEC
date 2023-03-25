@@ -48,7 +48,12 @@ ALL_DOCUMENT_TYPES = [
 
 
 # endpoint path: /legal/docs/<doc_type>/<no>
-# test url: http://127.0.0.1:5000/v1/legal/docs/murs/7212
+# test urls:
+# http://127.0.0.1:5000/v1/legal/docs/statutes/9001/
+# http://127.0.0.1:5000/v1/legal/docs/regulations/1.1/
+# http://127.0.0.1:5000/v1/legal/docs/advisory_opinions/2022-25/
+# http://127.0.0.1:5000/v1/legal/docs/murs/7212
+
 # TODO: add this endpoint to swagger
 @doc(
     tags=["legal"],

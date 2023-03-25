@@ -556,8 +556,8 @@ def delete_index(index_name):
         try:
             logger.info(" Deleting index '{0}'...".format(index_name))
             es_client.indices.delete(index_name)
-            # sleep 120 second (2 mins)
-            time.sleep(120)
+            # sleep 60 seconds (1 min)
+            time.sleep(60)
             logger.info(" The index '{0}' is deleted successfully.".format(index_name))
         except Exception:
             pass
@@ -632,6 +632,19 @@ def restore_from_swapping_index(index_name=None):
 
     # 2) Re-create original_index (XXXX_INDEX)
     create_index(index_name)
+
+    # 3) Remove XXXX_ALIAS and SEARCH_ALIAS that point new empty XXXX_INDEX now
+    es_client.indices.update_aliases(
+        body={
+            "actions": [
+                {"remove": {"index": index_name, "alias": INDEX_DICT.get(index_name)[1]}},
+                {"remove": {"index": index_name, "alias": SEARCH_ALIAS}},
+            ]
+        }
+    )
+    logger.info(" Remove aliases '{0}' and '{1}' that point to empty '{2}' successfully.".format(
+        INDEX_DICT.get(index_name)[1], SEARCH_ALIAS, index_name)
+    )
 
     # 3) Re-index XXXX_INDEX based on XXXX_SWAP_INDEX
     try:

@@ -307,34 +307,35 @@ def get_full_name(case_type):
 
 
 def load_cases(case_type, case_no=None):
-    # TO DO: check if CASE_ALIAS exist before uploading.
     if case_type in ("MUR", "ADR", "AF"):
         es_client = create_es_client()
         logger.info("Loading {0}(s)".format(case_type))
         case_count = 0
-        for case in get_cases(case_type, case_no):
-            if case is not None:
-                if case.get("published_flg"):
-                    logger.info("Loading {0}: {1}".format(case_type, case["no"]))
-                    es_client.index(CASE_ALIAS, case, id=case["doc_id"])
-                    case_count += 1
-                    logger.info("{0} {1}(s) loaded".format(case_count, case_type))
-                else:
-                    try:
-                        logger.info("Found an unpublished case - deleting {0}: {1} from ES".format(
-                            case_type, case["no"]))
-                        es_client.delete(index=CASE_ALIAS, id=case["doc_id"])
-                        logger.info("Successfully deleted {} {} from ES".format(case_type, case["no"]))
-                    except Exception as err:
-                        logger.error("An error occurred while deteting an unpublished case.{0} {1} {2}".format(
-                            case_type, case["no"], err))
+        if es_client.indices.exists(index=CASE_ALIAS):
+            for case in get_cases(case_type, case_no):
+                if case is not None:
+                    if case.get("published_flg"):
+                        logger.info("Loading {0}: {1}".format(case_type, case["no"]))
+                        es_client.index(CASE_ALIAS, case, id=case["doc_id"])
+                        case_count += 1
+                        logger.info("{0} {1}(s) loaded".format(case_count, case_type))
+                    else:
+                        try:
+                            logger.info("Found an unpublished case - deleting {0}: {1} from ES".format(
+                                case_type, case["no"]))
+                            es_client.delete(index=CASE_ALIAS, id=case["doc_id"])
+                            logger.info("Successfully deleted {} {} from ES".format(case_type, case["no"]))
+                        except Exception as err:
+                            logger.error("An error occurred while deteting an unpublished case.{0} {1} {2}".format(
+                                case_type, case["no"], err))
 
-            # ==for local dubug use: remove the big "documents" section to display the object "case_type" data
-            debug_case_data = case
-            del debug_case_data["documents"]
-            logger.debug("case_data count=" + str(case_count))
-            logger.debug("debug_case_data =" + json.dumps(debug_case_data, indent=3, cls=DateTimeEncoder))
-
+                # ==for local dubug use: remove the big "documents" section to display the object "case_type" data
+                debug_case_data = case
+                del debug_case_data["documents"]
+                logger.debug("case_data count=" + str(case_count))
+                logger.debug("debug_case_data =" + json.dumps(debug_case_data, indent=3, cls=DateTimeEncoder))
+        else:
+            logger.info(" The index alias '{0}' is not found, can not load cases (mur/adr/af)".format(CASE_ALIAS))
     else:
         logger.error("Invalid case_type: must be 'MUR', 'ADR', or 'AF'.")
 

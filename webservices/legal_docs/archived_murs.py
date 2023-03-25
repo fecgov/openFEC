@@ -134,23 +134,26 @@ def load_archived_murs(mur_no=None):
     # TO DO: check if ARCH_MUR_ALIAS exist before uploading.
     es_client = create_es_client()
     mur_count = 0
-    for mur in get_murs(mur_no):
-        if mur is not None:
-            try:
-                logger.info("Loading archived MUR No: {0}".format(mur["no"]))
-                es_client.index(ARCH_MUR_ALIAS, mur, id=mur["doc_id"])
-                mur_count += 1
-                logger.info("{0} Archived Mur(s) loaded".format(mur_count))
-            except Exception as err:
-                logger.error(
-                    "An error occurred while uploading archived mur:\nmur no={0} \nerr={1}".format(
-                        mur["no"], err))
+    if es_client.indices.exists(index=ARCH_MUR_ALIAS):
+        for mur in get_murs(mur_no):
+            if mur is not None:
+                try:
+                    logger.info("Loading archived MUR No: {0}".format(mur["no"]))
+                    es_client.index(ARCH_MUR_ALIAS, mur, id=mur["doc_id"])
+                    mur_count += 1
+                    logger.info("{0} Archived Mur(s) loaded".format(mur_count))
+                except Exception as err:
+                    logger.error(
+                        "An error occurred while uploading archived mur:\nmur no={0} \nerr={1}".format(
+                            mur["no"], err))
 
-        # ==for dubug use: remove the big "documents" section to display the object "mur" data
-        mur_debug_data = mur
-        # del mur_debug_data["documents"]
-        logger.debug("mur_data count=" + str(mur_count))
-        logger.debug("mur_debug_data =" + json.dumps(mur_debug_data, indent=3, cls=DateTimeEncoder))
+            # ==for dubug use: remove the big "documents" section to display the object "mur" data
+            mur_debug_data = mur
+            # del mur_debug_data["documents"]
+            logger.debug("mur_data count=" + str(mur_count))
+            logger.debug("mur_debug_data =" + json.dumps(mur_debug_data, indent=3, cls=DateTimeEncoder))
+    else:
+        logger.info(" The index alias '{0}' is not found, can not load arch mur".format(ARCH_MUR_ALIAS))
 
 
 def get_murs(mur_no=None):
