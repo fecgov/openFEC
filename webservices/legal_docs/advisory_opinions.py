@@ -122,7 +122,7 @@ def load_advisory_opinions(from_ao_no=None):
     ao_count = 0
 
     if es_client.indices.exists(index=AO_ALIAS):
-        logger.info("Index alias '{}' exists, start Loading advisory opinions...".format(AO_ALIAS))
+        logger.info("Index alias '{}' exists, start loading advisory opinions...".format(AO_ALIAS))
         try:
             for ao in get_advisory_opinions(from_ao_no):
                 logger.info(" Loading AO number: %s", ao["no"])
@@ -139,7 +139,7 @@ def load_advisory_opinions(from_ao_no=None):
         except Exception:
             pass
     else:
-        logger.info(" The index alias '{0}' is not found, can not load advisory opinions".format(AO_ALIAS))
+        logger.error(" The index alias '{0}' is not found, cannot load advisory opinions".format(AO_ALIAS))
 
 
 def ao_stage_to_pending(stage):
@@ -419,25 +419,22 @@ def get_citations(ao_names):
 
     es_client = create_es_client()
 
-    if es_client.indices.exists(index=AO_ALIAS):
-        for citation in all_regulatory_citations:
-            entry = {
-                "type": "citations",
-                "citation_text": "%d CFR §%d.%d" % (citation[0], citation[1], citation[2]),
-                "citation_type": "regulation",
-            }
-            es_client.index(AO_ALIAS, entry, id=entry["citation_text"])
+    for citation in all_regulatory_citations:
+        entry = {
+            "type": "citations",
+            "citation_text": "%d CFR §%d.%d" % (citation[0], citation[1], citation[2]),
+            "citation_type": "regulation",
+        }
+        es_client.index(AO_ALIAS, entry, id=entry["citation_text"])
 
-        for citation in all_statutory_citations:
-            entry = {
-                "type": "citations",
-                "citation_text": "%d U.S.C. §%s" % (citation[0], citation[1]),
-                "citation_type": "statute",
-            }
-            es_client.index(AO_ALIAS, entry, id=entry["citation_text"])
-        logger.info(" AO Citations loaded.")
-    else:
-        logger.info(" The index alias '{0}' is not found, can not load AO Citations".format(AO_ALIAS))
+    for citation in all_statutory_citations:
+        entry = {
+            "type": "citations",
+            "citation_text": "%d U.S.C. §%s" % (citation[0], citation[1]),
+            "citation_type": "statute",
+        }
+        es_client.index(AO_ALIAS, entry, id=entry["citation_text"])
+    logger.info(" AO Citations loaded.")
     return citations
 
 

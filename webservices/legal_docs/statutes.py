@@ -131,4 +131,4 @@ def load_statutes():
         title_52_section_count = get_title_52_statutes()
         logger.info(" %d statute sections uploaded", title_26_section_count + title_52_section_count)
     else:
-        logger.info(" The index alias '{0}' is not found, can not load statutes.".format(AO_ALIAS))
+        logger.error(" The index alias '{0}' is not found, cannot load statutes.".format(AO_ALIAS))

@@ -153,7 +153,7 @@ def load_archived_murs(mur_no=None):
             logger.debug("mur_data count=" + str(mur_count))
             logger.debug("mur_debug_data =" + json.dumps(mur_debug_data, indent=3, cls=DateTimeEncoder))
     else:
-        logger.info(" The index alias '{0}' is not found, can not load arch mur".format(ARCH_MUR_ALIAS))
+        logger.error(" The index alias '{0}' is not found, cannot load arch mur".format(ARCH_MUR_ALIAS))
 
 
 def get_murs(mur_no=None):

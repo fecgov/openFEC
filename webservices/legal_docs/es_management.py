@@ -489,7 +489,7 @@ def create_index(index_name=None):
                 alias1,
                 alias2))
     else:
-        logger.info(" Invalid index '{0}'.".format(index_name))
+        logger.error(" Invalid index '{0}'.".format(index_name))
 
 
 def display_index_alias():
@@ -562,7 +562,7 @@ def delete_index(index_name):
         except Exception:
             pass
     else:
-        logger.info(" The index '{0}' is not found.".format(index_name))
+        logger.error(" The index '{0}' is not found.".format(index_name))
 
 
 def switch_alias(original_index=None, original_alias=None, swapping_index=None):
@@ -579,7 +579,7 @@ def switch_alias(original_index=None, original_alias=None, swapping_index=None):
 
     es_client = create_es_client()
     # 1) Remove original_alias from original_index
-    logger.info(" Removing original_alias '{0}' from original_index '{1}'...".format(
+    logger.info(" Removing original alias '{0}' from original index '{1}'...".format(
         original_alias, original_index)
     )
     try:
@@ -590,14 +590,14 @@ def switch_alias(original_index=None, original_alias=None, swapping_index=None):
                 ]
             }
         )
-        logger.info(" Removed original_alias '{0}' from original_index '{1}' successfully.".format(
+        logger.info(" Removed original alias '{0}' from original index '{1}' successfully.".format(
             original_alias, original_index)
         )
     except Exception:
         pass
 
     # 2) Switch original_alias to swapping_index
-    logger.info(" Switching original_alias '{0}' to swapping_index '{1}'...".format(
+    logger.info(" Switching original alias '{0}' to swapping index '{1}'...".format(
         original_alias, swapping_index)
     )
     es_client.indices.update_aliases(
@@ -607,7 +607,7 @@ def switch_alias(original_index=None, original_alias=None, swapping_index=None):
             ]
         }
     )
-    logger.info(" Switched original_alias '{0}' to swapping_index '{1}' successfully.".format(
+    logger.info(" Switched original alias '{0}' to swapping index '{1}' successfully.".format(
         original_alias, swapping_index)
     )
 
@@ -616,9 +616,10 @@ def restore_from_swapping_index(index_name=None):
     """
     1. Swith the SEARCH_ALIAS to point to XXXX_SWAP_INDEX instead of index_name(original_index).
     2. Re-create original_index (XXXX_INDEX)
-    3. Re-index XXXX_INDEX based on XXXX_SWAP_INDEX
-    4. Switch aliases (XXXX_ALIAS,SEARCH_ALIAS) point back to XXXX_INDEX
-    5. Delete XXXX_SWAP_INDEX
+    3. Remove XXXX_ALIAS and SEARCH_ALIAS that point new empty XXXX_INDEX
+    4. Re-index XXXX_INDEX based on XXXX_SWAP_INDEX
+    5. Switch aliases (XXXX_ALIAS,SEARCH_ALIAS) point back to XXXX_INDEX
+    6. Delete XXXX_SWAP_INDEX
 
     -How to call this function in Python code:
     a) restore_from_swapping_index(index_name)
@@ -646,7 +647,7 @@ def restore_from_swapping_index(index_name=None):
         INDEX_DICT.get(index_name)[1], SEARCH_ALIAS, index_name)
     )
 
-    # 3) Re-index XXXX_INDEX based on XXXX_SWAP_INDEX
+    # 4) Re-index XXXX_INDEX based on XXXX_SWAP_INDEX
     try:
         logger.info(" Reindexing all documents from index '{0}' to index '{1}'...".format(
             swapping_index, index_name)
@@ -770,7 +771,7 @@ def delete_repository(repo_name):
         except Exception as err:
             logger.error(" Error occured in delete_repository.{0}".format(err))
     else:
-        logger.info(" Please input a s3 repository name.")
+        logger.error(" Please input a s3 repository name.")
 
     display_repositories()
 
@@ -833,7 +834,7 @@ def create_es_snapshot(index_name):
         else:
             logger.error(" Unable to create snapshot: {0}".format(snapshot_name))
     else:
-        logger.info(" Invalid index '{0}', no snapshot created.".format(index_name))
+        logger.error(" Invalid index '{0}', no snapshot created.".format(index_name))
 
 
 def delete_snapshot(repo_name, snapshot_name):
@@ -858,7 +859,7 @@ def delete_snapshot(repo_name, snapshot_name):
         except Exception as err:
             logger.error(" Error occured in delete_snapshot.{0}".format(err))
     else:
-        logger.info(" Please provide both snapshot and repository names.")
+        logger.error(" Please provide both snapshot and repository names.")
 
 
 def restore_es_snapshot(repo_name=None, snapshot_name=None, index_name=None):
@@ -1040,9 +1041,14 @@ def display_snapshot_detail(repo_name=None, snapshot_name=None):
 
 def delete_doctype_from_es(index_name=None, doc_type=None):
     """
-    Deletes all records with the given `doc_type` from Elasticsearch
-    Ex: cf run-task api --command "python cli.py delete_doctype_from_es docs adrs" -m 2G
-    --name delete_adrs
+    Deletes all records with the given `doc_type` and `XXXX_INDEX` from Elasticsearch
+    Ex1-1: cf run-task api --command "python cli.py delete_doctype_from_es case_inde murs" -m 2G --name delete_murs
+    Ex1-2: cf run-task api --command "python cli.py delete_doctype_from_es case_inde adrs" -m 2G --name delete_adrs
+    Ex1-3: cf run-task api --command "python cli.py delete_doctype_from_es case_inde afs" -m 2G --name delete_afs
+    Ex2: cf run-task api --command "python cli.py delete_doctype_from_es ao_index advisory_opinions" -m 2G
+    --name delete_aos
+    Ex3: cf run-task api --command "python cli.py delete_doctype_from_es arch_mur_index murs" -m 2G
+    --name delete_arch_murs
     """
     body = {"query": {"match": {"type": doc_type}}}
 
@@ -1057,11 +1063,18 @@ def delete_doctype_from_es(index_name=None, doc_type=None):
 
 def delete_single_doctype_from_es(index_name=None, doc_type=None, num_doc_id=None):
     """
-    Deletes single record with the given `doc_type` and `doc_id` from Elasticsearch
-    Ex: cf run-task api --command "python cli.py delete_single_doctype_from_es docs
+    Deletes single record with the given `doc_type` , `doc_id` and `XXXX_INDEX` from Elasticsearch
+
+    Ex1: cf run-task api --command "python cli.py delete_single_doctype_from_es case_index
+    murs mur_8003" -m 2G --name delete_one_mur
+    Ex1-2: cf run-task api --command "python cli.py delete_single_doctype_from_es case_index
+    adrs adr_1091" -m 2G --name delete_one_adr
+    Ex1-3: cf run-task api --command "python cli.py delete_single_doctype_from_es case_index
     admin_fines af_4201" -m 2G --name delete_one_af
-        cf run-task api --command "python cli.py delete_single_doctype_from_es docs
-        advisory_opinions advisory_opinions_2021-08" -m 2G --name delete_one_ao
+    Ex2:cf run-task api --command "python cli.py delete_single_doctype_from_es ao_index
+    advisory_opinions advisory_opinions_2021-08" -m 2G --name delete_one_ao
+    Ex3:cf run-task api --command "python cli.py delete_single_doctype_from_es arch_mur_index
+    murs mur_99" -m 2G --name delete_one_arch_mur
     """
     body = {"query": {
         "bool": {

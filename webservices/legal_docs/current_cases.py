@@ -309,9 +309,9 @@ def get_full_name(case_type):
 def load_cases(case_type, case_no=None):
     if case_type in ("MUR", "ADR", "AF"):
         es_client = create_es_client()
-        logger.info("Loading {0}(s)".format(case_type))
-        case_count = 0
         if es_client.indices.exists(index=CASE_ALIAS):
+            logger.info("Loading {0}(s)".format(case_type))
+            case_count = 0
             for case in get_cases(case_type, case_no):
                 if case is not None:
                     if case.get("published_flg"):
@@ -335,9 +335,9 @@ def load_cases(case_type, case_no=None):
                 logger.debug("case_data count=" + str(case_count))
                 logger.debug("debug_case_data =" + json.dumps(debug_case_data, indent=3, cls=DateTimeEncoder))
         else:
-            logger.info(" The index alias '{0}' is not found, can not load cases (mur/adr/af)".format(CASE_ALIAS))
+            logger.error(" The index alias '{0}' is not found, cannot load cases (mur/adr/af)".format(CASE_ALIAS))
     else:
-        logger.error("Invalid case_type: must be 'MUR', 'ADR', or 'AF'.")
+        logger.error("Invalid case type: must be 'MUR', 'ADR', or 'AF'.")
 
 
 def get_cases(case_type, case_no=None):

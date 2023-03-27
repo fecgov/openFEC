@@ -43,25 +43,22 @@ def load_regulations():
     Load the regulations relevant to the FEC in Elasticsearch.
     The regulations are accessed from FEC_EREGS_API.
     """
-
-    # set env variable:
-    # export FEC_EREGS_API=https://fec-dev-eregs.app.cloud.gov/regulations/api/
-    eregs_api = env.get_credential("FEC_EREGS_API", "")
-    if not eregs_api:
-        logger.error(
-            "Regs could not be loaded, environment variable FEC_EREGS_API not set."
-        )
-        return
-
-    logger.info("Uploading regulations...")
-    reg_versions = requests.get(eregs_api + "regulation").json()["versions"]
-    logger.debug("reg_versions =" + json.dumps(reg_versions, indent=3, cls=DateTimeEncoder))
-
-    # TO DO: check if AO_ALIAS exist before uploading.
     es_client = create_es_client()
-    regulation_part_count = 0
-    document_count = 0
     if es_client.indices.exists(index=AO_ALIAS):
+        # Before loading, set env variable:
+        # `export FEC_EREGS_API=https://fec-dev-eregs.app.cloud.gov/regulations/api/`
+        eregs_api = env.get_credential("FEC_EREGS_API", "")
+        if not eregs_api:
+            logger.error(
+                "Regulations could not be loaded, environment variable FEC_EREGS_API not set."
+            )
+            return
+        logger.info("Uploading regulations...")
+        reg_versions = requests.get(eregs_api + "regulation").json()["versions"]
+        logger.debug("reg_versions =" + json.dumps(reg_versions, indent=3, cls=DateTimeEncoder))
+
+        regulation_part_count = 0
+        document_count = 0
         for reg in reg_versions:
             url = "%sregulation/%s/%s" % (eregs_api, reg["regulation"], reg["version"])
             logger.debug("url=" + url)
@@ -97,4 +94,4 @@ def load_regulations():
             regulation_part_count += 1
             logger.info("%d Regulation parts with %d documents are loaded.", regulation_part_count, document_count)
     else:
-        logger.info(" The index alias '{0}' is not found, can not load regulations.".format(AO_ALIAS))
+        logger.error(" The index alias '{0}' is not found, cannot load regulations.".format(AO_ALIAS))

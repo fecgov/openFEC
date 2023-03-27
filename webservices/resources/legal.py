@@ -52,7 +52,9 @@ ALL_DOCUMENT_TYPES = [
 # http://127.0.0.1:5000/v1/legal/docs/statutes/9001/
 # http://127.0.0.1:5000/v1/legal/docs/regulations/1.1/
 # http://127.0.0.1:5000/v1/legal/docs/advisory_opinions/2022-25/
-# http://127.0.0.1:5000/v1/legal/docs/murs/7212
+# http://127.0.0.1:5000/v1/legal/docs/murs/8070/
+# http://127.0.0.1:5000/v1/legal/docs/adrs/1091/
+# http://127.0.0.1:5000/v1/legal/docs/admin_fines/4399/
 
 # TODO: add this endpoint to swagger
 @doc(
