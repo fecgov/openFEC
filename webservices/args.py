@@ -1122,3 +1122,9 @@ presidential_by_candidate = {
     'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
     'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
 }
+
+Inaugural_donations_by_contributor = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'contributor_name': fields.List(IStr, description=docs.CONTRIBUTOR_NAME),
+    'cycle': fields.List(fields.Int(), description=docs.COMMITTEE_CYCLE)
+}

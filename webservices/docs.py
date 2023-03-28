@@ -705,7 +705,7 @@ The maximum date this record was last updated.(MM/DD/YYYY or YYYY-MM-DD)
 
 # ======== financial start ===========
 FINANCIAL_TAG = '''
-Fetch key information about a committee's Form 3, Form 3X, or Form 3P financial reports.
+Fetch key information about a committee's Form 3, Form 3X, Form 13, or Form 3P financial reports.
 
 Most committees are required to summarize their financial activity in each filing; those summaries
 are included in these files. Generally, committees file reports on a quarterly or monthly basis, but
@@ -720,6 +720,7 @@ The financial endpoints use data from FEC [form 5](https://www.fec.gov/pdf/forms
 for independent expenditors; or the summary and detailed summary pages of the FEC
 [Form 3](https://www.fec.gov/pdf/forms/fecfrm3.pdf), for House and Senate committees;
 [Form 3X](https://www.fec.gov/pdf/forms/fecfrm3x.pdf), for PACs and parties;
+[Form 13](https://www.fec.gov/pdf/forms/fecfrm13.pdf) for inaugural committees;
 and [Form 3P](https://www.fec.gov/pdf/forms/fecfrm3p.pdf), for presidential committees.
 '''
 
@@ -2336,3 +2337,9 @@ total contribution refunds
 """
 
 # ======== presidential end =========
+
+TOTALS_INAUGURAL_DONATIONS = '''
+This endpoint provides information about an inaugural committee's Form 13 report of donations accepted.
+The data is aggregated by the contributor and the two-year period. We refer to two-year periods as a `cycle`.
+
+'''

@@ -381,6 +381,7 @@ api.add_resource(candidate_aggregates.AggregateByOfficeView, '/candidates/totals
 api.add_resource(candidate_aggregates.AggregateByOfficeByPartyView, '/candidates/totals/by_office/by_party/')
 
 api.add_resource(candidate_aggregates.CandidateTotalAggregateView, '/candidates/totals/aggregates/')
+api.add_resource(totals.InauguralDonationsView, '/totals/inaugural_committees/by_contributor/')
 
 
 api.add_resource(
@@ -475,6 +476,7 @@ apidoc.register(reports.EFilingPacPartySummaryView, blueprint='v1')
 apidoc.register(totals.TotalsByEntityTypeView, blueprint='v1')
 apidoc.register(totals.CandidateTotalsView, blueprint='v1')
 apidoc.register(totals.TotalsCommitteeView, blueprint='v1')
+apidoc.register(totals.InauguralDonationsView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAEfileView, blueprint='v1')
 apidoc.register(sched_b.ScheduleBView, blueprint='v1')
