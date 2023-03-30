@@ -7,7 +7,7 @@ from webservices.utils import (
     DateTimeEncoder,
 )
 from .es_management import (  # noqa
-    DOCS_ALIAS,
+    AO_ALIAS,
 )
 import json
 
@@ -43,55 +43,55 @@ def load_regulations():
     Load the regulations relevant to the FEC in Elasticsearch.
     The regulations are accessed from FEC_EREGS_API.
     """
-
-    # set env variable:
-    # export FEC_EREGS_API=https://fec-dev-eregs.app.cloud.gov/regulations/api/
-    eregs_api = env.get_credential("FEC_EREGS_API", "")
-    if not eregs_api:
-        logger.error(
-            "Regs could not be loaded, environment variable FEC_EREGS_API not set."
-        )
-        return
-
-    logger.info("Uploading regulations...")
-    reg_versions = requests.get(eregs_api + "regulation").json()["versions"]
-    logger.debug("reg_versions =" + json.dumps(reg_versions, indent=3, cls=DateTimeEncoder))
-
-    # TO DO: check if DOCS_ALIAS exist before uploading.
     es_client = create_es_client()
-    regulation_part_count = 0
-    document_count = 0
-    for reg in reg_versions:
-        url = "%sregulation/%s/%s" % (eregs_api, reg["regulation"], reg["version"])
-        logger.debug("url=" + url)
-        regulation = requests.get(url).json()
-        sections = get_sections(regulation)
-
-        each_part_document_count = 0
-        logger.debug("Loading part %s" % reg["regulation"])
-        for section_label in sections:
-            doc_id = "%s_%s" % (section_label[0], section_label[1])
-            logger.debug("(%d) doc_id= %s" % (each_part_document_count + 1, doc_id))
-            section_formatted = "%s-%s" % (section_label[0], section_label[1])
-            reg_url = "/regulations/{0}/{1}#{0}".format(
-                section_formatted, reg["version"]
+    if es_client.indices.exists(index=AO_ALIAS):
+        # Before loading, set env variable:
+        # `export FEC_EREGS_API=https://fec-dev-eregs.app.cloud.gov/regulations/api/`
+        eregs_api = env.get_credential("FEC_EREGS_API", "")
+        if not eregs_api:
+            logger.error(
+                "Regulations could not be loaded, environment variable FEC_EREGS_API not set."
             )
-            no = "%s.%s" % (section_label[0], section_label[1])
-            name = sections[section_label]["title"].split(no)[1].strip()
-            doc = {
-                "type": "regulations",
-                "doc_id": doc_id,
-                "name": name,
-                "text": sections[section_label]["text"],
-                "url": reg_url,
-                "no": no,
-                "sort1": int(section_label[0]),
-                "sort2": int(section_label[1]),
-            }
-            each_part_document_count += 1
-            document_count += 1
+            return
+        logger.info("Uploading regulations...")
+        reg_versions = requests.get(eregs_api + "regulation").json()["versions"]
+        logger.debug("reg_versions =" + json.dumps(reg_versions, indent=3, cls=DateTimeEncoder))
 
-            es_client.index(DOCS_ALIAS, doc, id=doc["doc_id"])
-        logger.debug("Part %s: %d document(s) are loaded." % (reg["regulation"], each_part_document_count))
-        regulation_part_count += 1
-        logger.info("%d regulation parts with %d documents are loaded.", regulation_part_count, document_count)
+        regulation_part_count = 0
+        document_count = 0
+        for reg in reg_versions:
+            url = "%sregulation/%s/%s" % (eregs_api, reg["regulation"], reg["version"])
+            logger.debug("url=" + url)
+            regulation = requests.get(url).json()
+            sections = get_sections(regulation)
+
+            each_part_document_count = 0
+            logger.debug("Loading part %s" % reg["regulation"])
+            for section_label in sections:
+                doc_id = "%s_%s" % (section_label[0], section_label[1])
+                logger.debug("(%d) doc_id= %s" % (each_part_document_count + 1, doc_id))
+                section_formatted = "%s-%s" % (section_label[0], section_label[1])
+                reg_url = "/regulations/{0}/{1}#{0}".format(
+                    section_formatted, reg["version"]
+                )
+                no = "%s.%s" % (section_label[0], section_label[1])
+                name = sections[section_label]["title"].split(no)[1].strip()
+                doc = {
+                    "type": "regulations",
+                    "doc_id": doc_id,
+                    "name": name,
+                    "text": sections[section_label]["text"],
+                    "url": reg_url,
+                    "no": no,
+                    "sort1": int(section_label[0]),
+                    "sort2": int(section_label[1]),
+                }
+                each_part_document_count += 1
+                document_count += 1
+
+                es_client.index(AO_ALIAS, doc, id=doc["doc_id"])
+            logger.debug("Part %s: %d document(s) are loaded." % (reg["regulation"], each_part_document_count))
+            regulation_part_count += 1
+            logger.info("%d Regulation parts with %d documents are loaded.", regulation_part_count, document_count)
+    else:
+        logger.error(" The index alias '{0}' is not found, cannot load regulations.".format(AO_ALIAS))

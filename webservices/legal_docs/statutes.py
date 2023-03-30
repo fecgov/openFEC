@@ -7,7 +7,7 @@ import logging
 import requests
 from webservices.utils import create_es_client
 from .es_management import (  # noqa
-    DOCS_ALIAS,
+    AO_ALIAS,
 )
 
 logger = logging.getLogger(__name__)
@@ -32,8 +32,6 @@ def get_xml_tree_from_url(url):
 
 def get_title_52_statutes():
     es_client = create_es_client()
-
-    # TO DO: check if DOCS_ALIAS exist before uploading.
     title_parsed = get_xml_tree_from_url(
         "https://uscode.house.gov/download/"
         "releasepoints/us/pl/114/219/xml_usc52@114-219.zip"
@@ -72,15 +70,13 @@ def get_title_52_statutes():
                         "sort1": 52,
                         "sort2": int(section_no),
                     }
-                    es_client.index(DOCS_ALIAS, doc, id=doc["doc_id"])
+                    es_client.index(AO_ALIAS, doc, id=doc["doc_id"])
                     section_count += 1
     return section_count
 
 
 def get_title_26_statutes():
     es_client = create_es_client()
-
-    # TO DO: check if DOCS_ALIAS exist before uploading.
     title_parsed = get_xml_tree_from_url(
         "https://uscode.house.gov/download/"
         "releasepoints/us/pl/114/219/xml_usc26@114-219.zip"
@@ -116,7 +112,7 @@ def get_title_26_statutes():
                         "sort1": 26,
                         "sort2": int(section_no),
                     }
-                    es_client.index(DOCS_ALIAS, doc, id=doc["doc_id"])
+                    es_client.index(AO_ALIAS, doc, id=doc["doc_id"])
                     section_count += 1
     return section_count
 
@@ -127,9 +123,12 @@ def load_statutes():
         Load statutes with titles 26 and 52 in Elasticsearch.
         The statutes are downloaded from http://uscode.house.gov.
     """
-    logger.info("Uploading statutes...")
-    title_26_section_count = get_title_26_statutes()
-    title_52_section_count = get_title_52_statutes()
-    logger.info(
-        "%d statute sections uploaded", title_26_section_count + title_52_section_count
-    )
+    es_client = create_es_client()
+    # check if AO_ALIAS exist before uploading.
+    if es_client.indices.exists(index=AO_ALIAS):
+        logger.info(" Uploading statutes...")
+        title_26_section_count = get_title_26_statutes()
+        title_52_section_count = get_title_52_statutes()
+        logger.info(" %d statute sections uploaded", title_26_section_count + title_52_section_count)
+    else:
+        logger.error(" The index alias '{0}' is not found, cannot load statutes.".format(AO_ALIAS))

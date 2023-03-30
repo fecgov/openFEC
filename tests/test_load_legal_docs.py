@@ -3,7 +3,7 @@
 # from webservices.legal_docs import (
 #     index_regulations,
 #     index_statutes,
-#     create_docs_index,
+#     create_index,
 # )
 
 # from webservices.legal_docs.load_legal_docs import (
@@ -19,7 +19,7 @@
 # class ElasticSearchMock:
 #     class ElasticSearchIndicesMock:
 #         def delete(self, index):
-#             assert index in ['docs', 'archived_murs', 'docs_index']
+#             assert index in ['docs', 'archived_murs', 'case_index']
 
 #         def create(self, index, mappings):
 #             assert index in ['docs', 'archived_murs']
@@ -36,7 +36,7 @@
 #         assert self.dictToIndex == doc
 
 #     def delete_by_query(self, index, body, doc_type):
-#         assert index == 'docs_index'
+#         assert index == 'case_index'
 
 
 # def get_es_with_doc(doc):
@@ -245,5 +245,5 @@
 
 # class InitializeLegalDocsTest(unittest.TestCase):
 #     @patch('webservices.utils.create_es_client', get_es_with_doc({}))
-#     def test_create_docs_index(self):
-#         create_docs_index()
+#     def test_create_index(self):
+#         create_index()
