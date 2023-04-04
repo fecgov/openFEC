@@ -40,7 +40,7 @@ smart_open==1.8.0
 # Task queue
 celery==5.2.2 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
 celery-once==3.0.0
-redis==4.2.2
+redis==4.5.4
 
 # testing and build in circle
 codecov==2.1.7
