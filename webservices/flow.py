@@ -47,7 +47,8 @@ def get_graph():
         'totals_ie',
         'totals_presidential',
         'sched_b_by_recipient',
-        'totals_inaugural_donations'
+        'totals_inaugural_donations',
+        'schedule_d'
     ]
     graph.add_nodes_from(MATERIALIZED_VIEWS)
 

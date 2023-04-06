@@ -1,5 +1,5 @@
 import datetime
-
+import time
 import logging
 
 from celery_once import QueueOnce
@@ -195,16 +195,22 @@ def create_es_backup():
     """
         Take Elasticsearch `CASE_INDEX` and `AO_INDEX` snapshot weekly.
     """
+    slack_message = ""
+    index_name_message = ""
     index_name_list = [CASE_INDEX, AO_INDEX]
     logger.info(" Weekly (%s) elasticsearch snapshot backup starting", datetime.date.today().strftime("%A"))
-    for index_name in enumerate(index_name_list):
-        try:
+    try:
+        for i, index_name in enumerate(index_name_list):
+            index_name = index_name_list[i]
             create_es_snapshot(index_name)
-        except Exception as error:
-            logger.exception(error)
-            slack_message = "*ERROR* elasticsearch backup failed for {0}. Check logs.".format(get_app_name())
-            utils.post_to_slack(slack_message, SLACK_BOTS)
-
-    logger.info(" Weekly (%s) elasticsearch snapshot backup completed", datetime.date.today().strftime("%A"))
-    slack_message = "Weekly elasticsearch backup completed in {0} space".format(get_app_name())
-    utils.post_to_slack(slack_message, SLACK_BOTS)
+            logger.info("elasticsearch snapshot on index: '{0}' created".format(index_name))
+            index_name_message += index_name + ","
+            time.sleep(20)
+        logger.info(" Weekly (%s) elasticsearch snapshot backup completed", datetime.date.today().strftime("%A"))
+        slack_message = "Weekly elasticsearch backup completed in {0} space on indices({1})".format(
+            get_app_name(), index_name_message)
+        utils.post_to_slack(slack_message, SLACK_BOTS)
+    except Exception as error:
+        logger.exception(error)
+        slack_message = "*ERROR* elasticsearch backup failed for {0}. Check logs.".format(get_app_name())
+        utils.post_to_slack(slack_message, SLACK_BOTS)
