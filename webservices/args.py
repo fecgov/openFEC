@@ -1096,6 +1096,13 @@ totals_by_candidate_other_costs_CC = {
 }
 
 schedule_h4 = {
+    # 'payee_name': fields.List(fields.Str, description=docs.PAYEE_NAME),
+    'q_payee_name': fields.List(Keyword, description=docs.PAYEE_NAME),
+    'payee_city': fields.List(fields.Str, description=docs.PAYEE_CITY),
+    'payee_zip': fields.List(fields.Str, description=docs.PAYEE_ZIP),
+    'payee_state': fields.List(fields.Str, description=docs.PAYEE_STATE),
+    # 'disbursement_purpose': fields.List(fields.Str, description=docs.DISBURSEMENT_PURPOSE),
+    'q_disbursement_purpose': fields.List(Keyword, description=docs.DISBURSEMENT_PURPOSE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'last_event_purpose_date': fields.Date(missing=None, description=docs.LAST_DISBURSEMENT_DATE),

@@ -30,9 +30,18 @@ class ScheduleH4View(ItemizedResource):
 
     filter_multi_fields = [
         ('image_number', models.ScheduleH4.image_number),
+        ('payee_city', models.ScheduleH4.payee_city),
+        ('payee_zip', models.ScheduleH4.payee_zip),
+        ('payee_state', models.ScheduleH4.payee_state),
         ('committee_id', models.ScheduleH4.committee_id),
         ('cycle', models.ScheduleH4.cycle),
     ]
+
+    filter_fulltext_fields = [
+        ('q_disbursement_purpose', models.ScheduleH4.disbursement_purpose_text),
+        ('q_payee_name', models.ScheduleH4.payee_name_text),
+    ]
+
     sort_options = ['event_purpose_date', 'disbursement_amount']
 
     @property

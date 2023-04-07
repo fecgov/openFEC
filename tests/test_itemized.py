@@ -1589,6 +1589,8 @@ class TestScheduleE(ApiBaseTest):
 
 
 class TestScheduleH4(ApiBaseTest):
+    kwargs = {'two_year_transaction_period': 2016}
+
     def test_schedule_h4_basic_accessibility(self):
         """
         testing schedule_h4 api_for very basic accessibility
@@ -1621,3 +1623,41 @@ class TestScheduleH4(ApiBaseTest):
         self.assertEqual(len(results), 3)
         results = self._results(api.url_for(ScheduleH4View, committee_id='C001'))
         self.assertEqual(len(results), 1)
+
+    def test_schedule_h4_filter_fulltext_purpose_and(self):
+        purposes = ['Test&Test', 'Test & Test', 'Test& Test', 'Test &Test']
+        [
+            factories.ScheduleH4Factory(disbursement_purpose=purpose)
+            for purpose in purposes
+        ]
+        results = self._results(
+            api.url_for(ScheduleH4View, disbursement_purpose='Test&Test', **self.kwargs)
+        )
+        self.assertIn(results[0]['disbursement_purpose'], purposes)
+        results = self._results(
+            api.url_for(
+                ScheduleH4View, disbursement_purpose='Test & Test', **self.kwargs
+            )
+        )
+        self.assertIn(results[0]['disbursement_purpose'], purposes)
+        results = self._results(
+            api.url_for(ScheduleH4View, disbursement_purpose='Test& Test', **self.kwargs)
+        )
+        self.assertIn(results[0]['disbursement_purpose'], purposes)
+        results = self._results(
+            api.url_for(ScheduleH4View, disbursement_purpose='Test &Test', **self.kwargs)
+        )
+        self.assertIn(results[0]['disbursement_purpose'], purposes)
+
+    def test_schedule_h4_filter_payee_name_text_pass(self):
+        payee_names = [
+            'Test.com',
+            'Test com',
+            'Testerosa',
+            'Test#com',
+            'Not.com',
+            'Test.com and Test.com',
+        ]
+        [factories.ScheduleH4Factory(payee_name=payee) for payee in payee_names]
+        results = self._results(api.url_for(ScheduleH4View, payee_name='test'))
+        self.assertEqual(len(results), len(payee_names))
