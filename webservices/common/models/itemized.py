@@ -850,17 +850,3 @@ class ScheduleH4(BaseItemized):
     cycle = db.Column('election_cycle', db.Numeric(4, 0))
     disbursement_purpose_text = db.Column(TSVECTOR)
     payee_name_text = db.Column(TSVECTOR)
-
-    @hybrid_property
-    def sort_expressions(self):
-        return {
-            'event_purpose_date': {
-                'expression': sa.func.coalesce(
-                    self.event_purpose_date,
-                    sa.cast('9999-12-31', sa.Date)
-                ),
-                'field': ma.fields.Date,
-                'type': 'date',
-                'null_sort': self.event_purpose_date,
-            },
-        }

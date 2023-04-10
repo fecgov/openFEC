@@ -773,11 +773,8 @@ ScheduleH4Schema = make_schema(
     },
     options={
         'exclude': (
-            'payee_street_1',
-            'payee_street_2',
             'payee_name_text',
             'disbursement_purpose_text',
-            'sort_expressions',
         ),
         'relationships': [
             Relationship(
