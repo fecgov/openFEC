@@ -35,6 +35,9 @@ class ScheduleDView(ApiResource):
         (('min_image_number', 'max_image_number'), models.ScheduleD.image_number),
         (('min_amount_outstanding_beginning', 'max_amount_outstanding_beginning'), models.ScheduleD.outstanding_balance_beginning_of_period),
         (('min_amount_outstanding_close', 'max_amount_outstanding_close'), models.ScheduleD.outstanding_balance_close_of_period),
+        (('min_coverage_start_date', 'max_coverage_start_date'), models.ScheduleD.coverage_start_date),
+        (('min_coverage_end_date', 'max_coverage_end_date'), models.ScheduleD.coverage_end_date)
+
     ]
 
     filter_match_fields = [

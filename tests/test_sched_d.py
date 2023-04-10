@@ -53,25 +53,33 @@ class TestScheduleDView(ApiBaseTest):
                 load_date=datetime.date(2012, 1, 1),
                 amount_incurred_period=1,
                 outstanding_balance_beginning_of_period=1,
-                outstanding_balance_close_of_period=1
+                outstanding_balance_close_of_period=1,
+                coverage_start_date=datetime.date(2011, 1, 1),
+                coverage_end_date=datetime.date(2011, 8, 27)
             ),
             factories.ScheduleDViewFactory(
                 load_date=datetime.date(2013, 1, 1),
                 amount_incurred_period=2,
                 outstanding_balance_beginning_of_period=2,
-                outstanding_balance_close_of_period=2
+                outstanding_balance_close_of_period=2,
+                coverage_start_date=datetime.date(2012, 1, 1),
+                coverage_end_date=datetime.date(2012, 2, 27)
             ),
             factories.ScheduleDViewFactory(
                 load_date=datetime.date(2014, 1, 1),
                 amount_incurred_period=3,
                 outstanding_balance_beginning_of_period=3,
-                outstanding_balance_close_of_period=3
+                outstanding_balance_close_of_period=3,
+                coverage_start_date=datetime.date(2013, 1, 1),
+                coverage_end_date=datetime.date(2013, 5, 5)
             ),
             factories.ScheduleDViewFactory(
                 load_date=datetime.date(2015, 1, 1),
                 amount_incurred_period=4,
                 outstanding_balance_beginning_of_period=3,
-                outstanding_balance_close_of_period=4
+                outstanding_balance_close_of_period=4,
+                coverage_start_date=datetime.date(2014, 1, 1),
+                coverage_end_date=datetime.date(2014, 6, 6)
             ),
         ]
         # load_date min, max
@@ -83,10 +91,38 @@ class TestScheduleDView(ApiBaseTest):
                 for each in results
             )
         )
+        results = self._results(api.url_for(ScheduleDView, min_coverage_start_date=min_date))
+        self.assertTrue(
+            all(
+                each['coverage_start_date'] >= min_date.isoformat()
+                for each in results
+            )
+        )
+        results = self._results(api.url_for(ScheduleDView, min_coverage_end_date=min_date))
+        self.assertTrue(
+            all(
+                each['coverage_end_date'] >= min_date.isoformat()
+                for each in results
+            )
+        )
         max_date = datetime.date(2014, 1, 1)
         results = self._results(api.url_for(ScheduleDView, max_date=max_date))
         self.assertTrue(
             all(each['load_date'] <= max_date.isoformat() for each in results)
+        )
+        results = self._results(api.url_for(ScheduleDView, max_coverage_start_date=min_date))
+        self.assertTrue(
+            all(
+                each['coverage_start_date'] <= max_date.isoformat()
+                for each in results
+            )
+        )
+        results = self._results(api.url_for(ScheduleDView, max_coverage_end_date=min_date))
+        self.assertTrue(
+            all(
+                each['coverage_end_date'] <= max_date.isoformat()
+                for each in results
+            )
         )
         results = self._results(
             api.url_for(ScheduleDView, min_date=min_date, max_date=max_date)
@@ -94,6 +130,25 @@ class TestScheduleDView(ApiBaseTest):
         self.assertTrue(
             all(
                 min_date.isoformat() <= each['load_date'] <= max_date.isoformat()
+                for each in results
+            )
+        )
+        results = self._results(
+            api.url_for(ScheduleDView, min_coverage_end_date=min_date, max_coverage_end_date=max_date)
+        )
+        self.assertTrue(
+            all(
+                min_date.isoformat() <= each['coverage_end_date'] <= max_date.isoformat()
+                for each in results
+            )
+        )
+        results = self._results(
+            api.url_for(ScheduleDView, min_coverage_start_date=min_date, max_coverage_start_date=max_date)
+        )
+
+        self.assertTrue(
+            all(
+                min_date.isoformat() <= each['coverage_start_date'] <= max_date.isoformat()
                 for each in results
             )
         )
