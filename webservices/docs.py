@@ -1852,6 +1852,14 @@ MAX_COVERAGE_END_DATE = '''
 Ending date of the reporting period before this date(MM/DD/YYYY or YYYY-MM-DD)
 '''
 
+MIN_COVERAGE_START_DATE = '''
+Starting date of the reporting period after this date(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MAX_COVERAGE_START_DATE = '''
+Starting date of the reporting period before this date(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
 MIN_TRANSACTION_DATA_COMPLETE_DATE = '''
 Select all filings processed completely after this date(MM/DD/YYYY or YYYY-MM-DD)
 '''

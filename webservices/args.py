@@ -759,6 +759,12 @@ schedule_d = {
     'creditor_debtor_name': fields.List(fields.Str),
     'nature_of_debt': fields.Str(),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'min_coverage_end_date': fields.Date(missing=None, description=docs.MIN_COVERAGE_END_DATE),
+    'max_coverage_end_date': fields.Date(missing=None, description=docs.MAX_COVERAGE_END_DATE),
+    'min_coverage_start_date': fields.Date(missing=None, description=docs.MIN_COVERAGE_START_DATE),
+    'max_coverage_start_date': fields.Date(missing=None, description=docs.MAX_COVERAGE_START_DATE),
+    'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
+    'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE)
 }
 schedule_e_by_candidate = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
