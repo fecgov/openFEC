@@ -131,7 +131,7 @@ class EFilingF3PSchema(BaseEfileSchema):
                     state_map[keys[int(row.line_number - 1)][1]] = row.column_b
                 else:
                     replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_',
-                        keys[int(row.line_number - 1)][0]).replace(' ', '_')
+                                       keys[int(row.line_number - 1)][0]).replace(' ', '_')
                     replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
                                        str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
                     replace_a = make_period_string(replace_a)
@@ -451,7 +451,8 @@ augment_models(
 
 
 class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'],
-        schemas['CandidateTotalSchema'], schemas['CandidateFlagsSchema']):
+                                  schemas['CandidateTotalSchema'],
+                                  schemas['CandidateFlagsSchema']):
     pass
 
 
@@ -772,9 +773,8 @@ ScheduleH4Schema = make_schema(
     },
     options={
         'exclude': (
-            'payee_street_1',
-            'payee_street_2',
-            'sort_expressions',
+            'payee_name_text',
+            'disbursement_purpose_text',
         ),
         'relationships': [
             Relationship(

@@ -282,7 +282,7 @@ def handle_exception(exception):
         )
     )
     raise exceptions.ApiError('Could not process the request',
-        status_code=http.client.NOT_FOUND)
+                              status_code=http.client.NOT_FOUND)
 
 
 @app.errorhandler(404)
@@ -489,9 +489,7 @@ apidoc.register(sched_f.ScheduleFView, blueprint='v1')
 apidoc.register(sched_f.ScheduleFViewBySubId, blueprint='v1')
 apidoc.register(sched_d.ScheduleDView, blueprint='v1')
 apidoc.register(sched_d.ScheduleDViewBySubId, blueprint='v1')
-# following line is a feature flag to publish endpoint to dev
-if bool(env.get_credential('FEC_FEATURE_SCHEDULE_H4', '')):
-    apidoc.register(sched_h4.ScheduleH4View, blueprint='v1')
+apidoc.register(sched_h4.ScheduleH4View, blueprint='v1')
 apidoc.register(costs.CommunicationCostView, blueprint='v1')
 apidoc.register(aggregates.CCAggregatesView, blueprint='v1')
 apidoc.register(costs.ElectioneeringView, blueprint='v1')

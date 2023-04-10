@@ -1,6 +1,3 @@
-import marshmallow as ma
-import sqlalchemy as sa
-
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.postgresql import TSVECTOR
 
@@ -15,7 +12,7 @@ class BaseItemized(db.Model):
 
     committee = utils.related_committee_history('committee_id', cycle_label='report_year')
     committee_id = db.Column('cmte_id', db.String, doc=docs.COMMITTEE_ID)
-    report_year = db.Column('rpt_yr', db.Integer, doc=docs.REPORT_YEAR)
+    report_year = db.Column('rpt_yr', db.Numeric(4, 0))
     report_type = db.Column('rpt_tp', db.String, doc=docs.REPORT_TYPE)
     image_number = db.Column('image_num', db.String, doc=docs.IMAGE_NUMBER)
     filing_form = db.Column(db.String)
@@ -804,8 +801,8 @@ class ScheduleF(PdfMixin, BaseItemized):
 
 
 class ScheduleH4(BaseItemized):
-    __table_args__ = {'schema': 'disclosure'}
-    __tablename__ = 'fec_fitem_sched_h4'
+    __table_args__ = {'schema': 'public'}
+    __tablename__ = 'ofec_sched_h4_mv'
 
     committee = db.relationship(
         'CommitteeHistory',
@@ -816,94 +813,37 @@ class ScheduleH4(BaseItemized):
     )
 
     # Recipient info
-    committee_id = db.Column('filer_cmte_id', db.String)  # override from BaseItemized
-    entity_type = db.Column('entity_tp', db.String)
-    entity_type_desc = db.Column('entity_tp_desc', db.String)
-    payee_name = db.Column('pye_nm', db.String)
-    payee_street_1 = db.Column('pye_st1', db.String)
-    payee_street_2 = db.Column('pye_st2', db.String)
-    payee_city = db.Column('pye_city', db.String)
-    payee_state = db.Column('pye_st', db.String)
-    payee_zip = db.Column('pye_zip', db.String)
-    filer_committee_name = db.Column('filer_cmte_nm', db.String)
-    # Primary transaction info
-    # event_purpose_category_type = db.Column('evt_purpose_category_tp', db.String)
-    # event_purpose_category_type_description = db.Column('evt_purpose_category_tp_desc', db.String)
-    event_purpose_name = db.Column('evt_purpose_nm', db.String)
-    event_purpose_description = db.Column('evt_purpose_desc', db.String)
-    event_purpose_category_type = db.Column('evt_purpose_category_tp', db.String)
-    event_purpose_category_type_full = db.Column('evt_purpose_category_tp_desc', db.String)
+    committee_id = db.Column('cmte_id', db.String)  # override from BaseItemized
+    payee_name = db.Column('payee_name', db.String)
+    payee_street_1 = db.Column('payee_st1', db.String)
+    payee_street_2 = db.Column('payee_st2', db.String)
+    payee_city = db.Column('payee_city', db.String)
+    payee_state = db.Column('payee_state', db.String)
+    payee_zip = db.Column('payee_zip', db.String)
+    disbursement_purpose = db.Column('disbursement_purpose', db.String)
     memo_code = db.Column('memo_cd', db.String)
-    memo_code_description = db.Column('memo_cd_desc', db.String)
     memo_text = db.Column('memo_text', db.String)
-    event_purpose_date = db.Column('evt_purpose_dt', db.Date)
-    disbursement_amount = db.Column('ttl_amt_disb', db.Numeric(30, 2))
-    # Related candidate info
-    candidate_office = db.Column('cand_office', db.String)
-    candidate_office_description = db.Column('cand_office_desc', db.String)
-    candidate_office_district = db.Column('cand_office_district', db.String)
-    candidate_id = db.Column('cand_id', db.String, doc=docs.CANDIDATE_ID)
-    candidate_name = db.Column('cand_nm', db.String, doc=docs.CANDIDATE_NAME)
-    candidate_first_name = db.Column('cand_nm_first', db.String)
-    candidate_last_name = db.Column('cand_nm_last', db.String)
-    candidate_office_state = db.Column('cand_office_st', db.String)
-    candidate_office_state_full = db.Column('cand_office_st_desc', db.String)
+    event_purpose_date = db.Column('event_purpose_date', db.Date)
+    disbursement_amount = db.Column('disbursement_amount', db.Numeric(30, 2))
     # Transaction meta info
-    amendment_indicator = db.Column('action_cd', db.String)
-    amendment_indicator_desc = db.Column('action_cd_desc', db.String)
     schedule_type = db.Column('schedule_type', db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
-    load_date = db.Column('pg_date', db.DateTime)
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
-    back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
-    back_reference_schedule_id = db.Column('back_ref_sched_id', db.String)
-    # Payee info
-    payee_last_name = db.Column('payee_l_nm', db.String)
-    payee_first_name = db.Column('payee_f_nm', db.String)
-    payee_middle_name = db.Column('payee_m_nm', db.String)
-    payee_prefix = db.Column(db.String)
-    payee_suffix = db.Column(db.String)
-    # Category info
-    category_code = db.Column('catg_cd', db.String)
-    category_code_full = db.Column('catg_cd_desc', db.String)
-    # Conduit info
-    conduit_committee_id = db.Column('conduit_cmte_id', db.String)
-    conduit_committee_name = db.Column('conduit_cmte_nm', db.String)
-    conduit_committee_street1 = db.Column('conduit_cmte_st1', db.String)
-    conduit_committee_street2 = db.Column('conduit_cmte_st2', db.String)
-    conduit_committee_city = db.Column('conduit_cmte_city', db.String)
-    conduit_committee_state = db.Column('conduit_cmte_st', db.String)
-    conduit_committee_zip = db.Column('conduit_cmte_zip', db.Integer)
-    # TODO: determine place for these:
+    # back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
+    # back_reference_schedule_id = db.Column('back_ref_sched_id', db.String)
     federal_share = db.Column('fed_share', db.Numeric(14, 2))
     nonfederal_share = db.Column('nonfed_share', db.Numeric(14, 2))
     administrative_voter_drive_activity_indicator = db.Column('admin_voter_drive_acty_ind', db.String)
     fundraising_activity_indicator = db.Column('fndrsg_acty_ind', db.String)
     exempt_activity_indicator = db.Column('exempt_acty_ind', db.String)
     direct_candidate_support_activity_indicator = db.Column('direct_cand_supp_acty_ind', db.String)
-    event_amount_year_to_date = db.Column('evt_amt_ytd', db.Numeric(14, 2))
-    additional_description = db.Column('add_desc', db.String)
-    administrative_activity_inidcator = db.Column('admin_acty_ind', db.String)
+    event_amount_year_to_date = db.Column('event_amount_ytd', db.Numeric(14, 2))
+    activity_or_event = db.Column('activity_or_event', db.String)
+    administrative_activity_indicator = db.Column('admin_acty_ind', db.String)
     general_voter_drive_activity_indicator = db.Column('gen_voter_drive_acty_ind', db.String)
-    disbursement_type = db.Column('disb_tp', db.String)
-    disbursement_type_full = db.Column('disb_tp_desc', db.String)
-    published_committee_reference_parity_check = db.Column('pub_comm_ref_pty_chk', db.String)
+    public_comm_indicator = db.Column('public_comm_indicator', db.String)
     filing_form = db.Column('filing_form', db.String)
-    report_type = db.Column('rpt_tp', db.String)
-    report_year = db.Column('rpt_yr', db.Numeric(4, 0))
     cycle = db.Column('election_cycle', db.Numeric(4, 0))
-
-    @hybrid_property
-    def sort_expressions(self):
-        return {
-            'event_purpose_date': {
-                'expression': sa.func.coalesce(
-                    self.event_purpose_date,
-                    sa.cast('9999-12-31', sa.Date)
-                ),
-                'field': ma.fields.Date,
-                'type': 'date',
-                'null_sort': self.event_purpose_date,
-            },
-        }
+    disbursement_purpose_text = db.Column(TSVECTOR)
+    payee_name_text = db.Column(TSVECTOR)
