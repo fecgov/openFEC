@@ -9,7 +9,7 @@ from webservices.utils import (
 from webservices.tasks.utils import get_bucket
 from .reclassify_statutory_citation import reclassify_statutory_citation
 from .es_management import (  # noqa
-    DOCS_ALIAS,
+   AO_ALIAS,
 )
 import json
 
@@ -113,28 +113,33 @@ def load_advisory_opinions(from_ao_no=None):
     """
     Reads data for advisory opinions from a Postgres database,
     assembles a JSON document corresponding to the advisory opinion
-    and indexes this document in Elasticsearch in the DOCS_ALIAS of DOCS_INDEX
+    and indexes this document in Elasticsearch in the AO_ALIAS of AO_INDEX
     with a type=`advisory_opinions`.
     In addition, all documents attached to the advisory opinion
     are uploaded to an S3 bucket under the _directory_`legal/aos/`.
     """
     es_client = create_es_client()
-
-    # TO DO: check if DOCS_ALIAS exist before uploading.
-    logger.info("Loading advisory opinions")
     ao_count = 0
-    for ao in get_advisory_opinions(from_ao_no):
-        logger.info("Loading AO: %s", ao["no"])
-        es_client.index(DOCS_ALIAS, ao, id=ao["no"])
-        ao_count += 1
 
-        # ==for local dubug use: remove the big "documents" section to display the object "ao" data.
-        debug_ao_data = ao
-        del debug_ao_data["documents"]
-        logger.debug("ao_data count=" + str(ao_count))
-        logger.debug("debug_ao_data =" + json.dumps(debug_ao_data, indent=3, cls=DateTimeEncoder))
+    if es_client.indices.exists(index=AO_ALIAS):
+        logger.info("Index alias '{}' exists, start loading advisory opinions...".format(AO_ALIAS))
+        try:
+            for ao in get_advisory_opinions(from_ao_no):
+                logger.info(" Loading AO number: %s", ao["no"])
+                es_client.index(AO_ALIAS, ao, id=ao["no"])
+                ao_count += 1
 
-    logger.info("%d advisory opinions loaded", ao_count)
+                # ==for local dubug use: remove the big "documents" section to display the object "ao" data.
+                debug_ao_data = ao
+                del debug_ao_data["documents"]
+                logger.debug("ao_data count=" + str(ao_count))
+                logger.debug("debug_ao_data =" + json.dumps(debug_ao_data, indent=3, cls=DateTimeEncoder))
+
+            logger.info(" Total %d advisory opinions loaded.", ao_count)
+        except Exception:
+            pass
+    else:
+        logger.error(" The index alias '{0}' is not found, cannot load advisory opinions".format(AO_ALIAS))
 
 
 def ao_stage_to_pending(stage):
@@ -261,7 +266,7 @@ def get_documents(ao_id, bucket):
             }
             if not row["fileimage"]:
                 logger.error(
-                    "Error uploading document ID {0} for AO no {1}: No file image".format(
+                    " Error uploading document ID {0} for AO no {1}: No file image".format(
                         row["document_id"], row["ao_no"]
                     )
                 )
@@ -308,7 +313,6 @@ def fix_citations(ao_no, citation_type, citations):
         {"statute": [(52, "30101"), (52, "30116")]},
         {"regulation": [(11, 110, 3), (11, 100, 5)]},
     }
-
     """
 
     CITATION_EXCLUDE_LOOKUP = {
@@ -341,7 +345,7 @@ def fix_citations(ao_no, citation_type, citations):
 def get_citations(ao_names):
     ao_component_to_name_map = {tuple(map(int, a.split("-"))): a for a in ao_names}
 
-    logger.info("Getting citations...")
+    logger.info(" Getting AO citations...")
 
     rs = db.engine.execute(
         """SELECT ao_no, ocrtext FROM aouser.document
@@ -358,7 +362,7 @@ def get_citations(ao_names):
 
         if not row["ocrtext"]:
             logger.error(
-                "Missing OCR text for AO no {0}: unable to get citations".format(
+                " Missing OCR text for AO no {0}: unable to get citations".format(
                     row["ao_no"]
                 )
             )
@@ -421,7 +425,7 @@ def get_citations(ao_names):
             "citation_text": "%d CFR §%d.%d" % (citation[0], citation[1], citation[2]),
             "citation_type": "regulation",
         }
-        es_client.index(DOCS_ALIAS, entry, id=entry["citation_text"])
+        es_client.index(AO_ALIAS, entry, id=entry["citation_text"])
 
     for citation in all_statutory_citations:
         entry = {
@@ -429,10 +433,8 @@ def get_citations(ao_names):
             "citation_text": "%d U.S.C. §%s" % (citation[0], citation[1]),
             "citation_type": "statute",
         }
-        es_client.index(DOCS_ALIAS, entry, id=entry["citation_text"])
-
-    logger.info("Citations loaded.")
-
+        es_client.index(AO_ALIAS, entry, id=entry["citation_text"])
+    logger.info(" AO Citations loaded.")
     return citations
 
 

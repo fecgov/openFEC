@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch
 from elasticsearch import RequestError
 from webservices.legal_docs.es_management import (  # noqa
-    DOCS_INDEX,
+    DOCS_PATH, CASE_INDEX
 )
 from webservices.resources.legal import (  # noqa
     ALL_DOCUMENT_TYPES,
@@ -228,11 +228,11 @@ class TestLegalDoc(unittest.TestCase):
     @patch("webservices.rest.legal.es_client.search", legal_doc_data)
     def test_legal_doc(self):
         app = rest.app.test_client()
-        response = app.get("/v1/legal/" + DOCS_INDEX + "/doc_type/1?api_key=1234")
+        response = app.get("/v1/legal/" + DOCS_PATH + "/doc_type/1?api_key=1234")
         assert response.status_code == 200
         result = json.loads(codecs.decode(response.data))
         assert result == {
-            DOCS_INDEX: [{
+            DOCS_PATH: [{
                 "type": "document type",
                 "no": "100",
                 "summary": "summery 100",

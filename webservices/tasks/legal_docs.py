@@ -1,5 +1,5 @@
 import datetime
-
+import time
 import logging
 
 from celery_once import QueueOnce
@@ -8,6 +8,11 @@ from webservices import utils
 from webservices.legal_docs.advisory_opinions import load_advisory_opinions
 from webservices.legal_docs.current_cases import load_cases
 from webservices.legal_docs.es_management import create_es_snapshot
+from webservices.legal_docs.es_management import (  # noqa
+    CASE_INDEX,
+    AO_INDEX,
+)
+
 from webservices.rest import db
 from webservices.tasks import app
 from webservices.tasks.utils import get_app_name
@@ -139,7 +144,9 @@ def daily_reload_all_aos_when_change():
             slack_message = "No daily modified AO found."
         else:
             logger.info(
-                " Daily (%s) total of %d ao(s) reload to elasticsearch successfully.", datetime.date.today().strftime("%A"), row_count)
+                " Daily (%s) total of %d ao(s) reload to elasticsearch successfully.",
+                datetime.date.today().strftime("%A"), row_count
+            )
 
     if slack_message:
         slack_message = slack_message + " in " + get_app_name()
@@ -168,10 +175,12 @@ def send_alert_daily_modified_legal_case():
         for row in rs:
             row_count += 1
             if row["published_flg"]:
-                slack_message = slack_message + str(row["case_type"]) + " " + str(row["case_no"]) + " found published at " + str(row["pg_date"])
+                slack_message = slack_message + str(row["case_type"]) + " "
+                + str(row["case_no"]) + " found published at " + str(row["pg_date"])
                 slack_message = slack_message + "\n"
             else:
-                slack_message = slack_message + str(row["case_type"]) + " " + str(row["case_no"]) + " found unpublished at " + str(row["pg_date"])
+                slack_message = slack_message + str(row["case_type"]) + " "
+                + str(row["case_no"]) + " found unpublished at " + str(row["pg_date"])
                 slack_message = slack_message + "\n"
     if row_count <= 0:
         slack_message = "No daily modified case (MUR/AF/ADR) found"
@@ -184,13 +193,22 @@ def send_alert_daily_modified_legal_case():
 @app.task(once={"graceful": True}, base=QueueOnce)
 def create_es_backup():
     """
-        Take Elasticsearch 'docs' index snapshot weekly.
+        Take Elasticsearch `CASE_INDEX` and `AO_INDEX` snapshot weekly.
     """
+    slack_message = ""
+    index_name_message = ""
+    index_name_list = [CASE_INDEX, AO_INDEX]
+    logger.info(" Weekly (%s) elasticsearch snapshot backup starting", datetime.date.today().strftime("%A"))
     try:
-        logger.info(" Weekly (%s) elasticsearch backup starting", datetime.date.today().strftime("%A"))
-        create_es_snapshot()
-        logger.info(" Weekly (%s) elasticsearch backup completed", datetime.date.today().strftime("%A"))
-        slack_message = "Weekly elasticsearch backup completed in {0} space".format(get_app_name())
+        for i, index_name in enumerate(index_name_list):
+            index_name = index_name_list[i]
+            create_es_snapshot(index_name)
+            logger.info("elasticsearch snapshot on index: '{0}' created".format(index_name))
+            index_name_message += index_name + ","
+            time.sleep(20)
+        logger.info(" Weekly (%s) elasticsearch snapshot backup completed", datetime.date.today().strftime("%A"))
+        slack_message = "Weekly elasticsearch backup completed in {0} space on indices({1})".format(
+            get_app_name(), index_name_message)
         utils.post_to_slack(slack_message, SLACK_BOTS)
     except Exception as error:
         logger.exception(error)

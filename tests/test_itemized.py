@@ -1428,6 +1428,14 @@ class TestScheduleE(ApiBaseTest):
         )
         self.assertEqual(results[0]['support_oppose_indicator'], 's')
 
+    def test_schedule_e_expenditure_description_field(self):
+        factories.ScheduleEFactory(committee_id='C001', expenditure_description='Advertising Costs')
+        results = self._results(
+            api.url_for(ScheduleEView, **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['expenditure_description'], 'Advertising Costs')
+
     def test_schedule_e_efile_filters(self):
         filters = [
             ('image_number', ScheduleEEfile.image_number, ['456', '789']),
