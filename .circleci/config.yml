@@ -1,6 +1,8 @@
 # Python CircleCI 2.0 configuration file
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 version: 2.1
+orbs:
+  codecov: codecov/codecov@3.2.4
 jobs:
   build:
     docker:
@@ -86,11 +88,7 @@ jobs:
             . .env/bin/activate
             pytest
 
-      - run:
-          name: Perform post-test checks
-          command: |
-            . .env/bin/activate
-            codecov
+      - codecov/upload
 
       - store_artifacts:
           path: test-reports
