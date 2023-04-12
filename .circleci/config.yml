@@ -1,8 +1,6 @@
 # Python CircleCI 2.0 configuration file
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 version: 2.1
-orbs:
-  codecov: codecov/codecov@3.2.4
 jobs:
   build:
     docker:
@@ -88,7 +86,17 @@ jobs:
             . .env/bin/activate
             pytest
 
-      - codecov/upload
+      - run:
+          name: Download and run codecov
+          command: |
+            curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
+            curl -Os https://uploader.codecov.io/latest/linux/codecov
+            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+            gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+            shasum -a 256 -c codecov.SHA256SUM
+            chmod +x codecov
+            ./codecov
 
       - store_artifacts:
           path: test-reports
