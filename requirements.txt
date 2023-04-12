@@ -44,6 +44,7 @@ redis==4.5.4
 
 # testing and build in circle
 factory_boy==2.8.1
+coverage==7.0.3
 importlib-metadata==3.10.1 #pinned to fix the pytest deprecation warning: SelectableGroups dict interface
 jsonschema==3.2.0 #pinned to fix the pytest deprecation warning inside jsonschema/validators.py
 nplusone==0.8.0
