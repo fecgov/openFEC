@@ -1570,7 +1570,7 @@ COVERAGE_START_DATE = 'Beginning date of the reporting period'
 COVERAGE_END_DATE = 'Ending date of the reporting period'
 DEBTS_OWED_BY_COMMITTEE = 'Debts owed by the committee'
 DEBTS_OWED_TO_COMMITTEE = 'Debts owed to the committee'
-
+TEST = 'Test'
 # shared receipts
 RECEIPTS = 'Anything of value (money, goods, services or property) received by a political committee'
 

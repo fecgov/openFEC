@@ -27,7 +27,7 @@ class TestElectionSearch(ApiBaseTest):
             office='S', state='VA', district='00', incumbent_id='SVA123'
         )
         factories.ElectionsListFactory(
-            office='S', state='VA', district='04', incumbent_id='HVA121'
+            office='H', state='VA', district='04', incumbent_id='HVA121'
         )
         factories.ElectionsListFactory(
             office='H', state='VA', district='05', incumbent_id='HVA123'
