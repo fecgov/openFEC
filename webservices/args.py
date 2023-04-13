@@ -1128,3 +1128,7 @@ Inaugural_donations_by_contributor = {
     'contributor_name': fields.List(IStr, description=docs.CONTRIBUTOR_NAME),
     'cycle': fields.List(fields.Int(), description=docs.COMMITTEE_CYCLE)
 }
+
+test_code_cov = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+}
