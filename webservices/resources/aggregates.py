@@ -14,7 +14,7 @@ from webservices.common.views import ApiResource
 
 CANDIDATE_NAME_LABEL = 'candidate_name'
 COMMITTEE_NAME_LABEL = 'committee_name'
-
+Test = 'Testing changes for codecov'
 
 class AggregateResource(ApiResource):
     query_args = {}
