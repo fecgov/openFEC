@@ -96,7 +96,6 @@ jobs:
             gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
             shasum -a 256 -c codecov.SHA256SUM
             pip install coverage
-            touch coverage.xml
             chmod +x codecov
             ./codecov -t ${CODECOV_TOKEN} -v
 
