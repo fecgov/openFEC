@@ -69,6 +69,7 @@ jobs:
             python3 -m venv .env
             . .env/bin/activate
             pip install -r requirements.txt
+            coverage xml
 
       - save_cache:
           paths:
@@ -95,7 +96,6 @@ jobs:
             curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
             gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
             shasum -a 256 -c codecov.SHA256SUM
-            coverage xml
             chmod +x codecov
             ./codecov -t ${CODECOV_TOKEN} -v
 
