@@ -87,10 +87,17 @@ jobs:
             pytest
 
       - run:
-          name: Perform post-test checks
+          name: Upload coverage report to codecov
           command: |
             . .env/bin/activate
-            codecov
+            curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
+            curl -Os https://uploader.codecov.io/latest/linux/codecov
+            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+            gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+            shasum -a 256 -c codecov.SHA256SUM
+            chmod +x codecov
+            ./codecov -t ${CODECOV_TOKEN} -v
 
       - store_artifacts:
           path: test-reports
