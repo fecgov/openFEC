@@ -22,6 +22,8 @@ class TestScheduleDView(ApiBaseTest):
             ('image_number', ScheduleD.image_number, ['123', '456']),
             ('committee_id', ScheduleD.committee_id, ['C01', 'C02']),
             ('candidate_id', ScheduleD.candidate_id, ['S01', 'S02']),
+            ('report_year', ScheduleD.report_year, [2023, 2019]),
+            ('report_type', ScheduleD.report_type, ['60D', 'Q3'])
         ]
         for label, column, values in filters:
             [factories.ScheduleDViewFactory(**{column.key: value}) for value in values]

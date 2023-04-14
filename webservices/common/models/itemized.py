@@ -536,6 +536,8 @@ class ScheduleD(PdfMixin, BaseItemized):
     load_date = db.Column('pg_date', db.Date)
     coverage_start_date = db.Column(db.Date, index=True, doc=docs.COVERAGE_START_DATE)
     coverage_end_date = db.Column(db.Date, index=True, doc=docs.COVERAGE_END_DATE)
+    report_year = db.Column('rpt_yr', db.Integer,  index=True, doc=docs.REPORT_YEAR)
+    report_type = db.Column('rpt_tp', db.String, index=True, doc=docs.REPORT_TYPE)
 
     committee = db.relationship(
         'CommitteeHistory',

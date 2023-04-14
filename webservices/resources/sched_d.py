@@ -26,6 +26,8 @@ class ScheduleDView(ApiResource):
         ('image_number', models.ScheduleD.image_number),
         ('committee_id', models.ScheduleD.committee_id),
         ('candidate_id', models.ScheduleD.candidate_id),
+        ('report_year', models.ScheduleD.report_year),
+        ('report_type', models.ScheduleD.report_type)
     ]
 
     filter_range_fields = [
