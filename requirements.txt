@@ -43,7 +43,7 @@ celery-once==3.0.0
 redis==4.5.4
 
 # testing and build in circle
-codecov==2.1.7
+coverage==7.0.3
 factory_boy==2.8.1
 importlib-metadata==3.10.1 #pinned to fix the pytest deprecation warning: SelectableGroups dict interface
 jsonschema==3.2.0 #pinned to fix the pytest deprecation warning inside jsonschema/validators.py
