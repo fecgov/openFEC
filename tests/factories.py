@@ -314,6 +314,11 @@ class ScheduleH4Factory(BaseFactory):
     report_year = 2016
     cycle = 2016
 
+    @factory.post_generation
+    def update_fulltext(obj, create, extracted, **kwargs):
+        obj.payee_name_text = sa.func.to_tsvector(obj.payee_name)
+        obj.disbursement_purpose_text = sa.func.to_tsvector(obj.disbursement_purpose)
+
 
 class FilingsFactory(BaseFactory):
     sub_id = factory.Sequence(lambda n: n)
@@ -619,4 +624,3 @@ class JFCCommitteeFactory(BaseFactory):
 class TotalsInauguralDonationsFactory(BaseFactory):
     class Meta:
         model = models.InauguralDonations
-

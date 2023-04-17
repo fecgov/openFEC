@@ -7,7 +7,7 @@ candidates and committees fund their campaigns.
 
 The Federal Election Commission (FEC) API is a RESTful web service supporting full-text and field-specific searches on
 FEC data. [Bulk downloads](https://www.fec.gov/data/advanced/?tab=bulk-data) are available on the current
-site. Information is tied to the underlying forms by file ID and image ID. Data is updated
+site. Information is tied to the underlying forms by file ID and image ID. Data are updated
 nightly.
 
 There are a lot of data, and a good place to start is to use search to find
@@ -897,7 +897,7 @@ reported as part of forms F3, F3X and F3P.
 '''
 
 SCHEDULE_B = SCHEDULE_B_TAG + '''
-The data is divided in two-year periods, called `two_year_transaction_period`, which
+The data are divided in two-year periods, called `two_year_transaction_period`, which
 is derived from the `report_year` submitted of the corresponding form. If no value is supplied, the results will
 default to the most recent two-year period that is named after the ending,
 even-numbered year.
@@ -1133,7 +1133,14 @@ Unitemized individual contributions are not included.
 '''
 
 SCHEDULE_H4 = '''
-TODO: create text
+Schedule H4 filings describe disbursements for allocated federal/nonfederal activity. This data
+demonstrates how separate segregated funds, party committees and nonconnected committees that are active
+in both federal and nonfederal elections, and have established separate federal and nonfederal accounts,
+allocate their activity. These figures are reported on Form 3X.
+
+The data are divided in two-year periods, called `two_year_transaction_period`, which are derived from the
+`report_year` submitted on Form 3X. If no value is supplied, the results will default to the most recent
+two-year period.
 '''
 
 TOTAL_CANDIDATE_TAG = '''
@@ -1519,6 +1526,13 @@ EXPENDITURE_MIN_AMOUNT = 'Selects all items expended by this committee greater t
 EXPENDITURE_MAX_AMOUNT = 'Selects all items expended by this committee less than this amount'
 SUPPORT_OPPOSE = 'Support or opposition'
 
+# schedule H4
+# PAYEE_NAME = Name of the entity that received the payment (is pulled from above)
+PAYEE_CITY = 'City of the entity that received the payment'
+PAYEE_STATE = 'State of the entity that received the payment'
+PAYEE_ZIP = 'Zip of the entity that received the payment'
+DISBURSEMENT_PURPOSE = 'Purpose of the allocated disbursement'
+
 # dates
 DUE_DATE = 'Date the report is due'
 CREATE_DATE = 'Date the record was created'
@@ -1873,7 +1887,7 @@ Date when the report is processed completely
 '''
 
 TRANSACTION_COVERAGE_DATE = '''
-Date through which transaction-level data is available
+Date through which transaction-level data are available
 '''
 
 LAST_EXPENDITURE_DATE = '''

@@ -41,7 +41,7 @@ def parse_option(option, model=None, aliases=None, join_columns=None, query=None
 
 
 def multi_sort(query, keys, model, aliases=None, join_columns=None, clear=False,
-         hide_null=False, index_column=None, nulls_last=False):
+               hide_null=False, index_column=None, nulls_last=False):
     for key in keys:
         query, _ = sort(query, key, model, aliases, join_columns, clear, hide_null, index_column, nulls_last)
     return query, _
@@ -94,21 +94,6 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
         column_name = column.key
     else:
         column_name = column
-
-    if model:
-        # Check to see if the model has a sort_expressions attribute on it,
-        # which contains a dictionary of column mappings to SQL expressions.
-        # If the model has this and there is a matching expression for the
-        # column, use the expression instead.
-        if hasattr(model, 'sort_expressions') and column_name in model.sort_expressions:
-            column = model.sort_expressions[column_name]['expression']
-            expression_field = model.sort_expressions[column_name]['field']
-            expression_type = model.sort_expressions[column_name]['type']
-            null_sort = model.sort_expressions[column_name].get(
-                'null_sort',
-                model.sort_expressions[column_name]['expression']
-            )
-            is_expression = True
 
     sort_column = order(column)
     if nulls_last and not hide_null:
