@@ -42,7 +42,7 @@ class ScheduleH4View(ItemizedResource):
         ('q_payee_name', models.ScheduleH4.payee_name_text),
     ]
 
-    sort_options = ['event_purpose_date', 'disbursement_amount']
+    sort_options = ['event_purpose_date']
 
     @property
     def args(self):

@@ -801,7 +801,6 @@ class ScheduleF(PdfMixin, BaseItemized):
 
 
 class ScheduleH4(BaseItemized):
-    __table_args__ = {'schema': 'public'}
     __tablename__ = 'ofec_sched_h4_mv'
 
     committee = db.relationship(
