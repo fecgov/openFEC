@@ -31,7 +31,6 @@ class ScheduleDView(ApiResource):
     ]
 
     filter_range_fields = [
-        (('min_date', 'max_date'), models.ScheduleD.load_date),
         (('min_payment_period', 'max_payment_period'), models.ScheduleD.payment_period),
         (('min_amount_incurred', 'max_amount_incurred'), models.ScheduleD.amount_incurred_period),
         (('min_image_number', 'max_image_number'), models.ScheduleD.image_number),
@@ -57,7 +56,7 @@ class ScheduleDView(ApiResource):
             args.schedule_d,
             args.paging,
             args.make_sort_args(
-                default='load_date',
+                default='-coverage_end_date',
             )
         )
 
@@ -91,6 +90,6 @@ class ScheduleDViewBySubId(ApiResource):
         return utils.extend(
             args.paging,
             args.make_sort_args(
-                default='load_date',
+                default='-coverage_end_date',
             )
         )

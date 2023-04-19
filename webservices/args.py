@@ -745,8 +745,6 @@ schedule_d = {
     'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
     'min_image_number': ImageNumber(description=docs.MIN_IMAGE_NUMBER),
     'max_image_number': ImageNumber(description=docs.MAX_IMAGE_NUMBER),
-    'min_date': fields.Date(description='Minimum load date'),
-    'max_date': fields.Date(description='Maximum load date'),
     'min_payment_period': fields.Float(),
     'max_payment_period': fields.Float(),
     'min_amount_incurred': fields.Float(),

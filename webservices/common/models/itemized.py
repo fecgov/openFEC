@@ -533,7 +533,6 @@ class ScheduleD(PdfMixin, BaseItemized):
     schedule_type = db.Column(db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     election_cycle = db.Column(db.Integer)
-    load_date = db.Column('pg_date', db.Date)
     coverage_start_date = db.Column(db.Date, index=True, doc=docs.COVERAGE_START_DATE)
     coverage_end_date = db.Column(db.Date, index=True, doc=docs.COVERAGE_END_DATE)
     report_year = db.Column('rpt_yr', db.Integer, index=True, doc=docs.REPORT_YEAR)
