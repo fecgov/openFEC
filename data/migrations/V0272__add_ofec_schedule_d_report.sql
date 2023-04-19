@@ -57,11 +57,10 @@ CREATE MATERIALIZED VIEW public.ofec_sched_d_mv AS
         sd.schedule_type,
         sd.schedule_type_desc,
         sd.election_cycle,
-        sd.pg_date,
         sd.rpt_tp,
         sd.rpt_yr,
-        public.date_or_null(fr.cvg_start_dt::integer) as coverage_start_date,
-        public.date_or_null(fr.cvg_end_dt::integer) as coverage_end_date
+        fr.cvg_start_dt::text::date::timestamp without time zone as coverage_start_date,
+        fr.cvg_end_dt::text::date::timestamp without time zone as coverage_end_date
     FROM disclosure.fec_fitem_sched_d sd
     LEFT JOIN disclosure.f_rpt_or_form_sub fr
         ON sd.link_id = fr.sub_id
@@ -78,7 +77,6 @@ CREATE UNIQUE INDEX idx_ofec_sched_d_mv_sub_id ON public.ofec_sched_d_mv USING b
 
 -- Create indices on filtered columns
 CREATE INDEX IF NOT EXISTS idx_ofec_sched_d_mv_cand_id on ofec_sched_d_mv USING btree (cand_id);
-CREATE INDEX IF NOT EXISTS idx_ofec_sched_d_mv_pg_date on ofec_sched_d_mv USING btree (pg_date);
 CREATE INDEX IF NOT EXISTS idx_ofec_sched_d_mv_pymt_per on ofec_sched_d_mv USING btree (pymt_per);
 CREATE INDEX IF NOT EXISTS idx_ofec_sched_d_mv_amt_incurred_per on ofec_sched_d_mv USING btree (amt_incurred_per);
 CREATE INDEX IF NOT EXISTS idx_ofec_sched_d_mv_outstg_bal_bop on ofec_sched_d_mv USING btree (outstg_bal_bop);
