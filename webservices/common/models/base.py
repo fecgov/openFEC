@@ -1,7 +1,6 @@
 import random
 import celery
 from sqlalchemy import orm
-from flask import request
 from flask_sqlalchemy import SQLAlchemy as SQLAlchemyBase
 from flask_sqlalchemy import SignallingSession
 
@@ -41,24 +40,8 @@ class RoutingSession(SignallingSession):
 
         return use_follower
 
-    @property
-    def route_schedule_a(self):
-        """If we have more than 1 replica, separate Schedule A traffic. """
-        return (
-            self.app.config['SQLALCHEMY_ROUTE_SCHEDULE_A'] and len(self.followers) > 1
-        )
-
     def get_bind(self, mapper=None, clause=None):
         if self.use_follower:
-            # Celery worker doesn't have request context
-            if request and self.route_schedule_a:
-                if '/schedule_a/' not in request.path:
-                    # Route all non-schedule A traffic to replica 1
-                    return self.followers[0]
-                else:
-                    # Split out Schedule A to remaining replicas
-                    return random.choice(self.followers[1:])
-
             return random.choice(self.followers)
 
         return super().get_bind(mapper=mapper, clause=clause)
