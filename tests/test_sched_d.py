@@ -22,6 +22,8 @@ class TestScheduleDView(ApiBaseTest):
             ('image_number', ScheduleD.image_number, ['123', '456']),
             ('committee_id', ScheduleD.committee_id, ['C01', 'C02']),
             ('candidate_id', ScheduleD.candidate_id, ['S01', 'S02']),
+            ('report_year', ScheduleD.report_year, [2023, 2019]),
+            ('report_type', ScheduleD.report_type, ['60D', 'Q3'])
         ]
         for label, column, values in filters:
             [factories.ScheduleDViewFactory(**{column.key: value}) for value in values]
@@ -39,61 +41,95 @@ class TestScheduleDView(ApiBaseTest):
         self.assertEqual(results[0]['creditor_debtor_name'], 'OFFICE MAX')
 
     def test_filter_match_field(self):
-        names = ['DUES', 'PRINTING', 'ENTERTAIMENT']
+        names = ['DUES', 'PRINTING', 'ENTERTAINMENT']
         [factories.ScheduleDViewFactory(nature_of_debt=name) for name in names]
         results = self._results(
-            api.url_for(ScheduleDView, nature_of_debt='ENTERTAIMENT')
+            api.url_for(ScheduleDView, nature_of_debt='ENTERTAINMENT')
         )
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['nature_of_debt'], 'ENTERTAIMENT')
+        self.assertEqual(results[0]['nature_of_debt'], 'ENTERTAINMENT')
 
     def test_filter_range(self):
         [
             factories.ScheduleDViewFactory(
-                load_date=datetime.date(2012, 1, 1),
                 amount_incurred_period=1,
                 outstanding_balance_beginning_of_period=1,
-                outstanding_balance_close_of_period=1
+                outstanding_balance_close_of_period=1,
+                coverage_start_date=datetime.date(2011, 1, 1),
+                coverage_end_date=datetime.date(2011, 8, 27)
             ),
             factories.ScheduleDViewFactory(
-                load_date=datetime.date(2013, 1, 1),
                 amount_incurred_period=2,
                 outstanding_balance_beginning_of_period=2,
-                outstanding_balance_close_of_period=2
+                outstanding_balance_close_of_period=2,
+                coverage_start_date=datetime.date(2012, 1, 1),
+                coverage_end_date=datetime.date(2012, 2, 27)
             ),
             factories.ScheduleDViewFactory(
-                load_date=datetime.date(2014, 1, 1),
                 amount_incurred_period=3,
                 outstanding_balance_beginning_of_period=3,
-                outstanding_balance_close_of_period=3
+                outstanding_balance_close_of_period=3,
+                coverage_start_date=datetime.date(2013, 1, 1),
+                coverage_end_date=datetime.date(2013, 5, 5)
             ),
             factories.ScheduleDViewFactory(
-                load_date=datetime.date(2015, 1, 1),
                 amount_incurred_period=4,
                 outstanding_balance_beginning_of_period=3,
-                outstanding_balance_close_of_period=4
+                outstanding_balance_close_of_period=4,
+                coverage_start_date=datetime.date(2014, 1, 1),
+                coverage_end_date=datetime.date(2014, 6, 6)
             ),
         ]
         # load_date min, max
         min_date = datetime.date(2013, 1, 1)
-        results = self._results(api.url_for(ScheduleDView, min_date=min_date))
+
+        results = self._results(api.url_for(ScheduleDView, min_coverage_start_date=min_date))
         self.assertTrue(
             all(
-                each['load_date'] >= min_date.isoformat()
+                each['coverage_start_date'] >= min_date.isoformat()
+                for each in results
+            )
+        )
+        results = self._results(api.url_for(ScheduleDView, min_coverage_end_date=min_date))
+        self.assertTrue(
+            all(
+                each['coverage_end_date'] >= min_date.isoformat()
                 for each in results
             )
         )
         max_date = datetime.date(2014, 1, 1)
-        results = self._results(api.url_for(ScheduleDView, max_date=max_date))
+
+        results = self._results(api.url_for(ScheduleDView, max_coverage_start_date=min_date))
         self.assertTrue(
-            all(each['load_date'] <= max_date.isoformat() for each in results)
+            all(
+                each['coverage_start_date'] <= max_date.isoformat()
+                for each in results
+            )
         )
+        results = self._results(api.url_for(ScheduleDView, max_coverage_end_date=min_date))
+        self.assertTrue(
+            all(
+                each['coverage_end_date'] <= max_date.isoformat()
+                for each in results
+            )
+        )
+
         results = self._results(
-            api.url_for(ScheduleDView, min_date=min_date, max_date=max_date)
+            api.url_for(ScheduleDView, min_coverage_end_date=min_date, max_coverage_end_date=max_date)
         )
         self.assertTrue(
             all(
-                min_date.isoformat() <= each['load_date'] <= max_date.isoformat()
+                min_date.isoformat() <= each['coverage_end_date'] <= max_date.isoformat()
+                for each in results
+            )
+        )
+        results = self._results(
+            api.url_for(ScheduleDView, min_coverage_start_date=min_date, max_coverage_start_date=max_date)
+        )
+
+        self.assertTrue(
+            all(
+                min_date.isoformat() <= each['coverage_start_date'] <= max_date.isoformat()
                 for each in results
             )
         )
@@ -136,17 +172,17 @@ class TestScheduleDView(ApiBaseTest):
 
     def test_sort_ascending(self):
         [
-            factories.ScheduleDViewFactory(sub_id=1, load_date='2017-01-02'),
-            factories.ScheduleDViewFactory(sub_id=2, load_date='2017-01-01'),
+            factories.ScheduleDViewFactory(sub_id=1, coverage_end_date='2017-01-02'),
+            factories.ScheduleDViewFactory(sub_id=2, coverage_end_date='2017-01-01'),
         ]
-        results = self._results(api.url_for(ScheduleDView, sort=['load_date']))
-        self.assertEqual(results[0]['load_date'], '2017-01-01')
-        self.assertEqual(results[1]['load_date'], '2017-01-02')
+        results = self._results(api.url_for(ScheduleDView, sort=['coverage_end_date']))
+        self.assertEqual(results[0]['coverage_end_date'], '2017-01-01')
+        self.assertEqual(results[1]['coverage_end_date'], '2017-01-02')
 
     def test_sort_descending(self):
         [
-            factories.ScheduleDViewFactory(sub_id=1, load_date='2017-01-02'),
-            factories.ScheduleDViewFactory(sub_id=2, load_date='2017-01-01'),
+            factories.ScheduleDViewFactory(sub_id=1),
+            factories.ScheduleDViewFactory(sub_id=2),
         ]
         results = self._results(api.url_for(ScheduleDView, sort=['-sub_id']))
         self.assertEqual(results[0]['sub_id'], '2')

@@ -487,8 +487,7 @@ class ScheduleC(PdfMixin, BaseItemized):
 
 
 class ScheduleD(PdfMixin, BaseItemized):
-    __table_args__ = {'schema': 'disclosure'}
-    __tablename__ = 'fec_fitem_sched_d'
+    __tablename__ = 'ofec_sched_d_mv'
 
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
@@ -531,7 +530,10 @@ class ScheduleD(PdfMixin, BaseItemized):
     schedule_type = db.Column(db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     election_cycle = db.Column(db.Integer)
-    load_date = db.Column('pg_date', db.Date)
+    coverage_start_date = db.Column(db.Date, index=True, doc=docs.COVERAGE_START_DATE)
+    coverage_end_date = db.Column(db.Date, index=True, doc=docs.COVERAGE_END_DATE)
+    report_year = db.Column('rpt_yr', db.Integer, index=True, doc=docs.REPORT_YEAR)
+    report_type = db.Column('rpt_tp', db.String, index=True, doc=docs.REPORT_TYPE)
 
     committee = db.relationship(
         'CommitteeHistory',
