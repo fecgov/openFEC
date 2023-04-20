@@ -88,9 +88,6 @@ app.config['SQLALCHEMY_FOLLOWERS'] = [
     for follower in utils.split_env_var(env.get_credential('SQLA_FOLLOWERS', ''))
     if follower.strip()
 ]
-app.config['SQLALCHEMY_ROUTE_SCHEDULE_A'] = bool(
-    env.get_credential('SQLA_ROUTE_SCHEDULE_A', '')
-)
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
 # app.config['SQLALCHEMY_ECHO'] = True
