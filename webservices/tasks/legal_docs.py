@@ -205,7 +205,7 @@ def create_es_backup():
             create_es_snapshot(index_name)
             logger.info("elasticsearch snapshot on index: '{0}' created".format(index_name))
             index_name_message += index_name + ","
-            time.sleep(20)
+            time.sleep(60)
         logger.info(" Weekly (%s) elasticsearch snapshot backup completed", datetime.date.today().strftime("%A"))
         slack_message = "Weekly elasticsearch backup completed in {0} space on indices({1})".format(
             get_app_name(), index_name_message)

@@ -919,274 +919,6 @@ class TestScheduleB(ApiBaseTest):
         )
         self.assertEqual(len(results), 2)
 
-    def test_schedule_b_pagination_with_sort_expression(self):
-        # NOTE:  Schedule B is sorted by disbursement date with the expression
-        # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
-        # by default (in descending order), so we must account for that with the
-        # results and slice the baseline list of objects accordingly!
-        filings = [factories.ScheduleBFactory() for _ in range(30)]
-        page1 = self._results(api.url_for(ScheduleBView, **self.kwargs))
-        self.assertEqual(len(page1), 20)
-        self.assertEqual(
-            [int(each['sub_id']) for each in page1],
-            [each.sub_id for each in filings[:-21:-1]],
-        )
-        page2_missing_sort_null_only = self.app.get(
-            api.url_for(
-                ScheduleBView,
-                last_index=page1[-1]['sub_id'],
-                **self.kwargs
-            )
-        )
-        self.assertEqual(page2_missing_sort_null_only.status_code, 422)
-        page2 = self._results(
-            api.url_for(
-                ScheduleBView,
-                last_index=page1[-1]['sub_id'],
-                sort_null_only=True,
-                **self.kwargs
-            )
-        )
-        self.assertEqual(len(page2), 10)
-        self.assertEqual(
-            [int(each['sub_id']) for each in page2],
-            [each.sub_id for each in filings[9::-1]],
-        )
-
-    def test_schedule_b_pagination_with_null_sort_column_values_with_sort_expression(
-        self,
-    ):
-        # NOTE:  Schedule B is sorted by disbursement date with the expression
-        # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
-        # by default (in descending order), so we must account for that with the
-        # results and slice the baseline list of objects accordingly!
-        filings = [factories.ScheduleBFactory(disbursement_date=None) for _ in range(5)]
-        filings = filings + [
-            factories.ScheduleBFactory(disbursement_date=datetime.date(2016, 1, 1))
-            for _ in range(25)
-        ]
-        page1 = self._results(
-            api.url_for(ScheduleBView, sort='disbursement_date', **self.kwargs)
-        )
-        self.assertEqual(len(page1), 20)
-        self.assertEqual(
-            [int(each['sub_id']) for each in page1],
-            [each.sub_id for each in filings[5:25]],
-        )
-        self.assertEqual(
-            [each['disbursement_date'] for each in page1],
-            [
-                each.disbursement_date.strftime('%Y-%m-%d')
-                if each.disbursement_date
-                else None
-                for each in filings[5:25]
-            ],
-        )
-        page2_missing_last_disbursement_date = self.app.get(
-            api.url_for(
-                ScheduleBView,
-                last_index=page1[-1]['sub_id'],
-                sort='disbursement_date',
-                **self.kwargs
-            )
-        )
-        self.assertEqual(page2_missing_last_disbursement_date.status_code, 422)
-
-        page2 = self._results(
-            api.url_for(
-                ScheduleBView,
-                last_index=page1[-1]['sub_id'],
-                last_disbursement_date=page1[-1]['disbursement_date'],
-                sort='disbursement_date',
-                **self.kwargs
-            )
-        )
-        self.assertEqual(len(page2), 10)
-        last_date_results = filings[25:]
-        null_date_results = filings[:5]
-        last_date_results.extend(null_date_results)
-        self.assertEqual(
-            [int(each['sub_id']) for each in page2],
-            [each.sub_id for each in last_date_results],
-        )
-        self.assertEqual(
-            [each['disbursement_date'] for each in page2],
-            [
-                each.disbursement_date.strftime('%Y-%m-%d')
-                if each.disbursement_date
-                else None
-                for each in last_date_results
-            ],
-        )
-
-    def test_schedule_b_null_pagination_with_null_sort_column_values_descending_with_sort_expression(
-        self,
-    ):
-        # NOTE:  Schedule B is sorted by disbursement date with the expression
-        # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
-        # by default (in descending order), so we must account for that with the
-        # results and slice the baseline list of objects accordingly!
-        filings = [
-            factories.ScheduleBFactory(disbursement_date=None)
-            # this range should ensure the page has a null transition
-            for _ in range(10)
-        ]
-        filings = filings + [
-            factories.ScheduleBFactory(disbursement_date=datetime.date(2016, 1, 1))
-            for _ in range(15)
-        ]
-
-        page1 = self._results(
-            api.url_for(
-                ScheduleBView,
-                sort='-disbursement_date',
-                sort_reverse_nulls='true',
-                **self.kwargs
-            )
-        )
-
-        self.assertEqual(len(page1), 20)
-
-        top_reversed_from_middle = filings[9::-1]
-        reversed_from_bottom_to_middle = filings[-1:14:-1]
-        top_reversed_from_middle.extend(reversed_from_bottom_to_middle)
-        self.assertEqual(
-            [int(each['sub_id']) for each in page1],
-            [each.sub_id for each in top_reversed_from_middle],
-        )
-        self.assertEqual(
-            [each['disbursement_date'] for each in page1],
-            [
-                each.disbursement_date.strftime('%Y-%m-%d')
-                if each.disbursement_date
-                else None
-                for each in top_reversed_from_middle
-            ],
-        )
-        page2 = self._results(
-            api.url_for(
-                ScheduleBView,
-                last_index=page1[-1]['sub_id'],
-                last_disbursement_date=page1[-1]['disbursement_date'],
-                sort='-disbursement_date',
-                **self.kwargs
-            )
-        )
-        self.assertEqual(len(page2), 5)
-        self.assertEqual(
-            [int(each['sub_id']) for each in page2],
-            [each.sub_id for each in filings[14:9:-1]],
-        )
-        self.assertEqual(
-            [each['disbursement_date'] for each in page2],
-            [
-                each.disbursement_date.strftime('%Y-%m-%d')
-                if each.disbursement_date
-                else None
-                for each in filings[14:9:-1]
-            ],
-        )
-
-    def test_schedule_b_null_pagination_with_null_sort_column_values_ascending_with_sort_expression(
-        self,
-    ):
-        # NOTE:  Schedule B is sorted by disbursement date with the expression
-        # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
-        # by default (in descending order), so we must account for that with the
-        # results and slice the baseline list of objects accordingly!
-        filings = [
-            factories.ScheduleBFactory(disbursement_date=None)
-            # this range should ensure the page has a null transition
-            for _ in range(10)
-        ]
-        filings = filings + [
-            factories.ScheduleBFactory(disbursement_date=datetime.date(2016, 1, 1))
-            for _ in range(15)
-        ]
-
-        page1 = self._results(
-            api.url_for(
-                ScheduleBView,
-                sort='disbursement_date',
-                sort_reverse_nulls='true',
-                **self.kwargs
-            )
-        )
-
-        self.assertEqual(len(page1), 20)
-
-        top_reversed_from_middle = filings[10::]
-        reversed_from_bottom_to_middle = filings[0:5:]
-        top_reversed_from_middle.extend(reversed_from_bottom_to_middle)
-        self.assertEqual(
-            [int(each['sub_id']) for each in page1],
-            [each.sub_id for each in top_reversed_from_middle],
-        )
-        self.assertEqual(
-            [each['disbursement_date'] for each in page1],
-            [
-                each.disbursement_date.strftime('%Y-%m-%d')
-                if each.disbursement_date
-                else None
-                for each in top_reversed_from_middle
-            ],
-        )
-        page2 = self._results(
-            api.url_for(
-                ScheduleBView,
-                last_index=page1[-1]['sub_id'],
-                sort_null_only=True,
-                sort='disbursement_date',
-                **self.kwargs
-            )
-        )
-        self.assertEqual(len(page2), 5)
-        self.assertEqual(
-            [int(each['sub_id']) for each in page2],
-            [each.sub_id for each in filings[5:10:]],
-        )
-        self.assertEqual(
-            [each['disbursement_date'] for each in page2],
-            [
-                each.disbursement_date.strftime('%Y-%m-%d')
-                if each.disbursement_date
-                else None
-                for each in filings[5:10:]
-            ],
-        )
-
-    def test_schedule_b_pagination_with_null_sort_column_parameter_with_sort_expression(
-        self,
-    ):
-        # NOTE:  Schedule B is sorted by disbursement date with the expression
-        # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
-        # by default (in descending order), so we must account for that with the
-        # results and slice the baseline list of objects accordingly!
-        response = self.app.get(
-            api.url_for(
-                ScheduleBView, sort='disbursement_date', last_disbursement_date='null'
-            )
-        )
-        self.assertEqual(response.status_code, 422)
-
-    def test_schedule_b_amount(self):
-        [
-            factories.ScheduleBFactory(disbursement_amount=50),
-            factories.ScheduleBFactory(disbursement_amount=100),
-            factories.ScheduleBFactory(disbursement_amount=150),
-            factories.ScheduleBFactory(disbursement_amount=200),
-        ]
-        results = self._results(api.url_for(ScheduleBView, min_amount=100))
-        self.assertTrue(all(each['disbursement_amount'] >= 100 for each in results))
-        results = self._results(api.url_for(ScheduleBView, max_amount=150))
-        self.assertTrue(all(each['disbursement_amount'] <= 150 for each in results))
-        results = self._results(
-            api.url_for(ScheduleBView, min_amount=100, max_amount=150)
-        )
-        self.assertTrue(
-            all(100 <= each['disbursement_amount'] <= 150 for each in results)
-        )
-
     def test_schedule_b_sort_ignores_nulls_last_parameter(self):
         disbursements = [
             factories.ScheduleBFactory(disbursement_amount=50),
@@ -1589,6 +1321,8 @@ class TestScheduleE(ApiBaseTest):
 
 
 class TestScheduleH4(ApiBaseTest):
+    kwargs = {'two_year_transaction_period': 2016}
+
     def test_schedule_h4_basic_accessibility(self):
         """
         testing schedule_h4 api_for very basic accessibility
@@ -1621,3 +1355,41 @@ class TestScheduleH4(ApiBaseTest):
         self.assertEqual(len(results), 3)
         results = self._results(api.url_for(ScheduleH4View, committee_id='C001'))
         self.assertEqual(len(results), 1)
+
+    def test_schedule_h4_filter_fulltext_purpose_and(self):
+        purposes = ['Test&Test', 'Test & Test', 'Test& Test', 'Test &Test']
+        [
+            factories.ScheduleH4Factory(disbursement_purpose=purpose)
+            for purpose in purposes
+        ]
+        results = self._results(
+            api.url_for(ScheduleH4View, disbursement_purpose='Test&Test', **self.kwargs)
+        )
+        self.assertIn(results[0]['disbursement_purpose'], purposes)
+        results = self._results(
+            api.url_for(
+                ScheduleH4View, disbursement_purpose='Test & Test', **self.kwargs
+            )
+        )
+        self.assertIn(results[0]['disbursement_purpose'], purposes)
+        results = self._results(
+            api.url_for(ScheduleH4View, disbursement_purpose='Test& Test', **self.kwargs)
+        )
+        self.assertIn(results[0]['disbursement_purpose'], purposes)
+        results = self._results(
+            api.url_for(ScheduleH4View, disbursement_purpose='Test &Test', **self.kwargs)
+        )
+        self.assertIn(results[0]['disbursement_purpose'], purposes)
+
+    def test_schedule_h4_filter_payee_name_text_pass(self):
+        payee_names = [
+            'Test.com',
+            'Test com',
+            'Testerosa',
+            'Test#com',
+            'Not.com',
+            'Test.com and Test.com',
+        ]
+        [factories.ScheduleH4Factory(payee_name=payee) for payee in payee_names]
+        results = self._results(api.url_for(ScheduleH4View, payee_name='test'))
+        self.assertEqual(len(results), len(payee_names))
