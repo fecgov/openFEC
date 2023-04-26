@@ -38,7 +38,9 @@ const Footer = () => (
         </ul>
 
         <p>
-          1050 First Street, NE<br /> Washington, DC 20463
+          1050 First Street, NE
+          <br />
+          Washington, DC 20463
         </p>
 
         <a href="mailto:apiinfo@fec.gov">
