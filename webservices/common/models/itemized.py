@@ -29,7 +29,7 @@ class BaseItemized(db.Model):
 class BaseRawItemized(db.Model):
     __abstract__ = True
 
-    line_number = db.Column("line_num", db.String)
+    # line_number = db.Column("line_num", db.String) removed as H4 Raw data does not have line_num
     transaction_id = db.Column('tran_id', db.String)
     image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
     entity_type = db.Column('entity', db.String)
@@ -181,6 +181,7 @@ class ScheduleAEfile(BaseRawItemized):
     __table_args__ = {'schema': 'real_efile'}
     __tablename__ = 'sa7'
 
+    line_number = db.Column("line_num", db.String)
     file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
     related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
     committee_id = db.Column("comid", db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -371,6 +372,7 @@ class ScheduleB(BaseItemized):
 class ScheduleBEfile(BaseRawItemized):
     __tablename__ = 'real_efile_sb4'
 
+    line_number = db.Column("line_num", db.String)
     file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
     related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
     committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
@@ -636,6 +638,7 @@ class ScheduleE(PdfMixin, BaseItemized):
 class ScheduleEEfile(BaseRawItemized):
     __tablename__ = 'real_efile_se_f57_vw'
 
+    line_number = db.Column("line_num", db.String)
     filing_form = db.Column('filing_form', db.String)
     is_notice = db.Column(db.Boolean, index=True)
     file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
@@ -815,24 +818,24 @@ class ScheduleH4(BaseItemized):
 
     # Recipient info
     committee_id = db.Column('cmte_id', db.String)  # override from BaseItemized
-    payee_name = db.Column('payee_name', db.String)
+    spender_committee_type = db.Column('cmte_tp', db.String(1), index=True)
+    spender_committee_designation = db.Column('cmte_dsgn', db.String(1), index=True)
+    spender_committee_name = db.Column('cmte_nm', db.String, index=True)
+    payee_name = db.Column('payee_name', db.String, index=True)
     payee_street_1 = db.Column('payee_st1', db.String)
     payee_street_2 = db.Column('payee_st2', db.String)
     payee_city = db.Column('payee_city', db.String)
     payee_state = db.Column('payee_state', db.String)
     payee_zip = db.Column('payee_zip', db.String)
-    disbursement_purpose = db.Column('disbursement_purpose', db.String)
+    disbursement_purpose = db.Column('disbursement_purpose', db.String, index=True)
     memo_code = db.Column('memo_cd', db.String)
     memo_text = db.Column('memo_text', db.String)
-    event_purpose_date = db.Column('event_purpose_date', db.Date)
-    disbursement_amount = db.Column('disbursement_amount', db.Numeric(30, 2))
-    # Transaction meta info
+    event_purpose_date = db.Column('event_purpose_date', db.Date, index=True)
+    disbursement_amount = db.Column('disbursement_amount', db.Numeric(30, 2), index=True)
     schedule_type = db.Column('schedule_type', db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
-    # back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
-    # back_reference_schedule_id = db.Column('back_ref_sched_id', db.String)
     federal_share = db.Column('fed_share', db.Numeric(14, 2))
     nonfederal_share = db.Column('nonfed_share', db.Numeric(14, 2))
     administrative_voter_drive_activity_indicator = db.Column('admin_voter_drive_acty_ind', db.String)
@@ -848,3 +851,49 @@ class ScheduleH4(BaseItemized):
     cycle = db.Column('election_cycle', db.Numeric(4, 0))
     disbursement_purpose_text = db.Column(TSVECTOR)
     payee_name_text = db.Column(TSVECTOR)
+
+
+class ScheduleH4Efile(BaseRawItemized):
+    __table_args__ = {'schema': 'real_efile'}
+    __tablename__ = 'h4_2'
+
+    file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
+    related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
+    committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
+    payee_name = db.Column('lname', db.String)
+    payee_city = db.Column('city', db.String)
+    payee_state = db.Column('state', db.String)
+    payee_zip = db.Column('zip', db.String)
+    activity_or_event = db.Column('exp_desc', db.String)
+    disbursement_purpose = db.Column('purpose', db.String)
+    event_purpose_date = db.Column('event_date', db.Date)
+    disbursement_amount = db.Column('amount', db.Numeric(30, 2))
+    fed_share = db.Column('fed_share', db.Numeric(30, 2))
+    nonfed_share = db.Column('nonfed_share', db.Numeric(30, 2))
+    event_amount_year_to_date = db.Column('event_ytd', db.Numeric(30, 2))
+    administrative_voter_drive_activity_indicator = db.Column('admin', db.String)
+    fundraising_activity_indicator = db.Column('fundraising', db.String)
+    exempt_activity_indicator = db.Column('exempt', db.String)
+    direct_candidate_support_activity_indicator = db.Column('support', db.String)
+    general_voter_drive_activity_indicator = db.Column('gen_vote', db.String)
+    public_comm_indicator = db.Column('activity_pc', db.String)
+
+    filing = db.relationship(
+        'EFilings',
+        primaryjoin='''and_(
+                        ScheduleH4Efile.file_number == EFilings.file_number,
+                    )''',
+        foreign_keys=file_number,
+        lazy='joined',
+    )
+
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+                                ScheduleH4Efile.committee_id == CommitteeHistory.committee_id,
+                                extract('year', ScheduleH4Efile.load_timestamp) +cast(extract('year',
+                                ScheduleH4Efile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
+                                )''',
+        foreign_keys=committee_id,
+        lazy='joined',
+    )

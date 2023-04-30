@@ -1100,6 +1100,12 @@ totals_by_candidate_other_costs_CC = {
 }
 
 schedule_h4 = {
+    'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
+    'min_image_number': ImageNumber(description=docs.MIN_IMAGE_NUMBER),
+    'max_image_number': ImageNumber(description=docs.MAX_IMAGE_NUMBER),
+    'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
+    'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE),
+    'activity_or_event': fields.List(fields.Str, descripiption=docs.ACTIVITY_OR_EVENT_ADD),
     'q_payee_name': fields.List(Keyword, description=docs.PAYEE_NAME),
     'payee_city': fields.List(fields.Str, description=docs.PAYEE_CITY),
     'payee_zip': fields.List(fields.Str, description=docs.PAYEE_ZIP),
@@ -1107,8 +1113,50 @@ schedule_h4 = {
     'q_disbursement_purpose': fields.List(Keyword, description=docs.DISBURSEMENT_PURPOSE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'last_event_purpose_date': fields.Date(missing=None, description=docs.LAST_DISBURSEMENT_DATE),
+    'last_payee_name': fields.List(IStr, missing=None, description=docs.LAST_PAYEE_NAME),
+    'last_disbursement_purpose': fields.List(IStr, missing=None, description=docs.LAST_DISBURSEMENT_PURPOSE),
+    'last_event_purpose_date': fields.Date(missing=None, description=docs.LAST_EVENT_DATE),
+    'last_spender_committee_name': fields.List(IStr, missing=None, description=docs.LAST_COMMITTEE_NAME),
+    'min_date': fields.Date(missing=None, description=docs.MIN_EVENT_DATE),
+    'max_date': fields.Date(missing=None, description=docs.MAX_EVENT_DATE),
+    'last_disbursement_amount': fields.Float(missing=None, description=docs.LAST_DISBURSEMENT_AMOUNT),
+    'min_amount': Currency(description=docs.MIN_FILTER),
+    'max_amount': Currency(description=docs.MAX_FILTER),
+    'administrative_voter_drive_activity_indicator': fields.List(fields.Str, description=docs.ADMIN_VOTER_IND),
+    'fundraising_activity_indicator': fields.List(fields.Str, description=docs.FUND_ACT_IND),
+    'exempt_activity_indicator': fields.List(fields.Str, description=docs.EXEMPT_IND),
+    'direct_candidate_support_activity_indicator': fields.List(fields.Str, description=docs.CAND_SUPP_IND),
+    'administrative_activity_indicator': fields.List(fields.Str, description=docs.ADMIN_ACT_IND),
+    'general_voter_drive_activity_indicator': fields.List(fields.Str, description=docs.GENERAL_VOTER_IND),
+    'public_comm_indicator': fields.List(fields.Str, description=docs.PUBLIC_COMM_IND),
+    'spender_committee_name': fields.List(fields.Str, description=docs.COMMITTEE_NAME),
+    'spender_committee_type': fields.List(
+        IStr(validate=validate.OneOf([
+            '', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q',
+            'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
+        description=docs.COMMITTEE_TYPE,
+    ),
+    'spender_committee_designation': fields.List(
+        IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
+        description=docs.DESIGNATION,
+    ),
+}
 
+schedule_h4_efile = {
+    'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
+    'min_image_number': ImageNumber(description=docs.MIN_IMAGE_NUMBER),
+    'max_image_number': ImageNumber(description=docs.MAX_IMAGE_NUMBER),
+    'payee_city': fields.List(fields.Str, description=docs.PAYEE_CITY),
+    'payee_zip': fields.List(fields.Str, description=docs.PAYEE_ZIP),
+    'payee_state': fields.List(fields.Str, description=docs.PAYEE_STATE),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'last_disbursement_purpose': fields.List(IStr, missing=None, description=docs.LAST_DISBURSEMENT_PURPOSE),
+    'last_event_purpose_date': fields.Date(missing=None, description=docs.LAST_EVENT_DATE),
+    'min_date': fields.Date(missing=None, description=docs.MIN_EVENT_DATE),
+    'max_date': fields.Date(missing=None, description=docs.MAX_EVENT_DATE),
+    'last_disbursement_amount': fields.Float(missing=None, description=docs.LAST_DISBURSEMENT_AMOUNT),
+    'min_amount': Currency(description=docs.MIN_FILTER),
+    'max_amount': Currency(description=docs.MAX_FILTER),
 }
 
 presidential = {

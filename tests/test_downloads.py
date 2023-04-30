@@ -23,6 +23,7 @@ from webservices.resources import (
     sched_d,
     sched_e,
     sched_f,
+    sched_h4,
     totals
 )
 
@@ -112,6 +113,8 @@ class TestDownloadTask(ApiBaseTest):
             sched_e.ScheduleEView,
             sched_e.ScheduleEEfileView,
             sched_f.ScheduleFView,
+            sched_h4.ScheduleH4View,
+            sched_h4.ScheduleH4EfileView,
             totals.TotalsByEntityTypeView
         }
 
