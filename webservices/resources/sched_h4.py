@@ -79,7 +79,7 @@ class ScheduleH4View(ItemizedResource):
             args.make_sort_args(
                 default='-event_purpose_date',
                 validator=args.OptionValidator(self.sort_options),
-                show_nulls_last_arg=True,
+                show_nulls_last_arg=False,
             ))
 
     def build_query(self, **kwargs):
