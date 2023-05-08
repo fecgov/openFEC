@@ -358,6 +358,37 @@ class TestScheduleA(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_employer'], 'Vandelay Industries')
 
+    def test_schedule_a_filter_fulltext_employer_with_null(self):
+        receipts = [  # noqa
+            factories.ScheduleAFactory(
+                contribution_receipt_date=datetime.date(2016, 6, 1),
+                two_year_transaction_period=2016,
+                contributor_employer='Vandelay Industries',
+            ),
+            factories.ScheduleAFactory(
+                contribution_receipt_date=datetime.date(2016, 4, 1),
+                two_year_transaction_period=2016,
+                contributor_employer='Thomas Null LLC',
+            ),
+            factories.ScheduleAFactory(
+                contribution_receipt_date=datetime.date(2016, 1, 1),
+                two_year_transaction_period=2016,
+                contributor_employer=None,
+            )
+        ]
+        results = self._results(
+            api.url_for(ScheduleAView, contributor_employer='vandelay', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['contributor_employer'], 'Vandelay Industries')
+
+        results = self._results(
+            api.url_for(ScheduleAView, contributor_employer='null', sort='contribution_receipt_date', **self.kwargs)
+        )
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results[0]['contributor_employer'], None)
+        self.assertEqual(results[1]['contributor_employer'], 'Thomas Null LLC')
+
     def test_schedule_a_filter_fulltext_employer_and(self):
         employers = ['Test&Test', 'Test & Test', 'Test& Test', 'Test &Test']
         [

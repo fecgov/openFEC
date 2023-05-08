@@ -91,10 +91,11 @@ def filter_fulltext(query, kwargs, fields):
                 ]
                 query = query.filter(sa.and_(*filters))
             if include_list:
-                filters = [
-                    column.match(utils.parse_fulltext(value))
-                    for value in include_list
-                ]
+                filters = []
+                for value in include_list:
+                    filters.append(column.match(utils.parse_fulltext(value)))
+                    if value.upper() == 'NULL':
+                        filters.append(column.is_(None))
                 query = query.filter(sa.or_(*filters))
     return query
 
