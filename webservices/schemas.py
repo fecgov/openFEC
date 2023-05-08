@@ -977,6 +977,37 @@ ItemizedScheduleEfilingsSchema = make_schema(
 
 augment_schemas(ItemizedScheduleEfilingsSchema)
 
+ItemizedScheduleH4filingsSchema = make_schema(
+    models.ScheduleH4Efile,
+    fields={
+        'beginning_image_number': ma.fields.Str(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'filing': ma.fields.Nested(schemas['EFilingsSchema']),
+        'pdf_url': ma.fields.Str(),
+        'fec_url': ma.fields.Str(),
+        'is_notice': ma.fields.Boolean(),
+        'payee_name': ma.fields.Str(),
+        'report_type': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
+    },
+    options={
+        'exclude': (
+            'line_num',
+            'tran_id',
+        ),
+        'relationships': [
+            Relationship(
+                models.ScheduleH4Efile.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+                1
+            ),
+        ],
+    }
+)
+
+augment_schemas(ItemizedScheduleH4filingsSchema)
+
 ItemizedScheduleAfilingsSchema = make_schema(
     models.ScheduleAEfile,
     fields={

@@ -11,11 +11,12 @@ from webservices.common.models import (
     ScheduleAEfile,
     ScheduleBEfile,
     ScheduleEEfile,
+    ScheduleH4Efile,
 )
 from webservices.resources.sched_a import ScheduleAView, ScheduleAEfileView
 from webservices.resources.sched_b import ScheduleBView, ScheduleBEfileView
 from webservices.resources.sched_e import ScheduleEView, ScheduleEEfileView
-from webservices.resources.sched_h4 import ScheduleH4View
+from webservices.resources.sched_h4 import ScheduleH4View, ScheduleH4EfileView
 
 
 class TestItemized(ApiBaseTest):
@@ -1393,3 +1394,61 @@ class TestScheduleH4(ApiBaseTest):
         [factories.ScheduleH4Factory(payee_name=payee) for payee in payee_names]
         results = self._results(api.url_for(ScheduleH4View, payee_name='test'))
         self.assertEqual(len(results), len(payee_names))
+
+    def test_schedule_h4_efile_event_purpose_date_range(self):
+
+        min_date = datetime.date(2018, 1, 1)
+        max_date = datetime.date(2019, 12, 31)
+
+        results = self._results(
+            api.url_for(ScheduleH4EfileView, min_date=min_date)
+        )
+        self.assertTrue(
+            all(
+                each for each in results if each['event_purpose_date'] >= min_date.isoformat()
+            )
+        )
+
+        results = self._results(
+            api.url_for(ScheduleH4EfileView, max_date=max_date)
+        )
+        self.assertTrue(
+            all(
+                each for each in results if each['event_purpose_date'] <= max_date.isoformat()
+            )
+        )
+
+        results = self._results(
+            api.url_for(
+                ScheduleH4EfileView,
+                min_date=min_date,
+                max_date=max_date,
+            )
+        )
+        self.assertTrue(
+            all(
+                each
+                for each in results
+                if min_date.isoformat()
+                <= each['event_purpose_date']
+                <= max_date.isoformat()
+            )
+        )
+
+    def test_schedule_h4_efile_filters(self):
+        filters = [
+            ('image_number', ScheduleH4Efile.image_number, ['123', '456']),
+            ('committee_id', ScheduleH4Efile.committee_id, ['C01', 'C02']),
+            (
+                'payee_state',
+                ScheduleH4Efile.payee_state,
+                ['MISSOURI', 'NEW YORK'],
+            ),
+        ]
+        for label, column, values in filters:
+            [factories.ScheduleH4EfileFactory(**{column.key: value}) for value in values]
+            results = self._results(
+                api.url_for(ScheduleH4EfileView, **{label: values[0]})
+            )
+            assert len(results) == 1
+            assert results[0][column.key] == values[0]
