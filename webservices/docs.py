@@ -1527,11 +1527,33 @@ EXPENDITURE_MAX_AMOUNT = 'Selects all items expended by this committee less than
 SUPPORT_OPPOSE = 'Support or opposition'
 
 # schedule H4
-# PAYEE_NAME = Name of the entity that received the payment (is pulled from above)
+LAST_PAYEE_NAME = 'When sorting by `payee_name`, this is populated with the `payee_name` of \
+the last result.  However, you will need to pass the index of that last result to `last_index` to get the next page.'
+LAST_DISBURSEMENT_PURPOSE = 'When sorting by `disbursement_purpose`, this is populated with the `disbursement_purpose`\
+of the last result.  However, you will need to pass the index of that last result to `last_index` to get the next page.'
 PAYEE_CITY = 'City of the entity that received the payment'
 PAYEE_STATE = 'State of the entity that received the payment'
 PAYEE_ZIP = 'Zip of the entity that received the payment'
 DISBURSEMENT_PURPOSE = 'Purpose of the allocated disbursement'
+LAST_DISBURSEMENT_AMOUNT = 'When sorting by `disbursement_amount`, this is populated with the `disbursement_amount` of \
+the last result.  However, you will need to pass the index of that last result to `last_index` to get the next page.'
+LAST_COMMITTEE_NAME = 'When sorting by `spender_committee_name`, this is populated with the `spender_committee_name` \
+of the last result.  However, you will need to pass the index of that last result to `last_index` to get the next page.'
+MIN_DISBURSEMENT_AMOUNT = 'Minimum disbursement_amount'
+MAX_DISBURSEMENT_AMOUNT = 'Maximum disbursement_amount'
+LAST_EVENT_DATE = 'When sorting by `event_purpose_date`, this is populated with the `event_purpose_date` of \
+the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'
+MIN_EVENT_DATE = 'Minimum event_purpose_date'
+MAX_EVENT_DATE = 'Maximum event_purpose_date'
+EVENT_DATE = 'Date of event'
+ACTIVITY_OR_EVENT_ADD = 'Additional description of activity_or_event'
+ADMIN_VOTER_IND = 'Activity or event: Admin/Voter Drive checkbox'
+FUND_ACT_IND = 'Activity or event: Fundraising checkbox'
+EXEMPT_IND = 'Activity or event: Exempt checkbox'
+CAND_SUPP_IND = 'Activity or event: Direct Candidate checkbox'
+ADMIN_ACT_IND = 'Activity or event: Administrative checkbox'
+GENERAL_VOTER_IND = 'Activity or event: Voter Drive checkbox'
+PUBLIC_COMM_IND = 'Activity or event: Public Comm (ref to party only) by PAC checkbox'
 
 # dates
 DUE_DATE = 'Date the report is due'
@@ -1866,6 +1888,14 @@ MAX_COVERAGE_END_DATE = '''
 Ending date of the reporting period before this date(MM/DD/YYYY or YYYY-MM-DD)
 '''
 
+MIN_COVERAGE_START_DATE = '''
+Starting date of the reporting period after this date(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MAX_COVERAGE_START_DATE = '''
+Starting date of the reporting period before this date(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
 MIN_TRANSACTION_DATA_COMPLETE_DATE = '''
 Select all filings processed completely after this date(MM/DD/YYYY or YYYY-MM-DD)
 '''
@@ -1943,10 +1973,12 @@ EC_SUB_ID = '''
 The identifier for each electioneering record.
 '''
 
-TOTAL_BY_OFFICE_TAG = ''' Aggregated candidate receipts and disbursements grouped by office by cycle.
+TOTAL_BY_OFFICE_TAG = '''
+`DEPRECATED` Aggregated candidate receipts and disbursements grouped by office by cycle.
 '''
 
-TOTAL_BY_OFFICE_BY_PARTY_TAG = ''' Aggregated candidate receipts and disbursements grouped by office by party by cycle.
+TOTAL_BY_OFFICE_BY_PARTY_TAG = '''
+`DEPRECATED` Aggregated candidate receipts and disbursements grouped by office by party by cycle.
 '''
 
 CANDIDATE_TOTAL_AGGREGATE_TAG = ''' Candidate total receipts and disbursements aggregated by `aggregate_by`.
@@ -1977,7 +2009,14 @@ Explore relevant statutes, regulations and Commission actions.
 '''
 
 LEGAL_SEARCH = '''
-Search legal documents by document type, or across all document types using keywords, parameter values and ranges.
+Search legal documents by document type, or across all document types using keywords, parameter values and ranges.\n\
+This endpoint uses elasticsearch-dsl pagination.\
+For pagination, use both `from_hit` and `hits_returned` parameters. `from_hit` defines the offset from the first \
+result you want to fetch. `hits_returned` allows you to configure the maximum results to be returned.\n\
+By default `from_hit` = 0 and `hits_returned` = 20, endpoint will return the first 20 documents (i.e. 0 to 19).\n\
+if set `from_hit` = 20 and `hits_returned` = 20, endpoint will return documents range from 21 to 40 (i.e. 20 to 39).
+The maximum value of `hits_returned` is 200.\n\
+
 '''
 
 LEGAL_DOC_SEARCH = '''

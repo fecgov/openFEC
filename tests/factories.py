@@ -320,6 +320,14 @@ class ScheduleH4Factory(BaseFactory):
         obj.disbursement_purpose_text = sa.func.to_tsvector(obj.disbursement_purpose)
 
 
+class ScheduleH4EfileFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleH4Efile
+
+    file_number = factory.Sequence(lambda n: n)
+    related_line_number = factory.Sequence(lambda n: n)
+
+
 class FilingsFactory(BaseFactory):
     sub_id = factory.Sequence(lambda n: n)
 

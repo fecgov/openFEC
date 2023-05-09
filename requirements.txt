@@ -15,7 +15,7 @@ icalendar==4.0.2
 invoke==0.15.0
 kombu==5.2.4 # Starting from celery 5.x release, the minimum required version is Kombu 5.x
 networkx==2.6.2
-prance[osv]>=0.19
+prance[osv]==0.22.11.4.0
 psycopg2-binary==2.9.1
 python-dateutil==2.8.1
 python-dotenv>=0.20.0 # Sets variable defaults in .flaskenv file
@@ -46,7 +46,6 @@ redis==4.5.4
 coverage==7.0.3
 factory_boy==2.8.1
 importlib-metadata==3.10.1 #pinned to fix the pytest deprecation warning: SelectableGroups dict interface
-jsonschema==3.2.0 #pinned to fix the pytest deprecation warning inside jsonschema/validators.py
 nplusone==0.8.0
 pytest==5.2.0
 pytest-cov==2.5.1

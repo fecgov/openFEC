@@ -88,9 +88,6 @@ app.config['SQLALCHEMY_FOLLOWERS'] = [
     for follower in utils.split_env_var(env.get_credential('SQLA_FOLLOWERS', ''))
     if follower.strip()
 ]
-app.config['SQLALCHEMY_ROUTE_SCHEDULE_A'] = bool(
-    env.get_credential('SQLA_ROUTE_SCHEDULE_A', '')
-)
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
 # app.config['SQLALCHEMY_ECHO'] = True
@@ -344,6 +341,7 @@ api.add_resource(sched_e.ScheduleEEfileView, '/schedules/schedule_e/efile/')
 api.add_resource(sched_f.ScheduleFView, '/schedules/schedule_f/', '/schedules/schedule_f/<string:sub_id>/')
 api.add_resource(sched_f.ScheduleFViewBySubId, '/schedules/schedule_f/<string:sub_id>/')
 api.add_resource(sched_h4.ScheduleH4View, '/schedules/schedule_h4/')
+api.add_resource(sched_h4.ScheduleH4EfileView, '/schedules/schedule_h4/efile/')
 api.add_resource(costs.CommunicationCostView, '/communication_costs/')
 api.add_resource(costs.ElectioneeringView, '/electioneering/')
 api.add_resource(elections.ElectionView, '/elections/')
@@ -490,6 +488,7 @@ apidoc.register(sched_f.ScheduleFViewBySubId, blueprint='v1')
 apidoc.register(sched_d.ScheduleDView, blueprint='v1')
 apidoc.register(sched_d.ScheduleDViewBySubId, blueprint='v1')
 apidoc.register(sched_h4.ScheduleH4View, blueprint='v1')
+apidoc.register(sched_h4.ScheduleH4EfileView, blueprint='v1')
 apidoc.register(costs.CommunicationCostView, blueprint='v1')
 apidoc.register(aggregates.CCAggregatesView, blueprint='v1')
 apidoc.register(costs.ElectioneeringView, blueprint='v1')

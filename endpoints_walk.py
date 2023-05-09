@@ -55,6 +55,8 @@ endpoints = [
     "/schedules/schedule_e/?api_key={api_key}",
     "/schedules/schedule_e/efile/?api_key={api_key}",
     "/schedules/schedule_f/{sub_id}/?api_key={api_key}",
+    "/schedules/schedule_h4/?api_key={api_key}",
+    "/schedules/schedule_h4/efile/?api_key={api_key}",
     "/elections/?cycle=2018&office=president&api_key={api_key}",
     "/elections/search/?api_key={api_key}",
     "/elections/summary/?cycle=2018&office=president&api_key={api_key}",
