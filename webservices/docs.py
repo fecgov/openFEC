@@ -1527,11 +1527,33 @@ EXPENDITURE_MAX_AMOUNT = 'Selects all items expended by this committee less than
 SUPPORT_OPPOSE = 'Support or opposition'
 
 # schedule H4
-# PAYEE_NAME = Name of the entity that received the payment (is pulled from above)
+LAST_PAYEE_NAME = 'When sorting by `payee_name`, this is populated with the `payee_name` of \
+the last result.  However, you will need to pass the index of that last result to `last_index` to get the next page.'
+LAST_DISBURSEMENT_PURPOSE = 'When sorting by `disbursement_purpose`, this is populated with the `disbursement_purpose`\
+of the last result.  However, you will need to pass the index of that last result to `last_index` to get the next page.'
 PAYEE_CITY = 'City of the entity that received the payment'
 PAYEE_STATE = 'State of the entity that received the payment'
 PAYEE_ZIP = 'Zip of the entity that received the payment'
 DISBURSEMENT_PURPOSE = 'Purpose of the allocated disbursement'
+LAST_DISBURSEMENT_AMOUNT = 'When sorting by `disbursement_amount`, this is populated with the `disbursement_amount` of \
+the last result.  However, you will need to pass the index of that last result to `last_index` to get the next page.'
+LAST_COMMITTEE_NAME = 'When sorting by `spender_committee_name`, this is populated with the `spender_committee_name` \
+of the last result.  However, you will need to pass the index of that last result to `last_index` to get the next page.'
+MIN_DISBURSEMENT_AMOUNT = 'Minimum disbursement_amount'
+MAX_DISBURSEMENT_AMOUNT = 'Maximum disbursement_amount'
+LAST_EVENT_DATE = 'When sorting by `event_purpose_date`, this is populated with the `event_purpose_date` of \
+the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'
+MIN_EVENT_DATE = 'Minimum event_purpose_date'
+MAX_EVENT_DATE = 'Maximum event_purpose_date'
+EVENT_DATE = 'Date of event'
+ACTIVITY_OR_EVENT_ADD = 'Additional description of activity_or_event'
+ADMIN_VOTER_IND = 'Activity or event: Admin/Voter Drive checkbox'
+FUND_ACT_IND = 'Activity or event: Fundraising checkbox'
+EXEMPT_IND = 'Activity or event: Exempt checkbox'
+CAND_SUPP_IND = 'Activity or event: Direct Candidate checkbox'
+ADMIN_ACT_IND = 'Activity or event: Administrative checkbox'
+GENERAL_VOTER_IND = 'Activity or event: Voter Drive checkbox'
+PUBLIC_COMM_IND = 'Activity or event: Public Comm (ref to party only) by PAC checkbox'
 
 # dates
 DUE_DATE = 'Date the report is due'
