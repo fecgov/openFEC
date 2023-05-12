@@ -8,7 +8,7 @@ applications:
     health-check-type: process
     command: celery --app webservices.tasks worker --loglevel ${LOGLEVEL:=INFO} --concurrency 2
     path: ../
-    stack: cflinuxfs3
+    stack: cflinuxfs4
     buildpacks:
       - python_buildpack
     services:

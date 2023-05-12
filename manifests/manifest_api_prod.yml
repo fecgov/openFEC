@@ -4,7 +4,7 @@ applications:
     instances: 10
     memory: 2G
     disk_quota: 1G
-    stack: cflinuxfs3
+    stack: cflinuxfs4
     buildpacks:
       - python_buildpack
     path: ../
