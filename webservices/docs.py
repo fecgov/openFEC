@@ -1973,14 +1973,6 @@ EC_SUB_ID = '''
 The identifier for each electioneering record.
 '''
 
-TOTAL_BY_OFFICE_TAG = '''
-`DEPRECATED` Aggregated candidate receipts and disbursements grouped by office by cycle.
-'''
-
-TOTAL_BY_OFFICE_BY_PARTY_TAG = '''
-`DEPRECATED` Aggregated candidate receipts and disbursements grouped by office by party by cycle.
-'''
-
 CANDIDATE_TOTAL_AGGREGATE_TAG = ''' Candidate total receipts and disbursements aggregated by `aggregate_by`.
 '''
 

@@ -375,9 +375,6 @@ api.add_resource(candidate_aggregates.ScheduleAByStateCandidateTotalsView,
                  '/schedules/schedule_a/by_state/by_candidate/totals/')
 api.add_resource(candidate_aggregates.TotalsCandidateView, '/candidates/totals/')
 api.add_resource(totals.ScheduleAByStateRecipientTotalsView, '/schedules/schedule_a/by_state/totals/')
-api.add_resource(candidate_aggregates.AggregateByOfficeView, '/candidates/totals/by_office/')
-api.add_resource(candidate_aggregates.AggregateByOfficeByPartyView, '/candidates/totals/by_office/by_party/')
-
 api.add_resource(candidate_aggregates.CandidateTotalAggregateView, '/candidates/totals/aggregates/')
 api.add_resource(totals.InauguralDonationsView, '/totals/inaugural_committees/by_contributor/')
 
@@ -529,8 +526,6 @@ apidoc.register(audit.AuditCandidateNameSearch, blueprint='v1')
 apidoc.register(audit.AuditCommitteeNameSearch, blueprint='v1')
 apidoc.register(operations_log.OperationsLogView, blueprint='v1')
 apidoc.register(legal.UniversalSearch, blueprint='v1')
-apidoc.register(candidate_aggregates.AggregateByOfficeView, blueprint='v1')
-apidoc.register(candidate_aggregates.AggregateByOfficeByPartyView, blueprint='v1')
 apidoc.register(candidate_aggregates.CandidateTotalAggregateView, blueprint='v1')
 apidoc.register(spending_by_others.ECTotalsByCandidateView, blueprint='v1')
 apidoc.register(spending_by_others.IETotalsByCandidateView, blueprint='v1')
