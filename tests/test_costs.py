@@ -71,6 +71,6 @@ class TestElectioneering(ApiBaseTest):
     def test_filter_fulltext(self):
         factories.ElectioneeringFactory()
         factories.ElectioneeringFactory(purpose_description='fitter happier')
-        results = self._results(api.url_for(ElectioneeringView, description='happier'))
+        results = self._results(api.url_for(ElectioneeringView, disbursement_description='happier'))
         assert len(results) == 1
         assert results[0]['purpose_description'] == 'fitter happier'
