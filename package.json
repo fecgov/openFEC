@@ -7,7 +7,7 @@
     "url": "git+https://github.com/fecgov/openFEC.git"
   },
   "scripts": {
-    "build": "export NODE_OPTIONS=--openssl-legacy-provider && npm run format:lint && webpack --config webpack.production.config.js --colors",
+    "build": "export NODE_OPTIONS=--openssl-legacy-provider && npm run lint && webpack --config webpack.production.config.js --colors",
     "develop": "export NODE_OPTIONS=--openssl-legacy-provider && webpack-dev-server --config webpack.config.js --mode development",
     "format": "prettier --write 'src/**/*.js'",
     "lint": "eslint ./src/**/*.js",
@@ -16,11 +16,11 @@
   "dependencies": {
     "@braintree/sanitize-url": "^6.0.0",
     "immutable": "^3.8.2",
-    "minimist":"^1.2.6",
+    "minimist": "^1.2.6",
     "prop-types": "^15.6.2",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
-    "async":"^2.6.4",
+    "async": "^2.6.4",
     "swagger-ui-dist": "4.5.0"
   },
   "devDependencies": {
