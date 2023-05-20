@@ -1,7 +1,5 @@
 const path = require('path');
-const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   entry: {
@@ -18,14 +16,9 @@ module.exports = {
 
   mode: 'production',
 
+  plugins: [new MiniCssExtractPlugin()],
   module: {
     rules: [
-      // {
-      //   enforce: 'pre',
-      //   test: /\.js$/,
-      //   exclude: /node_modules/,
-      //   loader: 'eslint-loader',
-      // },
       {
         test: /\.(js(x)?)(\?.*)?$/,
         use: [
@@ -39,11 +32,8 @@ module.exports = {
         include: [path.join(__dirname, 'src')],
       },
       {
-        test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: 'css-loader',
-        }),
+        test: /\.css$/i,
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
         test: /\.(png|jpg|gif|svg)$/,
@@ -69,22 +59,13 @@ module.exports = {
       },
     ],
   },
-
   optimization: {
     minimize: true,
-    minimizer: [
-      new TerserPlugin({
-        terserOptions: {
-          output: false,
-        },
-      }),
-    ],
   },
-
-  plugins: [
-    new ExtractTextPlugin({
-      filename: 'main.css',
-      allChunks: true,
-    }),
-  ],
+  resolve: {
+    extensions: ['.*', '.js', '.jsx'],
+    fallback: {
+      path: false,
+    },
+  },
 };
