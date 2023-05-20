@@ -16,6 +16,7 @@
   "dependencies": {
     "async": "^2.6.4",
     "minimist": "^1.2.6",
+    "prop-types": "^15.6.2",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "swagger-ui-dist": "4.5.0"
@@ -40,7 +41,6 @@
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^2.7.6",
     "prettier": "^1.12.1",
-    "prop-types": "^15.6.2",
     "react-hot-loader": "^4.1.0",
     "style-loader": "^2.0",
     "url-loader": "^4.1.1",
