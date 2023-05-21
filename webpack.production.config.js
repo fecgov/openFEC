@@ -1,12 +1,7 @@
 const path = require('path');
-const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
-  // const ESLintPlugin = require('eslint-webpack-plugin');
-  // mode: 'development',
-  // plugins: [new ESLintPlugin()],
+  mode: 'production',
   entry: {
     'swagger-layout': ['./src/index.js'],
   },
@@ -19,12 +14,6 @@ module.exports = {
   },
   module: {
     rules: [
-      {
-        enforce: 'pre',
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: 'eslint-loader',
-      },
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
@@ -60,8 +49,8 @@ module.exports = {
   },
   resolve: {
     extensions: ['*', '.js', '.jsx'],
-    // fallback: {
-    //   path: false,
-    // },
+    fallback: {
+      path: false,
+    },
   },
 };

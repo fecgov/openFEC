@@ -32,9 +32,9 @@ module.exports = {
   },
   resolve: {
     extensions: ['*', '.js', '.jsx'],
-    // fallback: {
-    //   path: false,
-    // },
+    fallback: {
+      path: false,
+    },
   },
   output: {
     path: `${__dirname}/src/dist`,
