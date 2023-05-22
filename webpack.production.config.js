@@ -1,7 +1,7 @@
 const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
-  mode: 'production',
   entry: {
     'swagger-layout': ['./src/index.js'],
   },
@@ -53,4 +53,10 @@ module.exports = {
       path: false,
     },
   },
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: 'main.css',
+    }),
+  ],
+  // new ExtractTextPlugin()
 };

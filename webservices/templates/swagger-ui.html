@@ -133,10 +133,7 @@
 
   <script>
     window.onload = function() {
-      SwaggerLayout(
-        "{{ specs_url }}",
-        document.getElementById("swagger-ui")
-      );
+      window.swaggerUrl = "{{ specs_url }}"
       function addSignUpForm() {
         var apiUmbrella = document.createElement('script');
         apiUmbrella.type = 'text/javascript';
