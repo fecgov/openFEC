@@ -15,9 +15,16 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        use: ['babel-loader'],
+        test: /\.(js(x)?)(\?.*)?$/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              retainLines: true,
+            },
+          },
+        ],
+        include: [path.join(__dirname, 'src')],
       },
       {
         test: /\.css$/,

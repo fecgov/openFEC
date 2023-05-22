@@ -1,8 +1,8 @@
-// const ESLintPlugin = require('eslint-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 module.exports = {
   mode: 'development',
-  // plugins: [new ESLintPlugin()],
+  plugins: [new ESLintPlugin()],
   entry: ['react-hot-loader/patch', './src/server.js'],
   module: {
     rules: [

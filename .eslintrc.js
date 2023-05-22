@@ -3,6 +3,7 @@ const finalRules = {
   'react/jsx-filename-extension': [0],
   'react/no-render-return-value': [0],
   'react/no-array-index-key': [0],
+  'react/destructuring-assignment': [0],
   'import/no-extraneous-dependencies': [0],
   'import/no-named-as-default': [0], // allow component to be the same as the default export
   'class-methods-use-this': [0],
