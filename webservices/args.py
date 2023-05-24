@@ -810,11 +810,11 @@ electioneering = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
-    'min_amount': Currency(description='Filter for all amounts greater than a value.'),
-    'max_amount': Currency(description='Filter for all amounts less than a value.'),
-    'min_date': fields.Date(description='Minimum disbursement date'),
-    'max_date': fields.Date(description='Maximum disbursement date'),
-    'description': fields.Str('Disbursement description'),
+    'min_amount': Currency(description=docs.ELECTIONEERING_MIN_AMOUNT),
+    'max_amount': Currency(description=docs.ELECTIONEERING_MAX_AMOUNT),
+    'min_date': fields.Date(description=docs.ELECTIONEERING_MIN_DATE),
+    'max_date': fields.Date(description=docs.ELECTIONEERING_MAX_DATE),
+    'disbursement_description': fields.List(Keyword, description=docs.DISBURSEMENT_DESCRIPTION),
 }
 
 electioneering_by_candidate = {
