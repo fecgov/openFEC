@@ -1046,22 +1046,6 @@ operations_log = {
 }
 
 
-totals_by_office = {
-    'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
-    'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
-    'election_full': election_full,
-    'min_election_cycle': fields.Int(description=docs.CYCLE),
-    'max_election_cycle': fields.Int(description=docs.CYCLE),
-}
-
-totals_by_office_by_party = {
-    'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
-    'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
-    'election_full': election_full,
-}
-
 # for /candidates/totals/aggregates/ (candidate_aggregates.CandidateTotalAggregateView
 candidate_total_aggregate = {
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
