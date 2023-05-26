@@ -1,12 +1,12 @@
 import functools
 import sqlalchemy as sa
 
-from marshmallow.compat import text_type
 from webargs import fields, validate
 
 from webservices import docs
 from webservices import exceptions
 from webservices.common.models import db
+import datetime
 
 
 def _validate_natural(value):
@@ -31,15 +31,15 @@ class Currency(fields.Decimal):
         super().__init__(places=places, **kwargs)
 
     def _validated(self, value):
-        if isinstance(value, text_type):
+        if isinstance(value, str):
             value = value.lstrip('$').replace(',', '')
         return super()._validated(value)
 
 
 class IStr(fields.Str):
 
-    def _deserialize(self, value, attr, data):
-        return super()._deserialize(value, attr, data).upper()
+    def _deserialize(self, value, attr, data, **kwargs):
+        return super()._deserialize(value, attr, data, **kwargs).upper()
 
 
 class District(fields.Str):
@@ -57,8 +57,24 @@ class District(fields.Str):
                 'District must be a natural number',
                 status_code=422)
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         return '{0:0>2}'.format(value)
+
+
+class Date(fields.Str):
+
+    def _validate(self, value):
+        value = value.strip()
+        super()._validate(value)
+        try:
+            datetime.datetime.strptime(value, '%Y-%m-%d')
+        except (TypeError, ValueError):
+            try:
+                datetime.datetime.strptime(value, '%m/%d/%Y')
+            except (TypeError, ValueError):
+                raise exceptions.ApiError(
+                    'Date must be formatted as MM/DD/YYYY or YYYY-MM-DD',
+                    status_code=422)
 
 
 class ImageNumber(fields.Str):
@@ -229,10 +245,10 @@ legal_universal_search = {
 
     'ao_no': fields.List(IStr, required=False, description=docs.AO_NUMBER),
     'ao_name': fields.List(IStr, required=False, description=docs.AO_NAME),
-    'ao_min_issue_date': fields.Date(description=docs.AO_MIN_ISSUE_DATE),
-    'ao_max_issue_date': fields.Date(description=docs.AO_MAX_ISSUE_DATE),
-    'ao_min_request_date': fields.Date(description=docs.AO_MIN_REQUEST_DATE),
-    'ao_max_request_date': fields.Date(description=docs.AO_MAX_REQUEST_DATE),
+    'ao_min_issue_date': Date(description=docs.AO_MIN_ISSUE_DATE),
+    'ao_max_issue_date': Date(description=docs.AO_MAX_ISSUE_DATE),
+    'ao_min_request_date': Date(description=docs.AO_MIN_REQUEST_DATE),
+    'ao_max_request_date': Date(description=docs.AO_MAX_REQUEST_DATE),
     'ao_category': fields.List(
         IStr(validate=validate.OneOf(['F', 'V', 'D', 'R', 'W', 'C', 'S'])),
         description=docs.AO_CATEGORY),
@@ -248,13 +264,13 @@ legal_universal_search = {
     'ao_entity_name': fields.List(IStr, required=False, description=docs.AO_ENTITY_NAME),
 
     'case_no': fields.List(IStr, required=False, description=docs.CASE_NO),
-    'case_respondents': fields.Str(IStr, required=False, description=docs.CASE_RESPONDONTS),
+    'case_respondents': IStr(required=False, description=docs.CASE_RESPONDONTS),
     'case_dispositions': fields.List(IStr, required=False, description=docs.CASE_DISPOSTIONS),
-    'case_election_cycles': fields.Int(IStr, required=False, description=docs.CASE_ELECTION_CYCLES),
-    'case_min_open_date': fields.Date(required=False, description=docs.CASE_MIN_OPEN_DATE),
-    'case_max_open_date': fields.Date(required=False, description=docs.CASE_MAX_OPEN_DATE),
-    'case_min_close_date': fields.Date(required=False, description=docs.CASE_MIN_CLOSE_DATE),
-    'case_max_close_date': fields.Date(required=False, description=docs.CASE_MAX_CLOSE_DATE),
+    'case_election_cycles': fields.Int(required=False, description=docs.CASE_ELECTION_CYCLES),
+    'case_min_open_date': Date(required=False, description=docs.CASE_MIN_OPEN_DATE),
+    'case_max_open_date': Date(required=False, description=docs.CASE_MAX_OPEN_DATE),
+    'case_min_close_date': Date(required=False, description=docs.CASE_MIN_CLOSE_DATE),
+    'case_max_close_date': Date(required=False, description=docs.CASE_MAX_CLOSE_DATE),
     'case_regulatory_citation': fields.List(IStr, required=False, description=docs.REGULATORY_CITATION),
     'case_statutory_citation': fields.List(IStr, required=False, description=docs.STATUTORY_CITATION),
     'case_citation_require_all': fields.Bool(description=docs.CITATION_REQUIRE_ALL),
@@ -269,15 +285,15 @@ legal_universal_search = {
         required=False, validate=validate.OneOf(["archived", "current"]), description=docs.MUR_TYPE),
 
     'af_name': fields.List(IStr, required=False, description=docs.AF_NAME),
-    'af_committee_id': fields.Str(IStr, required=False, description=docs.AF_COMMITTEE_ID),
-    'af_report_year': fields.Str(IStr, required=False, description=docs.AF_REPORT_YEAR),
-    'af_min_rtb_date': fields.Date(required=False, description=docs.AF_MIN_RTB_DATE),
-    'af_max_rtb_date': fields.Date(required=False, description=docs.AF_MAX_RTB_DATE),
-    'af_rtb_fine_amount': fields.Int(IStr, required=False, description=docs.AF_RTB_FINE_AMOUNT),
-    'af_min_fd_date': fields.Date(required=False, description=docs.AF_MIN_FD_DATE),
-    'af_max_fd_date': fields.Date(required=False, description=docs.AF_MAX_FD_DATE),
-    'af_fd_fine_amount': fields.Int(IStr, required=False, description=docs.AF_FD_FINE_AMOUNT),
-    'sort': fields.Str(IStr, required=False, description=docs.SORT),
+    'af_committee_id': IStr(required=False, description=docs.AF_COMMITTEE_ID),
+    'af_report_year': IStr(required=False, description=docs.AF_REPORT_YEAR),
+    'af_min_rtb_date': Date(required=False, description=docs.AF_MIN_RTB_DATE),
+    'af_max_rtb_date': Date(required=False, description=docs.AF_MAX_RTB_DATE),
+    'af_rtb_fine_amount': fields.Int(required=False, description=docs.AF_RTB_FINE_AMOUNT),
+    'af_min_fd_date': Date(required=False, description=docs.AF_MIN_FD_DATE),
+    'af_max_fd_date': Date(required=False, description=docs.AF_MAX_FD_DATE),
+    'af_fd_fine_amount': fields.Int(required=False, description=docs.AF_FD_FINE_AMOUNT),
+    'sort': IStr(required=False, description=docs.SORT),
 }
 
 candidate_detail = {
@@ -304,8 +320,8 @@ candidate_detail = {
 candidate_list = {
     'q': fields.List(Keyword, description=docs.CANDIDATE_NAME),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'min_first_file_date': fields.Date(description=docs.CANDIDATE_MIN_FIRST_FILE_DATE),
-    'max_first_file_date': fields.Date(description=docs.CANDIDATE_MAX_FIRST_FILE_DATE),
+    'min_first_file_date': Date(description=docs.CANDIDATE_MIN_FIRST_FILE_DATE),
+    'max_first_file_date': Date(description=docs.CANDIDATE_MAX_FIRST_FILE_DATE),
     'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
 }
 
@@ -342,12 +358,12 @@ committee_list = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'state': fields.List(IStr, description=docs.STATE_GENERIC),
     'party': fields.List(IStr, description=docs.PARTY),
-    'min_first_file_date': fields.Date(description=docs.MIN_FIRST_FILE_DATE),
-    'max_first_file_date': fields.Date(description=docs.MAX_FIRST_FILE_DATE),
-    'min_first_f1_date': fields.Date(description=docs.MIN_FIRST_F1_DATE),
-    'max_first_f1_date': fields.Date(description=docs.MAX_FIRST_F1_DATE),
-    'min_last_f1_date': fields.Date(description=docs.MIN_LAST_F1_DATE),
-    'max_last_f1_date': fields.Date(description=docs.MAX_LAST_F1_DATE),
+    'min_first_file_date': Date(description=docs.MIN_FIRST_FILE_DATE),
+    'max_first_file_date': Date(description=docs.MAX_FIRST_FILE_DATE),
+    'min_first_f1_date': Date(description=docs.MIN_FIRST_F1_DATE),
+    'max_first_f1_date': Date(description=docs.MAX_FIRST_F1_DATE),
+    'min_last_f1_date': Date(description=docs.MIN_LAST_F1_DATE),
+    'max_last_f1_date': Date(description=docs.MAX_LAST_F1_DATE),
     'treasurer_name': fields.List(Keyword, description=docs.TREASURER_NAME),
     'sponsor_candidate_id': fields.List(IStr, description=docs.SPONSOR_CANDIDATE_ID),
 }
@@ -371,8 +387,8 @@ filings = {
     'document_type': fields.List(IStr, description=docs.DOC_TYPE),
     'beginning_image_number': fields.List(ImageNumber, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
-    'min_receipt_date': fields.Date(description=docs.MIN_RECEIPT_DATE),
-    'max_receipt_date': fields.Date(description=docs.MAX_RECEIPT_DATE),
+    'min_receipt_date': Date(description=docs.MIN_RECEIPT_DATE),
+    'max_receipt_date': Date(description=docs.MAX_RECEIPT_DATE),
     'form_type': fields.List(IStr, description=docs.FORM_TYPE),
     'state': fields.List(IStr, description=docs.STATE),
     'district': fields.List(IStr, description=docs.DISTRICT),
@@ -394,8 +410,8 @@ filings = {
 efilings = {
     'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'min_receipt_date': fields.Date(description=docs.MIN_RECEIPT_DATE),
-    'max_receipt_date': fields.Date(description=docs.MAX_RECEIPT_DATE),
+    'min_receipt_date': Date(description=docs.MIN_RECEIPT_DATE),
+    'max_receipt_date': Date(description=docs.MAX_RECEIPT_DATE),
     'q_filer': fields.List(Keyword, description=docs.FILER_NAME_TEXT),
 }
 
@@ -414,8 +430,8 @@ reports = {
     'max_disbursements_amount': Currency(description=docs.MAX_FILTER),
     'min_receipts_amount': Currency(description=docs.MIN_FILTER),
     'max_receipts_amount': Currency(description=docs.MAX_FILTER),
-    'max_receipt_date': fields.Date(description=docs.MAX_REPORT_RECEIPT_DATE),
-    'min_receipt_date': fields.Date(description=docs.MIN_REPORT_RECEIPT_DATE),
+    'max_receipt_date': Date(description=docs.MAX_REPORT_RECEIPT_DATE),
+    'min_receipt_date': Date(description=docs.MIN_REPORT_RECEIPT_DATE),
     'min_cash_on_hand_end_period_amount': Currency(description=docs.MIN_FILTER),
     'max_cash_on_hand_end_period_amount': Currency(description=docs.MAX_FILTER),
     'min_debts_owed_amount': Currency(description=docs.MIN_FILTER),
@@ -488,8 +504,8 @@ totals_by_entity_type = {
         IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
         description=docs.ORGANIZATION_TYPE,
     ),
-    'min_first_f1_date': fields.Date(description=docs.MIN_FIRST_F1_DATE),
-    'max_first_f1_date': fields.Date(description=docs.MAX_FIRST_F1_DATE),
+    'min_first_f1_date': Date(description=docs.MIN_FIRST_F1_DATE),
+    'max_first_f1_date': Date(description=docs.MAX_FIRST_F1_DATE),
 }
 
 candidate_totals_detail = {
@@ -503,10 +519,10 @@ calendar_dates = {
     'calendar_category_id': fields.List(fields.Int, description=docs.CATEGORY),
     'description': fields.List(Keyword, description=docs.CAL_DESCRIPTION),
     'summary': fields.List(Keyword, description=docs.SUMMARY),
-    'min_start_date': fields.Date(description=docs.MIN_START_DATE),
-    'min_end_date': fields.Date(description=docs.MIN_END_DATE),
-    'max_start_date': fields.Date(description=docs.MAX_START_DATE),
-    'max_end_date': fields.Date(description=docs.MAX_END_DATE),
+    'min_start_date': Date(description=docs.MIN_START_DATE),
+    'min_end_date': Date(description=docs.MIN_END_DATE),
+    'max_start_date': Date(description=docs.MAX_START_DATE),
+    'max_end_date': Date(description=docs.MAX_END_DATE),
     'event_id': fields.Int(description=docs.EVENT_ID),
 }
 
@@ -515,27 +531,27 @@ election_dates = {
     'election_district': fields.List(fields.Str, description=docs.ELECTION_DISTRICT),
     'election_party': fields.List(fields.Str, description=docs.ELECTION_PARTY),
     'office_sought': fields.List(fields.Str(validate=validate.OneOf(['H', 'S', 'P'])), description=docs.OFFICE_SOUGHT),
-    'min_election_date': fields.Date(description=docs.MIN_ELECTION_DATE),
-    'max_election_date': fields.Date(description=docs.MAX_ELECTION_DATE),
+    'min_election_date': Date(description=docs.MIN_ELECTION_DATE),
+    'max_election_date': Date(description=docs.MAX_ELECTION_DATE),
     'election_type_id': fields.List(fields.Str, description=docs.ELECTION_TYPE_ID),
-    'min_create_date': fields.Date(description=docs.MIN_CREATE_DATE),
-    'max_create_date': fields.Date(description=docs.MAX_CREATE_DATE),
-    'min_update_date': fields.Date(description=docs.MIN_UPDATE_DATE),
-    'max_update_date': fields.Date(description=docs.MAX_UPDATE_DATE),
+    'min_create_date': Date(description=docs.MIN_CREATE_DATE),
+    'max_create_date': Date(description=docs.MAX_CREATE_DATE),
+    'min_update_date': Date(description=docs.MIN_UPDATE_DATE),
+    'max_update_date': Date(description=docs.MAX_UPDATE_DATE),
     'election_year': fields.List(fields.Str, description=docs.ELECTION_YEAR),
-    'min_primary_general_date': fields.Date(description=docs.MIN_PRIMARY_GENERAL_DATE),
-    'max_primary_general_date': fields.Date(description=docs.MAX_PRIMARY_GENERAL_DATE),
+    'min_primary_general_date': Date(description=docs.MIN_PRIMARY_GENERAL_DATE),
+    'max_primary_general_date': Date(description=docs.MAX_PRIMARY_GENERAL_DATE),
 }
 
 reporting_dates = {
-    'min_due_date': fields.Date(description=docs.MIN_DUE_DATE),
-    'max_due_date': fields.Date(description=docs.MAX_DUE_DATE),
+    'min_due_date': Date(description=docs.MIN_DUE_DATE),
+    'max_due_date': Date(description=docs.MAX_DUE_DATE),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE),
-    'min_create_date': fields.Date(description=docs.MIN_CREATE_DATE),
-    'max_create_date': fields.Date(description=docs.MAX_CREATE_DATE),
-    'min_update_date': fields.Date(description=docs.MIN_UPDATE_DATE),
-    'max_update_date': fields.Date(description=docs.MAX_UPDATE_DATE),
+    'min_create_date': Date(description=docs.MIN_CREATE_DATE),
+    'max_create_date': Date(description=docs.MAX_CREATE_DATE),
+    'min_update_date': Date(description=docs.MIN_UPDATE_DATE),
+    'max_update_date': Date(description=docs.MAX_UPDATE_DATE),
 }
 # ====tag:dates -- endpoints [end]========
 
@@ -545,8 +561,8 @@ itemized = {
     'max_image_number': ImageNumber(description=docs.MAX_IMAGE_NUMBER),
     'min_amount': Currency(description='Filter for all amounts greater than a value.'),
     'max_amount': Currency(description='Filter for all amounts less than a value.'),
-    'min_date': fields.Date(description='Minimum date'),
-    'max_date': fields.Date(description='Maximum date'),
+    'min_date': Date(description='Minimum date'),
+    'max_date': Date(description='Maximum date'),
     'line_number': fields.Str(description='Filter for form and line number using the following format: '
                                           '`FORM-LINENUMBER`.  For example an argument such as `F3X-16` would filter'
                                           ' down to all entries from form `F3X` line number `16`.')
@@ -561,7 +577,7 @@ schedule_a = {
     'contributor_zip': fields.List(IStr, description=docs.CONTRIBUTOR_ZIP),
     'contributor_employer': fields.List(Keyword, description=docs.CONTRIBUTOR_EMPLOYER),
     'contributor_occupation': fields.List(Keyword, description=docs.CONTRIBUTOR_OCCUPATION),
-    'last_contribution_receipt_date': fields.Date(
+    'last_contribution_receipt_date': Date(
         missing=None,
         description='When sorting by `contribution_receipt_date`, this is populated with the \
         `contribution_receipt_date` of the last result. However, you will need to pass the index \
@@ -596,8 +612,8 @@ schedule_a = {
         IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
         description=docs.DESIGNATION,
     ),
-    'min_load_date': fields.Date(description=docs.MIN_LOAD_DATE),
-    'max_load_date': fields.Date(description=docs.MAX_LOAD_DATE),
+    'min_load_date': Date(description=docs.MIN_LOAD_DATE),
+    'max_load_date': Date(description=docs.MAX_LOAD_DATE),
 }
 
 schedule_a_e_file = {
@@ -671,7 +687,7 @@ schedule_b = {
     'disbursement_description': fields.List(Keyword, description=docs.DISBURSEMENT_DESCRIPTION),
     'disbursement_purpose_category': fields.List(IStr, description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
     'last_disbursement_amount': fields.Float(missing=None, description=docs.LAST_DISBURSEMENT_AMOUNT),
-    'last_disbursement_date': fields.Date(missing=None, description=docs.LAST_DISBURSEMENT_DATE),
+    'last_disbursement_date': Date(missing=None, description=docs.LAST_DISBURSEMENT_DATE),
     'recipient_city': fields.List(IStr, description=docs.RECIPIENT_CITY),
     'recipient_committee_id': fields.List(IStr, description=docs.RECIPIENT_COMMITTEE_ID),
     'recipient_name': fields.List(Keyword, description=docs.RECIPIENT_NAME),
@@ -705,13 +721,13 @@ schedule_b_efile = {
     'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
     'recipient_city': fields.List(IStr, description='City of recipient'),
     'recipient_state': fields.List(IStr, description='State of recipient'),
-    'max_date': fields.Date(
+    'max_date': Date(
         missing=None,
         description='When sorting by `disbursement_date`, this is populated with the \
         `disbursement_date` of the last result. However, you will need to pass the index \
         of that last result to `last_index` to get the next page.'
     ),
-    'min_date': fields.Date(
+    'min_date': Date(
         missing=None,
         description='When sorting by `disbursement_date`, this is populated with the \
         `disbursement_date` of the last result. However, you will need to pass the index \
@@ -735,8 +751,8 @@ schedule_c = {
     'loan_source_name': fields.List(Keyword, description=docs.LOAN_SOURCE),
     'min_payment_to_date': fields.Int(description=docs.MIN_PAYMENT_DATE),
     'max_payment_to_date': fields.Int(description=docs.MAX_PAYMENT_DATE),
-    'min_incurred_date': fields.Date(missing=None, description=docs.MIN_INCURRED_DATE),
-    'max_incurred_date': fields.Date(missing=None, description=docs.MAX_INCURRED_DATE),
+    'min_incurred_date': Date(missing=None, description=docs.MIN_INCURRED_DATE),
+    'max_incurred_date': Date(missing=None, description=docs.MAX_INCURRED_DATE),
 }
 
 schedule_d = {
@@ -755,10 +771,10 @@ schedule_d = {
     'creditor_debtor_name': fields.List(Keyword),
     'nature_of_debt': fields.Str(),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'min_coverage_end_date': fields.Date(missing=None, description=docs.MIN_COVERAGE_END_DATE),
-    'max_coverage_end_date': fields.Date(missing=None, description=docs.MAX_COVERAGE_END_DATE),
-    'min_coverage_start_date': fields.Date(missing=None, description=docs.MIN_COVERAGE_START_DATE),
-    'max_coverage_start_date': fields.Date(missing=None, description=docs.MAX_COVERAGE_START_DATE),
+    'min_coverage_end_date': Date(missing=None, description=docs.MIN_COVERAGE_END_DATE),
+    'max_coverage_end_date': Date(missing=None, description=docs.MAX_COVERAGE_END_DATE),
+    'min_coverage_start_date': Date(missing=None, description=docs.MIN_COVERAGE_START_DATE),
+    'max_coverage_start_date': Date(missing=None, description=docs.MAX_COVERAGE_START_DATE),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE)
 }
@@ -810,8 +826,8 @@ electioneering = {
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'min_amount': Currency(description=docs.ELECTIONEERING_MIN_AMOUNT),
     'max_amount': Currency(description=docs.ELECTIONEERING_MAX_AMOUNT),
-    'min_date': fields.Date(description=docs.ELECTIONEERING_MIN_DATE),
-    'max_date': fields.Date(description=docs.ELECTIONEERING_MAX_DATE),
+    'min_date': Date(description=docs.ELECTIONEERING_MIN_DATE),
+    'max_date': Date(description=docs.ELECTIONEERING_MAX_DATE),
     'disbursement_description': fields.List(Keyword, description=docs.DISBURSEMENT_DESCRIPTION),
 }
 
@@ -922,7 +938,7 @@ schedule_e = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'filing_form': fields.List(IStr, description=docs.FORM_TYPE),
-    'last_expenditure_date': fields.Date(
+    'last_expenditure_date': Date(
         missing=None,
         description=docs.LAST_EXPENDITURE_DATE),
     'last_expenditure_amount': fields.Float(
@@ -939,10 +955,10 @@ schedule_e = {
         missing=None,
         description=docs.LAST_SUPPOSE_OPPOSE_INDICATOR),
     'is_notice': fields.List(fields.Bool, description=docs.IS_NOTICE),
-    'min_dissemination_date': fields.Date(description=docs.DISSEMINATION_MIN_DATE),
-    'max_dissemination_date': fields.Date(description=docs.DISSEMINATION_MAX_DATE),
-    'min_filing_date': fields.Date(description=docs.MIN_FILED_DATE),
-    'max_filing_date': fields.Date(description=docs.MAX_FILED_DATE),
+    'min_dissemination_date': Date(description=docs.DISSEMINATION_MIN_DATE),
+    'max_dissemination_date': Date(description=docs.DISSEMINATION_MAX_DATE),
+    'min_filing_date': Date(description=docs.MIN_FILED_DATE),
+    'max_filing_date': Date(description=docs.MAX_FILED_DATE),
     'most_recent': fields.Bool(description=docs.MOST_RECENT_IE),
     'q_spender': fields.List(Keyword, description=docs.SPENDER_NAME_TEXT),
 }
@@ -956,10 +972,10 @@ schedule_e_efile = {
     'support_oppose_indicator': fields.List(
         IStr(validate=validate.OneOf(['S', 'O'])),
         description=docs.SUPPORT_OPPOSE_INDICATOR),
-    'min_expenditure_date': fields.Date(description=docs.EXPENDITURE_MIN_DATE),
-    'max_expenditure_date': fields.Date(description=docs.EXPENDITURE_MAX_DATE),
-    'min_dissemination_date': fields.Date(description=docs.DISSEMINATION_MIN_DATE),
-    'max_dissemination_date': fields.Date(description=docs.DISSEMINATION_MAX_DATE),
+    'min_expenditure_date': Date(description=docs.EXPENDITURE_MIN_DATE),
+    'max_expenditure_date': Date(description=docs.EXPENDITURE_MAX_DATE),
+    'min_dissemination_date': Date(description=docs.DISSEMINATION_MIN_DATE),
+    'max_dissemination_date': Date(description=docs.DISSEMINATION_MAX_DATE),
     'min_expenditure_amount': fields.Integer(description=docs.EXPENDITURE_MIN_AMOUNT),
     'max_expenditure_amount': fields.Integer(description=docs.EXPENDITURE_MAX_AMOUNT),
     'spender_name': fields.List(IStr, description=docs.COMMITTEE_NAME),
@@ -968,8 +984,8 @@ schedule_e_efile = {
     'candidate_office_state': fields.List(IStr, description=docs.STATE),
     'candidate_office_district': fields.List(IStr, description=docs.DISTRICT),
     'most_recent': fields.Bool(description=docs.MOST_RECENT_IE),
-    'min_filed_date': fields.Date(description=docs.FILED_DATE),
-    'max_filed_date': fields.Date(description=docs.FILED_DATE),
+    'min_filed_date': Date(description=docs.FILED_DATE),
+    'max_filed_date': Date(description=docs.FILED_DATE),
     'filing_form': fields.List(IStr, description=docs.FORM_TYPE),
     'is_notice': fields.Bool(description=docs.IS_NOTICE),
 }
@@ -982,8 +998,8 @@ rad_analyst = {
     'name': fields.List(Keyword, description='Name of RAD analyst'),
     'email': fields.List(fields.Str, description='Email of RAD analyst'),
     'title': fields.List(Keyword, description='Title of RAD analyst'),
-    'min_assignment_update_date': fields.Date(description='Filter results for assignment updates made after this date'),
-    'max_assignment_update_date': fields.Date(description='Filter results for assignment updates made before this date')
+    'min_assignment_update_date': Date(description='Filter results for assignment updates made after this date'),
+    'max_assignment_update_date': Date(description='Filter results for assignment updates made before this date')
 }
 
 large_aggregates = {'cycle': fields.Int(required=True, description=docs.RECORD_CYCLE)}
@@ -1035,12 +1051,12 @@ operations_log = {
     'form_type': fields.List(IStr, description=docs.FORM_TYPE),
     'amendment_indicator': fields.List(IStr, description=docs.AMENDMENT_INDICATOR),
     'status_num': fields.List(fields.Str(validate=validate.OneOf(['0', '1'])), description=docs.STATUS_NUM),
-    'min_receipt_date': fields.Date(description=docs.MIN_RECEIPT_DATE),
-    'max_receipt_date': fields.Date(description=docs.MAX_RECEIPT_DATE),
-    'min_coverage_end_date': fields.Date(description=docs.MIN_COVERAGE_END_DATE),
-    'max_coverage_end_date': fields.Date(description=docs.MAX_COVERAGE_END_DATE),
-    'min_transaction_data_complete_date': fields.Date(description=docs.MIN_TRANSACTION_DATA_COMPLETE_DATE),
-    'max_transaction_data_complete_date': fields.Date(description=docs.MAX_TRANSACTION_DATA_COMPLETE_DATE),
+    'min_receipt_date': Date(description=docs.MIN_RECEIPT_DATE),
+    'max_receipt_date': Date(description=docs.MAX_RECEIPT_DATE),
+    'min_coverage_end_date': Date(description=docs.MIN_COVERAGE_END_DATE),
+    'max_coverage_end_date': Date(description=docs.MAX_COVERAGE_END_DATE),
+    'min_transaction_data_complete_date': Date(description=docs.MIN_TRANSACTION_DATA_COMPLETE_DATE),
+    'max_transaction_data_complete_date': Date(description=docs.MAX_TRANSACTION_DATA_COMPLETE_DATE),
 }
 
 
@@ -1097,10 +1113,10 @@ schedule_h4 = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'last_payee_name': fields.List(IStr, missing=None, description=docs.LAST_PAYEE_NAME),
     'last_disbursement_purpose': fields.List(IStr, missing=None, description=docs.LAST_DISBURSEMENT_PURPOSE),
-    'last_event_purpose_date': fields.Date(missing=None, description=docs.LAST_EVENT_DATE),
+    'last_event_purpose_date': Date(missing=None, description=docs.LAST_EVENT_DATE),
     'last_spender_committee_name': fields.List(IStr, missing=None, description=docs.LAST_COMMITTEE_NAME),
-    'min_date': fields.Date(missing=None, description=docs.MIN_EVENT_DATE),
-    'max_date': fields.Date(missing=None, description=docs.MAX_EVENT_DATE),
+    'min_date': Date(missing=None, description=docs.MIN_EVENT_DATE),
+    'max_date': Date(missing=None, description=docs.MAX_EVENT_DATE),
     'last_disbursement_amount': fields.Float(missing=None, description=docs.LAST_DISBURSEMENT_AMOUNT),
     'min_amount': Currency(description=docs.MIN_FILTER),
     'max_amount': Currency(description=docs.MAX_FILTER),
@@ -1121,7 +1137,7 @@ schedule_h4 = {
     'spender_committee_designation': fields.List(
         IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
         description=docs.DESIGNATION,
-    ),
+    )
 }
 
 schedule_h4_efile = {
@@ -1133,9 +1149,9 @@ schedule_h4_efile = {
     'payee_state': fields.List(fields.Str, description=docs.PAYEE_STATE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'last_disbursement_purpose': fields.List(IStr, missing=None, description=docs.LAST_DISBURSEMENT_PURPOSE),
-    'last_event_purpose_date': fields.Date(missing=None, description=docs.LAST_EVENT_DATE),
-    'min_date': fields.Date(missing=None, description=docs.MIN_EVENT_DATE),
-    'max_date': fields.Date(missing=None, description=docs.MAX_EVENT_DATE),
+    'last_event_purpose_date': Date(missing=None, description=docs.LAST_EVENT_DATE),
+    'min_date': Date(missing=None, description=docs.MIN_EVENT_DATE),
+    'max_date': Date(missing=None, description=docs.MAX_EVENT_DATE),
     'last_disbursement_amount': fields.Float(missing=None, description=docs.LAST_DISBURSEMENT_AMOUNT),
     'min_amount': Currency(description=docs.MIN_FILTER),
     'max_amount': Currency(description=docs.MAX_FILTER),

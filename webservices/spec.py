@@ -107,8 +107,8 @@ if bool(env.get_credential('FEC_FEATURE_PRESIDENTIAL', '')):
 spec = APISpec(
     title='OpenFEC',
     version=__API_VERSION__,
+    openapi_version='2.0',
     info={'description': format_docstring(docs.API_DESCRIPTION)},
-    basePath='/v1',
     produces=['application/json'],
     plugins=[MarshmallowPlugin()],
     securityDefinitions={

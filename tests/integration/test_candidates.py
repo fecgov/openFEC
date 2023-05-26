@@ -125,19 +125,33 @@ class CandidatesTestCase(common.BaseTestCase):
             )
         )
         results_tab = self.connection.execute(sql_extract).fetchall()
-        params = {
+        candidate_params = {
             'election_year': election_year,
+            'cycle': election_year,
+            'district': '01',
+            'state': 'MD',
+        }
+
+        election_params = {
             'cycle': election_year,
             'election_full': True,
             'district': '01',
             'state': 'MD',
         }
-        candidates_api = self._results(rest.api.url_for(CandidateList, **params))
+
+        total_params = {
+            'cycle': election_year,
+            'election_full': True,
+            'district': '01',
+            'state': 'MD',
+            'election_year': election_year,
+        }
+        candidates_api = self._results(rest.api.url_for(CandidateList, **candidate_params))
         candidates_totals_api = self._results(
-            rest.api.url_for(TotalsCandidateView, **params)
+            rest.api.url_for(TotalsCandidateView, **total_params)
         )
         elections_api = self._results(
-            rest.api.url_for(ElectionView, office='house', **params)
+            rest.api.url_for(ElectionView, office='house', **election_params)
         )
         assert (
             len(results_tab)
