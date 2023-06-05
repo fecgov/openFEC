@@ -1169,8 +1169,9 @@ class TestScheduleE(ApiBaseTest):
         """
         payee_names = ['#', '##', '@#$%^&*', '%', '', '  ']
         [factories.ScheduleEFactory(payee_name_text=payee) for payee in payee_names]
-        results = self._results(api.url_for(ScheduleEView, payee_name=payee_names))
-        self.assertEqual(len(results), 0)
+        response = self.app.get(
+            api.url_for(ScheduleEView, payee_name=payee_names))
+        self.assertEqual(response.status_code, 422)
 
     def test_schedule_e_sort_args_descending(self):
         [
