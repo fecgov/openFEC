@@ -84,7 +84,7 @@ class TestScheduleCView(ApiBaseTest):
             factories.ScheduleCFactory(loan_source_name=loaner_name)
             for loaner_name in loaner_names
         ]
-        results = self._results(api.url_for(ScheduleCView, loan_source_name='aa'))
+        results = self._results(api.url_for(ScheduleCView, loan_source_name='aa '))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['loan_source_name'], 'aa cc')
 
@@ -94,9 +94,14 @@ class TestScheduleCView(ApiBaseTest):
             factories.ScheduleCFactory(candidate_name=candidate_name)
             for candidate_name in candidate_names
         ]
-        results = self._results(api.url_for(ScheduleCView, candidate_name='aa'))
+        results = self._results(api.url_for(ScheduleCView, candidate_name='aa '))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['candidate_name'], 'aa cc')
+
+# test invlid keyword search
+        response = self.app.get(
+            api.url_for(ScheduleCView, candidate_name='aa'))
+        self.assertEqual(response.status_code, 422)
 
     def test_filter_payment_to_date(self):
         [
