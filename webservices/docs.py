@@ -1328,6 +1328,14 @@ Total electioneering communications spent on candidates by cycle
 or candidate election year
 '''
 
+ELECTIONEERING_MIN_AMOUNT = 'Filter for all amounts greater than a value'
+
+ELECTIONEERING_MAX_AMOUNT = 'Filter for all amounts less than a value'
+
+ELECTIONEERING_MIN_DATE = 'Minimum disbursement date'
+
+ELECTIONEERING_MAX_DATE = 'Maximum disbursement date'
+
 COMMUNICATION_COST = '''
 52 U.S.C. 30118 allows "communications by a corporation to its stockholders and executive \
 or administrative personnel and their families or by a labor organization to its members \
@@ -1971,14 +1979,6 @@ an obligation to make disbursements (SB date of disbursement).
 '''
 EC_SUB_ID = '''
 The identifier for each electioneering record.
-'''
-
-TOTAL_BY_OFFICE_TAG = '''
-`DEPRECATED` Aggregated candidate receipts and disbursements grouped by office by cycle.
-'''
-
-TOTAL_BY_OFFICE_BY_PARTY_TAG = '''
-`DEPRECATED` Aggregated candidate receipts and disbursements grouped by office by party by cycle.
 '''
 
 CANDIDATE_TOTAL_AGGREGATE_TAG = ''' Candidate total receipts and disbursements aggregated by `aggregate_by`.

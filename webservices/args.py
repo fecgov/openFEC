@@ -810,11 +810,11 @@ electioneering = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
-    'min_amount': Currency(description='Filter for all amounts greater than a value.'),
-    'max_amount': Currency(description='Filter for all amounts less than a value.'),
-    'min_date': fields.Date(description='Minimum disbursement date'),
-    'max_date': fields.Date(description='Maximum disbursement date'),
-    'description': fields.Str('Disbursement description'),
+    'min_amount': Currency(description=docs.ELECTIONEERING_MIN_AMOUNT),
+    'max_amount': Currency(description=docs.ELECTIONEERING_MAX_AMOUNT),
+    'min_date': fields.Date(description=docs.ELECTIONEERING_MIN_DATE),
+    'max_date': fields.Date(description=docs.ELECTIONEERING_MAX_DATE),
+    'disbursement_description': fields.List(Keyword, description=docs.DISBURSEMENT_DESCRIPTION),
 }
 
 electioneering_by_candidate = {
@@ -1046,22 +1046,6 @@ operations_log = {
 }
 
 
-totals_by_office = {
-    'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
-    'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
-    'election_full': election_full,
-    'min_election_cycle': fields.Int(description=docs.CYCLE),
-    'max_election_cycle': fields.Int(description=docs.CYCLE),
-}
-
-totals_by_office_by_party = {
-    'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), description=docs.OFFICE),
-    'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
-    'election_full': election_full,
-}
-
 # for /candidates/totals/aggregates/ (candidate_aggregates.CandidateTotalAggregateView
 candidate_total_aggregate = {
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
@@ -1104,12 +1088,12 @@ schedule_h4 = {
     'min_image_number': ImageNumber(description=docs.MIN_IMAGE_NUMBER),
     'max_image_number': ImageNumber(description=docs.MAX_IMAGE_NUMBER),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
-    'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE),
-    'activity_or_event': fields.List(fields.Str, descripiption=docs.ACTIVITY_OR_EVENT_ADD),
+    'report_type': fields.List(IStr, description=docs.REPORT_TYPE),
+    'activity_or_event': fields.List(IStr, descripiption=docs.ACTIVITY_OR_EVENT_ADD),
     'q_payee_name': fields.List(Keyword, description=docs.PAYEE_NAME),
-    'payee_city': fields.List(fields.Str, description=docs.PAYEE_CITY),
+    'payee_city': fields.List(IStr, description=docs.PAYEE_CITY),
     'payee_zip': fields.List(fields.Str, description=docs.PAYEE_ZIP),
-    'payee_state': fields.List(fields.Str, description=docs.PAYEE_STATE),
+    'payee_state': fields.List(IStr, description=docs.PAYEE_STATE),
     'q_disbursement_purpose': fields.List(Keyword, description=docs.DISBURSEMENT_PURPOSE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
@@ -1123,13 +1107,13 @@ schedule_h4 = {
     'min_amount': Currency(description=docs.MIN_FILTER),
     'max_amount': Currency(description=docs.MAX_FILTER),
     'administrative_voter_drive_activity_indicator': fields.List(fields.Str, description=docs.ADMIN_VOTER_IND),
-    'fundraising_activity_indicator': fields.List(fields.Str, description=docs.FUND_ACT_IND),
-    'exempt_activity_indicator': fields.List(fields.Str, description=docs.EXEMPT_IND),
-    'direct_candidate_support_activity_indicator': fields.List(fields.Str, description=docs.CAND_SUPP_IND),
-    'administrative_activity_indicator': fields.List(fields.Str, description=docs.ADMIN_ACT_IND),
-    'general_voter_drive_activity_indicator': fields.List(fields.Str, description=docs.GENERAL_VOTER_IND),
-    'public_comm_indicator': fields.List(fields.Str, description=docs.PUBLIC_COMM_IND),
-    'spender_committee_name': fields.List(fields.Str, description=docs.COMMITTEE_NAME),
+    'fundraising_activity_indicator': fields.List(IStr, description=docs.FUND_ACT_IND),
+    'exempt_activity_indicator': fields.List(IStr, description=docs.EXEMPT_IND),
+    'direct_candidate_support_activity_indicator': fields.List(IStr, description=docs.CAND_SUPP_IND),
+    'administrative_activity_indicator': fields.List(IStr, description=docs.ADMIN_ACT_IND),
+    'general_voter_drive_activity_indicator': fields.List(IStr, description=docs.GENERAL_VOTER_IND),
+    'public_comm_indicator': fields.List(IStr, description=docs.PUBLIC_COMM_IND),
+    'spender_committee_name': fields.List(IStr, description=docs.COMMITTEE_NAME),
     'spender_committee_type': fields.List(
         IStr(validate=validate.OneOf([
             '', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q',

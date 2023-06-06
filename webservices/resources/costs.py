@@ -58,7 +58,7 @@ class ElectioneeringView(ApiResource):
     page_schema = schemas.ElectioneeringPageSchema
 
     filter_fulltext_fields = [
-        ('description', models.Electioneering.purpose_description_text),
+        ('disbursement_description', models.Electioneering.purpose_description_text),
     ]
 
     @property
