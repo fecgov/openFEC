@@ -768,6 +768,7 @@ ScheduleH4Schema = make_schema(
     fields={
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'image_number': ma.fields.Str(),
+        'pdf_url': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
