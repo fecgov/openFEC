@@ -851,6 +851,7 @@ class ScheduleH4(BaseItemized):
     cycle = db.Column('election_cycle', db.Numeric(4, 0))
     disbursement_purpose_text = db.Column(TSVECTOR)
     payee_name_text = db.Column(TSVECTOR)
+    pdf_url = db.Column('pdf_url', db.String)
 
 
 class ScheduleH4Efile(BaseRawItemized):
