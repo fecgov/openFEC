@@ -1,6 +1,6 @@
-import React from 'react';
-import smallFlag from '../static/img/us_flag_small.png';
-import printLogo from '../static/img/print-logo.png';
+import React from "react";
+import smallFlag from "../static/img/us_flag_small.png";
+import printLogo from "../static/img/print-logo.png";
 
 const Header = () => (
   <header className="site-header">
