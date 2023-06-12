@@ -1,5 +1,5 @@
-import React from 'react';
-import seal from '../static/img/seal--inverse.svg';
+import React from "react";
+import seal from "../static/img/seal--inverse.svg";
 
 const Footer = () => (
   <footer className="footer">
