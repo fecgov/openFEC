@@ -1,6 +1,6 @@
 /*
-This migration file is for issue #5430. 
-It creates a new indices for sorting on committee_name, disbursment_amount, committee_type, and committee_designation
+This migration file is for issue #5364. 
+It adds pdf_url to the H4 endpoint
 */
 DROP MATERIALIZED VIEW IF EXISTS public.ofec_sched_h4_mv_tmp;
 
@@ -49,7 +49,8 @@ to_tsvector(parse_fulltext(h4.evt_purpose_nm)) as disbursement_purpose_text,
 to_tsvector(parse_fulltext(h4.pye_nm)) as payee_name_text,
 cmte.cmte_nm AS cmte_nm,
 cmte.cmte_tp AS cmte_tp,
-cmte.cmte_dsgn AS cmte_dsgn
+cmte.cmte_dsgn AS cmte_dsgn,
+image_pdf_url(h4.image_num) as pdf_url
 FROM disclosure.fec_fitem_sched_h4 h4
 LEFT OUTER JOIN disclosure.cmte_valid_fec_yr cmte
 ON h4.filer_cmte_id = cmte.cmte_id AND h4.election_cycle = cmte.fec_election_yr;
@@ -59,7 +60,7 @@ ALTER TABLE public.ofec_sched_h4_mv_tmp OWNER TO fec;
 GRANT ALL ON TABLE public.ofec_sched_h4_mv_tmp TO fec;
 GRANT SELECT ON TABLE public.ofec_sched_h4_mv_tmp TO fec_read;
 
--- create index on the ofec_sched_h4_mv (should support sort by sub_id, event_purpose_date, & disbursement_amount)
+-- create indexes on the ofec_sched_h4_mv 
 CREATE UNIQUE INDEX idx_ofec_sched_h4_mv_tmp_sub_id_date_amount ON public.ofec_sched_h4_mv_tmp USING btree (sub_id, event_purpose_date, disbursement_amount);
 
 CREATE INDEX idx_ofec_sched_h4_mv_tmp_cmte_id ON public.ofec_sched_h4_mv_tmp USING btree (cmte_id);

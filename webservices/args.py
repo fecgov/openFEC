@@ -213,7 +213,7 @@ def make_seek_args(field=fields.Int, description=None):
 
 
 names = {
-    'q': fields.List(fields.Str, required=True, description='Name (candidate or committee) to search for'),
+    'q': fields.List(Keyword, required=True, description='Name (candidate or committee) to search for'),
 }
 
 
@@ -302,7 +302,7 @@ candidate_detail = {
 }
 
 candidate_list = {
-    'q': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
+    'q': fields.List(Keyword, description=docs.CANDIDATE_NAME),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'min_first_file_date': fields.Date(description=docs.CANDIDATE_MIN_FIRST_FILE_DATE),
     'max_first_file_date': fields.Date(description=docs.CANDIDATE_MAX_FIRST_FILE_DATE),
@@ -337,7 +337,7 @@ committee = {
 }
 
 committee_list = {
-    'q': fields.List(fields.Str, description=docs.COMMITTEE_NAME),
+    'q': fields.List(Keyword, description=docs.COMMITTEE_NAME),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'state': fields.List(IStr, description=docs.STATE_GENERIC),
@@ -348,7 +348,7 @@ committee_list = {
     'max_first_f1_date': fields.Date(description=docs.MAX_FIRST_F1_DATE),
     'min_last_f1_date': fields.Date(description=docs.MIN_LAST_F1_DATE),
     'max_last_f1_date': fields.Date(description=docs.MAX_LAST_F1_DATE),
-    'treasurer_name': fields.List(fields.Str, description=docs.TREASURER_NAME),
+    'treasurer_name': fields.List(Keyword, description=docs.TREASURER_NAME),
     'sponsor_candidate_id': fields.List(IStr, description=docs.SPONSOR_CANDIDATE_ID),
 }
 
@@ -474,7 +474,7 @@ totals_by_entity_type = {
         IStr(validate=validate.OneOf(['', 'A', 'M', 'N', 'Q', 'T', 'W', '-A', '-T'])),
         description=docs.FILING_FREQUENCY,
     ),
-    'treasurer_name': fields.List(fields.Str, description=docs.TREASURER_NAME),
+    'treasurer_name': fields.List(Keyword, description=docs.TREASURER_NAME),
     'min_disbursements': Currency(description=docs.MIN_FILTER),
     'max_disbursements': Currency(description=docs.MAX_FILTER),
     'min_receipts': Currency(description=docs.MIN_FILTER),
@@ -498,26 +498,11 @@ candidate_totals_detail = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
 }
 
-
-itemized = {
-    'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
-    'min_image_number': ImageNumber(description=docs.MIN_IMAGE_NUMBER),
-    'max_image_number': ImageNumber(description=docs.MAX_IMAGE_NUMBER),
-    'min_amount': Currency(description='Filter for all amounts greater than a value.'),
-    'max_amount': Currency(description='Filter for all amounts less than a value.'),
-    'min_date': fields.Date(description='Minimum date'),
-    'max_date': fields.Date(description='Maximum date'),
-    'line_number': fields.Str(description='Filter for form and line number using the following format: '
-                                          '`FORM-LINENUMBER`.  For example an argument such as `F3X-16` would filter'
-                                          ' down to all entries from form `F3X` line number `16`.')
-}
-
-
 # ====tag:dates -- endpoints [start]========
 calendar_dates = {
     'calendar_category_id': fields.List(fields.Int, description=docs.CATEGORY),
-    'description': fields.List(IStr, description=docs.CAL_DESCRIPTION),
-    'summary': fields.List(IStr, description=docs.SUMMARY),
+    'description': fields.List(Keyword, description=docs.CAL_DESCRIPTION),
+    'summary': fields.List(Keyword, description=docs.SUMMARY),
     'min_start_date': fields.Date(description=docs.MIN_START_DATE),
     'min_end_date': fields.Date(description=docs.MIN_END_DATE),
     'max_start_date': fields.Date(description=docs.MAX_START_DATE),
@@ -554,15 +539,28 @@ reporting_dates = {
 }
 # ====tag:dates -- endpoints [end]========
 
+itemized = {
+    'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
+    'min_image_number': ImageNumber(description=docs.MIN_IMAGE_NUMBER),
+    'max_image_number': ImageNumber(description=docs.MAX_IMAGE_NUMBER),
+    'min_amount': Currency(description='Filter for all amounts greater than a value.'),
+    'max_amount': Currency(description='Filter for all amounts less than a value.'),
+    'min_date': fields.Date(description='Minimum date'),
+    'max_date': fields.Date(description='Maximum date'),
+    'line_number': fields.Str(description='Filter for form and line number using the following format: '
+                                          '`FORM-LINENUMBER`.  For example an argument such as `F3X-16` would filter'
+                                          ' down to all entries from form `F3X` line number `16`.')
+}
+
 schedule_a = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
-    'contributor_name': fields.List(fields.Str, description=docs.CONTRIBUTOR_NAME),
+    'contributor_name': fields.List(Keyword, description=docs.CONTRIBUTOR_NAME),
     'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
     'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
     'contributor_zip': fields.List(IStr, description=docs.CONTRIBUTOR_ZIP),
-    'contributor_employer': fields.List(fields.Str, description=docs.CONTRIBUTOR_EMPLOYER),
-    'contributor_occupation': fields.List(fields.Str, description=docs.CONTRIBUTOR_OCCUPATION),
+    'contributor_employer': fields.List(Keyword, description=docs.CONTRIBUTOR_EMPLOYER),
+    'contributor_occupation': fields.List(Keyword, description=docs.CONTRIBUTOR_OCCUPATION),
     'last_contribution_receipt_date': fields.Date(
         missing=None,
         description='When sorting by `contribution_receipt_date`, this is populated with the \
@@ -605,11 +603,11 @@ schedule_a = {
 schedule_a_e_file = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     # 'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
-    'contributor_name': fields.List(fields.Str, description=docs.CONTRIBUTOR_NAME),
+    'contributor_name': fields.List(Keyword, description=docs.CONTRIBUTOR_NAME),
     'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
     'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
-    'contributor_employer': fields.List(fields.Str, description=docs.CONTRIBUTOR_EMPLOYER),
-    'contributor_occupation': fields.List(fields.Str, description=docs.CONTRIBUTOR_OCCUPATION),
+    'contributor_employer': fields.List(Keyword, description=docs.CONTRIBUTOR_EMPLOYER),
+    'contributor_occupation': fields.List(Keyword, description=docs.CONTRIBUTOR_OCCUPATION),
 
 }
 
@@ -635,13 +633,13 @@ schedule_a_by_zip = {
 
 schedule_a_by_employer = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'employer': fields.List(IStr, description=docs.EMPLOYER),
+    'employer': fields.List(Keyword, description=docs.EMPLOYER),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
 
 schedule_a_by_occupation = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'occupation': fields.List(IStr, description=docs.OCCUPATION),
+    'occupation': fields.List(Keyword, description=docs.OCCUPATION),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
 
@@ -652,13 +650,13 @@ schedule_a_by_contributor = {
 
 schedule_b_by_purpose = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'purpose': fields.List(fields.Str, description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
+    'purpose': fields.List(Keyword, description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
 
 schedule_b_by_recipient = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'recipient_name': fields.List(fields.Str, description=docs.RECIPIENT_NAME),
+    'recipient_name': fields.List(Keyword, description=docs.RECIPIENT_NAME),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
 
@@ -670,13 +668,13 @@ schedule_b_by_recipient_id = {
 
 schedule_b = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'disbursement_description': fields.List(fields.Str, description=docs.DISBURSEMENT_DESCRIPTION),
+    'disbursement_description': fields.List(Keyword, description=docs.DISBURSEMENT_DESCRIPTION),
     'disbursement_purpose_category': fields.List(IStr, description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
     'last_disbursement_amount': fields.Float(missing=None, description=docs.LAST_DISBURSEMENT_AMOUNT),
     'last_disbursement_date': fields.Date(missing=None, description=docs.LAST_DISBURSEMENT_DATE),
     'recipient_city': fields.List(IStr, description=docs.RECIPIENT_CITY),
     'recipient_committee_id': fields.List(IStr, description=docs.RECIPIENT_COMMITTEE_ID),
-    'recipient_name': fields.List(fields.Str, description=docs.RECIPIENT_NAME),
+    'recipient_name': fields.List(Keyword, description=docs.RECIPIENT_NAME),
     'recipient_state': fields.List(IStr, description=docs.RECIPIENT_STATE),
     'spender_committee_designation': fields.List(
         IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
@@ -703,7 +701,7 @@ schedule_b_efile = {
     # 'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here
     # if the contributor is registered with the FEC.'),
     # 'recipient_name': fields.List(fields.Str, description='Name of recipient'),
-    'disbursement_description': fields.List(fields.Str, description='Description of disbursement'),
+    'disbursement_description': fields.List(Keyword, description='Description of disbursement'),
     'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
     'recipient_city': fields.List(IStr, description='City of recipient'),
     'recipient_state': fields.List(IStr, description='State of recipient'),
@@ -733,8 +731,8 @@ schedule_c = {
     'max_amount': Currency(description=docs.MAX_FILTER),
     'line_number': fields.Str(description=docs.LINE_NUMBER),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'candidate_name': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
-    'loan_source_name': fields.List(fields.Str, description=docs.LOAN_SOURCE),
+    'candidate_name': fields.List(Keyword, description=docs.CANDIDATE_NAME),
+    'loan_source_name': fields.List(Keyword, description=docs.LOAN_SOURCE),
     'min_payment_to_date': fields.Int(description=docs.MIN_PAYMENT_DATE),
     'max_payment_to_date': fields.Int(description=docs.MAX_PAYMENT_DATE),
     'min_incurred_date': fields.Date(missing=None, description=docs.MIN_INCURRED_DATE),
@@ -754,7 +752,7 @@ schedule_d = {
     'min_amount_outstanding_close': fields.Float(),
     'max_amount_outstanding_close': fields.Float(),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'creditor_debtor_name': fields.List(fields.Str),
+    'creditor_debtor_name': fields.List(Keyword),
     'nature_of_debt': fields.Str(),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'min_coverage_end_date': fields.Date(missing=None, description=docs.MIN_COVERAGE_END_DATE),
@@ -781,7 +779,7 @@ schedule_e_by_candidate = {
 
 schedule_f = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'payee_name': fields.List(fields.Str),
+    'payee_name': fields.List(Keyword, description=docs.PAYEE_NAME),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
 }
@@ -865,14 +863,14 @@ schedule_a_candidate_aggregate = {
 }
 
 candidate_totals = {
-    'q': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
+    'q': fields.List(Keyword, description=docs.CANDIDATE_NAME),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description=docs.OFFICE),
     'election_full': election_full,
-    'state': fields.List(IStr, description='State of candidate'),
-    'district': fields.List(District, description='District of candidate'),
+    'state': fields.List(IStr, description=docs.STATE),
+    'district': fields.List(District, description=docs.DISTRICT),
     'party': fields.List(IStr, description='Three-letter party code'),
     'min_receipts': Currency(description='Minimum aggregated receipts'),
     'max_receipts': Currency(description='Maximum aggregated receipts'),
@@ -933,7 +931,7 @@ schedule_e = {
     'last_office_total_ytd': fields.Float(
         missing=None,
         description=docs.LAST_OFFICE_TOTAL_YTD),
-    'payee_name': fields.List(fields.Str, description=docs.PAYEE_NAME),
+    'payee_name': fields.List(Keyword, description=docs.PAYEE_NAME),
     'support_oppose_indicator': fields.List(
         IStr(validate=validate.OneOf(['S', 'O'])),
         description=docs.SUPPORT_OPPOSE_INDICATOR),
@@ -950,7 +948,7 @@ schedule_e = {
 }
 
 schedule_e_efile = {
-    'candidate_search': fields.List(fields.Str, description=docs.CANDIDATE_FULL_SEARCH),
+    'candidate_search': fields.List(Keyword, description=docs.CANDIDATE_FULL_SEARCH),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'payee_name': fields.List(fields.Str, description=docs.PAYEE_NAME),
@@ -981,9 +979,9 @@ rad_analyst = {
     'analyst_id': fields.List(fields.Int(), description='ID of RAD analyst'),
     'analyst_short_id': fields.List(fields.Int(), description='Short ID of RAD analyst'),
     'telephone_ext': fields.List(fields.Int(), description='Telephone extension of RAD analyst'),
-    'name': fields.List(fields.Str, description='Name of RAD analyst'),
+    'name': fields.List(Keyword, description='Name of RAD analyst'),
     'email': fields.List(fields.Str, description='Email of RAD analyst'),
-    'title': fields.List(fields.Str, description='Title of RAD analyst'),
+    'title': fields.List(Keyword, description='Title of RAD analyst'),
     'min_assignment_update_date': fields.Date(description='Filter results for assignment updates made after this date'),
     'max_assignment_update_date': fields.Date(description='Filter results for assignment updates made before this date')
 }
@@ -1014,8 +1012,8 @@ auditCategory = {
 
 # endpoint audit-case
 auditCase = {
-    'q': fields.List(fields.Str, description=docs.COMMITTEE_NAME),
-    'qq': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
+    'q': fields.List(Keyword, description=docs.COMMITTEE_NAME),
+    'qq': fields.List(Keyword, description=docs.CANDIDATE_NAME),
     'primary_category_id': fields.Str(missing='all', description=docs.PRIMARY_CATEGORY_ID),
     'sub_category_id': fields.Str(missing='all', description=docs.SUB_CATEGORY_ID),
     'audit_case_id': fields.List(fields.Str(), description=docs.AUDIT_CASE_ID),
