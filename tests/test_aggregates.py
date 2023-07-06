@@ -250,7 +250,7 @@ class TestAggregates(ApiBaseTest):
             results = self._results(
                 api.url_for(
                     resource,
-                    candidate_id=self.candidate.candidate_id,
+                    committee_id=self.committee.committee_id,
                     cycle=2012,
                     office='president',
                     election_full=False,

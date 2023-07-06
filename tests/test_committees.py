@@ -386,13 +386,12 @@ class CommitteeFormatTest(ApiBaseTest):
                 for each in results
             )
         )
-        results = self._results(
-            api.url_for(
-                CommitteeList,
-                **{min_date_field: datetime.date.fromisoformat(values[1]),
-                max_date_field: datetime.date.fromisoformat(values[2])}
-            )
-        )
+        results = self._results(api.url_for(
+            CommitteeList,
+            **{min_date_field: datetime.date.fromisoformat(values[1]),
+               max_date_field: datetime.date.fromisoformat(values[2])}
+                                            )
+                                )
         self.assertTrue(
             all(
                 datetime.date.fromisoformat(values[1]).isoformat()
@@ -618,6 +617,7 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
             )
         )
         assert len(results) == 1
+        self.assertFalse(results[0]["is_active"])
 
         results = self._results(
             api.url_for(
@@ -628,6 +628,7 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
             )
         )
         assert len(results) == 1
+        self.assertTrue(results[0]["is_active"])
 
     def test_candidate_cycle(self):
         results = self._results(
