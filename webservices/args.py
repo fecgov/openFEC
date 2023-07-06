@@ -73,7 +73,7 @@ class Date(fields.Str):
                 datetime.datetime.strptime(value, '%m/%d/%Y')
             except (TypeError, ValueError):
                 raise exceptions.ApiError(
-                    'Date must be formatted as MM/DD/YYYY or YYYY-MM-DD',
+                    exceptions.DATE_ERROR,
                     status_code=422)
 
 
