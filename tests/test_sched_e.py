@@ -35,7 +35,7 @@ class TestScheduleEByCandidateView(ApiBaseTest):
         factories.ScheduleEByCandidateFactory(
             total=10000,
             count=5,
-            cycle=2014,
+            cycle=2010,
             candidate_id='S002',
             support_oppose_indicator='S',
         ),
