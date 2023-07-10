@@ -30,7 +30,7 @@ werkzeug==2.2.3
 
 # Marshalling
 flask-apispec==0.11.4
-git+https://github.com/fecgov/marshmallow-pagination.git@feature/upgrade-to-marshmallow-v3
+git+https://github.com/fecgov/marshmallow-pagination@develop
 marshmallow==3.0.0
 marshmallow-sqlalchemy==0.23.1
 
