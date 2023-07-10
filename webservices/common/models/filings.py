@@ -18,7 +18,7 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     sub_id = db.Column(db.BigInteger, index=True, primary_key=True, doc=docs.SUB_ID)
     coverage_start_date = db.Column(db.Date, index=True, doc=docs.COVERAGE_START_DATE)
     coverage_end_date = db.Column(db.Date, index=True, doc=docs.COVERAGE_END_DATE)
-    receipt_date = db.Column(db.Date, index=True, doc=docs.RECEIPT_DATE)
+    receipt_date = db.Column(db.DateTime, index=True, doc=docs.RECEIPT_DATE)
     election_year = db.Column(db.Integer, doc=docs.ELECTION_YEAR)
     form_type = db.Column(db.String, index=True, doc=docs.FORM_TYPE)
     report_year = db.Column(db.Integer, index=True, doc=docs.REPORT_YEAR)
