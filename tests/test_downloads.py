@@ -93,6 +93,7 @@ class TestDownloadTask(ApiBaseTest):
             aggregates.ScheduleBByRecipientIDView,
             aggregates.ScheduleBByPurposeView,
             candidate_aggregates.TotalsCandidateView,
+            candidate_aggregates.CandidateTotalAggregateView,
             candidates.CandidateList,
             committees.CommitteeList,
             costs.CommunicationCostView,
