@@ -329,7 +329,9 @@ def check_election_arguments(kwargs):
 def get_model(name):
     from webservices.common.models import db
 
-    return db.Model._decl_class_registry.get(name)
+    for value in db.Model.registry._class_registry.values():
+        if getattr(value, '__name__', None) == name:
+            return value
 
 
 def related(

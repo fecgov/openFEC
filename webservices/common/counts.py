@@ -7,7 +7,7 @@ ANALYZE borrowed from https://bitbucket.org/zzzeek/sqlalchemy/wiki/UsageRecipes/
 import re
 
 from sqlalchemy.ext.compiler import compiles
-from sqlalchemy.sql.expression import Executable, ClauseElement, _literal_as_text
+from sqlalchemy.sql.expression import Executable, ClauseElement
 from webservices.common import models
 
 
@@ -64,7 +64,7 @@ def extract_analyze_count(rows):
 
 class explain(Executable, ClauseElement):
     def __init__(self, stmt, analyze=False):
-        self.statement = _literal_as_text(stmt)
+        self.statement = stmt
         self.analyze = analyze
         # helps with INSERT statements
         self.inline = getattr(stmt, 'inline', None)

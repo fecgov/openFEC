@@ -86,7 +86,7 @@ class ApiBaseTest(BaseTestCase):
             rest.db.engine,
             tables=[
                 each.__table__
-                for each in rest.db.Model._decl_class_registry.values()
+                for each in rest.db.Model.registry._class_registry.values()
                 if hasattr(each, '__table__') and each not in tables_to_skip
             ],
         )
