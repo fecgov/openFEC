@@ -68,6 +68,7 @@ def check_cap(kwargs, cap):
 def fetch_page(
     query,
     kwargs,
+    session,
     model=None,
     aliases=None,
     join_columns=None,
@@ -107,7 +108,7 @@ def fetch_page(
             index_column=index_column,
             nulls_last=nulls_last,
         )
-    paginator = paginators.OffsetPaginator(query, kwargs["per_page"], count=count)
+    paginator = paginators.OffsetPaginator(query, kwargs["per_page"], session, count=count)
     return paginator.get_page(kwargs["page"])
 
 

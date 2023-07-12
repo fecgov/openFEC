@@ -9,7 +9,7 @@ import re
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import Executable, ClauseElement
 from webservices.common import models
-
+from sqlalchemy import select, func
 
 count_pattern = re.compile(r'rows=(\d+)')
 
@@ -41,7 +41,7 @@ def get_count(resource, query):
         estimated_count = get_estimated_count(query)
         return estimated_count, is_estimate
     # Use exact counts for `use_estimated_counts == False` and small result sets
-    exact_count = query.count()
+    exact_count = models.db.session.execute(select(func.count()).select_from(query).order_by(None)).scalar()
     return exact_count, is_estimate
 
 

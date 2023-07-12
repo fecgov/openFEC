@@ -1,9 +1,7 @@
-import sqlalchemy as sa
 
 from flask_apispec import Ref, marshal_with
 from webservices import utils
 from webservices import filters
-from webservices import sorting
 from webservices import exceptions
 from webservices.common import counts
 from webservices.common import models
@@ -44,13 +42,13 @@ class ApiResource(utils.Resource):
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
         return utils.fetch_page(
-            query, kwargs,
+            query, kwargs, session=models.db.session,
             count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
             index_column=self.index_column, cap=self.cap, multi=multi,
         )
 
     def build_query(self, *args, _apply_options=True, **kwargs):
-        query = self.model.query
+        query = models.db.select(self.model)
         query = filters.filter_match(query, kwargs, self.filter_match_fields)
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields)
         query = filters.filter_range(query, kwargs, self.filter_range_fields)
@@ -73,7 +71,7 @@ class ItemizedResource(ApiResource):
         """Get itemized resources.
         """
         self.validate_kwargs(kwargs)
-        
+
         query = self.build_query(**kwargs)
         is_estimate = counts.is_estimated_count(self, query)
         if not is_estimate:

@@ -30,9 +30,9 @@ werkzeug==2.2.3
 
 # Marshalling
 flask-apispec==0.11.4
-git+https://github.com/fecgov/marshmallow-pagination@develop
+git+https://github.com/fecgov/marshmallow-pagination.git@upgrade-sqlalchemy
 marshmallow==3.0.0
-marshmallow-sqlalchemy==0.23.1
+marshmallow-sqlalchemy==0.28.2
 
 # Data export
 smart_open==1.8.0

@@ -77,8 +77,8 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
     # In this case, use the string name of the sort key.
     sort_model = (
         model
-        if len(query._entities) == 1 and hasattr(query._entities[0], 'mapper')
-        else None
+        # if len(query._entities) == 1 and hasattr(query._entities[0], 'mapper')
+        # else None
     )
     column, order, relationship = parse_option(
         key,
