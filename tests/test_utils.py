@@ -309,7 +309,7 @@ class TestSort(ApiBaseTest):
 class TestArgs(TestCase):
     def test_currency(self):
         with rest.app.test_request_context('?dollars=$24.50'):
-            parsed = flaskparser.parser.parse({'dollars': args.Currency()}, request, location='query')
+            parsed = flaskparser.parser.parse({'dollars': args.Currency()}, request)
             self.assertEqual(parsed, {'dollars': 24.50})
 
 

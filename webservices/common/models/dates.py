@@ -55,7 +55,7 @@ class ElectionDate(db.Model, FecAppMixin):
 
     trc_election_id = db.Column(db.Integer, primary_key=True)
     election_state = db.Column(db.String, index=True, doc=docs.STATE)
-    election_district = db.Column(db.String, index=True, doc=docs.DISTRICT)
+    election_district = db.Column(db.Integer, index=True, doc=docs.DISTRICT)
     election_party = db.Column(db.String, index=True, doc=docs.PARTY)
     office_sought = db.Column(db.String, index=True, doc=docs.OFFICE)
     election_date = db.Column(db.Date, index=True, doc=docs.ELECTION_DATE)

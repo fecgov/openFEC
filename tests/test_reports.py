@@ -425,6 +425,7 @@ class TestEFileReports(ApiBaseTest):
         results = self._results(
             api.url_for(
                 EFilingPresidentialSummaryView,
+                entity_type='presidential',
                 committee_id=committee_id,
             )
         )
@@ -462,6 +463,7 @@ class TestEFileReports(ApiBaseTest):
         results = self._results(
             api.url_for(
                 EFilingHouseSenateSummaryView,
+                entity_type='house-senate',
                 committee_id=committee_id,
             )
         )

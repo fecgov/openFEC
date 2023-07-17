@@ -477,12 +477,12 @@ class TriggerTestCase(common.BaseTestCase):
             connection.execute(insert, data)
         manage.refresh_materialized(concurrent=False)
         results = self._results(
-            api.url_for(ScheduleBView, recipient_name='ést-lou')
+            api.url_for(ScheduleBView, contributor_employer='ést-lou')
         )
         contbr_employer_list = {r['recipient_name'] for r in results}
         assert names.issubset(contbr_employer_list)
         results = self._results(
-            api.url_for(ScheduleBView, recipient_name='est lou')
+            api.url_for(ScheduleBView, contributor_employer='est lou')
         )
         contbr_employer_list = {r['recipient_name'] for r in results}
         assert names.issubset(contbr_employer_list)
