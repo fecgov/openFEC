@@ -6,7 +6,6 @@ full documentation visit: https://api.open.fec.gov/developers.
 import http
 import logging
 import os
-from marshmallow import EXCLUDE
 import ujson
 import sqlalchemy as sa
 import flask_cors as cors
@@ -103,9 +102,8 @@ cors.CORS(app)
 
 
 class FlaskRestParser(FlaskParser):
-    DEFAULT_UNKNOWN_BY_LOCATION = {"query": EXCLUDE}
 
-    def handle_error(self, error, req, schema, *, error_status_code, error_headers):
+    def handle_error(self, error, req, schema, status_code, error_headers):
         message = error.messages
         status_code = getattr(error, 'status_code', 422)
         raise exceptions.ApiError(message, status_code)

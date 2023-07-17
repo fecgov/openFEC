@@ -4,7 +4,7 @@ import functools
 from collections import namedtuple
 
 import marshmallow as ma
-from marshmallow_sqlalchemy import SQLAlchemySchema, SQLAlchemyAutoSchema
+from marshmallow_sqlalchemy import ModelSchema
 from marshmallow_pagination import schemas as paging_schemas
 
 from webservices import utils, decoders
@@ -14,21 +14,22 @@ from webservices import __API_VERSION__
 from webservices.calendar import format_start_date, format_end_date
 from marshmallow import post_dump
 
-spec.components.schema('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
-spec.components.schema('SeekInfo', schema=paging_schemas.SeekInfoSchema)
+
+spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
+spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
 
 # A namedtuple used to help capture any additional columns that should be
 # included with exported data:
-# field: the field object definining the relationship on a model,e.g.,
+# field: the field object definining the relationship on a model, e.g.,
 #   models.ScheduleA.committee (an object)
-# column: the column object found in the related model,e.g.,
+# column: the column object found in the related model, e.g.,
 #   models.CommitteeHistory.name (an object)
 # label: the label to use for the column in the query that will appear in the
-# header row of the output,e.g.,
+# header row of the output, e.g.,
 #   'committee_name' (a string)
 # position: the spot within the list of columns that this should be inserted
-# at; defaults to -1 (end of the list),e.g.,
-#   1 (an integer,in this case the second spot in a list)
+# at; defaults to -1 (end of the list), e.g.,
+#   1 (an integer, in this case the second spot in a list)
 
 # Usage:  Define a custom attribute in a schema's Meta options object called
 # 'relationships' and set to a list of one or more relationships.
@@ -49,33 +50,15 @@ class Relationship(namedtuple('Relationship', 'field column label position')):
         )
 
 
-class BaseSchema(SQLAlchemySchema):
-    class Meta:
-        sqla_session = models.db.session
-        load_instance = True
-        include_relationships = True
-        include_fk = True
+class BaseSchema(ModelSchema):
 
-    def get_attribute(self, obj, attr, default):
+    def get_attribute(self, attr, obj, default):
         if '.' in attr:
-            return super().get_attribute(obj, attr, default)
+            return super().get_attribute(attr, obj, default)
         return getattr(obj, attr, default)
 
 
-class BaseAutoSchema(SQLAlchemyAutoSchema):
-    def get_attribute(self, obj, attr, default):
-        if '.' in attr:
-            return super().get_attribute(obj, attr, default)
-        return getattr(obj, attr, default)
-
-
-class BaseEfileSchema(BaseAutoSchema):
-    class Meta:
-        sqla_session = models.db.session
-        load_instance = True
-        include_relationships = True
-        include_fk = True
-
+class BaseEfileSchema(BaseSchema):
     summary_lines = ma.fields.Method("parse_summary_rows")
     report_year = ma.fields.Int()
     pdf_url = ma.fields.Str()
@@ -91,7 +74,7 @@ class BaseEfileSchema(BaseAutoSchema):
     fec_file_id = ma.fields.Str()
 
     @post_dump
-    def extract_summary_rows(self, obj, **kwargs):
+    def extract_summary_rows(self, obj):
         if obj.get('summary_lines'):
             for key, value in obj.get('summary_lines').items():
                 # may be a way to pull these out using pandas?
@@ -101,7 +84,6 @@ class BaseEfileSchema(BaseAutoSchema):
             obj.pop('summary_lines')
         if obj.get('amendment'):
             obj.pop('amendment')
-        return obj
 
 
 def extract_columns(obj, column_a, column_b, descriptions):
@@ -128,14 +110,10 @@ def make_period_string(per_string=None):
     return per_string
 
 
-class BaseF3PFilingSchema(BaseEfileSchema):
-    class Meta(BaseEfileSchema.Meta):
-        model = models.BaseF3PFiling
-        exclude = ('total_disbursements', 'total_receipts')
-
+class EFilingF3PSchema(BaseEfileSchema):
     treasurer_name = ma.fields.Str()
 
-    def parse_summary_rows(self, obj, **kwargs):
+    def parse_summary_rows(self, obj):
         line_list = {}
         state_map = {}
 
@@ -172,83 +150,73 @@ class BaseF3PFilingSchema(BaseEfileSchema):
             return line_list
 
 
-class BaseF3FilingSchema(BaseEfileSchema):
-    class Meta(BaseEfileSchema.Meta):
-        model = models.BaseF3Filing
-
+class EFilingF3Schema(BaseEfileSchema):
     candidate_name = ma.fields.Str()
     treasurer_name = ma.fields.Str()
 
-    def parse_summary_rows(self, obj, **kwargs):
+    def parse_summary_rows(self, obj):
         descriptions = decoders.f3_description
         line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b, descriptions)
         # final bit of data cleaning before json marshalling
-        # If values are None,fall back to 0 to prevent errors
-        if line_list:
-            coh_cop_i = line_list.get('coh_cop_i') if line_list.get('coh_cop_i') else 0
-            coh_cop_ii = line_list.get('coh_cop_ii') if line_list.get('coh_cop_ii') else 0
-            cash = max(coh_cop_i, coh_cop_ii)
-            line_list["cash_on_hand_end_period"] = cash
-            # i and ii should always be the same but data can be wrong
-            line_list.pop('coh_cop_ii')
-            line_list.pop('coh_cop_i')
-            coh_bop = line_list.get('coh_bop') if line_list.get('coh_bop') else 0
-            cash_on_hand_beginning_period = (
-                obj.cash_on_hand_beginning_period
-                if obj.cash_on_hand_beginning_period
-                else 0
-            )
-            cash = max(cash_on_hand_beginning_period, coh_bop)
-            obj.cash_on_hand_beginning_period = None
-            line_list.pop('coh_bop')
-            line_list["cash_on_hand_beginning_period"] = cash
-            cash = max(line_list.get('total_disbursements_per_i'), line_list.get('total_disbursements_per_ii'))
-            line_list["total_disbursements_period"] = cash
-            line_list.pop('total_disbursements_per_i')
-            line_list.pop('total_disbursements_per_ii')
-            cash = max(line_list.get('total_receipts_per_i'), line_list.get('ttl_receipts_ii'))
-            line_list["total_receipts_period"] = cash
-            line_list.pop('total_receipts_per_i')
-            line_list.pop('ttl_receipts_ii')
+        # If values are None, fall back to 0 to prevent errors
+        coh_cop_i = line_list.get('coh_cop_i') if line_list.get('coh_cop_i') else 0
+        coh_cop_ii = line_list.get('coh_cop_ii') if line_list.get('coh_cop_ii') else 0
+        cash = max(coh_cop_i, coh_cop_ii)
+        line_list["cash_on_hand_end_period"] = cash
+        # i and ii should always be the same but data can be wrong
+        line_list.pop('coh_cop_ii')
+        line_list.pop('coh_cop_i')
+        coh_bop = line_list.get('coh_bop') if line_list.get('coh_bop') else 0
+        cash_on_hand_beginning_period = (
+            obj.cash_on_hand_beginning_period
+            if obj.cash_on_hand_beginning_period
+            else 0
+        )
+        cash = max(cash_on_hand_beginning_period, coh_bop)
+        obj.cash_on_hand_beginning_period = None
+        line_list.pop('coh_bop')
+        line_list["cash_on_hand_beginning_period"] = cash
+        cash = max(line_list.get('total_disbursements_per_i'), line_list.get('total_disbursements_per_ii'))
+        line_list["total_disbursements_period"] = cash
+        line_list.pop('total_disbursements_per_i')
+        line_list.pop('total_disbursements_per_ii')
+        cash = max(line_list.get('total_receipts_per_i'), line_list.get('ttl_receipts_ii'))
+        line_list["total_receipts_period"] = cash
+        line_list.pop('total_receipts_per_i')
+        line_list.pop('ttl_receipts_ii')
         return line_list
 
 
-class BaseF3XFilingSchema(BaseEfileSchema):
-    class Meta(BaseEfileSchema.Meta):
-        model = models.BaseF3XFiling
-
-    def parse_summary_rows(self, obj, **kwargsj):
+class EFilingF3XSchema(BaseEfileSchema):
+    def parse_summary_rows(self, obj):
         descriptions = decoders.f3x_description
         line_list = extract_columns(obj, decoders.f3x_col_a, decoders.f3x_col_b, descriptions)
-        if line_list:
-            line_list['cash_on_hand_beginning_calendar_ytd'] = line_list.pop('coh_begin_calendar_yr')
-            line_list['cash_on_hand_beginning_period'] = line_list.pop('coh_bop')
+        line_list['cash_on_hand_beginning_calendar_ytd'] = line_list.pop('coh_begin_calendar_yr')
+        line_list['cash_on_hand_beginning_period'] = line_list.pop('coh_bop')
         return line_list
 
 
 schema_map = {}
-schema_map["BaseF3XFiling"] = BaseF3XFilingSchema
-schema_map["BaseF3Filing"] = BaseF3FilingSchema
-schema_map["BaseF3PFiling"] = BaseF3PFilingSchema
+schema_map["BaseF3XFiling"] = EFilingF3XSchema
+schema_map["BaseF3Filing"] = EFilingF3Schema
+schema_map["BaseF3PFiling"] = EFilingF3PSchema
 
 
 def register_schema(schema, definition_name=None):
     definition_name = definition_name or re.sub(r'Schema$', '', schema.__name__)
-    spec.components.schema(definition_name, schema=schema)
+    spec.definition(definition_name, schema=schema)
 
 
-def make_schema(model, class_name=None, fields=None, options=None, BaseSchema=BaseAutoSchema):
+def make_schema(model, class_name=None, fields=None, options=None):
     class_name = class_name or '{0}Schema'.format(model.__name__)
     Meta = type(
         'Meta',
-        (object,),
+        (object, ),
         utils.extend(
             {
                 'model': model,
                 'sqla_session': models.db.session,
-                'load_instance': True,
-                'include_relationships': True,
-                'include_fk': True
+                'exclude': ('idx', ),
             },
             options or {},
         )
@@ -257,10 +225,11 @@ def make_schema(model, class_name=None, fields=None, options=None, BaseSchema=Ba
         BaseSchema
         if not schema_map.get(model.__name__)
         else schema_map.get(model.__name__)
+
     )
     return type(
         class_name,
-        (mapped_schema,),
+        (mapped_schema, ),
         utils.extend({'Meta': Meta}, fields or {}),
     )
 
@@ -319,8 +288,7 @@ def augment_itemized_aggregate_models(factory, committee_model, *models, namespa
 
 
 class ApiSchema(ma.Schema):
-    @post_dump
-    def _postprocess(self, data, **kwargs):
+    def _postprocess(self, data, many, obj):
         ret = {'api_version': __API_VERSION__}
         ret.update(data)
         return ret
@@ -331,7 +299,7 @@ class BaseSearchSchema(ma.Schema):
     name = ma.fields.Str()
 
 
-class CandidateSearchBaseSchema(BaseSearchSchema):
+class CandidateSearchSchema(BaseSearchSchema):
     office_sought = ma.fields.Str()
 
 
@@ -341,7 +309,7 @@ class CommitteeSearchSchema(BaseSearchSchema):
 
 class CandidateSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
-        CandidateSearchBaseSchema,
+        CandidateSearchSchema,
         ref='#/definitions/CandidateSearch',
         many=True,
     )
@@ -355,8 +323,8 @@ class CommitteeSearchListSchema(ApiSchema):
     )
 
 
-register_schema(CandidateSearchBaseSchema, 'CandidateSearchBaseSchema')
-register_schema(CandidateSearchListSchema, 'CandidateSearchListSchema')
+register_schema(CandidateSearchSchema)
+register_schema(CandidateSearchListSchema)
 register_schema(CommitteeSearchSchema)
 register_schema(CommitteeSearchListSchema)
 
@@ -390,12 +358,27 @@ register_schema(AuditCandidateSearchListSchema)
 register_schema(AuditCommitteeSearchSchema)
 register_schema(AuditCommitteeSearchListSchema)
 
-augment_schemas(BaseF3PFilingSchema, BaseF3FilingSchema, BaseF3XFilingSchema)
+
+make_efiling_schema = functools.partial(
+    make_schema,
+    options={'exclude': ('idx', 'total_disbursements', 'total_receipts')},
+    fields={
+        'pdf_url': ma.fields.Str(),
+        'report_year': ma.fields.Int(),
+    }
+)
+
+augment_models(
+    make_efiling_schema,
+    models.BaseF3PFiling,
+    models.BaseF3XFiling,
+    models.BaseF3Filing,
+)
 
 # create pac sponsor candidate schema
 PacSponsorCandidateschema = make_schema(
     models.PacSponsorCandidate,
-    options={'exclude': ('idx', 'committee_id',)},
+    options={'exclude': ('idx', 'committee_id', )},
 )
 # End create pac sponsor candidate schema
 
@@ -409,14 +392,10 @@ PrincipalCommitteeSchema = make_schema(
 
 CommitteeSchema = make_schema(
     models.Committee,
+    options={'exclude': ('idx', 'treasurer_text', )},
     fields={
         'sponsor_candidate_list': ma.fields.Nested(PacSponsorCandidateschema, many=True),
-        'first_f1_date': ma.fields.Date(),
-        'first_file_date': ma.fields.Date(),
-        'last_f1_date': ma.fields.Date(),
-        'last_file_date': ma.fields.Date()
     },
-    options={'exclude': ('idx', 'treasurer_text',)},
 )
 CommitteePageSchema = make_page_schema(CommitteeSchema)
 register_schema(CommitteeSchema)
@@ -426,16 +405,16 @@ register_schema(CommitteePageSchema)
 JFCCommitteeSchema = make_schema(
     models.JFCCommittee,
     class_name='JFCCommitteeSchema',
-    options={'exclude': ('idx', 'committee_id',  'most_recent_filing_flag',)},
-    )
+    options={'exclude': ('idx', 'committee_id', 'most_recent_filing_flag', )},
+)
 # End create JFC committee schema
 
 make_committees_schema = functools.partial(
     make_schema,
+    options={'exclude': ('idx', 'treasurer_text', )},
     fields={
         'jfc_committee': ma.fields.Nested(JFCCommitteeSchema, many=True),
-    },
-    options={'exclude': ('idx', 'treasurer_text',)},
+    }
 )
 
 augment_models(
@@ -448,53 +427,26 @@ augment_models(
 
 make_candidate_schema = functools.partial(
     make_schema,
+    options={'exclude': ('idx', 'principal_committees')},
     fields={
         'federal_funds_flag': ma.fields.Boolean(attribute='flags.federal_funds_flag'),
         'has_raised_funds': ma.fields.Boolean(attribute='flags.has_raised_funds'),
-    },
-    options={'exclude': ('idx', 'principal_committees', 'flags')},
+    }
 )
 
 augment_models(
     make_candidate_schema,
-    models.Candidate
-)
-
-candidate_detail_schema = make_schema(
+    models.Candidate,
     models.CandidateDetail,
-    fields={
-        'federal_funds_flag': ma.fields.Boolean(attribute='flags.federal_funds_flag'),
-        'has_raised_funds': ma.fields.Boolean(attribute='flags.has_raised_funds'),
-    },
-    options={'exclude': ('idx',)},
+
 )
-
-augment_schemas(candidate_detail_schema)
-
-# built these schemas without make_candidate_schema,as it was filtering out the flags
-make_candidate_total_schema = make_schema(
-    models.CandidateTotal,
-    fields={
-        'receipts': ma.fields.Float(),
-        'disbursements': ma.fields.Float(),
-        'individual_itemized_contributions': ma.fields.Float(),
-        'transfers_from_other_authorized_committee': ma.fields.Float(),
-        'other_political_committee_contributions': ma.fields.Float()
-    }
-)
-
-augment_schemas(make_candidate_total_schema)
-
-make_candidate_history_schema = make_schema(
-    models.CandidateHistory,
-    options={'exclude': ('idx',)}
-)
-
-augment_schemas(make_candidate_history_schema)
-
+# built these schemas without make_candidate_schema, as it was filtering out the flags
 augment_models(
     make_schema,
+    models.CandidateHistory,
+    models.CandidateTotal,
     models.CandidateFlags
+
 )
 
 
@@ -508,229 +460,20 @@ augment_schemas(CandidateHistoryTotalSchema)
 
 CandidateSearchSchema = make_schema(
     models.Candidate,
+    options={'exclude': ('idx', 'flags')},
     fields={
         'principal_committees': ma.fields.Nested('PrincipalCommitteeSchema', many=True),
         'federal_funds_flag': ma.fields.Boolean(attribute='flags.federal_funds_flag'),
         'has_raised_funds': ma.fields.Boolean(attribute='flags.has_raised_funds'),
     },
-    options={'exclude': ('idx', 'flags')},
 )
 CandidateSearchPageSchema = make_page_schema(CandidateSearchSchema)
-register_schema(CandidateSearchSchema, 'CandidateSearch')
-register_schema(CandidateSearchPageSchema, 'CandidateSearchPage')
+register_schema(CandidateSearchSchema)
+register_schema(CandidateSearchPageSchema)
 
-committee_fields = {
-        'pdf_url': ma.fields.Str(),
-        'csv_url': ma.fields.Str(),
-        'fec_url': ma.fields.Str(),
-        'report_form': ma.fields.Str(),
-        'document_description': ma.fields.Str(),
-        'committee_type': ma.fields.Str(attribute='committee.committee_type'),
-        'beginning_image_number': ma.fields.Str(),
-        'end_image_number': ma.fields.Str(),
-        'fec_file_id': ma.fields.Str(),
-        'total_receipts_period': ma.fields.Float(),
-        'total_disbursements_ytd': ma.fields.Float(),
-        'total_disbursements_period': ma.fields.Float(),
-        'total_contributions_ytd': ma.fields.Float(),
-        'total_contributions_period': ma.fields.Float(),
-        'refunded_political_party_committee_contributions_ytd': ma.fields.Float(),
-        'total_contribution_refunds_period': ma.fields.Float(),
-        'total_contribution_refunds_ytd': ma.fields.Float(),
-        'refunded_individual_contributions_period': ma.fields.Float(),
-        'refunded_individual_contributions_ytd': ma.fields.Float(),
-        'refunded_other_political_committee_contributions_period': ma.fields.Float(),
-        'refunded_other_political_committee_contributions_ytd': ma.fields.Float(),
-        'refunded_political_party_committee_contributions_period': ma.fields.Float(),
-        'previous_file_number': ma.fields.Float(),
-        'most_recent_file_number': ma.fields.Float(),
-        'cash_on_hand_beginning_period': ma.fields.Float(),
-        'cash_on_hand_end_period': ma.fields.Float(),
-        'debts_owed_by_committee': ma.fields.Float(),
-        'debts_owed_to_committee': ma.fields.Float(),
-        'other_disbursements_period': ma.fields.Float(),
-        'other_disbursements_ytd': ma.fields.Float(),
-        'other_political_committee_contributions_period': ma.fields.Float(),
-        'other_political_committee_contributions_ytd': ma.fields.Float(),
-        'political_party_committee_contributions_period': ma.fields.Float(),
-        'political_party_committee_contributions_ytd': ma.fields.Float()
-    }
 
-committee_reports_presidential_schema = make_schema(
-        models.CommitteeReportsPresidential,
-        fields=utils.extend(
-            committee_fields,
-            {
-                'candidate_contribution_period': ma.fields.Float(),
-                'candidate_contribution_ytd': ma.fields.Float(),
-                'exempt_legal_accounting_disbursement_period': ma.fields.Float(),
-                'exempt_legal_accounting_disbursement_ytd': ma.fields.Float(),
-                'expenditure_subject_to_limits': ma.fields.Float(),
-                'federal_funds_period': ma.fields.Float(),
-                'federal_funds_ytd': ma.fields.Float(),
-                'fundraising_disbursements_period': ma.fields.Float(),
-                'fundraising_disbursements_ytd': ma.fields.Float(),
-                'items_on_hand_liquidated': ma.fields.Float(),
-                'loans_received_from_candidate_period': ma.fields.Float(),
-                'loans_received_from_candidate_ytd': ma.fields.Float(),
-                'offsets_to_fundraising_expenditures_ytd': ma.fields.Float(),
-                'offsets_to_fundraising_expenditures_period': ma.fields.Float(),
-                'offsets_to_legal_accounting_period': ma.fields.Float(),
-                'offsets_to_legal_accounting_ytd': ma.fields.Float(),
-                'operating_expenditures_period': ma.fields.Float(),
-                'operating_expenditures_ytd': ma.fields.Float(),
-                'other_loans_received_period': ma.fields.Float(),
-                'other_loans_received_ytd': ma.fields.Float(),
-                'other_receipts_period': ma.fields.Float(),
-                'other_receipts_ytd': ma.fields.Float(),
-                'repayments_loans_made_by_candidate_period': ma.fields.Float(),
-                'repayments_loans_made_candidate_ytd': ma.fields.Float(),
-                'repayments_other_loans_period': ma.fields.Float(),
-                'repayments_other_loans_ytd': ma.fields.Float(),
-                'subtotal_summary_period': ma.fields.Float(),
-                'total_loan_repayments_made_period': ma.fields.Float(),
-                'total_loan_repayments_made_ytd': ma.fields.Float(),
-                'total_loans_received_period': ma.fields.Float(),
-                'total_loans_received_ytd': ma.fields.Float(),
-                'total_offsets_to_operating_expenditures_period': ma.fields.Float(),
-                'total_offsets_to_operating_expenditures_ytd': ma.fields.Float(),
-                'total_period': ma.fields.Float(),
-                'total_ytd': ma.fields.Float(),
-                'transfers_from_affiliated_committee_period': ma.fields.Float(),
-                'transfers_from_affiliated_committee_ytd': ma.fields.Float(),
-                'transfers_to_other_authorized_committee_period': ma.fields.Float(),
-                'transfers_to_other_authorized_committee_ytd': ma.fields.Float(),
-                'net_contributions_cycle_to_date': ma.fields.Float(),
-                'net_operating_expenditures_cycle_to_date': ma.fields.Float()
-            }),
-        options={'exclude': ('idx', 'committee', 'filer_name_text')}
-)
-
-augment_schemas(committee_reports_presidential_schema)
-
-committee_reports_hs_schema = make_schema(
-    models.CommitteeReportsHouseSenate,
-    fields=utils.extend(
-        committee_fields,
-        {
-            'aggregate_amount_personal_contributions_general': ma.fields.Float(),
-            'aggregate_contributions_personal_funds_primary': ma.fields.Float(),
-            'all_other_loans_period': ma.fields.Float(),
-            'all_other_loans_ytd': ma.fields.Float(),
-            'candidate_contribution_period': ma.fields.Float(),
-            'candidate_contribution_ytd': ma.fields.Float(),
-            'gross_receipt_authorized_committee_general': ma.fields.Float(),  # missing
-            'gross_receipt_authorized_committee_primary': ma.fields.Float(),  # missing
-            'gross_receipt_minus_personal_contribution_general': ma.fields.Float(),
-            'gross_receipt_minus_personal_contributions_primary': ma.fields.Float(),
-            'loan_repayments_candidate_loans_period': ma.fields.Float(),
-            'loan_repayments_candidate_loans_ytd': ma.fields.Float(),
-            'loan_repayments_other_loans_period': ma.fields.Float(),
-            'loan_repayments_other_loans_ytd': ma.fields.Float(),
-            'loans_made_by_candidate_period': ma.fields.Float(),
-            'loans_made_by_candidate_ytd': ma.fields.Float(),
-            'net_contributions_ytd': ma.fields.Float(),
-            'net_contributions_period': ma.fields.Float(),
-            'net_operating_expenditures_period': ma.fields.Float(),
-            'net_operating_expenditures_ytd': ma.fields.Float(),
-            'operating_expenditures_period': ma.fields.Float(),
-            'operating_expenditures_ytd': ma.fields.Float(),
-            'other_receipts_period': ma.fields.Float(),
-            'other_receipts_ytd': ma.fields.Float(),
-            'refunds_total_contributions_col_total_ytd': ma.fields.Float(),
-            'subtotal_period': ma.fields.Float(),
-            'total_contribution_refunds_col_total_period': ma.fields.Float(),
-            'total_contributions_column_total_period': ma.fields.Float(),  # missing
-            'total_loan_repayments_made_period': ma.fields.Float(),
-            'total_loan_repayments_made_ytd': ma.fields.Float(),
-            'total_loans_received_period': ma.fields.Float(),
-            'total_loans_received_ytd': ma.fields.Float(),
-            'total_offsets_to_operating_expenditures_period': ma.fields.Float(),
-            'total_offsets_to_operating_expenditures_ytd': ma.fields.Float(),
-            'total_operating_expenditures_period': ma.fields.Float(),
-            'total_operating_expenditures_ytd': ma.fields.Float(),
-            'transfers_from_other_authorized_committee_period': ma.fields.Float(),
-            'transfers_from_other_authorized_committee_ytd': ma.fields.Float(),
-            'transfers_to_other_authorized_committee_period': ma.fields.Float(),
-            'transfers_to_other_authorized_committee_ytd': ma.fields.Float(),
-        }),
-    options={'exclude': ('idx', 'committee', 'filer_name_text')}
-    )
-
-augment_schemas(committee_reports_hs_schema)
-
-committee_reports_pac_schema = make_schema(
-        models.CommitteeReportsPacParty,
-        fields=utils.extend(
-            committee_fields,
-            {
-                'all_loans_received_period': ma.fields.Float(),
-                'all_loans_received_ytd': ma.fields.Float(),
-                'allocated_federal_election_levin_share_period': ma.fields.Float(),
-                'cash_on_hand_beginning_calendar_ytd': ma.fields.Float(),
-                'cash_on_hand_close_ytd': ma.fields.Float(),
-                'coordinated_expenditures_by_party_committee_period': ma.fields.Float(),
-                'coordinated_expenditures_by_party_committee_ytd': ma.fields.Float(),
-                'fed_candidate_committee_contribution_refunds_ytd': ma.fields.Float(),
-                'fed_candidate_committee_contributions_period': ma.fields.Float(),
-                'fed_candidate_committee_contributions_ytd': ma.fields.Float(),
-                'fed_candidate_contribution_refunds_period': ma.fields.Float(),
-                'independent_expenditures_period': ma.fields.Float(),
-                'independent_expenditures_ytd': ma.fields.Float(),
-                'loan_repayments_made_period': ma.fields.Float(),
-                'loan_repayments_made_ytd': ma.fields.Float(),
-                'loan_repayments_received_period': ma.fields.Float(),
-                'loan_repayments_received_ytd': ma.fields.Float(),
-                'loans_made_period': ma.fields.Float(),
-                'loans_made_ytd': ma.fields.Float(),
-                'net_contributions_period': ma.fields.Float(),
-                'net_contributions_ytd': ma.fields.Float(),
-                'net_operating_expenditures_period': ma.fields.Float(),
-                'net_operating_expenditures_ytd': ma.fields.Float(),
-                'non_allocated_fed_election_activity_period': ma.fields.Float(),
-                'non_allocated_fed_election_activity_ytd': ma.fields.Float(),
-                'nonfed_share_allocated_disbursements_period': ma.fields.Float(),
-                'other_fed_operating_expenditures_period': ma.fields.Float(),
-                'other_fed_operating_expenditures_ytd': ma.fields.Float(),
-                'other_fed_receipts_period': ma.fields.Float(),
-                'other_fed_receipts_ytd': ma.fields.Float(),
-                'shared_fed_activity_nonfed_ytd': ma.fields.Float(),
-                'shared_fed_activity_period': ma.fields.Float(),
-                'shared_fed_activity_ytd': ma.fields.Float(),
-                'shared_fed_operating_expenditures_period': ma.fields.Float(),
-                'shared_fed_operating_expenditures_ytd': ma.fields.Float(),
-                'shared_nonfed_operating_expenditures_period': ma.fields.Float(),
-                'shared_nonfed_operating_expenditures_ytd': ma.fields.Float(),
-                'subtotal_summary_page_period': ma.fields.Float(),
-                'subtotal_summary_ytd': ma.fields.Float(),
-                'total_fed_disbursements_period': ma.fields.Float(),
-                'total_fed_disbursements_ytd': ma.fields.Float(),
-                'total_fed_election_activity_period': ma.fields.Float(),
-                'total_fed_election_activity_ytd': ma.fields.Float(),
-                'total_fed_operating_expenditures_period': ma.fields.Float(),
-                'total_fed_operating_expenditures_ytd': ma.fields.Float(),
-                'total_fed_receipts_period': ma.fields.Float(),
-                'total_fed_receipts_ytd': ma.fields.Float(),
-                'total_nonfed_transfers_period': ma.fields.Float(),
-                'total_nonfed_transfers_ytd': ma.fields.Float(),
-                'total_operating_expenditures_period': ma.fields.Float(),
-                'total_operating_expenditures_ytd': ma.fields.Float(),
-                'transfers_from_affiliated_party_period': ma.fields.Float(),
-                'transfers_from_affiliated_party_ytd': ma.fields.Float(),
-                'transfers_from_nonfed_account_period': ma.fields.Float(),
-                'transfers_from_nonfed_account_ytd': ma.fields.Float(),
-                'transfers_from_nonfed_levin_period': ma.fields.Float(),
-                'transfers_from_nonfed_levin_ytd': ma.fields.Float(),
-                'transfers_to_affiliated_committee_period': ma.fields.Float(),
-                'transfers_to_affilitated_committees_ytd': ma.fields.Float()
-            }),
-        options={'exclude': ('idx', 'committee', 'filer_name_text')}
-)
-
-augment_schemas(committee_reports_pac_schema)
-
-committee_reports_ie_schema = make_schema(
-    models.CommitteeReportsIEOnly,
+make_reports_schema = functools.partial(
+    make_schema,
     fields={
         'pdf_url': ma.fields.Str(),
         'csv_url': ma.fields.Str(),
@@ -741,13 +484,17 @@ committee_reports_ie_schema = make_schema(
         'beginning_image_number': ma.fields.Str(),
         'end_image_number': ma.fields.Str(),
         'fec_file_id': ma.fields.Str(),
-        'independent_contributions_period': ma.fields.Float(),
-        'independent_expenditures_period': ma.fields.Float()
     },
-    options={'exclude': ('idx', 'spender_name_text')},
+    options={'exclude': ('idx', 'committee', 'filer_name_text', 'spender_name_text')},
 )
 
-augment_schemas(committee_reports_ie_schema)
+augment_models(
+    make_reports_schema,
+    models.CommitteeReportsPresidential,
+    models.CommitteeReportsHouseSenate,
+    models.CommitteeReportsPacParty,
+    models.CommitteeReportsIEOnly,
+)
 
 reports_schemas = (
     schemas['CommitteeReportsPresidentialSchema'],
@@ -761,288 +508,68 @@ CommitteeReportsPageSchema = make_page_schema(CommitteeReportsSchema)
 entity_fields = {
     'pdf_url': ma.fields.Str(),
     'report_form': ma.fields.Str(),
-    'last_cash_on_hand_end_period': ma.fields.Float(),
+    'last_cash_on_hand_end_period': ma.fields.Decimal(places=2),
     'last_beginning_image_number': ma.fields.Str(),
     'transaction_coverage_date': ma.fields.Date(
         attribute='transaction_coverage.transaction_coverage_date',
         default=None),
-    'individual_contributions_percent': ma.fields.Float(),
-    'party_and_other_committee_contributions_percent': ma.fields.Float(),
-    'contributions_ie_and_party_expenditures_made_percent': ma.fields.Float(),
-    'operating_expenditures_percent': ma.fields.Float(),
+    'individual_contributions_percent': ma.fields.Decimal(places=2),
+    'party_and_other_committee_contributions_percent': ma.fields.Decimal(places=2),
+    'contributions_ie_and_party_expenditures_made_percent': ma.fields.Decimal(places=2),
+    'operating_expenditures_percent': ma.fields.Decimal(places=2),
 }
-# All /totals/entity_type/except 'pac','party','pac-party'
+# All /totals/entity_type/except 'pac', 'party', 'pac-party'
 make_totals_schema = functools.partial(
     make_schema,
-    fields=utils.extend(
-        entity_fields,
-        {'cash_on_hand_beginning_period': ma.fields.Float()},
-        {'all_other_loans': ma.fields.Float()},
-        {'candidate_contribution': ma.fields.Float()},
-        {'disbursements': ma.fields.Float()},
-        {'individual_contributions': ma.fields.Float()},
-        {'individual_itemized_contributions': ma.fields.Float()},
-        {'individual_unitemized_contributions': ma.fields.Float()},
-        {'last_cash_on_hand_end_period': ma.fields.Float()},
-        {'last_debts_owed_by_committee': ma.fields.Float()},
-        {'last_debts_owed_to_committee': ma.fields.Float()},
-        {'loan_repayments': ma.fields.Float()},
-        {'loan_repayments_candidate_loans': ma.fields.Float()},
-        {'loan_repayments_other_loans': ma.fields.Float()},
-        {'loans': ma.fields.Float()},
-        {'loans_made_by_candidate': ma.fields.Float()},
-        {'net_contributions': ma.fields.Float()},
-        {'net_operating_expenditures': ma.fields.Float()},
-        {'offsets_to_operating_expenditures': ma.fields.Float()},
-        {'operating_expenditures': ma.fields.Float()},
-        {'other_political_committee_contributions': ma.fields.Float()},
-        {'other_receipts': ma.fields.Float()},
-        {'political_party_committee_contributions': ma.fields.Float()},
-        {'receipts': ma.fields.Float()},
-        {'refunded_individual_contributions': ma.fields.Float()},
-        {'refunded_other_political_committee_contributions': ma.fields.Float()},
-        {'refunded_political_party_committee_contributions': ma.fields.Float()},
-        {'transfers_from_other_authorized_committee': ma.fields.Float()},
-        {'transfers_to_other_authorized_committee': ma.fields.Float()},
-        {'other_disbursements': ma.fields.Float()},
-        {'contribution_refunds': ma.fields.Float()},
-        {'contributions': ma.fields.Float()},
-    ), options={
+    fields=entity_fields,
+    options={
         'exclude': (
             'transaction_coverage',
             'idx',
             'treasurer_text',
+            'sponsor_candidate_list',
+            'sponsor_candidate_ids'
         )
-    }
+    },
 )
 augment_models(
     make_totals_schema,
-    models.CommitteeTotalsHouseSenate
-)
-
-make_totals_per_cycle_schema = functools.partial(
-    make_schema,
-    fields=utils.extend(
-        entity_fields,
-        {'cash_on_hand_beginning_period': ma.fields.Float()},
-        {'all_other_loans': ma.fields.Float()},
-        {'candidate_contribution': ma.fields.Float()},
-        {'disbursements': ma.fields.Float()},
-        {'individual_contributions': ma.fields.Float()},
-        {'individual_itemized_contributions': ma.fields.Float()},
-        {'individual_unitemized_contributions': ma.fields.Float()},
-        {'last_cash_on_hand_end_period': ma.fields.Float()},
-        {'last_debts_owed_by_committee': ma.fields.Float()},
-        {'last_debts_owed_to_committee': ma.fields.Float()},
-        {'loan_repayments': ma.fields.Float()},
-        {'loan_repayments_candidate_loans': ma.fields.Float()},
-        {'loan_repayments_other_loans': ma.fields.Float()},
-        {'loans': ma.fields.Float()},
-        {'loans_made_by_candidate': ma.fields.Float()},
-        {'net_contributions': ma.fields.Float()},
-        {'net_operating_expenditures': ma.fields.Float()},
-        {'offsets_to_operating_expenditures': ma.fields.Float()},
-        {'operating_expenditures': ma.fields.Float()},
-        {'other_political_committee_contributions': ma.fields.Float()},
-        {'other_receipts': ma.fields.Float()},
-        {'political_party_committee_contributions': ma.fields.Float()},
-        {'receipts': ma.fields.Float()},
-        {'refunded_individual_contributions': ma.fields.Float()},
-        {'refunded_other_political_committee_contributions': ma.fields.Float()},
-        {'refunded_political_party_committee_contributions': ma.fields.Float()},
-        {'transfers_from_other_authorized_committee': ma.fields.Float()},
-        {'transfers_to_other_authorized_committee': ma.fields.Float()},
-        {'other_disbursements': ma.fields.Float()},
-        {'contribution_refunds': ma.fields.Float()},
-        {'contributions': ma.fields.Float()},
-        {'exempt_legal_accounting_disbursement': ma.fields.Float()},
-        {'federal_funds': ma.fields.Float()},
-        {'fundraising_disbursements': ma.fields.Float()},
-        {'loan_repayments_made': ma.fields.Float()},
-        {'loans_received': ma.fields.Float()},
-        {'loans_received_from_candidate': ma.fields.Float()},
-        {'offsets_to_fundraising_expenditures': ma.fields.Float()},
-        {'offsets_to_legal_accounting': ma.fields.Float()},
-        {'other_loans_received': ma.fields.Float()},
-        {'repayments_loans_made_by_candidate': ma.fields.Float()},
-        {'repayments_other_loans': ma.fields.Float()},
-        {'total_offsets_to_operating_expenditures': ma.fields.Float()},
-        {'transfers_from_affiliated_committee': ma.fields.Float()}
-    ), options={
-        'exclude': (
-            'transaction_coverage',
-            'idx',
-            'treasurer_text',
-        )
-    }
-)
-
-augment_models(
-    make_totals_per_cycle_schema,
-    models.CommitteeTotalsPerCycle
-)
-
-make_committee_totals_ie_only = make_schema(
+    models.CommitteeTotalsHouseSenate,
     models.CommitteeTotalsIEOnly,
-    fields=utils.extend(
-        entity_fields,
-        {'total_independent_contributions': ma.fields.Float()},
-        {'total_independent_expenditures': ma.fields.Float()}
-    ), options={
-        'exclude': (
-            'transaction_coverage',
-            'idx',
-        )
-    }
+    models.CommitteeTotalsPerCycle,
 )
-
-augment_schemas(make_committee_totals_ie_only)
-
-# /totals/entity_type/ 'pac','party','pac-party'
+# /totals/entity_type/ 'pac', 'party', 'pac-party'
 make_pac_party_totals_schema = functools.partial(
     make_schema,
     fields=utils.extend(
         entity_fields,
-        {'sponsor_candidate_list': ma.fields.Nested(PacSponsorCandidateschema, many=True)},
-        {'all_loans_received': ma.fields.Float()},
-        {'allocated_federal_election_levin_share': ma.fields.Float()},
-        {'disbursements': ma.fields.Float()},
-        {'convention_exp': ma.fields.Float()},
-        {'coordinated_expenditures_by_party_committee': ma.fields.Float()},
-        {'exp_prior_years_subject_limits': ma.fields.Float()},
-        {'exp_subject_limits': ma.fields.Float()},
-        {'fed_candidate_committee_contributions': ma.fields.Float()},
-        {'fed_candidate_contribution_refunds': ma.fields.Float()},
-        {'fed_disbursements': ma.fields.Float()},
-        {'fed_election_activity': ma.fields.Float()},
-        {'fed_operating_expenditures': ma.fields.Float()},
-        {'fed_receipts': ma.fields.Float()},
-        {'independent_expenditures': ma.fields.Float()},
-        {'cash_on_hand_beginning_period': ma.fields.Float()},
-        {'contribution_refunds': ma.fields.Float()},
-        {'individual_contributions': ma.fields.Float()},
-        {'individual_itemized_contributions': ma.fields.Float()},
-        {'individual_unitemized_contributions': ma.fields.Float()},
-        {'itemized_convention_exp': ma.fields.Float()},
-        {'itemized_other_disb': ma.fields.Float()},
-        {'itemized_other_income': ma.fields.Float()},
-        {'itemized_other_refunds': ma.fields.Float()},
-        {'itemized_refunds_relating_convention_exp': ma.fields.Float()},
-        {'last_debts_owed_by_committee': ma.fields.Float()},
-        {'last_debts_owed_to_committee': ma.fields.Float()},
-        {'loan_repayments_made': ma.fields.Float()},
-        {'loan_repayments_received': ma.fields.Float()},
-        {'loans_and_loan_repayments_made': ma.fields.Float()},
-        {'loans_and_loan_repayments_received': ma.fields.Float()},
-        {'loans_made': ma.fields.Float()},
-        {'net_contributions': ma.fields.Float()},
-        {'net_operating_expenditures': ma.fields.Float()},
-        {'non_allocated_fed_election_activity': ma.fields.Float()},
-        {'offsets_to_operating_expenditures': ma.fields.Float()},
-        {'operating_expenditures': ma.fields.Float()},
-        {'other_disbursements': ma.fields.Float()},
-        {'other_fed_operating_expenditures': ma.fields.Float()},
-        {'other_fed_receipts': ma.fields.Float()},
-        {'other_political_committee_contributions': ma.fields.Float()},
-        {'other_refunds': ma.fields.Float()},
-        {'political_party_committee_contributions': ma.fields.Float()},
-        {'refunded_individual_contributions': ma.fields.Float()},
-        {'refunded_other_political_committee_contributions': ma.fields.Float()},
-        {'refunded_political_party_committee_contributions': ma.fields.Float()},
-        {'refunds_relating_convention_exp': ma.fields.Float()},
-        {'shared_fed_activity': ma.fields.Float()},
-        {'shared_fed_activity_nonfed': ma.fields.Float()},
-        {'shared_fed_operating_expenditures': ma.fields.Float()},
-        {'shared_nonfed_operating_expenditures': ma.fields.Float()},
-        {'total_exp_subject_limits': ma.fields.Float()},
-        {'total_transfers': ma.fields.Float()},
-        {'transfers_from_affiliated_party': ma.fields.Float()},
-        {'transfers_from_nonfed_account': ma.fields.Float()},
-        {'transfers_from_nonfed_levin': ma.fields.Float()},
-        {'transfers_to_affiliated_committee': ma.fields.Float()},
-        {'unitemized_convention_exp': ma.fields.Float()},
-        {'unitemized_other_disb': ma.fields.Float()},
-        {'unitemized_other_income': ma.fields.Float()},
-        {'unitemized_other_refunds': ma.fields.Float()},
-        {'unitemized_refunds_relating_convention_exp': ma.fields.Float()},
-        {'contributions': ma.fields.Float()},
-        {'federal_funds': ma.fields.Float()},
-        {'receipts': ma.fields.Float()}
+        {'sponsor_candidate_list': ma.fields.Nested(PacSponsorCandidateschema, many=True)}
     ),
-    options={'exclude': ('idx', 'treasurer_text', 'transaction_coverage')}
+    options={
+        'exclude': (
+            'transaction_coverage',
+            'idx',
+            'treasurer_text',
+        )
+    },
 )
 augment_models(
     make_pac_party_totals_schema,
     models.CommitteeTotalsPacParty,
 )
 
-candidate_committee_fields = {
-        'last_cash_on_hand_end_period': ma.fields.Float(),
+make_candidate_totals_schema = functools.partial(
+    make_schema,
+    fields={
+        'last_cash_on_hand_end_period': ma.fields.Decimal(places=2),
         'last_beginning_image_number': ma.fields.Str(),
-        'receipts': ma.fields.Float(),
-        'candidate_contribution': ma.fields.Float(),
-        'offsets_to_operating_expenditures': ma.fields.Float(),
-        'political_party_committee_contributions': ma.fields.Float(),
-        'other_disbursements': ma.fields.Float(),
-        'other_political_committee_contributions': ma.fields.Float(),
-        'individual_itemized_contributions': ma.fields.Float(),
-        'individual_unitemized_contributions': ma.fields.Float(),
-        'disbursements': ma.fields.Float(),
-        'contributions': ma.fields.Float(),
-        'individual_contributions': ma.fields.Float(),
-        'contribution_refunds': ma.fields.Float(),
-        'operating_expenditures': ma.fields.Float(),
-        'refunded_individual_contributions': ma.fields.Float(),
-        'refunded_other_political_committee_contributions': ma.fields.Float(),
-        'refunded_political_party_committee_contributions': ma.fields.Float(),
-        'last_debts_owed_by_committee': ma.fields.Float(),
-        'last_debts_owed_to_committee': ma.fields.Float()
-
-}
-
-make_candidate_totals_schema = make_schema(
+    },
+)
+augment_models(
+    make_candidate_totals_schema,
     models.CandidateCommitteeTotalsPresidential,
-    fields=utils.extend({
-        'exempt_legal_accounting_disbursement': ma.fields.Float(),
-        'federal_funds': ma.fields.Float(),
-        'fundraising_disbursements': ma.fields.Float(),
-        'loan_repayments_made': ma.fields.Float(),
-        'loans_received': ma.fields.Float(),
-        'loans_received_from_candidate': ma.fields.Float(),
-        'offsets_to_fundraising_expenditures': ma.fields.Float(),
-        'offsets_to_legal_accounting': ma.fields.Float(),
-        'total_offsets_to_operating_expenditures': ma.fields.Float(),
-        'other_loans_received': ma.fields.Float(),
-        'other_receipts': ma.fields.Float(),
-        'repayments_loans_made_by_candidate': ma.fields.Float(),
-        'repayments_other_loans': ma.fields.Float(),
-        'transfers_from_affiliated_committee': ma.fields.Float(),
-        'transfers_to_other_authorized_committee': ma.fields.Float(),
-        'net_operating_expenditures': ma.fields.Float(),
-        'net_contributions': ma.fields.Float(),
-        'disbursements': ma.fields.Float()
-    }, candidate_committee_fields)
-)
-augment_schemas(make_candidate_totals_schema)
-
-candidate_committee_totals_hs = make_schema(
     models.CandidateCommitteeTotalsHouseSenate,
-    fields=utils.extend({
-        'all_other_loans': ma.fields.Float(),
-        'candidate_contribution': ma.fields.Float(),
-        'loan_repayments': ma.fields.Float(),
-        'loan_repayments_candidate_loans': ma.fields.Float(),
-        'loan_repayments_other_loans': ma.fields.Float(),
-        'loans': ma.fields.Float(),
-        'loans_made_by_candidate': ma.fields.Float(),
-        'other_receipts': ma.fields.Float(),
-        'transfers_from_other_authorized_committee': ma.fields.Float(),
-        'transfers_to_other_authorized_committee': ma.fields.Float(),
-        'net_operating_expenditures': ma.fields.Float(),
-        'net_contributions': ma.fields.Float()
-    }, candidate_committee_fields)
 )
-augment_schemas(candidate_committee_totals_hs)
 
 register_schema(CommitteeReportsSchema)
 register_schema(CommitteeReportsPageSchema)
@@ -1066,27 +593,29 @@ ScheduleASchema = make_schema(
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'contributor': ma.fields.Nested(schemas['CommitteeHistorySchema']),
-        'contribution_receipt_amount': ma.fields.Float(),
-        'contributor_aggregate_ytd': ma.fields.Float(),
+        'contribution_receipt_amount': ma.fields.Decimal(places=2),
+        'contributor_aggregate_ytd': ma.fields.Decimal(places=2),
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
-        'report_year': ma.fields.Int()
     },
     options={
-         'exclude': (
+        'exclude': (
             'contributor_name_text',
             'contributor_employer_text',
             'contributor_occupation_text',
-            ),
-         'relationships': [
+            'recipient_street_1',
+            'recipient_street_2',
+        ),
+        'relationships': [
             Relationship(
                 models.ScheduleA.committee,
                 models.CommitteeHistory.name,
                 'committee_name',
                 1
-                ),
-            ],
+            ),
+        ],
+
     }
 )
 
@@ -1100,9 +629,15 @@ ScheduleCSchema = make_schema(
         'sub_id': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+
     },
-    options={'exclude': ('loan_source_name_text', 'candidate_name_text',)}
-    )
+    options={
+        'exclude': (
+            'loan_source_name_text',
+            'candidate_name_text',
+        )
+    },
+)
 ScheduleCPageSchema = make_page_schema(
     ScheduleCSchema,
 )
@@ -1112,10 +647,10 @@ ScheduleBByRecipientIDSchema = make_schema(
     fields={
         'committee_name': ma.fields.Str(),
         'recipient_name': ma.fields.Str(),
-        'total': ma.fields.Float(),
-        'memo_total': ma.fields.Float()
     },
-    options={'exclude': ('idx', 'committee', 'recipient')}
+    options={
+        'exclude': ('idx', 'committee', 'recipient')
+    },
 )
 augment_schemas(ScheduleBByRecipientIDSchema)
 
@@ -1124,12 +659,11 @@ augment_schemas(ScheduleBByRecipientIDSchema)
 ScheduleBByRecipientSchema = make_schema(
     models.ScheduleBByRecipient,
     fields={
-        'recipient_disbursement_percent': ma.fields.Float(),
-        'committee_total_disbursements': ma.fields.Float(),
-        'total': ma.fields.Float(),
-        'memo_total': ma.fields.Float()
+        'recipient_disbursement_percent': ma.fields.Decimal(places=2),
     },
-    options={'exclude': ('idx', 'committee')}
+    options={
+        'exclude': ('idx', 'committee')
+    },
 )
 
 ScheduleBByRecipientPageSchema = make_page_schema(ScheduleBByRecipientSchema, page_type=paging_schemas.SeekPageSchema)
@@ -1154,10 +688,9 @@ make_aggregate_schema = functools.partial(
         'candidate_id': ma.fields.Str(),
         'committee_name': ma.fields.Str(),
         'candidate_name': ma.fields.Str(),
-        'total': ma.fields.Float()
     },
-    options={'exclude': ('idx', 'committee', 'candidate')}
-    )
+    options={'exclude': ('idx', 'committee', 'candidate')},
+)
 
 ScheduleEByCandidateSchema = make_aggregate_schema(models.ScheduleEByCandidate)
 augment_schemas(ScheduleEByCandidateSchema)
@@ -1169,7 +702,9 @@ ScheduleDSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
-    options={'exclude': ('creditor_debtor_name_text',)}
+    options={
+        'exclude': ('creditor_debtor_name_text',)
+    },
 )
 ScheduleDPageSchema = make_page_schema(
     ScheduleDSchema
@@ -1183,8 +718,10 @@ ScheduleFSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
-    options={'exclude': ('payee_name_text',)}
-    )
+    options={'exclude': ('payee_name_text',)
+             },
+
+)
 ScheduleFPageSchema = make_page_schema(
     ScheduleFSchema
 )
@@ -1204,7 +741,6 @@ ScheduleBSchema = make_schema(
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
-        'disbursement_amount': ma.fields.Float()
     },
     options={
         'exclude': (
@@ -1234,12 +770,6 @@ ScheduleH4Schema = make_schema(
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
-        'cycle': ma.fields.Int(),
-        'disbursement_amount': ma.fields.Float(),
-        'federal_share': ma.fields.Float(),
-        'nonfederal_share': ma.fields.Float(),
-        'event_amount_year_to_date': ma.fields.Float(),
-
     },
     options={
         'exclude': (
@@ -1265,8 +795,8 @@ ScheduleESchema = make_schema(
     fields={
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
-        'expenditure_amount': ma.fields.Float(),
-        'office_total_ytd': ma.fields.Float(),
+        'expenditure_amount': ma.fields.Decimal(places=2),
+        'office_total_ytd': ma.fields.Decimal(places=2),
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
@@ -1290,7 +820,9 @@ ScheduleEPageSchema = make_page_schema(ScheduleESchema, page_type=paging_schemas
 register_schema(ScheduleESchema)
 register_schema(ScheduleEPageSchema)
 
-CommunicationCostSchema = make_schema(models.CommunicationCost, fields={'transaction_amount': ma.fields.Float()})
+CommunicationCostSchema = make_schema(
+    models.CommunicationCost,
+)
 CommunicationCostPageSchema = make_page_schema(
     CommunicationCostSchema,
     page_type=paging_schemas.OffsetPageSchema
@@ -1307,24 +839,18 @@ CCAggregatesSchema = make_schema(
         'candidate_name': ma.fields.Str(),
         'cycle': ma.fields.Int(),
         'count': ma.fields.Int(),
-        'total': ma.fields.Float(),
+        'total': ma.fields.Decimal(places=2),
     },
-    options={'exclude': ('idx',)}
 )
 CCAggregatesPageSchema = make_page_schema(CCAggregatesSchema)
-register_schema(CCAggregatesSchema, 'CCAggregates')
-register_schema(CCAggregatesPageSchema, 'CCAggregatesPage')
+register_schema(CCAggregatesSchema)
+register_schema(CCAggregatesPageSchema)
 
 ElectioneeringSchema = make_schema(
     models.Electioneering,
-    fields={'election_type': ma.fields.Str(),
-            'number_of_candidates': ma.fields.Float(),
-            'calculated_candidate_share': ma.fields.Float(),
-            'disbursement_amount': ma.fields.Float(),
-            },
-    options={'exclude': ('idx', 'purpose_description_text', 'election_type_raw')}
+    fields={'election_type': ma.fields.Str()},
+    options={'exclude': ('idx', 'purpose_description_text', 'election_type_raw')},
 )
-
 ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(ElectioneeringSchema)
 register_schema(ElectioneeringPageSchema)
@@ -1338,13 +864,12 @@ ECAggregatesSchema = make_schema(
         'candidate_name': ma.fields.Str(),
         'cycle': ma.fields.Int(),
         'count': ma.fields.Int(),
-        'total': ma.fields.Float(),
+        'total': ma.fields.Decimal(places=2),
     },
-    options={'exclude': ('idx',)}
 )
 ECAggregatesPageSchema = make_page_schema(ECAggregatesSchema)
-register_schema(ECAggregatesSchema, 'ECAggregates')
-register_schema(ECAggregatesPageSchema, 'ECAggregatesPage')
+register_schema(ECAggregatesSchema)
+register_schema(ECAggregatesPageSchema)
 
 BaseFilingsSchema = make_schema(
     models.Filings,
@@ -1357,46 +882,22 @@ BaseFilingsSchema = make_schema(
         'sub_id': ma.fields.Str(),
         'fec_file_id': ma.fields.Str(),
         'report_type_full': ma.fields.Str(),
-        'amendment_chain': ma.fields.List(ma.fields.Int()),
-        'total_receipts': ma.fields.Float(),
-        'total_individual_contributions': ma.fields.Float(),
-        'net_donations': ma.fields.Float(),
-        'total_disbursements': ma.fields.Float(),
-        'total_independent_expenditures': ma.fields.Float(),
-        'total_communication_cost': ma.fields.Float(),
-        'cash_on_hand_beginning_period': ma.fields.Float(),
-        'cash_on_hand_end_period': ma.fields.Float(),
-        'debts_owed_by_committee': ma.fields.Float(),
-        'debts_owed_to_committee': ma.fields.Float(),
-        'house_personal_funds': ma.fields.Float(),
-        'senate_personal_funds': ma.fields.Float(),
-        'opposition_personal_funds': ma.fields.Float()
     },
-    options={'exclude': ('committee', 'filer_name_text', 'report_type_full_original', )}
+    options={'exclude': ('committee', 'filer_name_text', 'report_type_full_original',)},
 )
 
 
 class FilingsSchema(BaseFilingsSchema):
     @post_dump
-    def remove_fec_url(self, obj, **kwargs):
+    def remove_fec_url(self, obj):
         if not obj.get('fec_url'):
             obj.pop('fec_url')
-
-        return obj
 
 
 augment_schemas(FilingsSchema)
 
 EfilingsAmendmentsSchema = make_schema(
     models.EfilingsAmendments,
-    fields={
-        'amendment_chain': ma.fields.List(ma.fields.Int()),
-        'longest_chain': ma.fields.Float(),
-        'most_recent_filing': ma.fields.Float(),
-        'depth': ma.fields.Float(),
-        'last': ma.fields.Float(),
-        'previous_file_number': ma.fields.Float()
-    }
 )
 
 augment_schemas(EfilingsAmendmentsSchema)
@@ -1418,7 +919,7 @@ EFilingsSchema = make_schema(
         'amended_by': ma.fields.Int(),
         'fec_file_id': ma.fields.Str(),
     },
-    options={'exclude': ('report', 'amendment', 'superceded', 'report_type')}
+    options={'exclude': ('report', 'amendment', 'superceded')},
 )
 augment_schemas(EFilingsSchema)
 
@@ -1434,7 +935,6 @@ ItemizedScheduleBfilingsSchema = make_schema(
         'payee_name': ma.fields.Str(),
         'report_type': ma.fields.Str(),
         'csv_url': ma.fields.Str(),
-        'disbursement_amount': ma.fields.Float()
     },
     options={
         'relationships': [
@@ -1463,7 +963,7 @@ ItemizedScheduleEfilingsSchema = make_schema(
         'csv_url': ma.fields.Str(),
     },
     options={
-        'exclude': ('cand_fulltxt',),
+        'exclude': ['cand_fulltxt'],
         'relationships': [
             Relationship(
                 models.ScheduleEEfile.committee,
@@ -1489,11 +989,12 @@ ItemizedScheduleH4filingsSchema = make_schema(
         'payee_name': ma.fields.Str(),
         'report_type': ma.fields.Str(),
         'csv_url': ma.fields.Str(),
-        'disbursement_amount': ma.fields.Float(),
-        'fed_share': ma.fields.Float(),
-        'event_amount_year_to_date': ma.fields.Float()
     },
     options={
+        'exclude': (
+            'line_num',
+            'tran_id',
+        ),
         'relationships': [
             Relationship(
                 models.ScheduleH4Efile.committee,
@@ -1520,9 +1021,6 @@ ItemizedScheduleAfilingsSchema = make_schema(
         'contributor_name': ma.fields.Str(),
         'fec_election_type_desc': ma.fields.Str(),
         'csv_url': ma.fields.Str(),
-        'contributor_aggregate_ytd': ma.fields.Float(),
-        'contribution_receipt_amount': ma.fields.Float(),
-
     },
     options={
         'exclude': (
@@ -1553,8 +1051,8 @@ ReportingDatesSchema = make_schema(
         'report_type_full': ma.fields.Str(),
     },
     options={'exclude': ('trc_report_due_date_id', 'report')},
-    class_name='ReportingDatesSchema'
 )
+ReportingDatesPageSchema = make_page_schema(ReportingDatesSchema)
 augment_schemas(ReportingDatesSchema)
 
 ElectionDatesSchema = make_schema(
@@ -1563,10 +1061,11 @@ ElectionDatesSchema = make_schema(
         'election_type_full': ma.fields.Str(),
         'active_election': ma.fields.Boolean(),
     },
-    options={'exclude': ('trc_election_id', 'election_status_id')},
-    class_name='ElectionDatesSchema'
-
+    options={
+        'exclude': ('trc_election_id', 'election_status_id'),
+    },
 )
+ElectionDatesPageSchema = make_page_schema(ElectionDatesSchema)
 augment_schemas(ElectionDatesSchema)
 
 CalendarDateSchema = make_schema(
@@ -1578,8 +1077,12 @@ CalendarDateSchema = make_schema(
         'end_date': ma.fields.Function(format_end_date),
     },
     options={
-        'exclude': ('summary_text', 'description_text')}
+        'exclude': (
+            'summary_text', 'description_text'
+        )
+    },
 )
+CalendarDatePageSchema = make_page_schema(CalendarDateSchema)
 augment_schemas(CalendarDateSchema)
 
 
@@ -1598,9 +1101,9 @@ augment_schemas(ElectionSearchSchema)
 
 class ElectionSummarySchema(ApiSchema):
     count = ma.fields.Int()
-    receipts = ma.fields.Float()
-    disbursements = ma.fields.Float()
-    independent_expenditures = ma.fields.Float()
+    receipts = ma.fields.Decimal(places=2)
+    disbursements = ma.fields.Decimal(places=2)
+    independent_expenditures = ma.fields.Decimal(places=2)
 
 
 register_schema(ElectionSummarySchema)
@@ -1614,20 +1117,23 @@ class ElectionSchema(ma.Schema):
     committee_ids = ma.fields.List(ma.fields.Str)
     candidate_pcc_id = ma.fields.Str(doc="The candidate's primary campaign committee ID")
     candidate_pcc_name = ma.fields.Str(doc="The candidate's primary campaign committee name")
-    total_receipts = ma.fields.Float()
-    total_disbursements = ma.fields.Float()
-    cash_on_hand_end_period = ma.fields.Float()
+    total_receipts = ma.fields.Decimal(places=2)
+    total_disbursements = ma.fields.Decimal(places=2)
+    cash_on_hand_end_period = ma.fields.Decimal(places=2)
     candidate_election_year = ma.fields.Int()
     coverage_end_date = ma.fields.Date()
 
 
 augment_schemas(ElectionSchema)
 
+ElectionPageSchema = make_page_schema(ElectionSchema)
+register_schema(ElectionPageSchema)
+
 
 class ScheduleABySizeCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
-    total = ma.fields.Float()
+    total = ma.fields.Decimal(places=2)
     size = ma.fields.Int()
     count = ma.fields.Int()
 
@@ -1635,7 +1141,7 @@ class ScheduleABySizeCandidateSchema(ma.Schema):
 class ScheduleAByStateCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
-    total = ma.fields.Float()
+    total = ma.fields.Decimal(places=2)
     state = ma.fields.Str()
     state_full = ma.fields.Str()
     count = ma.fields.Int()
@@ -1644,16 +1150,16 @@ class ScheduleAByStateCandidateSchema(ma.Schema):
 class ScheduleAByContributorTypeCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
-    total = ma.fields.Float()
+    total = ma.fields.Decimal(places=2)
     individual = ma.fields.Bool()
 
 
 class TotalsCommitteeSchema(schemas['CommitteeHistorySchema']):
-    receipts = ma.fields.Float()
-    disbursements = ma.fields.Float()
-    cash_on_hand_end_period = ma.fields.Float()
-    debts_owed_by_committee = ma.fields.Float()
-    independent_expenditures = ma.fields.Float()
+    receipts = ma.fields.Decimal(places=2)
+    disbursements = ma.fields.Decimal(places=2)
+    cash_on_hand_end_period = ma.fields.Decimal(places=2)
+    debts_owed_by_committee = ma.fields.Decimal(places=2)
+    independent_expenditures = ma.fields.Decimal(places=2)
 
 
 augment_schemas(
@@ -1664,11 +1170,7 @@ augment_schemas(
 
 RadAnalystSchema = make_schema(
     models.RadAnalyst,
-    fields={'analyst_id': ma.fields.Float(),
-            'analyst_short_id': ma.fields.Float(),
-            'telephone_ext': ma.fields.Float()
-            },
-    options={'exclude': ('idx', 'name_txt')}
+    options={'exclude': ('idx', 'name_txt')},
 )
 RadAnalystPageSchema = make_page_schema(RadAnalystSchema)
 register_schema(RadAnalystSchema)
@@ -1685,7 +1187,6 @@ register_schema(EntityReceiptDisbursementTotalsPageSchema)
 
 ScheduleAByStateRecipientTotalsSchema = make_schema(
     models.ScheduleAByStateRecipientTotals,
-    fields={'total': ma.fields.Float()},
     options={'exclude': ('idx',)}
 )
 ScheduleAByStateRecipientTotalsPageSchema = make_page_schema(
@@ -1705,8 +1206,7 @@ AuditPrimaryCategorySchema = make_schema(
     },
     options={
         'exclude': ('tier',)
-    },
-    BaseSchema=BaseSchema
+    }
 )
 
 AuditPrimaryCategoryPageSchema = make_page_schema(AuditPrimaryCategorySchema)
@@ -1724,8 +1224,7 @@ AuditCategoryRelationSchema = make_schema(
     },
     options={
         'exclude': ('primary_category_id', 'primary_category_name')
-    },
-    BaseSchema=BaseSchema
+    }
 )
 
 AuditCategoryRelationPageSchema = make_page_schema(AuditCategoryRelationSchema)
@@ -1751,8 +1250,7 @@ AuditCategorySchema = make_schema(
         #         1
         #     ),
         # ],
-    },
-    BaseSchema=BaseSchema
+    }
 )
 
 AuditCategoryPageSchema = make_page_schema(AuditCategorySchema)
@@ -1773,7 +1271,7 @@ AuditCaseSubCategorySchema = make_schema(
         'exclude': (
             'primary_category_id',
             'audit_case_id',
-            'primary_category_name'
+            'primary_category_name',
         )
     }
 )
@@ -1818,12 +1316,14 @@ AuditCaseSchema = make_schema(
         'audit_id': ma.fields.Integer(),
         'candidate_id': ma.fields.Str(),
         'candidate_name': ma.fields.Str(),
-        'link_to_report': ma.fields.Str(),
         'primary_category_list': ma.fields.Nested(AuditCaseCategoryRelationSchema, many=True),
     },
     options={
-        'exclude': ('idx',)},
-    BaseSchema=BaseSchema
+        'exclude': (
+            'primary_category_id',
+            'sub_category_id',
+            'idx',
+        )}
 )
 AuditCasePageSchema = make_page_schema(AuditCaseSchema)
 register_schema(AuditCaseSchema)
@@ -1836,20 +1336,26 @@ ElectionsListSchema = make_schema(
             'idx',
             'sort_order',
             'incumbent_id',
-            'incumbent_name')}
+            'incumbent_name',
+        )
+    }
 )
 
 ElectionsListPageSchema = make_page_schema(ElectionsListSchema)
 register_schema(ElectionsListSchema)
 register_schema(ElectionsListPageSchema)
 
-StateElectionOfficeInfoSchema = make_schema(models.StateElectionOfficeInfo)
+StateElectionOfficeInfoSchema = make_schema(
+    models.StateElectionOfficeInfo,
+)
 
 StateElectionOfficeInfoPageSchema = make_page_schema(StateElectionOfficeInfoSchema)
 register_schema(StateElectionOfficeInfoSchema)
 register_schema(StateElectionOfficeInfoPageSchema)
 
-OperationsLogSchema = make_schema(models.OperationsLog)
+OperationsLogSchema = make_schema(
+    models.OperationsLog,
+)
 
 OperationsLogPageSchema = make_page_schema(OperationsLogSchema)
 register_schema(OperationsLogSchema)
@@ -1859,11 +1365,11 @@ register_schema(OperationsLogPageSchema)
 class TotalByOfficeSchema(ma.Schema):
     office = ma.fields.Str()
     election_year = ma.fields.Int()
-    total_receipts = ma.fields.Float()
-    total_disbursements = ma.fields.Float()
-    total_individual_itemized_contributions = ma.fields.Float()
-    total_transfers_from_other_authorized_committee = ma.fields.Float()
-    total_other_political_committee_contributions = ma.fields.Float()
+    total_receipts = ma.fields.Decimal(places=2)
+    total_disbursements = ma.fields.Decimal(places=2)
+    total_individual_itemized_contributions = ma.fields.Decimal(places=2)
+    total_transfers_from_other_authorized_committee = ma.fields.Decimal(places=2)
+    total_other_political_committee_contributions = ma.fields.Decimal(places=2)
 
 
 augment_schemas(TotalByOfficeSchema)
@@ -1873,8 +1379,8 @@ class TotalByOfficeByPartySchema(ma.Schema):
     office = ma.fields.Str()
     party = ma.fields.Str()
     election_year = ma.fields.Int()
-    total_receipts = ma.fields.Float()
-    total_disbursements = ma.fields.Float()
+    total_receipts = ma.fields.Decimal(places=2)
+    total_disbursements = ma.fields.Decimal(places=2)
 
 
 augment_schemas(TotalByOfficeByPartySchema)
@@ -1884,13 +1390,13 @@ class CandidateTotalAggregateSchema(ma.Schema):
     election_year = ma.fields.Int()
     office = ma.fields.Str()
     party = ma.fields.Str()
-    total_receipts = ma.fields.Float()
-    total_disbursements = ma.fields.Float()
-    total_individual_itemized_contributions = ma.fields.Float()
-    total_transfers_from_other_authorized_committee = ma.fields.Float()
-    total_other_political_committee_contributions = ma.fields.Float()
-    total_cash_on_hand_end_period = ma.fields.Float()
-    total_debts_owed_by_committee = ma.fields.Float()
+    total_receipts = ma.fields.Decimal(places=2)
+    total_disbursements = ma.fields.Decimal(places=2)
+    total_individual_itemized_contributions = ma.fields.Decimal(places=2)
+    total_transfers_from_other_authorized_committee = ma.fields.Decimal(places=2)
+    total_other_political_committee_contributions = ma.fields.Decimal(places=2)
+    total_cash_on_hand_end_period = ma.fields.Decimal(places=2)
+    total_debts_owed_by_committee = ma.fields.Decimal(places=2)
     state = ma.fields.Str()
     district = ma.fields.Str()
     district_number = ma.fields.Int()
@@ -1903,7 +1409,7 @@ augment_schemas(CandidateTotalAggregateSchema)
 class ECTotalsByCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
-    total = ma.fields.Float()
+    total = ma.fields.Decimal(places=2)
 
 
 augment_schemas(ECTotalsByCandidateSchema)
@@ -1913,7 +1419,7 @@ class IETotalsByCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
     support_oppose_indicator = ma.fields.Str()
-    total = ma.fields.Float()
+    total = ma.fields.Decimal(places=2)
 
 
 augment_schemas(IETotalsByCandidateSchema)
@@ -1923,21 +1429,19 @@ class CCTotalsByCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
     support_oppose_indicator = ma.fields.Str()
-    total = ma.fields.Float()
+    total = ma.fields.Decimal(places=2)
 
 
 augment_schemas(CCTotalsByCandidateSchema)
 
 # Presidential endpoints
-# There may be a more efficient way to do this,but we're going for speed
+# There may be a more efficient way to do this, but we're going for speed
 
 # By candidate
 
 PresidentialByCandidateSchema = make_schema(
     models.PresidentialByCandidate,
-    fields={'net_receipts': ma.fields.Float(),
-            'rounded_net_receipts': ma.fields.Float()},
-    options={'exclude': ('idx',)}
+    options={'exclude': ('idx',)},
 )
 PresidentialByCandidatePageSchema = make_page_schema(PresidentialByCandidateSchema)
 register_schema(PresidentialByCandidateSchema)
@@ -1947,30 +1451,7 @@ register_schema(PresidentialByCandidatePageSchema)
 
 PresidentialSummarySchema = make_schema(
     models.PresidentialSummary,
-    fields={
-                'net_receipts': ma.fields.Float(),
-                'rounded_net_receipts': ma.fields.Float(),
-                'individual_contributions_less_refunds': ma.fields.Float(),
-                'pac_contributions_less_refunds': ma.fields.Float(),
-                'party_contributions_less_refunds': ma.fields.Float(),
-                'candidate_contributions_less_repayments': ma.fields.Float(),
-                'disbursements_less_offsets': ma.fields.Float(),
-                'operating_expenditures': ma.fields.Float(),
-                'transfers_to_other_authorized_committees': ma.fields.Float(),
-                'transfers_from_affiliated_committees': ma.fields.Float(),
-                'fundraising_disbursements': ma.fields.Float(),
-                'exempt_legal_accounting_disbursement': ma.fields.Float(),
-                'total_loan_repayments_made': ma.fields.Float(),
-                'repayments_loans_made_by_candidate': ma.fields.Float(),
-                'repayments_other_loans': ma.fields.Float(),
-                'other_disbursements': ma.fields.Float(),
-                'offsets_to_operating_expenditures': ma.fields.Float(),
-                'total_contribution_refunds': ma.fields.Float(),
-                'debts_owed_by_committee': ma.fields.Float(),
-                'federal_funds': ma.fields.Float(),
-                'cash_on_hand_end': ma.fields.Float()
-             },
-    options={'exclude': ('idx',)}
+    options={'exclude': ('idx',)},
 )
 PresidentialSummaryPageSchema = make_page_schema(PresidentialSummarySchema)
 register_schema(PresidentialSummarySchema)
@@ -1980,8 +1461,7 @@ register_schema(PresidentialSummaryPageSchema)
 
 PresidentialBySizeSchema = make_schema(
     models.PresidentialBySize,
-    fields={'contribution_receipt_amount': ma.fields.Float()},
-    options={'exclude': ('idx',)}
+    options={'exclude': ('idx',)},
 )
 PresidentialBySizePageSchema = make_page_schema(PresidentialBySizeSchema)
 register_schema(PresidentialBySizeSchema)
@@ -1991,7 +1471,6 @@ register_schema(PresidentialBySizePageSchema)
 
 PresidentialByStateSchema = make_schema(
     models.PresidentialByState,
-    fields={'contribution_receipt_amount': ma.fields.Float()},
     options={'exclude': ('idx',)},
 )
 PresidentialByStatePageSchema = make_page_schema(PresidentialByStateSchema)
@@ -2002,19 +1481,13 @@ register_schema(PresidentialByStatePageSchema)
 
 PresidentialCoverageSchema = make_schema(
     models.PresidentialCoverage,
-    options={'exclude': ('idx',)}
+    options={'exclude': ('idx',)},
 )
 PresidentialCoveragePageSchema = make_page_schema(PresidentialCoverageSchema)
 register_schema(PresidentialCoverageSchema)
 register_schema(PresidentialCoveragePageSchema)
 
-InauguralDonationsSchema = make_schema(
-    models.InauguralDonations,
-    fields={
-        'total_donation': ma.fields.Float(),
-        'cycle': ma.fields.Int()
-    }
-)
+InauguralDonationsSchema = make_schema(models.InauguralDonations)
 InauguralDonationsPageSchema = make_page_schema(InauguralDonationsSchema)
 register_schema(InauguralDonationsSchema)
 register_schema(InauguralDonationsPageSchema)

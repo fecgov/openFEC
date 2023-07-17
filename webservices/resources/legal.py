@@ -46,7 +46,6 @@ ALL_DOCUMENT_TYPES = [
     "admin_fines",
 ]
 
-ACCEPTED_DATE_FORMATS = "strict_date_optional_time_nanos||MM/dd/yyyy||M/d/yyyy||MM/d/yyyy||M/dd/yyyy"
 
 # endpoint path: /legal/docs/<doc_type>/<no>
 # test urls:
@@ -56,7 +55,6 @@ ACCEPTED_DATE_FORMATS = "strict_date_optional_time_nanos||MM/dd/yyyy||M/d/yyyy||
 # http://127.0.0.1:5000/v1/legal/docs/murs/8070/
 # http://127.0.0.1:5000/v1/legal/docs/adrs/1091/
 # http://127.0.0.1:5000/v1/legal/docs/admin_fines/4399/
-
 
 # TODO: add this endpoint to swagger
 @doc(
@@ -272,7 +270,6 @@ def apply_af_specific_query_params(query, **kwargs):
     if kwargs.get("af_max_rtb_date"):
         date_range["lte"] = kwargs.get("af_max_rtb_date")
     if date_range:
-        date_range["format"] = ACCEPTED_DATE_FORMATS
         must_clauses.append(Q("range", reason_to_believe_action_date=date_range))
 
     date_range = {}
@@ -281,7 +278,6 @@ def apply_af_specific_query_params(query, **kwargs):
     if kwargs.get("af_max_fd_date"):
         date_range["lte"] = kwargs.get("af_max_fd_date")
     if date_range:
-        date_range["format"] = ACCEPTED_DATE_FORMATS
         must_clauses.append(Q("range", final_determination_date=date_range))
 
     if kwargs.get("af_rtb_fine_amount"):
@@ -323,7 +319,6 @@ def apply_mur_specific_query_params(query, **kwargs):
     if kwargs.get("case_max_open_date"):
         date_range["lte"] = kwargs.get("case_max_open_date")
     if date_range:
-        date_range["format"] = ACCEPTED_DATE_FORMATS
         must_clauses.append(Q("range", open_date=date_range))
 
     date_range = {}
@@ -332,7 +327,6 @@ def apply_mur_specific_query_params(query, **kwargs):
     if kwargs.get("case_max_close_date"):
         date_range["lte"] = kwargs.get("case_max_close_date")
     if date_range:
-        date_range["format"] = ACCEPTED_DATE_FORMATS
         must_clauses.append(Q("range", close_date=date_range))
 
     query = query.query("bool", must=must_clauses)
@@ -459,7 +453,6 @@ def apply_adr_specific_query_params(query, **kwargs):
     if kwargs.get("case_max_open_date"):
         date_range["lte"] = kwargs.get("case_max_open_date")
     if date_range:
-        date_range["format"] = ACCEPTED_DATE_FORMATS
         must_clauses.append(Q("range", open_date=date_range))
 
     date_range = {}
@@ -468,7 +461,6 @@ def apply_adr_specific_query_params(query, **kwargs):
     if kwargs.get("case_max_close_date"):
         date_range["lte"] = kwargs.get("case_max_close_date")
     if date_range:
-        date_range["format"] = ACCEPTED_DATE_FORMATS
         must_clauses.append(Q("range", close_date=date_range))
 
     query = query.query("bool", must=must_clauses)
@@ -653,7 +645,6 @@ def apply_ao_specific_query_params(query, **kwargs):
     if kwargs.get("ao_max_issue_date"):
         date_range["lte"] = kwargs.get("ao_max_issue_date")
     if date_range:
-        date_range["format"] = ACCEPTED_DATE_FORMATS
         must_clauses.append(Q("range", issue_date=date_range))
 
     date_range = {}
@@ -662,7 +653,6 @@ def apply_ao_specific_query_params(query, **kwargs):
     if kwargs.get("ao_max_request_date"):
         date_range["lte"] = kwargs.get("ao_max_request_date")
     if date_range:
-        date_range["format"] = ACCEPTED_DATE_FORMATS
         must_clauses.append(Q("range", request_date=date_range))
 
     if kwargs.get("ao_entity_name"):

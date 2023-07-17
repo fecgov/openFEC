@@ -53,7 +53,7 @@ def parse_kwargs(resource, qs):
     annotation = resolve_annotations(resource.get, "args", parent=resource)
     fields = utils.extend(*[option["args"] for option in annotation.options])
     with task_utils.get_app().test_request_context(b"?" + qs):
-        kwargs = flaskparser.parser.parse(fields, location='query')
+        kwargs = flaskparser.parser.parse(fields)
     return fields, kwargs
 
 
