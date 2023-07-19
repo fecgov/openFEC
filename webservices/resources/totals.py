@@ -89,7 +89,7 @@ class TotalsByEntityTypeView(ApiResource):
             committee_id=committee_id, entity_type=entity_type, **kwargs
         )
         page = utils.fetch_page(query, kwargs, model=totals_class)
-        return totals_schema().dump(page)
+        return totals_schema().dump(page).data
 
     def build_query(self, committee_id=None, entity_type=None, **kwargs):
         totals_class, totals_schema = totals_schema_map.get(
@@ -240,7 +240,7 @@ class TotalsCommitteeView(ApiResource):
             committee_id=committee_id.upper(), committee_type=committee_type, **kwargs
         )
         page = utils.fetch_page(query, kwargs, model=totals_class)
-        return totals_schema().dump(page)
+        return totals_schema().dump(page).data
 
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
         totals_class, totals_schema = totals_schema_map.get(
@@ -285,7 +285,7 @@ class CandidateTotalsView(utils.Resource):
             validator = args.IndexValidator(totals_class)
             validator(kwargs['sort'])
         page = utils.fetch_page(query, kwargs, model=totals_class)
-        return totals_schema().dump(page)
+        return totals_schema().dump(page).data
 
     def build_query(self, candidate_id=None, **kwargs):
         totals_class, totals_schema = candidate_totals_schema_map.get(
@@ -347,7 +347,6 @@ class ScheduleAByStateRecipientTotalsView(ApiResource):
     @property
     def index_column(self):
         return self.model.idx
-
 
 @doc(
     tags=['financial'], description=docs.TOTALS_INAUGURAL_DONATIONS
