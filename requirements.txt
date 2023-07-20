@@ -49,4 +49,5 @@ importlib-metadata==3.10.1 #pinned to fix the pytest deprecation warning: Select
 nplusone==0.8.0
 pytest==5.2.0
 pytest-cov==2.5.1
+setuptools==68.0.0 #pin to remediate snyk ReDoS#5477
 webtest==2.0.34
