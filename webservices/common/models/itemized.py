@@ -456,7 +456,7 @@ class ScheduleC(PdfMixin, BaseItemized):
     due_date_terms = db.Column('due_dt_terms', db.String)
     interest_rate_terms = db.Column(db.String)
     secured_ind = db.Column(db.String)
-    schedule_a_line_number = db.Column('sched_a_line_num', db.Integer)
+    schedule_a_line_number = db.Column('sched_a_line_num', db.String)
     personally_funded = db.Column('pers_fund_yes_no', db.String)
     memo_code = db.Column('memo_cd', db.String)
     memo_text = db.Column(db.String)
