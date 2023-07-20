@@ -71,6 +71,7 @@ class CalendarDatesExport(CalendarDatesView):
         'ics': (calendar.ICalEventSchema, calendar.render_ical, 'text/calendar'),
     }
 
+    @use_kwargs(args.calendar_dates)
     @use_kwargs({
         'renderer': fields.Str(missing='ics', validate=validate.OneOf(['ics', 'csv'])),
     })
@@ -84,7 +85,7 @@ class CalendarDatesExport(CalendarDatesView):
         schema_type, renderer, mimetype = self.renderers[kwargs['renderer']]
         schema = schema_type(many=True)
         return Response(
-            renderer(schema.dump(query), schema),
+            renderer(schema.dump(query).data, schema),
             mimetype=mimetype,
         )
 

@@ -13,9 +13,6 @@ KEYWORD_LENGTH_ERROR = """Invalid keyword. The keyword must be at least 3 charac
 NEXT_IN_CHAIN_DATA_ERROR = """next_in_chain data error, please contact apiinfo@fec.gov.\
 """
 
-DATE_ERROR = """Invalid date. Date must be formatted as MM/DD/YYYY or YYYY-MM-DD.\
-"""
-
 
 class ApiError(Exception):
     status_code = 400

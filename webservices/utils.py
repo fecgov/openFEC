@@ -34,7 +34,7 @@ from json import JSONEncoder
 
 logger = logging.getLogger(__name__)
 
-use_kwargs = functools.partial(use_kwargs_original, location="query")
+use_kwargs = functools.partial(use_kwargs_original, locations=("query",))
 
 DOCQUERY_URL = 'https://docquery.fec.gov'
 
