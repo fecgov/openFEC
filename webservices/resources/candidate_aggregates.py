@@ -33,7 +33,7 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
 
     """
     rows = (
-        db.session.query(
+        db.select(
             CandidateCommitteeLink.candidate_id.label('candidate_id'),
             CandidateCommitteeLink.committee_id.label('committee_id'),
             CandidateCommitteeLink.fec_election_year.label('fec_election_year'),
@@ -63,7 +63,7 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
     ).label('cycle')
 
     aggregates = (
-        db.session.query(rows.c.candidate_id, cycle_column, *label_columns)
+        db.select(rows.c.candidate_id, cycle_column, *label_columns)
         .join(
             aggregate_model,
             sa.and_(
@@ -95,7 +95,7 @@ class ScheduleABySizeCandidateView(utils.Resource):
         _, query = candidate_aggregate(
             ScheduleABySize, label_columns, group_columns, kwargs
         )
-        return utils.fetch_page(query, kwargs, cap=None)
+        return utils.fetch_page(query, kwargs, db.session, cap=None)
 
 
 @doc(
@@ -119,14 +119,14 @@ class ScheduleAByStateCandidateTotalsView(utils.Resource):
             kwargs,
         )
         q = query.subquery()
-        query = db.session.query(
+        query = db.select(
             sa.func.sum(q.c.total).label('total'),
             sa.func.sum(q.c.count).label('count'),
             q.c.candidate_id.label('candidate_id'),
             q.c.cycle,
         ).group_by(q.c.candidate_id, q.c.cycle)
 
-        return utils.fetch_page(query, kwargs, cap=0)
+        return utils.fetch_page(query, kwargs, db.session, cap=0)
 
 
 @doc(
@@ -149,7 +149,7 @@ class ScheduleAByStateCandidateView(utils.Resource):
             [ScheduleAByState.state],
             kwargs,
         )
-        return utils.fetch_page(query, kwargs, cap=0)
+        return utils.fetch_page(query, kwargs, db.session, cap=0)
 
 
 @doc(
@@ -200,7 +200,7 @@ class TotalsCandidateView(ApiResource):
     def build_query(self, **kwargs):
         history = models.CandidateHistoryWithFuture
         query = (
-            db.session.query(history.__table__, models.CandidateTotal.__table__)
+            db.select(history.__table__, models.CandidateTotal.__table__)
             .join(
                 models.CandidateTotal,
                 sa.and_(
@@ -258,7 +258,7 @@ class CandidateTotalAggregateView(ApiResource):
 
     def build_query(self, **kwargs):
         total = models.CandidateTotal
-        query = db.session.query(
+        query = db.select(
             total.election_year.label("election_year"),
             sa.func.sum(total.receipts).label(
                 "total_receipts"),

@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 
 from webservices.exceptions import ApiError
-from webservices.common.util import get_class_by_tablename
+# from webservices.common.util import get_class_by_tablename
 
 
 def parse_option(option, model=None, aliases=None, join_columns=None, query=None):
@@ -28,14 +28,14 @@ def parse_option(option, model=None, aliases=None, join_columns=None, query=None
         except AttributeError:
             raise ApiError('Field "{0}" not found'.format(column))
     else:
-        for entity in query._entities:
-            if entity._label_name == column:
-                single_model = get_class_by_tablename(entity.namespace)
-                if not single_model:
-                    column = entity.column
-                    break
-                column = getattr(single_model, column)
+        for descr in query.column_descriptions:
+            if descr.get('name') == column:
+                # single_model = get_class_by_tablename(descr.entity._sa_class_manager.mapper.mapped_table.name)
+                # if not single_model:
+                column = descr.get('expr')
                 break
+                # column = getattr(single_model, column)
+                # break
         return column, order, relationship
     return column, order, relationship
 

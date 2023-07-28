@@ -253,19 +253,20 @@ class CandidateAggregateResource(AggregateResource):
                 self.model.cycle > (models.CandidateElection.cand_election_year - election_duration),
             ),
         )
-        return query.with_entities(
+        query = query.with_only_columns(
             self.model.candidate_id,
             self.model.committee_id,
             cycle_column.label('cycle'),
-            sa.func.sum(self.model.total).label('total'),
-            sa.func.sum(self.model.count).label('count'),
-            *self.label_columns
+            # sa.func.sum(self.model.total).label('total'),
+            # sa.func.sum(self.model.count).label('count'),
+            # *self.label_columns #, maintain_column_froms=True
         ).group_by(
             self.model.candidate_id,
             self.model.committee_id,
             cycle_column,
-            *self.group_columns
+            # *self.group_columns
         )
+        return query
 
 
 @doc(
@@ -399,11 +400,11 @@ class ECAggregatesView(AggregateResource):
         ('candidate_id', model.candidate_id),
         ('committee_id', model.committee_id),
     ]
-    
+
 
 def join_cand_cmte_names(query):
     query = query.subquery()
-    return models.db.session.query(
+    return models.db.select(
         query,
         models.CandidateHistory.candidate_id.label('candidate_id'),
         models.CommitteeHistory.committee_id.label('committee_id'),

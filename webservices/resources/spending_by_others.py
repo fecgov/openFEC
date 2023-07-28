@@ -1,3 +1,4 @@
+import logging
 import sqlalchemy as sa
 from flask_apispec import doc
 from webservices import args
@@ -20,7 +21,7 @@ def get_candidate_list(kwargs):
 
     """
     candidate = (
-        db.session.query(
+        db.select(
             CandidateHistory.candidate_id.label('candidate_id'),
             CandidateHistory.two_year_period.label('two_year_period'),
             CandidateHistory.candidate_election_year.label('candidate_election_year'),
@@ -64,7 +65,7 @@ class ECTotalsByCandidateView(ApiResource):
         cycle_column, candidate = get_candidate_list(kwargs)
 
         query = (
-            db.session.query(
+            db.select(
                 ElectioneeringByCandidate.candidate_id,
                 cycle_column,
                 sa.func.sum(ElectioneeringByCandidate.total).label('total'),
@@ -106,7 +107,7 @@ class IETotalsByCandidateView(ApiResource):
         cycle_column, candidate = get_candidate_list(kwargs)
 
         query = (
-            db.session.query(
+            db.select(
                 ScheduleEByCandidate.candidate_id,
                 ScheduleEByCandidate.support_oppose_indicator,
                 cycle_column,
@@ -154,9 +155,9 @@ class CCTotalsByCandidateView(ApiResource):
 
     def build_query(self, **kwargs):
         cycle_column, candidate = get_candidate_list(kwargs)
-
+        logging.warning(cycle_column)
         query = (
-            db.session.query(
+            db.select(
                 CommunicationCostByCandidate.candidate_id,
                 CommunicationCostByCandidate.support_oppose_indicator,
                 cycle_column,
@@ -184,5 +185,5 @@ class CCTotalsByCandidateView(ApiResource):
                 CommunicationCostByCandidate.support_oppose_indicator,
             )
         )
-
+        logging.warning(query)
         return query

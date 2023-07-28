@@ -165,11 +165,12 @@ class AuditCandidateNameSearch(utils.Resource):
     @use_kwargs(args.names)
     @marshal_with(schemas.AuditCandidateSearchListSchema())
     def get(self, **kwargs):
-        query = filters.filter_fulltext(models.AuditCandidateSearch.query, kwargs, self.filter_fulltext_fields)
+        query = models.db.select(models.AuditCandidateSearch.id, models.AuditCandidateSearch.name)
+        query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         query = query.order_by(
             sa.desc(models.AuditCandidateSearch.id)
         ).limit(20)
-        return {'results': query.all()}
+        return {'results': models.db.session.execute(query).all()}
 
 
 @doc(
@@ -186,8 +187,9 @@ class AuditCommitteeNameSearch(utils.Resource):
     @use_kwargs(args.names)
     @marshal_with(schemas.AuditCommitteeSearchListSchema())
     def get(self, **kwargs):
-        query = filters.filter_fulltext(models.AuditCommitteeSearch.query, kwargs, self.filter_fulltext_fields)
+        query = models.db.select(models.AuditCommitteeSearch.id, models.AuditCommitteeSearch.name)
+        query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         query = query.order_by(
             sa.desc(models.AuditCommitteeSearch.id)
         ).limit(20)
-        return {'results': query.all()}
+        return {'results': models.db.session.execute(query).all()}

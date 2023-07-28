@@ -22,7 +22,7 @@ def is_estimated_count(resource, query):
     """
     if resource.use_pk_for_count and resource.model:
         primary_key = resource.model.__mapper__.primary_key[0]
-        query = query.with_entities(primary_key)
+        query = query.with_only_columns(primary_key)
     if resource.use_estimated_counts:
         estimated_count = get_estimated_count(query)
         if estimated_count > resource.estimated_count_threshold:
