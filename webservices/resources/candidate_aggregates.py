@@ -8,7 +8,7 @@ from webservices import docs
 from webservices import filters
 from webservices import schemas
 from webservices.utils import use_kwargs
-from webservices.common.views import ApiResource, IndividualColumnResource
+from webservices.common.views import IndividualColumnResource
 from webservices.common import models
 from webservices.common.models import (
     CandidateCommitteeLink,
@@ -95,7 +95,12 @@ class ScheduleABySizeCandidateView(utils.Resource):
         _, query = candidate_aggregate(
             ScheduleABySize, label_columns, group_columns, kwargs
         )
-        return utils.fetch_page(query, kwargs, db.session, cap=None)
+        return utils.fetch_page(
+            query,
+            kwargs,
+            db.session,
+            cap=None,
+            contains_individual_columns=True)
 
 
 @doc(
@@ -126,7 +131,12 @@ class ScheduleAByStateCandidateTotalsView(utils.Resource):
             q.c.cycle,
         ).group_by(q.c.candidate_id, q.c.cycle)
 
-        return utils.fetch_page(query, kwargs, db.session, cap=0)
+        return utils.fetch_page(
+            query,
+            kwargs,
+            db.session,
+            cap=0,
+            contains_individual_columns=True)
 
 
 @doc(
@@ -244,7 +254,7 @@ class TotalsCandidateView(IndividualColumnResource):
 @doc(
     tags=["candidate"], description=docs.CANDIDATE_TOTAL_AGGREGATE_TAG,
 )
-class CandidateTotalAggregateView(ApiResource):
+class CandidateTotalAggregateView(IndividualColumnResource):
     schema = schemas.CandidateTotalAggregateSchema
     page_schema = schemas.CandidateTotalAggregatePageSchema
 
