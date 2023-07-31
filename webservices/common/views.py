@@ -127,3 +127,30 @@ class ItemizedResource(ApiResource):
                 ),
                 status_code=422,
             )
+
+
+class IndividualColumnResource(ApiResource):
+
+    def get(self, *args, **kwargs):
+        query = self.build_query(*args, **kwargs)
+        is_estimate = counts.is_estimated_count(self, query)
+        if not is_estimate:
+            count = None
+        else:
+            count, _ = counts.get_count(self, query)
+        multi = False
+        if isinstance(kwargs['sort'], (list, tuple)):
+            multi = True
+        return utils.fetch_page(
+            query,
+            kwargs,
+            models.db.session,
+            count=count,
+            model=self.model,
+            join_columns=self.join_columns,
+            aliases=self.aliases,
+            index_column=self.index_column,
+            cap=self.cap,
+            multi=multi,
+            contains_individual_columns=True
+        )

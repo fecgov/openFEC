@@ -77,6 +77,7 @@ def fetch_page(
     cap=100,
     index_column=None,
     multi=False,
+    **options
 ):
     check_cap(kwargs, cap)
     sort, hide_null, nulls_last = (
@@ -109,7 +110,7 @@ def fetch_page(
             nulls_last=nulls_last,
         )
     paginator = paginators.OffsetPaginator(query, kwargs["per_page"], session, count=count)
-    return paginator.get_page(kwargs["page"])
+    return paginator.get_page(kwargs["page"], **options)
 
 
 class SeekCoalescePaginator(paginators.SeekPaginator):

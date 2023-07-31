@@ -1,11 +1,10 @@
-import logging
 import sqlalchemy as sa
 from flask_apispec import doc
 from webservices import args
 from webservices import utils
 from webservices import docs
 from webservices import schemas
-from webservices.common.views import ApiResource
+from webservices.common.views import ApiResource, IndividualColumnResource
 from webservices.common.models import (
     CandidateHistory,
     ElectioneeringByCandidate,
@@ -90,7 +89,7 @@ class ECTotalsByCandidateView(ApiResource):
     tags=['independent expenditures'],
     description=docs.SCHEDULE_E_INDEPENDENT_EXPENDITURES_TOTALS_BY_CANDIDATE,
 )
-class IETotalsByCandidateView(ApiResource):
+class IETotalsByCandidateView(IndividualColumnResource):
 
     schema = schemas.IETotalsByCandidateSchema
     page_schema = schemas.IETotalsByCandidatePageSchema
@@ -142,7 +141,7 @@ class IETotalsByCandidateView(ApiResource):
     tags=['communication cost'],
     description=docs.COMMUNICATIONS_COSTS_TOTALS_BY_CANDIDATE,
 )
-class CCTotalsByCandidateView(ApiResource):
+class CCTotalsByCandidateView(IndividualColumnResource):
 
     schema = schemas.CCTotalsByCandidateSchema
     page_schema = schemas.CCTotalsByCandidatePageSchema
@@ -155,7 +154,6 @@ class CCTotalsByCandidateView(ApiResource):
 
     def build_query(self, **kwargs):
         cycle_column, candidate = get_candidate_list(kwargs)
-        logging.warning(cycle_column)
         query = (
             db.select(
                 CommunicationCostByCandidate.candidate_id,
@@ -185,5 +183,5 @@ class CCTotalsByCandidateView(ApiResource):
                 CommunicationCostByCandidate.support_oppose_indicator,
             )
         )
-        logging.warning(query)
+
         return query

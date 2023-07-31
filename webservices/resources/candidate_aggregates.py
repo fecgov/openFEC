@@ -8,7 +8,7 @@ from webservices import docs
 from webservices import filters
 from webservices import schemas
 from webservices.utils import use_kwargs
-from webservices.common.views import ApiResource
+from webservices.common.views import ApiResource, IndividualColumnResource
 from webservices.common import models
 from webservices.common.models import (
     CandidateCommitteeLink,
@@ -155,7 +155,7 @@ class ScheduleAByStateCandidateView(utils.Resource):
 @doc(
     tags=['candidate'], description=docs.TOTAL_CANDIDATE_TAG,
 )
-class TotalsCandidateView(ApiResource):
+class TotalsCandidateView(IndividualColumnResource):
 
     schema = schemas.CandidateHistoryTotalSchema
     page_schema = schemas.CandidateHistoryTotalPageSchema

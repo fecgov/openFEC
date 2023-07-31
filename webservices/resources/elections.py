@@ -151,6 +151,7 @@ class ElectionView(ApiResource):
             index_column=self.index_column,
             cap=0,
             multi=multi,
+            contains_individual_columns=True
         )
 
     def build_query(self, **kwargs):
