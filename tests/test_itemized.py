@@ -617,7 +617,6 @@ class TestScheduleA(ApiBaseTest):
             api.url_for(
                 ScheduleAView,
                 sort='-contribution_receipt_date',
-                sort_reverse_nulls='true',
                 **self.kwargs
             )
         )
@@ -681,7 +680,6 @@ class TestScheduleA(ApiBaseTest):
             api.url_for(
                 ScheduleAView,
                 sort='contribution_receipt_date',
-                sort_reverse_nulls='true',
                 **self.kwargs
             )
         )
@@ -969,7 +967,6 @@ class TestScheduleB(ApiBaseTest):
             api.url_for(
                 ScheduleBView,
                 sort='-disbursement_date',
-                sort_nulls_last=True,
                 **self.kwargs
             )
         )
@@ -1151,15 +1148,15 @@ class TestScheduleE(ApiBaseTest):
             ),
         ]
         results = self._results(
-            api.url_for(ScheduleEView, q_spender='action', **self.kwargs)
+            api.url_for(ScheduleEView, q_spender='action')
         )
         self.assertEqual(len(results), 2)
         results = self._results(
-            api.url_for(ScheduleEView, q_spender='abc', **self.kwargs)
+            api.url_for(ScheduleEView, q_spender='abc')
         )
         self.assertEqual(len(results), 1)
         results = self._results(
-            api.url_for(ScheduleEView, q_spender='C001', **self.kwargs)
+            api.url_for(ScheduleEView, q_spender='C001')
         )
         self.assertEqual(len(results), 1)
 
@@ -1196,7 +1193,7 @@ class TestScheduleE(ApiBaseTest):
     def test_schedule_e_expenditure_description_field(self):
         factories.ScheduleEFactory(committee_id='C001', expenditure_description='Advertising Costs')
         results = self._results(
-            api.url_for(ScheduleEView, **self.kwargs)
+            api.url_for(ScheduleEView)
         )
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['expenditure_description'], 'Advertising Costs')
@@ -1322,7 +1319,7 @@ class TestScheduleE(ApiBaseTest):
             factories.ScheduleEFactory(committee_id='C006', filing_form='F3X'),
         ]
         results = self._results(
-            api.url_for(ScheduleEView, most_recent=True, **self.kwargs)
+            api.url_for(ScheduleEView, most_recent=True)
         )
         # Most recent should include null values
         self.assertEqual(len(results), 5)
@@ -1347,7 +1344,7 @@ class TestScheduleE(ApiBaseTest):
         factories.EFilingsFactory(file_number=123)
         db.session.flush()
         results = self._results(
-            api.url_for(ScheduleEEfileView, most_recent=True, **self.kwargs)
+            api.url_for(ScheduleEEfileView, most_recent=True)
         )
         # Most recent should include null values
         self.assertEqual(len(results), 5)
@@ -1396,21 +1393,21 @@ class TestScheduleH4(ApiBaseTest):
             for purpose in purposes
         ]
         results = self._results(
-            api.url_for(ScheduleH4View, disbursement_purpose='Test&Test', **self.kwargs)
+            api.url_for(ScheduleH4View, q_disbursement_purpose='Test&Test')
         )
         self.assertIn(results[0]['disbursement_purpose'], purposes)
         results = self._results(
             api.url_for(
-                ScheduleH4View, disbursement_purpose='Test & Test', **self.kwargs
+                ScheduleH4View, q_disbursement_purpose='Test & Test'
             )
         )
         self.assertIn(results[0]['disbursement_purpose'], purposes)
         results = self._results(
-            api.url_for(ScheduleH4View, disbursement_purpose='Test& Test', **self.kwargs)
+            api.url_for(ScheduleH4View, q_disbursement_purpose='Test& Test')
         )
         self.assertIn(results[0]['disbursement_purpose'], purposes)
         results = self._results(
-            api.url_for(ScheduleH4View, disbursement_purpose='Test &Test', **self.kwargs)
+            api.url_for(ScheduleH4View, q_disbursement_purpose='Test &Test')
         )
         self.assertIn(results[0]['disbursement_purpose'], purposes)
 
@@ -1420,12 +1417,12 @@ class TestScheduleH4(ApiBaseTest):
             'Test com',
             'Testerosa',
             'Test#com',
-            'Not.com',
+            'Not.com',  # this should not be a result
             'Test.com and Test.com',
         ]
         [factories.ScheduleH4Factory(payee_name=payee) for payee in payee_names]
-        results = self._results(api.url_for(ScheduleH4View, payee_name='test'))
-        self.assertEqual(len(results), len(payee_names))
+        results = self._results(api.url_for(ScheduleH4View, q_payee_name='test'))
+        self.assertEqual(len(results), 5)
 
     def test_schedule_h4_efile_event_purpose_date_range(self):
 

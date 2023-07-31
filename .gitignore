@@ -72,3 +72,4 @@ static/swagger-ui/js
 
 # Pycharm
 .idea
+.vscode/launch.json
