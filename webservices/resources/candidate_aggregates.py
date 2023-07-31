@@ -8,7 +8,7 @@ from webservices import docs
 from webservices import filters
 from webservices import schemas
 from webservices.utils import use_kwargs
-from webservices.common.views import IndividualColumnResource
+from webservices.common.views import ApiResource
 from webservices.common import models
 from webservices.common.models import (
     CandidateCommitteeLink,
@@ -165,10 +165,11 @@ class ScheduleAByStateCandidateView(utils.Resource):
 @doc(
     tags=['candidate'], description=docs.TOTAL_CANDIDATE_TAG,
 )
-class TotalsCandidateView(IndividualColumnResource):
+class TotalsCandidateView(ApiResource):
 
     schema = schemas.CandidateHistoryTotalSchema
     page_schema = schemas.CandidateHistoryTotalPageSchema
+    contains_individual_columns = True
 
     @property
     def args(self):
@@ -254,9 +255,10 @@ class TotalsCandidateView(IndividualColumnResource):
 @doc(
     tags=["candidate"], description=docs.CANDIDATE_TOTAL_AGGREGATE_TAG,
 )
-class CandidateTotalAggregateView(IndividualColumnResource):
+class CandidateTotalAggregateView(ApiResource):
     schema = schemas.CandidateTotalAggregateSchema
     page_schema = schemas.CandidateTotalAggregatePageSchema
+    contains_individual_columns = True
 
     @property
     def args(self):
@@ -421,5 +423,4 @@ class CandidateTotalAggregateView(IndividualColumnResource):
             query = query.group_by(
                 total.election_year,
             )
-
         return query

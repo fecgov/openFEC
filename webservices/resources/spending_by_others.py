@@ -4,7 +4,7 @@ from webservices import args
 from webservices import utils
 from webservices import docs
 from webservices import schemas
-from webservices.common.views import ApiResource, IndividualColumnResource
+from webservices.common.views import ApiResource
 from webservices.common.models import (
     CandidateHistory,
     ElectioneeringByCandidate,
@@ -89,10 +89,11 @@ class ECTotalsByCandidateView(ApiResource):
     tags=['independent expenditures'],
     description=docs.SCHEDULE_E_INDEPENDENT_EXPENDITURES_TOTALS_BY_CANDIDATE,
 )
-class IETotalsByCandidateView(IndividualColumnResource):
+class IETotalsByCandidateView(ApiResource):
 
     schema = schemas.IETotalsByCandidateSchema
     page_schema = schemas.IETotalsByCandidatePageSchema
+    contains_individual_columns = True
 
     @property
     def args(self):
@@ -141,10 +142,11 @@ class IETotalsByCandidateView(IndividualColumnResource):
     tags=['communication cost'],
     description=docs.COMMUNICATIONS_COSTS_TOTALS_BY_CANDIDATE,
 )
-class CCTotalsByCandidateView(IndividualColumnResource):
+class CCTotalsByCandidateView(ApiResource):
 
     schema = schemas.CCTotalsByCandidateSchema
     page_schema = schemas.CCTotalsByCandidatePageSchema
+    contains_individual_columns = True
 
     @property
     def args(self):

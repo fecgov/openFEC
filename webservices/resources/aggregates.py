@@ -8,7 +8,7 @@ from webservices import utils
 from webservices import filters
 from webservices import schemas
 from webservices import exceptions
-from webservices.common import models, counts
+from webservices.common import models
 from webservices.common.views import ApiResource
 
 
@@ -36,33 +36,6 @@ class AggregateResource(ApiResource):
     @property
     def index_column(self):
         return self.model.idx
-
-
-class IndividualColumnAggregateResource(AggregateResource):
-
-    def get(self, *args, **kwargs):
-        query = self.build_query(*args, **kwargs)
-        is_estimate = counts.is_estimated_count(self, query)
-        if not is_estimate:
-            count = None
-        else:
-            count, _ = counts.get_count(self, query)
-        multi = False
-        if isinstance(kwargs['sort'], (list, tuple)):
-            multi = True
-        return utils.fetch_page(
-            query,
-            kwargs,
-            models.db.session,
-            count=count,
-            model=self.model,
-            join_columns=self.join_columns,
-            aliases=self.aliases,
-            index_column=self.index_column,
-            cap=self.cap,
-            multi=multi,
-            contains_individual_columns=True
-        )
 
 
 @doc(
@@ -228,12 +201,13 @@ class ScheduleBByRecipientIDView(AggregateResource):
     ]
 
 
-class CandidateAggregateResource(IndividualColumnAggregateResource):
+class CandidateAggregateResource(AggregateResource):
 
     # Since candidate aggregates are aggregated on the fly, they don't have a
     # consistent unique index. We nullify `index_column` to avoiding sorting
     # on the unique index of the base model.
     index_column = None
+    contains_individual_columns = True
 
     @property
     def sort_args(self):
@@ -341,7 +315,8 @@ class CommunicationCostByCandidateView(CandidateAggregateResource):
     tags=['communication cost'],
     description=docs.COMMUNICATION_COST_AGGREGATE,
 )
-class CCAggregatesView(IndividualColumnAggregateResource):
+class CCAggregatesView(AggregateResource):
+    contains_individual_columns = True
 
     @property
     def sort_args(self):
@@ -396,7 +371,8 @@ class ElectioneeringByCandidateView(CandidateAggregateResource):
     tags=['electioneering'],
     description=docs.ELECTIONEERING_AGGREGATE,
 )
-class ECAggregatesView(IndividualColumnAggregateResource):
+class ECAggregatesView(AggregateResource):
+    contains_individual_columns = True
 
     @property
     def sort_args(self):
