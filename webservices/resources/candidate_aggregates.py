@@ -160,9 +160,27 @@ class TotalsCandidateView(ApiResource):
     schema = schemas.CandidateHistoryTotalSchema
     page_schema = schemas.CandidateHistoryTotalPageSchema
 
+    sort_options = [
+        'election_year',
+        'name',
+        'party',
+        'state',
+        'office',
+        'district',
+        'receipts',
+        'disbursements',
+    ]
+
     @property
     def args(self):
-        return utils.extend(args.paging, args.candidate_totals, args.make_sort_args(),)
+        return utils.extend(
+            args.paging,
+            args.candidate_totals,
+            args.make_sort_args(
+                default='-election_year',
+                validator=args.OptionValidator(self.sort_options)
+            ),
+        )
 
     def filter_multi_fields(self, history, total):
         return [
