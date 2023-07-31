@@ -577,6 +577,7 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
         foreign_keys=file_number,
         uselist=True,
         lazy='subquery',
+        overlaps='amendment',
     )
 
     amendment = db.relationship(
@@ -586,6 +587,7 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
                             )''',
         foreign_keys=file_number,
         lazy='joined',
+        overlaps='summary_lines',
     )
 
     @declared_attr
@@ -639,6 +641,7 @@ class BaseF3Filing(TreasurerMixin, BaseFiling):
                                 )''',
         foreign_keys=file_number,
         lazy='joined',
+        overlaps='summary_lines'
     )
 
     summary_lines = db.relationship(
@@ -649,6 +652,7 @@ class BaseF3Filing(TreasurerMixin, BaseFiling):
         foreign_keys=file_number,
         uselist=True,
         lazy='subquery',
+        overlaps='amendment'
     )
 
     @declared_attr
@@ -681,6 +685,7 @@ class BaseF3XFiling(BaseFiling):
         foreign_keys=file_number,
         uselist=True,
         lazy='subquery',
+        overlaps='amendment',
     )
 
     amendment = db.relationship(
@@ -690,6 +695,7 @@ class BaseF3XFiling(BaseFiling):
                                 )''',
         foreign_keys=file_number,
         lazy='joined',
+        overlaps='summary_lines',
     )
 
     @declared_attr

@@ -66,6 +66,7 @@ class BaseCandidate(BaseModel):
             primaryjoin=sa.orm.foreign(CandidateFlags.candidate_id)
             == self.candidate_id,
             uselist=False,
+            overlaps='flags',
         )
 
 
