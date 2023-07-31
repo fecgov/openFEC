@@ -8,7 +8,7 @@ from webservices import utils
 from webservices import filters
 from webservices import schemas
 from webservices import exceptions
-from webservices.common import models
+from webservices.common import models, counts
 from webservices.common.views import ApiResource
 
 
@@ -36,6 +36,33 @@ class AggregateResource(ApiResource):
     @property
     def index_column(self):
         return self.model.idx
+
+
+class IndividualColumnAggregateResource(AggregateResource):
+
+    def get(self, *args, **kwargs):
+        query = self.build_query(*args, **kwargs)
+        is_estimate = counts.is_estimated_count(self, query)
+        if not is_estimate:
+            count = None
+        else:
+            count, _ = counts.get_count(self, query)
+        multi = False
+        if isinstance(kwargs['sort'], (list, tuple)):
+            multi = True
+        return utils.fetch_page(
+            query,
+            kwargs,
+            models.db.session,
+            count=count,
+            model=self.model,
+            join_columns=self.join_columns,
+            aliases=self.aliases,
+            index_column=self.index_column,
+            cap=self.cap,
+            multi=multi,
+            contains_individual_columns=True
+        )
 
 
 @doc(
@@ -201,7 +228,7 @@ class ScheduleBByRecipientIDView(AggregateResource):
     ]
 
 
-class CandidateAggregateResource(AggregateResource):
+class CandidateAggregateResource(IndividualColumnAggregateResource):
 
     # Since candidate aggregates are aggregated on the fly, they don't have a
     # consistent unique index. We nullify `index_column` to avoiding sorting
@@ -254,17 +281,17 @@ class CandidateAggregateResource(AggregateResource):
             ),
         )
         query = query.with_only_columns(
-            self.model.candidate_id,
-            self.model.committee_id,
+            self.model.candidate_id.label('cand_id'),
+            self.model.committee_id.label('cmte_id'),
             cycle_column.label('cycle'),
-            # sa.func.sum(self.model.total).label('total'),
-            # sa.func.sum(self.model.count).label('count'),
-            # *self.label_columns #, maintain_column_froms=True
+            sa.func.sum(self.model.total).label('total'),
+            sa.func.sum(self.model.count).label('count'),
+            *self.label_columns
         ).group_by(
             self.model.candidate_id,
             self.model.committee_id,
             cycle_column,
-            # *self.group_columns
+            *self.group_columns
         )
         return query
 
@@ -314,7 +341,7 @@ class CommunicationCostByCandidateView(CandidateAggregateResource):
     tags=['communication cost'],
     description=docs.COMMUNICATION_COST_AGGREGATE,
 )
-class CCAggregatesView(AggregateResource):
+class CCAggregatesView(IndividualColumnAggregateResource):
 
     @property
     def sort_args(self):
@@ -369,7 +396,7 @@ class ElectioneeringByCandidateView(CandidateAggregateResource):
     tags=['electioneering'],
     description=docs.ELECTIONEERING_AGGREGATE,
 )
-class ECAggregatesView(AggregateResource):
+class ECAggregatesView(IndividualColumnAggregateResource):
 
     @property
     def sort_args(self):
