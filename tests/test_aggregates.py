@@ -257,7 +257,7 @@ class TestAggregates(ApiBaseTest):
                 )
             )
             assert len(results) == 1
-            serialized = schema().dump(aggregates[0]).data
+            serialized = schema().dump(aggregates[0])
             serialized.update(
                 {
                     'committee_name': self.committee.name,
@@ -278,14 +278,13 @@ class TestAggregates(ApiBaseTest):
                 api.url_for(
                     resource,
                     candidate_id=self.candidate.candidate_id,
-                    committee_id=self.committee.committee_id,
                     cycle=2012,
                     office='president',
                     election_full='true',
                 )
             )
             assert len(results) == 1
-            serialized = schema().dump(aggregates[0]).data
+            serialized = schema().dump(aggregates[0])
             serialized.update(
                 {
                     'committee_name': self.committee.name,

@@ -297,8 +297,8 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_first_f1_date_sort(self):
         committees = [
-            factories.CommitteeFactory(first_f1_date="2003-10-12"),
-            factories.CommitteeFactory(first_f1_date="2017-05-14"),
+            factories.CommitteeFactory(first_f1_date=datetime.date.fromisoformat("2003-10-12")),
+            factories.CommitteeFactory(first_f1_date=datetime.date.fromisoformat("2017-05-14")),
         ]
         committee_ids = [each.committee_id for each in committees]
         results = self._results(api.url_for(CommitteeList, sort="first_f1_date"))
@@ -386,13 +386,12 @@ class CommitteeFormatTest(ApiBaseTest):
                 for each in results
             )
         )
-        results = self._results(
-            api.url_for(
-                CommitteeList,
-                **{min_date_field: datetime.date.fromisoformat(values[1]),
-                max_date_field: datetime.date.fromisoformat(values[2])}
-            )
-        )
+        results = self._results(api.url_for(
+            CommitteeList,
+            **{min_date_field: datetime.date.fromisoformat(values[1]),
+               max_date_field: datetime.date.fromisoformat(values[2])}
+                                            )
+                                )
         self.assertTrue(
             all(
                 datetime.date.fromisoformat(values[1]).isoformat()
@@ -614,22 +613,22 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
                 CommitteeHistoryProfileView,
                 committee_id=self.committees[4].committee_id,
                 cycle=2014,
-                election_full=False,
-                is_active=False,
+                election_full=False
             )
         )
         assert len(results) == 1
+        self.assertFalse(results[0]["is_active"])
 
         results = self._results(
             api.url_for(
                 CommitteeHistoryProfileView,
                 committee_id=self.committees[2].committee_id,
                 cycle=2014,
-                election_full=False,
-                is_active=True,
+                election_full=False
             )
         )
         assert len(results) == 1
+        self.assertTrue(results[0]["is_active"])
 
     def test_candidate_cycle(self):
         results = self._results(
@@ -739,8 +738,7 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
                 CommitteeHistoryProfileView,
                 committee_id="id01",
                 cycle=2014,
-                election_full=False,
-                is_active=False,
+                election_full=False
             )
         )
         assert len(results) == 1
@@ -750,8 +748,7 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
                 CommitteeHistoryProfileView,
                 candidate_id="h01",
                 cycle=2014,
-                election_full=False,
-                is_active=False,
+                election_full=False
             )
         )
         assert len(results) == 1

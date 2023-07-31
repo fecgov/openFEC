@@ -154,7 +154,7 @@ class ReportsView(views.ApiResource):
             validator = args.IndicesValidator(reports_class)
             validator(kwargs['sort'])
         page = utils.fetch_page(query, kwargs, model=reports_class, multi=True)
-        return reports_schema().dump(page).data
+        return reports_schema().dump(page)
 
     def build_query(self, entity_type=None, **kwargs):
         # For this endpoint we now enforce the enpoint specified to map the right model.
@@ -219,7 +219,7 @@ class CommitteeReportsView(views.ApiResource):
             validator = args.IndicesValidator(reports_class)
             validator(kwargs['sort'])
         page = utils.fetch_page(query, kwargs, model=reports_class, multi=True)
-        return reports_schema().dump(page).data
+        return reports_schema().dump(page)
 
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
         reports_class, reports_schema = reports_schema_map.get(

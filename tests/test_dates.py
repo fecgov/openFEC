@@ -30,7 +30,7 @@ class TestReportingDates(ApiBaseTest):
         factories.ReportDateFactory(update_date=datetime.datetime(2014, 4, 2))
 
         filter_fields = (
-            ('due_date', '2014-01-02'),
+            ('min_due_date', '2014-01-02'),
             ('report_year', 2015),
             ('report_type', 'YE'),
             ('min_create_date', '2014-03-02'),
