@@ -84,11 +84,11 @@ class ApiBaseTest(BaseTestCase):
         ]
         rest.db.metadata.create_all(
             rest.db.engine,
-            tables=set(  # This can be done better, but works for now
-                [each.__table__
+            tables=[
+                each.__table__
                 for each in rest.db.Model.registry._class_registry.values()
                 if hasattr(each, '__table__') and each not in tables_to_skip
-            ],)
+            ],
         )
 
     def setUp(self):
