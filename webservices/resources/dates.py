@@ -84,7 +84,9 @@ class CalendarDatesExport(CalendarDatesView):
         schema_type, renderer, mimetype = self.renderers[kwargs['renderer']]
         schema = schema_type(many=True)
         return Response(
-            renderer(schema.dump(query), schema),
+            renderer(
+                schema.dump(
+                    models.db.session.execute(query).scalars().all()), schema),
             mimetype=mimetype,
         )
 
