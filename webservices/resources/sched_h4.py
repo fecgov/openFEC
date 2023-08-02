@@ -72,6 +72,10 @@ class ScheduleH4View(ItemizedResource):
         'disbursement_purpose',
     ]
 
+    query_options = [
+        sa.orm.joinedload(models.ScheduleH4.committee)
+    ]
+
     @property
     def args(self):
         return utils.extend(
@@ -83,8 +87,8 @@ class ScheduleH4View(ItemizedResource):
             ))
 
     def build_query(self, **kwargs):
-        query = super(ScheduleH4View, self).build_query(**kwargs)
-        query = query.options(sa.orm.joinedload(models.ScheduleH4.committee))
+        query = super(ScheduleH4View, self).build_query(_apply_options=False,
+                                                        **kwargs)
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         if kwargs.get('line_number'):

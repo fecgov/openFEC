@@ -81,7 +81,7 @@ class ScheduleBView(ItemizedResource):
             ))
 
     def build_query(self, **kwargs):
-        query = super(ScheduleBView, self).build_query(**kwargs)
+        query = super(ScheduleBView, self).build_query(_apply_options=False, **kwargs)
         # might be worth looking to factoring these out into the filter script
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))

@@ -112,7 +112,7 @@ class ScheduleAView(ItemizedResource):
         )
 
     def build_query(self, **kwargs):
-        query = super().build_query(**kwargs)
+        query = super().build_query(_apply_options=False, **kwargs)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
         zip_list = []
         if kwargs.get('contributor_zip'):

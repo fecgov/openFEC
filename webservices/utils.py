@@ -114,7 +114,7 @@ def fetch_page(
 
 
 class SeekCoalescePaginator(paginators.SeekPaginator):
-    def __init__(self, cursor, per_page, hide_null, index_column, sort_column=None, count=None):
+    def __init__(self, cursor, per_page, session, hide_null, index_column, count, sort_column=None):
         self.max_column_map = {
             "date": date.max,
             "float": float("inf"),
@@ -127,7 +127,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         }
         self.hide_null = hide_null
         super(SeekCoalescePaginator, self).__init__(
-            cursor, per_page, index_column, sort_column, count
+            cursor, per_page, session, index_column, count, sort_column
         )
 
     def _fetch(self, last_index, sort_index=None, limit=None, eager=True):
@@ -220,10 +220,10 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
 
 
 def fetch_seek_page(
-    query, kwargs, index_column, clear=False, count=None, cap=100, eager=True
+    query, kwargs, session, index_column, clear=False, count=None, cap=100, eager=True
 ):
     paginator = fetch_seek_paginator(
-        query, kwargs, index_column, clear=clear, count=count, cap=cap
+        query, kwargs, session, index_column, clear=clear, count=count, cap=cap
     )
     if paginator.sort_column is not None:
         sort_index = kwargs["last_{0}".format(paginator.sort_column[2])]
@@ -249,7 +249,7 @@ def fetch_seek_page(
     )
 
 
-def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, cap=100):
+def fetch_seek_paginator(query, kwargs, session, index_column, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
     model = index_column.parent.class_
     sort, hide_null, nulls_last = (
@@ -270,7 +270,7 @@ def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, c
         sort_column = None
 
     return SeekCoalescePaginator(
-        query, kwargs["per_page"], kwargs["sort_hide_null"], index_column, sort_column=sort_column, count=count
+        query, kwargs["per_page"], session, kwargs["sort_hide_null"], index_column, count, sort_column=sort_column
     )
 
 

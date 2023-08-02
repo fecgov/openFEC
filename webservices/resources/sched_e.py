@@ -106,7 +106,7 @@ class ScheduleEView(ItemizedResource):
         return query
 
     def build_query(self, **kwargs):
-        query = super().build_query(**kwargs)
+        query = super().build_query(_apply_options=False, **kwargs)
         if 'most_recent' in kwargs:
             query = query.filter(sa.or_(self.model.most_recent == kwargs.get('most_recent'),
                                         self.model.most_recent == None))  # noqa

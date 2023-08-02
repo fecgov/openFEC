@@ -88,7 +88,16 @@ class ItemizedResource(ApiResource):
             count = None
         else:
             count, _ = counts.get_count(self, query)
-        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
+        # We cannot count rows with joinedload option applied
+        # add options after counting
+        query = self.add_options(query)
+
+        return utils.fetch_seek_page(query, kwargs, models.db.session, self.index_column, count=count, cap=self.cap)
+
+    def add_options(self, query, _apply_options=True):
+        if _apply_options:
+            query = query.options(*self.query_options)
+        return query
 
     def validate_kwargs(self, kwargs):
         """Custom keyword argument validation
