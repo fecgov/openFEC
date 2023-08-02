@@ -38,6 +38,7 @@ class CommitteeList(ApiResource):
     schema = schemas.CommitteeSchema
     page_schema = schemas.CommitteePageSchema
     aliases = {"receipts": models.CommitteeSearch.receipts}
+    contains_joined_load = True
 
     filter_multi_fields = [
         ("committee_id", models.Committee.committee_id),
