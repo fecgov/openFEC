@@ -164,6 +164,7 @@ class TotalsCandidateView(ApiResource):
         'election_year',
         'name',
         'party',
+        'party_full',
         'state',
         'office',
         'district',
