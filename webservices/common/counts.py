@@ -58,7 +58,7 @@ def get_query_plan(query):
 
 
 def extract_analyze_count(rows):
-    for row in rows:
+    for row in reversed(rows):
         match = count_pattern.search(row[0])
         if match:
             return int(match.groups()[0])
