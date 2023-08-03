@@ -36,12 +36,6 @@ const Footer = () => (
             </div>
           </li>
         </ul>
-
-        <p>
-          1050 First Street, NE
-          <br /> Washington, DC 20463
-        </p>
-
         <a href="mailto:apiinfo@fec.gov">
           <button className="button--standard button--envelope" type="button">
             Email FEC API Info
