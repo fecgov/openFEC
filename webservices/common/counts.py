@@ -41,7 +41,9 @@ def get_count(resource, query):
         estimated_count = get_estimated_count(query)
         return estimated_count, is_estimate
     # Use exact counts for `use_estimated_counts == False` and small result sets
-    exact_count = models.db.session.execute(select(func.count()).select_from(query).order_by(None)).scalar()
+    exact_count = models.db.session.scalars(select(func.count())
+                                            .select_from(query)).one()
+
     return exact_count, is_estimate
 
 
@@ -63,6 +65,8 @@ def extract_analyze_count(rows):
 
 
 class explain(Executable, ClauseElement):
+    inherit_cache = True
+
     def __init__(self, stmt, analyze=False):
         self.statement = stmt
         self.analyze = analyze
