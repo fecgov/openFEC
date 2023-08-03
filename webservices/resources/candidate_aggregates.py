@@ -159,7 +159,7 @@ class ScheduleAByStateCandidateView(utils.Resource):
             [ScheduleAByState.state],
             kwargs,
         )
-        return utils.fetch_page(query, kwargs, db.session, cap=0)
+        return utils.fetch_page(query, kwargs, db.session, cap=0, contains_individual_columns=True)
 
 
 @doc(

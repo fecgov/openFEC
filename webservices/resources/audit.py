@@ -54,6 +54,7 @@ class AuditCategoryView(ApiResource):
     model = models.AuditCategory
     schema = schemas.AuditCategorySchema
     page_schema = schemas.AuditCategoryPageSchema
+    contains_joined_load = True
 
     filter_multi_fields = [
         ('primary_category_id', model.primary_category_id),
@@ -90,6 +91,7 @@ class AuditCaseView(ApiResource):
     model = models.AuditCase
     schema = schemas.AuditCaseSchema
     page_schema = schemas.AuditCasePageSchema
+    contains_joined_load = True
 
     filter_multi_fields = [
         ('audit_case_id', model.audit_case_id),

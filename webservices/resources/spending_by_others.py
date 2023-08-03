@@ -52,6 +52,7 @@ class ECTotalsByCandidateView(ApiResource):
 
     schema = schemas.ECTotalsByCandidateSchema
     page_schema = schemas.ECTotalsByCandidatePageSchema
+    contains_individual_columns = True
 
     @property
     def args(self):
