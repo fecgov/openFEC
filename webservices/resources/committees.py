@@ -290,9 +290,11 @@ class CommitteeHistoryProfileView(ApiResource):
                     # remove duplicate committee(s), mostly for Presidental and Senate candidate.
                     models.CommitteeHistoryProfile.committee_id,
                 )
+                self.contains_individual_columns = True
+                self.contains_joined_load = False
 
                 # union three queries: query_regular + query_leadership_pac + query_pcc_converted
-                query = query_regular.union(query_leadership_pac, query_pcc_converted).order_by(
+                query = sa.union(query_regular, query_leadership_pac, query_pcc_converted).order_by(
                     models.CommitteeHistoryProfile.committee_id,
                     sa.desc(models.CommitteeHistoryProfile.cycle),
                 )
@@ -300,4 +302,3 @@ class CommitteeHistoryProfileView(ApiResource):
                 # for election_full=false
                 query = query.filter(models.CommitteeHistoryProfile.cycle == cycle)
         return query
-
