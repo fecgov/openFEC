@@ -170,6 +170,7 @@ class TotalsCandidateView(ApiResource):
         'district',
         'receipts',
         'disbursements',
+        'individual_itemized_contributions',
     ]
 
     @property
