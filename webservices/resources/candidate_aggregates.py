@@ -164,11 +164,13 @@ class TotalsCandidateView(ApiResource):
         'election_year',
         'name',
         'party',
+        'party_full',
         'state',
         'office',
         'district',
         'receipts',
         'disbursements',
+        'individual_itemized_contributions',
     ]
 
     @property
