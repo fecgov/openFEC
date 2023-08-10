@@ -81,6 +81,8 @@ CREATE INDEX IF NOT EXISTS idx_ofec_sched_d_mv_tmp_image_num on ofec_sched_d_mv_
 
 -- update the interface VW to point to the updated tmp MV
 -- ---------------
+DROP VIEW IF EXISTS public.ofec_sched_d_vw;
+
 CREATE OR REPLACE VIEW public.ofec_sched_d_vw AS
 SELECT * FROM public.ofec_sched_d_mv_tmp;
 
