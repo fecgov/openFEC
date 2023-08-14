@@ -776,7 +776,8 @@ schedule_d = {
     'min_coverage_start_date': Date(missing=None, description=docs.MIN_COVERAGE_START_DATE),
     'max_coverage_start_date': Date(missing=None, description=docs.MAX_COVERAGE_START_DATE),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
-    'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE)
+    'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE),
+    'line_number': fields.List(IStr, description=docs.LINE_NUMBER_ONLY),
 }
 schedule_e_by_candidate = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
