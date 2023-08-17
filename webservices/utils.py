@@ -379,7 +379,6 @@ related_efile_summary = functools.partial(
 def document_description(
     report_year, report_type=None, document_type=None, form_type=None
 ):
-    DEBT_DOCUMENT_NAME = "Debt Settlement Plan"
 
     if report_type:
         clean = re.sub(r"\{[^)]*\}", "", report_type)
@@ -388,7 +387,7 @@ def document_description(
     elif form_type and form_type in decoders.form_types:
         clean = decoders.form_types[form_type]
     else:
-        clean = DEBT_DOCUMENT_NAME
+        clean = "Document"
 
     if form_type and (form_type == "RFAI" or form_type == "FRQ"):
         clean = "RFAI: " + clean
