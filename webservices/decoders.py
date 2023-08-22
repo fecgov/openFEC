@@ -25,6 +25,7 @@ form_types = {
     "F12": "24-Hour notice of suspension of increased limits",
     "F99": "Miscellaneous document",
     "F6": "48-Hour notice of contribution/loans received",
+    "F8": "Debt Settlement Plan",
 }
 
 

@@ -379,6 +379,7 @@ related_efile_summary = functools.partial(
 def document_description(
     report_year, report_type=None, document_type=None, form_type=None
 ):
+
     if report_type:
         clean = re.sub(r"\{[^)]*\}", "", report_type)
     elif document_type:
