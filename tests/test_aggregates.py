@@ -881,6 +881,32 @@ class TestCandidateAggregates(ApiBaseTest):
         assert len(results) == 1
         assert_dicts_subset(results[0], {'cycle': self.next_cycle, 'receipts': 55000})
 
+    def test_sort_validation_candidate_totals(self):
+        results = self.app.get(
+            api.url_for(
+                TotalsCandidateView,
+                election_full='false',
+                sort='test',
+            )
+        )
+        self.assertEqual(results.status_code, 422)
+
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                election_full='false',
+                sort='-election_year',
+            )
+        )
+        assert len(results) == 5
+        assert_dicts_subset(
+            results[0],
+            {
+                "candidate_id": "P456",
+                "receipts": 25000,
+            },
+        )
+
 
 # Test /candidates/totals/aggregates/ (candidate_aggregates.CandidateTotalAggregateView
 class TestCandidatesTotalsAggregates(ApiBaseTest):
