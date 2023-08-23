@@ -24,7 +24,6 @@ class TestScheduleDView(ApiBaseTest):
             ('candidate_id', ScheduleD.candidate_id, ['S01', 'S02']),
             ('report_year', ScheduleD.report_year, [2023, 2019]),
             ('report_type', ScheduleD.report_type, ['60D', 'Q3']),
-            ('line_number', ScheduleD.line_number, ['9', '10']),
             ('filing_form', ScheduleD.filing_form, ['F3P', 'F3X']),
             ('committee_type', ScheduleD.committee_type, ['P', 'H'])
         ]

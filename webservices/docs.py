@@ -1810,10 +1810,6 @@ Filter for form and line number using the following format:
 down to all entries from form `F3X` line number `16`.
 '''
 
-LINE_NUMBER_ONLY = '''
-Filter for line number using the following format: "9" or "10".
-'''
-
 IMAGE_NUMBER = '''
 An unique identifier for each page where the electronic or paper filing is reported.
 '''

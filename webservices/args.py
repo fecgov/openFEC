@@ -777,7 +777,7 @@ schedule_d = {
     'max_coverage_start_date': Date(missing=None, description=docs.MAX_COVERAGE_START_DATE),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE),
-    'line_number': fields.List(IStr, description=docs.LINE_NUMBER_ONLY),
+    'line_number': fields.Str(description=docs.LINE_NUMBER),
     'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
     'filing_form': fields.List(fields.Str, description=docs.FORM_TYPE),
 }

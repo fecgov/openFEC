@@ -2,6 +2,7 @@ from flask_apispec import doc
 
 from webservices import args
 from webservices import docs
+from webservices import exceptions
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
@@ -28,7 +29,6 @@ class ScheduleDView(ApiResource):
         ('candidate_id', models.ScheduleD.candidate_id),  # TODO: deprecate and remove
         ('report_year', models.ScheduleD.report_year),
         ('report_type', models.ScheduleD.report_type),
-        ('line_number', models.ScheduleD.line_number),
         ('filing_form', models.ScheduleD.filing_form),
         ('committee_type', models.ScheduleD.committee_type)
     ]
@@ -66,9 +66,21 @@ class ScheduleDView(ApiResource):
         )
 
     def build_query(self, **kwargs):
-        query = super().build_query(**kwargs)
+        query = super(ScheduleDView, self).build_query(**kwargs)
+        # might be worth looking to factoring these out into the filter script
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
+        if kwargs.get('line_number'):
+            # line number is a composite value of 'filing_form-line_number'
+            if len(kwargs.get('line_number').split('-')) == 2:
+                form, line_no = kwargs.get('line_number').split('-')
+                query = query.filter_by(filing_form=form.upper())
+                query = query.filter_by(line_number=line_no)
+            else:
+                raise exceptions.ApiError(
+                    exceptions.LINE_NUMBER_ERROR,
+                    status_code=400,
+                )
         return query
 
 
