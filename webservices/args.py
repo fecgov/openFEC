@@ -767,7 +767,7 @@ schedule_d = {
     'max_amount_outstanding_beginning': fields.Float(),
     'min_amount_outstanding_close': fields.Float(),
     'max_amount_outstanding_close': fields.Float(),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID_DEP),  # to be deprecated
     'creditor_debtor_name': fields.List(Keyword),
     'nature_of_debt': fields.Str(),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
@@ -777,8 +777,11 @@ schedule_d = {
     'max_coverage_start_date': Date(missing=None, description=docs.MAX_COVERAGE_START_DATE),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE),
-    'line_number': fields.List(IStr, description=docs.LINE_NUMBER_ONLY),
+    'line_number': fields.Str(description=docs.LINE_NUMBER),
+    'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
+    'filing_form': fields.List(fields.Str, description=docs.FORM_TYPE),
 }
+
 schedule_e_by_candidate = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
