@@ -68,6 +68,7 @@ def refresh_materialized(concurrent=True):
         "candidate_totals_detail": ["ofec_candidate_totals_detail_mv"],
         "committee_detail": ["ofec_committee_detail_mv"],
         "committee_fulltext": ["ofec_committee_fulltext_mv"],
+        "affiliated_committees": ["ofec_affiliated_committees_mv"],
         "committee_history": ["ofec_committee_history_mv"],
         "communication_cost": ["ofec_communication_cost_mv"],
         "communication_cost_by_candidate": [
