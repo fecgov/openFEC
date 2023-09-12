@@ -430,10 +430,17 @@ JFCCommitteeSchema = make_schema(
     )
 # End create JFC committee schema
 
+AffiliatedCommitteeSchema = make_schema(
+    models.AffiliatedCommittee,
+    class_name='AffiliatedCommitteeSchema',
+    options={'exclude': ('committee_id',)},
+    )
+
 make_committees_schema = functools.partial(
     make_schema,
     fields={
         'jfc_committee': ma.fields.Nested(JFCCommitteeSchema, many=True),
+        'affiliated_committee': ma.fields.Nested(AffiliatedCommitteeSchema, many=True),
     },
     options={'exclude': ('idx', 'treasurer_text',)},
 )

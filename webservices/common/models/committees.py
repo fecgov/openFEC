@@ -184,6 +184,18 @@ class CommitteeDetail(BaseConcreteCommittee):
     custodian_name_title = db.Column(db.String(50), doc=docs.CUSTODIAN_NAME_TITLE)
     custodian_zip = db.Column(db.String(9), doc=docs.CUSTODIAN_ZIP)
 
+    @declared_attr
+    def affiliated_committee(self):
+        return db.relationship(
+            "AffiliatedCommittee",
+            primaryjoin='''and_(
+                        BaseConcreteCommittee.committee_id == foreign(AffiliatedCommittee.committee_id)
+                    )''',
+            lazy="joined",
+            uselist=True,
+    )
+
+
 
 # return JFC committee information
 # no resource class
@@ -200,3 +212,19 @@ class JFCCommittee(BaseModel):
     joint_committee_id = db.Column('joint_cmte_id', db.String, doc=docs.COMMITTEE_ID)
     joint_committee_name = db.Column('joint_cmte_nm', db.String(100), doc=docs.COMMITTEE_NAME)
     most_recent_filing_flag = db.Column(db.String(1), doc=docs.MOST_RECENT)
+
+class AffiliatedCommittee(db.Model):
+    __tablename__ = 'ofec_affiliated_committees_tmp_pmp'
+
+    committee_id = db.Column('cmte_id', db.String, primary_key=True, doc=docs.COMMITTEE_ID)
+    affiliated_committee_id = db.Column('affiliated_cmte_id', db.String, primary_key=True, doc=docs.COMMITTEE_ID)
+    affiliated_committee_name = db.Column('affiliated_cmte_nm', db.String(100), doc=docs.COMMITTEE_NAME)
+    affiliated_relationship_cd = db.Column(db.String(3), doc=docs.MOST_RECENT)
+    filed_committee_type = db.Column('filed_cmte_tp', db.String(1), doc=docs.COMMITTEE_NAME)
+    filed_committee_type_description = db.Column('filed_cmte_tp_desc', db.String(58), doc=docs.COMMITTEE_NAME)
+    form_type = db.Column('form_tp', db.String, doc=docs.COMMITTEE_NAME)
+    form_type_description = db.Column('form_tp_desc', db.String(90), doc=docs.COMMITTEE_NAME)
+    receipt_date = db.Column('receipt_dt', db.Date, doc=docs.COMMITTEE_NAME)
+    file_number = db.Column('file_num', db.Integer, doc=docs.COMMITTEE_NAME)
+    filed_committee_design = db.Column('filed_cmte_dsgn', db.String(1), doc=docs.COMMITTEE_NAME)
+    filed_committee_design_description = db.Column('filed_cmte_dsgn_desc', db.String(90), doc=docs.COMMITTEE_NAME)
