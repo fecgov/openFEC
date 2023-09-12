@@ -413,6 +413,7 @@ efilings = {
     'min_receipt_date': Date(description=docs.MIN_RECEIPT_DATE),
     'max_receipt_date': Date(description=docs.MAX_RECEIPT_DATE),
     'q_filer': fields.List(Keyword, description=docs.FILER_NAME_TEXT),
+    'form_type': fields.List(IStr, description=docs.FORM_TYPE_EFILING),
 }
 
 reports = {

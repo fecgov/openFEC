@@ -1407,6 +1407,27 @@ FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 
     - F99  Miscellaneous Text\n\
     - FRQ  Request for Additional Information\n\
 '
+
+FORM_TYPE_EFILING = 'The form where the underlying data comes from, for example Form 1 would appear as F1: \n\
+    - F1   Statement of Organization\n\
+    - F1M  Notification of Multicandidate Status\n\
+    - F2   Statement of Candidacy\n\
+    - F3   Report of Receipts and Disbursements for an Authorized Committee\n\
+    - F3P  Report of Receipts and Disbursements by an Authorized Committee of a Candidate for \
+    The Office of President or Vice President\n\
+    - F3L  Report of Contributions Bundled by Lobbyists/Registrants and Lobbyist/Registrant PACs\n\
+    - F3X  Report of Receipts and Disbursements for other than an Authorized Committee\n\
+    - F4   Report of Receipts and Disbursements for a Committee or Organization Supporting a Nomination Convention\n\
+    - F5   Report of Independent Expenditures Made and Contributions Received\n\
+    - F6   48 Hour Notice of Contributions/Loans Received\n\
+    - F7   Report of Communication Costs by Corporations and Membership Organizations\n\
+    - F8   Debt Settlement Plan\n\
+    - F9   24 Hour Notice of Disbursements for Electioneering Communications\n\
+    - F13  Report of Donations Accepted for Inaugural Committee\n\
+    - F99  Miscellaneous Text\n\
+NOTE: This filter also works if you specify new, amended, or termination, \n\
+for example F3XN, F3XA, or F3XT respectively \n\
+'
 BASE_REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
     - 10D Pre-Election\n\
     - 10G Pre-General\n\

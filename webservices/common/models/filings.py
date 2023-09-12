@@ -6,6 +6,7 @@ from webservices.common.models.dates import clean_report_type
 from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin, FecFileNumberMixin
 from webservices import exceptions
 
+
 class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     __tablename__ = 'ofec_filings_all_mv'
 
@@ -123,7 +124,7 @@ class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.M
     __tablename__ = 'reps'
 
     file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
-    form_type = db.Column('form', db.String, doc=docs.FORM_TYPE)
+    form_type = db.Column('form', db.String, doc=docs.FORM_TYPE_EFILING)
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
     committee_name = db.Column('com_name', db.String, doc=docs.COMMITTEE_NAME)
     receipt_date = db.Column('timestamp', db.DateTime, index=True, doc=docs.RECEIPT_DATE)
