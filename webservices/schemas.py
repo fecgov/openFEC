@@ -433,7 +433,7 @@ JFCCommitteeSchema = make_schema(
 AffiliatedCommitteeSchema = make_schema(
     models.AffiliatedCommittee,
     class_name='AffiliatedCommitteeSchema',
-    options={'exclude': ('committee_id',)},
+    options={'exclude': ('idx', 'committee_id',)},
     )
 
 make_committees_schema = functools.partial(

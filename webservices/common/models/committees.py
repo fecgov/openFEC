@@ -213,12 +213,14 @@ class JFCCommittee(BaseModel):
     joint_committee_name = db.Column('joint_cmte_nm', db.String(100), doc=docs.COMMITTEE_NAME)
     most_recent_filing_flag = db.Column(db.String(1), doc=docs.MOST_RECENT)
 
+# return affiliated committee information
 class AffiliatedCommittee(db.Model):
     __tablename__ = 'ofec_affiliated_committees_tmp_pmp'
 
-    committee_id = db.Column('cmte_id', db.String, primary_key=True, doc=docs.COMMITTEE_ID)
-    affiliated_committee_id = db.Column('affiliated_cmte_id', db.String, primary_key=True, doc=docs.COMMITTEE_ID)
-    affiliated_committee_name = db.Column('affiliated_cmte_nm', db.String(100), doc=docs.COMMITTEE_NAME)
+    idx = db.Column('sub_id', db.Integer, primary_key=True)
+    committee_id = db.Column('cmte_id', db.String, doc=docs.COMMITTEE_ID)
+    affiliated_committee_id = db.Column('affiliated_cmte_id', db.String, doc=docs.COMMITTEE_ID)
+    affiliated_committee_name = db.Column('cmte_nm', db.String(100), doc=docs.COMMITTEE_NAME)
     affiliated_relationship_cd = db.Column(db.String(3), doc=docs.MOST_RECENT)
     filed_committee_type = db.Column('filed_cmte_tp', db.String(1), doc=docs.COMMITTEE_NAME)
     filed_committee_type_description = db.Column('filed_cmte_tp_desc', db.String(58), doc=docs.COMMITTEE_NAME)
