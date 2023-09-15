@@ -449,6 +449,50 @@ class CommitteeFormatTest(ApiBaseTest):
             results[0]["sponsor_candidate_list"][0]["sponsor_candidate_id"], "H002"
         )
 
+    def test_affiliated_committees(self):
+
+        committee = factories.CommitteeDetailFactory(
+            committee_id="C000001",
+            first_file_date=datetime.date.fromisoformat("1982-12-31"),
+            committee_type="P",
+            treasurer_name="Robert J. Lipshutz",
+            party="DEM",
+            form_type="F1Z",
+            street_1="1795 Peachtree Road",
+            zip="30309",
+        )
+        factories.AffiliatedCommitteeFactory(
+            committee_id="C000001",
+            affiliated_committee_id="C000004",
+            affiliated_committee_name="Freedom Committee",
+        )
+        factories.AffiliatedCommitteeFactory(
+            committee_id="C000001",
+            affiliated_committee_id="C000005",
+            affiliated_committee_name="Justice Committee",
+        )
+        factories.AffiliatedCommitteeFactory(
+            committee_id="C000002",
+            affiliated_committee_id="C000006",
+            affiliated_committee_name="Advocate Committee",
+        )
+
+        results = self._results(
+            api.url_for(CommitteeView, committee_id=committee.committee_id)
+        )
+
+        self.assertEqual(len(results), 1)
+        self.assertIn("affiliated_committees", results[0])
+        self.assertEqual(len(results[0]["affiliated_committees"]), 2)
+        self.assertEqual(
+            results[0]["affiliated_committees"][0]["affiliated_committee_id"],
+            "C000004"
+        )
+        self.assertEqual(
+            results[0]["affiliated_committees"][1]["affiliated_committee_id"],
+            "C000005"
+        )
+
 
 # test these endpoints:
 #  '/committee/<string:committee_id>/history/',

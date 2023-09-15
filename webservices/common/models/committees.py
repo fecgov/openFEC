@@ -100,7 +100,6 @@ class CommitteeHistory(BaseCommittee):
     cycles_has_activity = db.Column(ARRAY(db.Integer), doc=docs.COMMITTEE_CYCLES_HAS_ACTIVITY)
     last_cycle_has_activity = db.Column(db.Integer, doc=docs.COMMITTEE_LAST_CYCLE_HAS_ACTIVITY)
     is_active = db.Column(db.Boolean, doc=docs.IS_COMMITTEE_ACTIVE)
-    
 
 
 # return committee history profile
@@ -113,7 +112,7 @@ class CommitteeHistory(BaseCommittee):
 class CommitteeHistoryProfile(CommitteeHistory):
     __tablename__ = 'ofec_committee_history_mv'
     __table_args__ = {'extend_existing': True}
-    
+
     former_committee_name = db.Column(db.String(200), doc=docs.COMMITTEE_NAME)
     former_candidate_id = db.Column(db.String(9), doc=docs.CANDIDATE_ID)
     former_candidate_name = db.Column(db.String(90), doc=docs.CANDIDATE_NAME)
@@ -133,7 +132,7 @@ class CommitteeHistoryProfile(CommitteeHistory):
                     )''',
             lazy="joined",
             uselist=True,
-    )
+        )
 
 
 # return one committee detail information
@@ -185,7 +184,7 @@ class CommitteeDetail(BaseConcreteCommittee):
     custodian_zip = db.Column(db.String(9), doc=docs.CUSTODIAN_ZIP)
 
     @declared_attr
-    def affiliated_committee(self):
+    def affiliated_committees(self):
         return db.relationship(
             "AffiliatedCommittee",
             primaryjoin='''and_(
@@ -193,8 +192,7 @@ class CommitteeDetail(BaseConcreteCommittee):
                     )''',
             lazy="joined",
             uselist=True,
-    )
-
+        )
 
 
 # return JFC committee information
@@ -212,6 +210,7 @@ class JFCCommittee(BaseModel):
     joint_committee_id = db.Column('joint_cmte_id', db.String, doc=docs.COMMITTEE_ID)
     joint_committee_name = db.Column('joint_cmte_nm', db.String(100), doc=docs.COMMITTEE_NAME)
     most_recent_filing_flag = db.Column(db.String(1), doc=docs.MOST_RECENT)
+
 
 # return affiliated committee information
 class AffiliatedCommittee(db.Model):

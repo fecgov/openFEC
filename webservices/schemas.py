@@ -440,7 +440,7 @@ make_committees_schema = functools.partial(
     make_schema,
     fields={
         'jfc_committee': ma.fields.Nested(JFCCommitteeSchema, many=True),
-        'affiliated_committee': ma.fields.Nested(AffiliatedCommitteeSchema, many=True),
+        'affiliated_committees': ma.fields.Nested(AffiliatedCommitteeSchema, many=True),
     },
     options={'exclude': ('idx', 'treasurer_text',)},
 )
