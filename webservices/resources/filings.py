@@ -74,6 +74,7 @@ class BaseFilings(ApiResource):
         query = super().build_query(**kwargs)
         return query
 
+
 # use for two endpoints: under tag:filings
 # `/committee/<committee_id>/filings/`
 # `/candidate/<candidate_id>/filings/`
@@ -118,11 +119,14 @@ class EFilingsView(ApiResource):
     filter_multi_fields = [
         ("file_number", models.EFilings.file_number),
         ("committee_id", models.EFilings.committee_id),
+        ("form_type", models.EFilings.form_type),
     ]
     filter_range_fields = [
         (("min_receipt_date", "max_receipt_date"), models.EFilings.filed_date),
     ]
-    filter_fulltext_fields = [("q_filer", models.CommitteeSearch.fulltxt)]
+    filter_fulltext_fields = [
+        ("q_filer", models.CommitteeSearch.fulltxt)
+    ]
 
     @property
     def args(self):
@@ -136,6 +140,14 @@ class EFilingsView(ApiResource):
         )
 
     def build_query(self, **kwargs):
+        if kwargs.get("form_type"):
+            original_form_type_values = kwargs["form_type"]
+            new_form_type_values = []
+
+            for value in original_form_type_values:
+                new_form_type_values.extend([f"{value}{suffix}" for suffix in ("", "N", "A", "T")])
+                kwargs["form_type"] = new_form_type_values
+
         query = super().build_query(**kwargs)
 
         if kwargs.get("q_filer"):
@@ -143,6 +155,7 @@ class EFilingsView(ApiResource):
                 models.CommitteeSearch,
                 self.model.committee_id == models.CommitteeSearch.id,
             ).distinct()
+
         return query
 
     @property

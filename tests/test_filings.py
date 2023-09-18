@@ -321,6 +321,41 @@ class TestEfileFiles(ApiBaseTest):
         results = self._results(api.url_for(EFilingsView, file_number=file_number))
         self.assertEqual(results[0]["file_number"], file_number)
 
+    def test_filter_form_type_efile(self):
+
+        [
+            factories.EFilingsFactory(
+                form_type="F2A",
+                beginning_image_number=5,
+            ),
+            factories.EFilingsFactory(
+                form_type="F2N",
+                beginning_image_number=6,
+            ),
+            factories.EFilingsFactory(
+                form_type="F99",
+                beginning_image_number=8,
+            ),
+            factories.EFilingsFactory(
+                form_type="F24",
+                beginning_image_number=9,
+            ),
+        ]
+        results = self._results(
+            api.url_for(
+                EFilingsView,
+                form_type='F2',
+            )
+        )
+        self.assertEqual(len(results), 2)
+        results = self._results(
+            api.url_for(
+                EFilingsView,
+                form_type='F2A',
+            )
+        )
+        self.assertEqual(len(results), 1)
+
     def test_fulltext_keyword_search(self):
         [
             factories.EFilingsFactory(
