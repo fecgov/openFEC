@@ -103,7 +103,6 @@ class CandidateCommitteeTotals(db.Model):
 
 
 class CandidateCommitteeTotalsPresidential(CandidateCommitteeTotals):
-    __table_args__ = {'extend_existing': True}
     __tablename__ = 'ofec_candidate_totals_detail_mv'
 
     candidate_contribution = db.Column(db.Numeric(30, 2))
@@ -128,21 +127,17 @@ class CandidateCommitteeTotalsPresidential(CandidateCommitteeTotals):
     transaction_coverage_date = db.Column(db.DateTime())
 
 
-class CandidateCommitteeTotalsHouseSenate(CandidateCommitteeTotals):
+class CandidateCommitteeTotalsHouseSenate(db.Model):
     __table_args__ = {'extend_existing': True}
     __tablename__ = 'ofec_candidate_totals_detail_mv'
 
     all_other_loans = db.Column('other_loans_received', db.Numeric(30, 2))
-    candidate_contribution = db.Column(db.Numeric(30, 2))
     loan_repayments = db.Column('loan_repayments_made', db.Numeric(30, 2))
     loan_repayments_candidate_loans = db.Column('repayments_loans_made_by_candidate', db.Numeric(30, 2))
     loan_repayments_other_loans = db.Column('repayments_other_loans', db.Numeric(30, 2))
     loans = db.Column('loans_received', db.Numeric(30, 2))
     loans_made_by_candidate = db.Column('loans_received_from_candidate', db.Numeric(30, 2))
-    other_receipts = db.Column(db.Numeric(30, 2))
     transfers_from_other_authorized_committee = db.Column('transfers_from_affiliated_committee', db.Numeric(30, 2))
-    transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
-    election_full = db.Column(db.Boolean, primary_key=True)
     net_operating_expenditures = db.Column(db.Numeric(30, 2))
     net_contributions = db.Column(db.Numeric(30, 2))
 
@@ -346,6 +341,7 @@ class CommitteeTotalsPerCycle(CommitteeTotals):
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
     net_operating_expenditures = db.Column('last_net_operating_expenditures', db.Numeric(30, 2))
     net_contributions = db.Column('last_net_contributions', db.Numeric(30, 2))
+
 
 # used for endpoint:'/totals/inaugural_committees/by_contributor/'
 class InauguralDonations(db.Model):

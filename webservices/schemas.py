@@ -996,22 +996,23 @@ candidate_committee_fields = {
         'refunded_other_political_committee_contributions': ma.fields.Float(),
         'refunded_political_party_committee_contributions': ma.fields.Float(),
         'last_debts_owed_by_committee': ma.fields.Float(),
-        'last_debts_owed_to_committee': ma.fields.Float()
+        'last_debts_owed_to_committee': ma.fields.Float(),
+        'fundraising_disbursements': ma.fields.Float(),
+        'exempt_legal_accounting_disbursement': ma.fields.Float(),
+        'federal_funds': ma.fields.Float(),
+        'offsets_to_fundraising_expenditures': ma.fields.Float(),
+        'total_offsets_to_operating_expenditures': ma.fields.Float(),
+        'offsets_to_legal_accounting': ma.fields.Float(),
+
 
 }
 
 make_candidate_totals_schema = make_schema(
     models.CandidateCommitteeTotalsPresidential,
     fields=utils.extend({
-        'exempt_legal_accounting_disbursement': ma.fields.Float(),
-        'federal_funds': ma.fields.Float(),
-        'fundraising_disbursements': ma.fields.Float(),
         'loan_repayments_made': ma.fields.Float(),
         'loans_received': ma.fields.Float(),
         'loans_received_from_candidate': ma.fields.Float(),
-        'offsets_to_fundraising_expenditures': ma.fields.Float(),
-        'offsets_to_legal_accounting': ma.fields.Float(),
-        'total_offsets_to_operating_expenditures': ma.fields.Float(),
         'other_loans_received': ma.fields.Float(),
         'other_receipts': ma.fields.Float(),
         'repayments_loans_made_by_candidate': ma.fields.Float(),
@@ -1039,7 +1040,9 @@ candidate_committee_totals_hs = make_schema(
         'transfers_from_other_authorized_committee': ma.fields.Float(),
         'transfers_to_other_authorized_committee': ma.fields.Float(),
         'net_operating_expenditures': ma.fields.Float(),
-        'net_contributions': ma.fields.Float()
+        'net_contributions': ma.fields.Float(),
+        'last_net_operating_expenditures': ma.fields.Float(),
+        'last_net_contributions': ma.fields.Float(),
     }, candidate_committee_fields)
 )
 augment_schemas(candidate_committee_totals_hs)
