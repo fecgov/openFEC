@@ -11,6 +11,7 @@ from webservices.resources.totals import (
     TotalsCommitteeView,
     TotalsByEntityTypeView,
     ScheduleAByStateRecipientTotalsView,
+    CandidateTotalsView,
 )
 
 
@@ -183,8 +184,8 @@ class TestTotalsByEntityType(ApiBaseTest):
         for field in filters:
             results = self._results(
                 api.url_for(TotalsByEntityTypeView,
-                    entity_type='pac-party',
-                    **{field: self.second_pac_total.get(field)})
+                            entity_type='pac-party',
+                            **{field: self.second_pac_total.get(field)})
             )
             assert len(results) == 1
             assert results[0][field] == self.second_pac_total.get(field)
@@ -1227,3 +1228,306 @@ class TestTotals(ApiBaseTest):
         self.assertEqual(response[0]['cycle'], 2014)
         self.assertEqual(response[0]['state'], 'NY')
         self.assertEqual(response[0]['committee_type'], 'U')
+
+
+# test for endpoint: /candidate/<string:candidate_id>/totals/
+class TestCandidateTotals(ApiBaseTest):
+
+    candidate_totals_fields = {
+        'candidate_election_year': 2020,
+        'offsets_to_operating_expenditures': 100.0,
+        'political_party_committee_contributions': 110.10,
+        'other_disbursements': 120.0,
+        'other_political_committee_contributions': 130.0,
+        'individual_itemized_contributions': 140.0,
+        'individual_unitemized_contributions': 150.0,
+        'disbursements': 160.0,
+        'contributions': 170.0,
+        'contribution_refunds': 180.0,
+        'individual_contributions': 190.0,
+        'refunded_individual_contributions': 200.0,
+        'refunded_other_political_committee_contributions': 210.0,
+        'refunded_political_party_committee_contributions': 220.0,
+        'receipts': 230.0,
+        'coverage_start_date': None,
+        'coverage_end_date': None,
+        'transaction_coverage_date': None,
+        'operating_expenditures': 240.0,
+        'last_report_year': 2020,
+        'last_report_type_full': 'Q3',
+        'last_beginning_image_number': '123456',
+        'last_cash_on_hand_end_period': 250.0,
+        'last_debts_owed_by_committee': 260.0,
+        'last_debts_owed_to_committee': 270.0,
+        'candidate_contribution': 280.0,
+        'exempt_legal_accounting_disbursement': 290.0,
+        'federal_funds': 300.0,
+        'fundraising_disbursements': 310.0,
+        'offsets_to_fundraising_expenditures': 350.0,
+        'offsets_to_legal_accounting': 360.0,
+        'total_offsets_to_operating_expenditures': 370.0,
+        'other_receipts': 390.0,
+        'transfers_to_other_authorized_committee': 430.0,
+        'election_full': True,
+        'net_operating_expenditures': 440.0,
+        'net_contributions': 450.0,
+    }
+    excluded_schema_fields = {
+                          'other_loans_received': 380.0,
+                          'loan_repayments_made': 320.0,
+                          'repayments_loans_made_by_candidate': 400.0,
+                          'repayments_other_loans': 410.0,
+                          'loans_received': 330.0,
+                          'loans_received_from_candidate': 340.0,
+                          'transfers_from_affiliated_committee': 420.0,
+                          'last_net_operating_expenditures': 530.0,
+                          'last_net_contributions': 540.0,
+                          }
+
+    def test_house_senate_totals_fields(self):
+
+        changed_schema_fields = {
+                'all_other_loans': 380.0,
+                'loan_repayments': 320.0,
+                'loan_repayments_candidate_loans': 400.0,
+                'loan_repayments_other_loans': 410.0,
+                'loans': 330.0,
+                'loans_made_by_candidate': 340.0,
+                'transfers_from_other_authorized_committee': 420.0,
+                'last_net_operating_expenditures': 530.0,
+                'last_net_contributions': 540.0,
+        }
+        first_candidate = utils.extend(self.excluded_schema_fields,
+                                       self.candidate_totals_fields,
+                                       {'candidate_id': 'H0001',
+                                        'cycle': 2020})
+
+        second_candidate = utils.extend(self.excluded_schema_fields,
+                                        self.candidate_totals_fields,
+                                        {'candidate_id': 'H0002',
+                                         'cycle': 2022})
+        factories.CandidateTotalsFactory(**first_candidate)
+
+        factories.CandidateTotalsFactory(
+            **second_candidate)
+
+        results = self._results(
+             api.url_for(CandidateTotalsView, candidate_id='H0001')
+         )
+        fields = utils.extend(self.candidate_totals_fields,
+                              changed_schema_fields,
+                              {'candidate_id': 'H0001',
+                               'cycle': 2020})
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0], fields)
+
+    def test_presidential_totals_fields(self):
+        changed_schema_fields = {
+                'other_loans_received': 380.0,
+                'loan_repayments_made': 320.0,
+                'repayments_loans_made_by_candidate': 400.0,
+                'repayments_other_loans': 410.0,
+                'loans_received': 330.0,
+                'loans_received_from_candidate': 340.0,
+                'transfers_from_affiliated_committee': 420.0,
+                'net_operating_expenditures': 530.0,
+                'net_contributions': 540.0,
+
+        }
+        first_candidate = utils.extend(self.candidate_totals_fields,
+                                       self.excluded_schema_fields,
+                                       {'candidate_id': 'P0001',
+                                        'cycle': 2020})
+
+        second_candidate = utils.extend(self.candidate_totals_fields,
+                                        self.excluded_schema_fields,
+                                        {'candidate_id': 'P0002',
+                                         'cycle': 2022})
+        factories.CandidateTotalsFactory(
+            **first_candidate)
+
+        factories.CandidateTotalsFactory(
+            **second_candidate)
+
+        results = self._results(
+             api.url_for(CandidateTotalsView, candidate_id='P0002')
+         )
+        fields = utils.extend(self.candidate_totals_fields,
+                              changed_schema_fields,
+                              {'candidate_id': 'P0002',
+                               'cycle': 2022})
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0], fields)
+
+    def test_election_full_filter(self):
+        factories.CandidateTotalsFactory(
+            candidate_id='H0001',
+            candidate_election_year=2020,
+            cycle=2020,
+            election_full=True
+        )
+
+        factories.CandidateTotalsFactory(
+            candidate_id='H0001',
+            candidate_election_year=2018,
+            cycle=2018,
+            election_full=False
+            )
+
+        factories.CandidateTotalsFactory(
+            candidate_id='H0001',
+            candidate_election_year=2016,
+            cycle=2016,
+            election_full=False
+            )
+
+        results = self._results(
+             api.url_for(CandidateTotalsView, candidate_id='H0001',
+                         election_full=True))
+
+        self.assertEqual(len(results), 1)
+
+        factories.CandidateTotalsFactory(
+            candidate_id='P0001',
+            candidate_election_year=2020,
+            cycle=2020,
+            election_full=True
+        )
+
+        factories.CandidateTotalsFactory(
+            candidate_id='P0001',
+            candidate_election_year=2018,
+            cycle=2018,
+            election_full=False
+            )
+
+        factories.CandidateTotalsFactory(
+            candidate_id='P0001',
+            candidate_election_year=2016,
+            cycle=2016,
+            election_full=False
+            )
+
+        results = self._results(
+             api.url_for(CandidateTotalsView, candidate_id='P0001',
+                         election_full=False))
+
+        self.assertEqual(len(results), 2)
+
+    def test_cycle_filter(self):
+        factories.CandidateTotalsFactory(
+            candidate_id='H0001',
+            candidate_election_year=2020,
+            cycle=2020,
+            election_full=True
+        )
+
+        factories.CandidateTotalsFactory(
+            candidate_id='H0001',
+            candidate_election_year=2018,
+            cycle=2018,
+            election_full=False
+            )
+
+        factories.CandidateTotalsFactory(
+            candidate_id='H0002',
+            candidate_election_year=2018,
+            cycle=2018,
+            election_full=False
+            )
+
+        results = self._results(
+             api.url_for(CandidateTotalsView, candidate_id='H0002',
+                         cycle=2018))
+
+        self.assertEqual(len(results), 1)
+
+        factories.CandidateTotalsFactory(
+            candidate_id='P0001',
+            candidate_election_year=2020,
+            cycle=2020,
+            election_full=True
+        )
+
+        factories.CandidateTotalsFactory(
+            candidate_id='P0001',
+            candidate_election_year=2022,
+            cycle=2020,
+            election_full=False
+            )
+
+        factories.CandidateTotalsFactory(
+            candidate_id='P0001',
+            candidate_election_year=2024,
+            cycle=2020,
+            election_full=False
+            )
+
+        results = self._results(
+             api.url_for(CandidateTotalsView, candidate_id='P0001',
+                         cycle=2020))
+
+        self.assertEqual(len(results), 3)
+
+    def test_sort(self):
+        factories.CandidateTotalsFactory(
+            candidate_id='H0003',
+            candidate_election_year=2020,
+            cycle=2020,
+            election_full=True
+        )
+
+        factories.CandidateTotalsFactory(
+            candidate_id='H0003',
+            candidate_election_year=2018,
+            cycle=2018,
+            election_full=False
+            )
+
+        factories.CandidateTotalsFactory(
+            candidate_id='H0003',
+            candidate_election_year=2018,
+            cycle=2016,
+            election_full=False
+            )
+
+        results = self._results(
+             api.url_for(CandidateTotalsView, candidate_id='H0003',
+                         sort='cycle'))
+
+        self.assertEqual(len(results), 3)
+        self.assertEqual(results[0]['cycle'], 2016)
+        self.assertEqual(results[0]['election_full'], False)
+        self.assertEqual(results[0]['candidate_election_year'], 2018)
+
+        factories.CandidateTotalsFactory(
+            candidate_id='P0001',
+            candidate_election_year=2016,
+            cycle=2016,
+            election_full=True
+        )
+
+        factories.CandidateTotalsFactory(
+            candidate_id='P0001',
+            candidate_election_year=2018,
+            cycle=2018,
+            election_full=False
+            )
+
+        factories.CandidateTotalsFactory(
+            candidate_id='P0001',
+            candidate_election_year=2022,
+            cycle=2022,
+            election_full=True
+            )
+
+        results = self._results(
+             api.url_for(CandidateTotalsView, candidate_id='P0001',
+                         sort='-cycle'))
+
+        self.assertEqual(len(results), 3)
+        self.assertEqual(results[0]['cycle'], 2022)
+        self.assertEqual(results[0]['election_full'], True)
+        self.assertEqual(results[0]['candidate_election_year'], 2022)

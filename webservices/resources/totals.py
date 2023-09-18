@@ -38,16 +38,16 @@ default_schemas = (
 
 candidate_totals_schema_map = {
     'P': (
-        models.CandidateCommitteeTotalsPresidential,
-        schemas.CandidateCommitteeTotalsPresidentialPageSchema,
+        models.CandidateTotals,
+        schemas.CandidateTotalsPresidentialPageSchema,
     ),
     'H': (
-        models.CandidateCommitteeTotalsHouseSenate,
-        schemas.CandidateCommitteeTotalsHouseSenatePageSchema,
+        models.CandidateTotals,
+        schemas.CandidateTotalsHouseSenatePageSchema,
     ),
     'S': (
-        models.CandidateCommitteeTotalsHouseSenate,
-        schemas.CandidateCommitteeTotalsHouseSenatePageSchema,
+        models.CandidateTotals,
+        schemas.CandidateTotalsHouseSenatePageSchema,
     ),
 }
 pac_cmte_list = {'N', 'O', 'Q', 'V', 'W'}
@@ -55,8 +55,8 @@ pac_cmte_list = {'N', 'O', 'Q', 'V', 'W'}
 party_cmte_list = {'X', 'Y'}
 
 default_candidate_schemas = (
-    models.CandidateCommitteeTotalsHouseSenate,
-    schemas.CandidateCommitteeTotalsHouseSenatePageSchema,
+    models.CandidateTotals,
+    schemas.CandidateTotalsHouseSenatePageSchema,
 )
 
 
@@ -272,6 +272,7 @@ class TotalsCommitteeView(ApiResource):
     description=docs.TOTALS,
     params={'candidate_id': {'description': docs.CANDIDATE_ID}, },
 )
+# used for endpoint: /v1/candidate/{candidate_id}/totals/
 class CandidateTotalsView(utils.Resource):
     @use_kwargs(args.paging)
     @use_kwargs(args.candidate_totals_detail)

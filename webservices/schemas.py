@@ -758,6 +758,9 @@ reports_schemas = (
 CommitteeReportsSchema = type('CommitteeReportsSchema', reports_schemas, {})
 CommitteeReportsPageSchema = make_page_schema(CommitteeReportsSchema)
 
+register_schema(CommitteeReportsSchema)
+register_schema(CommitteeReportsPageSchema)
+
 entity_fields = {
     'pdf_url': ma.fields.Str(),
     'report_form': ma.fields.Str(),
@@ -975,77 +978,6 @@ augment_models(
     make_pac_party_totals_schema,
     models.CommitteeTotalsPacParty,
 )
-
-candidate_committee_fields = {
-        'last_cash_on_hand_end_period': ma.fields.Float(),
-        'last_beginning_image_number': ma.fields.Str(),
-        'receipts': ma.fields.Float(),
-        'candidate_contribution': ma.fields.Float(),
-        'offsets_to_operating_expenditures': ma.fields.Float(),
-        'political_party_committee_contributions': ma.fields.Float(),
-        'other_disbursements': ma.fields.Float(),
-        'other_political_committee_contributions': ma.fields.Float(),
-        'individual_itemized_contributions': ma.fields.Float(),
-        'individual_unitemized_contributions': ma.fields.Float(),
-        'disbursements': ma.fields.Float(),
-        'contributions': ma.fields.Float(),
-        'individual_contributions': ma.fields.Float(),
-        'contribution_refunds': ma.fields.Float(),
-        'operating_expenditures': ma.fields.Float(),
-        'refunded_individual_contributions': ma.fields.Float(),
-        'refunded_other_political_committee_contributions': ma.fields.Float(),
-        'refunded_political_party_committee_contributions': ma.fields.Float(),
-        'last_debts_owed_by_committee': ma.fields.Float(),
-        'last_debts_owed_to_committee': ma.fields.Float()
-
-}
-
-make_candidate_totals_schema = make_schema(
-    models.CandidateCommitteeTotalsPresidential,
-    fields=utils.extend({
-        'exempt_legal_accounting_disbursement': ma.fields.Float(),
-        'federal_funds': ma.fields.Float(),
-        'fundraising_disbursements': ma.fields.Float(),
-        'loan_repayments_made': ma.fields.Float(),
-        'loans_received': ma.fields.Float(),
-        'loans_received_from_candidate': ma.fields.Float(),
-        'offsets_to_fundraising_expenditures': ma.fields.Float(),
-        'offsets_to_legal_accounting': ma.fields.Float(),
-        'total_offsets_to_operating_expenditures': ma.fields.Float(),
-        'other_loans_received': ma.fields.Float(),
-        'other_receipts': ma.fields.Float(),
-        'repayments_loans_made_by_candidate': ma.fields.Float(),
-        'repayments_other_loans': ma.fields.Float(),
-        'transfers_from_affiliated_committee': ma.fields.Float(),
-        'transfers_to_other_authorized_committee': ma.fields.Float(),
-        'net_operating_expenditures': ma.fields.Float(),
-        'net_contributions': ma.fields.Float(),
-        'disbursements': ma.fields.Float()
-    }, candidate_committee_fields)
-)
-augment_schemas(make_candidate_totals_schema)
-
-candidate_committee_totals_hs = make_schema(
-    models.CandidateCommitteeTotalsHouseSenate,
-    fields=utils.extend({
-        'all_other_loans': ma.fields.Float(),
-        'candidate_contribution': ma.fields.Float(),
-        'loan_repayments': ma.fields.Float(),
-        'loan_repayments_candidate_loans': ma.fields.Float(),
-        'loan_repayments_other_loans': ma.fields.Float(),
-        'loans': ma.fields.Float(),
-        'loans_made_by_candidate': ma.fields.Float(),
-        'other_receipts': ma.fields.Float(),
-        'transfers_from_other_authorized_committee': ma.fields.Float(),
-        'transfers_to_other_authorized_committee': ma.fields.Float(),
-        'net_operating_expenditures': ma.fields.Float(),
-        'net_contributions': ma.fields.Float()
-    }, candidate_committee_fields)
-)
-augment_schemas(candidate_committee_totals_hs)
-
-register_schema(CommitteeReportsSchema)
-register_schema(CommitteeReportsPageSchema)
 
 totals_schemas = (
     schemas['CommitteeTotalsHouseSenateSchema'],
@@ -2018,6 +1950,90 @@ InauguralDonationsSchema = make_schema(
 InauguralDonationsPageSchema = make_page_schema(InauguralDonationsSchema)
 register_schema(InauguralDonationsSchema)
 register_schema(InauguralDonationsPageSchema)
+
+
+class CandidateTotalsBaseSchema(BaseAutoSchema):
+    class Meta:
+        model = models.CandidateTotals
+        sqla_session = models.db.session
+        load_instance = True
+        include_relationships = True
+        include_fk = True
+
+    last_cash_on_hand_end_period = ma.fields.Float()
+    last_beginning_image_number = ma.fields.Str()
+    receipts = ma.fields.Float()
+    candidate_contribution = ma.fields.Float()
+    offsets_to_operating_expenditures = ma.fields.Float()
+    political_party_committee_contributions = ma.fields.Float()
+    other_disbursements = ma.fields.Float()
+    other_political_committee_contributions = ma.fields.Float()
+    individual_itemized_contributions = ma.fields.Float()
+    individual_unitemized_contributions = ma.fields.Float()
+    disbursements = ma.fields.Float()
+    contributions = ma.fields.Float()
+    individual_contributions = ma.fields.Float()
+    contribution_refunds = ma.fields.Float()
+    operating_expenditures = ma.fields.Float()
+    refunded_individual_contributions = ma.fields.Float()
+    refunded_other_political_committee_contributions = ma.fields.Float()
+    refunded_political_party_committee_contributions = ma.fields.Float()
+    last_debts_owed_by_committee = ma.fields.Float()
+    last_debts_owed_to_committee = ma.fields.Float()
+    fundraising_disbursements = ma.fields.Float()
+    exempt_legal_accounting_disbursement = ma.fields.Float()
+    federal_funds = ma.fields.Float()
+    offsets_to_fundraising_expenditures = ma.fields.Float()
+    total_offsets_to_operating_expenditures = ma.fields.Float()
+    offsets_to_legal_accounting = ma.fields.Float()
+    net_operating_expenditures = ma.fields.Float()
+    net_contributions = ma.fields.Float()
+    last_net_contributions = ma.fields.Float()
+    last_net_operating_expenditures = ma.fields.Float()
+    other_receipts = ma.fields.Float()
+    transfers_to_other_authorized_committee = ma.fields.Float()
+    other_loans_received = ma.fields.Float()
+    loan_repayments_made = ma.fields.Float()
+    repayments_loans_made_by_candidate = ma.fields.Float()
+    repayments_other_loans = ma.fields.Float()
+    loans_received = ma.fields.Float()
+    loans_received_from_candidate = ma.fields.Float()
+    transfers_from_affiliated_committee = ma.fields.Float()
+
+
+class CandidateTotalsPresidentialSchema(CandidateTotalsBaseSchema):
+    class Meta(CandidateTotalsBaseSchema.Meta):
+        exclude = ('last_net_operating_expenditures', 'last_net_contributions')
+    net_operating_expenditures = ma.fields.Float(attribute='last_net_operating_expenditures')
+    net_contributions = ma.fields.Float(attribute='last_net_contributions')
+
+
+class CandidateTotalsHouseSenateSchema(CandidateTotalsBaseSchema):
+    class Meta(CandidateTotalsBaseSchema.Meta):
+        exclude = ('loans_received',
+                   'repayments_other_loans',
+                   'transfers_from_affiliated_committee',
+                   'loans_received_from_candidate',
+                   'loan_repayments_made',
+                   'repayments_loans_made_by_candidate',
+                   'other_loans_received')
+    all_other_loans = ma.fields.Float(attribute='other_loans_received')
+    loan_repayments = ma.fields.Float(attribute='loan_repayments_made')
+    loan_repayments_candidate_loans = ma.fields.Float(attribute='repayments_loans_made_by_candidate')
+    loan_repayments_other_loans = ma.fields.Float(attribute='repayments_other_loans')
+    loans = ma.fields.Float(attribute='loans_received')
+    loans_made_by_candidate = ma.fields.Float(attribute='loans_received_from_candidate')
+    transfers_from_other_authorized_committee = ma.fields.Float(attribute='transfers_from_affiliated_committee')
+
+
+CandidateTotalsPresidentialPageSchema = make_page_schema(CandidateTotalsPresidentialSchema)
+CandidateTotalsHouseSenatePageSchema = make_page_schema(CandidateTotalsHouseSenateSchema)
+
+register_schema(CandidateTotalsPresidentialSchema)
+register_schema(CandidateTotalsHouseSenateSchema)
+
+register_schema(CandidateTotalsPresidentialPageSchema)
+register_schema(CandidateTotalsHouseSenatePageSchema)
 
 # Copy schemas generated by helper methods to module namespace
 globals().update(schemas)
