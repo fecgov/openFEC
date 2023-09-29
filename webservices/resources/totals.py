@@ -36,20 +36,6 @@ default_schemas = (
     schemas.CommitteeTotalsPacPartyPageSchema,
 )
 
-candidate_totals_schema_map = {
-    'P': (
-        models.CandidateTotals,
-        schemas.CandidateTotalsPresidentialPageSchema,
-    ),
-    'H': (
-        models.CandidateTotals,
-        schemas.CandidateTotalsHouseSenatePageSchema,
-    ),
-    'S': (
-        models.CandidateTotals,
-        schemas.CandidateTotalsHouseSenatePageSchema,
-    ),
-}
 pac_cmte_list = {'N', 'O', 'Q', 'V', 'W'}
 
 party_cmte_list = {'X', 'Y'}
@@ -289,10 +275,9 @@ class CandidateTotalsView(utils.Resource):
         return totals_schema().dump(page)
 
     def build_query(self, candidate_id=None, **kwargs):
-        totals_class, totals_schema = candidate_totals_schema_map.get(
-            self._resolve_committee_type(candidate_id=candidate_id.upper(), **kwargs),
-            default_schemas,
-        )
+        committee_type = self._resolve_committee_type(candidate_id=candidate_id.upper(), **kwargs)
+        totals_class = models.CandidateTotals
+        totals_schema = schemas.CandidateTotalsPresidentialPageSchema if committee_type == 'P' else schemas.CandidateTotalsHouseSenatePageSchema
         query = totals_class.query
         query = query.filter(totals_class.candidate_id == candidate_id.upper())
 
