@@ -40,12 +40,6 @@ pac_cmte_list = {'N', 'O', 'Q', 'V', 'W'}
 
 party_cmte_list = {'X', 'Y'}
 
-default_candidate_schemas = (
-    models.CandidateTotals,
-    schemas.CandidateTotalsHouseSenatePageSchema,
-)
-
-
 @doc(
     tags=['financial'],
     description=docs.TOTALS,
