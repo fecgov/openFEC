@@ -768,7 +768,6 @@ schedule_d = {
     'max_amount_outstanding_beginning': fields.Float(),
     'min_amount_outstanding_close': fields.Float(),
     'max_amount_outstanding_close': fields.Float(),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID_DEP),  # to be deprecated
     'creditor_debtor_name': fields.List(Keyword),
     'nature_of_debt': fields.Str(),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),

@@ -511,7 +511,6 @@ class ScheduleD(PdfMixin, BaseItemized):
     outstanding_balance_close_of_period = db.Column('outstg_bal_cop', db.Float)
     amount_incurred_period = db.Column('amt_incurred_per', db.Float)
     payment_period = db.Column('pymt_per', db.Float)
-    candidate_id = db.Column('cand_id', db.String, doc=docs.CANDIDATE_ID)
     action_code = db.Column('action_cd', db.String)
     action_code_full = db.Column('action_cd_desc', db.String)
     schedule_type = db.Column(db.String)

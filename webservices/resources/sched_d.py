@@ -26,7 +26,6 @@ class ScheduleDView(ApiResource):
     filter_multi_fields = [
         ('image_number', models.ScheduleD.image_number),
         ('committee_id', models.ScheduleD.committee_id),
-        ('candidate_id', models.ScheduleD.candidate_id),  # TODO: deprecate and remove
         ('report_year', models.ScheduleD.report_year),
         ('report_type', models.ScheduleD.report_type),
         ('filing_form', models.ScheduleD.filing_form),
