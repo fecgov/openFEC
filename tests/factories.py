@@ -42,9 +42,9 @@ class CandidateDetailFactory(BaseCandidateFactory):
         model = models.CandidateDetail
 
 
-class CandidateTotalsFactory(BaseCandidateFactory):
+class CandidateTotalsDetailFactory(BaseCandidateFactory):
     class Meta:
-        model = models.CandidateTotals
+        model = models.CandidateTotalsDetail
 
     cycle = 2016
 

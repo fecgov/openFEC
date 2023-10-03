@@ -253,7 +253,7 @@ class TotalsCommitteeView(ApiResource):
     params={'candidate_id': {'description': docs.CANDIDATE_ID}, },
 )
 # used for endpoint: /v1/candidate/{candidate_id}/totals/
-class CandidateTotalsView(utils.Resource):
+class CandidateTotalsDetailView(utils.Resource):
     @use_kwargs(args.paging)
     @use_kwargs(args.candidate_totals_detail)
     @use_kwargs(args.make_sort_args(default='-cycle'))
@@ -270,8 +270,8 @@ class CandidateTotalsView(utils.Resource):
 
     def build_query(self, candidate_id=None, **kwargs):
         committee_type = self._resolve_committee_type(candidate_id=candidate_id.upper(), **kwargs)
-        totals_class = models.CandidateTotals
-        totals_schema = schemas.CandidateTotalsPresidentialPageSchema if committee_type == 'P' else schemas.CandidateTotalsHouseSenatePageSchema
+        totals_class = models.CandidateTotalsDetail
+        totals_schema = schemas.CandidateTotalsDetailPresidentialPageSchema if committee_type == 'P' else schemas.CandidateTotalsDetailHouseSenatePageSchema
         query = totals_class.query
         query = query.filter(totals_class.candidate_id == candidate_id.upper())
 
