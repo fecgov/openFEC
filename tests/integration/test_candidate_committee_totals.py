@@ -7,7 +7,7 @@ import manage
 from tests import common
 from webservices import rest, __API_VERSION__
 from webservices.rest import db
-from webservices.resources.totals import CandidateTotalsView, TotalsCommitteeView
+from webservices.resources.totals import CandidateTotalsDetailView, TotalsCommitteeView
 
 
 @pytest.mark.usefixtures("migrate_db")
@@ -156,7 +156,7 @@ class TotalTestCase(common.BaseTestCase):
             'election_full': True,
         }
         candidate_totals_api = self._results(
-            rest.api.url_for(CandidateTotalsView, **params_cand)
+            rest.api.url_for(CandidateTotalsDetailView, **params_cand)
         )
         assert len(candidate_totals_api) == 1
         assert candidate_totals_api[0]['receipts'] == 311
@@ -172,7 +172,7 @@ class TotalTestCase(common.BaseTestCase):
             'election_full': True,
         }
         candidate_totals_api = self._results(
-            rest.api.url_for(CandidateTotalsView, **params_cand)
+            rest.api.url_for(CandidateTotalsDetailView, **params_cand)
         )
         assert len(candidate_totals_api) == 0
 

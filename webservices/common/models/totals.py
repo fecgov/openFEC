@@ -4,9 +4,9 @@ from .base import db, BaseModel
 from sqlalchemy.ext.declarative import declared_attr
 
 
-# resource class that uses this model: CandidateTotalsView
+# resource class that uses this model: CandidateTotalsDetailView
 # used for endpoint: /v1/candidate/{candidate_id}/totals/
-class CandidateTotals(db.Model):
+class CandidateTotalsDetail(db.Model):
     __tablename__ = 'ofec_candidate_totals_detail_mv'
 
     candidate_contribution = db.Column(db.Numeric(30, 2))
