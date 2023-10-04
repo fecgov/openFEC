@@ -21,7 +21,6 @@ class TestScheduleDView(ApiBaseTest):
         filters = [
             ('image_number', ScheduleD.image_number, ['123', '456']),
             ('committee_id', ScheduleD.committee_id, ['C01', 'C02']),
-            ('candidate_id', ScheduleD.candidate_id, ['S01', 'S02']),
             ('report_year', ScheduleD.report_year, [2023, 2019]),
             ('report_type', ScheduleD.report_type, ['60D', 'Q3']),
             ('filing_form', ScheduleD.filing_form, ['F3P', 'F3X']),
