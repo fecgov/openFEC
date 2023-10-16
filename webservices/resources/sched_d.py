@@ -29,7 +29,8 @@ class ScheduleDView(ApiResource):
         ('report_year', models.ScheduleD.report_year),
         ('report_type', models.ScheduleD.report_type),
         ('filing_form', models.ScheduleD.filing_form),
-        ('committee_type', models.ScheduleD.committee_type)
+        ('committee_type', models.ScheduleD.committee_type),
+        ('line_number', models.ScheduleD.line_number),
     ]
 
     filter_range_fields = [
@@ -69,17 +70,12 @@ class ScheduleDView(ApiResource):
         # might be worth looking to factoring these out into the filter script
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
-        if kwargs.get('line_number'):
-            # line number is a composite value of 'filing_form-line_number'
-            if len(kwargs.get('line_number').split('-')) == 2:
-                form, line_no = kwargs.get('line_number').split('-')
-                query = query.filter_by(filing_form=form.upper())
-                query = query.filter_by(line_number=line_no)
-            else:
-                raise exceptions.ApiError(
-                    exceptions.LINE_NUMBER_ERROR,
-                    status_code=400,
-                )
+        if 'line_number' in kwargs:
+            for each in kwargs['line_number']:
+                if len(each.split('-')) != 2:
+                    raise exceptions.ApiError(
+                        exceptions.LINE_NUMBER_ERROR, status_code=400
+                    )
         return query
 
 
