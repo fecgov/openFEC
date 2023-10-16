@@ -46,6 +46,7 @@ class ScheduleEView(ItemizedResource):
         ('candidate_office_state', models.ScheduleE.candidate_office_state),
         ('candidate_office_district', models.ScheduleE.candidate_office_district),
         ('candidate_party', models.ScheduleE.candidate_party),
+        ('line_number', models.ScheduleE.line_number),
     ]
     filter_fulltext_fields = [
         ('payee_name', models.ScheduleE.payee_name_text),
@@ -110,6 +111,12 @@ class ScheduleEView(ItemizedResource):
         if 'most_recent' in kwargs:
             query = query.filter(sa.or_(self.model.most_recent == kwargs.get('most_recent'),
                                         self.model.most_recent == None))  # noqa
+        if 'line_number' in kwargs:
+            for each in kwargs['line_number']:
+                if len(each.split('-')) != 2:
+                    raise exceptions.ApiError(
+                        exceptions.LINE_NUMBER_ERROR, status_code=400
+                    )
         return query
 
 

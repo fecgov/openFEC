@@ -802,6 +802,7 @@ schedule_f = {
     'payee_name': fields.List(Keyword, description=docs.PAYEE_NAME),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'line_number': fields.List(IStr, description=docs.LINE_NUMBER),
 }
 
 communication_cost = {
@@ -965,6 +966,7 @@ schedule_e = {
     'max_filing_date': Date(description=docs.MAX_FILED_DATE),
     'most_recent': fields.Bool(description=docs.MOST_RECENT_IE),
     'q_spender': fields.List(Keyword, description=docs.SPENDER_NAME_TEXT),
+    'line_number': fields.List(IStr, description=docs.LINE_NUMBER),
 }
 
 schedule_e_efile = {

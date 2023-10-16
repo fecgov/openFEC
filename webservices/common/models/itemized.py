@@ -629,6 +629,11 @@ class ScheduleE(PdfMixin, BaseItemized):
     pdf_url = db.Column(db.String)
     spender_name_text = db.Column(TSVECTOR)
 
+    @hybrid_property
+    def line_number(self):
+        if self.filing_form and self.line_number_short:
+            return self.filing_form + "-" + self.line_number_short
+
 
 class ScheduleEEfile(BaseRawItemized):
     __tablename__ = 'real_efile_se_f57_vw'
@@ -798,6 +803,11 @@ class ScheduleF(PdfMixin, BaseItemized):
         if self.has_pdf:
             return utils.make_schedule_pdf_url(self.image_number)
         return None
+    
+    @hybrid_property
+    def line_number(self):
+        if self.filing_form and self.line_number_short:
+            return self.filing_form + "-" + self.line_number_short
 
 
 class ScheduleH4(BaseItemized):

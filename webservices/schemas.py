@@ -1117,6 +1117,7 @@ ScheduleFSchema = make_schema(
         'subordinate_committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
+        'line_number':  ma.fields.Str()
     },
     options={'exclude': ('payee_name_text',)}
     )
@@ -1207,6 +1208,7 @@ ScheduleESchema = make_schema(
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
+        'line_number':  ma.fields.Str(),
     },
     options={
         'exclude': (
