@@ -112,10 +112,10 @@ def extract_columns(obj, column_a, column_b, descriptions):
     ytd = re.compile('(.+?(?=ytd))')
     if obj.summary_lines:
         for row in obj.summary_lines:
-            replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_',
-                               str(keys[int(row.line_number - 1)][0])).replace(' ', '_')
-            replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
-                               str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
+            replace_a = re.sub(per, descriptions[int(row.line_number_short - 1)] + '_',
+                               str(keys[int(row.line_number_short - 1)][0])).replace(' ', '_')
+            replace_b = re.sub(ytd, descriptions[int(row.line_number_short - 1)] + '_',
+                               str(keys[int(row.line_number_short - 1)][1])).replace(' ', '_')
             replace_a = make_period_string(replace_a)
             line_list[replace_a] = row.column_a
             line_list[replace_b] = row.column_b
@@ -148,14 +148,14 @@ class BaseF3PFilingSchema(BaseEfileSchema):
         if obj.summary_lines:
 
             for row in obj.summary_lines:
-                if row.line_number >= 33 and row.line_number < 87:
-                    state_map[keys[int(row.line_number - 1)][0]] = row.column_a
-                    state_map[keys[int(row.line_number - 1)][1]] = row.column_b
+                if row.line_number_short >= 33 and row.line_number_short < 87:
+                    state_map[keys[int(row.line_number_short - 1)][0]] = row.column_a
+                    state_map[keys[int(row.line_number_short - 1)][1]] = row.column_b
                 else:
-                    replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_',
-                                       keys[int(row.line_number - 1)][0]).replace(' ', '_')
-                    replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
-                                       str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
+                    replace_a = re.sub(per, descriptions[int(row.line_number_short - 1)] + '_',
+                                       keys[int(row.line_number_short - 1)][0]).replace(' ', '_')
+                    replace_b = re.sub(ytd, descriptions[int(row.line_number_short - 1)] + '_',
+                                       str(keys[int(row.line_number_short - 1)][1])).replace(' ', '_')
                     replace_a = make_period_string(replace_a)
                     line_list[replace_a] = row.column_a
                     line_list[replace_b] = row.column_b
@@ -1003,7 +1003,8 @@ ScheduleASchema = make_schema(
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
-        'report_year': ma.fields.Int()
+        'report_year': ma.fields.Int(),
+        'line_number':  ma.fields.Str()
     },
     options={
          'exclude': (
@@ -1032,6 +1033,7 @@ ScheduleCSchema = make_schema(
         'sub_id': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'line_number':  ma.fields.Str()
     },
     options={'exclude': ('loan_source_name_text', 'candidate_name_text',)}
     )
@@ -1098,6 +1100,7 @@ ScheduleDSchema = make_schema(
     models.ScheduleD,
     fields={
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'line_number':  ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
@@ -1114,6 +1117,7 @@ ScheduleFSchema = make_schema(
         'subordinate_committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
+        'line_number':  ma.fields.Str()
     },
     options={'exclude': ('payee_name_text',)}
     )
@@ -1136,7 +1140,8 @@ ScheduleBSchema = make_schema(
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
-        'disbursement_amount': ma.fields.Float()
+        'disbursement_amount': ma.fields.Float(),
+        'line_number':  ma.fields.Str(),
     },
     options={
         'exclude': (
@@ -1171,6 +1176,7 @@ ScheduleH4Schema = make_schema(
         'federal_share': ma.fields.Float(),
         'nonfederal_share': ma.fields.Float(),
         'event_amount_year_to_date': ma.fields.Float(),
+        'line_number':  ma.fields.Str(),
 
     },
     options={
@@ -1202,6 +1208,7 @@ ScheduleESchema = make_schema(
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
+        'line_number':  ma.fields.Str(),
     },
     options={
         'exclude': (

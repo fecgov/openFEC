@@ -564,9 +564,7 @@ itemized = {
     'max_amount': Currency(description='Filter for all amounts less than a value.'),
     'min_date': Date(description='Minimum date'),
     'max_date': Date(description='Maximum date'),
-    'line_number': fields.Str(description='Filter for form and line number using the following format: '
-                                          '`FORM-LINENUMBER`.  For example an argument such as `F3X-16` would filter'
-                                          ' down to all entries from form `F3X` line number `16`.')
+    'line_number': fields.List(IStr, description=docs.LINE_NUMBER),
 }
 
 schedule_a = {
@@ -746,7 +744,7 @@ schedule_c = {
     'max_image_number': ImageNumber(description=docs.MAX_IMAGE_NUMBER),
     'min_amount': Currency(description=docs.MIN_FILTER),
     'max_amount': Currency(description=docs.MAX_FILTER),
-    'line_number': fields.Str(description=docs.LINE_NUMBER),
+    'line_number': fields.List(IStr, description=docs.LINE_NUMBER),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_name': fields.List(Keyword, description=docs.CANDIDATE_NAME),
     'loan_source_name': fields.List(Keyword, description=docs.LOAN_SOURCE),
@@ -777,9 +775,10 @@ schedule_d = {
     'max_coverage_start_date': Date(missing=None, description=docs.MAX_COVERAGE_START_DATE),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE),
-    'line_number': fields.Str(description=docs.LINE_NUMBER),
     'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
     'filing_form': fields.List(fields.Str, description=docs.FORM_TYPE),
+    'line_number': fields.List(IStr, description=docs.LINE_NUMBER),
+
 }
 
 schedule_e_by_candidate = {
@@ -802,6 +801,7 @@ schedule_f = {
     'payee_name': fields.List(Keyword, description=docs.PAYEE_NAME),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'line_number': fields.List(IStr, description=docs.LINE_NUMBER),
 }
 
 communication_cost = {
@@ -965,6 +965,7 @@ schedule_e = {
     'max_filing_date': Date(description=docs.MAX_FILED_DATE),
     'most_recent': fields.Bool(description=docs.MOST_RECENT_IE),
     'q_spender': fields.List(Keyword, description=docs.SPENDER_NAME_TEXT),
+    'line_number': fields.List(IStr, description=docs.LINE_NUMBER),
 }
 
 schedule_e_efile = {

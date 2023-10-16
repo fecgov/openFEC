@@ -17,19 +17,23 @@ class BaseItemized(db.Model):
     image_number = db.Column('image_num', db.String, doc=docs.IMAGE_NUMBER)
     filing_form = db.Column(db.String)
     link_id = db.Column(db.Integer)
-    line_number = db.Column('line_num', db.String)
+    line_number_short = db.Column('line_num', db.String)
     transaction_id = db.Column('tran_id', db.String)
     file_number = db.Column('file_num', db.Integer)
 
     @hybrid_property
     def memoed_subtotal(self):
         return self.memo_code == 'X'
+    
+    @hybrid_property
+    def line_number(self):
+        if self.filing_form and self.line_number_short:
+            return self.filing_form + "-" + self.line_number_short
 
 
 class BaseRawItemized(db.Model):
     __abstract__ = True
 
-    # line_number = db.Column("line_num", db.String) removed as H4 Raw data does not have line_num
     transaction_id = db.Column('tran_id', db.String)
     image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
     entity_type = db.Column('entity', db.String)
@@ -181,7 +185,7 @@ class ScheduleAEfile(BaseRawItemized):
     __table_args__ = {'schema': 'real_efile'}
     __tablename__ = 'sa7'
 
-    line_number = db.Column("line_num", db.String)
+    line_number_short = db.Column("line_num", db.String)
     file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
     related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
     committee_id = db.Column("comid", db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -372,7 +376,7 @@ class ScheduleB(BaseItemized):
 class ScheduleBEfile(BaseRawItemized):
     __tablename__ = 'real_efile_sb4'
 
-    line_number = db.Column("line_num", db.String)
+    line_number_short = db.Column("line_num", db.String)
     file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
     related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
     committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
@@ -537,6 +541,11 @@ class ScheduleD(PdfMixin, BaseItemized):
         if self.has_pdf:
             return utils.make_schedule_pdf_url(self.image_number)
         return None
+    
+    @hybrid_property
+    def line_number(self):
+        if self.filing_form and self.line_number_short:
+            return self.filing_form + "-" + self.line_number_short
 
 
 class ScheduleE(PdfMixin, BaseItemized):
@@ -620,11 +629,16 @@ class ScheduleE(PdfMixin, BaseItemized):
     pdf_url = db.Column(db.String)
     spender_name_text = db.Column(TSVECTOR)
 
+    @hybrid_property
+    def line_number(self):
+        if self.filing_form and self.line_number_short:
+            return self.filing_form + "-" + self.line_number_short
+
 
 class ScheduleEEfile(BaseRawItemized):
     __tablename__ = 'real_efile_se_f57_vw'
 
-    line_number = db.Column("line_num", db.String)
+    line_number_short = db.Column("line_num", db.String)
     filing_form = db.Column('filing_form', db.String)
     is_notice = db.Column(db.Boolean, index=True)
     file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
@@ -789,6 +803,11 @@ class ScheduleF(PdfMixin, BaseItemized):
         if self.has_pdf:
             return utils.make_schedule_pdf_url(self.image_number)
         return None
+    
+    @hybrid_property
+    def line_number(self):
+        if self.filing_form and self.line_number_short:
+            return self.filing_form + "-" + self.line_number_short
 
 
 class ScheduleH4(BaseItemized):

@@ -46,6 +46,7 @@ class ScheduleBView(ItemizedResource):
         ('spender_committee_designation', models.ScheduleB.spender_committee_designation),
         ('two_year_transaction_period',
          models.ScheduleB.two_year_transaction_period),
+         ('line_number', models.ScheduleB.line_number),
     ]
     filter_fulltext_fields = [
         ('recipient_name', models.ScheduleB.recipient_name_text),
@@ -85,17 +86,13 @@ class ScheduleBView(ItemizedResource):
         # might be worth looking to factoring these out into the filter script
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
-        if kwargs.get('line_number'):
-            # line number is a composite value of 'filing_form-line_number'
-            if len(kwargs.get('line_number').split('-')) == 2:
-                form, line_no = kwargs.get('line_number').split('-')
-                query = query.filter_by(filing_form=form.upper())
-                query = query.filter_by(line_number=line_no)
-            else:
-                raise exceptions.ApiError(
-                    exceptions.LINE_NUMBER_ERROR,
-                    status_code=400,
-                )
+        if 'line_number' in kwargs:
+            for each in kwargs['line_number']:
+                each.upper()
+                if len(each.split('-')) != 2:
+                    raise exceptions.ApiError(
+                        exceptions.LINE_NUMBER_ERROR, status_code=400
+                    )
         return query
 
 

@@ -315,8 +315,8 @@ class TestScheduleA(ApiBaseTest):
 
     def test_schedule_a_filter_line_number(self):
         [
-            factories.ScheduleAFactory(line_number='16', filing_form='F3X'),
-            factories.ScheduleAFactory(line_number='17', filing_form='F3X'),
+            factories.ScheduleAFactory(line_number_short='16', filing_form='F3X'),
+            factories.ScheduleAFactory(line_number_short='17', filing_form='F3X'),
         ]
         results = self._results(
             api.url_for(ScheduleAView, line_number='f3X-16', **self.kwargs)
@@ -324,8 +324,8 @@ class TestScheduleA(ApiBaseTest):
         self.assertEqual(len(results), 1)
 
         [
-            factories.ScheduleBFactory(line_number='21', filing_form='F3X'),
-            factories.ScheduleBFactory(line_number='22', filing_form='F3X'),
+            factories.ScheduleBFactory(line_number_short='21', filing_form='F3X'),
+            factories.ScheduleBFactory(line_number_short='22', filing_form='F3X'),
         ]
 
         results = self._results(

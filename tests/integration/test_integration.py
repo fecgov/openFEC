@@ -149,13 +149,13 @@ class IntegrationTestCase(common.BaseTestCase):
         individuals = [
             factories.ScheduleAFactory(receipt_type='15J', filing_form='F3X'),
             factories.ScheduleAFactory(
-                line_number='12', contribution_receipt_amount=150, filing_form='F3X'
+                line_number_short='12', contribution_receipt_amount=150, filing_form='F3X'
             ),
         ]
         earmarks = [
             factories.ScheduleAFactory(filing_form='F3X'),
             factories.ScheduleAFactory(
-                line_number='12',
+                line_number_short='12',
                 contribution_receipt_amount=150,
                 memo_text='earmark',
                 memo_code='X',
@@ -166,7 +166,7 @@ class IntegrationTestCase(common.BaseTestCase):
         is_individual = sa.func.is_individual(
             ScheduleA.contribution_receipt_amount,
             ScheduleA.receipt_type,
-            ScheduleA.line_number,
+            ScheduleA.line_number_short,
             ScheduleA.memo_code,
             ScheduleA.memo_text,
             ScheduleA.contributor_id,
