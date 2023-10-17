@@ -4,6 +4,7 @@ from tests.common import ApiBaseTest
 from webservices.rest import api
 from webservices.schemas import ScheduleEByCandidateSchema
 from webservices.resources.aggregates import ScheduleEByCandidateView
+from webservices.resources.sched_e import ScheduleEView
 
 
 # test /schedules/schedule_e/by_candidate/ under tag: independent expenditures
@@ -288,3 +289,18 @@ class TestScheduleEByCandidateView(ApiBaseTest):
         self.assertEqual(len(response), 2)
         self.assertEqual(response[0]['committee_name'], 'Warner for America')
         self.assertEqual(response[1]['committee_name'], 'Ritche for America')
+
+    def test_schedule_e_filter_line_number(self):
+        [
+            factories.ScheduleEFactory(line_number_short='10', filing_form='F3X'),
+            factories.ScheduleEFactory(line_number_short='9', filing_form='F3X'),
+        ]
+        results = self._results(
+            api.url_for(ScheduleEView, line_number='f3x-10')
+        )
+        self.assertEqual(len(results), 1)
+        response = self.app.get(
+            api.url_for(ScheduleEView, line_number='f3x21')
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Invalid line_number', response.data)

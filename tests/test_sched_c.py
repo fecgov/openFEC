@@ -201,6 +201,21 @@ class TestScheduleCView(ApiBaseTest):
         )
         self.assertTrue(all('2' <= each['image_number'] <= '3' for each in results))
 
+    def test_schedule_c_filter_line_number(self):
+        [
+            factories.ScheduleCFactory(line_number_short='10', filing_form='F3X'),
+            factories.ScheduleCFactory(line_number_short='9', filing_form='F3X'),
+        ]
+        results = self._results(
+            api.url_for(ScheduleCView, line_number='f3x-10')
+        )
+        self.assertEqual(len(results), 1)
+        response = self.app.get(
+            api.url_for(ScheduleCView, line_number='f3x21')
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Invalid line_number', response.data)
+
 
 class TestScheduleCViewBySubId(ApiBaseTest):
     def test_fields(self):

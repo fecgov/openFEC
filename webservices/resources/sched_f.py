@@ -2,6 +2,7 @@ from flask_apispec import doc
 
 from webservices import args
 from webservices import docs
+from webservices import exceptions
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
@@ -55,6 +56,12 @@ class ScheduleFView(ApiResource):
         query = super().build_query(**kwargs)
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
+        if 'line_number' in kwargs:
+            for each in kwargs['line_number']:
+                if len(each.split('-')) != 2:
+                    raise exceptions.ApiError(
+                        exceptions.LINE_NUMBER_ERROR, status_code=400
+                    )
         return query
 
 

@@ -188,6 +188,21 @@ class TestScheduleDView(ApiBaseTest):
         results = self._results(api.url_for(ScheduleDView, sort=['-sub_id']))
         self.assertEqual(results[0]['sub_id'], '2')
         self.assertEqual(results[1]['sub_id'], '1')
+    
+    def test_schedule_d_filter_line_number(self):
+        [
+            factories.ScheduleDViewFactory(line_number_short='10', filing_form='F3X'),
+            factories.ScheduleDViewFactory(line_number_short='9', filing_form='F3X'),
+        ]
+        results = self._results(
+            api.url_for(ScheduleDView, line_number='f3x-10')
+        )
+        self.assertEqual(len(results), 1)
+        response = self.app.get(
+            api.url_for(ScheduleDView, line_number='f3x21')
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Invalid line_number', response.data)
 
 
 class TestScheduleDViewBySubId(ApiBaseTest):

@@ -2,6 +2,7 @@
 from flask_apispec import doc
 from webservices import args
 from webservices import docs
+from webservices import exceptions
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
@@ -41,6 +42,16 @@ class ScheduleCView(ApiResource):
         (('min_payment_to_date', 'max_payment_to_date'), models.ScheduleC.payment_to_date),
     ]
 
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+        if 'line_number' in kwargs:
+            for each in kwargs['line_number']:
+                if len(each.split('-')) != 2:
+                    raise exceptions.ApiError(
+                        exceptions.LINE_NUMBER_ERROR, status_code=400
+                    )
+        return query
+
     @property
     def args(self):
         return utils.extend(
@@ -75,12 +86,6 @@ class ScheduleCViewBySubId(ApiResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
         query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
-        if 'line_number' in kwargs:
-            for each in kwargs['line_number']:
-                if len(each.split('-')) != 2:
-                    raise exceptions.ApiError(
-                        exceptions.LINE_NUMBER_ERROR, status_code=400
-                    )
         return query
 
     @property

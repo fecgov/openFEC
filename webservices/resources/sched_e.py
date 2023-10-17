@@ -3,6 +3,7 @@ import sqlalchemy as sa
 from flask_apispec import doc
 from webservices import args
 from webservices import docs
+from webservices import exceptions
 from webservices import utils
 from webservices import schemas
 from sqlalchemy.orm import aliased, contains_eager
