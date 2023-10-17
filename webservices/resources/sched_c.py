@@ -86,12 +86,6 @@ class ScheduleCViewBySubId(ApiResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
         query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
-        if 'line_number' in kwargs:
-            for each in kwargs['line_number']:
-                if len(each.split('-')) != 2:
-                    raise exceptions.ApiError(
-                        exceptions.LINE_NUMBER_ERROR, status_code=400
-                    )
         return query
 
     @property
