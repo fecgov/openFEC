@@ -491,7 +491,7 @@ class BaseFilingSummary(db.Model):
     __table_args__ = {'schema': 'real_efile'}
     __tablename__ = 'summary'
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
-    line_number = db.Column('lineno', db.Integer, primary_key=True)
+    line_number_short = db.Column('lineno', db.Integer, primary_key=True)
     column_a = db.Column('cola', db.Float)
     column_b = db.Column('colb', db.Float)
 
