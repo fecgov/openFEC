@@ -7,10 +7,12 @@ from celery_once import QueueOnce
 from webservices import utils
 from webservices.legal_docs.advisory_opinions import load_advisory_opinions
 from webservices.legal_docs.current_cases import load_cases
-from webservices.legal_docs.es_management import create_es_snapshot
+from webservices.legal_docs.es_management import create_es_snapshot, display_snapshot_detail, delete_snapshot
 from webservices.legal_docs.es_management import (  # noqa
     CASE_INDEX,
     AO_INDEX,
+    AO_REPO,
+    CASE_REPO,
 )
 
 from webservices.rest import db
@@ -213,4 +215,33 @@ def create_es_backup():
     except Exception as error:
         logger.exception(error)
         slack_message = "*ERROR* elasticsearch backup failed for {0}. Check logs.".format(get_app_name())
+        utils.post_to_slack(slack_message, SLACK_BOTS)
+
+
+@app.task(once={"graceful": True}, base=QueueOnce)
+def delete_es_backup_monthly():
+    # Delete snapshots on the first of every month at 1am EST,
+    # Send information to Slack.
+    today = datetime.datetime.today()
+    repo_list = [CASE_REPO, AO_REPO]
+
+    try:
+        for repo_name in repo_list:
+            snapshots = display_snapshot_detail(repo_name)
+            snapshots = snapshots.get('snapshots')
+            for snapshot in snapshots:
+                id = snapshot.get("snapshot")
+                snapshot_date = snapshot.get("start_time")
+                snapshot_date = datetime.datetime.strptime(snapshot_date.split("T")[0], '%Y-%m-%d')
+                if (today - snapshot_date).days >= 30 and 'arch_mur' not in id:
+                    delete_snapshot(repo_name, id)
+                    logger.info("deleting snapshot: '{0}'".format(id))
+                    time.sleep(30)
+            logger.info(" Monthly (%s) elasticsearch snapshot deletion completed", datetime.date.today().strftime("%A"))
+            slack_message = "Monthly elasticsearch deletion completed in {0} space in repoistory: ({1})".format(
+                get_app_name(), repo_name)
+            utils.post_to_slack(slack_message, SLACK_BOTS)
+    except Exception as error:
+        logger.exception(error)
+        slack_message = "*ERROR* elasticsearch snapshot deletion failed for {0}. Check logs.".format(get_app_name())
         utils.post_to_slack(slack_message, SLACK_BOTS)

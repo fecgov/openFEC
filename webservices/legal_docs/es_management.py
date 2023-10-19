@@ -828,6 +828,7 @@ def create_es_snapshot(index_name):
             repository=repo_name,
             snapshot=snapshot_name,
             body=body,
+            wait_for_completion=True,
         )
         if result.get("accepted"):
             logger.info(" The snapshot: {0} is created successfully.".format(snapshot_name))
@@ -1033,6 +1034,8 @@ def display_snapshot_detail(repo_name=None, snapshot_name=None):
         snapshot=snapshot_name
     )
     logger.info(" Snapshot details =" + json.dumps(result, indent=3, cls=DateTimeEncoder))
+
+    return result
 
 # =========== end snapshot management =============
 

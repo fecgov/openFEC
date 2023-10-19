@@ -59,6 +59,13 @@ if env.app.get("space_name", "unknown-space").lower() != "feature":
             "task": "webservices.tasks.refresh_db.refresh_materialized_views",
             "schedule": crontab(minute=0, hour=9),
         },
+        # Task 7: This task is launched at 1am(EST) on the first day of the
+        # month
+        # Deletes snapshots older than 30 days
+        "delete_elasticsearch_backups_monthly": {
+            "task": "webservices.tasks.legal_docs.delete_es_backup_monthly",
+            "schedule": crontab(minute=0, hour=5, day_of_month=1),
+        },
     }
 
 
