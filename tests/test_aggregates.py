@@ -24,6 +24,11 @@ from webservices.resources.candidate_aggregates import (
 )
 
 
+# Test: (1)'/schedules/schedule_a/by_employer/' (aggregates.ScheduleAByEmployerView)
+# Test: (2)'/schedules/schedule_a/by_state/' (aggregates.ScheduleAByStateView)
+# Test: (3)'/schedules/schedule_b/by_purpose/'(aggregates.ScheduleBByPurposeView)
+# Test: (4)'/schedules/schedule_b/by_recipient/'(aggregates.ScheduleBByRecipientView)
+# Test: (5)'/schedules/schedule_b/by_recipient_id/'(aggregates.ScheduleBByRecipientIDView)
 class TestCommitteeAggregates(ApiBaseTest):
     def test_stable_sort(self):
         rows = [
@@ -185,6 +190,9 @@ class TestCommitteeAggregates(ApiBaseTest):
         self.assertEqual(results[0], expected)
 
 
+# Test: (1)'/schedules/schedule_e/by_candidate/' (aggregates.ScheduleEByCandidateView)
+# Test: (2)'/communication_costs/by_candidate/' (aggregates.CommunicationCostByCandidateView)
+# Test: (3)'/electioneering/by_candidate/' (aggregates.ElectioneeringByCandidateView)
 class TestAggregates(ApiBaseTest):
     cases = [
         (
@@ -312,7 +320,12 @@ class TestAggregates(ApiBaseTest):
             assert results[0]['candidate_id'] == self.candidate.candidate_id
 
 
-class TestCandidateAggregates(ApiBaseTest):
+# Test (1)'/schedules/schedule_a/by_size/by_candidate/' (candidate_aggregates.ScheduleABySizeCandidateView)
+# Test (2)'/schedules/schedule_a/by_state/by_candidate/' (candidate_aggregates.ScheduleAByStateCandidateView)
+# Test (3)'/schedules/schedule_a/by_state/by_candidate/totals/'
+# (candidate_aggregates.ScheduleAByStateCandidateTotalsView)
+# Test (4)'/candidates/totals/' (candidate_aggregates.TotalsCandidateView)
+class TestScheduleACandidateAggregates(ApiBaseTest):
     current_cycle = get_current_cycle()
     next_cycle = current_cycle + 2
 
@@ -574,7 +587,8 @@ class TestCandidateAggregates(ApiBaseTest):
             fec_election_year=self.next_cycle,
         )
 
-    def test_by_size(self):
+# start --- test '/schedules/schedule_a/by_size/by_candidate/' (candidate_aggregates.ScheduleABySizeCandidateView)
+    def test_schedule_a_by_size_candidate(self):
         [
             factories.ScheduleABySizeFactory(
                 committee_id=self.committees[0].committee_id,
@@ -633,7 +647,61 @@ class TestCandidateAggregates(ApiBaseTest):
         }
         assert results[0] == expected
 
-    def test_by_state(self):
+    def test_sort_validation_schedule_a_by_size_candidate(self):
+        [
+            factories.ScheduleABySizeFactory(
+                committee_id=self.committees[0].committee_id,
+                cycle=2012,
+                total=50,
+                size=2000,
+                count=20,
+            ),
+            factories.ScheduleABySizeFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2012,
+                total=150,
+                size=1000,
+                count=20,
+            ),
+            factories.ScheduleABySizeFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2010,
+                total=3,
+                size=100,
+                count=3,
+            ),
+        ]
+        # sort_option = ['total','size','count'], sort value must be one of sort_option.
+        results = self.app.get(
+            api.url_for(
+                ScheduleABySizeCandidateView,
+                sort='bad_value',
+            )
+        )
+        self.assertEqual(results.status_code, 422)
+
+        results = self._results(
+            api.url_for(
+                ScheduleABySizeCandidateView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                election_full=False,
+                sort=['size', 'total'],
+            )
+        )
+        assert len(results) == 2
+        expected = {
+            'candidate_id': self.candidate.candidate_id,
+            'cycle': 2012,
+            'total': 150,
+            'size': 1000,
+            'count': 20,
+        }
+        assert results[0] == expected
+# end --- test '/schedules/schedule_a/by_size/by_candidate/' (candidate_aggregates.ScheduleABySizeCandidateView)
+
+# start --- test '/schedules/schedule_a/by_state/by_candidate' (candidate_aggregates.ScheduleAByStateCandidateView)
+    def test_schedule_a_by_state_candidate(self):
         [
             factories.ScheduleAByStateFactory(
                 committee_id=self.committees[0].committee_id,
@@ -697,7 +765,74 @@ class TestCandidateAggregates(ApiBaseTest):
         }
         assert results[0] == expected
 
-    def test_by_state_candidate_totals(self):
+    def test_sort_validation_schedule_a_by_state_candidate(self):
+        [
+            factories.ScheduleAByStateFactory(
+                committee_id=self.committees[0].committee_id,
+                cycle=2012,
+                total=50,
+                state='NY',
+                state_full='New York',
+                count=30,
+            ),
+            factories.ScheduleAByStateFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2012,
+                total=150,
+                state='NY',
+                state_full='New York',
+                count=30,
+            ),
+            factories.ScheduleAByStateFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2012,
+                total=100,
+                state='CA',
+                state_full='California',
+                count=40,
+            ),
+            factories.ScheduleAByStateFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2010,
+                total=10.01,
+                state='NY',
+                state_full='New York',
+                count=3,
+            ),
+        ]
+        # sort_option = ['total','count','state','state_full'], sort value must be one of sort_option.
+        results = self.app.get(
+            api.url_for(
+                ScheduleAByStateCandidateView,
+                sort='bad_value',
+            )
+        )
+        self.assertEqual(results.status_code, 422)
+
+        results = self._results(
+            api.url_for(
+                ScheduleAByStateCandidateView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                election_full=False,
+                sort=['state', 'total'],
+            )
+        )
+        assert len(results) == 2
+        expected = {
+            'candidate_id': self.candidate.candidate_id,
+            'cycle': 2012,
+            'total': 100,
+            'state': 'CA',
+            'state_full': 'California',
+            'count': 40,
+        }
+        assert results[0] == expected
+# end --- test '/schedules/schedule_a/by_state/by_candidate' (candidate_aggregates.ScheduleAByStateCandidateView)
+
+# start --- test '/schedules/schedule_a/by_state/by_candidate/totals/'
+# (candidate_aggregates.ScheduleAByStateCandidateTotalsView),always return one row.
+    def test_schedule_a_by_state_candidate_totals(self):
         [
             factories.ScheduleAByStateFactory(
                 committee_id=self.committees[0].committee_id,
@@ -740,7 +875,64 @@ class TestCandidateAggregates(ApiBaseTest):
         }
         assert results[0] == expected
 
-    def test_totals(self):
+    def test_sort_validation_schedule_a_by_state_candidate_totals(self):
+        [
+            factories.ScheduleAByStateFactory(
+                committee_id=self.committees[0].committee_id,
+                cycle=2012,
+                total=50.3,
+                state='NY',
+                state_full='New York',
+                count=30,
+            ),
+            factories.ScheduleAByStateFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2012,
+                total=150.11,
+                state='CT',
+                state_full='New York',
+                count=10,
+            ),
+            factories.ScheduleAByStateFactory(
+                committee_id=self.committees[1].committee_id,
+                cycle=2012,
+                total=150.10,
+                state='NJ',
+                state_full='New Jersey',
+                count=60,
+            ),
+        ]
+        # sort_option = ['total','count'], sort value must be one of sort_option.
+        results = self.app.get(
+            api.url_for(
+                ScheduleAByStateCandidateTotalsView,
+                sort='bad_value',
+            )
+        )
+        self.assertEqual(results.status_code, 422)
+
+        results = self._results(
+            api.url_for(
+                ScheduleAByStateCandidateTotalsView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                election_full=False,
+                sort=['total'],
+            )
+        )
+        assert len(results) == 1
+        expected = {
+            'candidate_id': self.candidate.candidate_id,
+            'cycle': 2012,
+            'total': 350.51,
+            'count': 100,
+        }
+        assert results[0] == expected
+# end --- test '/schedules/schedule_a/by_state/by_candidate/totals/'
+# (candidate_aggregates.ScheduleAByStateCandidateTotalsView)
+
+# start ---test '/candidates/totals/' (candidate_aggregates.TotalsCandidateView)
+    def test_totals_candidate(self):
         # 2-year totals
         results = self._results(
             api.url_for(
@@ -857,7 +1049,7 @@ class TestCandidateAggregates(ApiBaseTest):
             results[0], {'cycle': self.current_cycle, 'receipts': 25000}
         )
 
-    def test_totals_full(self):
+    def test_totals__candidate_full(self):
         results = self._results(
             api.url_for(
                 TotalsCandidateView,
@@ -881,7 +1073,7 @@ class TestCandidateAggregates(ApiBaseTest):
         assert len(results) == 1
         assert_dicts_subset(results[0], {'cycle': self.next_cycle, 'receipts': 55000})
 
-    def test_sort_validation_candidate_totals(self):
+    def test_sort_validation_totals_candidate(self):
         results = self.app.get(
             api.url_for(
                 TotalsCandidateView,
@@ -906,10 +1098,11 @@ class TestCandidateAggregates(ApiBaseTest):
                 "receipts": 25000,
             },
         )
+# end ---test '/candidates/totals/' (candidate_aggregates.TotalsCandidateView)
 
 
-# Test /candidates/totals/aggregates/ (candidate_aggregates.CandidateTotalAggregateView
-class TestCandidatesTotalsAggregates(ApiBaseTest):
+# Test '/candidates/totals/aggregates/' (candidate_aggregates.CandidateTotalAggregateView
+class TestCandidateTotalAggregateView(ApiBaseTest):
     def setUp(self):
         super().setUp()
         factories.ElectionsListFactory(
@@ -1183,8 +1376,8 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
         )
 
     def test_base(self):
-        # without any paramenter, group by election_year only
-        # return  rows (election_year:  2016, 2022)
+        # without any parameter, group by election_year only
+        # return rows (-election_year:  2022, 2016)
         results = self._results(api.url_for(
             CandidateTotalAggregateView, sort='-election_year')
         )
@@ -1194,7 +1387,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
     def test_aggregate_by_office(self):
         # aggregate_by=office, election_full default=true
         # group by election_year, office.
-        # return  rows (2016/H, 2022/S, 2016/S)
+        # return rows (2016/H, 2022/S, 2016/S)
         results = self._results(api.url_for(
             CandidateTotalAggregateView,
             aggregate_by="office",)
@@ -1204,7 +1397,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
     def test_aggregate_by_office_state(self):
         # aggregate_by=office-state, is_active_candidate=True, election_year=2016, election_full default=true
         # group by election_year, office, state.
-        # return  rows (2016/H/CA, 2016/H/NY, 2016/S/CA, 2016/S/NY)
+        # return rows (2016/H/CA, 2016/H/NY, 2016/S/CA, 2016/S/NY)
         results = self._results(api.url_for(
             CandidateTotalAggregateView,
             aggregate_by="office-state",
@@ -1216,7 +1409,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
     def test_aggregate_by_office_state_district(self):
         # aggregate_by=office-state-district, is_active_candidate=True, election_year=2016, election_full default=true
         # group by election_year, office, state, district.
-        # return  rows (2016/H/CA/01, 2016/H/CA/02, 2016/H/NY/01, 2016/S/CA/00, 2016/S/NY/00)
+        # return rows (2016/H/CA/01, 2016/H/CA/02, 2016/H/NY/01, 2016/S/CA/00, 2016/S/NY/00)
         results = self._results(api.url_for(
             CandidateTotalAggregateView,
             aggregate_by="office-state-district",
@@ -1228,7 +1421,7 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
     def test_aggregate_by_office_party(self):
         # aggregate_by=office-party, is_active_candidate=True, election_year=2016, election_full default=true
         # group by election_year, office, party.
-        # return  rows (2016/H/DEM, 2016/H/REP, 2016/S/DEM,)
+        # return rows (2016/H/DEM, 2016/H/REP, 2016/S/DEM,)
         results = self._results(api.url_for(
             CandidateTotalAggregateView,
             aggregate_by="office-party",
@@ -1431,6 +1624,16 @@ class TestCandidatesTotalsAggregates(ApiBaseTest):
                 "total_debts_owed_by_committee": 200,
             },
         )
+
+    def test_sort_validation(self):
+        results = self.app.get(
+            api.url_for(
+                CandidateTotalAggregateView,
+                election_full='true',
+                sort='test',
+            )
+        )
+        self.assertEqual(results.status_code, 422)
 
     def test_sort_by_election_year(self):
         # aggregate_by=office, office=H, election_full=true, is_active_candidate=true

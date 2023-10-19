@@ -176,6 +176,22 @@ class IndicesValidator(IndexValidator):
                 )
 
 
+class SortMultiOptionValidator(object):
+
+    def __init__(self, values):
+        self.values = values
+
+    def __call__(self, sort_arg_value_list):
+        for sort_arg_value in sort_arg_value_list:
+            if sort_arg_value.lstrip('-') not in self.values:
+                raise exceptions.ApiError(
+                    'Cannot sort on value "{0}". Instead choose one of: "{1}"'.format(
+                        sort_arg_value, '", "'.join(self.values)
+                    ),
+                    status_code=422,
+                )
+
+
 def make_sort_args(
     default=None, validator=None, default_hide_null=False,
         default_nulls_only=False, default_sort_nulls_last=False, show_nulls_last_arg=True,
@@ -207,14 +223,14 @@ def make_sort_args(
     return args
 
 
-def make_multi_sort_args(
-    default=None, validator=None, default_hide_null=False,
-        default_nulls_only=False, default_sort_nulls_last=False):
+def make_multi_sort_args(default=None, validator=None, default_hide_null=False, default_nulls_only=False,
+                         default_sort_nulls_last=False, show_nulls_last_arg=True, additional_description=''):
 
-    args = make_sort_args(default, validator, default_hide_null, default_nulls_only, default_sort_nulls_last)
-    args['sort'] = fields.List(
-        fields.Str, missing=default, validate=validator, required=False, allow_none=True,
-        description=docs.SORT)
+    args = make_sort_args(default, validator, default_hide_null, default_nulls_only,
+                          default_sort_nulls_last, show_nulls_last_arg, additional_description)
+
+    args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True, description='Provide a field to sort by. Use `-` for descending order.\n{}'.format(
+                                    additional_description))
     return args
 
 
