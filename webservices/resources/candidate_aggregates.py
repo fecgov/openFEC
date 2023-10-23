@@ -224,6 +224,7 @@ class TotalsCandidateView(ApiResource):
         'receipts',
         'disbursements',
         'individual_itemized_contributions',
+        'candidate_id',
     ]
 
     @property
