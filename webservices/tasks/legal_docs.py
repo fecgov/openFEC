@@ -238,7 +238,7 @@ def delete_es_backup_monthly():
                     logger.info("deleting snapshot: '{0}'".format(id))
                     time.sleep(30)
             logger.info(" Monthly (%s) elasticsearch snapshot deletion completed", datetime.date.today().strftime("%A"))
-            slack_message = "Monthly elasticsearch deletion completed in {0} space in repoistory: ({1})".format(
+            slack_message = "Monthly elasticsearch deletion completed in {0} space in repository: ({1})".format(
                 get_app_name(), repo_name)
             utils.post_to_slack(slack_message, SLACK_BOTS)
     except Exception as error:
