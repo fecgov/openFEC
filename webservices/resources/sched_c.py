@@ -2,6 +2,7 @@
 from flask_apispec import doc
 from webservices import args
 from webservices import docs
+from webservices import exceptions
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
@@ -25,6 +26,7 @@ class ScheduleCView(ApiResource):
     filter_multi_fields = [
         ('image_number', models.ScheduleC.image_number),
         ('committee_id', models.ScheduleC.committee_id),
+        ('form_line_number', models.ScheduleC.form_line_number),
     ]
 
     filter_fulltext_fields = [
@@ -38,6 +40,23 @@ class ScheduleCView(ApiResource):
         (('min_image_number', 'max_image_number'), models.ScheduleC.image_number),
         (('min_payment_to_date', 'max_payment_to_date'), models.ScheduleC.payment_to_date),
     ]
+
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+        if 'form_line_number' in kwargs:
+            for each in kwargs['form_line_number']:
+                if each.startswith('-'):
+                    each = each[1:]
+                if len(each.split('-')) != 2:
+                    raise exceptions.ApiError(
+                        exceptions.FORM_LINE_NUMBER_ERROR, status_code=400
+                    )
+        # added to help with transition to the new form_line_number, to be removed
+        if 'line_number' in kwargs:
+            raise exceptions.ApiError(
+                exceptions.LINE_NUMBER_ERROR, status_code=400
+            )
+        return query
 
     @property
     def args(self):

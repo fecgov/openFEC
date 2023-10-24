@@ -313,39 +313,34 @@ class TestScheduleA(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_name'], 'George Soros')
 
-    def test_schedule_a_filter_line_number(self):
+    def test_schedule_a_filter_form_line_number(self):
         [
-            factories.ScheduleAFactory(line_number='16', filing_form='F3X'),
-            factories.ScheduleAFactory(line_number='17', filing_form='F3X'),
+            factories.ScheduleAFactory(line_number='12', filing_form='F3X'),
+            factories.ScheduleAFactory(line_number='11AI', filing_form='F3X'),
+            factories.ScheduleAFactory(line_number='15', filing_form='F3X'),
+            factories.ScheduleAFactory(line_number='15', filing_form='F3X'),
         ]
         results = self._results(
-            api.url_for(ScheduleAView, line_number='f3X-16', **self.kwargs)
+            api.url_for(ScheduleAView, form_line_number='f3x-11AI', **self.kwargs)
         )
         self.assertEqual(len(results), 1)
-
-        [
-            factories.ScheduleBFactory(line_number='21', filing_form='F3X'),
-            factories.ScheduleBFactory(line_number='22', filing_form='F3X'),
-        ]
-
         results = self._results(
-            api.url_for(ScheduleBView, line_number='f3X-21', **self.kwargs)
+            api.url_for(ScheduleAView, form_line_number=('f3x-11AI', 'f3X-12'), **self.kwargs)
         )
-        self.assertEqual(len(results), 1)
+        self.assertEqual(len(results), 2)
 
-        # invalid line_number testing for sched_b
+        # test NOT a form_line_number
+        results = self._results(
+            api.url_for(ScheduleAView, form_line_number='-F3x-12', **self.kwargs)
+        )
+        self.assertEqual(len(results), 3)
+
+        # invalid form_line_number testing for sched_a
         response = self.app.get(
-            api.url_for(ScheduleBView, line_number='f3x21', **self.kwargs)
+            api.url_for(ScheduleAView, form_line_number='f3x16', **self.kwargs)
         )
         self.assertEqual(response.status_code, 400)
-        self.assertIn(b'Invalid line_number', response.data)
-
-        # invalid line_number testing for sched_a
-        response = self.app.get(
-            api.url_for(ScheduleAView, line_number='f3x16', **self.kwargs)
-        )
-        self.assertEqual(response.status_code, 400)
-        self.assertIn(b'Invalid line_number', response.data)
+        self.assertIn(b'Invalid form_line_number', response.data)
 
     def test_schedule_a_filter_fulltext_employer(self):
         employers = ['Acme Corporation', 'Vandelay Industries']
@@ -990,6 +985,36 @@ class TestScheduleB(ApiBaseTest):
             assert len(results) == 1
             assert results[0][column.key] == values[0]
 
+    def test_schedule_b_filter_form_line_number(self):
+        [
+            factories.ScheduleBFactory(line_number='23', filing_form='F3X'),
+            factories.ScheduleBFactory(line_number='17', filing_form='F3X'),
+            factories.ScheduleBFactory(line_number='22', filing_form='F3'),
+            factories.ScheduleBFactory(line_number='22', filing_form='F3P'),
+        ]
+        results = self._results(
+            api.url_for(ScheduleBView, form_line_number='f3x-23', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+
+        results = self._results(
+            api.url_for(ScheduleBView, form_line_number=('f3x-23', 'f3X-17'), **self.kwargs)
+        )
+        self.assertEqual(len(results), 2)
+
+        # test searching for NOT a form_line_number
+        results = self._results(
+            api.url_for(ScheduleBView, form_line_number='-f3x-23', **self.kwargs)
+        )
+        self.assertEqual(len(results), 3)
+
+        # invalid form_line_number testing for sched_b
+        response = self.app.get(
+            api.url_for(ScheduleBView, form_line_number='f3x21', **self.kwargs)
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Invalid form_line_number', response.data)
+
 
 # Test endpoints:
 # /schedules/schedule_e/ (sched_e.ScheduleEView)
@@ -1481,3 +1506,33 @@ class TestScheduleH4(ApiBaseTest):
             )
             assert len(results) == 1
             assert results[0][column.key] == values[0]
+
+    def test_schedule_h4_filter_form_line_number(self):
+        [
+            factories.ScheduleH4Factory(line_number='23', filing_form='F3X'),
+            factories.ScheduleH4Factory(line_number='17', filing_form='F3X'),
+            factories.ScheduleH4Factory(line_number='22', filing_form='F3'),
+            factories.ScheduleH4Factory(line_number='22', filing_form='F3P'),
+        ]
+        results = self._results(
+            api.url_for(ScheduleH4View, form_line_number='f3x-23', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+
+        results = self._results(
+            api.url_for(ScheduleH4View, form_line_number=('f3x-23', 'f3X-17'), **self.kwargs)
+        )
+        self.assertEqual(len(results), 2)
+
+        # test searching for NOT a form_line_number
+        results = self._results(
+            api.url_for(ScheduleH4View, form_line_number='-f3x-23', **self.kwargs)
+        )
+        self.assertEqual(len(results), 3)
+
+        # invalid form_line_number testing for sched_h4
+        response = self.app.get(
+            api.url_for(ScheduleH4View, form_line_number='f3x21', **self.kwargs)
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Invalid form_line_number', response.data)

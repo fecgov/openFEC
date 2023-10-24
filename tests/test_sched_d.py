@@ -189,6 +189,35 @@ class TestScheduleDView(ApiBaseTest):
         self.assertEqual(results[0]['sub_id'], '2')
         self.assertEqual(results[1]['sub_id'], '1')
 
+    def test_schedule_d_filter_form_line_number(self):
+        [
+            factories.ScheduleDViewFactory(line_number='9', filing_form='F3X'),
+            factories.ScheduleDViewFactory(line_number='10', filing_form='F3X'),
+            factories.ScheduleDViewFactory(line_number='12', filing_form='F3'),
+            factories.ScheduleDViewFactory(line_number='9', filing_form='F3'),
+        ]
+        results = self._results(
+            api.url_for(ScheduleDView, form_line_number='f3X-9')
+        )
+        self.assertEqual(len(results), 1)
+        results = self._results(
+            api.url_for(ScheduleDView, form_line_number=('f3x-9', 'f3X-10'))
+        )
+        self.assertEqual(len(results), 2)
+
+        # test NOT a form_line_number
+        results = self._results(
+            api.url_for(ScheduleDView, form_line_number='-F3x-10')
+        )
+        self.assertEqual(len(results), 3)
+
+        # invalid form_line_number testing for sched_d
+        response = self.app.get(
+            api.url_for(ScheduleDView, form_line_number='f3x10')
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Invalid form_line_number', response.data)
+
 
 class TestScheduleDViewBySubId(ApiBaseTest):
     def test_sub_id_field(self):

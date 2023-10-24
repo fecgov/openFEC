@@ -25,6 +25,11 @@ class BaseItemized(db.Model):
     def memoed_subtotal(self):
         return self.memo_code == 'X'
 
+    @hybrid_property
+    def form_line_number(self):
+        if self.filing_form and self.line_number:
+            return self.filing_form + "-" + self.line_number
+
 
 class BaseRawItemized(db.Model):
     __abstract__ = True
