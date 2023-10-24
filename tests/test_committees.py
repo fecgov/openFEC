@@ -170,12 +170,12 @@ class CommitteeFormatTest(ApiBaseTest):
             factories.CommitteeFactory(designation="P"),
             factories.CommitteeFactory(party="DEM"),
             factories.CommitteeFactory(organization_type="C"),
-            factories.CommitteeFactory(committee_id="C01"),
+            factories.CommitteeFactory(committee_id="C00000001"),
         ]
 
         # checking one example from each field
         filter_fields = (
-            ("committee_id", ["C01", "C02"]),
+            ("committee_id", ["C00000001", "C00000002"]),
             ("state", ["CA", "DC"]),
             ("committee_type", "S"),
             ("designation", "P"),
@@ -701,7 +701,7 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
 
     def test_case_insensitivity(self):
         lower_candidate = factories.CandidateDetailFactory(candidate_id="H01")
-        lower_committee_1 = factories.CommitteeDetailFactory(committee_id="ID01")
+        lower_committee_1 = factories.CommitteeDetailFactory(committee_id="C00000001")
         [
             factories.CommitteeHistoryProfileFactory(
                 committee_id=lower_committee_1.committee_id,
@@ -736,7 +736,7 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
         results = self._results(
             api.url_for(
                 CommitteeHistoryProfileView,
-                committee_id="id01",
+                committee_id="c00000001",
                 cycle=2014,
                 election_full=False
             )

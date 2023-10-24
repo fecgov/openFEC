@@ -8,7 +8,7 @@ from webservices.resources.rad_analyst import RadAnalystView
 class TestFilerResources(ApiBaseTest):
     def test_committee_id_fetch(self):
         """ Check Analyst is returned with a specified committee id"""
-        committee_id = 'C8675309'
+        committee_id = 'C86753090'
         factories.RadAnalystFactory(committee_id=committee_id)
 
         results = self._results(api.url_for(RadAnalystView, committee_id=committee_id))
@@ -16,8 +16,8 @@ class TestFilerResources(ApiBaseTest):
 
     def test_rad(self):
         """ Check RAD returns in general endpoint"""
-        factories.RadAnalystFactory(committee_id='C001')
-        factories.RadAnalystFactory(committee_id='C002')
+        factories.RadAnalystFactory(committee_id='C00000001')
+        factories.RadAnalystFactory(committee_id='C00000002')
 
         results = self._results(api.url_for(RadAnalystView))
         self.assertEqual(len(results), 2)
@@ -25,24 +25,24 @@ class TestFilerResources(ApiBaseTest):
     def test_filters(self):
         [
             factories.RadAnalystFactory(
-                telephone_ext=123, committee_id='C0001', title='xyz 111'
+                telephone_ext=123, committee_id='C0000001', title='xyz 111'
             ),
             factories.RadAnalystFactory(
                 telephone_ext=456,
-                committee_id='C0002',
+                committee_id='C00000002',
                 title='abc',
                 email='test2@fec.gov',
             ),
             factories.RadAnalystFactory(
-                analyst_id=789, committee_id='C0003', email='test1@fec.gov'
+                analyst_id=789, committee_id='C00000003', email='test1@fec.gov'
             ),
             factories.RadAnalystFactory(
-                analyst_id=1011, analyst_short_id=11, committee_id='C0004'
+                analyst_id=1011, analyst_short_id=11, committee_id='C00000004'
             ),
         ]
 
         filter_fields = (
-            ('committee_id', 'C0002'),
+            ('committee_id', 'C00000002'),
             ('telephone_ext', 123),
             ('analyst_id', 789),
             ('analyst_short_id', 11),
@@ -65,9 +65,9 @@ class TestFilerResources(ApiBaseTest):
 
     def test_sort(self):
         [
-            factories.RadAnalystFactory(last_name='Young', committee_id='C0005'),
-            factories.RadAnalystFactory(last_name='Old', committee_id='C0006'),
-            factories.RadAnalystFactory(last_name='Someone-Else', committee_id='C0007'),
+            factories.RadAnalystFactory(last_name='Young', committee_id='C00000005'),
+            factories.RadAnalystFactory(last_name='Old', committee_id='C00000006'),
+            factories.RadAnalystFactory(last_name='Someone-Else', committee_id='C00000007'),
         ]
         results = self._results(api.url_for(RadAnalystView, sort='last_name'))
         self.assertEqual(
@@ -77,16 +77,16 @@ class TestFilerResources(ApiBaseTest):
     def test_assignment_date_filters(self):
         [
             factories.RadAnalystFactory(
-                assignment_update_date='2015-01-01', committee_id='C0007'
+                assignment_update_date='2015-01-01', committee_id='C00000007'
             ),
             factories.RadAnalystFactory(
-                assignment_update_date='2015-02-01', committee_id='C0008'
+                assignment_update_date='2015-02-01', committee_id='C00000008'
             ),
             factories.RadAnalystFactory(
-                assignment_update_date='2015-03-01', committee_id='C0009'
+                assignment_update_date='2015-03-01', committee_id='C00000009'
             ),
             factories.RadAnalystFactory(
-                assignment_update_date='2015-04-01', committee_id='C0010'
+                assignment_update_date='2015-04-01', committee_id='C00000010'
             ),
         ]
         results = self._results(
