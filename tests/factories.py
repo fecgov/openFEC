@@ -86,7 +86,7 @@ class CandidateFlagsFactory(BaseFactory):
 
 
 class BaseCommitteeFactory(BaseFactory):
-    committee_id = factory.Sequence(lambda n: "ID{0}".format(n))
+    committee_id = factory.Sequence(lambda n: "C{0}".format(n + 10000000))
 
 
 class CommitteeFactory(BaseCommitteeFactory):

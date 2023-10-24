@@ -221,6 +221,8 @@ class CandidateAggregateResource(AggregateResource):
     group_columns = []
 
     def build_query(self, committee_id=None, **kwargs):
+        if committee_id:
+            committee_id = utils.check_committee_id_list(committee_id)
         query = super().build_query(committee_id=committee_id, **kwargs)
         election_full = kwargs.get('election_full')
         if election_full and not (kwargs.get('candidate_id') or kwargs.get('office')):
@@ -399,7 +401,7 @@ class ECAggregatesView(AggregateResource):
         ('candidate_id', model.candidate_id),
         ('committee_id', model.committee_id),
     ]
-    
+
 
 def join_cand_cmte_names(query):
     query = query.subquery()

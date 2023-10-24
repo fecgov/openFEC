@@ -326,6 +326,28 @@ def check_election_arguments(kwargs):
             )
 
 
+def check_committee_id_list(committee_ids):
+    for idx, committee_id in enumerate(committee_ids):
+        check_committee_id(committee_id.upper())
+        committee_ids[idx] = committee_id.upper()
+    return committee_ids
+
+
+def check_committee_id(committee_id):
+
+    if len(committee_id) != 9 or not committee_id.startswith('C'):
+        raise exceptions.ApiError(
+                    exceptions.COMMITTEE_ID_ERROR,
+                    status_code=422)
+
+    try:
+        committee_id = int(committee_id[1:])
+    except (TypeError, ValueError):
+        raise exceptions.ApiError(
+                exceptions.COMMITTEE_ID_ERROR,
+                status_code=422)
+
+
 def get_model(name):
     from webservices.common.models import db
 

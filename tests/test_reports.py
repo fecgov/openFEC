@@ -393,10 +393,10 @@ class TestCommitteeReports(ApiBaseTest):
 
     def test_reports_committee_not_found(self):
         resp = self.app.get(api.url_for(CommitteeReportsView, committee_id='fake'))
-        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.status_code, 422)
         self.assertEqual(resp.content_type, 'application/json')
         data = json.loads(resp.data.decode('utf-8'))
-        self.assertIn('not found', data['message'].lower())
+        self.assertIn('invalid committee_id', data['message'].lower())
 
 
 # Test 3 endpoints:
@@ -435,8 +435,8 @@ class TestEFileReports(ApiBaseTest):
         self._check_committee_ids(results, [committee_efile], [other_efile])
 
     def test_efile_pac_party_reports(self):
-        committee_id = 'C8675310'
-        other_id = 'C3333333'
+        committee_id = 'C86753100'
+        other_id = 'C33333330'
 
         committee_efile = factories.EfileReportsPacPartyFactory(
             committee_id=committee_id
@@ -451,8 +451,8 @@ class TestEFileReports(ApiBaseTest):
         self._check_committee_ids(results, [committee_efile], [other_efile])
 
     def test_efile_house_senate_reports(self):
-        committee_id = 'C8675311'
-        other_id = 'C1111111'
+        committee_id = 'C86753110'
+        other_id = 'C11111110'
 
         committee_efile = factories.EfileReportsHouseSenateFactory(
             committee_id=committee_id

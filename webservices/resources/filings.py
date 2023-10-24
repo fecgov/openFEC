@@ -83,6 +83,8 @@ class FilingsView(BaseFilings):
     def build_query(self, committee_id=None, candidate_id=None, **kwargs):
         query = super().build_query(**kwargs)
         if committee_id:
+            committee_id = committee_id.upper()
+            utils.check_committee_id(committee_id)
             query = query.filter(models.Filings.committee_id == committee_id)
         if candidate_id:
             query = query.filter(models.Filings.candidate_id == candidate_id)

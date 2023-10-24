@@ -11,38 +11,39 @@ class TestInauguralDonations(ApiBaseTest):
         super().setUp()
 
         factories.TotalsInauguralDonationsFactory(
-            committee_id='C00001',
+            committee_id='C00000001',
             contributor_name='Walmart',
             cycle=2015,
             total_donation=1000
         )
 
         factories.TotalsInauguralDonationsFactory(
-            committee_id='C00002',
+            committee_id='C00000002',
             contributor_name='Target',
             cycle=2016,
             total_donation=4000
         )
         factories.TotalsInauguralDonationsFactory(
-            committee_id='C00003',
+            committee_id='C00000003',
             contributor_name='Jason',
             cycle=2020,
             total_donation=3000
         )
 
         factories.TotalsInauguralDonationsFactory(
-            committee_id='C00004',
+            committee_id='C00000004',
             contributor_name='Bass Pro Shop',
             cycle=2023,
             total_donation=6000
         )
 
         factories.TotalsInauguralDonationsFactory(
-            committee_id='C00005',
+            committee_id='C00000005',
             contributor_name='Petsmart',
             cycle=2023,
             total_donation=6000
         )
+
     def test_base(self):
         results = self._results(api.url_for(InauguralDonationsView))
 
@@ -50,14 +51,14 @@ class TestInauguralDonations(ApiBaseTest):
 
     def test_filter_by_committee(self):
         results = self._results(api.url_for(InauguralDonationsView,
-                                            committee_id='C00003'))
+                                            committee_id='C00000003'))
 
         assert len(results) == 1
 
         assert_dicts_subset(
             results[0],
             {
-                'committee_id': 'C00003',
+                'committee_id': 'C00000003',
                 'contributor_name': 'Jason',
                 'cycle': 2020,
                 'total_donation': 3000
@@ -73,7 +74,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[0],
             {
-                'committee_id': 'C00002',
+                'committee_id': 'C00000002',
                 'contributor_name': 'Target',
                 'cycle': 2016,
                 'total_donation': 4000
@@ -82,14 +83,14 @@ class TestInauguralDonations(ApiBaseTest):
 
     def test_multi_filter(self):
         results = self._results(api.url_for(InauguralDonationsView,
-                                            cycle=2023, committee_id='C00005'))
+                                            cycle=2023, committee_id='C00000005'))
 
         assert len(results) == 1
 
         assert_dicts_subset(
             results[0],
             {
-                'committee_id': 'C00005',
+                'committee_id': 'C00000005',
                 'contributor_name': 'Petsmart',
                 'cycle': 2023,
                 'total_donation': 6000
@@ -104,7 +105,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[0],
             {
-                'committee_id': 'C00005',
+                'committee_id': 'C00000005',
                 'contributor_name': 'Petsmart',
                 'cycle': 2023,
                 'total_donation': 6000
@@ -113,7 +114,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[1],
             {
-                'committee_id': 'C00004',
+                'committee_id': 'C00000004',
                 'contributor_name': 'Bass Pro Shop',
                 'cycle': 2023,
                 'total_donation': 6000
@@ -122,7 +123,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[2],
             {
-                'committee_id': 'C00003',
+                'committee_id': 'C00000003',
                 'contributor_name': 'Jason',
                 'cycle': 2020,
                 'total_donation': 3000
@@ -131,7 +132,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[3],
             {
-                'committee_id': 'C00002',
+                'committee_id': 'C00000002',
                 'contributor_name': 'Target',
                 'cycle': 2016,
                 'total_donation': 4000
@@ -140,7 +141,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[4],
             {
-                'committee_id': 'C00001',
+                'committee_id': 'C00000001',
                 'contributor_name': 'Walmart',
                 'cycle': 2015,
                 'total_donation': 1000
@@ -155,7 +156,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[0],
             {
-                'committee_id': 'C00004',
+                'committee_id': 'C00000004',
                 'contributor_name': 'Bass Pro Shop',
                 'cycle': 2023,
                 'total_donation': 6000
@@ -164,7 +165,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[1],
             {
-                'committee_id': 'C00003',
+                'committee_id': 'C00000003',
                 'contributor_name': 'Jason',
                 'cycle': 2020,
                 'total_donation': 3000
@@ -173,7 +174,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[2],
             {
-                'committee_id': 'C00005',
+                'committee_id': 'C00000005',
                 'contributor_name': 'Petsmart',
                 'cycle': 2023,
                 'total_donation': 6000
@@ -182,7 +183,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[3],
             {
-                'committee_id': 'C00002',
+                'committee_id': 'C00000002',
                 'contributor_name': 'Target',
                 'cycle': 2016,
                 'total_donation': 4000
@@ -191,7 +192,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[4],
             {
-                'committee_id': 'C00001',
+                'committee_id': 'C00000001',
                 'contributor_name': 'Walmart',
                 'cycle': 2015,
                 'total_donation': 1000
@@ -206,7 +207,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[0],
             {
-                'committee_id': 'C00001',
+                'committee_id': 'C00000001',
                 'contributor_name': 'Walmart',
                 'cycle': 2015,
                 'total_donation': 1000
@@ -215,7 +216,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[1],
             {
-                'committee_id': 'C00002',
+                'committee_id': 'C00000002',
                 'contributor_name': 'Target',
                 'cycle': 2016,
                 'total_donation': 4000
@@ -224,7 +225,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[2],
             {
-                'committee_id': 'C00003',
+                'committee_id': 'C00000003',
                 'contributor_name': 'Jason',
                 'cycle': 2020,
                 'total_donation': 3000
@@ -233,7 +234,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[3],
             {
-                'committee_id': 'C00005',
+                'committee_id': 'C00000005',
                 'contributor_name': 'Petsmart',
                 'cycle': 2023,
                 'total_donation': 6000
@@ -242,7 +243,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[4],
             {
-                'committee_id': 'C00004',
+                'committee_id': 'C00000004',
                 'contributor_name': 'Bass Pro Shop',
                 'cycle': 2023,
                 'total_donation': 6000
@@ -257,7 +258,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[0],
             {
-                'committee_id': 'C00005',
+                'committee_id': 'C00000005',
                 'contributor_name': 'Petsmart',
                 'cycle': 2023,
                 'total_donation': 6000
@@ -266,7 +267,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[1],
             {
-                'committee_id': 'C00004',
+                'committee_id': 'C00000004',
                 'contributor_name': 'Bass Pro Shop',
                 'cycle': 2023,
                 'total_donation': 6000
@@ -275,7 +276,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[2],
             {
-                'committee_id': 'C00002',
+                'committee_id': 'C00000002',
                 'contributor_name': 'Target',
                 'cycle': 2016,
                 'total_donation': 4000
@@ -284,7 +285,7 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[3],
             {
-                'committee_id': 'C00003',
+                'committee_id': 'C00000003',
                 'contributor_name': 'Jason',
                 'cycle': 2020,
                 'total_donation': 3000
@@ -293,11 +294,9 @@ class TestInauguralDonations(ApiBaseTest):
         assert_dicts_subset(
             results[4],
             {
-                'committee_id': 'C00001',
+                'committee_id': 'C00000001',
                 'contributor_name': 'Walmart',
                 'cycle': 2015,
                 'total_donation': 1000
             }
         )
-
-
