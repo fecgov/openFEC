@@ -4,6 +4,7 @@ from tests.common import ApiBaseTest
 from webservices.rest import api
 from webservices.schemas import ScheduleEByCandidateSchema
 from webservices.resources.aggregates import ScheduleEByCandidateView
+from webservices.resources.sched_e import ScheduleEView
 
 
 # test /schedules/schedule_e/by_candidate/ under tag: independent expenditures
@@ -288,3 +289,32 @@ class TestScheduleEByCandidateView(ApiBaseTest):
         self.assertEqual(len(response), 2)
         self.assertEqual(response[0]['committee_name'], 'Warner for America')
         self.assertEqual(response[1]['committee_name'], 'Ritche for America')
+
+    def test_schedule_e_filter_form_line_number(self):
+        [
+            factories.ScheduleEFactory(line_number='24', filing_form='F3X'),
+            factories.ScheduleEFactory(line_number='25', filing_form='F3X'),
+            factories.ScheduleEFactory(line_number='24', filing_form='F3'),
+            factories.ScheduleEFactory(line_number='25', filing_form='F3'),
+        ]
+        results = self._results(
+            api.url_for(ScheduleEView, form_line_number='f3X-24')
+        )
+        self.assertEqual(len(results), 1)
+        results = self._results(
+            api.url_for(ScheduleEView, form_line_number=('f3x-24', 'f3X-25'))
+        )
+        self.assertEqual(len(results), 2)
+
+        # test NOT a form_line_number
+        results = self._results(
+            api.url_for(ScheduleEView, form_line_number='-F3x-24')
+        )
+        self.assertEqual(len(results), 3)
+
+        # invalid form_line_number testing for sched_e
+        response = self.app.get(
+            api.url_for(ScheduleEView, form_line_number='f3x10')
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Invalid form_line_number', response.data)

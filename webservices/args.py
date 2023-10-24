@@ -564,7 +564,8 @@ itemized = {
     'max_amount': Currency(description='Filter for all amounts less than a value.'),
     'min_date': Date(description='Minimum date'),
     'max_date': Date(description='Maximum date'),
-    'line_number': fields.Str(description=docs.LINE_NUMBER),
+    'form_line_number': fields.List(IStr, description=docs.FORM_LINE_NUMBER),
+    'line_number': fields.Str(description=docs.LINE_NUMBER),     # added to ease transition to form_line_number TBR
 }
 
 schedule_a = {
@@ -744,7 +745,7 @@ schedule_c = {
     'max_image_number': ImageNumber(description=docs.MAX_IMAGE_NUMBER),
     'min_amount': Currency(description=docs.MIN_FILTER),
     'max_amount': Currency(description=docs.MAX_FILTER),
-    'line_number': fields.Str(description=docs.LINE_NUMBER),
+    'form_line_number': fields.List(IStr, description=docs.FORM_LINE_NUMBER),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_name': fields.List(Keyword, description=docs.CANDIDATE_NAME),
     'loan_source_name': fields.List(Keyword, description=docs.LOAN_SOURCE),
@@ -752,6 +753,7 @@ schedule_c = {
     'max_payment_to_date': fields.Int(description=docs.MAX_PAYMENT_DATE),
     'min_incurred_date': Date(missing=None, description=docs.MIN_INCURRED_DATE),
     'max_incurred_date': Date(missing=None, description=docs.MAX_INCURRED_DATE),
+    'line_number': fields.Str(description=docs.LINE_NUMBER),     # added to ease transition to form_line_number TBR
 }
 
 schedule_d = {
@@ -775,9 +777,10 @@ schedule_d = {
     'max_coverage_start_date': Date(missing=None, description=docs.MAX_COVERAGE_START_DATE),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE),
-    'line_number': fields.Str(description=docs.LINE_NUMBER),
+    'form_line_number': fields.List(IStr, description=docs.FORM_LINE_NUMBER),
     'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
     'filing_form': fields.List(fields.Str, description=docs.FORM_TYPE),
+    'line_number': fields.Str(description=docs.LINE_NUMBER),     # added to ease transition to form_line_number TBR
 }
 
 schedule_e_by_candidate = {
