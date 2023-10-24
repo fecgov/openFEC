@@ -9,7 +9,6 @@ from nplusone.ext.flask_sqlalchemy import NPlusOne
 
 from jdbc_utils import to_jdbc_url
 from webservices import rest
-from webservices.common import models
 from webservices import __API_VERSION__
 
 TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
@@ -78,16 +77,12 @@ class ApiBaseTest(BaseTestCase):
                 stdout=null,
             )
 
-        tables_to_skip = [
-            models.CandidateCommitteeTotalsPresidential,
-            models.CandidateCommitteeTotalsHouseSenate,
-        ]
         rest.db.metadata.create_all(
             rest.db.engine,
             tables=[
                 each.__table__
                 for each in rest.db.Model._decl_class_registry.values()
-                if hasattr(each, '__table__') and each not in tables_to_skip
+                if hasattr(each, '__table__')
             ],
         )
 

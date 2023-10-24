@@ -42,16 +42,9 @@ class CandidateDetailFactory(BaseCandidateFactory):
         model = models.CandidateDetail
 
 
-class CandidateCommitteeTotalsPresidentialFactory(BaseCandidateFactory):
+class CandidateTotalsDetailFactory(BaseCandidateFactory):
     class Meta:
-        model = models.CandidateCommitteeTotalsPresidential
-
-    cycle = 2016
-
-
-class CandidateCommitteeTotalsHouseSenateFactory(BaseCandidateFactory):
-    class Meta:
-        model = models.CandidateCommitteeTotalsHouseSenate
+        model = models.CandidateTotalsDetail
 
     cycle = 2016
 

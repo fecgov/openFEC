@@ -79,18 +79,6 @@ candidate/member's district changes during re-districting. Presidential IDs don'
 The rest is sequence.
 '''
 
-CANDIDATE_ID_DEP = '''
-`DEPRECATED`
-A unique identifier assigned to each candidate registered with the FEC.
-If a person runs for several offices, that person will have separate candidate IDs for each office.
-First character indicates office - [P]residential, [H]ouse, [S]enate].
-Second character is the last digit of the two-year period the ID was created.
-Third and fourth is the candidate state. Presidential IDs don't have state.
-Fifth and sixth is the district when the candidate first ran. This does not change if the
-candidate/member's district changes during re-districting. Presidential IDs don't have districts.
-The rest is sequence.
-'''
-
 CANDIDATE_INACTIVE = '''
 True indicates that a candidate is inactive.
 '''
@@ -1826,6 +1814,7 @@ also incorporate any changes made by committees, if any report covering the peri
 EFILE_REPORTS += WIP_TAG
 
 LINE_NUMBER = '''
+`DEPRECATED This filter will be renamed to form_line_number`
 Filter for form and line number using the following format:
 `FORM-LINENUMBER`.  For example an argument such as `F3X-16` would filter
 down to all entries from form `F3X` line number `16`.
