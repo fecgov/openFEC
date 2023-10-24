@@ -39,7 +39,7 @@ class CommitteeTestCase(BaseTestCase):
     committee_data = [
         {
             'valid_fec_yr_id': 10,
-            'cmte_id': 'C001',
+            'cmte_id': 'C00000001',
             'fec_election_yr': 2020,
             'cmte_tp': 'P',
             'cmte_dsgn': 'P',
@@ -53,7 +53,7 @@ class CommitteeTestCase(BaseTestCase):
             'cand_id': 'P01',
             'fec_election_yr': 2020,
             'cand_election_yr': 2020,
-            'cmte_id': 'C001',
+            'cmte_id': 'C00000001',
             'cmte_count_cand_yr': 1,
             'cmte_tp': 'P',
             'cmte_dsgn': 'P',
@@ -64,28 +64,28 @@ class CommitteeTestCase(BaseTestCase):
 
     f_rpt_or_form_sub_data = [
         {
-            'cand_cmte_id': 'C001',
+            'cand_cmte_id': 'C00000001',
             'receipt_dt': 20160610,
             'form_tp': 'F1',
             'rpt_yr': 2015,
             'sub_id': 1001,
         },
         {
-            'cand_cmte_id': 'C001',
+            'cand_cmte_id': 'C00000001',
             'receipt_dt': 20170310,
             'form_tp': 'F3',
             'rpt_yr': 2017,
             'sub_id': 1002,
         },
         {
-            'cand_cmte_id': 'C001',
+            'cand_cmte_id': 'C00000001',
             'receipt_dt': 20170510,
             'form_tp': 'F3',
             'rpt_yr': None,
             'sub_id': 1003,
         },
         {
-            'cand_cmte_id': 'C001',
+            'cand_cmte_id': 'C00000001',
             'receipt_dt': 20190310,
             'form_tp': 'F3',
             'rpt_yr': 2019,
@@ -100,7 +100,7 @@ class CommitteeTestCase(BaseTestCase):
         manage.refresh_materialized(concurrent=False)
 
         params_cmte = {
-            'committee_id': 'C001',
+            'committee_id': 'C00000001',
         }
 
         committee_api = self._results(
@@ -116,7 +116,7 @@ class CommitteeTestCase(BaseTestCase):
 
     def check_nulls_in_array_column(self, api_result, array_column):
         self.assertEqual(len(api_result), 1)
-        self.assertEqual(api_result[0]['committee_id'], 'C001')
+        self.assertEqual(api_result[0]['committee_id'], 'C00000001')
 
         for each in api_result[0][array_column]:
             has_null = 1 if each is None else 0

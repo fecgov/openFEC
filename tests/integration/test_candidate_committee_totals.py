@@ -35,7 +35,7 @@ class TotalTestCase(common.BaseTestCase):
     STOCK_CMTE_VALID_FEC_YR = [
         {
             'valid_fec_yr_id': 1,
-            'cmte_id': 'C001',
+            'cmte_id': 'C00000001',
             'fec_election_yr': 2020,
             'cmte_tp': 'P',
             'cmte_dsgn': 'P',
@@ -43,7 +43,7 @@ class TotalTestCase(common.BaseTestCase):
         },
         {
             'valid_fec_yr_id': 2,
-            'cmte_id': 'C002',
+            'cmte_id': 'C00000002',
             'fec_election_yr': 2020,
             'cmte_tp': 'P',
             'cmte_dsgn': 'A',
@@ -51,7 +51,7 @@ class TotalTestCase(common.BaseTestCase):
         },
         {
             'valid_fec_yr_id': 3,
-            'cmte_id': 'C003',
+            'cmte_id': 'C00000003',
             'fec_election_yr': 2020,
             'cmte_tp': 'P',
             'cmte_dsgn': 'P',
@@ -65,7 +65,7 @@ class TotalTestCase(common.BaseTestCase):
             'cand_id': 'P01',
             'fec_election_yr': 2020,
             'cand_election_yr': 2020,
-            'cmte_id': 'C001',
+            'cmte_id': 'C00000001',
             'cmte_count_cand_yr': 1,
             'cmte_tp': 'P',
             'cmte_dsgn': 'P',
@@ -77,7 +77,7 @@ class TotalTestCase(common.BaseTestCase):
             'cand_id': 'P01',
             'fec_election_yr': 2020,
             'cand_election_yr': 2020,
-            'cmte_id': 'C002',
+            'cmte_id': 'C00000002',
             'cmte_count_cand_yr': 1,
             'cmte_tp': 'P',
             'cmte_dsgn': 'A',
@@ -89,7 +89,7 @@ class TotalTestCase(common.BaseTestCase):
             'cand_id': 'P03',
             'fec_election_yr': 2020,
             'cand_election_yr': 2020,
-            'cmte_id': 'C003',
+            'cmte_id': 'C00000003',
             'cmte_count_cand_yr': 1,
             'cmte_tp': 'P',
             'cmte_dsgn': 'P',
@@ -99,7 +99,7 @@ class TotalTestCase(common.BaseTestCase):
     ]
 
     STOCK_FILING_F3P_Q1 = {
-        'committee_id': 'C001',
+        'committee_id': 'C00000001',
         'report_year': 2019,
         'file_number': 10001,
         'ttl_receipts': 100,
@@ -109,7 +109,7 @@ class TotalTestCase(common.BaseTestCase):
         'rpt_year': 2019,
     }
     STOCK_FILING_F3X_Q2 = {
-        'committee_id': 'C001',
+        'committee_id': 'C00000001',
         'report_year': 2019,
         'file_number': 10002,
         'ttl_receipts': 200,
@@ -119,7 +119,7 @@ class TotalTestCase(common.BaseTestCase):
         'rpt_year': 2019,
     }
     STOCK_FILING_F3_Q1 = {
-        'committee_id': 'C002',
+        'committee_id': 'C00000002',
         'report_year': 2019,
         'file_number': 10004,
         'ttl_receipts': 11,
@@ -138,11 +138,11 @@ class TotalTestCase(common.BaseTestCase):
         manage.refresh_materialized(concurrent=False)
 
         """
-        Test committee 'C001' filed wrong form: F3P and F3X(wrong form)
+        Test committee 'C00000001' filed wrong form: F3P and F3X(wrong form)
         totals should be sum of them
         """
         params_cmte = {
-            'committee_id': 'C001',
+            'committee_id': 'C00000001',
         }
         committee_totals_api = self._results(
             rest.api.url_for(TotalsCommitteeView, **params_cmte)
