@@ -55,8 +55,12 @@ class TestElectionerringByCandidate(ApiBaseTest):
             candidate_id='S002',
         ),
 
-        response = self._results(api.url_for(ElectioneeringByCandidateView, cycle=2010,
-            office='senate', state='NY', sort='-candidate_name'))
+        response = self._results(api.url_for(
+            ElectioneeringByCandidateView,
+            cycle=2010,
+            office='senate',
+            state='NY',
+            sort='-candidate_name'))
         self.assertEqual(len(response), 2)
         self.assertEqual(response[0]['candidate_name'], 'WARNER, MARK')
         self.assertEqual(response[1]['candidate_name'], 'BALDWIN, ALISSA')
@@ -115,8 +119,12 @@ class TestElectionerringByCandidate(ApiBaseTest):
             count=1,
         ),
         response = self._results(
-            api.url_for(ElectioneeringByCandidateView, sort='-candidate_id',
-                office='senate', state='NY', cycle=2012))
+            api.url_for(
+                ElectioneeringByCandidateView,
+                sort='-candidate_id',
+                office='senate',
+                state='NY',
+                cycle=2012))
         self.assertEqual(len(response), 3)
         self.assertEqual(response[0]['candidate_id'], 'S003')
         self.assertEqual(response[1]['candidate_id'], 'S002')
@@ -166,19 +174,19 @@ class TestElectioneeringAggregates(ApiBaseTest):
 
     def test_filters_committee_candidate_id_cycle(self):
         factories.ElectioneeringByCandidateFactory(
-            committee_id='P001', candidate_id='C001', cycle=2000
+            committee_id='C00000001', candidate_id='P001', cycle=2000
         )
         factories.ElectioneeringByCandidateFactory(
-            committee_id='P001', candidate_id='C002', cycle=2000
+            committee_id='C00000001', candidate_id='P002', cycle=2000
         )
         factories.ElectioneeringByCandidateFactory(
-            committee_id='P002', candidate_id='C001', cycle=2004
+            committee_id='C00000002', candidate_id='P001', cycle=2004
         )
         db.session.flush()
-        results = self._results(api.url_for(ECAggregatesView, committee_id='P001'))
+        results = self._results(api.url_for(ECAggregatesView, committee_id='C00000001'))
         self.assertEqual(len(results), 2)
 
-        results = self._results(api.url_for(ECAggregatesView, candidate_id='C001'))
+        results = self._results(api.url_for(ECAggregatesView, candidate_id='P001'))
         self.assertEqual(len(results), 2)
 
         results = self._results(api.url_for(ECAggregatesView, cycle=2000))
@@ -359,8 +367,12 @@ class TestCommunicationsCostsByCandidate(ApiBaseTest):
             support_oppose_indicator='S',
         ),
 
-        response = self._results(api.url_for(CommunicationCostByCandidateView, cycle=2010,
-            office='senate', state='NY', sort='-candidate_name'))
+        response = self._results(api.url_for(
+            CommunicationCostByCandidateView,
+            cycle=2010,
+            office='senate',
+            state='NY',
+            sort='-candidate_name'))
         self.assertEqual(len(response), 2)
         self.assertEqual(response[0]['candidate_name'], 'WARNER, MARK')
         self.assertEqual(response[1]['candidate_name'], 'BALDWIN, ALISSA')
@@ -422,8 +434,12 @@ class TestCommunicationsCostsByCandidate(ApiBaseTest):
             count=1,
         ),
         response = self._results(
-            api.url_for(CommunicationCostByCandidateView, sort='-candidate_id',
-                office='senate', state='NY', cycle=2012))
+            api.url_for(
+                CommunicationCostByCandidateView,
+                sort='-candidate_id',
+                office='senate',
+                state='NY',
+                cycle=2012))
         self.assertEqual(len(response), 3)
         self.assertEqual(response[0]['candidate_id'], 'S003')
         self.assertEqual(response[0]['support_oppose_indicator'], 'S')
@@ -452,34 +468,34 @@ class TestCommunicationCostAggregates(ApiBaseTest):
         ),
 
         factories.CommitteeHistoryFactory(
-            committee_id='C001', cycle=2000, name='Acme Co'
+            committee_id='C00000001', cycle=2000, name='Acme Co'
         ),
         factories.CommitteeHistoryFactory(
-            committee_id='C002', cycle=2000, name='Tetris Corp'
+            committee_id='C00000002', cycle=2000, name='Tetris Corp'
         ),
         factories.CommitteeHistoryFactory(
-            committee_id='C002', cycle=2004, name='Winner PAC'
+            committee_id='C00000002', cycle=2004, name='Winner PAC'
         ),
 
         factories.CommunicationCostByCandidateFactory(
-            committee_id='C001', candidate_id='P001', cycle=2000
+            committee_id='C00000001', candidate_id='P001', cycle=2000
         )
         factories.CommunicationCostByCandidateFactory(
-            committee_id='C001', candidate_id='P002', cycle=2000
+            committee_id='C00000001', candidate_id='P002', cycle=2000
         )
         factories.CommunicationCostByCandidateFactory(
-            committee_id='C002', candidate_id='P001', cycle=2004
+            committee_id='C00000002', candidate_id='P001', cycle=2004
         )
         db.session.flush()
 
         # assert results filtered by committee_id sorted by candidate name in descending order
-        results = self._results(api.url_for(CCAggregatesView, committee_id='C001', sort='-candidate_name'))
+        results = self._results(api.url_for(CCAggregatesView, committee_id='C00000001', sort='-candidate_name'))
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0]['candidate_name'], 'Snapple Smith')
         self.assertEqual(results[1]['candidate_name'], 'Apple Smith')
 
         # assert results filtered by committee_id sorted by candidate name in ascending order
-        results = self._results(api.url_for(CCAggregatesView, committee_id='C001', sort='candidate_name'))
+        results = self._results(api.url_for(CCAggregatesView, committee_id='C00000001', sort='candidate_name'))
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0]['candidate_name'], 'Apple Smith')
         self.assertEqual(results[1]['candidate_name'], 'Snapple Smith')

@@ -40,6 +40,7 @@ pac_cmte_list = {'N', 'O', 'Q', 'V', 'W'}
 
 party_cmte_list = {'X', 'Y'}
 
+
 @doc(
     tags=['financial'],
     description=docs.TOTALS,
@@ -231,7 +232,7 @@ class TotalsCommitteeView(ApiResource):
         )
         query = totals_class.query
         if committee_id is not None:
-            query = query.filter(totals_class.committee_id == committee_id.upper())
+            query = query.filter(totals_class.committee_id == committee_id)
         if kwargs.get('cycle'):
             query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
 
@@ -239,6 +240,7 @@ class TotalsCommitteeView(ApiResource):
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
         if committee_id is not None:
+            utils.check_committee_id(committee_id)
             query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
             if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))

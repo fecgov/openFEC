@@ -14,7 +14,7 @@ from webservices.resources.filings import FilingsView, FilingsList
 class TestAmendmentChain(BaseTestCase):
 
     STOCK_FIRST_F1 = {
-        'committee_id': 'C006',
+        'committee_id': 'C00000006',
         'report_year': 2018,
         'amendment_indicator': 'N',
         'receipt_date': datetime.date(2018, 1, 31),
@@ -28,7 +28,7 @@ class TestAmendmentChain(BaseTestCase):
         'begin_image_num': '20180131001',
     }
     STOCK_SECOND_F1 = {
-        'committee_id': 'C006',
+        'committee_id': 'C00000006',
         'report_year': 2018,
         'amendment_indicator': 'A',
         'receipt_date': datetime.date(2018, 2, 28),
@@ -138,7 +138,7 @@ class TestAmendmentChain(BaseTestCase):
 
     def test_multiple_form_3s(self):
         form_3_q2_new = {
-            'committee_id': 'C006',
+            'committee_id': 'C00000006',
             'report_year': 2018,
             'amendment_indicator': 'N',
             'receipt_date': datetime.date(2018, 7, 15),
@@ -152,7 +152,7 @@ class TestAmendmentChain(BaseTestCase):
             'begin_image_num': '20180715001',
         }
         form_3_q2_amend_1 = {
-            'committee_id': 'C006',
+            'committee_id': 'C00000006',
             'report_year': 2018,
             'amendment_indicator': 'A',
             'receipt_date': datetime.date(2018, 8, 15),
@@ -166,7 +166,7 @@ class TestAmendmentChain(BaseTestCase):
             'begin_image_num': '20180815001',
         }
         form_3_q3_new = {
-            'committee_id': 'C006',
+            'committee_id': 'C00000006',
             'report_year': 2018,
             'amendment_indicator': 'N',
             'receipt_date': datetime.date(2018, 10, 15),
@@ -180,7 +180,7 @@ class TestAmendmentChain(BaseTestCase):
             'begin_image_num': '20181015001',
         }
         form_3_q3_amend_1 = {
-            'committee_id': 'C006',
+            'committee_id': 'C00000006',
             'report_year': 2018,
             'amendment_indicator': 'A',
             'receipt_date': datetime.date(2018, 11, 15),
@@ -194,7 +194,7 @@ class TestAmendmentChain(BaseTestCase):
             'begin_image_num': '20181115001',
         }
         form_3_q2_amend_2 = {
-            'committee_id': 'C006',
+            'committee_id': 'C00000006',
             'report_year': 2018,
             'amendment_indicator': 'A',
             'receipt_date': datetime.date(2018, 12, 15),
@@ -247,7 +247,7 @@ class TestAmendmentChain(BaseTestCase):
 
     def test_multiple_form_1s(self):
         first_f1 = {
-            'committee_id': 'C006',
+            'committee_id': 'C00000006',
             'report_year': 2018,
             'amendment_indicator': 'N',
             'receipt_date': datetime.date(2018, 1, 31),
@@ -261,7 +261,7 @@ class TestAmendmentChain(BaseTestCase):
             'begin_image_num': '20180131004',
         }
         second_f1 = {
-            'committee_id': 'C006',
+            'committee_id': 'C00000006',
             'report_year': 2018,
             'amendment_indicator': 'A',
             'receipt_date': datetime.date(2018, 2, 28),
@@ -275,7 +275,7 @@ class TestAmendmentChain(BaseTestCase):
             'begin_image_num': '20180228001',
         }
         third_f1 = {
-            'committee_id': 'C006',
+            'committee_id': 'C00000006',
             'report_year': 2018,
             'amendment_indicator': 'A',
             'receipt_date': datetime.date(2018, 3, 28),
@@ -316,7 +316,7 @@ class TestAmendmentChain(BaseTestCase):
     def test_negative_filing_chain(self):
         # Make sure no negative numbers appear in amendment chain
         negative_f1 = {
-            'committee_id': 'C006',
+            'committee_id': 'C00000006',
             'report_year': 2018,
             'amendment_indicator': 'N',
             'receipt_date': datetime.date(2018, 1, 31),

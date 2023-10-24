@@ -14,7 +14,7 @@ from webservices.resources.filings import FilingsView, FilingsList, EFilingsView
 class TestFilings(ApiBaseTest):
     def test_committee_filings(self):
         """ Check filing returns with a specified committee id"""
-        committee_id = 'C8675309'
+        committee_id = 'C86753090'
         factories.FilingsFactory(committee_id=committee_id)
 
         results = self._results(api.url_for(FilingsView, committee_id=committee_id))
@@ -209,12 +209,12 @@ class TestFilings(ApiBaseTest):
         """ Getting rid of extra text that comes in the tables."""
         factories.FilingsFactory(
             report_type_full_original='report    {more information than we want}',
-            committee_id='C007',
+            committee_id='C00000007',
             form_type='RFAI',
             report_year=2004,
         )
 
-        results = self._results(api.url_for(FilingsView, committee_id='C007'))
+        results = self._results(api.url_for(FilingsView, committee_id='C00000007'))
 
         self.assertEqual(results[0]['document_description'], 'RFAI: report 2004')
 
@@ -307,7 +307,7 @@ class TestEfileFiles(ApiBaseTest):
 
     def test_committee_efilings(self):
         """ Check filing returns with a specified committee id"""
-        committee_id = "C8675309"
+        committee_id = "C86753090"
         factories.EFilingsFactory(committee_id=committee_id)
 
         results = self._results(api.url_for(EFilingsView, committee_id=committee_id))

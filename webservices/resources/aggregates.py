@@ -399,7 +399,7 @@ class ECAggregatesView(AggregateResource):
         ('candidate_id', model.candidate_id),
         ('committee_id', model.committee_id),
     ]
-    
+
 
 def join_cand_cmte_names(query):
     query = query.subquery()

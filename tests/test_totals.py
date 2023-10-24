@@ -66,7 +66,7 @@ class TestTotalsByEntityType(ApiBaseTest):
 
     # Factories are being weird about test data - base cases to share
     first_pac_total = {
-        'committee_id': 'C00001',
+        'committee_id': 'C00000001',
         'committee_type': 'O',
         'cycle': 2018,
         'committee_designation': 'A',
@@ -85,7 +85,7 @@ class TestTotalsByEntityType(ApiBaseTest):
         'first_f1_date': datetime.date.fromisoformat("1983-02-01"),
     }
     second_pac_total = {
-        'committee_id': 'C00002',
+        'committee_id': 'C00000002',
         'committee_type': 'N',
         'cycle': 2016,
         'committee_designation': 'B',
@@ -113,8 +113,8 @@ class TestTotalsByEntityType(ApiBaseTest):
             api.url_for(TotalsByEntityTypeView, entity_type='pac')
         )
         assert len(results) == 2
-        assert results[0]['committee_id'] == 'C00001'
-        assert results[1]['committee_id'] == 'C00002'
+        assert results[0]['committee_id'] == 'C00000001'
+        assert results[1]['committee_id'] == 'C00000002'
 
         # Test all fields for result #2
 
@@ -196,7 +196,7 @@ class TestTotalsByEntityType(ApiBaseTest):
         factories.TotalsPacFactory(**self.second_pac_total)
         factories.TotalsPacFactory(
             **{
-                "committee_id": "C00003",
+                "committee_id": "C00000003",
                 "committee_type": "Q",
                 "cycle": 2016,
                 "committee_designation": "B",
@@ -227,7 +227,7 @@ class TestTotalsByEntityType(ApiBaseTest):
         )
 
         assert len(results) == 2
-        self.assertTrue(all(each["committee_id"] != "C00003" for each in results))
+        self.assertTrue(all(each["committee_id"] != "C00000003" for each in results))
 
     def test_filter_receipts(self):
 
@@ -341,13 +341,13 @@ class TestTotalsByEntityType(ApiBaseTest):
             sponsor_candidate_name="Sponsor A",
         )
         factories.PacSponsorCandidatePerCycleFactory(
-            committee_id='C007',
+            committee_id='C00000007',
             cycle=committee.cycle + 2,
             sponsor_candidate_id="S03",
             sponsor_candidate_name="Sponsor B",
         )
         factories.PacSponsorCandidatePerCycleFactory(
-            committee_id='C007',
+            committee_id='C00000007',
             cycle=committee.cycle,
             sponsor_candidate_id="S03",
             sponsor_candidate_name="Sponsor B",
@@ -381,16 +381,16 @@ class TestTotalsByEntityType(ApiBaseTest):
         )
 
         assert len(results) == 1
-        assert results[0]['committee_id'] == 'C00001'
+        assert results[0]['committee_id'] == 'C00000001'
 
     def test_entity_type_filter(self):
         first_committee = {
-            'committee_id': 'C00003',
+            'committee_id': 'C00000003',
             'committee_type': 'H',
             'cycle': 2016,
         }
         second_committee = {
-            'committee_id': 'C00004',
+            'committee_id': 'C00000004',
             'committee_type': 'P',
             'cycle': 2016,
         }
@@ -402,13 +402,13 @@ class TestTotalsByEntityType(ApiBaseTest):
         )
 
         assert len(results) == 1
-        assert results[0]['committee_id'] == 'C00004'
+        assert results[0]['committee_id'] == 'C00000004'
 
 
 # test for endpoint: /committee/{committee_id}/totals/
 class TestTotals(ApiBaseTest):
     def test_presidential_totals(self):
-        committee_id = 'C8675309'
+        committee_id = 'C86753090'
         transaction_coverage = factories.TransactionCoverageFactory(  # noqa
             committee_id=committee_id, fec_election_year=2016
         )
@@ -416,7 +416,7 @@ class TestTotals(ApiBaseTest):
             committee_id=committee_id, committee_type='P',
         )
         presidential_fields = {
-            'committee_id': 'C8675309',
+            'committee_id': 'C86753090',
             'cycle': 2016,
             'candidate_contribution': 1,
             'exempt_legal_accounting_disbursement': 2,
@@ -454,7 +454,7 @@ class TestTotals(ApiBaseTest):
         self.assertEqual(results[0], fields)
 
     def test_House_Senate_totals(self):
-        committee_id = 'C8675310'
+        committee_id = 'C86753100'
         transaction_coverage = factories.TransactionCoverageFactory(  # noqa
             committee_id=committee_id, fec_election_year=2016
         )
@@ -496,7 +496,7 @@ class TestTotals(ApiBaseTest):
         self.assertEqual(results[0], fields)
 
     def test_House_Senate_Jointed_totals(self):
-        committee_id = 'C009'
+        committee_id = 'C00000009'
         history = factories.CommitteeHistoryFactory(  # noqa
             committee_id=committee_id, committee_type='S',
         )
@@ -521,7 +521,7 @@ class TestTotals(ApiBaseTest):
         self.assertEqual(len(results), 1)
 
     def test_Pac_Party_totals(self):
-        committee_id = 'C8675311'
+        committee_id = 'C86753110'
         transaction_coverage = factories.TransactionCoverageFactory(  # noqa
             committee_id=committee_id, fec_election_year=2016
         )
@@ -650,7 +650,7 @@ class TestTotals(ApiBaseTest):
         self.assertEqual(results[0], fields)
 
     def test_Pac_totals(self):
-        committee_id = 'C8675311'
+        committee_id = 'C86753110'
         transaction_coverage = factories.TransactionCoverageFactory(  # noqa
             committee_id=committee_id, fec_election_year=2016
         )
@@ -913,7 +913,7 @@ class TestTotals(ApiBaseTest):
         self.assertEqual(results[0], fields)
 
     def test_ie_totals(self):
-        committee_id = 'C8675312'
+        committee_id = 'C86753120'
         history = factories.CommitteeHistoryFactory(  # noqa
             committee_id=committee_id, committee_type='I',
         )
@@ -970,10 +970,10 @@ class TestTotals(ApiBaseTest):
 
     def test_totals_committee_not_found(self):
         resp = self.app.get(api.url_for(TotalsCommitteeView, committee_id='fake'))
-        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.status_code, 422)
         self.assertEqual(resp.content_type, 'application/json')
         data = json.loads(resp.data.decode('utf-8'))
-        self.assertIn('not found', data['message'].lower())
+        self.assertIn('invalid committee_id', data['message'].lower())
 
     def test_sched_a_by_state_recipient_totals(self):
         rows = [  # noqa

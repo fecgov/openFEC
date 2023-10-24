@@ -147,7 +147,9 @@ class CommitteeView(ApiResource):
         query = super().build_query(**kwargs)
 
         if committee_id is not None:
-            query = query.filter_by(committee_id=committee_id.upper())
+            committee_id = committee_id.upper()
+            utils.check_committee_id(committee_id)
+            query = query.filter_by(committee_id=committee_id)
 
         if candidate_id is not None:
             query = query.join(
@@ -210,10 +212,13 @@ class CommitteeHistoryProfileView(ApiResource):
         query = super().build_query(**kwargs)
 
         if committee_id:
+            committee_id = committee_id.upper()
+            utils.check_committee_id(committee_id)
+
             # use for
             # '/committee/<string:committee_id>/history/',
             # '/committee/<string:committee_id>/history/<int:cycle>/',
-            query = query.filter(models.CommitteeHistoryProfile.committee_id == committee_id.upper())
+            query = query.filter(models.CommitteeHistoryProfile.committee_id == committee_id)
 
         elif candidate_id:
             # use for
@@ -232,7 +237,9 @@ class CommitteeHistoryProfileView(ApiResource):
             )
 
             # 2) query for PCC to PAC conversion
-            query_pcc_converted = query.filter(models.CommitteeHistoryProfile.former_candidate_id == candidate_id.upper())
+            query_pcc_converted = query.filter(
+                models.CommitteeHistoryProfile.former_candidate_id ==
+                candidate_id.upper())
 
             # 3) query for Leadership PAC committees
             query_leadership_pac = query.join(
@@ -298,4 +305,3 @@ class CommitteeHistoryProfileView(ApiResource):
                 # for election_full=false
                 query = query.filter(models.CommitteeHistoryProfile.cycle == cycle)
         return query
-
