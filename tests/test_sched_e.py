@@ -297,10 +297,18 @@ class TestScheduleEByCandidateView(ApiBaseTest):
             factories.ScheduleEFactory(line_number='24', filing_form='F3'),
             factories.ScheduleEFactory(line_number='25', filing_form='F3'),
         ]
+
         results = self._results(
             api.url_for(ScheduleEView, form_line_number='f3X-24')
         )
         self.assertEqual(len(results), 1)
+
+        # to be removed
+        results = self._results(
+            api.url_for(ScheduleEView, line_number='f3X-24')
+        )
+        self.assertEqual(len(results), 1)
+
         results = self._results(
             api.url_for(ScheduleEView, form_line_number=('f3x-24', 'f3X-25'))
         )

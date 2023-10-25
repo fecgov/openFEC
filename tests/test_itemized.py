@@ -320,9 +320,16 @@ class TestScheduleA(ApiBaseTest):
             factories.ScheduleAFactory(line_number='15', filing_form='F3X'),
             factories.ScheduleAFactory(line_number='15', filing_form='F3X'),
         ]
+
         results = self._results(
             api.url_for(ScheduleAView, form_line_number='f3x-11AI', **self.kwargs)
         )
+
+        # to be removed
+        results = self._results(
+            api.url_for(ScheduleAView, line_number='f3x-11AI', **self.kwargs)
+        )
+
         self.assertEqual(len(results), 1)
         results = self._results(
             api.url_for(ScheduleAView, form_line_number=('f3x-11AI', 'f3X-12'), **self.kwargs)
@@ -997,6 +1004,12 @@ class TestScheduleB(ApiBaseTest):
         )
         self.assertEqual(len(results), 1)
 
+        # to be removed
+        results = self._results(
+            api.url_for(ScheduleBView, form_line_number='f3x-23', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+
         results = self._results(
             api.url_for(ScheduleBView, form_line_number=('f3x-23', 'f3X-17'), **self.kwargs)
         )
@@ -1516,6 +1529,12 @@ class TestScheduleH4(ApiBaseTest):
         ]
         results = self._results(
             api.url_for(ScheduleH4View, form_line_number='f3x-23', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+
+        # to be removed
+        results = self._results(
+            api.url_for(ScheduleH4View, line_number='f3x-23', **self.kwargs)
         )
         self.assertEqual(len(results), 1)
 

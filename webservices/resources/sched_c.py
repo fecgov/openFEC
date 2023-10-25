@@ -51,11 +51,17 @@ class ScheduleCView(ApiResource):
                     raise exceptions.ApiError(
                         exceptions.FORM_LINE_NUMBER_ERROR, status_code=400
                     )
-        # added to help with transition to the new form_line_number, to be removed
+        # added for transition to form_line_number, to be replaced w/obsolete error
         if 'line_number' in kwargs:
-            raise exceptions.ApiError(
-                exceptions.LINE_NUMBER_ERROR, status_code=400
-            )
+            if len(kwargs.get('line_number').split('-')) == 2:
+                form, line_no = kwargs.get('line_number').split('-')
+                query = query.filter_by(filing_form=form.upper())
+                query = query.filter_by(line_number=line_no)
+            else:
+                raise exceptions.ApiError(
+                    exceptions.FORM_LINE_NUMBER_ERROR,
+                    status_code=400,
+                )
         return query
 
     @property
