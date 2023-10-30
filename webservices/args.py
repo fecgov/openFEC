@@ -421,7 +421,7 @@ filings = {
 
 efilings = {
     'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
-    'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'min_receipt_date': Date(description=docs.MIN_RECEIPT_DATE),
     'max_receipt_date': Date(description=docs.MAX_RECEIPT_DATE),
     'q_filer': fields.List(Keyword, description=docs.FILER_NAME_TEXT),
