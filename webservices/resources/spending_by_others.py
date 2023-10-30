@@ -45,6 +45,8 @@ def get_candidate_list(kwargs):
     return cycle_column, candidate
 
 
+# used for '/electioneering/totals/by_candidate/'
+# Ex:http://127.0.0.1:5000/v1/electioneering/totals/by_candidate/?sort=-cycle&election_full=true
 @doc(
     tags=['electioneering'], description=docs.ELECTIONEERING_TOTAL_BY_CANDIDATE,
 )
@@ -52,11 +54,20 @@ class ECTotalsByCandidateView(ApiResource):
 
     schema = schemas.ECTotalsByCandidateSchema
     page_schema = schemas.ECTotalsByCandidatePageSchema
+    sort_option = [
+            'cycle',
+            'candidate_id',
+            'total',
+    ]
 
     @property
     def args(self):
         return utils.extend(
-            args.paging, args.totals_by_candidate_other_costs_EC, args.make_sort_args(),
+            args.paging,
+            args.totals_by_candidate_other_costs_EC,
+            args.make_multi_sort_args(default=["-cycle", "candidate_id"], validator=args.SortMultiOptionValidator(
+                self.sort_option),
+            ),
         )
 
     def build_query(self, **kwargs):
@@ -79,12 +90,15 @@ class ECTotalsByCandidateView(ApiResource):
             .filter(
                 (cycle_column.in_(kwargs['cycle']) if kwargs.get('cycle') else True)
             )
-            .group_by(ElectioneeringByCandidate.candidate_id, cycle_column,)
+            .group_by(ElectioneeringByCandidate.candidate_id, cycle_column,)   
         )
 
         return query
 
 
+# used for '/schedules/schedule_e/totals/by_candidate/'
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_e/totals/by_candidate/?sort=-cycle&sort=candidate_id
+# &election_full=true
 @doc(
     tags=['independent expenditures'],
     description=docs.SCHEDULE_E_INDEPENDENT_EXPENDITURES_TOTALS_BY_CANDIDATE,
@@ -94,12 +108,21 @@ class IETotalsByCandidateView(ApiResource):
     schema = schemas.IETotalsByCandidateSchema
     page_schema = schemas.IETotalsByCandidatePageSchema
 
+    sort_option = [
+            'cycle',
+            'candidate_id',
+            'total',
+            'support_oppose_indicator',
+    ]
+
     @property
     def args(self):
         return utils.extend(
             args.paging,
             args.schedule_e_totals_by_candidate_other_costs_IE,
-            args.make_sort_args(),
+            args.make_multi_sort_args(default=["-cycle", "candidate_id"], validator=args.SortMultiOptionValidator(
+                self.sort_option),
+            ),
         )
 
     def build_query(self, **kwargs):
@@ -127,16 +150,15 @@ class IETotalsByCandidateView(ApiResource):
                 cycle_column,
                 ScheduleEByCandidate.support_oppose_indicator,
             )
-            .order_by(
-                ScheduleEByCandidate.candidate_id,
-                cycle_column,
-                ScheduleEByCandidate.support_oppose_indicator,
-            )
+
         )
 
         return query
 
 
+# used for '/communication_costs/totals/by_candidate/'
+# Ex: http://127.0.0.1:5000/v1/communication_costs/totals/by_candidate/?sort=-cycle&sort=candidate_id
+# &election_full=true
 @doc(
     tags=['communication cost'],
     description=docs.COMMUNICATIONS_COSTS_TOTALS_BY_CANDIDATE,
@@ -146,10 +168,21 @@ class CCTotalsByCandidateView(ApiResource):
     schema = schemas.CCTotalsByCandidateSchema
     page_schema = schemas.CCTotalsByCandidatePageSchema
 
+    sort_option = [
+            'cycle',
+            'candidate_id',
+            'total',
+            'support_oppose_indicator',
+    ]
+
     @property
     def args(self):
         return utils.extend(
-            args.paging, args.totals_by_candidate_other_costs_CC, args.make_sort_args(),
+            args.paging,
+            args.totals_by_candidate_other_costs_CC,
+            args.make_multi_sort_args(default=["-cycle", "candidate_id"], validator=args.SortMultiOptionValidator(
+                self.sort_option),
+            ),
         )
 
     def build_query(self, **kwargs):
@@ -178,11 +211,7 @@ class CCTotalsByCandidateView(ApiResource):
                 cycle_column,
                 CommunicationCostByCandidate.support_oppose_indicator,
             )
-            .order_by(
-                CommunicationCostByCandidate.candidate_id,
-                cycle_column,
-                CommunicationCostByCandidate.support_oppose_indicator,
-            )
+
         )
 
         return query

@@ -76,15 +76,32 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
     return rows, aggregates
 
 
+# used for 'schedules/schedule_a/by_size/by_candidate/'
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_a/by_size/by_candidate/?sort=-count&candidate_id=H8CA05035&cycle=2022
+# &election_full=true
 @doc(
     tags=['receipts'], description=docs.SCHEDULE_A_SIZE_CANDIDATE_TAG,
 )
-class ScheduleABySizeCandidateView(utils.Resource):
-    @use_kwargs(args.paging)
-    @use_kwargs(args.make_sort_args())
-    @use_kwargs(args.schedule_a_candidate_aggregate)
-    @marshal_with(schemas.ScheduleABySizeCandidatePageSchema())
-    def get(self, **kwargs):
+class ScheduleABySizeCandidateView(ApiResource):
+    schema = schemas.ScheduleABySizeCandidateSchema
+    page_schema = schemas.ScheduleABySizeCandidatePageSchema()
+    sort_option = [
+            'total',
+            'size',
+            'count'
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.schedule_a_candidate_aggregate,
+            args.make_multi_sort_args(default=["size", ], validator=args.SortMultiOptionValidator(
+                self.sort_option),
+            ),
+        )
+
+    def build_query(self, **kwargs):
         label_columns = [
             ScheduleABySize.size,
             sa.func.sum(ScheduleABySize.total).label('total'),
@@ -95,18 +112,75 @@ class ScheduleABySizeCandidateView(utils.Resource):
         _, query = candidate_aggregate(
             ScheduleABySize, label_columns, group_columns, kwargs
         )
-        return utils.fetch_page(query, kwargs, cap=None)
+        return query
 
 
+# used for 'schedules/schedule_a/by_state/by_candidate/'
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_a/by_state/by_candidate/?sort=state&candidate_id=H8CA05035
+# &cycle=2022&election_full=true
+@doc(
+    tags=['receipts'], description=docs.SCHEDULE_A_STATE_CANDIDATE_TAG,
+)
+class ScheduleAByStateCandidateView(ApiResource):
+    schema = schemas.ScheduleAByStateCandidateSchema
+    page_schema = schemas.ScheduleAByStateCandidatePageSchema()
+    sort_option = [
+            'total',
+            'count',
+            'state',
+            'state_full',
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.schedule_a_candidate_aggregate,
+            args.make_multi_sort_args(default=["state", ], validator=args.SortMultiOptionValidator(
+                self.sort_option),
+            ),
+        )
+
+    def build_query(self, **kwargs):
+        _, query = candidate_aggregate(
+            ScheduleAByState,
+            [
+                ScheduleAByState.state,
+                sa.func.sum(ScheduleAByState.total).label('total'),
+                sa.func.max(ScheduleAByState.state_full).label('state_full'),
+                sa.func.sum(ScheduleAByState.count).label('count'),
+            ],
+            [ScheduleAByState.state],
+            kwargs,
+        )
+        return query
+
+
+# used for 'schedules/schedule_a/by_state/by_candidate/totals/'. always return one row.
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_a/by_state/by_candidate/totals/?sort=total&candidate_id=H8CA05035
+# &cycle=2022&election_full=true
 @doc(
     tags=['receipts'], description=docs.SCHEDULE_A_STATE_CANDIDATE_TOTAL_TAG,
 )
-class ScheduleAByStateCandidateTotalsView(utils.Resource):
-    @use_kwargs(args.paging)
-    @use_kwargs(args.make_sort_args())
-    @use_kwargs(args.schedule_a_candidate_aggregate)
-    @marshal_with(schemas.ScheduleAByStateCandidatePageSchema())
-    def get(self, **kwargs):
+class ScheduleAByStateCandidateTotalsView(ApiResource):
+    schema = schemas.ScheduleAByStateCandidateSchema
+    page_schema = schemas.ScheduleAByStateCandidatePageSchema()
+    sort_option = [
+            'total',
+            'count',
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.schedule_a_candidate_aggregate,
+            args.make_multi_sort_args(default=["total", ], validator=args.SortMultiOptionValidator(
+                self.sort_option),
+            ),
+        )
+
+    def build_query(self, **kwargs):
         _, query = candidate_aggregate(
             ScheduleAByState,
             [
@@ -126,32 +200,11 @@ class ScheduleAByStateCandidateTotalsView(utils.Resource):
             q.c.cycle,
         ).group_by(q.c.candidate_id, q.c.cycle)
 
-        return utils.fetch_page(query, kwargs, cap=0)
+        return query
 
 
-@doc(
-    tags=['receipts'], description=docs.SCHEDULE_A_STATE_CANDIDATE_TAG,
-)
-class ScheduleAByStateCandidateView(utils.Resource):
-    @use_kwargs(args.paging)
-    @use_kwargs(args.make_sort_args())
-    @use_kwargs(args.schedule_a_candidate_aggregate)
-    @marshal_with(schemas.ScheduleAByStateCandidatePageSchema())
-    def get(self, **kwargs):
-        _, query = candidate_aggregate(
-            ScheduleAByState,
-            [
-                ScheduleAByState.state,
-                sa.func.sum(ScheduleAByState.total).label('total'),
-                sa.func.max(ScheduleAByState.state_full).label('state_full'),
-                sa.func.sum(ScheduleAByState.count).label('count'),
-            ],
-            [ScheduleAByState.state],
-            kwargs,
-        )
-        return utils.fetch_page(query, kwargs, cap=0)
-
-
+# used for '/candidates/totals/'
+# Ex: http://127.0.0.1:5000/v1/candidates/totals/?sort=-election_year&election_full=true
 @doc(
     tags=['candidate'], description=docs.TOTAL_CANDIDATE_TAG,
 )
@@ -171,6 +224,7 @@ class TotalsCandidateView(ApiResource):
         'receipts',
         'disbursements',
         'individual_itemized_contributions',
+        'candidate_id',
     ]
 
     @property
@@ -265,6 +319,15 @@ class TotalsCandidateView(ApiResource):
     tags=["candidate"], description=docs.CANDIDATE_TOTAL_AGGREGATE_TAG,
 )
 class CandidateTotalAggregateView(ApiResource):
+    sort_options = [
+        'election_year',
+        'office',
+        'state',
+        'state_full',
+        'party',
+        'district',
+    ]
+
     schema = schemas.CandidateTotalAggregateSchema
     page_schema = schemas.CandidateTotalAggregatePageSchema
 
@@ -273,11 +336,14 @@ class CandidateTotalAggregateView(ApiResource):
         return utils.extend(
             args.paging,
             args.candidate_total_aggregate,
-            args.make_multi_sort_args(default=["-election_year", ]),
+            args.make_multi_sort_args(default=["-election_year", ], validator=args.SortMultiOptionValidator(
+                self.sort_options),
+            ),
         )
 
     def build_query(self, **kwargs):
         total = models.CandidateTotal
+
         query = db.session.query(
             total.election_year.label("election_year"),
             sa.func.sum(total.receipts).label(
