@@ -142,7 +142,7 @@ def _detect_space(repo, branch=None, yes=False):
 
 DEPLOY_RULES = (
     ('prod', _detect_prod),
-    ('stage', lambda _, branch: branch.startswith('release')),
+    ('stage', lambda _, branch: branch == 'test_cmte_id_valid_stage'),
     ('dev', lambda _, branch: branch == 'develop'),
 )
 
