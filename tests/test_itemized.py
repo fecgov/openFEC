@@ -76,26 +76,26 @@ class TestScheduleA(ApiBaseTest):
                 report_year=2014,
                 contribution_receipt_date=datetime.date(2014, 1, 1),
                 two_year_transaction_period=2014,
-                committee_id='C001',
+                committee_id='C00000001',
             ),
             factories.ScheduleAFactory(
                 report_year=2016,
                 contribution_receipt_date=datetime.date(2016, 1, 1),
                 two_year_transaction_period=2016,
-                committee_id='C001',
+                committee_id='C00000001',
             ),
             factories.ScheduleAFactory(
                 report_year=2018,
                 contribution_receipt_date=datetime.date(2018, 1, 1),
                 two_year_transaction_period=2018,
-                committee_id='C001',
+                committee_id='C00000001',
             ),
         ]
         response = self._response(
             api.url_for(
                 ScheduleAView,
                 two_year_transaction_period=[2016, 2018],
-                committee_id='C001',
+                committee_id='C00000001',
             )
         )
         self.assertEqual(len(response['results']), 2)
@@ -109,69 +109,69 @@ class TestScheduleA(ApiBaseTest):
                 report_year=2014,
                 contribution_receipt_date=datetime.date(2014, 1, 1),
                 two_year_transaction_period=2014,
-                committee_id='C001',
+                committee_id='C00000001',
             ),
             factories.ScheduleAFactory(
                 report_year=2016,
                 contribution_receipt_date=datetime.date(2016, 1, 1),
                 two_year_transaction_period=2016,
-                committee_id='C001',
+                committee_id='C00000001',
             ),
             factories.ScheduleAFactory(
                 report_year=2018,
                 contribution_receipt_date=datetime.date(2018, 1, 1),
                 two_year_transaction_period=2018,
-                committee_id='C001',
+                committee_id='C00000001',
             ),
             factories.ScheduleAFactory(
                 report_year=2014,
                 contribution_receipt_date=datetime.date(2014, 1, 1),
                 two_year_transaction_period=2014,
-                committee_id='C002',
+                committee_id='C00000002',
             ),
             factories.ScheduleAFactory(
                 report_year=2016,
                 contribution_receipt_date=datetime.date(2016, 1, 1),
                 two_year_transaction_period=2016,
-                committee_id='C002',
+                committee_id='C00000002',
             ),
             factories.ScheduleAFactory(
                 report_year=2018,
                 contribution_receipt_date=datetime.date(2018, 1, 1),
                 two_year_transaction_period=2018,
-                committee_id='C002',
+                committee_id='C00000002',
             ),
             factories.ScheduleAFactory(
                 report_year=2014,
                 contribution_receipt_date=datetime.date(2014, 1, 1),
                 two_year_transaction_period=2014,
-                committee_id='C003',
+                committee_id='C00000003',
             ),
             factories.ScheduleAFactory(
                 report_year=2016,
                 contribution_receipt_date=datetime.date(2016, 1, 1),
                 two_year_transaction_period=2016,
-                committee_id='C003',
+                committee_id='C00000003',
             ),
             factories.ScheduleAFactory(
                 report_year=2018,
                 contribution_receipt_date=datetime.date(2018, 1, 1),
                 two_year_transaction_period=2018,
-                committee_id='C003',
+                committee_id='C00000003',
             ),
         ]
         response = self._response(
             api.url_for(
                 ScheduleAView,
                 two_year_transaction_period=[2016, 2018],
-                committee_id=['C001', 'C002'],
+                committee_id=['C00000001', 'C00000002'],
             )
         )
         self.assertEqual(len(response['results']), 4)
         response = self._response(
             api.url_for(
                 ScheduleAView,
-                committee_id='C001',
+                committee_id='C00000001',
             )
         )
         self.assertEqual(len(response['results']), 3)
@@ -457,13 +457,13 @@ class TestScheduleA(ApiBaseTest):
         filings = [
             factories.ScheduleAFactory(
                 contribution_receipt_date=None,
-                committee_id="1") for _ in range(5)
+                committee_id="C00000001") for _ in range(5)
         ]
         # Results [5:30] have date
         filings = filings + [
             factories.ScheduleAFactory(
                 contribution_receipt_date=datetime.date(2016, 1, 1),
-                committee_id="2")
+                committee_id="C00000002")
             for _ in range(25)
         ]
         page1 = self._results(
@@ -515,7 +515,7 @@ class TestScheduleA(ApiBaseTest):
                 sort='contribution_receipt_date',
                 sort_hide_null=True,
                 per_page=30,
-                committee_id=["1", "2"],
+                committee_id=["C00000001", "C00000002"],
                 **self.kwargs)
         )
         count = response["pagination"]["count"]
@@ -527,7 +527,7 @@ class TestScheduleA(ApiBaseTest):
                 sort='contribution_receipt_date',
                 sort_hide_null=True,
                 per_page=30,
-                committee_id=["1"],
+                committee_id=["C00000001"],
                 **self.kwargs)
         )
         count = response["pagination"]["count"]
@@ -844,7 +844,7 @@ class TestScheduleA(ApiBaseTest):
     def test_schedule_a_efile_filters(self):
         filters = [
             ('image_number', ScheduleAEfile.image_number, ['123', '456']),
-            ('committee_id', ScheduleAEfile.committee_id, ['C01', 'C02']),
+            ('committee_id', ScheduleAEfile.committee_id, ['C00000001', 'C00000002']),
             # may have to rethink this, currently on efile itemized resources the city isn't all caps
             # but for processed it is, is that something we are forcing when when
             # we build the tables?
@@ -975,7 +975,7 @@ class TestScheduleB(ApiBaseTest):
     def test_schedule_b_efile_filters(self):
         filters = [
             ('image_number', ScheduleBEfile.image_number, ['123', '456']),
-            ('committee_id', ScheduleBEfile.committee_id, ['C01', 'C02']),
+            ('committee_id', ScheduleBEfile.committee_id, ['C00000001', 'C00000002']),
             (
                 'recipient_state',
                 ScheduleBEfile.recipient_state,
@@ -1002,13 +1002,13 @@ class TestScheduleE(ApiBaseTest):
             factories.ScheduleEFactory(
                 expenditure_amount=100,
                 expenditure_date=datetime.date(2016, 1, 1),
-                committee_id='101',
+                committee_id='C00000001',
                 support_oppose_indicator='s',
             ),
             factories.ScheduleEFactory(
                 expenditure_amount=100,
                 expenditure_date=datetime.date(2016, 1, 1),
-                committee_id='101',
+                committee_id='C00000001',
                 support_oppose_indicator='o',
             ),
         ]
@@ -1101,7 +1101,7 @@ class TestScheduleE(ApiBaseTest):
     def test_schedule_e_filters(self):
         filters = [
             ('image_number', ScheduleE.image_number, ['123', '456']),
-            ('committee_id', ScheduleE.committee_id, ['C01', 'C02']),
+            ('committee_id', ScheduleE.committee_id, ['C00000001', 'C00000002']),
             (
                 'support_oppose_indicator',
                 ScheduleE.support_oppose_indicator,
@@ -1141,10 +1141,14 @@ class TestScheduleE(ApiBaseTest):
     def test_filter_sched_e_spender_name_text(self):
         [
             factories.ScheduleEFactory(
-                committee_id='C001', spender_name_text=sa.func.to_tsvector('international abc action committee C001'),
+                committee_id='C00000001',
+                spender_name_text=sa.func.to_tsvector(
+                            'international abc action committee C00000001'),
             ),
             factories.ScheduleEFactory(
-                committee_id='C002', spender_name_text=sa.func.to_tsvector('international xyz action committee C002'),
+                committee_id='C00000002',
+                spender_name_text=sa.func.to_tsvector(
+                            'international xyz action committee C00000002'),
             ),
         ]
         results = self._results(
@@ -1156,7 +1160,7 @@ class TestScheduleE(ApiBaseTest):
         )
         self.assertEqual(len(results), 1)
         results = self._results(
-            api.url_for(ScheduleEView, q_spender='C001')
+            api.url_for(ScheduleEView, q_spender='C00000001')
         )
         self.assertEqual(len(results), 1)
 
@@ -1175,13 +1179,13 @@ class TestScheduleE(ApiBaseTest):
             factories.ScheduleEFactory(
                 expenditure_amount=100,
                 expenditure_date=datetime.date(2016, 1, 1),
-                committee_id='101',
+                committee_id='C00000001',
                 support_oppose_indicator='s',
             ),
             factories.ScheduleEFactory(
                 expenditure_amount=100,
                 expenditure_date=datetime.date(2016, 1, 1),
-                committee_id='101',
+                committee_id='C00000001',
                 support_oppose_indicator='o',
             ),
         ]
@@ -1191,7 +1195,7 @@ class TestScheduleE(ApiBaseTest):
         self.assertEqual(results[0]['support_oppose_indicator'], 's')
 
     def test_schedule_e_expenditure_description_field(self):
-        factories.ScheduleEFactory(committee_id='C001', expenditure_description='Advertising Costs')
+        factories.ScheduleEFactory(committee_id='C00000001', expenditure_description='Advertising Costs')
         results = self._results(
             api.url_for(ScheduleEView)
         )
@@ -1201,7 +1205,7 @@ class TestScheduleE(ApiBaseTest):
     def test_schedule_e_efile_filters(self):
         filters = [
             ('image_number', ScheduleEEfile.image_number, ['456', '789']),
-            ('committee_id', ScheduleEEfile.committee_id, ['C01', 'C02']),
+            ('committee_id', ScheduleEEfile.committee_id, ['C00000001', 'C00000002']),
             (
                 'support_oppose_indicator',
                 ScheduleEEfile.support_oppose_indicator,
@@ -1287,13 +1291,13 @@ class TestScheduleE(ApiBaseTest):
     def test_schedule_e_efile_filter_cand_search(self):
         [
             factories.ScheduleEEfileFactory(
-                cand_fulltxt=sa.func.to_tsvector('C001, Rob, Senior')
+                cand_fulltxt=sa.func.to_tsvector('C00000001, Rob, Senior')
             ),
             factories.ScheduleEEfileFactory(
-                cand_fulltxt=sa.func.to_tsvector('C002, Ted, Berry')
+                cand_fulltxt=sa.func.to_tsvector('C00000002, Ted, Berry')
             ),
             factories.ScheduleEEfileFactory(
-                cand_fulltxt=sa.func.to_tsvector('C003, Rob, Junior')
+                cand_fulltxt=sa.func.to_tsvector('C00000003, Rob, Junior')
             ),
         ]
         factories.EFilingsFactory(file_number=123)
@@ -1304,19 +1308,19 @@ class TestScheduleE(ApiBaseTest):
     def test_filter_sched_e_most_recent(self):
         [
             factories.ScheduleEFactory(
-                committee_id='C001', filing_form='F24', most_recent=True
+                committee_id='C00000001', filing_form='F24', most_recent=True
             ),
             factories.ScheduleEFactory(
-                committee_id='C002', filing_form='F5', most_recent=False
+                committee_id='C00000002', filing_form='F5', most_recent=False
             ),
             factories.ScheduleEFactory(
-                committee_id='C003', filing_form='F24', most_recent=True
+                committee_id='C00000003', filing_form='F24', most_recent=True
             ),
             factories.ScheduleEFactory(
-                committee_id='C004', filing_form='F3X', most_recent=True
+                committee_id='C00000004', filing_form='F3X', most_recent=True
             ),
-            factories.ScheduleEFactory(committee_id='C005', filing_form='F3X'),
-            factories.ScheduleEFactory(committee_id='C006', filing_form='F3X'),
+            factories.ScheduleEFactory(committee_id='C00000005', filing_form='F3X'),
+            factories.ScheduleEFactory(committee_id='C00000006', filing_form='F3X'),
         ]
         results = self._results(
             api.url_for(ScheduleEView, most_recent=True)
@@ -1327,19 +1331,19 @@ class TestScheduleE(ApiBaseTest):
     def test_filter_sched_e_efile_most_recent(self):
         [
             factories.ScheduleEEfileFactory(
-                committee_id='C001', filing_form='F24', most_recent=True
+                committee_id='C00000001', filing_form='F24', most_recent=True
             ),
             factories.ScheduleEEfileFactory(
-                committee_id='C002', filing_form='F5', most_recent=False
+                committee_id='C00000002', filing_form='F5', most_recent=False
             ),
             factories.ScheduleEEfileFactory(
-                committee_id='C003', filing_form='F24', most_recent=True
+                committee_id='C00000003', filing_form='F24', most_recent=True
             ),
             factories.ScheduleEEfileFactory(
-                committee_id='C004', filing_form='F3X', most_recent=True
+                committee_id='C00000004', filing_form='F3X', most_recent=True
             ),
-            factories.ScheduleEEfileFactory(committee_id='C005', filing_form='F3X'),
-            factories.ScheduleEEfileFactory(committee_id='C006', filing_form='F3X'),
+            factories.ScheduleEEfileFactory(committee_id='C00000005', filing_form='F3X'),
+            factories.ScheduleEEfileFactory(committee_id='C00000006', filing_form='F3X'),
         ]
         factories.EFilingsFactory(file_number=123)
         db.session.flush()
@@ -1376,14 +1380,14 @@ class TestScheduleH4(ApiBaseTest):
 
     def test_schedule_h4_filters(self):
         [
-            factories.ScheduleH4Factory(committee_id='C001', cycle=2016),
-            factories.ScheduleH4Factory(committee_id='C002', cycle=2016),
-            factories.ScheduleH4Factory(committee_id='C003', cycle=2016),
-            factories.ScheduleH4Factory(committee_id='C004', cycle=2018),
+            factories.ScheduleH4Factory(committee_id='C00000001', cycle=2016),
+            factories.ScheduleH4Factory(committee_id='C00000002', cycle=2016),
+            factories.ScheduleH4Factory(committee_id='C00000003', cycle=2016),
+            factories.ScheduleH4Factory(committee_id='C00000004', cycle=2018),
         ]
         results = self._results(api.url_for(ScheduleH4View, cycle=2016))
         self.assertEqual(len(results), 3)
-        results = self._results(api.url_for(ScheduleH4View, committee_id='C001'))
+        results = self._results(api.url_for(ScheduleH4View, committee_id='C00000001'))
         self.assertEqual(len(results), 1)
 
     def test_schedule_h4_filter_fulltext_purpose_and(self):
@@ -1467,7 +1471,7 @@ class TestScheduleH4(ApiBaseTest):
     def test_schedule_h4_efile_filters(self):
         filters = [
             ('image_number', ScheduleH4Efile.image_number, ['123', '456']),
-            ('committee_id', ScheduleH4Efile.committee_id, ['C01', 'C02']),
+            ('committee_id', ScheduleH4Efile.committee_id, ['C00000001', 'C00000002']),
             (
                 'payee_state',
                 ScheduleH4Efile.payee_state,

@@ -33,7 +33,7 @@ class TestCommitteeAggregates(ApiBaseTest):
     def test_stable_sort(self):
         rows = [
             factories.ScheduleAByEmployerFactory(
-                committee_id='C001', employer='omnicorp-{}'.format(idx), total=538,
+                committee_id='C00000001', employer='omnicorp-{}'.format(idx), total=538,
             )
             for idx in range(100)
         ]
@@ -50,7 +50,7 @@ class TestCommitteeAggregates(ApiBaseTest):
     def test_by_state(self):
         [
             factories.ScheduleAByStateFactory(
-                committee_id='C0001',
+                committee_id='C00000001',
                 cycle=2012,
                 total=50,
                 state='NY',
@@ -58,7 +58,7 @@ class TestCommitteeAggregates(ApiBaseTest):
                 count=5,
             ),
             factories.ScheduleAByStateFactory(
-                committee_id='C0002',
+                committee_id='C00000002',
                 cycle=2012,
                 total=150,
                 state='NY',
@@ -66,14 +66,14 @@ class TestCommitteeAggregates(ApiBaseTest):
                 count=6,
             ),
             factories.ScheduleAByStateFactory(
-                committee_id='C0003',
+                committee_id='C00000003',
                 cycle=2018,
                 total=100,
                 state='OT',
                 state_full='Other',
             ),
             factories.ScheduleAByStateFactory(
-                committee_id='C0001',
+                committee_id='C00000001',
                 cycle=2016,
                 total=200,
                 state='CT',
@@ -82,7 +82,7 @@ class TestCommitteeAggregates(ApiBaseTest):
             ),
         ]
         results = self._results(
-            api.url_for(ScheduleAByStateView, committee_id='C0001', cycle=2012)
+            api.url_for(ScheduleAByStateView, committee_id='C00000001', cycle=2012)
         )
         assert len(results) == 1
 
@@ -95,7 +95,7 @@ class TestCommitteeAggregates(ApiBaseTest):
         assert len(results) == 1
 
         results = self._results(
-            api.url_for(ScheduleAByStateView, committee_id='C0001',)
+            api.url_for(ScheduleAByStateView, committee_id='C00000001',)
         )
         assert len(results) == 2
 

@@ -243,7 +243,7 @@ class CommitteeReportsView(views.ApiResource):
                 sa.orm.joinedload(reports_class.committee)
             )
         if committee_id is not None:
-            query = query.filter_by(committee_id=committee_id.upper())
+            query = query.filter_by(committee_id=committee_id)
 
         query = filters.filter_range(query, kwargs, get_range_filters())
         query = filters.filter_match(query, kwargs, get_match_filters())
@@ -252,7 +252,8 @@ class CommitteeReportsView(views.ApiResource):
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
         if committee_id is not None:
-            query = models.CommitteeHistory.query.filter_by(committee_id=committee_id.upper())
+            utils.check_committee_id(committee_id)
+            query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
 
             if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
