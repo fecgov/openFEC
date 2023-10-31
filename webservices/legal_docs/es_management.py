@@ -830,7 +830,8 @@ def create_es_snapshot(index_name):
             body=body,
             wait_for_completion=True,
         )
-        if result.get("accepted"):
+        result = result.get("snapshot")
+        if result.get("state") == 'SUCCESS':
             logger.info(" The snapshot: {0} is created successfully.".format(snapshot_name))
         else:
             logger.error(" Unable to create snapshot: {0}".format(snapshot_name))
