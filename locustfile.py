@@ -17,7 +17,7 @@ import os
 import random
 import resource
 
-from locust import between, HttpUser, task, TaskSet, user
+from locust import between, task, TaskSet, user
 
 
 # Avoid "Too many open files" error
@@ -57,6 +57,18 @@ TERMS = ["embezzle", "email", "department", "contribution", "commission"]
 small_records_sched_a = [
     {"contributor_name": "Teachout Zephyr"},
     {"contributor_state": "GU"},
+]
+
+multiple_form_line_number_sched_a = [
+    # attempting to see how multiple high form-line-numbers will perform
+    {
+        "form_line_number": [
+            "F3X-11AI",
+            "F3-11AI",
+            "F3X-15",
+            "F3-15",
+        ]
+    },
 ]
 
 medium_records_sched_a = [
@@ -145,10 +157,8 @@ poor_performance_a = [
     },
     {
         "sort_nulls_large": True,
-        "contributor_name": "Becher",
         "two_year_transaction_period": 2016,
-        "min_date": "01%2F01%2F2015",
-        "max_date": "12%2F31%2F2016",
+        "form_line_number": "F3X-11AI",
         "contributor_state": "FL",
         "sort": "-contribution_receipt_date",
         "per_page": 30,
@@ -333,6 +343,14 @@ class Tasks(TaskSet):
         params = random.choice(small_records_sched_a)
         params["api_key"] = API_KEY
         self.client.get("schedules/schedule_a/", name="schedule_a_small", params=params)
+
+    @task
+    def load_schedule_a_FLN(self):
+        params = random.choice(multiple_form_line_number_sched_a)
+        params["api_key"] = API_KEY
+        self.client.get(
+            "schedules/schedule_a/", name="schedule_a_FLN", params=params
+        )
 
     @task
     def load_schedule_a_medium(self):
