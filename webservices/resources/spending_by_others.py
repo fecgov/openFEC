@@ -46,6 +46,7 @@ def get_candidate_list(kwargs):
 
 
 # used for '/electioneering/totals/by_candidate/'
+# under tag: electioneering
 # Ex:http://127.0.0.1:5000/v1/electioneering/totals/by_candidate/?sort=-cycle&election_full=true
 @doc(
     tags=['electioneering'], description=docs.ELECTIONEERING_TOTAL_BY_CANDIDATE,
@@ -90,13 +91,14 @@ class ECTotalsByCandidateView(ApiResource):
             .filter(
                 (cycle_column.in_(kwargs['cycle']) if kwargs.get('cycle') else True)
             )
-            .group_by(ElectioneeringByCandidate.candidate_id, cycle_column,)   
+            .group_by(ElectioneeringByCandidate.candidate_id, cycle_column,)
         )
 
         return query
 
 
 # used for '/schedules/schedule_e/totals/by_candidate/'
+# under tag: independent expenditures
 # Ex: http://127.0.0.1:5000/v1/schedules/schedule_e/totals/by_candidate/?sort=-cycle&sort=candidate_id
 # &election_full=true
 @doc(
@@ -157,6 +159,7 @@ class IETotalsByCandidateView(ApiResource):
 
 
 # used for '/communication_costs/totals/by_candidate/'
+# under tag: communication cost
 # Ex: http://127.0.0.1:5000/v1/communication_costs/totals/by_candidate/?sort=-cycle&sort=candidate_id
 # &election_full=true
 @doc(

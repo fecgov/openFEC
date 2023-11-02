@@ -11,6 +11,9 @@ from webservices.common import models
 from webservices.utils import use_kwargs
 
 
+# used for endpoint:'/names/candidates/'
+# under tag: search
+# Ex: http://127.0.0.1:5000/v1/names/candidates/?q=John
 @doc(
     tags=['search'],
     description=docs.NAME_SEARCH,
@@ -33,7 +36,9 @@ class CandidateNameSearch(utils.Resource):
 
 # search committee full text name
 # model class: CommitteeSearch
-# use for endpoint:'/names/committees/'
+# used for endpoint:'/names/committees/'
+# under tag: search
+# Ex: http://127.0.0.1:5000/v1/names/committees/?q=John
 @doc(
     tags=['search'],
     description=docs.NAME_SEARCH,

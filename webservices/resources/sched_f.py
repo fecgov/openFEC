@@ -8,6 +8,9 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
+# Used for endpoint `/schedules/schedule_f/`
+# under tag: party-coordinated expenditures
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_f/
 @doc(
     tags=['party-coordinated expenditures'],
     description=docs.SCHEDULE_F,
@@ -57,6 +60,9 @@ class ScheduleFView(ApiResource):
         return query
 
 
+# Used for endpoint: `/schedules/schedule_f/<string:sub_id>/`
+# under tag: party-coordinated expenditures
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_f/3062020110012906087/
 @doc(
     tags=['party-coordinated expenditures'],
     description=docs.SCHEDULE_F,

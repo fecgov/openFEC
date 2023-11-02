@@ -8,6 +8,9 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
+# Used for '/schedules/schedule_c/'
+# under tag: loans
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_c/
 @doc(
     tags=['loans'],
     description=docs.SCHEDULE_C,
@@ -57,6 +60,9 @@ class ScheduleCView(ApiResource):
         )
 
 
+# Used for '/schedules/schedule_c/<string:sub_id>/'
+# under tag: loans
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_c/4101720231804739584/
 @doc(
     tags=['loans'],
     description=docs.SCHEDULE_C,

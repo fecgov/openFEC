@@ -12,7 +12,9 @@ from webservices import filters
 from webservices.utils import use_kwargs
 
 
-# endpoint: audit-primary-category
+# used for endpoint:`/audit-primary-category/`
+# under tag: audit
+# Ex: http://127.0.0.1:5000/v1/audit-primary-category/
 @doc(
     tags=['audit'],
     description=docs.AUDIT_PRIMARY_CATEGORY,
@@ -45,7 +47,9 @@ class AuditPrimaryCategoryView(ApiResource):
         return self.model.primary_category_id
 
 
-# endpoint: audit-category
+# used for endpoint:`/audit-category/`
+# under tag: audit
+# Ex: http://127.0.0.1:5000/v1/audit-category/
 @doc(
     tags=['audit'],
     description=docs.AUDIT_CATEGORY,
@@ -81,7 +85,9 @@ class AuditCategoryView(ApiResource):
         return self.model.primary_category_id
 
 
-# endpoint: audit-case
+# used for endpoint:`/audit-case/`
+# under tag: audit
+# Ex: http://127.0.0.1:5000/v1/audit-case/
 @doc(
     tags=['audit'],
     description=docs.AUDIT_CASE,
@@ -151,7 +157,9 @@ class AuditCaseView(ApiResource):
         return self.model.idx
 
 
-# endpoint audit/search/name/candidates
+# used for endpoint:`/names/audit_candidates/`
+# under tag: audit
+# Ex: http://127.0.0.1:5000/v1/names/audit_candidates/?q=John
 @doc(
     tags=['audit'],
     description=docs.NAME_SEARCH,
@@ -172,6 +180,9 @@ class AuditCandidateNameSearch(utils.Resource):
         return {'results': query.all()}
 
 
+# used for endpoint:`/names/audit_committees/`
+# under tag: audit
+# Ex: http://127.0.0.1:5000/v1/names/audit_committees/?q=John
 @doc(
     tags=['audit'],
     description=docs.NAME_SEARCH,

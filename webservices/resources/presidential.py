@@ -8,6 +8,9 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
+# used for endpoint: '/presidential/contributions/by_candidate/'
+# under tag: presidential
+# Ex: http://127.0.0.1:5000/v1/presidential/contributions/by_candidate/
 @doc(
     tags=['presidential'],
     description=docs.PRESIDENTIAL_BY_CANDIDATE,
@@ -39,6 +42,9 @@ class PresidentialByCandidateView(ApiResource):
         return self.model.idx
 
 
+# used for endpoint: '/presidential/financial_summary/'
+# under tag: presidential
+# Ex: http://127.0.0.1:5000/v1/presidential/financial_summary/
 @doc(
     tags=['presidential'],
     description=docs.PRESIDENTIAL_BY_SUMMERY,
@@ -70,6 +76,9 @@ class PresidentialSummaryView(ApiResource):
         return self.model.idx
 
 
+# used for endpoint: '/presidential/contributions/by_size/'
+# under tag: presidential
+# Ex: http://127.0.0.1:5000/v1/presidential/contributions/by_size/
 @doc(
     tags=['presidential'],
     description=docs.PRESIDENTIAL_BY_SIZE,
@@ -102,6 +111,9 @@ class PresidentialBySizeView(ApiResource):
         return self.model.idx
 
 
+# used for endpoint: '/presidential/contributions/by_state/'
+# under tag: presidential
+# Ex: http://127.0.0.1:5000/v1/presidential/contributions/by_state/
 @doc(
     tags=['presidential'],
     description=docs.PRESIDENTIAL_BY_STATE,
@@ -133,6 +145,9 @@ class PresidentialByStateView(ApiResource):
         return self.model.idx
 
 
+# used for endpoint: '/presidential/coverage_end_date/'
+# under tag: presidential
+# Ex: http://127.0.0.1:5000/v1/presidential/coverage_end_date/
 @doc(
     tags=['presidential'],
     description=docs.PRESIDENTIAL_BY_COVERAGE,

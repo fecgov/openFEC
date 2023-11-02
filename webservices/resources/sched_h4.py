@@ -11,6 +11,9 @@ from webservices.common.views import ItemizedResource
 from webservices import exceptions
 
 
+# Used for endpoint `/schedules/schedule_h4/`
+# under tag: disbursements
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_h4/
 @doc(
     tags=['disbursements'],
     description=docs.SCHEDULE_H4,
@@ -101,6 +104,9 @@ class ScheduleH4View(ItemizedResource):
         return query
 
 
+# Used for endpoint `/schedules/schedule_h4/efile/`
+# under tag: disbursements
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_h4/efile/
 @doc(
     tags=['disbursements'],
     description=docs.EFILING_TAG,

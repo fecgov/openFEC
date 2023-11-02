@@ -49,6 +49,7 @@ ALL_DOCUMENT_TYPES = [
 ACCEPTED_DATE_FORMATS = "strict_date_optional_time_nanos||MM/dd/yyyy||M/d/yyyy||MM/d/yyyy||M/dd/yyyy"
 
 # endpoint path: /legal/docs/<doc_type>/<no>
+# under tag: legal
 # test urls:
 # http://127.0.0.1:5000/v1/legal/docs/statutes/9001/
 # http://127.0.0.1:5000/v1/legal/docs/regulations/1.1/
@@ -92,6 +93,7 @@ class GetLegalDocument(Resource):
 
 
 # endpoint path: /legal/search/
+# under tag: legal
 # test url: http://127.0.0.1:5000/v1/legal/search/?case_no=3744&type=murs
 @doc(
     tags=["legal"],

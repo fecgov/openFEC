@@ -75,9 +75,12 @@ class BaseFilings(ApiResource):
         return query
 
 
-# use for two endpoints: under tag:filings
+# used for endpoints:
 # `/committee/<committee_id>/filings/`
 # `/candidate/<candidate_id>/filings/`
+#  under tag: filings
+# Ex: http://127.0.0.1:5000/v1/committee/C00724070/filings/
+# http://127.0.0.1:5000/v1/candidate/H2MN07162/filings/
 class FilingsView(BaseFilings):
 
     def build_query(self, committee_id=None, candidate_id=None, **kwargs):
@@ -91,8 +94,9 @@ class FilingsView(BaseFilings):
         return query
 
 
-# use for endpoint:`/filings/` under tag:filing
-# sample: http://127.0.0.1:5000/v1/filings/?filer_name_text=san
+# used for endpoint:`/filings/`
+# under tag: filing
+# Ex: http://127.0.0.1:5000/v1/filings/?filer_name_text=san
 class FilingsList(BaseFilings):
 
     filter_multi_fields = BaseFilings.filter_multi_fields + [
@@ -106,8 +110,9 @@ class FilingsList(BaseFilings):
         return utils.extend(super().args, args.entities)
 
 
-# use for endpoint:/efile/filings/ under tag:efiling
-# sample: http://127.0.0.1:5000/v1/efile/filings/?filer_name_text=san
+# used for endpoint:/efile/filings/
+# under tag: efiling
+# Ex: http://127.0.0.1:5000/v1/efile/filings/?filer_name_text=san
 @doc(
     tags=["efiling"],
     description=docs.EFILE_FILES,

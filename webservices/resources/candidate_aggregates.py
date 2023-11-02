@@ -77,6 +77,7 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
 
 
 # used for 'schedules/schedule_a/by_size/by_candidate/'
+# under tag: receipts
 # Ex: http://127.0.0.1:5000/v1/schedules/schedule_a/by_size/by_candidate/?sort=-count&candidate_id=H8CA05035&cycle=2022
 # &election_full=true
 @doc(
@@ -116,6 +117,7 @@ class ScheduleABySizeCandidateView(ApiResource):
 
 
 # used for 'schedules/schedule_a/by_state/by_candidate/'
+# under tag: receipts
 # Ex: http://127.0.0.1:5000/v1/schedules/schedule_a/by_state/by_candidate/?sort=state&candidate_id=H8CA05035
 # &cycle=2022&election_full=true
 @doc(
@@ -157,6 +159,7 @@ class ScheduleAByStateCandidateView(ApiResource):
 
 
 # used for 'schedules/schedule_a/by_state/by_candidate/totals/'. always return one row.
+# under tag: receipts
 # Ex: http://127.0.0.1:5000/v1/schedules/schedule_a/by_state/by_candidate/totals/?sort=total&candidate_id=H8CA05035
 # &cycle=2022&election_full=true
 @doc(
@@ -204,7 +207,9 @@ class ScheduleAByStateCandidateTotalsView(ApiResource):
 
 
 # used for '/candidates/totals/'
-# Ex: http://127.0.0.1:5000/v1/candidates/totals/?sort=-election_year&election_full=true
+# under tag: candidate
+# Ex:
+# http://127.0.0.1:5000/v1/candidates/totals/?sort=-election_year&election_full=true
 @doc(
     tags=['candidate'], description=docs.TOTAL_CANDIDATE_TAG,
 )
@@ -314,7 +319,9 @@ class TotalsCandidateView(ApiResource):
         return query
 
 
-# endpoint: /candidates/totals/aggregates/
+# used for endpoint:`/candidates/totals/aggregates/`
+# under tag: candidate
+# Ex: http://127.0.0.1:5000/v1/candidates/totals/aggregates/
 @doc(
     tags=["candidate"], description=docs.CANDIDATE_TOTAL_AGGREGATE_TAG,
 )

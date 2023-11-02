@@ -8,6 +8,9 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
+# used for endpoint: '/rad-analyst/'
+# under tag: filer resources
+# Ex: http://127.0.0.1:5000/v1/rad-analyst/
 @doc(
     tags=['filer resources'],
     description=docs.RAD_ANALYST,

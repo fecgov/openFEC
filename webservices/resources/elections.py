@@ -49,6 +49,9 @@ def get_cycle_duration(kwargs):
     return 2
 
 
+# used for endpoint:'/elections/search/'
+# under tag: financial
+# Ex: http://127.0.0.1:5000/v1/elections/search/
 @doc(description=docs.ELECTION_SEARCH, tags=['financial'])
 class ElectionsListView(utils.Resource):
 
@@ -120,6 +123,9 @@ class ElectionsListView(utils.Resource):
         )
 
 
+# used for endpoint:'/elections/'
+# under tag: financial
+# Ex: http://127.0.0.1:5000/v1/elections/?cycle=2020&office=president
 @doc(description=docs.ELECTIONS, tags=['financial'])
 class ElectionView(ApiResource):
     schema = schemas.ElectionSchema
@@ -315,6 +321,9 @@ class ElectionView(ApiResource):
         return candAggregates
 
 
+# used for endpoint:'/elections/summary/'
+# under tag: financial
+# Ex: http://127.0.0.1:5000/v1/elections/summary/?cycle=2020&office=president
 @doc(description=docs.ELECTION_SEARCH, tags=['financial'])
 class ElectionSummary(utils.Resource):
     @use_kwargs(args.elections)
@@ -412,6 +421,9 @@ def filter_candidate_totals(query, kwargs):
     return query
 
 
+# used for endpoint:'/state-election-office/'
+# under tag: filer resources
+# Ex: http://127.0.0.1:5000/v1/state-election-office/
 @doc(
     tags=['filer resources'], description=docs.STATE_ELECTION_OFFICES,
 )
