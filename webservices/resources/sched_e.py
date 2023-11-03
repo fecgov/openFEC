@@ -11,7 +11,9 @@ from webservices.common import views
 from webservices.common.views import ItemizedResource
 
 
-# Use for endpoint `/schedules/schedule_e/` under tag: independent expenditure
+# Used for endpoint `/schedules/schedule_e/`
+# under tag: independent expenditure
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_e/
 @doc(
     tags=['independent expenditures'],
     description=docs.SCHEDULE_E,
@@ -113,7 +115,9 @@ class ScheduleEView(ItemizedResource):
         return query
 
 
-# Use for endpoint `/schedules/schedule_e/efile/` under tag: independent expenditure
+# Used for endpoint `/schedules/schedule_e/efile/`
+# under tag: independent expenditures
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_e/efile/
 @doc(
     tags=['independent expenditures'],
     description=docs.EFILING_TAG,

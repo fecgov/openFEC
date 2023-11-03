@@ -15,6 +15,11 @@ https://github.com/fecgov/openFEC/issues/3595
 """
 
 
+# Used for '/schedules/schedule_b/'
+# '/schedules/schedule_b/<string:sub_id>/'
+# under tag: disbursements
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_b/
+# http://127.0.0.1:5000/v1/schedules/schedule_b/4123120201987370164/
 @doc(
     tags=['disbursements'],
     description=docs.SCHEDULE_B,
@@ -99,6 +104,9 @@ class ScheduleBView(ItemizedResource):
         return query
 
 
+# Used for '/schedules/schedule_b/efile/'
+# under tag: disbursements
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_b/efile/
 @doc(tags=['disbursements'], description=docs.EFILING_TAG)
 class ScheduleBEfileView(views.ApiResource):
     model = models.ScheduleBEfile

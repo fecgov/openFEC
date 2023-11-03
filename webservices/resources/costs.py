@@ -9,6 +9,9 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
+# used for endpoint:'/communication_costs/'
+# under tag: communication cost
+# Ex: http://127.0.0.1:5000/v1/communication_costs/
 @doc(
     tags=['communication cost'],
     description=docs.COMMUNICATION_COST,
@@ -47,6 +50,9 @@ class CommunicationCostView(ApiResource):
     ]
 
 
+# used for endpoint:'/electioneering/'
+# under tag: electioneering
+# Ex: http://127.0.0.1:5000/v1/electioneering/
 @doc(
     tags=['electioneering'],
     description=docs.ELECTIONEERING,

@@ -124,7 +124,8 @@ def get_match_filters():
     return filter_match_fields
 
 
-# Use for endpoint '/reports/<string:entity_type>/' under tag:'financial'
+# Used for endpoint '/reports/<string:entity_type>/'
+# under tag:'financial'
 # Sample urls:
 # http://127.0.0.1:5000/v1/reports/presidential/?q_filer=bid
 # http://127.0.0.1:5000/v1/reports/house-senate/?q_filer=bid
@@ -200,7 +201,9 @@ class ReportsView(views.ApiResource):
         return query, reports_class, reports_schema
 
 
-# Use for '/committee/<string:committee_id>/reports/' under tag:'financial'
+# Used for '/committee/<string:committee_id>/reports/'
+# under tag:'financial'
+# Ex: http://127.0.0.1:5000/v1/committee/C00180141/reports/
 @doc(
     tags=['financial'],
     description=docs.REPORTS,
@@ -268,7 +271,8 @@ class CommitteeReportsView(views.ApiResource):
             return reports_type_map.get(committee_type)
 
 
-# Use for '/efile/reports/house-senate/' under tag:'efiling'
+# Used for '/efile/reports/house-senate/'
+# under tag:'efiling'
 # Sample url:
 # http://127.0.0.1:5000/v1/efile/reports/house-senate/?filer_name_text=san
 @doc(
@@ -314,7 +318,8 @@ class EFilingHouseSenateSummaryView(views.ApiResource):
         return self.model.file_number
 
 
-# Use for '/efile/reports/presidential/' under tag:'efiling'
+# Used for '/efile/reports/presidential/'
+# under tag:'efiling'
 # Sample url:
 # http://127.0.0.1:5000/v1/efile/reports/presidential/?filer_name_text=bid
 @doc(
@@ -360,7 +365,8 @@ class EFilingPresidentialSummaryView(views.ApiResource):
         return self.model.file_number
 
 
-# Use for '/efile/reports/pac-party/' under tag:'efiling'
+# Used for '/efile/reports/pac-party/'
+# under tag:'efiling'
 # Sample url:
 # http://127.0.0.1:5000/v1/efile/reports/pac-party/?filer_name_text=san
 @doc(

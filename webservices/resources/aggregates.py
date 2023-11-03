@@ -38,6 +38,9 @@ class AggregateResource(ApiResource):
         return self.model.idx
 
 
+# used for endpoint:`/schedules/schedule_a/by_employer/`
+# under tag: receipts
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_a/by_employer/
 @doc(
     tags=['receipts'],
     description=docs.SCHEDULE_A_BY_EMPLOYER,
@@ -56,6 +59,9 @@ class ScheduleAByEmployerView(AggregateResource):
     ]
 
 
+# used for endpoint:`/schedules/schedule_a/by_occupation/`
+# under tag: receipts
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_a/by_occupation/
 @doc(
     tags=['receipts'],
     description=docs.SCHEDULE_A_BY_OCCUPATION,
@@ -75,6 +81,9 @@ class ScheduleAByOccupationView(AggregateResource):
     ]
 
 
+# used for endpoint:`/schedules/schedule_a/by_size/`
+# under tag: receipts
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_a/by_size/
 @doc(
     tags=['receipts'],
     description=docs.SCHEDULE_A_BY_SIZE,
@@ -92,6 +101,9 @@ class ScheduleABySizeView(AggregateResource):
     ]
 
 
+# used for endpoint:`/schedules/schedule_a/by_state/`
+# under tag: receipts
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_a/by_state/
 @doc(
     tags=['receipts'],
     description=docs.SCHEDULE_A_BY_STATE,
@@ -129,6 +141,9 @@ class ScheduleAByStateView(AggregateResource):
     tags=['receipts'],
     description=docs.SCHEDULE_A_BY_ZIP,
 )
+# used for endpoint:`/schedules/schedule_a/by_zip/`
+# under tag: receipts
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_a/by_zip/
 class ScheduleAByZipView(AggregateResource):
 
     model = models.ScheduleAByZip
@@ -142,6 +157,9 @@ class ScheduleAByZipView(AggregateResource):
     ]
 
 
+# used for endpoint:`/schedules/schedule_b/by_purpose/`
+# under tag: disbursements
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_b/by_purpose/
 @doc(
     tags=['disbursements'],
     description=docs.SCHEDULE_B_BY_PURPOSE,
@@ -161,6 +179,9 @@ class ScheduleBByPurposeView(AggregateResource):
     ]
 
 
+# used for endpoint:`/schedules/schedule_b/by_recipient/`
+# under tag: disbursements
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_b/by_recipient/
 @doc(
     tags=['disbursements'],
     description=docs.SCHEDULE_B_BY_RECIPIENT,
@@ -180,6 +201,9 @@ class ScheduleBByRecipientView(AggregateResource):
     ]
 
 
+# used for endpoint:`/schedules/schedule_b/by_recipient_id/`
+# under tag: disbursements
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_b/by_recipient_id/
 @doc(
     tags=['disbursements'],
     description=docs.SCHEDULE_B_BY_RECIPIENT_ID,
@@ -268,6 +292,10 @@ class CandidateAggregateResource(AggregateResource):
         )
 
 
+# used for endpoint:`/schedules/schedule_e/by_candidate/`
+# under tag: independent expenditures
+# Ex:
+# http://127.0.0.1:5000/v1/schedules/schedule_e/by_candidate/?cycle=2020&office=president
 @doc(
     tags=['independent expenditures'],
     description=docs.SCHEDULE_E_BY_CANDIDATE,
@@ -289,6 +317,10 @@ class ScheduleEByCandidateView(CandidateAggregateResource):
     group_columns = [models.ScheduleEByCandidate.support_oppose_indicator]
 
 
+# used for endpoint:`/communication_costs/by_candidate/`
+# under tag: communication cost
+# Ex:
+# http://127.0.0.1:5000/v1/communication_costs/by_candidate/?cycle=2020&office=president
 @doc(
     tags=['communication cost'],
     description=docs.COMMUNICATION_COST_AGGREGATE,
@@ -309,6 +341,9 @@ class CommunicationCostByCandidateView(CandidateAggregateResource):
     group_columns = [models.CommunicationCostByCandidate.support_oppose_indicator]
 
 
+# used for endpoint:`/communication_costs/aggregates/`
+# under tag: communication cost
+# Ex: http://127.0.0.1:5000/v1/communication_costs/aggregates/
 @doc(
     tags=['communication cost'],
     description=docs.COMMUNICATION_COST_AGGREGATE,
@@ -349,6 +384,10 @@ class CCAggregatesView(AggregateResource):
     ]
 
 
+# used for endpoint:`/electioneering/by_candidate/`
+# under tag: electioneering
+# Ex:
+# http://127.0.0.1:5000/v1/electioneering/by_candidate/?cycle=2020&office=president
 @doc(
     tags=['electioneering'],
     description=docs.ELECTIONEERING_AGGREGATE_BY_CANDIDATE,
@@ -364,6 +403,9 @@ class ElectioneeringByCandidateView(CandidateAggregateResource):
     ]
 
 
+# used for endpoint:`/electioneering/aggregates/`
+# under tag: electioneering
+# Ex: http://127.0.0.1:5000/v1/electioneering/aggregates/
 @doc(
     tags=['electioneering'],
     description=docs.ELECTIONEERING_AGGREGATE,
@@ -399,7 +441,7 @@ class ECAggregatesView(AggregateResource):
         ('candidate_id', model.candidate_id),
         ('committee_id', model.committee_id),
     ]
-    
+
 
 def join_cand_cmte_names(query):
     query = query.subquery()

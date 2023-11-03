@@ -27,7 +27,9 @@ def filter_year(model, query, years):
 
 # return committee list
 # model class: Committee, CommitteeSearch
-# use for endpoint:'/committees/'
+# used for endpoint:'/committees/'
+# under tag: committee
+# Ex: http://127.0.0.1:5000/v1/committees/
 @doc(
     tags=["committee"],
     description=docs.COMMITTEE_LIST,
@@ -109,9 +111,12 @@ class CommitteeList(ApiResource):
 
 # return one committee detail information
 # model class:CommitteeDetail, CandidateCommitteeLink
-# use for endpoints:
+# used for endpoints:
 # '/committee/<string:committee_id>/'
 # '/candidate/<string:candidate_id>/committees/'
+# under tag: committee
+# Ex: http://127.0.0.1:5000/v1/committee/C00462390/
+# http://127.0.0.1:5000/v1/candidate/S2UT00229/committees/
 @doc(
     tags=["committee"],
     description=docs.COMMITTEE_DETAIL,
@@ -170,11 +175,16 @@ class CommitteeView(ApiResource):
 # return committee history profile
 # model classes: CommitteeHistoryProfile, JFCCommittee,
 # CandidateCommitteeLink, CandidateCommitteeAlternateLink
-# use for endpoints:
+# used for endpoints:
 # '/committee/<string:committee_id>/history/'
 # '/committee/<string:committee_id>/history/<int:cycle>/'
 # '/candidate/<string:candidate_id>/committees/history/'
 # '/candidate/<string:candidate_id>/committees/history/<int:cycle>/'
+# under tag: committee
+# Ex: http://127.0.0.1:5000/v1/committee/C00462390/history/
+# http://127.0.0.1:5000/v1/committee/C00462390/history/2016/
+# http://127.0.0.1:5000/v1/candidate/S2UT00229/committees/history/
+# http://127.0.0.1:5000/v1/candidate/S2UT00229/committees/history/2018/
 @doc(
     tags=["committee"],
     description=docs.COMMITTEE_HISTORY,
