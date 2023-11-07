@@ -637,5 +637,3 @@ class TotalsInauguralDonationsFactory(BaseFactory):
 class AffiliatedCommitteeFactory(BaseFactory):
     class Meta:
         model = models.AffiliatedCommittee
-
-    idx = factory.Sequence(lambda n: n)
