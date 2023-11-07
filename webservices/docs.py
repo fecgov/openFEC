@@ -244,7 +244,7 @@ The committee endpoints primarily use data from FEC registration Form 1 and Form
 
 COMMITTEE_ID = '''
 A unique identifier assigned to each committee or filer registered with the FEC. In general \
-committee id's begin with the letter C which is followed by eight digits.
+a committee id begins with the letter C which is followed by eight digits.
 '''
 
 COMMITTEE_NAME = 'The name of the committee. If a committee changes its name, \
