@@ -1237,7 +1237,7 @@ class TestScheduleE(ApiBaseTest):
 
     def test_schedule_e_efile_candidate_id_filter(self):
         filters = [
-            ('candidate_id', ScheduleEEfile.candidate_id, ['S01', 'S02']),
+            ('candidate_id', ScheduleEEfile.candidate_id, ['S00000001', 'S00000002']),
         ]
         factories.EFilingsFactory(file_number=123)
         for label, column, values in filters:

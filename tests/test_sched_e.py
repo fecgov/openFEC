@@ -9,7 +9,7 @@ from webservices.resources.aggregates import ScheduleEByCandidateView
 # test /schedules/schedule_e/by_candidate/ under tag: independent expenditures
 class TestScheduleEByCandidateView(ApiBaseTest):
     def test_fields(self):
-        candidate_id = 'S001'
+        candidate_id = 'S00000001'
         support_oppose_indicator = 'S'
         factories.ScheduleEByCandidateFactory(
             candidate_id=candidate_id,
@@ -18,30 +18,30 @@ class TestScheduleEByCandidateView(ApiBaseTest):
         factories.CandidateElectionFactory(candidate_id=candidate_id,
                                            cand_election_year=2018)
         results = self._results(api.url_for(ScheduleEByCandidateView,
-                                            candidate_id='S001'))
+                                            candidate_id='S00000001'))
         assert len(results) == 1
         assert results[0].keys() == ScheduleEByCandidateSchema().fields.keys()
 
     def test_sched_e_filter_match(self):
-        factories.CandidateElectionFactory(candidate_id='S002',
+        factories.CandidateElectionFactory(candidate_id='S00000002',
                                            cand_election_year=2014)
         factories.ScheduleEByCandidateFactory(
             total=50000,
             count=10,
             cycle=2008,
-            candidate_id='S001',
+            candidate_id='S00000001',
             support_oppose_indicator='O',
         ),
         factories.ScheduleEByCandidateFactory(
             total=10000,
             count=5,
             cycle=2010,
-            candidate_id='S002',
+            candidate_id='S00000002',
             support_oppose_indicator='S',
         ),
 
         results = self._results(
-            api.url_for(ScheduleEByCandidateView, candidate_id='S002',
+            api.url_for(ScheduleEByCandidateView, candidate_id='S00000002',
                         cycle=2014, support_oppose='S')
         )
         self.assertEqual(len(results), 1)
@@ -55,21 +55,21 @@ class TestScheduleEByCandidateView(ApiBaseTest):
     def test_sort_by_candidate_id(self):
 
         factories.CandidateHistoryFactory(
-            candidate_id='S001',
+            candidate_id='S00000001',
             name='Robert Ritchie',
             two_year_period=2012,
             office='S',
             state='NY',
         )
         factories.CandidateHistoryFactory(
-            candidate_id='S002',
+            candidate_id='S00000002',
             name='FARLEY Ritchie',
             two_year_period=2012,
             office='S',
             state='NY',
         )
         factories.CandidateHistoryFactory(
-            candidate_id='S003',
+            candidate_id='S00000003',
             name='Robert Ritchie',
             election_years=[2012],
             two_year_period=2012,
@@ -78,32 +78,32 @@ class TestScheduleEByCandidateView(ApiBaseTest):
         )
 
         factories.CandidateElectionFactory(
-            candidate_id='S001',
+            candidate_id='S00000001',
             cand_election_year=2012)
         factories.CandidateElectionFactory(
-            candidate_id='S002',
+            candidate_id='S00000002',
             cand_election_year=2012)
         factories.CandidateElectionFactory(
-            candidate_id='S003',
+            candidate_id='S00000003',
             cand_election_year=2012)
 
         factories.ScheduleEByCandidateFactory(
             cycle=2012,
-            candidate_id='S001',
+            candidate_id='S00000001',
             support_oppose_indicator='O',
             total=700,
             count=5,
         ),
         factories.ScheduleEByCandidateFactory(
             cycle=2012,
-            candidate_id='S002',
+            candidate_id='S00000002',
             support_oppose_indicator='O',
             total=500,
             count=3,
         ),
         factories.ScheduleEByCandidateFactory(
             cycle=2012,
-            candidate_id='S003',
+            candidate_id='S00000003',
             support_oppose_indicator='S',
             total=100,
             count=1,
@@ -112,24 +112,24 @@ class TestScheduleEByCandidateView(ApiBaseTest):
             api.url_for(ScheduleEByCandidateView, sort='-candidate_id',
                         office='senate', state='NY', cycle=2012))
         self.assertEqual(len(response), 3)
-        self.assertEqual(response[0]['candidate_id'], 'S003')
+        self.assertEqual(response[0]['candidate_id'], 'S00000003')
         self.assertEqual(response[0]['support_oppose_indicator'], 'S')
-        self.assertEqual(response[1]['candidate_id'], 'S002')
+        self.assertEqual(response[1]['candidate_id'], 'S00000002')
         self.assertEqual(response[1]['support_oppose_indicator'], 'O')
-        self.assertEqual(response[2]['candidate_id'], 'S001')
+        self.assertEqual(response[2]['candidate_id'], 'S00000001')
         self.assertEqual(response[2]['support_oppose_indicator'], 'O')
 
     def test_sort_by_candidate_name_descending(self):
 
         factories.CandidateHistoryFactory(
-            candidate_id='S005',
+            candidate_id='S00000005',
             name='WARNER, MARK',
             two_year_period=2010,
             office='S',
             state='NY',
         )
         factories.CandidateHistoryFactory(
-            candidate_id='S006',
+            candidate_id='S00000006',
             name='BALDWIN, ALISSA',
             two_year_period=2010,
             office='S',
@@ -137,24 +137,24 @@ class TestScheduleEByCandidateView(ApiBaseTest):
         )
 
         factories.CandidateElectionFactory(
-            candidate_id='S005',
+            candidate_id='S00000005',
             cand_election_year=2010)
         factories.CandidateElectionFactory(
-            candidate_id='S006',
+            candidate_id='S00000006',
             cand_election_year=2010)
 
         factories.ScheduleEByCandidateFactory(
             total=50000,
             count=10,
             cycle=2010,
-            candidate_id='S005',
+            candidate_id='S00000005',
             support_oppose_indicator='S',
         ),
         factories.ScheduleEByCandidateFactory(
             total=10000,
             count=5,
             cycle=2010,
-            candidate_id='S006',
+            candidate_id='S00000006',
             support_oppose_indicator='S',
         ),
 
@@ -171,15 +171,15 @@ class TestScheduleEByCandidateView(ApiBaseTest):
 
         factories.CommitteeHistoryFactory(
             name='Warner for America', cycle=2010,
-            committee_id='C005'
+            committee_id='C00000005'
         )
         factories.CommitteeHistoryFactory(
             name='Ritche for America', cycle=2010,
-            committee_id='C006'
+            committee_id='C00000006'
         )
 
         factories.CandidateHistoryFactory(
-            candidate_id='S005',
+            candidate_id='S00000005',
             name='WARNER, MARK',
             election_years=[2010],
             two_year_period=2010,
@@ -187,7 +187,7 @@ class TestScheduleEByCandidateView(ApiBaseTest):
             state='NY',
         )
         factories.CandidateHistoryFactory(
-            candidate_id='S006',
+            candidate_id='S00000006',
             name='BALDWIN, ALISSA',
             election_years=[2010],
             two_year_period=2010,
@@ -196,27 +196,27 @@ class TestScheduleEByCandidateView(ApiBaseTest):
         )
 
         factories.CandidateElectionFactory(
-            candidate_id='S005',
+            candidate_id='S00000005',
             cand_election_year=2010)
         factories.CandidateElectionFactory(
-            candidate_id='S006',
+            candidate_id='S00000006',
             cand_election_year=2010)
 
         factories.ScheduleEByCandidateFactory(
             total=50000,
             count=10,
             cycle=2010,
-            candidate_id='S005',
+            candidate_id='S00000005',
             support_oppose_indicator='S',
-            committee_id='C005',
+            committee_id='C00000005',
         ),
         factories.ScheduleEByCandidateFactory(
             total=10000,
             count=5,
             cycle=2010,
-            candidate_id='S005',
+            candidate_id='S00000005',
             support_oppose_indicator='S',
-            committee_id='C006',
+            committee_id='C00000006',
         ),
 
         response = self._results(api.url_for(ScheduleEByCandidateView,
@@ -225,22 +225,22 @@ class TestScheduleEByCandidateView(ApiBaseTest):
                                              cycle=2010,
                                              state='NY'))
         self.assertEqual(len(response), 2)
-        self.assertEqual(response[0]['committee_id'], 'C006')
-        self.assertEqual(response[1]['committee_id'], 'C005')
+        self.assertEqual(response[0]['committee_id'], 'C00000006')
+        self.assertEqual(response[1]['committee_id'], 'C00000005')
 
     def test_sort_by_committee_name(self):
 
         factories.CommitteeHistoryFactory(
             name='Warner for America', cycle=2010,
-            committee_id='C005'
+            committee_id='C00000005'
         )
         factories.CommitteeHistoryFactory(
             name='Ritche for America', cycle=2010,
-            committee_id='C006'
+            committee_id='C00000006'
         )
 
         factories.CandidateHistoryFactory(
-            candidate_id='S005',
+            candidate_id='S00000005',
             name='WARNER, MARK',
             election_years=[2010],
             two_year_period=2010,
@@ -248,7 +248,7 @@ class TestScheduleEByCandidateView(ApiBaseTest):
             state='NY',
         )
         factories.CandidateHistoryFactory(
-            candidate_id='S006',
+            candidate_id='S00000006',
             name='BALDWIN, ALISSA',
             election_years=[2010],
             two_year_period=2010,
@@ -257,27 +257,27 @@ class TestScheduleEByCandidateView(ApiBaseTest):
         )
 
         factories.CandidateElectionFactory(
-            candidate_id='S005',
+            candidate_id='S00000005',
             cand_election_year=2010)
         factories.CandidateElectionFactory(
-            candidate_id='S006',
+            candidate_id='S00000006',
             cand_election_year=2010)
 
         factories.ScheduleEByCandidateFactory(
             total=50000,
             count=10,
             cycle=2010,
-            candidate_id='S005',
+            candidate_id='S00000005',
             support_oppose_indicator='S',
-            committee_id='C005',
+            committee_id='C00000005',
         ),
         factories.ScheduleEByCandidateFactory(
             total=10000,
             count=5,
             cycle=2010,
-            candidate_id='S005',
+            candidate_id='S00000005',
             support_oppose_indicator='S',
-            committee_id='C006',
+            committee_id='C00000006',
         ),
 
         response = self._results(api.url_for(ScheduleEByCandidateView,

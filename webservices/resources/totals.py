@@ -311,6 +311,8 @@ class CandidateTotalsDetailView(utils.Resource):
 
     def _resolve_committee_type(self, candidate_id=None, **kwargs):
         if candidate_id is not None:
+            candidate_id = candidate_id.upper()
+            utils.check_candidate_id(candidate_id)
             return candidate_id[0]
 
 

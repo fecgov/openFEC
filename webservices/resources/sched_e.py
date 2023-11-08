@@ -13,7 +13,8 @@ from webservices.common.views import ItemizedResource
 
 # Used for endpoint `/schedules/schedule_e/`
 # under tag: independent expenditure
-# Ex: http://127.0.0.1:5000/v1/schedules/schedule_e/
+# Ex1: http://127.0.0.1:5000/v1/schedules/schedule_e/
+# Ex2: http://127.0.0.1:5000/v1/schedules/schedule_e/?candidate_id=S0OH00133
 @doc(
     tags=['independent expenditures'],
     description=docs.SCHEDULE_E,

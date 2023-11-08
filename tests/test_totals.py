@@ -79,7 +79,7 @@ class TestTotalsByEntityType(ApiBaseTest):
         'first_file_date': datetime.date.fromisoformat("1982-12-31"),
         'receipts': 50,
         'disbursements': 200,
-        'sponsor_candidate_ids': ['H01'],
+        'sponsor_candidate_ids': ['H00000001'],
         'organization_type': 'C',
         'organization_type_full': 'Corporation',
         'first_f1_date': datetime.date.fromisoformat("1983-02-01"),
@@ -98,7 +98,7 @@ class TestTotalsByEntityType(ApiBaseTest):
         'first_file_date': datetime.date.fromisoformat("1984-12-31"),
         'receipts': 200,
         'disbursements': 50,
-        'sponsor_candidate_ids': ['H02'],
+        'sponsor_candidate_ids': ['H00000002'],
         'organization_type': 'T',
         'organization_type_full': 'Trade',
         'first_f1_date': datetime.date.fromisoformat("1984-12-31"),
@@ -134,7 +134,7 @@ class TestTotalsByEntityType(ApiBaseTest):
 
     def test_cycle_filter(self):
         presidential_fields = {
-            'committee_id': 'C00001',
+            'committee_id': 'C00000001',
             'cycle': 2016,
             'candidate_contribution': 1,
             'exempt_legal_accounting_disbursement': 2,
@@ -150,7 +150,7 @@ class TestTotalsByEntityType(ApiBaseTest):
 
     def test_designation_filter(self):
         party_fields = {
-            'committee_id': 'C00001',
+            'committee_id': 'C00000001',
             'cycle': 2014,
             'committee_name': 'REPUBLICAN COMMITTEE',
             'committee_designation': 'U',
@@ -209,7 +209,7 @@ class TestTotalsByEntityType(ApiBaseTest):
                 "first_file_date": datetime.date.fromisoformat("1984-12-31"),
                 "receipts": 200,
                 "disbursements": 50,
-                "sponsor_candidate_ids": ["H02"],
+                "sponsor_candidate_ids": ["H00000002"],
                 "organization_type": "T",
                 "organization_type_full": "Trade",
             }
@@ -324,7 +324,7 @@ class TestTotalsByEntityType(ApiBaseTest):
             api.url_for(
                 TotalsByEntityTypeView,
                 entity_type='pac-party',
-                sponsor_candidate_id='H02'
+                sponsor_candidate_id='H00000002'
             )
         )
         assert len(results) == 1
@@ -337,19 +337,19 @@ class TestTotalsByEntityType(ApiBaseTest):
         factories.PacSponsorCandidatePerCycleFactory(
             committee_id=committee.committee_id,
             cycle=committee.cycle,
-            sponsor_candidate_id="H01",
+            sponsor_candidate_id="H00000001",
             sponsor_candidate_name="Sponsor A",
         )
         factories.PacSponsorCandidatePerCycleFactory(
             committee_id='C00000007',
             cycle=committee.cycle + 2,
-            sponsor_candidate_id="S03",
+            sponsor_candidate_id="S00000003",
             sponsor_candidate_name="Sponsor B",
         )
         factories.PacSponsorCandidatePerCycleFactory(
             committee_id='C00000007',
             cycle=committee.cycle,
-            sponsor_candidate_id="S03",
+            sponsor_candidate_id="S00000003",
             sponsor_candidate_name="Sponsor B",
         )
         results = self._results(
@@ -365,7 +365,7 @@ class TestTotalsByEntityType(ApiBaseTest):
             results[0]["sponsor_candidate_list"][0]["sponsor_candidate_name"], "Sponsor A"
         )
         self.assertEqual(
-            results[0]["sponsor_candidate_list"][0]["sponsor_candidate_id"], "H01"
+            results[0]["sponsor_candidate_list"][0]["sponsor_candidate_id"], "H00000001"
         )
 
     def test_first_f1_date_filter(self):
@@ -1299,12 +1299,12 @@ class TestCandidateTotalsDetail(ApiBaseTest):
         }
         first_candidate = utils.extend(self.excluded_schema_fields,
                                        self.candidate_totals_fields,
-                                       {'candidate_id': 'H0001',
+                                       {'candidate_id': 'H00000001',
                                         'cycle': 2020})
 
         second_candidate = utils.extend(self.excluded_schema_fields,
                                         self.candidate_totals_fields,
-                                        {'candidate_id': 'H0002',
+                                        {'candidate_id': 'H00000002',
                                          'cycle': 2022})
         factories.CandidateTotalsDetailFactory(**first_candidate)
 
@@ -1312,11 +1312,11 @@ class TestCandidateTotalsDetail(ApiBaseTest):
             **second_candidate)
 
         results = self._results(
-             api.url_for(CandidateTotalsDetailView, candidate_id='H0001')
+             api.url_for(CandidateTotalsDetailView, candidate_id='H00000001')
          )
         fields = utils.extend(self.candidate_totals_fields,
                               changed_schema_fields,
-                              {'candidate_id': 'H0001',
+                              {'candidate_id': 'H00000001',
                                'cycle': 2020})
 
         self.assertEqual(len(results), 1)
@@ -1337,12 +1337,12 @@ class TestCandidateTotalsDetail(ApiBaseTest):
         }
         first_candidate = utils.extend(self.candidate_totals_fields,
                                        self.excluded_schema_fields,
-                                       {'candidate_id': 'P0001',
+                                       {'candidate_id': 'P00000001',
                                         'cycle': 2020})
 
         second_candidate = utils.extend(self.candidate_totals_fields,
                                         self.excluded_schema_fields,
-                                        {'candidate_id': 'P0002',
+                                        {'candidate_id': 'P00000002',
                                          'cycle': 2022})
         factories.CandidateTotalsDetailFactory(
             **first_candidate)
@@ -1351,11 +1351,11 @@ class TestCandidateTotalsDetail(ApiBaseTest):
             **second_candidate)
 
         results = self._results(
-             api.url_for(CandidateTotalsDetailView, candidate_id='P0002')
+             api.url_for(CandidateTotalsDetailView, candidate_id='P00000002')
          )
         fields = utils.extend(self.candidate_totals_fields,
                               changed_schema_fields,
-                              {'candidate_id': 'P0002',
+                              {'candidate_id': 'P00000002',
                                'cycle': 2022})
 
         self.assertEqual(len(results), 1)
@@ -1363,138 +1363,138 @@ class TestCandidateTotalsDetail(ApiBaseTest):
 
     def test_election_full_filter(self):
         factories.CandidateTotalsDetailFactory(
-            candidate_id='H0001',
+            candidate_id='H00000001',
             candidate_election_year=2020,
             cycle=2020,
             election_full=True
         )
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='H0001',
+            candidate_id='H00000001',
             candidate_election_year=2018,
             cycle=2018,
             election_full=False
             )
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='H0001',
+            candidate_id='H00000001',
             candidate_election_year=2016,
             cycle=2016,
             election_full=False
             )
 
         results = self._results(
-             api.url_for(CandidateTotalsDetailView, candidate_id='H0001',
+             api.url_for(CandidateTotalsDetailView, candidate_id='H00000001',
                          election_full=True))
 
         self.assertEqual(len(results), 1)
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='P0001',
+            candidate_id='P00000001',
             candidate_election_year=2020,
             cycle=2020,
             election_full=True
         )
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='P0001',
+            candidate_id='P00000001',
             candidate_election_year=2018,
             cycle=2018,
             election_full=False
             )
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='P0001',
+            candidate_id='P00000001',
             candidate_election_year=2016,
             cycle=2016,
             election_full=False
             )
 
         results = self._results(
-             api.url_for(CandidateTotalsDetailView, candidate_id='P0001',
+             api.url_for(CandidateTotalsDetailView, candidate_id='P00000001',
                          election_full=False))
 
         self.assertEqual(len(results), 2)
 
     def test_cycle_filter(self):
         factories.CandidateTotalsDetailFactory(
-            candidate_id='H0001',
+            candidate_id='H00000001',
             candidate_election_year=2020,
             cycle=2020,
             election_full=True
         )
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='H0001',
+            candidate_id='H00000001',
             candidate_election_year=2018,
             cycle=2018,
             election_full=False
             )
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='H0002',
+            candidate_id='H00000002',
             candidate_election_year=2018,
             cycle=2018,
             election_full=False
             )
 
         results = self._results(
-             api.url_for(CandidateTotalsDetailView, candidate_id='H0002',
+             api.url_for(CandidateTotalsDetailView, candidate_id='H00000002',
                          cycle=2018))
 
         self.assertEqual(len(results), 1)
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='P0001',
+            candidate_id='P00000001',
             candidate_election_year=2020,
             cycle=2020,
             election_full=True
         )
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='P0001',
+            candidate_id='P00000001',
             candidate_election_year=2022,
             cycle=2020,
             election_full=False
             )
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='P0001',
+            candidate_id='P00000001',
             candidate_election_year=2024,
             cycle=2020,
             election_full=False
             )
 
         results = self._results(
-             api.url_for(CandidateTotalsDetailView, candidate_id='P0001',
+             api.url_for(CandidateTotalsDetailView, candidate_id='P00000001',
                          cycle=2020))
 
         self.assertEqual(len(results), 3)
 
     def test_sort(self):
         factories.CandidateTotalsDetailFactory(
-            candidate_id='H0003',
+            candidate_id='H00000003',
             candidate_election_year=2020,
             cycle=2020,
             election_full=True
         )
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='H0003',
+            candidate_id='H00000003',
             candidate_election_year=2018,
             cycle=2018,
             election_full=False
             )
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='H0003',
+            candidate_id='H00000003',
             candidate_election_year=2018,
             cycle=2016,
             election_full=False
             )
 
         results = self._results(
-             api.url_for(CandidateTotalsDetailView, candidate_id='H0003',
+             api.url_for(CandidateTotalsDetailView, candidate_id='H00000003',
                          sort='cycle'))
 
         self.assertEqual(len(results), 3)
@@ -1503,28 +1503,28 @@ class TestCandidateTotalsDetail(ApiBaseTest):
         self.assertEqual(results[0]['candidate_election_year'], 2018)
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='P0001',
+            candidate_id='P00000001',
             candidate_election_year=2016,
             cycle=2016,
             election_full=True
         )
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='P0001',
+            candidate_id='P00000001',
             candidate_election_year=2018,
             cycle=2018,
             election_full=False
             )
 
         factories.CandidateTotalsDetailFactory(
-            candidate_id='P0001',
+            candidate_id='P00000001',
             candidate_election_year=2022,
             cycle=2022,
             election_full=True
             )
 
         results = self._results(
-             api.url_for(CandidateTotalsDetailView, candidate_id='P0001',
+             api.url_for(CandidateTotalsDetailView, candidate_id='P00000001',
                          sort='-cycle'))
 
         self.assertEqual(len(results), 3)

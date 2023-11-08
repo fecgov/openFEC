@@ -30,7 +30,7 @@ def filter_range_fields(model):
 
 # used for endpoint:`/candidates/`
 # under tag: candidate
-# Ex: http://127.0.0.1:5000/v1/candidates/
+# Ex: http://127.0.0.1:5000/v1/candidates/?candidate_id=S0LA00071&sort=name
 @doc(
     tags=['candidate'], description=docs.CANDIDATE_LIST,
 )
@@ -192,7 +192,9 @@ class CandidateView(ApiResource):
         query = super().build_query(**kwargs)
 
         if candidate_id is not None:
-            query = query.filter_by(candidate_id=candidate_id.upper())
+            candidate_id = candidate_id.upper()
+            utils.check_candidate_id(candidate_id)
+            query = query.filter_by(candidate_id=candidate_id)
 
         if committee_id is not None:
             committee_id = committee_id.upper()
@@ -271,7 +273,9 @@ class CandidateHistoryView(ApiResource):
             # use for
             # '/candidate/<string:candidate_id>/history/',
             # '/candidate/<string:candidate_id>/history/<int:cycle>/',
-            query = query.filter(models.CandidateHistory.candidate_id == candidate_id.upper())
+            candidate_id = candidate_id.upper()
+            utils.check_candidate_id(candidate_id)
+            query = query.filter(models.CandidateHistory.candidate_id == candidate_id)
 
         if committee_id:
             committee_id = committee_id.upper()
