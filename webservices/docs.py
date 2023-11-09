@@ -1813,8 +1813,14 @@ also incorporate any changes made by committees, if any report covering the peri
 '''
 EFILE_REPORTS += WIP_TAG
 
-LINE_NUMBER = '''
-`DEPRECATED This filter will be renamed to form_line_number`
+FORM_LINE_NUMBER = '''
+Filter for form and line number using the following format:
+`FORM-LINENUMBER`.  For example an argument such as `F3X-16` would filter
+down to all entries from form `F3X` line number `16`.
+'''
+
+# Added to ease transition to FORM_LINE_NUMBER, to be removed
+LINE_NUMBER = ''' `DEPRECATED This filter will be renamed to form_line_number`
 Filter for form and line number using the following format:
 `FORM-LINENUMBER`.  For example an argument such as `F3X-16` would filter
 down to all entries from form `F3X` line number `16`.

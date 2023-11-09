@@ -1003,7 +1003,7 @@ ScheduleASchema = make_schema(
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
-        'report_year': ma.fields.Int()
+        'report_year': ma.fields.Int(),
     },
     options={
          'exclude': (
@@ -1032,6 +1032,7 @@ ScheduleCSchema = make_schema(
         'sub_id': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'form_line_number': ma.fields.Str(),
     },
     options={'exclude': ('loan_source_name_text', 'candidate_name_text',)}
     )
@@ -1100,6 +1101,7 @@ ScheduleDSchema = make_schema(
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
+        'form_line_number': ma.fields.Str(),
     },
     options={'exclude': ('creditor_debtor_name_text',)}
 )
@@ -1114,6 +1116,7 @@ ScheduleFSchema = make_schema(
         'subordinate_committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
+        'form_line_number': ma.fields.Str(),
     },
     options={'exclude': ('payee_name_text',)}
     )
@@ -1136,7 +1139,7 @@ ScheduleBSchema = make_schema(
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
-        'disbursement_amount': ma.fields.Float()
+        'disbursement_amount': ma.fields.Float(),
     },
     options={
         'exclude': (
@@ -1171,6 +1174,7 @@ ScheduleH4Schema = make_schema(
         'federal_share': ma.fields.Float(),
         'nonfederal_share': ma.fields.Float(),
         'event_amount_year_to_date': ma.fields.Float(),
+        'form_line_number': ma.fields.Str(),
 
     },
     options={
@@ -1202,6 +1206,7 @@ ScheduleESchema = make_schema(
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
+        'form_line_number': ma.fields.Str(),
     },
     options={
         'exclude': (

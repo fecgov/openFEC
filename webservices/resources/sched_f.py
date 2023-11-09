@@ -2,6 +2,7 @@ from flask_apispec import doc
 
 from webservices import args
 from webservices import docs
+from webservices import exceptions
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
@@ -30,6 +31,7 @@ class ScheduleFView(ApiResource):
         ('committee_id', models.ScheduleF.committee_id),
         ('candidate_id', models.ScheduleF.candidate_id),
         ('cycle', models.ScheduleF.election_cycle),
+        ('form_line_number', models.ScheduleF.form_line_number),
     ]
 
     filter_range_fields = [
@@ -57,6 +59,18 @@ class ScheduleFView(ApiResource):
         query = super().build_query(**kwargs)
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
+        utils.check_form_line_number(kwargs)
+        # added for transition to form_line_number, to be replaced w/obsolete error
+        if 'line_number' in kwargs:
+            if len(kwargs.get('line_number').split('-')) == 2:
+                form, line_no = kwargs.get('line_number').split('-')
+                query = query.filter_by(filing_form=form.upper())
+                query = query.filter_by(line_number=line_no)
+            else:
+                raise exceptions.ApiError(
+                    exceptions.LINE_NUMBER_ERROR,
+                    status_code=400,
+                )
         return query
 
 
