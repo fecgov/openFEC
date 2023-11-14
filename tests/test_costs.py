@@ -18,7 +18,7 @@ class TestCommunicationCost(ApiBaseTest):
         filters = [
             ('image_number', CommunicationCost.image_number, ['123', '456']),
             ('committee_id', CommunicationCost.committee_id, ['C00000001', 'C00000002']),
-            ('candidate_id', CommunicationCost.candidate_id, ['S01', 'S02']),
+            ('candidate_id', CommunicationCost.candidate_id, ['S00000001', 'S00000002']),
         ]
         for label, column, values in filters:
             [
@@ -58,7 +58,7 @@ class TestElectioneering(ApiBaseTest):
         filters = [
             ('report_year', Electioneering.report_year, [2012, 2014]),
             ('committee_id', Electioneering.committee_id, ['C00000001', 'C00000002']),
-            ('candidate_id', Electioneering.candidate_id, ['S01', 'S02']),
+            ('candidate_id', Electioneering.candidate_id, ['S00000001', 'S00000002']),
         ]
         for label, column, values in filters:
             [factories.ElectioneeringFactory(**{column.key: value}) for value in values]

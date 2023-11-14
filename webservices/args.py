@@ -6,7 +6,7 @@ from webargs import fields, validate
 from webservices import docs
 from webservices import exceptions
 from webservices.common.models import db
-from webservices.utils import check_committee_id
+from webservices.utils import check_committee_id, check_candidate_id
 import datetime
 
 
@@ -27,7 +27,7 @@ per_page = Natural(
 
 
 class Committee_ID(fields.Str):
-
+    # A valid committee_id begins with a 'C' followed by 8 digits
     def _deserialize(self, value, attr, data, **kwargs):
         return super()._deserialize(value, attr, data, **kwargs).upper()
 
@@ -35,6 +35,16 @@ class Committee_ID(fields.Str):
         super()._validate(value)
 
         check_committee_id(value)
+
+
+class Candidate_ID(fields.Str):
+    # A valid candidate_id begins with a 'P' or 'H' or 'S' followed by 8 letters or numbers
+    def _deserialize(self, value, attr, data, **kwargs):
+        return super()._deserialize(value, attr, data, **kwargs).upper()
+
+    def _validate(self, value):
+        super()._validate(value)
+        check_candidate_id(value)
 
 
 class Currency(fields.Decimal):
@@ -348,7 +358,7 @@ candidate_detail = {
 
 candidate_list = {
     'q': fields.List(Keyword, description=docs.CANDIDATE_NAME),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'min_first_file_date': Date(description=docs.CANDIDATE_MIN_FIRST_FILE_DATE),
     'max_first_file_date': Date(description=docs.CANDIDATE_MAX_FIRST_FILE_DATE),
     'is_active_candidate': fields.Bool(description=docs.ACTIVE_CANDIDATE),
@@ -384,7 +394,7 @@ committee = {
 committee_list = {
     'q': fields.List(Keyword, description=docs.COMMITTEE_NAME),
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'state': fields.List(IStr, description=docs.STATE_GENERIC),
     'party': fields.List(IStr, description=docs.PARTY),
     'min_first_file_date': Date(description=docs.MIN_FIRST_FILE_DATE),
@@ -394,7 +404,7 @@ committee_list = {
     'min_last_f1_date': Date(description=docs.MIN_LAST_F1_DATE),
     'max_last_f1_date': Date(description=docs.MAX_LAST_F1_DATE),
     'treasurer_name': fields.List(Keyword, description=docs.TREASURER_NAME),
-    'sponsor_candidate_id': fields.List(IStr, description=docs.SPONSOR_CANDIDATE_ID),
+    'sponsor_candidate_id': fields.List(Candidate_ID, description=docs.SPONSOR_CANDIDATE_ID),
 }
 
 
@@ -406,6 +416,8 @@ committee_history = {
     ),
 }
 
+# used for endpoint:`/filings/`
+# under tag: filing
 filings = {
     'committee_type': fields.Str(description=docs.COMMITTEE_TYPE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
@@ -473,6 +485,7 @@ reports = {
     'min_total_contributions': Currency(description=docs.MIN_FILTER),
     'max_total_contributions': Currency(description=docs.MAX_FILTER),
     'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
+    # candidate_id validation is in reports.py/ReportsView. (front-end:AUTHORIZING CANDIDATE)
     'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
     'amendment_indicator': fields.List(
@@ -502,8 +515,7 @@ committee_reports = {
     'max_party_coordinated_expenditures': Currency(description=docs.MAX_FILTER),
     'min_total_contributions': Currency(description=docs.MIN_FILTER),
     'max_total_contributions': Currency(description=docs.MAX_FILTER),
-    'type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
-    'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
+    'type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE)
 }
 
 committee_totals = {
@@ -529,7 +541,9 @@ totals_by_entity_type = {
     'max_last_cash_on_hand_end_period': Currency(description=docs.MAX_FILTER),
     'min_last_debts_owed_by_committee': Currency(description=docs.MIN_FILTER),
     'max_last_debts_owed_by_committee': Currency(description=docs.MAX_FILTER),
-    'sponsor_candidate_id': fields.List(IStr, description=docs.SPONSOR_CANDIDATE_ID),
+
+    # sponsor_candidate_id Only for 'pac' and 'pac-party'
+    'sponsor_candidate_id': fields.List(Candidate_ID, description=docs.SPONSOR_CANDIDATE_ID),
     'organization_type': fields.List(
         IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
         description=docs.ORGANIZATION_TYPE,
@@ -651,8 +665,7 @@ schedule_a_e_file = {
     'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
     'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
     'contributor_employer': fields.List(Keyword, description=docs.CONTRIBUTOR_EMPLOYER),
-    'contributor_occupation': fields.List(Keyword, description=docs.CONTRIBUTOR_OCCUPATION),
-
+    'contributor_occupation': fields.List(Keyword, description=docs.CONTRIBUTOR_OCCUPATION)
 }
 
 schedule_a_by_size = {
@@ -813,7 +826,7 @@ schedule_d = {
 
 schedule_e_by_candidate = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
     'office': fields.Str(
         validate=validate.OneOf(['house', 'senate', 'president']),
@@ -827,7 +840,7 @@ schedule_e_by_candidate = {
 }
 
 schedule_f = {
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'payee_name': fields.List(Keyword, description=docs.PAYEE_NAME),
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
@@ -836,7 +849,7 @@ schedule_f = {
 
 communication_cost = {
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'support_oppose_indicator': fields.List(
         IStr(validate=validate.OneOf(['S', 'O'])),
         description=docs.SUPPORT_OPPOSE,
@@ -845,7 +858,7 @@ communication_cost = {
 
 CC_aggregates = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
     'support_oppose_indicator': IStr(
         missing=None,
@@ -856,7 +869,7 @@ CC_aggregates = {
 
 electioneering = {
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'min_amount': Currency(description=docs.ELECTIONEERING_MIN_AMOUNT),
     'max_amount': Currency(description=docs.ELECTIONEERING_MAX_AMOUNT),
@@ -867,16 +880,18 @@ electioneering = {
 
 electioneering_by_candidate = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'office': fields.Str(
         validate=validate.OneOf(['house', 'senate', 'president']),
         description=docs.OFFICE,
     ),
 }
 
+# used for endpoint:`/electioneering/aggregates/`
+# under tag: electioneering
 EC_aggregates = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
 }
 
@@ -906,15 +921,23 @@ state_election_office_info = {
     'state': IStr(required=True, description=docs.STATE_ELECTION_OFFICES_ADDRESS),
 }
 
+# used for endpoints
+# 'schedules/schedule_a/by_size/by_candidate/'
+# 'schedules/schedule_a/by_state/by_candidate/'
+# 'schedules/schedule_a/by_state/by_candidate/totals/'
+# under tag: receipts
+
 schedule_a_candidate_aggregate = {
-    'candidate_id': fields.List(IStr, required=True, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, required=True, description=docs.CANDIDATE_ID),
     'cycle': fields.List(fields.Int, required=True, description=docs.RECORD_CYCLE),
     'election_full': election_full,
 }
 
+# used for '/candidates/totals/'
+# under tag: candidate
 candidate_totals = {
     'q': fields.List(Keyword, description=docs.CANDIDATE_NAME),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description=docs.OFFICE),
@@ -943,7 +966,7 @@ totals_committee_aggregate = {
 }
 
 communication_cost_by_candidate = {
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'office': fields.Str(
         validate=validate.OneOf(['house', 'senate', 'president']),
@@ -958,9 +981,11 @@ communication_cost_by_candidate = {
 
 entities = {
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
 }
 
+# Used for endpoint `/schedules/schedule_e/`
+# under tag: independent expenditure
 schedule_e = {
     'candidate_office': fields.List(fields.Str(
         validate=validate.OneOf(['', 'H', 'S', 'P'])),
@@ -970,7 +995,7 @@ schedule_e = {
     'candidate_office_district': fields.List(District, description=docs.DISTRICT),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'filing_form': fields.List(IStr, description=docs.FORM_TYPE),
     'last_expenditure_date': Date(
         missing=None,
@@ -998,10 +1023,12 @@ schedule_e = {
     'form_line_number': fields.List(IStr, description=docs.FORM_LINE_NUMBER),
 }
 
+# Used for endpoint `/schedules/schedule_e/efile/`
+# under tag: independent expenditures
 schedule_e_efile = {
     'candidate_search': fields.List(Keyword, description=docs.CANDIDATE_FULL_SEARCH),
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'payee_name': fields.List(fields.Str, description=docs.PAYEE_NAME),
     'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
     'support_oppose_indicator': fields.List(
@@ -1073,7 +1100,7 @@ auditCase = {
     'committee_type': fields.List(fields.Str(), description=docs.COMMITTEE_TYPE),
     'committee_designation': fields.Str(description=docs.COMMITTEE_DESCRIPTION),
     'audit_id': fields.List(fields.Int(), description=docs.AUDIT_ID),
-    'candidate_id': fields.List(fields.Str(), description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'min_election_cycle': fields.Int(description=docs.CYCLE),
     'max_election_cycle': fields.Int(description=docs.CYCLE),
 }
@@ -1114,21 +1141,27 @@ candidate_total_aggregate = {
 totals_by_candidate_other_costs_EC = {
 
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'election_full': election_full,
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
+    'election_full': election_full
 }
 
+# used for '/schedules/schedule_e/totals/by_candidate/'
+# under tag: independent expenditures
+# IETotalsByCandidateView in spending_by_others.py
 schedule_e_totals_by_candidate_other_costs_IE = {
 
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'election_full': election_full,
 }
 
+# used for '/communication_costs/totals/by_candidate/'
+# under tag: communication cost
+# CCTotalsByCandidateView in spending_by_others.py
 totals_by_candidate_other_costs_CC = {
 
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'election_full': election_full,
 }
 
@@ -1193,19 +1226,28 @@ schedule_h4_efile = {
     'max_amount': Currency(description=docs.MAX_FILTER),
 }
 
+# used for endpoints:
+#  '/presidential/financial_summary/'
+#  '/presidential/contributions/by_state/'
+#  '/presidential/coverage_end_date/'
+# under tag: presidential
 presidential = {
     'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID_PRESIDENTIAL),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID_PRESIDENTIAL),
 }
 
+# used for endpoint: '/presidential/contributions/by_candidate/'
+# under tag: presidential
 presidential_by_candidate = {
     'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
     'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
 }
 
+# used for endpoint: '/presidential/contributions/by_size/'
+# under tag: presidential
 presidential_by_size = {
     'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
-    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID_PRESIDENTIAL),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID_PRESIDENTIAL),
     'size': fields.List(fields.Int(validate=validate.OneOf([0, 200, 500, 1000, 2000])), description=docs.SIZE),
 }
 

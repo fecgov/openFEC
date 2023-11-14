@@ -21,8 +21,12 @@ NEXT_IN_CHAIN_DATA_ERROR = """next_in_chain data error, please contact apiinfo@f
 DATE_ERROR = """Invalid date. Date must be formatted as MM/DD/YYYY or YYYY-MM-DD.\
 """
 
-COMMITTEE_ID_ERROR = """Invalid committee_id. A committee_id begins with a 'C'\
+COMMITTEE_ID_ERROR = """Invalid committee_id. A valid committee_id begins with a 'C'\
  followed by 8 digits. For example: C00100005.\
+"""
+
+CANDIDATE_ID_ERROR = """Invalid candidate_id. A valid candidate_id begins with a 'P' or 'H' or 'S'\
+ followed by 8 letters or numbers. For example: P00000034, S6MI00103, H0LA01087.\
 """
 
 

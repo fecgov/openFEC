@@ -90,13 +90,16 @@ class FilingsView(BaseFilings):
             utils.check_committee_id(committee_id)
             query = query.filter(models.Filings.committee_id == committee_id)
         if candidate_id:
+            candidate_id = candidate_id.upper()
+            utils.check_candidate_id(candidate_id)
             query = query.filter(models.Filings.candidate_id == candidate_id)
         return query
 
 
 # used for endpoint:`/filings/`
 # under tag: filing
-# Ex: http://127.0.0.1:5000/v1/filings/?filer_name_text=san
+# Ex1: http://127.0.0.1:5000/v1/filings/?q_filer=san
+# Ex2: http://127.0.0.1:5000/v1/filings/?candidate_id=H8TX10094
 class FilingsList(BaseFilings):
 
     filter_multi_fields = BaseFilings.filter_multi_fields + [

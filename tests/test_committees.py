@@ -64,7 +64,7 @@ class CommitteeFormatTest(ApiBaseTest):
             )
 
     def test_filter_by_candidate_id(self):
-        candidate_id = "ID0"
+        candidate_id = "H00000001"
         candidate_committees = [
             factories.CommitteeFactory(candidate_ids=[candidate_id]) for _ in range(2)
         ]
@@ -73,7 +73,7 @@ class CommitteeFormatTest(ApiBaseTest):
         self.assertEqual(len(response["results"]), len(candidate_committees))
 
     def test_filter_by_candidate_ids(self):
-        candidate_ids = ["ID0", "ID1"]
+        candidate_ids = ["H00000001", "H00000002"]
         candidate1_committees = [
             factories.CommitteeFactory(candidate_ids=[candidate_ids[0]])
             for _ in range(2)
@@ -402,20 +402,20 @@ class CommitteeFormatTest(ApiBaseTest):
         )
 
     def test_filter_by_sponsor_candidate_ids(self):
-        sponsor_candidate_ids1 = ["H001"]
-        sponsor_candidate_ids2 = ["S001"]
+        sponsor_candidate_ids1 = ["H00000001"]
+        sponsor_candidate_ids2 = ["S00000001"]
         factories.CommitteeFactory(sponsor_candidate_ids=sponsor_candidate_ids1)
         factories.CommitteeFactory(sponsor_candidate_ids=sponsor_candidate_ids2)
 
         results = self._results(
-            api.url_for(CommitteeList, sponsor_candidate_id="H001")
+            api.url_for(CommitteeList, sponsor_candidate_id="H00000001")
         )
 
         assert len(results) == 1
         assert results[0]["sponsor_candidate_ids"] == sponsor_candidate_ids1
 
         results = self._results(
-            api.url_for(CommitteeList, sponsor_candidate_id="-H001")
+            api.url_for(CommitteeList, sponsor_candidate_id="S00000001")
         )
         assert len(results) == 1
         assert results[0]["sponsor_candidate_ids"] == sponsor_candidate_ids2
@@ -424,16 +424,16 @@ class CommitteeFormatTest(ApiBaseTest):
         committee = factories.CommitteeFactory(
             party="REP",
             name="For America",
-            sponsor_candidate_ids=["H002"]
+            sponsor_candidate_ids=["H00000002"]
         )
         factories.PacSponsorCandidateFactory(
             committee_id=committee.committee_id,
-            sponsor_candidate_id="H002",
+            sponsor_candidate_id="H00000002",
             sponsor_candidate_name="Sponsor A",
         )
         factories.PacSponsorCandidateFactory(
-            committee_id='C007',
-            sponsor_candidate_id="S003",
+            committee_id='C00000007',
+            sponsor_candidate_id="S00000003",
             sponsor_candidate_name="Sponsor B",
         )
         results = self._results(
@@ -446,7 +446,7 @@ class CommitteeFormatTest(ApiBaseTest):
             results[0]["sponsor_candidate_list"][0]["sponsor_candidate_name"], "Sponsor A"
         )
         self.assertEqual(
-            results[0]["sponsor_candidate_list"][0]["sponsor_candidate_id"], "H002"
+            results[0]["sponsor_candidate_list"][0]["sponsor_candidate_id"], "H00000002"
         )
 
 
@@ -526,7 +526,7 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
                 cycle=2020,
                 designation="D",
                 is_active=True,
-                sponsor_candidate_ids=["H003", "H004"]
+                sponsor_candidate_ids=["H00000003", "H00000004"]
             ),
             factories.CommitteeHistoryProfileFactory(
                 committee_id=self.committees[7].committee_id,
@@ -700,7 +700,7 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
         assert results[0].get("former_candidate_id") == self.candidate.candidate_id
 
     def test_case_insensitivity(self):
-        lower_candidate = factories.CandidateDetailFactory(candidate_id="H01")
+        lower_candidate = factories.CandidateDetailFactory(candidate_id="H00000001")
         lower_committee_1 = factories.CommitteeDetailFactory(committee_id="C00000001")
         [
             factories.CommitteeHistoryProfileFactory(
@@ -746,7 +746,7 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
         results = self._results(
             api.url_for(
                 CommitteeHistoryProfileView,
-                candidate_id="h01",
+                candidate_id="h00000001",
                 cycle=2014,
                 election_full=False
             )
@@ -761,26 +761,26 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
             )
         )
         assert len(result) == 1
-        self.assertEqual(result[0]["sponsor_candidate_ids"], ["H003", "H004"])
+        self.assertEqual(result[0]["sponsor_candidate_ids"], ["H00000003", "H00000004"])
 
     def test_jfc_committee(self):
         factories.JFCCommitteeFactory(
             committee_id=self.committees[7].committee_id,
             joint_committee_name="JFC_001",
             most_recent_filing_flag='Y',
-            joint_committee_id="C009",
+            joint_committee_id="C00000009",
         )
         factories.JFCCommitteeFactory(
             committee_id=self.committees[7].committee_id,
             joint_committee_name="JFC_old",
             most_recent_filing_flag='N',
-            joint_committee_id="C009",
+            joint_committee_id="C00000009",
         )
         factories.JFCCommitteeFactory(
             committee_id=self.committees[7].committee_id,
             joint_committee_name="JFC_002",
             most_recent_filing_flag='Y',
-            joint_committee_id="C009",
+            joint_committee_id="C00000009",
         )
         results = self._results(
             api.url_for(CommitteeHistoryProfileView, committee_id=self.committees[7].committee_id)

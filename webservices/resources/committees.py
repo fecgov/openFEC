@@ -30,6 +30,7 @@ def filter_year(model, query, years):
 # used for endpoint:'/committees/'
 # under tag: committee
 # Ex: http://127.0.0.1:5000/v1/committees/
+# http://127.0.0.1:5000/v1/committees/?candidate_id=S0LA00071
 @doc(
     tags=["committee"],
     description=docs.COMMITTEE_LIST,
@@ -157,10 +158,12 @@ class CommitteeView(ApiResource):
             query = query.filter_by(committee_id=committee_id)
 
         if candidate_id is not None:
+            candidate_id = candidate_id.upper()
+            utils.check_candidate_id(candidate_id)            
             query = query.join(
                 models.CandidateCommitteeLink
             ).filter(
-                models.CandidateCommitteeLink.candidate_id == candidate_id.upper()
+                models.CandidateCommitteeLink.candidate_id == candidate_id
             ).distinct()
 
         if kwargs.get("year"):
@@ -236,6 +239,8 @@ class CommitteeHistoryProfileView(ApiResource):
             # '/candidate/<candidate_id>/committees/history/<int:cycle>/',
 
             # 1) query for regular committees
+            candidate_id = candidate_id.upper()
+            utils.check_candidate_id(candidate_id)
             query_regular = query.join(
                 models.CandidateCommitteeLink,
                 sa.and_(
@@ -243,13 +248,13 @@ class CommitteeHistoryProfileView(ApiResource):
                     models.CandidateCommitteeLink.fec_election_year == models.CommitteeHistoryProfile.cycle,
                 ),
             ).filter(
-                models.CandidateCommitteeLink.candidate_id == candidate_id.upper(),
+                models.CandidateCommitteeLink.candidate_id == candidate_id,
             )
 
             # 2) query for PCC to PAC conversion
             query_pcc_converted = query.filter(
                 models.CommitteeHistoryProfile.former_candidate_id ==
-                candidate_id.upper())
+                candidate_id)
 
             # 3) query for Leadership PAC committees
             query_leadership_pac = query.join(
@@ -259,7 +264,7 @@ class CommitteeHistoryProfileView(ApiResource):
                     models.CandidateCommitteeAlternateLink.fec_election_year == models.CommitteeHistoryProfile.cycle,
                 ),
             ).filter(
-                models.CandidateCommitteeAlternateLink.candidate_id == candidate_id.upper(),
+                models.CandidateCommitteeAlternateLink.candidate_id == candidate_id,
             )
 
             # query for election_full=false

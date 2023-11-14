@@ -62,7 +62,7 @@ class TotalTestCase(common.BaseTestCase):
     STOCK_CAND_CMTE_LINKAGE = [
         {
             'linkage_id': 1,
-            'cand_id': 'P01',
+            'cand_id': 'P00000001',
             'fec_election_yr': 2020,
             'cand_election_yr': 2020,
             'cmte_id': 'C00000001',
@@ -74,7 +74,7 @@ class TotalTestCase(common.BaseTestCase):
         },
         {
             'linkage_id': 3,
-            'cand_id': 'P01',
+            'cand_id': 'P00000001',
             'fec_election_yr': 2020,
             'cand_election_yr': 2020,
             'cmte_id': 'C00000002',
@@ -86,7 +86,7 @@ class TotalTestCase(common.BaseTestCase):
         },
         {
             'linkage_id': 5,
-            'cand_id': 'P03',
+            'cand_id': 'P00000003',
             'fec_election_yr': 2020,
             'cand_election_yr': 2020,
             'cmte_id': 'C00000003',
@@ -152,7 +152,7 @@ class TotalTestCase(common.BaseTestCase):
         assert committee_totals_api[0]['disbursements'] == 80
 
         params_cand = {
-            'candidate_id': 'P01',
+            'candidate_id': 'P00000001',
             'election_full': True,
         }
         candidate_totals_api = self._results(
@@ -168,7 +168,7 @@ class TotalTestCase(common.BaseTestCase):
         should return 0 row. Ex: S2MO00262, H2PA04192
         """
         params_cand = {
-            'candidate_id': 'P03',
+            'candidate_id': 'P00000003',
             'election_full': True,
         }
         candidate_totals_api = self._results(

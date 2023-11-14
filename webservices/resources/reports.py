@@ -184,10 +184,10 @@ class ReportsView(views.ApiResource):
             )
 
         if kwargs.get('candidate_id'):
+            candidate_id_upper = kwargs.get('candidate_id').upper()
+            utils.check_candidate_id(candidate_id_upper)
             query = query.filter(
-                models.CommitteeHistory.candidate_ids.overlap(
-                    [kwargs.get('candidate_id')]
-                )
+                models.CommitteeHistory.candidate_ids.overlap([candidate_id_upper])
             )
 
         if kwargs.get('committee_type'):

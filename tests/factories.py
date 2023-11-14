@@ -27,7 +27,7 @@ class CommitteeSearchFactory(BaseFactory):
 
 
 class BaseCandidateFactory(BaseFactory):
-    candidate_id = factory.Sequence(lambda n: "ID{0}".format(n))
+    candidate_id = factory.Sequence(lambda n: "S{0}".format(n + 10000000))
 
 
 class CandidateFactory(BaseCandidateFactory):
