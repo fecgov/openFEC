@@ -612,7 +612,7 @@ def check_form_line_number(kwargs):
         for each in kwargs['form_line_number']:
             if each.startswith('-'):
                 each = each[1:]
-            if len(each.split('-')) != 2:
+            if len(each.split('-')) != 2 or not each.startswith('F'):
                 raise exceptions.ApiError(
                     exceptions.FORM_LINE_NUMBER_ERROR, status_code=400
                 )
