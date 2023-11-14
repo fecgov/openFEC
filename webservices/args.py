@@ -241,8 +241,9 @@ def make_multi_sort_args(default=None, validator=None, default_hide_null=False, 
     args = make_sort_args(default, validator, default_hide_null, default_nulls_only,
                           default_sort_nulls_last, show_nulls_last_arg, additional_description)
 
-    args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True, description='Provide a field to sort by. Use `-` for descending order.\n{}'.format(
-                                    additional_description))
+    args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True,
+                               description='Provide a field to sort by. Use `-` for descending order.\n{}'.format(
+                                additional_description))
     return args
 
 
@@ -592,7 +593,7 @@ itemized = {
     'max_amount': Currency(description='Filter for all amounts less than a value.'),
     'min_date': Date(description='Minimum date'),
     'max_date': Date(description='Maximum date'),
-    'line_number': fields.Str(description=docs.LINE_NUMBER),
+    'line_number': fields.Str(description=docs.LINE_NUMBER),     # added to ease transition to form_line_number TBR
 }
 
 schedule_a = {
@@ -780,6 +781,7 @@ schedule_c = {
     'max_payment_to_date': fields.Int(description=docs.MAX_PAYMENT_DATE),
     'min_incurred_date': Date(missing=None, description=docs.MIN_INCURRED_DATE),
     'max_incurred_date': Date(missing=None, description=docs.MAX_INCURRED_DATE),
+    'form_line_number': fields.List(IStr, description=docs.FORM_LINE_NUMBER),
 }
 
 schedule_d = {
@@ -803,9 +805,10 @@ schedule_d = {
     'max_coverage_start_date': Date(missing=None, description=docs.MAX_COVERAGE_START_DATE),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE),
-    'line_number': fields.Str(description=docs.LINE_NUMBER),
+    'form_line_number': fields.List(IStr, description=docs.FORM_LINE_NUMBER),
     'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
     'filing_form': fields.List(fields.Str, description=docs.FORM_TYPE),
+    'line_number': fields.Str(description=docs.LINE_NUMBER),     # added to ease transition to form_line_number
 }
 
 schedule_e_by_candidate = {
@@ -828,6 +831,7 @@ schedule_f = {
     'payee_name': fields.List(Keyword, description=docs.PAYEE_NAME),
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'form_line_number': fields.List(IStr, description=docs.FORM_LINE_NUMBER),
 }
 
 communication_cost = {
@@ -991,6 +995,7 @@ schedule_e = {
     'max_filing_date': Date(description=docs.MAX_FILED_DATE),
     'most_recent': fields.Bool(description=docs.MOST_RECENT_IE),
     'q_spender': fields.List(Keyword, description=docs.SPENDER_NAME_TEXT),
+    'form_line_number': fields.List(IStr, description=docs.FORM_LINE_NUMBER),
 }
 
 schedule_e_efile = {
@@ -1167,7 +1172,8 @@ schedule_h4 = {
     'spender_committee_designation': fields.List(
         IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
         description=docs.DESIGNATION,
-    )
+    ),
+    'form_line_number': fields.List(IStr, description=docs.FORM_LINE_NUMBER),
 }
 
 schedule_h4_efile = {

@@ -1,4 +1,9 @@
 
+FORM_LINE_NUMBER_ERROR = """Invalid form_line_number detected. A valid form_line_number is using the following format: \
+'FORM-LINENUMBER'.  For example an argument such as 'F3X-16' would filter down to all schedule a entries \
+from form F3X line number 16.\
+"""
+
 LINE_NUMBER_ERROR = """Invalid line_number detected. A valid line_number is using the following format:
 'FORM-LINENUMBER'.  For example an argument such as 'F3X-16' would filter down to all schedule a entries
 from form F3X line number 16.\
