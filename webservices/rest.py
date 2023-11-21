@@ -236,6 +236,8 @@ def add_secure_headers(response):
     }
     content_security_policy = {
         "default-src": "'self' *.fec.gov *.app.cloud.gov",
+        "frame-src": "'self' *.fec.gov *.app.cloud.gov \
+            https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/",
         "img-src": "'self' data:",
         "script-src": "'self' https://api.data.gov https://dap.digitalgov.gov https://www.google-analytics.com \
             https://www.googletagmanager.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ \
