@@ -238,7 +238,8 @@ def add_secure_headers(response):
         "default-src": "'self' *.fec.gov *.app.cloud.gov",
         "img-src": "'self' data:",
         "script-src": "'self' https://api.data.gov https://dap.digitalgov.gov https://www.google-analytics.com \
-            https://www.googletagmanager.com 'unsafe-inline'",
+            https://www.googletagmanager.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ \
+            'unsafe-inline'",
         "style-src": "'self' https://fonts.googleapis.com https://api.data.gov 'unsafe-inline'",
         "font-src": "'self' https://fonts.gstatic.com data: https://api.data.gov",
         "connect-src": "*.fec.gov *.cloud.gov https://api.data.gov https://www.google-analytics.com",
