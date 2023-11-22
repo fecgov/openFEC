@@ -218,20 +218,20 @@ class TestAggregates(ApiBaseTest):
             name='Ritchie for America', cycle=2012,
         )
         self.candidate = factories.CandidateDetailFactory(
-            candidate_id='P123',
+            candidate_id='P12300000',
             name='Robert Ritchie',
             election_years=[2012],
             office='P',
         )
         self.candidate_history = factories.CandidateHistoryFactory(
-            candidate_id='P123',
+            candidate_id='P12300000',
             name='Robert Ritchie',
             election_years=[2012],
             two_year_period=2012,
             office='P',
         )
         factories.CandidateElectionFactory(
-            candidate_id='P123', cand_election_year=2012,
+            candidate_id='P12300000', cand_election_year=2012,
         )
 
     def make_aggregates(self, factory):
@@ -332,7 +332,7 @@ class TestScheduleACandidateAggregates(ApiBaseTest):
     def setUp(self):
         super().setUp()
         self.candidate = factories.CandidateHistoryFutureFactory(
-            candidate_id='S123', two_year_period=2012, candidate_election_year=2012,
+            candidate_id='S12300000', two_year_period=2012, candidate_election_year=2012,
         )
         self.committees = [
             factories.CommitteeHistoryFactory(cycle=2012, designation='P'),
@@ -394,7 +394,7 @@ class TestScheduleACandidateAggregates(ApiBaseTest):
         )
         # Create a candidate_zero without a committee and $0 in CandidateTotal
         self.candidate_zero = factories.CandidateHistoryFutureFactory(
-            candidate_id='H321',
+            candidate_id='H32100000',
             two_year_period=2018,
             candidate_election_year=2018,
             candidate_inactive=True,
@@ -417,7 +417,7 @@ class TestScheduleACandidateAggregates(ApiBaseTest):
         # Create data for a candidate who ran in 2017 and 2018
 
         self.candidate_17_18 = factories.CandidateHistoryFutureFactory(
-            candidate_id='S456',
+            candidate_id='S45600000',
             two_year_period=2018,
             candidate_election_year=2018,
             candidate_inactive=False,
@@ -472,7 +472,7 @@ class TestScheduleACandidateAggregates(ApiBaseTest):
         )
         # Create data for a candidate who ran just in 2017
         self.candidate_17_only = factories.CandidateHistoryFutureFactory(
-            candidate_id='H456', two_year_period=2018, candidate_election_year=2017,
+            candidate_id='H45600000', two_year_period=2018, candidate_election_year=2017,
         )
         self.committees_17_only = [
             factories.CommitteeHistoryFactory(cycle=2018, designation='P'),
@@ -522,12 +522,12 @@ class TestScheduleACandidateAggregates(ApiBaseTest):
         # Test full next_cycle and current_cycle 2-year totals
 
         self.candidate_20 = factories.CandidateHistoryFutureFactory(
-            candidate_id='P456',
+            candidate_id='P45600000',
             two_year_period=self.current_cycle,
             candidate_election_year=self.next_cycle,
         )
         self.candidate_20 = factories.CandidateHistoryFutureFactory(
-            candidate_id='P456',
+            candidate_id='P45600000',
             two_year_period=self.next_cycle,
             candidate_election_year=self.next_cycle,
         )
@@ -698,6 +698,15 @@ class TestScheduleACandidateAggregates(ApiBaseTest):
             'count': 20,
         }
         assert results[0] == expected
+
+    def test_candidate_id_validation(self):
+        results = self.app.get(
+            api.url_for(
+                ScheduleABySizeCandidateView,
+                candidate_id='S000',
+            )
+        )
+        self.assertEqual(results.status_code, 422)
 # end --- test '/schedules/schedule_a/by_size/by_candidate/' (candidate_aggregates.ScheduleABySizeCandidateView)
 
 # start --- test '/schedules/schedule_a/by_state/by_candidate' (candidate_aggregates.ScheduleAByStateCandidateView)
@@ -1094,7 +1103,7 @@ class TestScheduleACandidateAggregates(ApiBaseTest):
         assert_dicts_subset(
             results[0],
             {
-                "candidate_id": "P456",
+                "candidate_id": "P45600000",
                 "receipts": 25000,
             },
         )
@@ -1128,7 +1137,7 @@ class TestCandidateTotalAggregateView(ApiBaseTest):
         )
 
         factories.CandidateTotalFactory(
-            candidate_id="HCA01",
+            candidate_id="HCA000001",
             is_election=True,
             receipts=1000,
             disbursements=1000,
@@ -1147,7 +1156,7 @@ class TestCandidateTotalAggregateView(ApiBaseTest):
             state_full='California'
         )
         factories.CandidateTotalFactory(
-            candidate_id="HCA01",
+            candidate_id="HCA000001",
             is_election=False,
             receipts=1000,
             disbursements=1000,
@@ -1166,7 +1175,7 @@ class TestCandidateTotalAggregateView(ApiBaseTest):
             state_full='California'
         )
         factories.CandidateTotalFactory(
-            candidate_id="HCA02",
+            candidate_id="HCA000002",
             is_election=True,
             receipts=2000,
             disbursements=2000,
@@ -1185,7 +1194,7 @@ class TestCandidateTotalAggregateView(ApiBaseTest):
             state_full='California'
         )
         factories.CandidateTotalFactory(
-            candidate_id="HNY01",
+            candidate_id="HNY000001",
             is_election=True,
             receipts=3300,
             disbursements=3300,
@@ -1203,7 +1212,7 @@ class TestCandidateTotalAggregateView(ApiBaseTest):
             state_full='New York'
         )
         factories.CandidateTotalFactory(
-            candidate_id="HNY13",
+            candidate_id="HNY000013",
             is_election=True,
             receipts=4000,
             disbursements=4000,
@@ -1222,7 +1231,7 @@ class TestCandidateTotalAggregateView(ApiBaseTest):
         )
 
         factories.CandidateTotalFactory(
-            candidate_id="SCA01",
+            candidate_id="SCA000001",
             is_election=True,  # candidate election year
             receipts=100,
             disbursements=100,
@@ -1240,7 +1249,7 @@ class TestCandidateTotalAggregateView(ApiBaseTest):
             state_full='California'
         )
         factories.CandidateTotalFactory(
-            candidate_id="SCA01",
+            candidate_id="SCA000001",
             is_election=False,  # data for two-year period (not candidate election year)
             cycle=2012,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
             receipts=200,
@@ -1259,7 +1268,7 @@ class TestCandidateTotalAggregateView(ApiBaseTest):
             state_full='California'
         )
         factories.CandidateTotalFactory(
-            candidate_id="SNY01",
+            candidate_id="SNY000001",
             is_election=False,  # data for two-year period (not candidate election year)
             cycle=2014,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
             receipts=400,
@@ -1278,7 +1287,7 @@ class TestCandidateTotalAggregateView(ApiBaseTest):
             state_full='New York'
         )
         factories.CandidateTotalFactory(
-            candidate_id="SNY01",
+            candidate_id="SNY000001",
             is_election=False,  # data for two-year period (not candidate election year)
             cycle=2016,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
             receipts=600,
@@ -1297,7 +1306,7 @@ class TestCandidateTotalAggregateView(ApiBaseTest):
             state_full='New York'
         )
         factories.CandidateTotalFactory(
-            candidate_id="SNY01",
+            candidate_id="SNY000001",
             is_election=True,  # data for two-year period (not candidate election year)
             cycle=2016,  # UNIQUE INDEX=elction_year,candidate_id,cycle,is_election
             receipts=1000,
@@ -1316,7 +1325,7 @@ class TestCandidateTotalAggregateView(ApiBaseTest):
             state_full='New York'
         )
         factories.CandidateTotalFactory(
-            candidate_id="SVA02",  # not exist in election list
+            candidate_id="SVA000002",  # not exist in election list
             is_election=True,  # candidate election year
             cycle=2010,
             receipts=700,
@@ -1336,7 +1345,7 @@ class TestCandidateTotalAggregateView(ApiBaseTest):
         )
 
         factories.CandidateTotalFactory(
-            candidate_id="SCA03",
+            candidate_id="SCA000003",
             is_election=True,  # candidate election year
             cycle=2016,
             receipts=800,
@@ -1356,7 +1365,7 @@ class TestCandidateTotalAggregateView(ApiBaseTest):
         )
 
         factories.CandidateTotalFactory(
-            candidate_id="SCA04",
+            candidate_id="SCA000004",
             is_election=True,  # candidate election year
             cycle=2022,
             receipts=90,

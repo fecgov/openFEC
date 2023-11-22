@@ -487,6 +487,11 @@ class ScheduleC(PdfMixin, BaseItemized):
             return utils.make_schedule_pdf_url(self.image_number)
         return None
 
+    @hybrid_property
+    def form_line_number(self):
+        if self.filing_form and self.line_number:
+            return self.filing_form + "-" + self.line_number
+
 
 class ScheduleD(PdfMixin, BaseItemized):
     __tablename__ = 'ofec_sched_d_mv'
@@ -537,6 +542,11 @@ class ScheduleD(PdfMixin, BaseItemized):
         if self.has_pdf:
             return utils.make_schedule_pdf_url(self.image_number)
         return None
+
+    @hybrid_property
+    def form_line_number(self):
+        if self.filing_form and self.line_number:
+            return self.filing_form + "-" + self.line_number
 
 
 class ScheduleE(PdfMixin, BaseItemized):
@@ -619,6 +629,11 @@ class ScheduleE(PdfMixin, BaseItemized):
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     pdf_url = db.Column(db.String)
     spender_name_text = db.Column(TSVECTOR)
+
+    @hybrid_property
+    def form_line_number(self):
+        if self.filing_form and self.line_number:
+            return self.filing_form + "-" + self.line_number
 
 
 class ScheduleEEfile(BaseRawItemized):
@@ -790,6 +805,11 @@ class ScheduleF(PdfMixin, BaseItemized):
             return utils.make_schedule_pdf_url(self.image_number)
         return None
 
+    @hybrid_property
+    def form_line_number(self):
+        if self.filing_form and self.line_number:
+            return self.filing_form + "-" + self.line_number
+
 
 class ScheduleH4(BaseItemized):
     __tablename__ = 'ofec_sched_h4_mv'
@@ -838,6 +858,11 @@ class ScheduleH4(BaseItemized):
     disbursement_purpose_text = db.Column(TSVECTOR)
     payee_name_text = db.Column(TSVECTOR)
     pdf_url = db.Column('pdf_url', db.String)
+
+    @hybrid_property
+    def form_line_number(self):
+        if self.filing_form and self.line_number:
+            return self.filing_form + "-" + self.line_number
 
 
 class ScheduleH4Efile(BaseRawItemized):

@@ -146,8 +146,8 @@ class CandidateFormatTest(ApiBaseTest):
             factories.CandidateFactory(name='Obama'),
             factories.CandidateFactory(party='DEM'),
             factories.CandidateFactory(cycles=[2006]),
-            factories.CandidateFactory(candidate_id='BARLET'),
-            factories.CandidateFactory(candidate_id='RITCHIE'),
+            factories.CandidateFactory(candidate_id='H00000011'),
+            factories.CandidateFactory(candidate_id='H00000022'),
             factories.CandidateFactory(candidate_inactive=True),
             factories.CandidateFactory(inactive_election_years=[2012]),
         ]
@@ -158,7 +158,7 @@ class CandidateFormatTest(ApiBaseTest):
             ('state', 'CA'),
             ('party', 'DEM'),
             ('cycle', '2006'),
-            ('candidate_id', ['BARTLET', 'ritchie']),
+            ('candidate_id', ['H00000011', 'H00000022']),
             ('is_active_candidate', False),
         )
 
@@ -228,8 +228,8 @@ class TestCandidateHistory(ApiBaseTest):
         super().setUp()
         self.committee = factories.CommitteeDetailFactory()
         self.candidates = [
-            factories.CandidateDetailFactory(candidate_id='P001'),
-            factories.CandidateDetailFactory(candidate_id='P002'),
+            factories.CandidateDetailFactory(candidate_id='P00000001'),
+            factories.CandidateDetailFactory(candidate_id='P00000002'),
         ]
         self.histories = [
             factories.CandidateHistoryFactory(
@@ -277,7 +277,7 @@ class TestCandidateHistory(ApiBaseTest):
 
     def test_election_full(self):
         # When election_full=true, return all two_year_periods with that candidate_election_year
-        candidate = factories.CandidateDetailFactory(candidate_id='H001')
+        candidate = factories.CandidateDetailFactory(candidate_id='H00000001')
         first_two_year_period = factories.CandidateHistoryFactory(
             candidate_id=candidate.candidate_id,
             two_year_period=2018,

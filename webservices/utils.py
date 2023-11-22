@@ -327,18 +327,26 @@ def check_election_arguments(kwargs):
 
 
 def check_committee_id(committee_id):
-
+    # A valid committee_id begins with a 'C' followed by 8 digits
     if len(committee_id) != 9 or not committee_id.startswith('C'):
         raise exceptions.ApiError(
-                    exceptions.COMMITTEE_ID_ERROR,
-                    status_code=422)
+            exceptions.COMMITTEE_ID_ERROR,
+            status_code=422)
 
     try:
         committee_id = int(committee_id[1:])
     except (TypeError, ValueError):
         raise exceptions.ApiError(
-                exceptions.COMMITTEE_ID_ERROR,
-                status_code=422)
+            exceptions.COMMITTEE_ID_ERROR,
+            status_code=422)
+
+
+def check_candidate_id(candidate_id):
+    # A valid candidate_id begins with a 'P' or 'H' or 'S' followed by 8 letters or numbers
+    if len(candidate_id) != 9 or candidate_id[0] not in ('P', 'S', 'H'):
+        raise exceptions.ApiError(
+            exceptions.CANDIDATE_ID_ERROR,
+            status_code=422)
 
 
 def get_model(name):
@@ -605,3 +613,14 @@ def report_type_full(report_type, form_type, report_type_full_original):
         return "48-HOUR NOTICE OF CONTRIBUTIONS OR LOANS RECEIVED"
     else:
         return report_type_full_original
+
+
+def check_form_line_number(kwargs):
+    if 'form_line_number' in kwargs:
+        for each in kwargs['form_line_number']:
+            if each.startswith('-'):
+                each = each[1:]
+            if len(each.split('-')) != 2 or not each.startswith('F'):
+                raise exceptions.ApiError(
+                    exceptions.FORM_LINE_NUMBER_ERROR, status_code=400
+                )

@@ -165,28 +165,28 @@ class TestECTotalsByCandidateView(ApiBaseTest):
     def test_fields(self):
 
         factories.CandidateHistoryFactory(
-            candidate_id='S01', two_year_period=2018, candidate_election_year=2024
+            candidate_id='S00000001', two_year_period=2018, candidate_election_year=2024
         ),
         factories.CandidateHistoryFactory(
-            candidate_id='S01', two_year_period=2020, candidate_election_year=2024
+            candidate_id='S00000001', two_year_period=2020, candidate_election_year=2024
         ),
 
         factories.ElectioneeringByCandidateFactory(
-            candidate_id='S01', total=300, cycle=2018, committee_id='C00000001'
+            candidate_id='S00000001', total=300, cycle=2018, committee_id='C00000001'
         ),
         factories.ElectioneeringByCandidateFactory(
-            candidate_id='S01', total=200, cycle=2020, committee_id='C00000002'
+            candidate_id='S00000001', total=200, cycle=2020, committee_id='C00000002'
         ),
 
         results = self._results(
             api.url_for(
-                ECTotalsByCandidateView, candidate_id='S01', election_full=False
+                ECTotalsByCandidateView, candidate_id='S00000001', election_full=False
             )
         )
         assert len(results) == 2
 
         results = self._results(
-            api.url_for(ECTotalsByCandidateView, candidate_id='S01', election_full=True)
+            api.url_for(ECTotalsByCandidateView, candidate_id='S00000001', election_full=True)
         )
         assert len(results) == 1
         assert results[0]['total'] == 500
@@ -194,26 +194,26 @@ class TestECTotalsByCandidateView(ApiBaseTest):
     def test_sort_validation(self):
         # sort_option = ['cycle','candidate_id','total'], sort value must be one of sort_option.
         factories.CandidateHistoryFactory(
-            candidate_id='S01', two_year_period=2018, candidate_election_year=2024
+            candidate_id='S00000001', two_year_period=2018, candidate_election_year=2024
         ),
         factories.CandidateHistoryFactory(
-            candidate_id='S01', two_year_period=2020, candidate_election_year=2024
+            candidate_id='S00000001', two_year_period=2020, candidate_election_year=2024
         ),
 
         factories.ElectioneeringByCandidateFactory(
-            committee_id='C00000001', candidate_id='P001', cycle=2000
+            committee_id='C00000001', candidate_id='P00000001', cycle=2000
         )
         factories.ElectioneeringByCandidateFactory(
-            committee_id='C00000001', candidate_id='P002', cycle=2000
+            committee_id='C00000001', candidate_id='P00000002', cycle=2000
         )
         factories.ElectioneeringByCandidateFactory(
-            committee_id='C00000002', candidate_id='P001', cycle=2004
+            committee_id='C00000002', candidate_id='P00000001', cycle=2004
         )
         db.session.flush()
         results = self._results(api.url_for(ECAggregatesView, committee_id='C00000001'))
         self.assertEqual(len(results), 2)
 
-        results = self._results(api.url_for(ECAggregatesView, candidate_id='P001'))
+        results = self._results(api.url_for(ECAggregatesView, candidate_id='P00000001'))
         self.assertEqual(len(results), 2)
 
         results = self._results(api.url_for(ECAggregatesView, cycle=2000))
@@ -226,57 +226,57 @@ class TestIETotalsByCandidateView(ApiBaseTest):
     def test_fields(self):
 
         factories.CandidateHistoryFactory(
-            candidate_id='P01', two_year_period=2014, candidate_election_year=2016
+            candidate_id='P00000001', two_year_period=2014, candidate_election_year=2016
         ),
         factories.CandidateHistoryFactory(
-            candidate_id='P01', two_year_period=2016, candidate_election_year=2016
+            candidate_id='P00000001', two_year_period=2016, candidate_election_year=2016
         ),
 
         factories.ScheduleEByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=100,
             cycle=2012,
-            committee_id='C01',
+            committee_id='C00000001',
             support_oppose_indicator='S',
         ),
         factories.ScheduleEByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=200,
             cycle=2014,
-            committee_id='C02',
+            committee_id='C00000002',
             support_oppose_indicator='S',
         ),
         factories.ScheduleEByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=300,
             cycle=2014,
-            committee_id='C02',
+            committee_id='C00000002',
             support_oppose_indicator='O',
         ),
         factories.ScheduleEByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=400,
             cycle=2016,
-            committee_id='C03',
+            committee_id='C00000003',
             support_oppose_indicator='S',
         ),
         factories.ScheduleEByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=500,
             cycle=2016,
-            committee_id='C03',
+            committee_id='C00000003',
             support_oppose_indicator='O',
         ),
 
         results = self._results(
             api.url_for(
-                IETotalsByCandidateView, candidate_id='P01', election_full=False
+                IETotalsByCandidateView, candidate_id='P00000001', election_full=False
             )
         )
         assert len(results) == 4
 
         results = self._results(
-            api.url_for(IETotalsByCandidateView, candidate_id='P01', election_full=True)
+            api.url_for(IETotalsByCandidateView, candidate_id='P00000001', election_full=True)
         )
         assert len(results) == 2
         assert results[0]['total'] == 800
@@ -286,45 +286,45 @@ class TestIETotalsByCandidateView(ApiBaseTest):
         # sort_option = ['cycle','candidate_id','total','support_oppose_indicator'],
         # sort value must be one of sort_option.
         factories.CandidateHistoryFactory(
-            candidate_id='P01', two_year_period=2014, candidate_election_year=2016
+            candidate_id='P00000001', two_year_period=2014, candidate_election_year=2016
         ),
         factories.CandidateHistoryFactory(
-            candidate_id='P01', two_year_period=2016, candidate_election_year=2016
+            candidate_id='P00000001', two_year_period=2016, candidate_election_year=2016
         ),
 
         factories.ScheduleEByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=100,
             cycle=2012,
-            committee_id='C01',
+            committee_id='C00000001',
             support_oppose_indicator='S',
         ),
         factories.ScheduleEByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=200,
             cycle=2014,
-            committee_id='C02',
+            committee_id='C00000002',
             support_oppose_indicator='S',
         ),
         factories.ScheduleEByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=300,
             cycle=2014,
-            committee_id='C02',
+            committee_id='C00000002',
             support_oppose_indicator='O',
         ),
         factories.ScheduleEByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=400,
             cycle=2016,
-            committee_id='C03',
+            committee_id='C00000003',
             support_oppose_indicator='S',
         ),
         factories.ScheduleEByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=500,
             cycle=2016,
-            committee_id='C03',
+            committee_id='C00000003',
             support_oppose_indicator='O',
         ),
 
@@ -339,13 +339,13 @@ class TestIETotalsByCandidateView(ApiBaseTest):
         results = self._results(
             api.url_for(
                 IETotalsByCandidateView,
-                candidate_id='P01',
+                candidate_id='P00000001',
                 sort='cycle',
             )
         )
         assert len(results) == 2
         expected = {
-            'candidate_id': 'P01',
+            'candidate_id': 'P00000001',
             'cycle': 2016,
             'total': 800,
             'support_oppose_indicator': 'O'
@@ -359,45 +359,45 @@ class TestCCTotalsByCandidateView(ApiBaseTest):
     def test_fields(self):
 
         factories.CandidateHistoryFactory(
-            candidate_id='P01', two_year_period=2014, candidate_election_year=2016
+            candidate_id='P00000001', two_year_period=2014, candidate_election_year=2016
         ),
         factories.CandidateHistoryFactory(
-            candidate_id='P01', two_year_period=2016, candidate_election_year=2016
+            candidate_id='P00000001', two_year_period=2016, candidate_election_year=2016
         ),
 
         factories.CommunicationCostByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=100,
             cycle=2012,
-            committee_id='C01',
+            committee_id='C00000001',
             support_oppose_indicator='S',
         ),
         factories.CommunicationCostByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=200,
             cycle=2014,
-            committee_id='C02',
+            committee_id='C00000002',
             support_oppose_indicator='S',
         ),
         factories.CommunicationCostByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=300,
             cycle=2014,
-            committee_id='C02',
+            committee_id='C00000002',
             support_oppose_indicator='O',
         ),
         factories.CommunicationCostByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=400,
             cycle=2016,
-            committee_id='C03',
+            committee_id='C00000003',
             support_oppose_indicator='S',
         ),
         factories.CommunicationCostByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=500,
             cycle=2016,
-            committee_id='C03',
+            committee_id='C00000003',
             support_oppose_indicator='O',
         ),
 
@@ -405,7 +405,7 @@ class TestCCTotalsByCandidateView(ApiBaseTest):
             api.url_for(
                 CCTotalsByCandidateView,
                 cycle='2016',
-                candidate_id='P01',
+                candidate_id='P00000001',
                 election_full=False,
             )
         )
@@ -415,7 +415,7 @@ class TestCCTotalsByCandidateView(ApiBaseTest):
             api.url_for(
                 CCTotalsByCandidateView,
                 cycle='2016',
-                candidate_id='P01',
+                candidate_id='P00000001',
                 election_full=True,
             )
         )
@@ -426,45 +426,45 @@ class TestCCTotalsByCandidateView(ApiBaseTest):
     def test_sort_validation(self):
 
         factories.CandidateHistoryFactory(
-            candidate_id='P01', two_year_period=2014, candidate_election_year=2016
+            candidate_id='P00000001', two_year_period=2014, candidate_election_year=2016
         ),
         factories.CandidateHistoryFactory(
-            candidate_id='P01', two_year_period=2016, candidate_election_year=2016
+            candidate_id='P00000001', two_year_period=2016, candidate_election_year=2016
         ),
 
         factories.CommunicationCostByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=100,
             cycle=2012,
-            committee_id='C01',
+            committee_id='C00000001',
             support_oppose_indicator='S',
         ),
         factories.CommunicationCostByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=200,
             cycle=2014,
-            committee_id='C02',
+            committee_id='C00000002',
             support_oppose_indicator='S',
         ),
         factories.CommunicationCostByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=300,
             cycle=2014,
-            committee_id='C02',
+            committee_id='C00000002',
             support_oppose_indicator='O',
         ),
         factories.CommunicationCostByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=400,
             cycle=2016,
-            committee_id='C03',
+            committee_id='C00000003',
             support_oppose_indicator='S',
         ),
         factories.CommunicationCostByCandidateFactory(
-            candidate_id='P01',
+            candidate_id='P00000001',
             total=500,
             cycle=2016,
-            committee_id='C03',
+            committee_id='C00000003',
             support_oppose_indicator='O',
         ),
 
@@ -480,13 +480,13 @@ class TestCCTotalsByCandidateView(ApiBaseTest):
             api.url_for(
                 CCTotalsByCandidateView,
                 cycle='2016',
-                candidate_id='P01',
+                candidate_id='P00000001',
                 election_full=True,
             )
         )
         assert len(results) == 2
         expected = {
-            'candidate_id': 'P01',
+            'candidate_id': 'P00000001',
             'cycle': 2016,
             'total': 800,
             'support_oppose_indicator': 'O'
@@ -501,14 +501,14 @@ class TestCommunicationCostByCandidateView(ApiBaseTest):
     def test_sort_by_candidate_name_descending(self):
 
         factories.CandidateHistoryFactory(
-            candidate_id='S001',
+            candidate_id='S00000001',
             name='WARNER, MARK',
             two_year_period=2010,
             office='S',
             state='NY',
         )
         factories.CandidateHistoryFactory(
-            candidate_id='S002',
+            candidate_id='S00000002',
             name='BALDWIN, ALISSA',
             two_year_period=2010,
             office='S',
@@ -516,24 +516,24 @@ class TestCommunicationCostByCandidateView(ApiBaseTest):
         )
 
         factories.CandidateElectionFactory(
-            candidate_id='S001',
+            candidate_id='S00000001',
             cand_election_year=2010)
         factories.CandidateElectionFactory(
-            candidate_id='S002',
+            candidate_id='S00000002',
             cand_election_year=2010)
 
         factories.CommunicationCostByCandidateFactory(
             total=50000,
             count=10,
             cycle=2010,
-            candidate_id='S001',
+            candidate_id='S00000001',
             support_oppose_indicator='S',
         ),
         factories.CommunicationCostByCandidateFactory(
             total=10000,
             count=5,
             cycle=2010,
-            candidate_id='S002',
+            candidate_id='S00000002',
             support_oppose_indicator='S',
         ),
 
@@ -550,21 +550,21 @@ class TestCommunicationCostByCandidateView(ApiBaseTest):
     def test_sort_by_candidate_id(self):
 
         factories.CandidateHistoryFactory(
-            candidate_id='S001',
+            candidate_id='S00000001',
             name='Robert Ritchie',
             two_year_period=2012,
             office='S',
             state='NY',
         )
         factories.CandidateHistoryFactory(
-            candidate_id='S002',
+            candidate_id='S00000002',
             name='FARLEY Ritchie',
             two_year_period=2012,
             office='S',
             state='NY',
         )
         factories.CandidateHistoryFactory(
-            candidate_id='S003',
+            candidate_id='S00000003',
             name='Robert Ritchie',
             election_years=[2012],
             two_year_period=2012,
@@ -573,32 +573,32 @@ class TestCommunicationCostByCandidateView(ApiBaseTest):
         )
 
         factories.CandidateElectionFactory(
-            candidate_id='S001',
+            candidate_id='S00000001',
             cand_election_year=2012)
         factories.CandidateElectionFactory(
-            candidate_id='S002',
+            candidate_id='S00000002',
             cand_election_year=2012)
         factories.CandidateElectionFactory(
-            candidate_id='S003',
+            candidate_id='S00000003',
             cand_election_year=2012)
 
         factories.CommunicationCostByCandidateFactory(
             cycle=2012,
-            candidate_id='S001',
+            candidate_id='S00000001',
             support_oppose_indicator='O',
             total=700,
             count=5,
         ),
         factories.CommunicationCostByCandidateFactory(
             cycle=2012,
-            candidate_id='S002',
+            candidate_id='S00000002',
             support_oppose_indicator='O',
             total=500,
             count=3,
         ),
         factories.CommunicationCostByCandidateFactory(
             cycle=2012,
-            candidate_id='S003',
+            candidate_id='S00000003',
             support_oppose_indicator='S',
             total=100,
             count=1,
@@ -611,11 +611,11 @@ class TestCommunicationCostByCandidateView(ApiBaseTest):
                 state='NY',
                 cycle=2012))
         self.assertEqual(len(response), 3)
-        self.assertEqual(response[0]['candidate_id'], 'S003')
+        self.assertEqual(response[0]['candidate_id'], 'S00000003')
         self.assertEqual(response[0]['support_oppose_indicator'], 'S')
-        self.assertEqual(response[1]['candidate_id'], 'S002')
+        self.assertEqual(response[1]['candidate_id'], 'S00000002')
         self.assertEqual(response[1]['support_oppose_indicator'], 'O')
-        self.assertEqual(response[2]['candidate_id'], 'S001')
+        self.assertEqual(response[2]['candidate_id'], 'S00000001')
         self.assertEqual(response[2]['support_oppose_indicator'], 'O')
 
 
@@ -628,13 +628,13 @@ class TestCCAggregatesView(ApiBaseTest):
 
     def test_filters_committee_candidate_id_cycle(self):
         factories.CandidateHistoryFactory(
-            candidate_id='P001', two_year_period=2000, candidate_election_year=2000, name='Apple Smith'
+            candidate_id='P00000001', two_year_period=2000, candidate_election_year=2000, name='Apple Smith'
         ),
         factories.CandidateHistoryFactory(
-            candidate_id='P002', two_year_period=2000, candidate_election_year=2000, name='Snapple Smith'
+            candidate_id='P00000002', two_year_period=2000, candidate_election_year=2000, name='Snapple Smith'
         ),
         factories.CandidateHistoryFactory(
-            candidate_id='P002', two_year_period=2004, candidate_election_year=2004, name='Zapple Smith'
+            candidate_id='P00000002', two_year_period=2004, candidate_election_year=2004, name='Zapple Smith'
         ),
 
         factories.CommitteeHistoryFactory(
@@ -648,13 +648,13 @@ class TestCCAggregatesView(ApiBaseTest):
         ),
 
         factories.CommunicationCostByCandidateFactory(
-            committee_id='C00000001', candidate_id='P001', cycle=2000
+            committee_id='C00000001', candidate_id='P00000001', cycle=2000
         )
         factories.CommunicationCostByCandidateFactory(
-            committee_id='C00000001', candidate_id='P002', cycle=2000
+            committee_id='C00000001', candidate_id='P00000002', cycle=2000
         )
         factories.CommunicationCostByCandidateFactory(
-            committee_id='C00000002', candidate_id='P001', cycle=2004
+            committee_id='C00000002', candidate_id='P00000001', cycle=2004
         )
         db.session.flush()
 
@@ -671,13 +671,13 @@ class TestCCAggregatesView(ApiBaseTest):
         self.assertEqual(results[1]['candidate_name'], 'Snapple Smith')
 
         # assert results filtered by candidate_id sorted by committee name in descending order
-        results = self._results(api.url_for(CCAggregatesView, candidate_id='P001', sort='-committee_name'))
+        results = self._results(api.url_for(CCAggregatesView, candidate_id='P00000001', sort='-committee_name'))
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0]['committee_name'], 'Winner PAC')
         self.assertEqual(results[1]['committee_name'], 'Acme Co')
 
         # assert results filtered by candidate_id sorted by committee name in ascending order
-        results = self._results(api.url_for(CCAggregatesView, candidate_id='P001', sort='committee_name'))
+        results = self._results(api.url_for(CCAggregatesView, candidate_id='P00000001', sort='committee_name'))
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0]['committee_name'], 'Acme Co')
         self.assertEqual(results[1]['committee_name'], 'Winner PAC')

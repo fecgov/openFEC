@@ -42,7 +42,7 @@ class CandidatesTestCase(common.BaseTestCase):
         cand_valid_fec_yr_data = [
             {
                 'cand_valid_yr_id': 1,
-                'cand_id': 'H1',
+                'cand_id': 'H00000001',
                 'fec_election_yr': 2020,
                 'cand_election_yr': 2020,
                 'cand_status': 'A',
@@ -53,7 +53,7 @@ class CandidatesTestCase(common.BaseTestCase):
             },
             {
                 'cand_valid_yr_id': 2,
-                'cand_id': 'H2',
+                'cand_id': 'H00000002',
                 'fec_election_yr': 2020,
                 'cand_election_yr': 2020,
                 'cand_status': 'A',
@@ -64,7 +64,7 @@ class CandidatesTestCase(common.BaseTestCase):
             },
             {
                 'cand_valid_yr_id': 3,
-                'cand_id': 'H3',
+                'cand_id': 'H00000003',
                 'fec_election_yr': 2020,
                 'cand_election_yr': 2020,
                 'cand_status': 'A',
@@ -80,7 +80,7 @@ class CandidatesTestCase(common.BaseTestCase):
         cand_cmte_linkage_data = [
             {
                 'linkage_id': 2,
-                'cand_id': 'H1',
+                'cand_id': 'H00000001',
                 'fec_election_yr': 2020,
                 'cand_election_yr': 2020,
                 'cmte_id': '2',
@@ -92,7 +92,7 @@ class CandidatesTestCase(common.BaseTestCase):
             },
             {
                 'linkage_id': 4,
-                'cand_id': 'H2',
+                'cand_id': 'H00000002',
                 'fec_election_yr': 2020,
                 'cand_election_yr': 2020,
                 'cmte_id': '3',
@@ -104,7 +104,7 @@ class CandidatesTestCase(common.BaseTestCase):
             },
             {
                 'linkage_id': 6,
-                'cand_id': 'H3',
+                'cand_id': 'H00000003',
                 'fec_election_yr': 2020,
                 'cand_election_yr': 2020,
                 'cmte_id': '3',

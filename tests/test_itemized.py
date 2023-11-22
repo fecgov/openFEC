@@ -1237,7 +1237,7 @@ class TestScheduleE(ApiBaseTest):
 
     def test_schedule_e_efile_candidate_id_filter(self):
         filters = [
-            ('candidate_id', ScheduleEEfile.candidate_id, ['S01', 'S02']),
+            ('candidate_id', ScheduleEEfile.candidate_id, ['S00000001', 'S00000002']),
         ]
         factories.EFilingsFactory(file_number=123)
         for label, column, values in filters:
@@ -1353,6 +1353,43 @@ class TestScheduleE(ApiBaseTest):
         # Most recent should include null values
         self.assertEqual(len(results), 5)
 
+    def test_schedule_e_filter_form_line_number(self):
+        [
+            factories.ScheduleEFactory(line_number='24', filing_form='F3X'),
+            factories.ScheduleEFactory(line_number='25', filing_form='F3X'),
+            factories.ScheduleEFactory(line_number='24', filing_form='F3'),
+            factories.ScheduleEFactory(line_number='25', filing_form='F3'),
+        ]
+
+        results = self._results(
+            api.url_for(ScheduleEView, form_line_number='f3X-24')
+        )
+        self.assertEqual(len(results), 1)
+
+        # to be removed
+        results = self._results(
+            api.url_for(ScheduleEView, line_number='f3X-24')
+        )
+        self.assertEqual(len(results), 1)
+
+        results = self._results(
+            api.url_for(ScheduleEView, form_line_number=('f3x-24', 'f3X-25'))
+        )
+        self.assertEqual(len(results), 2)
+
+        # test NOT a form_line_number
+        results = self._results(
+            api.url_for(ScheduleEView, form_line_number='-F3x-24')
+        )
+        self.assertEqual(len(results), 3)
+
+        # invalid form_line_number testing for sched_e
+        response = self.app.get(
+            api.url_for(ScheduleEView, form_line_number='f3x10')
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Invalid form_line_number', response.data)
+
 
 class TestScheduleH4(ApiBaseTest):
     kwargs = {'two_year_transaction_period': 2016}
@@ -1467,6 +1504,42 @@ class TestScheduleH4(ApiBaseTest):
                 <= max_date.isoformat()
             )
         )
+
+    def test_schedule_h4_filter_form_line_number(self):
+        [
+            factories.ScheduleH4Factory(line_number='23', filing_form='F3X'),
+            factories.ScheduleH4Factory(line_number='17', filing_form='F3X'),
+            factories.ScheduleH4Factory(line_number='22', filing_form='F3'),
+            factories.ScheduleH4Factory(line_number='22', filing_form='F3P'),
+        ]
+        results = self._results(
+            api.url_for(ScheduleH4View, form_line_number='f3x-23', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+
+        # to be removed
+        results = self._results(
+            api.url_for(ScheduleH4View, line_number='f3x-23', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+
+        results = self._results(
+            api.url_for(ScheduleH4View, form_line_number=('f3x-23', 'f3X-17'), **self.kwargs)
+        )
+        self.assertEqual(len(results), 2)
+
+        # test searching for NOT a form_line_number
+        results = self._results(
+            api.url_for(ScheduleH4View, form_line_number='-f3x-23', **self.kwargs)
+        )
+        self.assertEqual(len(results), 3)
+
+        # invalid form_line_number testing for sched_h4
+        response = self.app.get(
+            api.url_for(ScheduleH4View, form_line_number='f3x21', **self.kwargs)
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Invalid form_line_number', response.data)
 
     def test_schedule_h4_efile_filters(self):
         filters = [

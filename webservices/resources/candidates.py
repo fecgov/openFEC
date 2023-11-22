@@ -28,6 +28,9 @@ def filter_range_fields(model):
     ]
 
 
+# used for endpoint:`/candidates/`
+# under tag: candidate
+# Ex: http://127.0.0.1:5000/v1/candidates/?candidate_id=S0LA00071&sort=name
 @doc(
     tags=['candidate'], description=docs.CANDIDATE_LIST,
 )
@@ -135,6 +138,9 @@ class CandidateList(ApiResource):
         return query
 
 
+# used for endpoint:`/candidates/search/`
+# under tag: candidate
+# Ex: http://127.0.0.1:5000/v1/candidates/search/
 @doc(
     tags=['candidate'], description=docs.CANDIDATE_SEARCH,
 )
@@ -148,6 +154,11 @@ class CandidateSearch(CandidateList):
     ]
 
 
+# used for endpoints: `/candidate/<string:candidate_id>/`
+# `/committee/<string:committee_id>/candidates/`
+# under tag: candidate
+# Ex: http://127.0.0.1:5000/v1/candidate/P40014052/
+# http://127.0.0.1:5000/v1/committee/C00684373/candidates/
 @doc(
     tags=['candidate'],
     description=docs.CANDIDATE_DETAIL,
@@ -181,7 +192,9 @@ class CandidateView(ApiResource):
         query = super().build_query(**kwargs)
 
         if candidate_id is not None:
-            query = query.filter_by(candidate_id=candidate_id.upper())
+            candidate_id = candidate_id.upper()
+            utils.check_candidate_id(candidate_id)
+            query = query.filter_by(candidate_id=candidate_id)
 
         if committee_id is not None:
             committee_id = committee_id.upper()
@@ -215,6 +228,15 @@ class CandidateView(ApiResource):
         return query
 
 
+# used for endpoints: `/candidate/<string:candidate_id>/history/`
+# `/candidate/<string:candidate_id>/history/<int:cycle>/`
+# `/committee/<string:committee_id>/candidates/history/`
+# `/committee/<string:committee_id>/candidates/history/<int:cycle>/`
+# under tag: candidate
+# Ex: http://127.0.0.1:5000/v1/candidate/P40014052/history/
+# http://127.0.0.1:5000/v1/candidate/P40014052/history/2024/
+# http://127.0.0.1:5000/v1/committee/C00684373/candidates/history/
+# http://127.0.0.1:5000/v1/committee/C00684373/candidates/history/2020/
 @doc(
     tags=['candidate'],
     description=docs.CANDIDATE_HISTORY,
@@ -251,7 +273,9 @@ class CandidateHistoryView(ApiResource):
             # use for
             # '/candidate/<string:candidate_id>/history/',
             # '/candidate/<string:candidate_id>/history/<int:cycle>/',
-            query = query.filter(models.CandidateHistory.candidate_id == candidate_id.upper())
+            candidate_id = candidate_id.upper()
+            utils.check_candidate_id(candidate_id)
+            query = query.filter(models.CandidateHistory.candidate_id == candidate_id)
 
         if committee_id:
             committee_id = committee_id.upper()

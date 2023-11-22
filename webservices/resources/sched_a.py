@@ -18,6 +18,12 @@ https://github.com/fecgov/openFEC/issues/3595
 """
 
 
+# Used for '/schedules/schedule_a/'
+# /schedules/schedule_a/<string:sub_id>/
+# under tag:'receipts'
+# Ex:
+# http://127.0.0.1:5000/v1/schedules/schedule_a/?two_year_transaction_period=2020
+# http://127.0.0.1:5000/v1/schedules/schedule_a/2071120191659332613/?two_year_transaction_period=2020
 @doc(
     tags=['receipts'], description=docs.SCHEDULE_A,
 )
@@ -143,6 +149,9 @@ class ScheduleAView(ItemizedResource):
         return query
 
 
+# Used for '/schedules/schedule_a/efile/'
+# under tag:'receipts'
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_a/efile/
 @doc(
     tags=['receipts'], description=docs.EFILING_TAG,
 )

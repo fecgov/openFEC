@@ -2,12 +2,16 @@
 from flask_apispec import doc
 from webservices import args
 from webservices import docs
+from webservices import exceptions
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
 from webservices.common.views import ApiResource
 
 
+# Used for '/schedules/schedule_c/'
+# under tag: loans
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_c/
 @doc(
     tags=['loans'],
     description=docs.SCHEDULE_C,
@@ -25,6 +29,7 @@ class ScheduleCView(ApiResource):
     filter_multi_fields = [
         ('image_number', models.ScheduleC.image_number),
         ('committee_id', models.ScheduleC.committee_id),
+        ('form_line_number', models.ScheduleC.form_line_number),
     ]
 
     filter_fulltext_fields = [
@@ -38,6 +43,22 @@ class ScheduleCView(ApiResource):
         (('min_image_number', 'max_image_number'), models.ScheduleC.image_number),
         (('min_payment_to_date', 'max_payment_to_date'), models.ScheduleC.payment_to_date),
     ]
+
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+        utils.check_form_line_number(kwargs)
+        # added for transition to form_line_number, to be replaced w/obsolete error
+        if 'line_number' in kwargs:
+            if len(kwargs.get('line_number').split('-')) == 2:
+                form, line_no = kwargs.get('line_number').split('-')
+                query = query.filter_by(filing_form=form.upper())
+                query = query.filter_by(line_number=line_no)
+            else:
+                raise exceptions.ApiError(
+                    exceptions.LINE_NUMBER_ERROR,
+                    status_code=400,
+                )
+        return query
 
     @property
     def args(self):
@@ -57,6 +78,9 @@ class ScheduleCView(ApiResource):
         )
 
 
+# Used for '/schedules/schedule_c/<string:sub_id>/'
+# under tag: loans
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_c/4101720231804739584/
 @doc(
     tags=['loans'],
     description=docs.SCHEDULE_C,

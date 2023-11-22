@@ -7,6 +7,9 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
+# used for endpoint: '/operations-log/'
+# under tag: filings
+# Ex: http://127.0.0.1:5000/v1/operations-log/
 @doc(tags=['filings'], description=docs.OPERATIONS_LOG)
 class OperationsLogView(ApiResource):
     model = models.OperationsLog

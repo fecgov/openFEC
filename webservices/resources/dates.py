@@ -17,6 +17,9 @@ from webservices.common.views import ApiResource
 from webservices import calendar
 
 
+# used for endpoint:'/calendar-dates/'
+# under tag: dates
+# Ex: http://127.0.0.1:5000/v1/calendar-dates/
 @doc(
     tags=['dates'],
     description=docs.CALENDAR_DATES,
@@ -61,6 +64,9 @@ class CalendarDatesView(ApiResource):
         return self.model.event_id
 
 
+# used for endpoint:'/calendar-dates/export/'
+# under tag: dates
+# Ex: http://127.0.0.1:5000/v1/calendar-dates/export/?renderer=ics
 @doc(
     tags=['dates'],
     description=docs.CALENDAR_EXPORT,
@@ -89,6 +95,9 @@ class CalendarDatesExport(CalendarDatesView):
         )
 
 
+# used for endpoint:'/election-dates/'
+# under tag: dates
+# Ex: http://127.0.0.1:5000/v1/election-dates/
 @doc(
     tags=['dates'],
     description=docs.ELECTION_DATES,
@@ -129,6 +138,9 @@ class ElectionDatesView(ApiResource):
         return query.filter_by(election_status_id=1)
 
 
+# used for endpoint:'/reporting-dates/'
+# under tag: dates
+# Ex: http://127.0.0.1:5000/v1/reporting-dates/
 @doc(
     tags=['dates'],
     description=docs.ELECTION_DATES,

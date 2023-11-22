@@ -3,6 +3,7 @@ import sqlalchemy as sa
 from flask_apispec import doc
 from webservices import args
 from webservices import docs
+from webservices import exceptions
 from webservices import utils
 from webservices import schemas
 from sqlalchemy.orm import aliased, contains_eager
@@ -11,7 +12,10 @@ from webservices.common import views
 from webservices.common.views import ItemizedResource
 
 
-# Use for endpoint `/schedules/schedule_e/` under tag: independent expenditure
+# Used for endpoint `/schedules/schedule_e/`
+# under tag: independent expenditure
+# Ex1: http://127.0.0.1:5000/v1/schedules/schedule_e/
+# Ex2: http://127.0.0.1:5000/v1/schedules/schedule_e/?candidate_id=S0OH00133
 @doc(
     tags=['independent expenditures'],
     description=docs.SCHEDULE_E,
@@ -46,6 +50,7 @@ class ScheduleEView(ItemizedResource):
         ('candidate_office_state', models.ScheduleE.candidate_office_state),
         ('candidate_office_district', models.ScheduleE.candidate_office_district),
         ('candidate_party', models.ScheduleE.candidate_party),
+        ('form_line_number', models.ScheduleE.form_line_number),
     ]
     filter_fulltext_fields = [
         ('payee_name', models.ScheduleE.payee_name_text),
@@ -110,10 +115,24 @@ class ScheduleEView(ItemizedResource):
         if 'most_recent' in kwargs:
             query = query.filter(sa.or_(self.model.most_recent == kwargs.get('most_recent'),
                                         self.model.most_recent == None))  # noqa
+        utils.check_form_line_number(kwargs)
+        # added for transition to form_line_number, to be replaced w/obsolete error
+        if 'line_number' in kwargs:
+            if len(kwargs.get('line_number').split('-')) == 2:
+                form, line_no = kwargs.get('line_number').split('-')
+                query = query.filter_by(filing_form=form.upper())
+                query = query.filter_by(line_number=line_no)
+            else:
+                raise exceptions.ApiError(
+                    exceptions.LINE_NUMBER_ERROR,
+                    status_code=400,
+                )
         return query
 
 
-# Use for endpoint `/schedules/schedule_e/efile/` under tag: independent expenditure
+# Used for endpoint `/schedules/schedule_e/efile/`
+# under tag: independent expenditures
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_e/efile/
 @doc(
     tags=['independent expenditures'],
     description=docs.EFILING_TAG,

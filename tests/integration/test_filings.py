@@ -28,7 +28,7 @@ class TestFilings(BaseTestCase):
     }
 
     SECOND_FILING = {
-        'cand_cmte_id': 'P001',
+        'cand_cmte_id': 'P00000001',
         'report_year': 1994,
         'form_type': 'F2',
         'begin_image_num': '95030061615',

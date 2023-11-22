@@ -11,6 +11,9 @@ from webservices.common.views import ItemizedResource
 from webservices import exceptions
 
 
+# Used for endpoint `/schedules/schedule_h4/`
+# under tag: disbursements
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_h4/
 @doc(
     tags=['disbursements'],
     description=docs.SCHEDULE_H4,
@@ -50,6 +53,7 @@ class ScheduleH4View(ItemizedResource):
         ('administrative_activity_indicator', models.ScheduleH4.administrative_activity_indicator),
         ('general_voter_drive_activity_indicator', models.ScheduleH4.general_voter_drive_activity_indicator),
         ('public_comm_indicator', models.ScheduleH4.public_comm_indicator),
+        ('form_line_number', models.ScheduleH4.form_line_number),
     ]
 
     filter_range_fields = [
@@ -87,8 +91,9 @@ class ScheduleH4View(ItemizedResource):
         query = query.options(sa.orm.joinedload(models.ScheduleH4.committee))
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
-        if kwargs.get('line_number'):
-            # line number is a composite value of 'filing_form-line_number'
+        utils.check_form_line_number(kwargs)
+        # added for transition to form_line_number, to be replaced w/obsolete error
+        if 'line_number' in kwargs:
             if len(kwargs.get('line_number').split('-')) == 2:
                 form, line_no = kwargs.get('line_number').split('-')
                 query = query.filter_by(filing_form=form.upper())
@@ -101,6 +106,9 @@ class ScheduleH4View(ItemizedResource):
         return query
 
 
+# Used for endpoint `/schedules/schedule_h4/efile/`
+# under tag: disbursements
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_h4/efile/
 @doc(
     tags=['disbursements'],
     description=docs.EFILING_TAG,

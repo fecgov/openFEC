@@ -21,7 +21,7 @@ class TestFilings(ApiBaseTest):
         self.assertEqual(results[0]['committee_id'], committee_id)
 
     def test_candidate_filings(self):
-        candidate_id = 'P12345'
+        candidate_id = 'P12345000'
         factories.FilingsFactory(candidate_id=candidate_id)
         results = self._results(api.url_for(FilingsView, candidate_id=candidate_id))
         self.assertEqual(len(results), 1)
@@ -29,15 +29,15 @@ class TestFilings(ApiBaseTest):
 
     def test_filings(self):
         """ Check filings returns in general endpoint"""
-        factories.FilingsFactory(committee_id='C001')
-        factories.FilingsFactory(committee_id='C002')
+        factories.FilingsFactory(committee_id='C00000001')
+        factories.FilingsFactory(committee_id='C00000002')
 
         results = self._results(api.url_for(FilingsList))
         self.assertEqual(len(results), 2)
 
     def test_filings_with_bank(self):
         """ Check filings returns bank information"""
-        factories.FilingsFactory(committee_id='C001', bank_depository_name='Bank A')
+        factories.FilingsFactory(committee_id='C00000001', bank_depository_name='Bank A')
 
         results = self._results(api.url_for(FilingsList))
         self.assertEqual(len(results), 1)
@@ -79,9 +79,9 @@ class TestFilings(ApiBaseTest):
 
     def test_filings_filters(self):
         [
-            factories.FilingsFactory(committee_id='C0004'),
-            factories.FilingsFactory(committee_id='C0005'),
-            factories.FilingsFactory(candidate_id='H0001'),
+            factories.FilingsFactory(committee_id='C00000004'),
+            factories.FilingsFactory(committee_id='C00000005'),
+            factories.FilingsFactory(candidate_id='H00000001'),
             factories.FilingsFactory(amendment_indicator='A'),
             factories.FilingsFactory(beginning_image_number=123456789021234567),
             factories.FilingsFactory(committee_type='P'),
@@ -118,7 +118,7 @@ class TestFilings(ApiBaseTest):
             ('report_year', 1999),
             ('request_type', '5'),
             ('state', 'MD'),
-            ('candidate_id', 'H0001'),
+            ('candidate_id', 'H00000001'),
             ('q_filer', 'action'),
         )
 
@@ -278,12 +278,12 @@ class TestEfileFiles(ApiBaseTest):
 
         [
             factories.EFilingsFactory(
-                committee_id="C013",
+                committee_id="C00000013",
                 beginning_image_number=5,
                 filed_date=datetime.date(2015, 1, 1),
             ),
             factories.EFilingsFactory(
-                committee_id="C014",
+                committee_id="C00000014",
                 beginning_image_number=6,
                 filed_date=datetime.date(2015, 1, 2),
             ),
@@ -299,8 +299,8 @@ class TestEfileFiles(ApiBaseTest):
 
     def test_efilings(self):
         """ Check filings returns in general endpoint"""
-        factories.EFilingsFactory(committee_id="C001")
-        factories.EFilingsFactory(committee_id="C002")
+        factories.EFilingsFactory(committee_id="C00000001")
+        factories.EFilingsFactory(committee_id="C00000002")
 
         results = self._results(api.url_for(EFilingsView))
         self.assertEqual(len(results), 2)
@@ -359,30 +359,30 @@ class TestEfileFiles(ApiBaseTest):
     def test_fulltext_keyword_search(self):
         [
             factories.EFilingsFactory(
-                committee_id="C01",
+                committee_id="C00000001",
                 committee_name="Danielle",
             ),
             factories.EFilingsFactory(
-                committee_id="C02",
+                committee_id="C00000002",
                 committee_name="Dana",
             ),
         ]
 
         factories.CommitteeSearchFactory(
-            id="C01", fulltxt=sa.func.to_tsvector("Danielle")
+            id="C00000001", fulltxt=sa.func.to_tsvector("Danielle")
         )
         factories.CommitteeSearchFactory(
-            id="C02", fulltxt=sa.func.to_tsvector("Dana")
+            id="C00000002", fulltxt=sa.func.to_tsvector("Dana")
         )
         rest.db.session.flush()
         results = self._results(api.url_for(EFilingsView, q_filer="Danielle"))
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["committee_id"], "C01")
+        self.assertEqual(results[0]["committee_id"], "C00000001")
 
         results = self._results(api.url_for(EFilingsView, q_filer="dan"))
         self.assertEqual(len(results), 2)
-        self.assertEqual(results[0]["committee_id"], "C01")
-        self.assertEqual(results[1]["committee_id"], "C02")
+        self.assertEqual(results[0]["committee_id"], "C00000001")
+        self.assertEqual(results[1]["committee_id"], "C00000002")
 
     def test_invalid_keyword(self):
         response = self.app.get(

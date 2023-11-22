@@ -41,6 +41,14 @@ pac_cmte_list = {'N', 'O', 'Q', 'V', 'W'}
 party_cmte_list = {'X', 'Y'}
 
 
+# used for '/totals/<string:entity_type>/'
+# under tag: financial
+# Ex: http://127.0.0.1:5000/v1/totals/presidential/
+# http://127.0.0.1:5000/v1/totals/house-senate/
+# http://127.0.0.1:5000/v1/totals/pac/
+# http://127.0.0.1:5000/v1/totals/party/
+# http://127.0.0.1:5000/v1/totals/pac-party/
+# http://127.0.0.1:5000/v1/totals/ie-only/
 @doc(
     tags=['financial'],
     description=docs.TOTALS,
@@ -193,6 +201,9 @@ class TotalsByEntityTypeView(ApiResource):
         ]
 
 
+# used for '/committee/<string:committee_id>/totals/'
+# under tag: financial
+# Ex: http://127.0.0.1:5000/v1/committee/C00358796/totals/
 @doc(
     tags=['financial'],
     description=docs.TOTALS,
@@ -249,12 +260,14 @@ class TotalsCommitteeView(ApiResource):
             return committee.committee_type
 
 
+# used for endpoint: /candidate/<string:candidate_id>/totals/
+# under tag: candidate
+# Ex: http://127.0.0.1:5000/v1/candidate/H2CO07170/totals/
 @doc(
     tags=['candidate'],
     description=docs.TOTALS,
     params={'candidate_id': {'description': docs.CANDIDATE_ID}, },
 )
-# used for endpoint: /v1/candidate/{candidate_id}/totals/
 class CandidateTotalsDetailView(utils.Resource):
     @use_kwargs(args.paging)
     @use_kwargs(args.candidate_totals_detail)
@@ -298,9 +311,14 @@ class CandidateTotalsDetailView(utils.Resource):
 
     def _resolve_committee_type(self, candidate_id=None, **kwargs):
         if candidate_id is not None:
+            candidate_id = candidate_id.upper()
+            utils.check_candidate_id(candidate_id)
             return candidate_id[0]
 
 
+# used for endpoint: /schedules/schedule_a/by_state/totals/
+# under tag: receipts
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_a/by_state/totals/
 @doc(tags=['receipts'], description=(docs.STATE_AGGREGATE_RECIPIENT_TOTALS))
 class ScheduleAByStateRecipientTotalsView(ApiResource):
     model = models.ScheduleAByStateRecipientTotals
@@ -331,10 +349,12 @@ class ScheduleAByStateRecipientTotalsView(ApiResource):
         return self.model.idx
 
 
+# used for endpoint:'/totals/inaugural_committees/by_contributor/'
+# under tag: financial
+# Ex: http://127.0.0.1:5000/v1/totals/inaugural_committees/by_contributor/
 @doc(
     tags=['financial'], description=docs.TOTALS_INAUGURAL_DONATIONS
 )
-# used for endpoint:'/totals/inaugural_committees/by_contributor/'
 class InauguralDonationsView(ApiResource):
     model = models.InauguralDonations
     schema = schemas.InauguralDonationsSchema

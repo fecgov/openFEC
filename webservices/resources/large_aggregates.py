@@ -8,6 +8,9 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
+# used for endpoint: '/totals/by_entity/'
+# under tag: financial
+# Ex: http://127.0.0.1:5000/v1/totals/by_entity/?cycle=2020
 @doc(
     tags=['financial'],
     description=docs.ENTITY_RECEIPTS_TOTLAS,
