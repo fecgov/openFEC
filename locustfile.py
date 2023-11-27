@@ -17,7 +17,7 @@ import os
 import random
 import resource
 
-from locust import between, HttpUser, task, TaskSet, user
+from locust import between, task, TaskSet, user
 
 
 # Avoid "Too many open files" error
@@ -56,7 +56,7 @@ TERMS = ["embezzle", "email", "department", "contribution", "commission"]
 # TODO: Add more small
 small_records_sched_a = [
     {"contributor_name": "Teachout Zephyr"},
-    {"contributor_state": "GU"},
+    {"contributor_zip": "96910"},
 ]
 
 medium_records_sched_a = [
@@ -64,7 +64,7 @@ medium_records_sched_a = [
     {"committee_id": "C00496067"},
     # these seemed mid sized on a given two year period
     {"contributor_city": "Fresno"},
-    {"contirbutor_city": "Sedona"},
+    {"contributor_city": "Sedona"},
     {"contributor_occupation": "government"},
 ]
 
@@ -420,7 +420,7 @@ class Tasks(TaskSet):
     def get_docs_advisory_opinions(self):
         params = {"api_key": API_KEY}
         self.client.get(
-            "legal/docs/advisory_opinions/2020-01", name="get_docs_advisory_opinions", params=params
+            "legal/docs/advisory_opinions/2023-12", name="get_docs_advisory_opinions", params=params
         )
 
 
