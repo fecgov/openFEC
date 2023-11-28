@@ -70,59 +70,54 @@ form_type_map = {
     'house-senate': 'H',
 }
 
+# used for ReportsView and CommitteeReportsView
+filter_range_fields = [
+    (
+        ('min_receipt_date', 'max_receipt_date'),
+        models.CommitteeReports.receipt_date,
+    ),
+    (
+        ('min_disbursements_amount', 'max_disbursements_amount'),
+        models.CommitteeReports.total_disbursements_period,
+    ),
+    (
+        ('min_receipts_amount', 'max_receipts_amount'),
+        models.CommitteeReports.total_receipts_period,
+    ),
+    (
+        (
+            'min_cash_on_hand_end_period_amount',
+            'max_cash_on_hand_end_period_amount',
+        ),
+        models.CommitteeReports.cash_on_hand_end_period,
+    ),
+    (
+        ('min_debts_owed_amount', 'max_debts_owed_amount'),
+        models.CommitteeReports.debts_owed_by_committee,
+    ),
+    (
+        ('min_independent_expenditures', 'max_independent_expenditures'),
+        models.CommitteeReportsPacParty.independent_expenditures_period,
+    ),
+    (
+        (
+            'min_party_coordinated_expenditures',
+            'max_party_coordinated_expenditures',
+        ),
+        models.CommitteeReportsPacParty.coordinated_expenditures_by_party_committee_period,
+    ),
+    (
+        ('min_total_contributions', 'max_total_contributions'),
+        models.CommitteeReportsIEOnly.independent_contributions_period,
+    ),
+]
 
-def get_range_filters():
-    filter_range_fields = [
-        (
-            ('min_receipt_date', 'max_receipt_date'),
-            models.CommitteeReports.receipt_date,
-        ),
-        (
-            ('min_disbursements_amount', 'max_disbursements_amount'),
-            models.CommitteeReports.total_disbursements_period,
-        ),
-        (
-            ('min_receipts_amount', 'max_receipts_amount'),
-            models.CommitteeReports.total_receipts_period,
-        ),
-        (
-            (
-                'min_cash_on_hand_end_period_amount',
-                'max_cash_on_hand_end_period_amount',
-            ),
-            models.CommitteeReports.cash_on_hand_end_period,
-        ),
-        (
-            ('min_debts_owed_amount', 'max_debts_owed_amount'),
-            models.CommitteeReports.debts_owed_by_committee,
-        ),
-        (
-            ('min_independent_expenditures', 'max_independent_expenditures'),
-            models.CommitteeReportsPacParty.independent_expenditures_period,
-        ),
-        (
-            (
-                'min_party_coordinated_expenditures',
-                'max_party_coordinated_expenditures',
-            ),
-            models.CommitteeReportsPacParty.coordinated_expenditures_by_party_committee_period,
-        ),
-        (
-            ('min_total_contributions', 'max_total_contributions'),
-            models.CommitteeReportsIEOnly.independent_contributions_period,
-        ),
-    ]
-    return filter_range_fields
-
-
-def get_match_filters():
-    filter_match_fields = [
-        ('filer_type', models.CommitteeReports.means_filed),
-        ('is_amended', models.CommitteeReports.is_amended),
-        ('most_recent', models.CommitteeReports.most_recent),
-    ]
-    return filter_match_fields
-
+# used for ReportsView and CommitteeReportsView
+filter_match_fields = [
+    ('filer_type', models.CommitteeReports.means_filed),
+    ('is_amended', models.CommitteeReports.is_amended),
+    ('most_recent', models.CommitteeReports.most_recent),
+]
 
 # Used for endpoint '/reports/<string:entity_type>/'
 # under tag:'financial'
@@ -173,6 +168,10 @@ class ReportsView(views.ApiResource):
             ('beginning_image_number', reports_class.beginning_image_number),
         ]
 
+        filter_overlap_fields = [
+            ("candidate_id", models.CommitteeHistory.candidate_ids),
+        ]
+
         if entity_type == 'ie-only':
             filter_fulltext_fields = [("q_spender", reports_class.spender_name_text), ]
         else:
@@ -183,21 +182,15 @@ class ReportsView(views.ApiResource):
                 sa.orm.contains_eager(reports_class.committee)
             )
 
-        if kwargs.get('candidate_id'):
-            candidate_id_upper = kwargs.get('candidate_id').upper()
-            utils.check_candidate_id(candidate_id_upper)
-            query = query.filter(
-                models.CommitteeHistory.candidate_ids.overlap([candidate_id_upper])
-            )
-
         if kwargs.get('committee_type'):
             query = query.filter(
                 models.CommitteeHistory.committee_type.in_(kwargs.get('committee_type'))
             )
-        query = filters.filter_range(query, kwargs, get_range_filters())
-        query = filters.filter_match(query, kwargs, get_match_filters())
+        query = filters.filter_range(query, kwargs, filter_range_fields)
+        query = filters.filter_match(query, kwargs, filter_match_fields)
         query = filters.filter_multi(query, kwargs, filter_multi_fields)
         query = filters.filter_fulltext(query, kwargs, filter_fulltext_fields)
+        query = filters.filter_overlap(query, kwargs, filter_overlap_fields)
         return query, reports_class, reports_schema
 
 
@@ -248,8 +241,8 @@ class CommitteeReportsView(views.ApiResource):
         if committee_id is not None:
             query = query.filter_by(committee_id=committee_id)
 
-        query = filters.filter_range(query, kwargs, get_range_filters())
-        query = filters.filter_match(query, kwargs, get_match_filters())
+        query = filters.filter_range(query, kwargs, filter_range_fields)
+        query = filters.filter_match(query, kwargs, filter_match_fields)
         query = filters.filter_multi(query, kwargs, filter_multi_fields)
         return query, reports_class, reports_schema
 

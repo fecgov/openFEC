@@ -5,10 +5,13 @@ from webservices import filters
 from webservices.common import models
 from webservices.resources.dates import CalendarDatesView
 from webservices.resources.committees import CommitteeList
-from webservices.resources.reports import get_match_filters
 
 
 class TestFilterMatch(ApiBaseTest):
+    filter_match_fields = [
+        ('filer_type', models.CommitteeReports.means_filed),
+    ]
+
     def setUp(self):
         super(TestFilterMatch, self).setUp()
         self.dates = [
@@ -53,7 +56,7 @@ class TestFilterMatch(ApiBaseTest):
         query_reports = filters.filter_match(
             models.CommitteeReportsHouseSenate.query,
             {'filer_type': 'e-file'},
-            get_match_filters(),
+            self.filter_match_fields,
         )
         self.assertEqual(
             set(query_reports.all()),
@@ -80,7 +83,7 @@ class TestFilterMatch(ApiBaseTest):
         query_reports = filters.filter_match(
             models.CommitteeReportsHouseSenate.query,
             {'filer_type': '-paper'},
-            get_match_filters(),
+            self.filter_match_fields,
         )
         self.assertEqual(
             set(query_reports.all()),
