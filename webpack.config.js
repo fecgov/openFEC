@@ -1,57 +1,51 @@
-const webpack = require('webpack');
+const webpack = require("webpack");
+const ESLintPlugin = require("eslint-webpack-plugin");
 
 module.exports = {
-  entry: [
-    'react-hot-loader/patch',
-    './src/server.js'
-  ],
+  entry: ["react-hot-loader/patch", "./src/server.js"],
   module: {
     rules: [
       {
-        enforce: 'pre',
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: 'eslint-loader',
-      },
-      {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        use: ['babel-loader']
+        use: ["babel-loader"],
       },
       {
         test: /\.css$/,
-        use: [ 'style-loader', 'css-loader' ]
+        use: ["style-loader", "css-loader"],
       },
       {
         test: /\.(png|jpg|gif|svg)$/,
-        use: [
-          'file-loader'
-        ]
+        type: "asset/resource",
       },
       {
         test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
-        use: {
-          loader: "url-loader",
-          options: {
-            limit: 50000
-          }
-        }
-      }
-    ]
+        type: "asset",
+        parser: {
+          dataUrlCondition: {
+            maxSize: 50000,
+          },
+        },
+      },
+    ],
   },
   resolve: {
-    extensions: ['*', '.js', '.jsx']
+    extensions: ["*", ".js", ".jsx"],
+    fallback: {
+      path: false,
+    },
   },
   output: {
-    path: __dirname + '/src/dist',
-    publicPath: '/',
-    filename: 'bundle.js'
+    path: __dirname + "/src/dist",
+    publicPath: "/",
+    filename: "bundle.js",
   },
-  plugins: [
-    new webpack.HotModuleReplacementPlugin()
-  ],
+  performance: {
+    maxAssetSize: 9000000,
+    maxEntrypointSize: 9000000,
+  },
+  plugins: [new webpack.HotModuleReplacementPlugin(), new ESLintPlugin()],
   devServer: {
-    contentBase: './src/public',
-    hot: true
-  }
+    static: { directory: "./src/public" },
+  },
 };
