@@ -7,8 +7,8 @@
     "url": "git+https://github.com/fecgov/openFEC.git"
   },
   "scripts": {
-    "build": "export NODE_OPTIONS=--openssl-legacy-provider && npm run lint && webpack --config webpack.production.config.js",
-    "develop": "export NODE_OPTIONS=--openssl-legacy-provider && webpack-dev-server --config webpack.config.js --mode development",
+    "build": "npm run lint && webpack --config webpack.production.config.js",
+    "develop": "webpack-dev-server --config webpack.config.js --mode development",
     "format": "prettier --write 'src/**/*.js'",
     "lint": "eslint ./src/**/*.js",
     "format:lint": "npm run format && npm run lint"
