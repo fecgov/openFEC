@@ -52,7 +52,7 @@ def call_resource(path, qs):
 def parse_kwargs(resource, qs):
     annotation = resolve_annotations(resource.get, "args", parent=resource)
     fields = utils.extend(*[option["args"] for option in annotation.options])
-    with task_utils.get_app().test_request_context(b"?" + qs):
+    with task_utils.get_app().test_request_context(qs):
         kwargs = flaskparser.parser.parse(fields, location='query')
     return fields, kwargs
 
@@ -141,7 +141,7 @@ def make_bundle(resource):
 
 @app.task(base=QueueOnce, once={"graceful": True})
 def export_query(path, qs):
-    qs = base64.b64decode(qs.encode("UTF-8"))
+    qs = qs.encode("UTF-8")
 
     try:
         logger.info("Download query: {0}".format(qs))

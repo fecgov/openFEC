@@ -41,7 +41,7 @@ class DownloadView(utils.Resource):
             )
         download.export_query.delay(
             path,
-            base64.b64encode(request.query_string).decode('UTF-8')
+            request.query_string
         )
         return {'status': 'queued'}
 
