@@ -328,6 +328,7 @@ def check_election_arguments(kwargs):
 
 def check_committee_id(committee_id):
     # A valid committee_id begins with a 'C' followed by 8 digits
+    committee_id = committee_id.lstrip('-')
     if len(committee_id) != 9 or not committee_id.startswith('C'):
         raise exceptions.ApiError(
             exceptions.COMMITTEE_ID_ERROR,
@@ -343,7 +344,7 @@ def check_committee_id(committee_id):
 
 def check_candidate_id(candidate_id):
     # A valid candidate_id begins with a 'P' or 'H' or 'S' followed by 8 letters or numbers
-    if len(candidate_id) != 9 or candidate_id[0] not in ('P', 'S', 'H'):
+    if len(candidate_id.lstrip('-')) != 9 or candidate_id.lstrip('-')[0] not in ('P', 'S', 'H'):
         raise exceptions.ApiError(
             exceptions.CANDIDATE_ID_ERROR,
             status_code=422)

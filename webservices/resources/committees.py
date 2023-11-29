@@ -30,7 +30,7 @@ def filter_year(model, query, years):
 # used for endpoint:'/committees/'
 # under tag: committee
 # Ex: http://127.0.0.1:5000/v1/committees/
-# http://127.0.0.1:5000/v1/committees/?candidate_id=S0LA00071
+# http://127.0.0.1:5000/v1/committees/?candidate_id=S2TX00106
 @doc(
     tags=["committee"],
     description=docs.COMMITTEE_LIST,
