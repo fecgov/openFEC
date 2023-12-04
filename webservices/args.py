@@ -6,7 +6,7 @@ from webargs import fields, validate
 from webservices import docs
 from webservices import exceptions
 from webservices.common.models import db
-from webservices.utils import check_committee_id, check_candidate_id
+from webservices.utils import check_committee_id, check_candidate_id, get_current_cycle
 import datetime
 
 
@@ -123,6 +123,23 @@ class Keyword(fields.Str):
         if len(value) < VALID_KEYWORD_LENGTH:  # noqa
             raise exceptions.ApiError(
                 exceptions.KEYWORD_LENGTH_ERROR,
+                status_code=422,
+            )
+
+
+class TwoYearTransactionPeriod(fields.Int):
+
+    def _validate(self, value):
+        super()._validate(value)
+        current_cycle = get_current_cycle()
+        if value < 1976 or value > current_cycle:
+            raise exceptions.ApiError(
+                exceptions.TWO_YEAR_TRANSACTION_PERIOD_ERROR,
+                status_code=422,
+            )
+        if value % 2 != 0:
+            raise exceptions.ApiError(
+                exceptions.TWO_YEAR_TRANSACTION_PERIOD_ERROR,
                 status_code=422,
             )
 
@@ -637,7 +654,7 @@ schedule_a = {
         description='Filters individual or committee contributions based on line number'
     ),
     'two_year_transaction_period': fields.List(
-        fields.Int,
+        TwoYearTransactionPeriod,
         description=docs.TWO_YEAR_TRANSACTION_PERIOD,
     ),
     'recipient_committee_type': fields.List(
@@ -748,7 +765,7 @@ schedule_b = {
         description=docs.COMMITTEE_TYPE,
     ),
     'two_year_transaction_period': fields.List(
-        fields.Int,
+        TwoYearTransactionPeriod,
         description=docs.TWO_YEAR_TRANSACTION_PERIOD,
     ),
 }
