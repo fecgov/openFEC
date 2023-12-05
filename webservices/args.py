@@ -485,8 +485,8 @@ reports = {
     'min_total_contributions': Currency(description=docs.MIN_FILTER),
     'max_total_contributions': Currency(description=docs.MAX_FILTER),
     'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
-    # candidate_id validation is in reports.py/ReportsView. (front-end:AUTHORIZING CANDIDATE)
-    'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
+    # AUTHORIZING CANDIDATE
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
     'amendment_indicator': fields.List(
         IStr(validate=validate.OneOf(['', 'N', 'A', 'T', 'C', 'M', 'S'])),
