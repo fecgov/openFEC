@@ -901,6 +901,13 @@ class TestScheduleA(ApiBaseTest):
         self.assertEqual(response.status_code, 422)
         self.assertIn(b'Invalid two_year_transaction period', response.data)
 
+        response = self.app.get(
+            api.url_for(ScheduleAView, two_year_transaction_period=1920)
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn(b'two_year_transaction_period not found', response.data)
+
 
 class TestScheduleB(ApiBaseTest):
     kwargs = {'two_year_transaction_period': 2016}
@@ -989,6 +996,13 @@ class TestScheduleB(ApiBaseTest):
 
         self.assertEqual(response.status_code, 422)
         self.assertIn(b'Invalid two_year_transaction period', response.data)
+
+        response = self.app.get(
+            api.url_for(ScheduleAView, two_year_transaction_period=1920)
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn(b'two_year_transaction_period not found', response.data)
 
     def test_schedule_b_efile_filters(self):
         filters = [

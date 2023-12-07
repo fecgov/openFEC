@@ -132,15 +132,17 @@ class TwoYearTransactionPeriod(fields.Int):
     def _validate(self, value):
         super()._validate(value)
         current_cycle = get_current_cycle()
-        if value < 1976 or value > current_cycle:
-            raise exceptions.ApiError(
-                exceptions.TWO_YEAR_TRANSACTION_PERIOD_ERROR,
-                status_code=422,
-            )
         if value % 2 != 0:
             raise exceptions.ApiError(
-                exceptions.TWO_YEAR_TRANSACTION_PERIOD_ERROR,
+                exceptions.TWO_YEAR_TRANSACTION_PERIOD_ERROR
+                + str(current_cycle) + ".",
                 status_code=422,
+            )
+        if value < 1976 or value > current_cycle:
+            raise exceptions.ApiError(
+                exceptions.TWO_YEAR_TRANSACTION_PERIOD_404
+                + str(current_cycle) + ".",
+                status_code=404,
             )
 
 
