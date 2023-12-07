@@ -1,10 +1,14 @@
 /*
 This migration file is for #4223
 1) rename column names to follow naming conventions
+   previous version V0026
 */
 ------
 --rename column names
 ------
+ALTER TABLE public.ofec_pacronyms
+  RENAME COLUMN index TO op_id;
+
 ALTER TABLE public.ofec_pacronyms
   RENAME COLUMN "ID NUMBER" TO committee_id;
 
