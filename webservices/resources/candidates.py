@@ -30,7 +30,7 @@ def filter_range_fields(model):
 
 # used for endpoint:`/candidates/`
 # under tag: candidate
-# Ex: http://127.0.0.1:5000/v1/candidates/?candidate_id=S0LA00071&sort=name
+# Ex: http://127.0.0.1:5000/v1/candidates/?candidate_id=S2TX00106&sort=name
 @doc(
     tags=['candidate'], description=docs.CANDIDATE_LIST,
 )

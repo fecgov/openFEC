@@ -29,6 +29,14 @@ CANDIDATE_ID_ERROR = """Invalid candidate_id. A valid candidate_id begins with a
  followed by 8 letters or numbers. For example: P00000034, S6MI00103, H0LA01087.\
 """
 
+TWO_YEAR_TRANSACTION_PERIOD_ERROR = """Invalid two_year_transaction period. A\
+ valid two_year_transaction_period should be an even year between 1976 and \
+"""
+
+TWO_YEAR_TRANSACTION_PERIOD_404 = """two_year_transaction_period not found.\
+ Data exists for two_year_transaction_periods between 1976 and \
+"""
+
 
 class ApiError(Exception):
     status_code = 400
