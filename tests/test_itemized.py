@@ -1398,12 +1398,6 @@ class TestScheduleE(ApiBaseTest):
         )
         self.assertEqual(len(results), 1)
 
-        # to be removed
-        results = self._results(
-            api.url_for(ScheduleEView, line_number='f3X-24')
-        )
-        self.assertEqual(len(results), 1)
-
         results = self._results(
             api.url_for(ScheduleEView, form_line_number=('f3x-24', 'f3X-25'))
         )
@@ -1546,12 +1540,6 @@ class TestScheduleH4(ApiBaseTest):
         ]
         results = self._results(
             api.url_for(ScheduleH4View, form_line_number='f3x-23', **self.kwargs)
-        )
-        self.assertEqual(len(results), 1)
-
-        # to be removed
-        results = self._results(
-            api.url_for(ScheduleH4View, line_number='f3x-23', **self.kwargs)
         )
         self.assertEqual(len(results), 1)
 
