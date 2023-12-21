@@ -3,7 +3,6 @@ import sqlalchemy as sa
 from flask_apispec import doc
 from webservices import args
 from webservices import docs
-from webservices import exceptions
 from webservices import utils
 from webservices import schemas
 from sqlalchemy.orm import aliased, contains_eager
@@ -116,17 +115,6 @@ class ScheduleEView(ItemizedResource):
             query = query.filter(sa.or_(self.model.most_recent == kwargs.get('most_recent'),
                                         self.model.most_recent == None))  # noqa
         utils.check_form_line_number(kwargs)
-        # added for transition to form_line_number, to be replaced w/obsolete error
-        if 'line_number' in kwargs:
-            if len(kwargs.get('line_number').split('-')) == 2:
-                form, line_no = kwargs.get('line_number').split('-')
-                query = query.filter_by(filing_form=form.upper())
-                query = query.filter_by(line_number=line_no)
-            else:
-                raise exceptions.ApiError(
-                    exceptions.LINE_NUMBER_ERROR,
-                    status_code=400,
-                )
         return query
 
 
