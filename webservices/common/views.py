@@ -30,6 +30,7 @@ class ApiResource(utils.Resource):
     use_estimated_counts = True
     estimated_count_threshold = 500000
     use_pk_for_count = False
+    is_count_exact = ''
 
     @use_kwargs(Ref('args'))
     @marshal_with(Ref('page_schema'))
@@ -44,7 +45,7 @@ class ApiResource(utils.Resource):
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
         return utils.fetch_page(
-            query, kwargs,
+            query, kwargs, is_count_exact=self.is_count_exact,
             count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
             index_column=self.index_column, cap=self.cap, multi=multi,
         )
@@ -73,14 +74,14 @@ class ItemizedResource(ApiResource):
         """Get itemized resources.
         """
         self.validate_kwargs(kwargs)
-        
+
         query = self.build_query(**kwargs)
         is_estimate = counts.is_estimated_count(self, query)
         if not is_estimate:
             count = None
         else:
             count, _ = counts.get_count(self, query)
-        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
+        return utils.fetch_seek_page(query, kwargs, self.index_column, is_count_exact=self.is_count_exact, count=count, cap=self.cap)
 
     def validate_kwargs(self, kwargs):
         """Custom keyword argument validation
