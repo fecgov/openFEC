@@ -131,7 +131,6 @@ class ElectionsListView(utils.Resource):
 class ElectionView(ApiResource):
     schema = schemas.ElectionSchema
     page_schema = schemas.ElectionPageSchema
-    count_type = ''
 
     @property
     def args(self):

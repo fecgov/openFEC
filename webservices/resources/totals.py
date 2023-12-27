@@ -78,7 +78,7 @@ class TotalsByEntityTypeView(ApiResource):
         query, totals_class, totals_schema = self.build_query(
             committee_id=committee_id, entity_type=entity_type, **kwargs
         )
-        count_type = counts.get_estimated_count(query)
+        count_type = counts.get_count_type(query)
         page = utils.fetch_page(query, kwargs, count_type=count_type, model=totals_class)
         return totals_schema().dump(page)
 
@@ -233,7 +233,7 @@ class TotalsCommitteeView(ApiResource):
         query, totals_class, totals_schema = self.build_query(
             committee_id=committee_id.upper(), committee_type=committee_type, **kwargs
         )
-        count_type = counts.get_estimated_count(query)
+        count_type = counts.get_count_type(query)
         page = utils.fetch_page(query, kwargs, count_type=count_type, model=totals_class)
         return totals_schema().dump(page)
 
