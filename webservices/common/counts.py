@@ -9,6 +9,7 @@ import re
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import Executable, ClauseElement, _literal_as_text
 from webservices.common import models
+from webservices.utils import ESTIMATED_COUNT_THRESHOLD
 
 
 count_pattern = re.compile(r'rows=(\d+)')
@@ -26,7 +27,9 @@ def is_estimated_count(resource, query):
     if resource.use_estimated_counts:
         estimated_count = get_estimated_count(query)
         if estimated_count > resource.estimated_count_threshold:
+            resource.count_type = 'estimated'
             return True
+    resource.count_type = 'exact'
     return False
 
 
@@ -49,6 +52,15 @@ def get_estimated_count(query):
     rows = get_query_plan(query)
     estimated_count = extract_analyze_count(rows)
     return estimated_count
+
+
+def get_count_type(query):
+    count = get_estimated_count(query)
+
+    if count > ESTIMATED_COUNT_THRESHOLD:
+        return "estimated"
+    else:
+        return "exact"
 
 
 def get_query_plan(query):

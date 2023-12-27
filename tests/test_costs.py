@@ -37,7 +37,11 @@ class TestCommunicationCost(ApiBaseTest):
         self.assertEqual(
             response['pagination'],
             {
-                'count': 1, 'page': 1, 'per_page': 20, 'pages': 1
+                'count': 1,
+                'page': 1,
+                'per_page': 20,
+                'pages': 1,
+                'count_type': 'exact',
             }
         )
         response = self._response(

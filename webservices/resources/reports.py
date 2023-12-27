@@ -8,6 +8,7 @@ from webservices import schemas
 from webservices import filters
 from webservices.common import models
 from webservices.common import views
+from webservices.common import counts
 from webservices.utils import use_kwargs
 
 
@@ -146,10 +147,11 @@ class ReportsView(views.ApiResource):
         query, reports_class, reports_schema = self.build_query(
             entity_type=entity_type, **kwargs
         )
+        count_type = counts.get_estimated_count(query)
         if kwargs['sort']:
             validator = args.IndicesValidator(reports_class)
             validator(kwargs['sort'])
-        page = utils.fetch_page(query, kwargs, model=reports_class, multi=True)
+        page = utils.fetch_page(query, kwargs, count_type=count_type, model=reports_class, multi=True)
         return reports_schema().dump(page)
 
     def build_query(self, entity_type=None, **kwargs):
@@ -214,7 +216,8 @@ class CommitteeReportsView(views.ApiResource):
         if kwargs['sort']:
             validator = args.IndicesValidator(reports_class)
             validator(kwargs['sort'])
-        page = utils.fetch_page(query, kwargs, model=reports_class, multi=True)
+        count_type = counts.get_estimated_count(query)
+        page = utils.fetch_page(query, kwargs, count_type=count_type, model=reports_class, multi=True)
         return reports_schema().dump(page)
 
     def build_query(self, committee_id=None, committee_type=None, **kwargs):

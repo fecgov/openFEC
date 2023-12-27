@@ -69,7 +69,8 @@ class ElectionsListView(utils.Resource):
     @marshal_with(schemas.ElectionsListPageSchema())
     def get(self, **kwargs):
         query = self._get_elections(kwargs)
-        return utils.fetch_page(query, kwargs, model=ElectionsList, multi=True)
+        count_type = counts.get_count_type(query)
+        return utils.fetch_page(query, kwargs, count_type=count_type, model=ElectionsList, multi=True)
 
     def _get_elections(self, kwargs):
         """Get elections from ElectionsList model."""
@@ -130,6 +131,7 @@ class ElectionsListView(utils.Resource):
 class ElectionView(ApiResource):
     schema = schemas.ElectionSchema
     page_schema = schemas.ElectionPageSchema
+    count_type = ''
 
     @property
     def args(self):
@@ -149,6 +151,7 @@ class ElectionView(ApiResource):
         return utils.fetch_page(
             query,
             kwargs,
+            count_type=self.count_type,
             count=count,
             model=self.model,
             join_columns=self.join_columns,

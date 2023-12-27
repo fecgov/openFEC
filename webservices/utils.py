@@ -38,6 +38,8 @@ use_kwargs = functools.partial(use_kwargs_original, location="query")
 
 DOCQUERY_URL = 'https://docquery.fec.gov'
 
+ESTIMATED_COUNT_THRESHOLD = 500000
+
 
 class Resource(six.with_metaclass(MethodResourceMeta, restful.Resource)):
     pass
@@ -68,6 +70,7 @@ def check_cap(kwargs, cap):
 def fetch_page(
     query,
     kwargs,
+    count_type=None,
     model=None,
     aliases=None,
     join_columns=None,
@@ -107,12 +110,12 @@ def fetch_page(
             index_column=index_column,
             nulls_last=nulls_last,
         )
-    paginator = paginators.OffsetPaginator(query, kwargs["per_page"], count=count)
+    paginator = paginators.OffsetPaginator(query, kwargs["per_page"], count_type=count_type, count=count)
     return paginator.get_page(kwargs["page"])
 
 
 class SeekCoalescePaginator(paginators.SeekPaginator):
-    def __init__(self, cursor, per_page, hide_null, index_column, sort_column=None, count=None):
+    def __init__(self, cursor, per_page, hide_null, index_column, count_type=None, sort_column=None, count=None):
         self.max_column_map = {
             "date": date.max,
             "float": float("inf"),
@@ -125,7 +128,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         }
         self.hide_null = hide_null
         super(SeekCoalescePaginator, self).__init__(
-            cursor, per_page, index_column, sort_column, count
+            cursor, per_page, index_column, count_type, sort_column, count
         )
 
     def _fetch(self, last_index, sort_index=None, limit=None, eager=True):
@@ -218,10 +221,10 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
 
 
 def fetch_seek_page(
-    query, kwargs, index_column, clear=False, count=None, cap=100, eager=True
+    query, kwargs, index_column, count_type=None, clear=False, count=None, cap=100, eager=True
 ):
     paginator = fetch_seek_paginator(
-        query, kwargs, index_column, clear=clear, count=count, cap=cap
+        query, kwargs, index_column, count_type=count_type, clear=clear, count=count, cap=cap
     )
     if paginator.sort_column is not None:
         sort_index = kwargs["last_{0}".format(paginator.sort_column[2])]
@@ -247,7 +250,7 @@ def fetch_seek_page(
     )
 
 
-def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, cap=100):
+def fetch_seek_paginator(query, kwargs, index_column, count_type=None, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
     model = index_column.parent.class_
     sort, hide_null, nulls_last = (
@@ -268,7 +271,7 @@ def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, c
         sort_column = None
 
     return SeekCoalescePaginator(
-        query, kwargs["per_page"], kwargs["sort_hide_null"], index_column, sort_column=sort_column, count=count
+        query, kwargs["per_page"], kwargs["sort_hide_null"], index_column, count_type=count_type, sort_column=sort_column, count=count
     )
 
 

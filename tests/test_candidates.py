@@ -46,6 +46,7 @@ class CandidateFormatTest(ApiBaseTest):
             'page': 1,
             'pages': 1,
             'per_page': 20,
+            'count_type': 'exact',
         }
         # we are showing the full history rather than one result
         assert len(response['results']) == 1
