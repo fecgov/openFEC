@@ -135,7 +135,7 @@ class TestReports(ApiBaseTest):
         factories.ReportsPresidentialFactory(cycle=2012)
 
         response = self._response(
-            api.url_for(ReportsView,  entity_type='presidential', cycle=2012)
+            api.url_for(ReportsView, entity_type='presidential', cycle=2012)
         )
         assert response['pagination'] == {
             'count': 1,

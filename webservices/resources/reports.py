@@ -8,7 +8,6 @@ from webservices import schemas
 from webservices import filters
 from webservices.common import models
 from webservices.common import views
-from webservices.common import counts
 from webservices.utils import use_kwargs
 
 

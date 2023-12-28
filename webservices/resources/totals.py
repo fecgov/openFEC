@@ -7,7 +7,6 @@ from webservices import filters
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
-from webservices.common import counts
 from webservices.common.views import ApiResource
 from webservices.utils import use_kwargs
 
@@ -78,8 +77,7 @@ class TotalsByEntityTypeView(ApiResource):
         query, totals_class, totals_schema = self.build_query(
             committee_id=committee_id, entity_type=entity_type, **kwargs
         )
-        count_type = counts.get_count_type(query)
-        page = utils.fetch_page(query, kwargs, count_type=count_type, model=totals_class)
+        page = utils.fetch_page(query, kwargs, count_type="exact", model=totals_class)
         return totals_schema().dump(page)
 
     def build_query(self, committee_id=None, entity_type=None, **kwargs):
@@ -233,8 +231,7 @@ class TotalsCommitteeView(ApiResource):
         query, totals_class, totals_schema = self.build_query(
             committee_id=committee_id.upper(), committee_type=committee_type, **kwargs
         )
-        count_type = counts.get_count_type(query)
-        page = utils.fetch_page(query, kwargs, count_type=count_type, model=totals_class)
+        page = utils.fetch_page(query, kwargs, count_type="exact", model=totals_class)
         return totals_schema().dump(page)
 
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
@@ -283,9 +280,8 @@ class CandidateTotalsDetailView(utils.Resource):
         if kwargs['sort']:
             validator = args.IndexValidator(totals_class)
             validator(kwargs['sort'])
-        count_type = counts.get_count_type(query)
 
-        page = utils.fetch_page(query, kwargs, count_type=count_type, model=totals_class)
+        page = utils.fetch_page(query, kwargs, count_type="exact", model=totals_class)
         return totals_schema().dump(page)
 
     def build_query(self, candidate_id=None, **kwargs):

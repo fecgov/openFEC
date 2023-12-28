@@ -7,7 +7,7 @@ from webservices import sorting
 from webservices import exceptions
 from webservices.common import counts
 from webservices.common import models
-from webservices.utils import use_kwargs, ESTIMATED_COUNT_THRESHOLD
+from webservices.utils import use_kwargs
 
 
 class ApiResource(utils.Resource):
@@ -28,7 +28,7 @@ class ApiResource(utils.Resource):
     aliases = {}
     cap = 100
     use_estimated_counts = True
-    estimated_count_threshold = ESTIMATED_COUNT_THRESHOLD
+    estimated_count_threshold = 500000
     use_pk_for_count = False
     count_type = ''
 
@@ -74,7 +74,7 @@ class ItemizedResource(ApiResource):
         """Get itemized resources.
         """
         self.validate_kwargs(kwargs)
-        
+
         query = self.build_query(**kwargs)
         is_estimate = counts.is_estimated_count(self, query)
         if not is_estimate:

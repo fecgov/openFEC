@@ -38,8 +38,6 @@ use_kwargs = functools.partial(use_kwargs_original, location="query")
 
 DOCQUERY_URL = 'https://docquery.fec.gov'
 
-ESTIMATED_COUNT_THRESHOLD = 500000
-
 
 class Resource(six.with_metaclass(MethodResourceMeta, restful.Resource)):
     pass
