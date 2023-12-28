@@ -130,6 +130,21 @@ class TestReports(ApiBaseTest):
         ]:
             self.assertEqual(result[key], getattr(report, key))
 
+    def test_report_pagination(self):
+
+        factories.ReportsPresidentialFactory(cycle=2012)
+
+        response = self._response(
+            api.url_for(ReportsView,  entity_type='presidential', cycle=2012)
+        )
+        assert response['pagination'] == {
+            'count': 1,
+            'page': 1,
+            'pages': 1,
+            'per_page': 20,
+            'count_type': 'exact',
+        }
+
 
 # Test endpoint:
 # '/committee/<string:committee_id>/reports/' under tag:'financial' (reports.CommitteeReportsView)
