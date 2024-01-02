@@ -626,7 +626,6 @@ itemized = {
     'max_amount': Currency(description='Filter for all amounts less than a value.'),
     'min_date': Date(description='Minimum date'),
     'max_date': Date(description='Maximum date'),
-    'line_number': fields.Str(description=docs.LINE_NUMBER),     # added to ease transition to form_line_number TBR
 }
 
 schedule_a = {
@@ -650,6 +649,7 @@ schedule_a = {
         `contribution_receipt_amount` of the last result. However, you will need to pass the index \
         of that last result to `last_index` to get the next page.'
     ),
+    'line_number': fields.Str(description=docs.LINE_NUMBER),
     'is_individual': fields.Bool(missing=None, description=docs.IS_INDIVIDUAL),
     'contributor_type': fields.List(
         fields.Str(validate=validate.OneOf(['individual', 'committee'])),
@@ -748,6 +748,7 @@ schedule_b = {
     'disbursement_purpose_category': fields.List(IStr, description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
     'last_disbursement_amount': fields.Float(missing=None, description=docs.LAST_DISBURSEMENT_AMOUNT),
     'last_disbursement_date': Date(missing=None, description=docs.LAST_DISBURSEMENT_DATE),
+    'line_number': fields.Str(description=docs.LINE_NUMBER),
     'recipient_city': fields.List(IStr, description=docs.RECIPIENT_CITY),
     'recipient_committee_id': fields.List(Committee_ID, description=docs.RECIPIENT_COMMITTEE_ID),
     'recipient_name': fields.List(Keyword, description=docs.RECIPIENT_NAME),
@@ -805,7 +806,6 @@ schedule_c = {
     'max_image_number': ImageNumber(description=docs.MAX_IMAGE_NUMBER),
     'min_amount': Currency(description=docs.MIN_FILTER),
     'max_amount': Currency(description=docs.MAX_FILTER),
-    'line_number': fields.Str(description=docs.LINE_NUMBER),
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
     'candidate_name': fields.List(Keyword, description=docs.CANDIDATE_NAME),
     'loan_source_name': fields.List(Keyword, description=docs.LOAN_SOURCE),
@@ -840,7 +840,6 @@ schedule_d = {
     'form_line_number': fields.List(IStr, description=docs.FORM_LINE_NUMBER),
     'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
     'filing_form': fields.List(fields.Str, description=docs.FORM_TYPE),
-    'line_number': fields.Str(description=docs.LINE_NUMBER),     # added to ease transition to form_line_number
 }
 
 schedule_e_by_candidate = {

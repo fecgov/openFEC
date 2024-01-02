@@ -8,7 +8,6 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
-from webservices import exceptions
 
 
 # Used for endpoint `/schedules/schedule_h4/`
@@ -92,17 +91,6 @@ class ScheduleH4View(ItemizedResource):
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         utils.check_form_line_number(kwargs)
-        # added for transition to form_line_number, to be replaced w/obsolete error
-        if 'line_number' in kwargs:
-            if len(kwargs.get('line_number').split('-')) == 2:
-                form, line_no = kwargs.get('line_number').split('-')
-                query = query.filter_by(filing_form=form.upper())
-                query = query.filter_by(line_number=line_no)
-            else:
-                raise exceptions.ApiError(
-                    exceptions.LINE_NUMBER_ERROR,
-                    status_code=400,
-                )
         return query
 
 

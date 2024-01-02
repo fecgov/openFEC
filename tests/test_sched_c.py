@@ -213,12 +213,6 @@ class TestScheduleCView(ApiBaseTest):
         )
         self.assertEqual(len(results), 1)
 
-        # to be removed
-        results = self._results(
-            api.url_for(ScheduleCView, line_number='f3X-9')
-        )
-        self.assertEqual(len(results), 1)
-
         results = self._results(
             api.url_for(ScheduleCView, form_line_number=('f3x-9', 'f3X-10'))
         )

@@ -9,6 +9,9 @@ LINE_NUMBER_ERROR = """Invalid line_number detected. A valid line_number is usin
 from form F3X line number 16.\
 """
 
+LINE_NUMBER_OBSOLETE_ERROR = """Obsolete, please use form_line_number.\
+"""
+
 IMAGE_NUMBER_ERROR = """Invalid image_number detected. A valid image_number is numeric only.\
 """
 

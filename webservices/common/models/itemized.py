@@ -29,7 +29,6 @@ class BaseItemized(db.Model):
 class BaseRawItemized(db.Model):
     __abstract__ = True
 
-    # line_number = db.Column("line_num", db.String) removed as H4 Raw data does not have line_num
     transaction_id = db.Column('tran_id', db.String)
     image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
     entity_type = db.Column('entity', db.String)
