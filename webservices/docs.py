@@ -845,6 +845,7 @@ case #1:
 pagination: {\n\
     pages: 2152643,\n\
     per_page: 20,\n\
+    is_count_exact: False,\n\
     count: 43052850,\n\
     last_indexes: {\n\
         last_index: "230880619",\n\
@@ -860,6 +861,7 @@ pagination: {\n\
     pages: 2152644,\n\
     per_page: 20,\n\
     count: 43052850,\n\
+    is_count_exact: False,\n\
     last_indexes: {\n\
         last_index: "230880639",\n\
         sort_null_only: True\n\
@@ -913,6 +915,7 @@ pagination: {\n\
     pages: 965191,\n\
     per_page: 20,\n\
     count: 19303814,\n\
+    is_count_exact: False,\n\
     last_indexes: {\n\
         last_index: "230906248",\n\
         last_disbursement_date: "2014-07-04"\n\
@@ -999,6 +1002,7 @@ results with the following pagination information:
 ```
  "pagination": {\n\
     "count": 152623,\n\
+    "is_count_exact": True,\n\
     "last_indexes": {\n\
       "last_index": "3023037",\n\
       "last_expenditure_amount": -17348.5\n\
