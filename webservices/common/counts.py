@@ -26,7 +26,9 @@ def is_estimated_count(resource, query):
     if resource.use_estimated_counts:
         estimated_count = get_estimated_count(query)
         if estimated_count > resource.estimated_count_threshold:
+            resource.is_count_exact = False
             return True
+    resource.is_count_exact = True
     return False
 
 
