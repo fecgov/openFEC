@@ -77,7 +77,7 @@ class TotalsByEntityTypeView(ApiResource):
         query, totals_class, totals_schema = self.build_query(
             committee_id=committee_id, entity_type=entity_type, **kwargs
         )
-        page = utils.fetch_page(query, kwargs, model=totals_class)
+        page = utils.fetch_page(query, kwargs, is_count_exact=True, model=totals_class)
         return totals_schema().dump(page)
 
     def build_query(self, committee_id=None, entity_type=None, **kwargs):
@@ -231,7 +231,7 @@ class TotalsCommitteeView(ApiResource):
         query, totals_class, totals_schema = self.build_query(
             committee_id=committee_id.upper(), committee_type=committee_type, **kwargs
         )
-        page = utils.fetch_page(query, kwargs, model=totals_class)
+        page = utils.fetch_page(query, kwargs, is_count_exact=True, model=totals_class)
         return totals_schema().dump(page)
 
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
@@ -280,7 +280,8 @@ class CandidateTotalsDetailView(utils.Resource):
         if kwargs['sort']:
             validator = args.IndexValidator(totals_class)
             validator(kwargs['sort'])
-        page = utils.fetch_page(query, kwargs, model=totals_class)
+
+        page = utils.fetch_page(query, kwargs, is_count_exact=True, model=totals_class)
         return totals_schema().dump(page)
 
     def build_query(self, candidate_id=None, **kwargs):

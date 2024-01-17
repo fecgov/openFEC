@@ -69,7 +69,7 @@ class ElectionsListView(utils.Resource):
     @marshal_with(schemas.ElectionsListPageSchema())
     def get(self, **kwargs):
         query = self._get_elections(kwargs)
-        return utils.fetch_page(query, kwargs, model=ElectionsList, multi=True)
+        return utils.fetch_page(query, kwargs, is_count_exact=True, model=ElectionsList, multi=True)
 
     def _get_elections(self, kwargs):
         """Get elections from ElectionsList model."""
@@ -149,6 +149,7 @@ class ElectionView(ApiResource):
         return utils.fetch_page(
             query,
             kwargs,
+            is_count_exact=self.is_count_exact,
             count=count,
             model=self.model,
             join_columns=self.join_columns,

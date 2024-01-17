@@ -119,6 +119,7 @@ filter_match_fields = [
     ('most_recent', models.CommitteeReports.most_recent),
 ]
 
+
 # Used for endpoint '/reports/<string:entity_type>/'
 # under tag:'financial'
 # Sample urls:
@@ -149,7 +150,7 @@ class ReportsView(views.ApiResource):
         if kwargs['sort']:
             validator = args.IndicesValidator(reports_class)
             validator(kwargs['sort'])
-        page = utils.fetch_page(query, kwargs, model=reports_class, multi=True)
+        page = utils.fetch_page(query, kwargs, is_count_exact=True, model=reports_class, multi=True)
         return reports_schema().dump(page)
 
     def build_query(self, entity_type=None, **kwargs):
@@ -214,7 +215,7 @@ class CommitteeReportsView(views.ApiResource):
         if kwargs['sort']:
             validator = args.IndicesValidator(reports_class)
             validator(kwargs['sort'])
-        page = utils.fetch_page(query, kwargs, model=reports_class, multi=True)
+        page = utils.fetch_page(query, kwargs, is_count_exact=True, model=reports_class, multi=True)
         return reports_schema().dump(page)
 
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
