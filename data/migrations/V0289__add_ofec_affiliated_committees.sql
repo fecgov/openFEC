@@ -25,12 +25,19 @@ union
  select 
     aff_list.cmte_id, 
     aff_list.affiliated_cmte_id,
-    f1b.cmte_nm as affiliated_cmte_nm,
-    f1b.receipt_dt
+    case when f1b.cmte_nm is null then f1z.cmte_nm 
+    else f1b.cmte_nm end as affiliated_cmte_nm,
+    case when f1b.receipt_dt is null then f1z.receipt_dt 
+    else f1b.receipt_dt end,
+    case when f1b.filed_cmte_tp is null then f1z.filed_cmte_tp 
+    else f1b.filed_cmte_tp end,
+  	rfct.filed_cmte_tp_desc,
+    case when f1b.affiliated_relationship_cd is null then f1z.affiliated_relationship_cd 
+    else f1b.affiliated_relationship_cd end
 from aff_list
-left join fec_vsum_f1_vw f1b on aff_list.affiliated_cmte_id = f1b.cmte_id
-where f1b.most_recent = 'Y'
-order by aff_list.cmte_id, aff_list.affiliated_cmte_id
+left join fec_vsum_f1_vw f1b on aff_list.affiliated_cmte_id = f1b.cmte_id and f1b.most_recent = 'Y'
+left join fec_vsum_f1z_vw f1z on aff_list.affiliated_cmte_id = f1z.cmte_id and f1z.most_recent = 'Y'
+left join staging.ref_filed_cmte_tp rfct on (case when f1b.filed_cmte_tp is null then f1z.filed_cmte_tp else f1b.filed_cmte_tp end) = rfct.filed_cmte_tp_cd 
 WITH DATA;
 
 -- grant correct ownership/permission
