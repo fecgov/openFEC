@@ -4,7 +4,7 @@ from webservices import rest
 from tests import factories
 from tests.common import ApiBaseTest
 from webservices.rest import api
-from webservices.resources.filings import FilingsView, FilingsList, EFilingsView
+from webservices.resources.filings import FilingsView, FilingsList, EFilingsView, F2EFilingsView
 
 
 # Test 3 endpoints:
@@ -389,3 +389,160 @@ class TestEfileFiles(ApiBaseTest):
             api.url_for(EFilingsView, q_filer="ab")
         )
         self.assertEqual(response.status_code, 422)
+
+
+class TestEfileForm2(ApiBaseTest):
+    def test_filter_load_timestamp(self):
+        [
+            factories.Form2EFilingFactory(
+                candidate_id="H010",
+                file_number=2,
+                load_timestamp=datetime.date(2012, 1, 1),
+            ),
+            factories.Form2EFilingFactory(
+                candidate_id="S011",
+                file_number=3,
+                load_timestamp=datetime.date(2013, 1, 1),
+            ),
+            factories.Form2EFilingFactory(
+                candidate_id="P012",
+                file_number=4,
+                load_timestamp=datetime.date(2014, 1, 1),
+            ),
+            factories.Form2EFilingFactory(
+                candidate_id="H013",
+                file_number=5,
+                load_timestamp=datetime.date(2015, 1, 1),
+            ),
+        ]
+
+        min_load_timestamp = datetime.date(2013, 1, 1)
+        results = self._results(api.url_for(F2EFilingsView, min_load_timestamp=min_load_timestamp))
+        self.assertTrue(
+            all(each for each in results if each["load_timestamp"] >= min_load_timestamp.isoformat())
+        )
+        max_load_timestamp = datetime.date(2014, 1, 1)
+        results = self._results(api.url_for(F2EFilingsView, max_load_timestamp=max_load_timestamp))
+        self.assertTrue(
+            all(each for each in results if each["load_timestamp"] <= max_load_timestamp.isoformat())
+        )
+        results = self._results(
+            api.url_for(
+                F2EFilingsView, min_load_timestamp=min_load_timestamp, max_load_timestamp=max_load_timestamp
+            )
+        )
+        self.assertTrue(
+            all(
+                each
+                for each in results
+                if min_load_timestamp.isoformat() <= each["load_timestamp"] <= max_load_timestamp.isoformat()
+            )
+        )
+
+    def test_filter_load_timestamp_efile(self):
+
+        [
+            factories.Form2EFilingFactory(
+                committee_id="C00000013",
+                file_number=5,
+                load_timestamp=datetime.date(2015, 1, 1),
+            ),
+            factories.Form2EFilingFactory(
+                committee_id="C00000014",
+                file_number=6,
+                load_timestamp=datetime.date(2015, 1, 2),
+            ),
+        ]
+        results = self._results(
+            api.url_for(
+                F2EFilingsView,
+                min_load_timestamp=datetime.date(2015, 1, 1),
+                max_load_timestamp=datetime.date(2015, 1, 2),
+            )
+        )
+        self.assertEqual(len(results), 2)
+
+    def test_efilings(self):
+        factories.Form2EFilingFactory(candidate_id="H00000001")
+        factories.Form2EFilingFactory(candidate_id="S00000002")
+
+        results = self._results(api.url_for(F2EFilingsView))
+        self.assertEqual(len(results), 2)
+
+    def test_file_number_efilings(self):
+        """ Check filing returns with a specified file number"""
+        file_number = 1124839
+        factories.Form2EFilingFactory(file_number=file_number)
+
+        results = self._results(api.url_for(F2EFilingsView, file_number=file_number))
+        self.assertEqual(results[0]["file_number"], file_number)
+
+    def test_filter_election_state(self):
+
+        [
+            factories.Form2EFilingFactory(
+                election_state="AK",
+                file_number=5,
+                candidate_district=1,
+                candidate_office="H",
+                candidate_id="H8UGH0000",
+
+            ),
+            factories.Form2EFilingFactory(
+                election_state="IN",
+                file_number=6,
+                candidate_district=7,
+                candidate_office="H",
+                candidate_id="H00000000",
+            ),
+            factories.Form2EFilingFactory(
+                election_state="IN",
+                file_number=8,
+                candidate_district="null",
+                candidate_office="S",
+                candidate_id="S00000000",
+            ),
+            factories.Form2EFilingFactory(
+                election_state="null",
+                file_number=9,
+                candidate_district="null",
+                candidate_office="P",
+                candidate_id="P00000000",
+
+            ),
+        ]
+        results = self._results(
+            api.url_for(
+                F2EFilingsView,
+                election_state='IN',
+            )
+        )
+        self.assertEqual(len(results), 2)
+        results = self._results(
+            api.url_for(
+                F2EFilingsView,
+                candidate_office='P',
+            )
+        )
+        self.assertEqual(len(results), 1)
+        results = self._results(
+            api.url_for(
+                F2EFilingsView,
+                election_state='IN',
+            )
+        )
+        self.assertEqual(len(results), 2)
+        results = self._results(
+            api.url_for(
+                F2EFilingsView,
+                candidate_district='1',
+            )
+        )
+        self.assertEqual(len(results), 1)
+        results = self._results(
+            api.url_for(
+                F2EFilingsView,
+                candidate_id='H8UGH0000',
+            )
+        )
+        self.assertEqual(len(results), 1)
