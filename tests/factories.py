@@ -274,6 +274,18 @@ class ScheduleEFactory(BaseFactory):
         obj.payee_name_text = sa.func.to_tsvector(obj.payee_name)
 
 
+class ScheduleFFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleF
+
+
+class ScheduleFEfileFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleF
+
+    sub_id = factory.Sequence(lambda n: n)
+
+
 class ScheduleBEfileFactory(BaseFactory):
     class Meta:
         model = models.ScheduleBEfile

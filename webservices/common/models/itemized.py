@@ -725,6 +725,15 @@ class ScheduleF(PdfMixin, BaseItemized):
     __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'fec_fitem_sched_f'
 
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleF.committee_id) == CommitteeHistory.committee_id,
+            ScheduleF.election_cycle == CommitteeHistory.cycle,
+        )''',
+        lazy='joined',
+    )
+
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
     committee_designated_coordinated_expenditure_indicator = db.Column('cmte_desg_coord_exp_ind', db.String)
@@ -738,7 +747,8 @@ class ScheduleF(PdfMixin, BaseItemized):
         primaryjoin='''and_(
             foreign(ScheduleF.subordinate_committee_id) == CommitteeHistory.committee_id,
             ScheduleF.report_year + ScheduleF.report_year % 2 == CommitteeHistory.cycle,
-        )'''
+        )''',
+        lazy='joined',
     )
     subordinate_committee_id = db.Column('subord_cmte_id', db.String)
     """
