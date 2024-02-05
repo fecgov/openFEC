@@ -325,4 +325,3 @@ END$$;
 ALTER TABLE mur_arch.subjct_from_file OWNER TO fec;
 GRANT ALL ON TABLE mur_arch.subjct_from_file TO fec;
 GRANT SELECT ON TABLE mur_arch.subjct_from_file TO fec_read;
-

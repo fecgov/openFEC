@@ -93,4 +93,3 @@ LEFT JOIN finding fs ON fr.parent_finding_pk = fs.finding_pk
 ORDER BY (fr.parent_finding_pk::integer), sub_category_name;
 
 ALTER TABLE finding_rel_vw OWNER TO fec;
-

@@ -276,4 +276,3 @@ ALTER INDEX IF EXISTS public.idx_ofec_filings_all_mv_tmp_ttl_disb RENAME TO idx_
 ALTER INDEX IF EXISTS public.idx_ofec_filings_all_mv_tmp_ttl_indpndnt_exp RENAME TO idx_ofec_filings_all_mv_ttl_indpndnt_exp;
 
 ALTER INDEX IF EXISTS public.idx_ofec_filings_all_mv_tmp_ttl_rcpt RENAME TO idx_ofec_filings_all_mv_ttl_rcpt; 
-

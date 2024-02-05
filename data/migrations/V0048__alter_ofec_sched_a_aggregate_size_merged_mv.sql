@@ -108,4 +108,3 @@ ALTER INDEX ofec_sched_a_aggregate_size_merged_mv_tmp_cycle_cmte_id_tmp RENAME T
 ALTER INDEX ofec_sched_a_aggregate_size_merged_mv_tmp_count_idx_tmp RENAME TO ofec_sched_a_aggregate_size_merged_mv_count_idx;
 
 ALTER INDEX ofec_sched_a_aggregate_size_merged_mv_tmp_cmte_id_idx_tmp RENAME TO ofec_sched_a_aggregate_size_merged_mv_cmte_id_idx;
-

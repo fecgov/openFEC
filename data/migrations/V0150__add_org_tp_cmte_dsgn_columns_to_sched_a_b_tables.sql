@@ -1169,4 +1169,3 @@ $BODY$
   COST 100;
 ALTER FUNCTION disclosure.finalize_itemized_schedule_a_tables(numeric, numeric, boolean, boolean)
   OWNER TO fec;
-

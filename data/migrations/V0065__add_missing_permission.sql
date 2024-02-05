@@ -28,6 +28,3 @@ GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE real_pfile.f3pz1 TO real_file;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE real_pfile.f3pz2 TO real_file;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE real_pfile.f3z1 TO real_file;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE real_pfile.f3z2 TO real_file;
-
-
-

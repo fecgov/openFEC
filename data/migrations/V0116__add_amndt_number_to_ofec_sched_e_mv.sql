@@ -527,5 +527,3 @@ ALTER INDEX IF EXISTS idx_ofec_sched_e_mv_cand_pty_tmp RENAME TO idx_ofec_sched_
 CREATE OR REPLACE VIEW ofec_sched_e_vw AS SELECT * FROM ofec_sched_e_mv;
 ALTER VIEW ofec_sched_e_vw OWNER TO fec;
 GRANT SELECT ON ofec_sched_e_vw TO fec_read;
-
-

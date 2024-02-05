@@ -182,6 +182,3 @@ EXCEPTION
     WHEN others THEN
         RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;
 END$$;
-
-
-

@@ -35,4 +35,3 @@ $$;
 
 ALTER FUNCTION public.expand_committee_type(text)
     OWNER TO fec;
-

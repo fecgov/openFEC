@@ -151,7 +151,3 @@ drop table if exists public.ofec_sched_a_2013_2014;
 drop table if exists public.ofec_sched_a_2015_2016;
 drop table if exists public.ofec_sched_a_2017_2018;
 drop table if exists public.ofec_sched_a_master;
-
-
-
-

@@ -114,7 +114,7 @@ class EfilingsAmendments(db.Model):
                 return self.longest_chain[index + 1]
             else:
                 return 0
-        except Exception as ex:
+        except Exception:
             raise exceptions.ApiError(
                 exceptions. NEXT_IN_CHAIN_DATA_ERROR, status_code=400)
 

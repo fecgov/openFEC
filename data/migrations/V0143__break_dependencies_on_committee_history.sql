@@ -633,5 +633,3 @@ ON ofec_committee_detail_mv USING gin (treasurer_text);
 
 CREATE OR REPLACE VIEW public.ofec_committee_detail_vw AS
 SELECT * FROM public.ofec_committee_detail_mv
-
-

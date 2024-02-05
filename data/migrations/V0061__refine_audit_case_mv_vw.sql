@@ -229,4 +229,3 @@ ALTER TABLE finding_rel_vw OWNER TO fec;
 GRANT ALL ON TABLE finding_rel_vw TO fec;
 GRANT SELECT ON TABLE finding_rel_vw TO fec_read;
 GRANT SELECT ON TABLE finding_rel_vw TO openfec_read;
-

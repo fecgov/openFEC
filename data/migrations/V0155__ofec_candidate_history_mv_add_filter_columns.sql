@@ -285,4 +285,3 @@ ALTER INDEX IF EXISTS idx_ofec_candidate_history_mv_tmp_office RENAME TO idx_ofe
 ALTER INDEX IF EXISTS idx_ofec_candidate_history_mv_tmp_state RENAME TO idx_ofec_candidate_history_mv_state;
 
 ALTER INDEX IF EXISTS idx_ofec_candidate_history_mv_tmp_idx RENAME TO idx_ofec_candidate_history_mv_idx;
-

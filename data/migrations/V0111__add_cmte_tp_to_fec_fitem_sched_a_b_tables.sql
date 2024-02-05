@@ -760,4 +760,3 @@ EXCEPTION
                 RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;
 END$$;
 -- ANALYZE disclosure.fec_fitem_sched_a_2017_2018;
-

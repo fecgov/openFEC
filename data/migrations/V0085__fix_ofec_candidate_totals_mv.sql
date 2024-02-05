@@ -293,4 +293,3 @@ CREATE INDEX ofec_candidate_totals_with_0s_mv_receipts_idx
 --MV no longer needed
 
 DROP MATERIALIZED VIEW IF EXISTS ofec_candidate_history_latest_mv
-

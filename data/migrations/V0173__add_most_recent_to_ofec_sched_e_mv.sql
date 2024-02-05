@@ -567,5 +567,3 @@ ALTER INDEX IF EXISTS idx_ofec_sched_e_mv_tmp_cand_office_st RENAME TO idx_ofec_
 ALTER INDEX IF EXISTS idx_ofec_sched_e_mv_tmp_cand_pty RENAME TO idx_ofec_sched_e_mv_cand_pty;
 
 ALTER INDEX IF EXISTS idx_ofec_sched_e_mv_tmp_filing_dt RENAME TO idx_ofec_sched_e_mv_filing_dt;
-
-

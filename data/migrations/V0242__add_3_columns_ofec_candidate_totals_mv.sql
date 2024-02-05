@@ -283,4 +283,3 @@ ALTER INDEX IF EXISTS idx_ofec_candidate_totals_mv_tmp_individual_itemized_contr
 ALTER INDEX IF EXISTS idx_ofec_candidate_totals_mv_tmp_transfers_from_other_authorized_cmte RENAME TO idx_ofec_candidate_totals_mv_transfers_from_other_authorized_cmte;
 
 ALTER INDEX IF EXISTS idx_ofec_candidate_totals_mv_tmp_other_receipts RENAME TO idx_ofec_candidate_totals_mv_other_receipts;
-

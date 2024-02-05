@@ -87,4 +87,3 @@ CREATE SCHEMA staging;
 
 
 ALTER SCHEMA staging OWNER TO fec;
-

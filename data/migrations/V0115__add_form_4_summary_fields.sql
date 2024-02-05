@@ -654,6 +654,3 @@ ALTER TABLE public.ofec_totals_pacs_parties_vw
   OWNER TO fec;
 GRANT ALL ON TABLE public.ofec_totals_pacs_parties_vw TO fec;
 GRANT SELECT ON TABLE public.ofec_totals_pacs_parties_vw TO fec_read;
-
-
-

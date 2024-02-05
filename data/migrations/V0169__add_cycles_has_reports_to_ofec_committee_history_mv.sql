@@ -191,4 +191,3 @@ ALTER INDEX public.idx_ofec_committee_history_mv_tmp_first_file_date RENAME TO i
 ALTER INDEX public.idx_ofec_committee_history_mv_tmp_name RENAME TO idx_ofec_committee_history_mv_name;
 ALTER INDEX public.idx_ofec_committee_history_mv_tmp_state RENAME TO idx_ofec_committee_history_mv_state;
 ALTER INDEX public.idx_ofec_committee_history_mv_tmp_comid_state RENAME TO idx_ofec_committee_history_mv_comid_state;
-

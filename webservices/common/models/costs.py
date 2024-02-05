@@ -66,12 +66,12 @@ class Electioneering(db.Model):
     sb_link_id = db.Column(db.String)
     number_of_candidates = db.Column(db.Numeric)
     calculated_candidate_share = db.Column('calculated_cand_share', db.Numeric(30, 2),
-        doc=docs.CALCULATED_CANDIDATE_SHARE)
+                                           doc=docs.CALCULATED_CANDIDATE_SHARE)
     communication_date = db.Column('comm_dt', db.Date, doc=docs.COMMUNICATION_DT)
     public_distribution_date = db.Column('pub_distrib_dt', db.Date,
-        doc=docs.PUBLIC_DISTRIBUTION_DT)
+                                         doc=docs.PUBLIC_DISTRIBUTION_DT)
     disbursement_date = db.Column('disb_dt', db.Date, index=True,
-        doc=docs.DISBURSEMENT_DT)
+                                  doc=docs.DISBURSEMENT_DT)
     disbursement_amount = db.Column('reported_disb_amt', db.Numeric(30, 2), index=True)
     purpose_description = db.Column('disb_desc', db.String)
     report_year = db.Column('rpt_yr', db.Integer, index=True)

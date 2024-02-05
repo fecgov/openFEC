@@ -269,7 +269,12 @@ def fetch_seek_paginator(query, kwargs, index_column, is_count_exact=None, clear
         sort_column = None
 
     return SeekCoalescePaginator(
-        query, kwargs["per_page"], kwargs["sort_hide_null"], index_column, is_count_exact=is_count_exact, sort_column=sort_column, count=count
+        query, kwargs["per_page"],
+        kwargs["sort_hide_null"],
+        index_column,
+        is_count_exact=is_count_exact,
+        sort_column=sort_column,
+        count=count
     )
 
 

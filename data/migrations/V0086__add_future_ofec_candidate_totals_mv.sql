@@ -380,4 +380,3 @@ CREATE INDEX ofec_candidate_flag_mv_federal_funds_flag_idx
 
 CREATE INDEX ofec_candidate_flag_mv_has_raised_funds_idx
     ON ofec_candidate_flag_mv USING btree (has_raised_funds);
-

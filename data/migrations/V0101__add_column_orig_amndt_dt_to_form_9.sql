@@ -277,4 +277,3 @@ ALTER TABLE real_efile.f9 ADD COLUMN IF NOT EXISTS orig_amndt_dt timestamp witho
 
 -- Adding column to real_pfile.f9
 ALTER TABLE real_pfile.f9 ADD COLUMN IF NOT EXISTS orig_amndt_dt timestamp without time zone;
-

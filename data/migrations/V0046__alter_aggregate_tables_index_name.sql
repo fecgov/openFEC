@@ -64,5 +64,3 @@ alter index IF EXISTS disclosure.ofec_sched_b_aggregate_recipient_id_count renam
 alter index IF EXISTS disclosure.ofec_sched_b_aggregate_recipient_id_cycle rename to dsc_sched_b_aggregate_recipient_id_cycle;
 alter index IF EXISTS disclosure.ofec_sched_b_aggregate_recipient_id_recipient_cmte_id rename to dsc_sched_b_aggregate_recipient_id_recipient_cmte_id;
 alter index IF EXISTS disclosure.ofec_sched_b_aggregate_recipient_id_total rename to dsc_sched_b_aggregate_recipient_id_total;
-
-

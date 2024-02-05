@@ -400,4 +400,3 @@ as select * from public.ofec_totals_combined_mv;
 -- No structrual changes to ofec_totals_pacs_parties_mv, 
 --  but refresh is required to pick up the data update from the underline mv/vw immediately.
 REFRESH MATERIALIZED VIEW CONCURRENTLY ofec_totals_pacs_parties_mv;
-

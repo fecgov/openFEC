@@ -567,4 +567,3 @@ ALTER INDEX public.idx_ofec_reports_pac_party_mv_tmp_rpt_year_idx RENAME TO idx_
 ALTER INDEX public.idx_ofec_reports_pac_party_mv_tmp_tot_disb_period_idx RENAME TO idx_ofec_reports_pac_party_mv_tot_disb_period_idx;
     
 ALTER INDEX public.idx_ofec_reports_pac_party_mv_tmp_tot_rcpt_period_idx RENAME TO idx_ofec_reports_pac_party_mv_tot_rcpt_period_idx;
-

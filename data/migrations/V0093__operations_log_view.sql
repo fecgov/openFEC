@@ -33,4 +33,3 @@ CREATE OR REPLACE VIEW fec_operations_log_vw AS
 ALTER TABLE fec_operations_log_vw OWNER TO fec;
 GRANT ALL ON TABLE fec_operations_log_vw TO fec;
 GRANT SELECT ON TABLE fec_operations_log_vw TO fec_read;
-

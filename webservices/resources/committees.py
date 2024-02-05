@@ -16,7 +16,7 @@ def filter_year(model, query, years):
             sa.and_(
                 sa.or_(
                     sa.extract("year", model.last_file_date) >= year,
-                    model.last_file_date == None,
+                    model.last_file_date.is_(None),
                 ),
                 sa.extract("year", model.first_file_date) <= year,
             )
@@ -159,7 +159,7 @@ class CommitteeView(ApiResource):
 
         if candidate_id is not None:
             candidate_id = candidate_id.upper()
-            utils.check_candidate_id(candidate_id)            
+            utils.check_candidate_id(candidate_id)
             query = query.join(
                 models.CandidateCommitteeLink
             ).filter(

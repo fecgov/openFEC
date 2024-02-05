@@ -12,7 +12,7 @@
 
 General components of the application that this PR will affect:
 
--  
+-
 
 ## Screenshots
 
@@ -22,16 +22,16 @@ General components of the application that this PR will affect:
 
 Related PRs against other branches:
 
-branch | PR
------- | ------
-fix/other_pr | [link]()
-feature/other_pr | [link]()
+| branch           | PR       |
+| ---------------- | -------- |
+| fix/other_pr     | [link]() |
+| feature/other_pr | [link]() |
 
 ## How to test
 
 (Include any information that may be helpful to the reviewer(s). This might include links to sample pages to test or any local environmental setup that is unusual such as environment variable (never credentials), API version to point to, etc)
 
-- 
+-
 
 ## System architecture updates (if applicable)
 

@@ -221,4 +221,3 @@ ALTER INDEX public.idx_ofec_reports_house_senate_mv_tmp_rpt_type_idx RENAME TO i
 ALTER INDEX public.idx_ofec_reports_house_senate_mv_tmp_rpt_year_idx RENAME TO idx_ofec_reports_house_senate_mv_rpt_year_idx;
     
 ALTER INDEX public.idx_ofec_reports_house_senate_mv_tmp_tot_rcpt_period_idx RENAME TO idx_ofec_reports_house_senate_mv_tot_rcpt_period_idx;
-

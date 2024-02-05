@@ -68,4 +68,3 @@ DROP SEQUENCE IF EXISTS public.ofec_sched_b_aggregate_recipient_idx_seq1;
 DROP SEQUENCE IF EXISTS public.ofec_sched_b_aggregate_recipient_id_idx_seq1;
 
 -- sample_db.sql need to be updated to remove/update changed tables/columns
-

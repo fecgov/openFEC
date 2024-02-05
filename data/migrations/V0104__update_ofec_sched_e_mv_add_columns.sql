@@ -476,4 +476,3 @@ create index IF NOT EXISTS idx_ofec_sched_e_mv_is_notice on ofec_sched_e_mv (is_
 create index IF NOT EXISTS idx_ofec_sched_e_mv_cand_office on ofec_sched_e_mv (cand_office);
 create index IF NOT EXISTS idx_ofec_sched_e_mv_cand_office_st on ofec_sched_e_mv (cand_office_st);
 create index IF NOT EXISTS idx_ofec_sched_e_mv_cand_pty on ofec_sched_e_mv (cand_pty_affiliation);
-

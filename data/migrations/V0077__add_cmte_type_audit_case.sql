@@ -263,5 +263,3 @@ ORDER BY (fr.parent_finding_pk::text), sub_category_name;
 ALTER TABLE finding_rel_vw OWNER TO fec;
 GRANT ALL ON TABLE finding_rel_vw TO fec;
 GRANT SELECT ON TABLE finding_rel_vw TO fec_read;
-
-

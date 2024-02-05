@@ -60,6 +60,3 @@ ALTER TABLE public.efiling_amendment_chain_vw
   OWNER TO fec;
 GRANT ALL ON TABLE public.efiling_amendment_chain_vw TO fec;
 GRANT SELECT ON TABLE public.efiling_amendment_chain_vw TO fec_read;
-
-
-

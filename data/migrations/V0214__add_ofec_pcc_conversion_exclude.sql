@@ -31,4 +31,3 @@ END$$;
 ALTER TABLE public.ofec_pcc_conversion_exclude OWNER TO fec;
 GRANT ALL ON TABLE public.ofec_pcc_conversion_exclude TO fec;
 GRANT SELECT ON TABLE public.ofec_pcc_conversion_exclude TO fec_read;
-

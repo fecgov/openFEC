@@ -85,6 +85,12 @@ jobs:
             pytest
 
       - run:
+          name: Run pre-commit
+          command: |
+            . .env/bin/activate
+            pre-commit run --all-files
+
+      - run:
           name: Upload coverage report to codecov
           command: |
             . .env/bin/activate

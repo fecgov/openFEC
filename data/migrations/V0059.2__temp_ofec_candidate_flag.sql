@@ -70,4 +70,3 @@ CREATE UNIQUE INDEX ofec_candidate_flag_tmp_idx_idx1
   ON ofec_candidate_flag
   USING btree
   (idx);
-

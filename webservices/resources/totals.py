@@ -287,7 +287,10 @@ class CandidateTotalsDetailView(utils.Resource):
     def build_query(self, candidate_id=None, **kwargs):
         committee_type = self._resolve_committee_type(candidate_id=candidate_id.upper(), **kwargs)
         totals_class = models.CandidateTotalsDetail
-        totals_schema = schemas.CandidateTotalsDetailPresidentialPageSchema if committee_type == 'P' else schemas.CandidateTotalsDetailHouseSenatePageSchema
+        if committee_type == 'P':
+            totals_schema = schemas.CandidateTotalsDetailPresidentialPageSchema
+        else:
+            totals_schema = schemas.CandidateTotalsDetailHouseSenatePageSchema
         query = totals_class.query
         query = query.filter(totals_class.candidate_id == candidate_id.upper())
 

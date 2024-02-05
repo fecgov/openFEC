@@ -224,5 +224,3 @@ ALTER TABLE ofec_candidate_fulltext_audit_mv OWNER TO fec;
 
 create unique index on ofec_candidate_fulltext_audit_mv(idx);
 create index on ofec_candidate_fulltext_audit_mv using gin(fulltxt);
-
-

@@ -60,4 +60,3 @@ GRANT SELECT ON TABLE ofec_committee_fulltext_audit_mv TO openfec_read;
 GRANT ALL ON TABLE ofec_candidate_fulltext_audit_mv TO fec;
 GRANT SELECT ON TABLE ofec_candidate_fulltext_audit_mv TO fec_read;
 GRANT SELECT ON TABLE ofec_candidate_fulltext_audit_mv TO openfec_read;
-

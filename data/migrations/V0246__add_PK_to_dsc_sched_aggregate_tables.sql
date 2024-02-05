@@ -351,5 +351,3 @@ BEGIN
                 RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;
 END$$;
 	
-
-

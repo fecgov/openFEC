@@ -30,5 +30,3 @@ $BODY$
 
 ALTER FUNCTION public.is_coded_individual(text)
   OWNER TO fec;
-
-

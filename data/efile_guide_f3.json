@@ -1,1 +1,105 @@
-[["total contributions","ttl_contb_column_ttl_per","ttl_contb_col_ttl_ytd"],["total refunds","ttl_contb_ref_per","ttl_contb_ref_ytd"],["net contributions","net_contb_per","net_contb_ytd"],["total operating expenditures","ttl_op_exp_per","ttl_op_exp_ytd"],["total offsets to operating expenditures","ttl_offsets_to_op_exp_per","ttl_offsets_to_op_exp_ytd"],["net operating expenditures","net_op_exp_per","net_op_exp_ytd"],["cash on hand at close of period","coh_cop_i","N\/A"],["debts owed to committee","debts_owed_to_cmte","N\/A"],["debts owed by committee","debts_owed_by_cmte","N\/A"],["individual itemized contributions","indv_item_contb_per","ttl_indv_item_contb_ytd"],["individual unitemized contributions","indv_unitem_contb_per","ttl_indv_unitem_contb_ytd"],["total individual contributions","ttl_indv_contb_per","ttl_indv_contb_ytd"],["poltical party contributions","pol_pty_cmte_contb_per","pol_pty_cmte_contb_ytd"],["other political committees","other_pol_cmte_contb_per","other_pol_cmte_contb_ytd"],["candidate contribution","cand_contb_per","cand_contb_ytd"],["total contributions","ttl_contb_per","ttl_contb_ytd"],["transfers from other authorized committee","tranf_from_other_auth_cmte_per","tranf_from_other_auth_cmte_ytd"],["loans made by candidate","loans_made_by_cand_per","loans_made_by_cand_ytd"],["all other loans","all_other_loans_per","all_other_loans_ytd"],["total loans received","ttl_loans_per","ttl_loans_ytd"],["total offsets to operating expenditures","offsets_to_op_exp_per","offsets_to_op_exp_ytd"],["other receipts","other_receipts_per","other_receipts_ytd"],["total receipts","ttl_receipts_per_i","ttl_receipts_ytd"],["total operating expenditures","op_exp_per","op_exp_ytd"],["transfers to other authorized committee","tranf_to_other_auth_cmte_per","tranf_to_other_auth_cmte_ytd"],["loan repayments candidate loans","loan_repymts_cand_loans_per","loan_repymts_cand_loans_ytd"],["loan repayments other candidate loans","loan_repymts_other_loans_per","loan_repymts_other_loans_ytd"],["total loan repayments made","ttl_loan_repymts_per","ttl_loan_repymts_ytd"],["refunds to individuals","ref_indv_contb_per","ref_indv_contb_ytd"],["refunds to political party committees","ref_pol_pty_cmte_contb_per","ref_pol_pty_cmte_contb_ytd"],["refunds to other political committees","ref_other_pol_cmte_contb_per","ref_other_pol_cmte_contb_ytd"],["total contribution refunds","ttl_contb_ref_col_ttl_per","ref_ttl_contb_col_ttl_ytd"],["other disbursements","other_disb_per","other_disb_ytd"],["total disbursements","ttl_disb_per_i","ttl_disb_ytd"],["cash on hand at beginning of period","coh_bop","N\/A"],["total receipts ","ttl_receipts_ii","N\/A"],["subtotal","subttl_per","N\/A"],["total disbursements","ttl_disb_per_ii","N\/A"],["cash on hand at close of period","coh_cop_ii","N\/A"]]
+[
+  ["total contributions", "ttl_contb_column_ttl_per", "ttl_contb_col_ttl_ytd"],
+  ["total refunds", "ttl_contb_ref_per", "ttl_contb_ref_ytd"],
+  ["net contributions", "net_contb_per", "net_contb_ytd"],
+  ["total operating expenditures", "ttl_op_exp_per", "ttl_op_exp_ytd"],
+  [
+    "total offsets to operating expenditures",
+    "ttl_offsets_to_op_exp_per",
+    "ttl_offsets_to_op_exp_ytd"
+  ],
+  ["net operating expenditures", "net_op_exp_per", "net_op_exp_ytd"],
+  ["cash on hand at close of period", "coh_cop_i", "N/A"],
+  ["debts owed to committee", "debts_owed_to_cmte", "N/A"],
+  ["debts owed by committee", "debts_owed_by_cmte", "N/A"],
+  [
+    "individual itemized contributions",
+    "indv_item_contb_per",
+    "ttl_indv_item_contb_ytd"
+  ],
+  [
+    "individual unitemized contributions",
+    "indv_unitem_contb_per",
+    "ttl_indv_unitem_contb_ytd"
+  ],
+  [
+    "total individual contributions",
+    "ttl_indv_contb_per",
+    "ttl_indv_contb_ytd"
+  ],
+  [
+    "poltical party contributions",
+    "pol_pty_cmte_contb_per",
+    "pol_pty_cmte_contb_ytd"
+  ],
+  [
+    "other political committees",
+    "other_pol_cmte_contb_per",
+    "other_pol_cmte_contb_ytd"
+  ],
+  ["candidate contribution", "cand_contb_per", "cand_contb_ytd"],
+  ["total contributions", "ttl_contb_per", "ttl_contb_ytd"],
+  [
+    "transfers from other authorized committee",
+    "tranf_from_other_auth_cmte_per",
+    "tranf_from_other_auth_cmte_ytd"
+  ],
+  [
+    "loans made by candidate",
+    "loans_made_by_cand_per",
+    "loans_made_by_cand_ytd"
+  ],
+  ["all other loans", "all_other_loans_per", "all_other_loans_ytd"],
+  ["total loans received", "ttl_loans_per", "ttl_loans_ytd"],
+  [
+    "total offsets to operating expenditures",
+    "offsets_to_op_exp_per",
+    "offsets_to_op_exp_ytd"
+  ],
+  ["other receipts", "other_receipts_per", "other_receipts_ytd"],
+  ["total receipts", "ttl_receipts_per_i", "ttl_receipts_ytd"],
+  ["total operating expenditures", "op_exp_per", "op_exp_ytd"],
+  [
+    "transfers to other authorized committee",
+    "tranf_to_other_auth_cmte_per",
+    "tranf_to_other_auth_cmte_ytd"
+  ],
+  [
+    "loan repayments candidate loans",
+    "loan_repymts_cand_loans_per",
+    "loan_repymts_cand_loans_ytd"
+  ],
+  [
+    "loan repayments other candidate loans",
+    "loan_repymts_other_loans_per",
+    "loan_repymts_other_loans_ytd"
+  ],
+  [
+    "total loan repayments made",
+    "ttl_loan_repymts_per",
+    "ttl_loan_repymts_ytd"
+  ],
+  ["refunds to individuals", "ref_indv_contb_per", "ref_indv_contb_ytd"],
+  [
+    "refunds to political party committees",
+    "ref_pol_pty_cmte_contb_per",
+    "ref_pol_pty_cmte_contb_ytd"
+  ],
+  [
+    "refunds to other political committees",
+    "ref_other_pol_cmte_contb_per",
+    "ref_other_pol_cmte_contb_ytd"
+  ],
+  [
+    "total contribution refunds",
+    "ttl_contb_ref_col_ttl_per",
+    "ref_ttl_contb_col_ttl_ytd"
+  ],
+  ["other disbursements", "other_disb_per", "other_disb_ytd"],
+  ["total disbursements", "ttl_disb_per_i", "ttl_disb_ytd"],
+  ["cash on hand at beginning of period", "coh_bop", "N/A"],
+  ["total receipts ", "ttl_receipts_ii", "N/A"],
+  ["subtotal", "subttl_per", "N/A"],
+  ["total disbursements", "ttl_disb_per_ii", "N/A"],
+  ["cash on hand at close of period", "coh_cop_ii", "N/A"]
+]

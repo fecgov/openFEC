@@ -33,4 +33,3 @@ GRANT SELECT ON TABLE trc_election_result TO fec_read;
 
 ALTER TABLE ONLY trc_election_result
     ADD CONSTRAINT trc_election_result_pkey PRIMARY KEY (trc_election_result_id);
-

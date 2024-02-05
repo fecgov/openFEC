@@ -18,7 +18,3 @@ drop table public.fec_vsum_f57_queue_old;
 drop table public.ofec_sched_e_queue_new;
 drop table public.ofec_sched_e_queue_old;
 -- 
-
-
-
-

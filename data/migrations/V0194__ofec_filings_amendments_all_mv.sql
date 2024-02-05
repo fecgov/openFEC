@@ -129,5 +129,3 @@ DROP VIEW IF EXISTS public.ofec_amendments_vw;
 DROP MATERIALIZED VIEW IF EXISTS public.ofec_amendments_mv;
 
 DROP VIEW IF EXISTS public.ofec_processed_non_financial_amendment_chain_vw;
-
-

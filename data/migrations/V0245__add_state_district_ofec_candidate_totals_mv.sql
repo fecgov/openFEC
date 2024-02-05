@@ -296,4 +296,3 @@ ALTER INDEX IF EXISTS idx_ofec_candidate_totals_mv_tmp_state RENAME TO idx_ofec_
 ALTER INDEX IF EXISTS idx_ofec_candidate_totals_mv_tmp_district RENAME TO idx_ofec_candidate_totals_mv_district;
 
 ALTER INDEX IF EXISTS idx_ofec_candidate_totals_mv_tmp_district_number RENAME TO idx_ofec_candidate_totals_mv_district_number;
-

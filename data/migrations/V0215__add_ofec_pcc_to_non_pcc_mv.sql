@@ -165,4 +165,3 @@ AS select * from public.ofec_pcc_to_pac_mv;
 alter table public.ofec_pcc_to_pac_vw owner to fec;
 grant all on public.ofec_pcc_to_pac_vw to fec;
 grant select on public.ofec_pcc_to_pac_vw to fec_read;
-

@@ -505,5 +505,3 @@ END$$;
 ALTER TABLE disclosure.pres_nml_form_3p_24d OWNER TO fec;
 GRANT ALL ON TABLE disclosure.pres_nml_form_3p_24d TO fec;
 GRANT SELECT ON TABLE disclosure.pres_nml_form_3p_24d TO fec_read;
-
-

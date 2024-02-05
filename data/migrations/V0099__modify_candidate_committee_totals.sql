@@ -383,6 +383,3 @@ DROP MATERIALIZED VIEW IF EXISTS ofec_totals_candidate_committees_mv;
 ALTER MATERIALIZED VIEW IF EXISTS ofec_totals_candidate_committees_mv_tmp RENAME TO ofec_totals_candidate_committees_mv;
 
 SELECT rename_indexes('ofec_totals_candidate_committees_mv');
-
-
-

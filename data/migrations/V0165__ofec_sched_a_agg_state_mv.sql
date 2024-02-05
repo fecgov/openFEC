@@ -79,5 +79,3 @@ ALTER TABLE public.ofec_sched_a_agg_state_vw
   OWNER TO fec;
 GRANT ALL ON TABLE public.ofec_sched_a_agg_state_vw TO fec;
 GRANT SELECT ON TABLE public.ofec_sched_a_agg_state_vw TO fec_read;
-
-
