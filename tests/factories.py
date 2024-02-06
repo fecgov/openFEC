@@ -347,6 +347,13 @@ class EFilingsFactory(BaseFactory):
         model = models.EFilings
 
 
+class Form2EFilingFactory(BaseFactory):
+    file_number = factory.Sequence(lambda n: n)
+
+    class Meta:
+        model = models.Form2
+
+
 class BaseFilingFactory(BaseFactory):
     file_number = factory.Sequence(lambda n: n)
 
