@@ -351,6 +351,12 @@ class CommitteeFormatTest(ApiBaseTest):
             "min_last_f1_date",
             "max_last_f1_date"
         )
+        self._test_committee_date_filters(
+            "last_file_date",
+            ["2015-01-01", "2015-02-01", "2015-03-01", "2015-04-01"],
+            "min_last_file_date",
+            "max_last_file_date"
+        )
 
     def _test_committee_date_filters(self, date_field, values, min_date_field, max_date_field, alt=None, **attrs):
 
