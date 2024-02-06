@@ -153,6 +153,11 @@ class CandidateHistory(BaseCandidate):
     fec_cycles_in_election = db.Column(
         ARRAY(db.Integer), index=True, doc=docs.FEC_CYCLES_IN_ELECTION
     )
+    candidate_first_name = db.Column(db.String(100), doc=docs.CANDIDATE_FIRST_NAME)
+    candidate_last_name = db.Column(db.String(100), doc=docs.CANDIDATE_LAST_NAME)
+    candidate_middle_name = db.Column(db.String(100), doc=docs.CANDIDATE_MIDDLE_NAME)
+    candidate_prefix = db.Column(db.String(100), doc=docs.CANDIDATE_PREFIX)
+    candidate_suffix = db.Column(db.String(100), doc=docs.CANDIDATE_SUFFIX)
 
 
 class CandidateHistoryWithFuture(BaseCandidate):

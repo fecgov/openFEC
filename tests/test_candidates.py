@@ -224,6 +224,11 @@ class CandidateFormatTest(ApiBaseTest):
         self.assertEqual(response.status_code, 422)
 
 
+# Test resource: candidates.CandidateHistoryView
+# API: '/candidate/<candidate_id>/history/'
+# '/candidate/<candidate_id>/history/<cycle>/'
+# '/committee/<committee_id>/candidates/history/'
+# '/committee/<committee_id>/candidates/history/<cycle>/'
 class TestCandidateHistory(ApiBaseTest):
     def setUp(self):
         super().setUp()
@@ -380,3 +385,20 @@ class TestCandidateHistory(ApiBaseTest):
         )
         assert len(results) == 1
         assert results[0]['candidate_id'] == self.candidates[1].candidate_id
+
+    def test_parsed_candidate_name(self):
+        candidate = factories.CandidateHistoryFactory(
+            candidate_id='H8VA00035',
+            name='John Hoynes',
+            candidate_first_name='JOHN',
+            candidate_last_name='HOYNES'
+        )
+
+        results = self._results(
+            api.url_for(
+                CandidateHistoryView,
+                candidate_id=candidate.candidate_id,
+            )
+        )
+        assert len(results) == 1
+        assert results[0]['candidate_first_name'] == candidate.candidate_first_name

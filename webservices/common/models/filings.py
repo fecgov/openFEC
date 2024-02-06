@@ -1,9 +1,10 @@
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
+from sqlalchemy.ext.hybrid import hybrid_property
 from .base import db
 from webservices import docs, utils
 from webservices.common.models.dates import ReportType
 from webservices.common.models.dates import clean_report_type
-from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin, FecFileNumberMixin
+from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin, FecFileNumberMixin, name_generator
 from webservices import exceptions
 
 
@@ -180,6 +181,49 @@ class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.M
         return utils.DOCQUERY_URL + '/cgi-bin/forms/{0}/{1}/'.format(self.committee_id, self.file_number)
 
 
-# TODO: add index on committee id and filed_date
-    #  version -- this is the efiling version and I don't think we need this
-    # - let's document in API for now, see if there are objections
+class Form2(db.Model):
+    __table_args__ = {'schema': 'real_efile'}
+    __tablename__ = 'f2'
+
+    file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
+    committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
+    candidate_id = db.Column('canid', db.String, index=True, doc=docs.CANDIDATE_ID)
+    election_state = db.Column('el_state', db.String, index=True, doc=docs.ELECTION_STATE)
+    image_number = db.Column('imageno', db.BigInteger, index=True, doc=docs.IMAGE_NUMBER)
+    load_timestamp = db.Column('create_dt', db.DateTime, index=True, doc=docs.LOAD_DATE)
+    candidate_party = db.Column('pty', db.String, index=True, doc=docs.PARTY)
+    candidate_office = db.Column('office', db.String, index=True, doc=docs.OFFICE)
+    candidate_district = db.Column('district', db.String, index=True, doc=docs.DISTRICT)
+    address_str1 = db.Column('str1', db.String)
+    address_str2 = db.Column('str2', db.String)
+    address_city = db.Column('city', db.String)
+    address_state = db.Column('state', db.String)
+    address_zip = db.Column('zip', db.String)
+    election_year = db.Column('el_year', db.String)
+    committee_name = db.Column('c_name', db.String)
+    committee_address_str1 = db.Column('c_str1', db.String)
+    committee_address_str2 = db.Column('c_str2', db.String)
+    committee_address_city = db.Column('c_city', db.String)
+    committee_address_zip = db.Column('c_zip', db.String)
+    candidate_last_name = db.Column('can_lname', db.String)
+    candidate_first_name = db.Column('can_fname', db.String)
+    candidate_middle_name = db.Column('can_mname', db.String)
+
+    @hybrid_property
+    def candidate_name(self):
+        name = name_generator(
+            self.candidate_last_name,
+            self.candidate_first_name,
+            self.candidate_middle_name,
+        )
+        name = (
+            name
+            if name
+            else None
+        )
+        return name
+
+    @property
+    def pdf_url(self):
+        image_number = str(self.image_number)
+        return utils.DOCQUERY_URL + '/pdf/{0}/{1}/{1}.pdf'.format(image_number[-3:], image_number)

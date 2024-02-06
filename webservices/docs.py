@@ -147,6 +147,16 @@ This endpoint is useful for finding detailed information about a particular cand
 
 CANDIDATE_NAME = 'Name of candidate running for office'
 
+CANDIDATE_FIRST_NAME = 'First name of candidate running for office'
+
+CANDIDATE_LAST_NAME = 'Last name of candidate running for office'
+
+CANDIDATE_MIDDLE_NAME = 'Middle name of candidate running for office'
+
+CANDIDATE_PREFIX = 'Name prefix of candidate running for office'
+
+CANDIDATE_SUFFIX = 'Name suffix of candidate running for office'
+
 OFFICE_FULL = 'Federal office candidate runs for: House, Senate or presidential'
 
 OFFICE = 'Federal office candidate runs for: H, S or P'
