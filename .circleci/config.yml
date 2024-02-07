@@ -117,7 +117,7 @@ jobs:
 
       - run: $FEC_BASTION_PROD_TUNNEL # establsh tunnel/port mapping to 'prod' RDS from CircleCI container through Bastion host.
 
-      - deploy:
+      - run:
           name: Deploy API
           command: |
             export PATH=$HOME/bin:$PATH
