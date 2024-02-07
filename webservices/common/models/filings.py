@@ -4,7 +4,11 @@ from .base import db
 from webservices import docs, utils
 from webservices.common.models.dates import ReportType
 from webservices.common.models.dates import clean_report_type
-from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin, FecFileNumberMixin, name_generator
+from webservices.common.models.reports import (CsvMixin,
+                                               FecMixin,
+                                               AmendmentChainMixin,
+                                               FecFileNumberMixin,
+                                               name_generator)
 from webservices import exceptions
 
 
@@ -115,7 +119,7 @@ class EfilingsAmendments(db.Model):
                 return self.longest_chain[index + 1]
             else:
                 return 0
-        except Exception as ex:
+        except Exception:
             raise exceptions.ApiError(
                 exceptions. NEXT_IN_CHAIN_DATA_ERROR, status_code=400)
 

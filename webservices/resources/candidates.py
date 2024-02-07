@@ -118,7 +118,7 @@ class CandidateList(ApiResource):
                 )
             else:
                 query = query.filter(
-                    candidate_detail.candidate_inactive == False
+                    candidate_detail.candidate_inactive.is_(False)
                 )  # noqa
         elif 'is_active_candidate' in kwargs and not kwargs.get('is_active_candidate'):
             # load inactive candidates only if False

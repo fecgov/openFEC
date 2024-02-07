@@ -16,7 +16,7 @@ def filter_year(model, query, years):
             sa.and_(
                 sa.or_(
                     sa.extract("year", model.last_file_date) >= year,
-                    model.last_file_date == None, # noqa, is will break test
+                    model.last_file_date.is_(None),
                 ),
                 sa.extract("year", model.first_file_date) <= year,
             )

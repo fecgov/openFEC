@@ -1,170 +1,190 @@
-<!DOCTYPE html>
+<!doctype html>
 
 <html>
-<head>
-  <title>OpenFEC API Documentation</title>
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="{{ swagger_static('dist/main.css') }}" >
-  <link rel="icon" type="image/png" href="{{ swagger_static('favicon.ico') }}" />
-  <style>
-    html
-    {
-      box-sizing: border-box;
-      overflow: -moz-scrollbars-vertical;
-      overflow-y: scroll;
-    }
+  <head>
+    <title>OpenFEC API Documentation</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ swagger_static('dist/main.css') }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ swagger_static('favicon.ico') }}"
+    />
+    <style>
+      html {
+        box-sizing: border-box;
+        overflow: -moz-scrollbars-vertical;
+        overflow-y: scroll;
+      }
 
-    *,
-    *:before,
-    *:after
-    {
-      box-sizing: inherit;
-    }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
 
-    body
-    {
-    margin: 0;
-    background: #fafafa;
-    }
-    
-    label[for=user_first_name]:before
-    {
-    content: " *";
-    color: #E87723;
-    font-weight: 1000;
-    font-family: "Verdana";
-    }
+      body {
+        margin: 0;
+        background: #fafafa;
+      }
 
-    label[for=user_last_name]:before
-    {
-    content: " *";
-    color: #E87723;
-    font-weight: 1000;
-    font-family: "Verdana";
-    }
-    
-    label[for=user_email]:before
-    {
-    content: " *";
-    color: #E87723;
-    font-weight: 1000;
-    font-family: "Verdana";
-    }
+      label[for="user_first_name"]:before {
+        content: " *";
+        color: #e87723;
+        font-weight: 1000;
+        font-family: "Verdana";
+      }
 
-    #signup_head
-    {
-    font-size: 24px;
-    }
+      label[for="user_last_name"]:before {
+        content: " *";
+        color: #e87723;
+        font-weight: 1000;
+        font-family: "Verdana";
+      }
 
-    /* npm package, swagger-ui-dist@4.5.0 causes overlapping of columns(name, description) in swagger UI. Override the value of response-col_description value from width: 99 to width: unset */
-    .swagger-ui .parameters-col_description, 
-    .swagger-ui .response-col_description 
-    {
-     width:unset;
-    }
+      label[for="user_email"]:before {
+        content: " *";
+        color: #e87723;
+        font-weight: 1000;
+        font-family: "Verdana";
+      }
 
-  </style>
-</head>
+      #signup_head {
+        font-size: 24px;
+      }
 
-<body>
-  <div id="swagger-ui"></div>
+      /* npm package, swagger-ui-dist@4.5.0 causes overlapping of columns(name, description) in swagger UI. Override the value of response-col_description value from width: 99 to width: unset */
+      .swagger-ui .parameters-col_description,
+      .swagger-ui .response-col_description {
+        width: unset;
+      }
+    </style>
+  </head>
 
-  <script type="text/javascript">
-    /* {#
-      CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE #} */
-    var apiUmbrellaSignupOptions = {
+  <body>
+    <div id="swagger-ui"></div>
+
+    <script type="text/javascript">
       /* {#
+      CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE #} */
+      var apiUmbrellaSignupOptions = {
+        /* {#
         Pick a short, unique name to identify your site, like 'gsa-auctions'
         in this example. #} */
-      registrationSource: 'fec-api',
+        registrationSource: "fec-api",
 
-      /* {#
+        /* {#
         Enter the API key you signed up for and specially configured for this
         API key signup embed form. #} */
-      apiKey: "{{ api_key_signup_key }}",
+        apiKey: "{{ api_key_signup_key }}",
 
-      /* {#
+        /* {#
         Provide a URL or e-mail address to be used for customer support.
       
         The format for e-mail addresses can be given as either
         'example@example.com' or 'mailto:example@example.com'. #} */
-      contactUrl: 'mailto:APIinfo@fec.gov',
+        contactUrl: "mailto:APIinfo@fec.gov",
 
-      /* {#
+        /* {#
         Provide the name of your developer site. This will appear in the
         subject of the welcome e-mail as "Your {{siteName}} API key". #} */
-      siteName: 'openFEC',
+        siteName: "openFEC",
 
-      /* {#
+        /* {#
         Provide a sender name for who the welcome email appears from. The
         actual address will be "noreply@api.data.gov", but this will
         change the name of the displayed sender in this fashion:
         "{{emailFromName}} <noreply@api.data.gov>". #} */
-      emailFromName: 'FEC',
+        emailFromName: "FEC",
 
-      /* {#
+        /* {#
         Provide an example URL you want to show to users after they signup.
         This can be any API endpoint on your server, and you can use the
         special {{api_key}} variable to automatically substitute in the API
         key the user just signed up for. #} */
-      exampleApiUrl: 'https://api.open.fec.gov/v1/legal/search/?api_key={{ "{{api_key}}" }}',
+        exampleApiUrl:
+          'https://api.open.fec.gov/v1/legal/search/?api_key={{ "{{api_key}}" }}',
 
-      /* {#
+        /* {#
         OPTIONAL: Provide extra content to display on the signup confirmation
         page. This will be displayed below the user's API key and the example
         API URL are shown. HTML is allowed. Defaults to ""
       // signupConfirmationMessage: '', #} */
 
-      /* {#
+        /* {#
         OPTIONAL: Set to true to verify the user's e-mail address by only
         sending them their API key via e-mail, and not displaying it on the
         signup confirmation web page. Defaults to false. #} */
-      verifyEmail: true,
+        verifyEmail: true,
 
-      /* {#
+        /* {#
         OPTIONAL: Set to false to disable sending a welcome e-mail to the
         user after signing up. Defaults to true. #} */
-      sendWelcomeEmail: true,
-    };
-  </script>
-  <noscript>Please enable JavaScript to signup for an <a href="https://api.data.gov/">api.data.gov</a> API key.</noscript>
-
-  <script src="{{ swagger_static('dist/swagger-layout.js') }}"></script>
-
-  <script>
-    window.onload = function() {
-      SwaggerLayout(
-        "{{ specs_url }}",
-        document.getElementById("swagger-ui")
-      );
-      function addSignUpForm() {
-        var apiUmbrella = document.createElement('script');
-        apiUmbrella.type = 'text/javascript';
-        apiUmbrella.async = true;
-        apiUmbrella.src = 'https://api.data.gov/static/javascripts/signup_embed.js';
-        (document.getElementsByTagName('head')[0])
-        .appendChild(apiUmbrella);
-      }
-      window.setTimeout(addSignUpForm, 1000);
-    };
-  </script>
-
-  {% if PRODUCTION %}
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-      ga('set', 'anonymizeIp', true);
-      ga('set', 'forceSSL', true);
-      ga('create', 'UA-16134356-1', {
-        'cookieFlags': 'SameSite=None; Secure'
-        }
-      );
-      ga('send', 'pageview');
+        sendWelcomeEmail: true,
+      };
     </script>
-    <script id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=FEC"></script>
-  {% endif %}
-</body>
+    <noscript
+      >Please enable JavaScript to signup for an
+      <a href="https://api.data.gov/">api.data.gov</a> API key.</noscript
+    >
+
+    <script src="{{ swagger_static('dist/swagger-layout.js') }}"></script>
+
+    <script>
+      window.onload = function () {
+        SwaggerLayout("{{ specs_url }}", document.getElementById("swagger-ui"));
+        function addSignUpForm() {
+          var apiUmbrella = document.createElement("script");
+          apiUmbrella.type = "text/javascript";
+          apiUmbrella.async = true;
+          apiUmbrella.src =
+            "https://api.data.gov/static/javascripts/signup_embed.js";
+          document.getElementsByTagName("head")[0].appendChild(apiUmbrella);
+        }
+        window.setTimeout(addSignUpForm, 1000);
+      };
+    </script>
+
+    {% if PRODUCTION %}
+    <script>
+      (function (i, s, o, g, r, a, m) {
+        i["GoogleAnalyticsObject"] = r;
+        (i[r] =
+          i[r] ||
+          function () {
+            (i[r].q = i[r].q || []).push(arguments);
+          }),
+          (i[r].l = 1 * new Date());
+        (a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]);
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m);
+      })(
+        window,
+        document,
+        "script",
+        "https://www.google-analytics.com/analytics.js",
+        "ga"
+      );
+
+      ga("set", "anonymizeIp", true);
+      ga("set", "forceSSL", true);
+      ga("create", "UA-16134356-1", {
+        cookieFlags: "SameSite=None; Secure",
+      });
+      ga("send", "pageview");
+    </script>
+    <script
+      id="_fed_an_ua_tag"
+      src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=FEC"
+    ></script>
+    {% endif %}
+  </body>
 </html>
