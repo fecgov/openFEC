@@ -16,7 +16,7 @@ def filter_year(model, query, years):
             sa.and_(
                 sa.or_(
                     sa.extract("year", model.last_file_date) >= year,
-                    model.last_file_date == None,
+                    model.last_file_date == None, # noqa, is will break test
                 ),
                 sa.extract("year", model.first_file_date) <= year,
             )
@@ -53,6 +53,7 @@ class CommitteeList(ApiResource):
     ]
     filter_range_fields = [
         (("min_first_file_date", "max_first_file_date"), models.Committee.first_file_date),
+        (("min_last_file_date", "max_last_file_date"), models.Committee.last_file_date),
         (("min_first_f1_date", "max_first_f1_date"), models.Committee.first_f1_date),
         (("min_last_f1_date", "max_last_f1_date"), models.Committee.last_f1_date),
 
@@ -159,7 +160,7 @@ class CommitteeView(ApiResource):
 
         if candidate_id is not None:
             candidate_id = candidate_id.upper()
-            utils.check_candidate_id(candidate_id)            
+            utils.check_candidate_id(candidate_id)
             query = query.join(
                 models.CandidateCommitteeLink
             ).filter(
