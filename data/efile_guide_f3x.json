@@ -1,1 +1,162 @@
-[["cash on hand beginning of calendar year","N\/A","coh_begin_calendar_yr"],["cash on hand beginning of reporting period","coh_bop","N\/A"],["total receipts","ttl_receipts_sum_page_per","ttl_receipts_sum_page_ytd"],["subtotal summary","subttl_sum_page_per","subttl_sum_ytd"],["total disbursements","ttl_disb_sum_page_per","ttl_disb_sum_page_ytd"],["cash on hand close","coh_cop_per","coh_coy_ytd"],["debts owed to committee","debts_owed_to_cmte","N\/A"],["debts owed by committee","debts_owed_by_cmte","N\/A"],["individual itemized contributions","indv_item_contb_per","indv_item_contb_ytd"],["individual unitemized contributions","indv_unitem_contb_per","indv_unitem_contb_ytd"],["total individual contributions","ttl_indv_contb_per","ttl_indv_contb_ytd"],["poltical party contributions","pol_pty_cmte_contb_per_i","pol_pty_cmte_contb_ytd_i"],["other political committees","other_pol_cmte_contb_per_i","other_pol_cmte_contb_ytd_i"],["total contributions","ttl_contb_per","ttl_contb_ytd"],["transfers from affiliated committee","tranf_from_affiliated_pty_per","tranf_from_affiliated_pty_ytd"],["all loans received","all_loans_received_per","all_loans_received_ytd"],["loan repayments received","loan_repymts_received_per","loan_repymts_received_ytd"],["offsets to operating expenditures","offsets_to_op_exp_per_i","offsets_to_op_exp_ytd_i"],["fed candidate committee contribution refunds","fed_cand_contb_ref_per","fed_cand_cmte_contb_ytd"],["other fed receipts","other_fed_receipts_per","other_fed_receipts_ytd"],["transfers from nonfed account","tranf_from_nonfed_acct_per","tranf_from_nonfed_acct_ytd"],["transfers from nonfed levin","tranf_from_nonfed_levin_per","tranf_from_nonfed_levin_ytd"],["total nonfed transfers","ttl_nonfed_tranf_per","ttl_nonfed_tranf_ytd"],["total receipts","ttl_receipts_per","ttl_receipts_ytd"],["total fed receipts","ttl_fed_receipts_per","ttl_fed_receipts_ytd"],["shared fed operating expenditures","shared_fed_op_exp_per","shared_fed_op_exp_ytd"],["shared nonfed operating expenditures","shared_nonfed_op_exp_per","shared_nonfed_op_exp_ytd"],["other fed operating expenditures","other_fed_op_exp_per","other_fed_op_exp_ytd"],["total operating expenditures","ttl_op_exp_per","ttl_op_exp_ytd"],["transfers to affiliated committee","tranf_to_affliliated_cmte_per","tranf_to_affilitated_cmte_ytd"],["fed candidate committee contributions","fed_cand_cmte_contb_per","fed_cand_cmte_contb_ref_ytd"],["independent expenditures","indt_exp_per","indt_exp_ytd"],["coordinated expenditures by party","coord_exp_by_pty_cmte_per","coord_exp_by_pty_cmte_ytd"],["total loan repayments made","loan_repymts_made_per","loan_repymts_made_ytd"],["loans made","loans_made_per","loans_made_ytd"],["refunds to individuals","indv_contb_ref_per","indv_contb_ref_ytd"],["political party committee contributions","pol_pty_cmte_contb_per_ii","pol_pty_cmte_contb_ytd_ii"],["refunded other political committee contributions","other_pol_cmte_contb_per_ii","other_pol_cmte_contb_ytd_ii"],["total contribution refunds","ttl_contb_ref_per_i","ttl_contb_ref_ytd_i"],["other disbursements","other_disb_per","other_disb_ytd"],["shared fec activity","shared_fed_actvy_fed_shr_per","shared_fed_actvy_fed_shr_ytd"],["shared fed activity nonfed","shared_fed_actvy_nonfed_per","shared_fed_actvy_nonfed_ytd"],["non allocated fed election activity","non_alloc_fed_elect_actvy_per","non_alloc_fed_elect_actvy_ytd"],["total fed election activity","ttl_fed_elect_actvy_per","ttl_fed_elect_actvy_ytd"],["total disbursements","ttl_disb_per","ttl_disb_ytd"],["total fed disbursements","ttl_fed_disb_per","ttl_fed_disb_ytd"],["total contributions","ttl_contb_col_ttl_per","ttl_contb_col_ttl_ytd"],["total contribution refunds","ttl_contb_ref_per_ii","ttl_contb_ref_ytd_ii"],["net contributions","net_contb_per","net_contb_ytd"],["total fed operating expenditures","ttl_fed_op_exp_per","ttl_fed_op_exp_ytd"],["offsets to operating expenditures","offsets_to_op_exp_per_ii","offsets_to_op_exp_ytd_ii"],["net operating expenditures","net_op_exp_per","net_op_exp_ytd"]]
+[
+  ["cash on hand beginning of calendar year", "N/A", "coh_begin_calendar_yr"],
+  ["cash on hand beginning of reporting period", "coh_bop", "N/A"],
+  ["total receipts", "ttl_receipts_sum_page_per", "ttl_receipts_sum_page_ytd"],
+  ["subtotal summary", "subttl_sum_page_per", "subttl_sum_ytd"],
+  ["total disbursements", "ttl_disb_sum_page_per", "ttl_disb_sum_page_ytd"],
+  ["cash on hand close", "coh_cop_per", "coh_coy_ytd"],
+  ["debts owed to committee", "debts_owed_to_cmte", "N/A"],
+  ["debts owed by committee", "debts_owed_by_cmte", "N/A"],
+  [
+    "individual itemized contributions",
+    "indv_item_contb_per",
+    "indv_item_contb_ytd"
+  ],
+  [
+    "individual unitemized contributions",
+    "indv_unitem_contb_per",
+    "indv_unitem_contb_ytd"
+  ],
+  [
+    "total individual contributions",
+    "ttl_indv_contb_per",
+    "ttl_indv_contb_ytd"
+  ],
+  [
+    "poltical party contributions",
+    "pol_pty_cmte_contb_per_i",
+    "pol_pty_cmte_contb_ytd_i"
+  ],
+  [
+    "other political committees",
+    "other_pol_cmte_contb_per_i",
+    "other_pol_cmte_contb_ytd_i"
+  ],
+  ["total contributions", "ttl_contb_per", "ttl_contb_ytd"],
+  [
+    "transfers from affiliated committee",
+    "tranf_from_affiliated_pty_per",
+    "tranf_from_affiliated_pty_ytd"
+  ],
+  ["all loans received", "all_loans_received_per", "all_loans_received_ytd"],
+  [
+    "loan repayments received",
+    "loan_repymts_received_per",
+    "loan_repymts_received_ytd"
+  ],
+  [
+    "offsets to operating expenditures",
+    "offsets_to_op_exp_per_i",
+    "offsets_to_op_exp_ytd_i"
+  ],
+  [
+    "fed candidate committee contribution refunds",
+    "fed_cand_contb_ref_per",
+    "fed_cand_cmte_contb_ytd"
+  ],
+  ["other fed receipts", "other_fed_receipts_per", "other_fed_receipts_ytd"],
+  [
+    "transfers from nonfed account",
+    "tranf_from_nonfed_acct_per",
+    "tranf_from_nonfed_acct_ytd"
+  ],
+  [
+    "transfers from nonfed levin",
+    "tranf_from_nonfed_levin_per",
+    "tranf_from_nonfed_levin_ytd"
+  ],
+  ["total nonfed transfers", "ttl_nonfed_tranf_per", "ttl_nonfed_tranf_ytd"],
+  ["total receipts", "ttl_receipts_per", "ttl_receipts_ytd"],
+  ["total fed receipts", "ttl_fed_receipts_per", "ttl_fed_receipts_ytd"],
+  [
+    "shared fed operating expenditures",
+    "shared_fed_op_exp_per",
+    "shared_fed_op_exp_ytd"
+  ],
+  [
+    "shared nonfed operating expenditures",
+    "shared_nonfed_op_exp_per",
+    "shared_nonfed_op_exp_ytd"
+  ],
+  [
+    "other fed operating expenditures",
+    "other_fed_op_exp_per",
+    "other_fed_op_exp_ytd"
+  ],
+  ["total operating expenditures", "ttl_op_exp_per", "ttl_op_exp_ytd"],
+  [
+    "transfers to affiliated committee",
+    "tranf_to_affliliated_cmte_per",
+    "tranf_to_affilitated_cmte_ytd"
+  ],
+  [
+    "fed candidate committee contributions",
+    "fed_cand_cmte_contb_per",
+    "fed_cand_cmte_contb_ref_ytd"
+  ],
+  ["independent expenditures", "indt_exp_per", "indt_exp_ytd"],
+  [
+    "coordinated expenditures by party",
+    "coord_exp_by_pty_cmte_per",
+    "coord_exp_by_pty_cmte_ytd"
+  ],
+  [
+    "total loan repayments made",
+    "loan_repymts_made_per",
+    "loan_repymts_made_ytd"
+  ],
+  ["loans made", "loans_made_per", "loans_made_ytd"],
+  ["refunds to individuals", "indv_contb_ref_per", "indv_contb_ref_ytd"],
+  [
+    "political party committee contributions",
+    "pol_pty_cmte_contb_per_ii",
+    "pol_pty_cmte_contb_ytd_ii"
+  ],
+  [
+    "refunded other political committee contributions",
+    "other_pol_cmte_contb_per_ii",
+    "other_pol_cmte_contb_ytd_ii"
+  ],
+  ["total contribution refunds", "ttl_contb_ref_per_i", "ttl_contb_ref_ytd_i"],
+  ["other disbursements", "other_disb_per", "other_disb_ytd"],
+  [
+    "shared fec activity",
+    "shared_fed_actvy_fed_shr_per",
+    "shared_fed_actvy_fed_shr_ytd"
+  ],
+  [
+    "shared fed activity nonfed",
+    "shared_fed_actvy_nonfed_per",
+    "shared_fed_actvy_nonfed_ytd"
+  ],
+  [
+    "non allocated fed election activity",
+    "non_alloc_fed_elect_actvy_per",
+    "non_alloc_fed_elect_actvy_ytd"
+  ],
+  [
+    "total fed election activity",
+    "ttl_fed_elect_actvy_per",
+    "ttl_fed_elect_actvy_ytd"
+  ],
+  ["total disbursements", "ttl_disb_per", "ttl_disb_ytd"],
+  ["total fed disbursements", "ttl_fed_disb_per", "ttl_fed_disb_ytd"],
+  ["total contributions", "ttl_contb_col_ttl_per", "ttl_contb_col_ttl_ytd"],
+  [
+    "total contribution refunds",
+    "ttl_contb_ref_per_ii",
+    "ttl_contb_ref_ytd_ii"
+  ],
+  ["net contributions", "net_contb_per", "net_contb_ytd"],
+  [
+    "total fed operating expenditures",
+    "ttl_fed_op_exp_per",
+    "ttl_fed_op_exp_ytd"
+  ],
+  [
+    "offsets to operating expenditures",
+    "offsets_to_op_exp_per_ii",
+    "offsets_to_op_exp_ytd_ii"
+  ],
+  ["net operating expenditures", "net_op_exp_per", "net_op_exp_ytd"]
+]

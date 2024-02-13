@@ -37,7 +37,7 @@ def show_legal_data():
             logger.info("\n*** current {0} data: ***\n{1}".format(
                 mur_id,
                 json.dumps(es_client.get(index="docs", id=mur_id), indent=2, cls=DateTimeEncoder)))
-        except Exception as err:
+        except Exception:
             logger.error("current {0} not found.".format(mur_id))
 
         # ---display admin fine data:
@@ -46,7 +46,7 @@ def show_legal_data():
             logger.info("\n*** admin fine {0} data: ***\n{1}".format(
                 af_id,
                 json.dumps(es_client.get(index="docs", id=af_id), indent=2, cls=DateTimeEncoder)))
-        except Exception as err:
+        except Exception:
             logger.error("admin fine {0} not found.".format(af_id))
 
         try:
@@ -54,7 +54,7 @@ def show_legal_data():
             logger.info("\n*** admin fine {0} data: ***\n{1}".format(
                 af_id,
                 json.dumps(es_client.get(index="docs", id=af_id), indent=2, cls=DateTimeEncoder)))
-        except Exception as err:
+        except Exception:
             logger.error("admin fine {0} not found.".format(af_id))
 
         # ---display adr data:
@@ -63,7 +63,7 @@ def show_legal_data():
             logger.info("\n*** adr {0} data: ***\n{1}".format(
                 adr_id,
                 json.dumps(es_client.get(index="docs", id=adr_id), indent=2, cls=DateTimeEncoder)))
-        except Exception as err:
+        except Exception:
             logger.error("adr {0} not found.".format(adr_id))
 
         # ---display ao data:
@@ -72,7 +72,7 @@ def show_legal_data():
             logger.info("\n*** ao id {0} data: ***\n{1}".format(
                 ao_id,
                 json.dumps(es_client.get(index="docs", id=ao_id), indent=2, cls=DateTimeEncoder)))
-        except Exception as err:
+        except Exception:
             logger.error("ao_id {0} not found.".format(ao_id))
 
         # ---display archived mur data:
@@ -81,7 +81,7 @@ def show_legal_data():
             logger.info("\n*** archived {0} data: ***\n{1}".format(
                 arch_mur_id,
                 json.dumps(es_client.get(index="archived_murs", id=arch_mur_id), indent=2, cls=DateTimeEncoder)))
-        except Exception as err:
+        except Exception:
             logger.error("ao_id {0} not found.".format(arch_mur_id))
 
     except Exception as err:

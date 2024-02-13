@@ -1,13 +1,12 @@
 import sqlalchemy as sa
 
-from flask_apispec import doc, marshal_with
+from flask_apispec import doc
 
 from webservices import args
 from webservices import utils
 from webservices import docs
 from webservices import filters
 from webservices import schemas
-from webservices.utils import use_kwargs
 from webservices.common.views import ApiResource
 from webservices.common import models
 from webservices.common.models import (

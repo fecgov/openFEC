@@ -1,12 +1,9 @@
-import sqlalchemy as sa
 
 from flask_apispec import Ref, marshal_with
 from webservices import utils
 from webservices import filters
-from webservices import sorting
 from webservices import exceptions
 from webservices.common import counts
-from webservices.common import models
 from webservices.utils import use_kwargs
 
 
@@ -81,7 +78,12 @@ class ItemizedResource(ApiResource):
             count = None
         else:
             count, _ = counts.get_count(self, query)
-        return utils.fetch_seek_page(query, kwargs, self.index_column, is_count_exact=self.is_count_exact, count=count, cap=self.cap)
+        return utils.fetch_seek_page(query,
+                                     kwargs,
+                                     self.index_column,
+                                     is_count_exact=self.is_count_exact,
+                                     count=count,
+                                     cap=self.cap)
 
     def validate_kwargs(self, kwargs):
         """Custom keyword argument validation

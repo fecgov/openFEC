@@ -19,7 +19,7 @@ class OperationsLog(db.Model):
     report_type = db.Column('rpt_tp', db.String, doc=docs.REPORT_TYPE)
     summary_data_complete_date = db.Column('pass_1_entry_dt', db.DateTime, doc=docs.SUMMERY_DATA_COMPLETE_DATE)
     summary_data_verification_date = db.Column('pass_1_verified_dt', db.DateTime,
-        doc=docs.SUMMERY_DATA_VERIFICATION_DATE)
+                                               doc=docs.SUMMERY_DATA_VERIFICATION_DATE)
     transaction_data_complete_date = db.Column('pass_3_entry_done_dt', db.Date, doc=docs.TRANSACTION_DATA_COMPLETE_DATE)
 
 
