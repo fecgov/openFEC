@@ -238,11 +238,13 @@ def add_secure_headers(response):
         "default-src": "'self' *.fec.gov *.app.cloud.gov",
         "connect-src": "*.fec.gov *.cloud.gov https://api.data.gov https://www.google-analytics.com",
         "font-src": "'self' https://fonts.gstatic.com data: https://api.data.gov",
-        "frame-src": "'self' *.fec.gov *.app.cloud.gov https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/",
+        "frame-src": "'self' *.fec.gov *.app.cloud.gov https://www.google.com/recaptcha/ \
+            https://recaptcha.google.com/recaptcha/",
         "img-src": "'self' data:",
         "object-src": "'none'",
         "script-src": "'self' https://api.data.gov https://dap.digitalgov.gov https://www.google-analytics.com \
-            https://www.googletagmanager.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ 'unsafe-inline'",
+            https://www.googletagmanager.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ \
+                'unsafe-inline'",
         "style-src": "'self' https://fonts.googleapis.com https://api.data.gov 'unsafe-inline'",
         "report-uri": "/report-csp-violation/",
     }

@@ -1,1 +1,165 @@
-[["federal funds","fed_funds_per","fed_funds_ytd"],["individual itemized contributions","indv_item_contb_per","indv_item_contb_ytd"],["individual unitemized contributions","indv_unitem_contb_per","indv_unitem_contb_ytd"],["total individual contributions","indv_contb_per","indv_contb_ytd"],["political party committee contributions","pol_pty_cmte_contb_per","pol_pty_cmte_contb_ytd"],["other political committee contributions","other_pol_cmte_contb_per","other_pol_cmte_contb_ytd"],["candidate contribution","cand_contb_per","cand_contb_ytd"],["total contributions","ttl_contb_per","ttl_contb_ytd"],["transfers from other affiliated committee","tranf_from_affilated_cmte_per","tranf_from_affiliated_cmte_ytd"],["loans received from candidate","loans_received_from_cand_per","loans_received_from_cand_ytd"],["other loans received","other_loans_received_per","other_loans_received_ytd"],["total loans received","ttl_loans_received_per","ttl_loans_received_ytd"],["offsets to operating expenditures","offsets_to_op_exp_per","offsets_to_op_exp_ytd"],["offsets to fundraising expenditures","offsets_to_fndrsg_exp_per","offsets_to_fndrsg_exp_ytd"],["offsets to legal accounting","offsets_to_legal_acctg_per","offsets_to_legal_acctg_ytd"],["total offsets to operating expenditures","ttl_offsets_to_op_exp_per","ttl_offsets_to_op_exp_ytd"],["other receipts","other_receipts_per","other_receipts_ytd"],["total receipts","ttl_receipts_per","ttl_receipts_ytd"],["operating expenditures","op_exp_per","op_exp_ytd"],["transfers to other authorized committee","tranf_to_other_auth_cmte_per","tranf_to_other_auth_cmte_ytd"],["fundraising disbursements","fndrsg_disb_per","fndrsg_disb_ytd"],["exempt legal accounting disbursement","exempt_legal_acctg_disb_per","exempt_legal_acctg_disb_ytd"],["repayments loans made by candidate","repymts_loans_made_by_cand_per","repymts_loans_made_cand_ytd"],["repayments other loans","repymts_other_loans_per","repymts_other_loans_ytd"],["total loan repayments made","ttl_loan_repymts_made_per","ttl_loan_repymts_made_ytd"],["refunded individual contributions","ref_indv_contb_per","ref_indv_contb_ytd"],["refunded political party committee contributions","ref_pol_pty_cmte_contb_per","ref_pol_pty_cmte_contb_ytd"],["refunded other political committee contributions","ref_other_pol_cmte_contb_per","ref_other_pol_cmte_contb_ytd"],["total contribution refunds","ttl_contb_ref_per","ttl_contb_ref_ytd"],["other disbursements","other_disb_per","other_disb_ytd"],["total disbursements","ttl_disb_per","ttl_disb_ytd"],["items on hand liquidated","items_on_hand_liquidated","N\/A"],["Alabama","alabama_per","alabama_ytd"],["Alaska","alaska_per","alaska_ytd"],["Arizona","arizona_per","arizona_ytd"],["Arkansas","arkansas_per","arkansas_ytd"],["California","california_per","california_ytd"],["Colorado","colorado_per","colorado_ytd"],["Connecticut","connecticut_per","connecticut_ytd"],["Delaware","delaware_per","delaware_ytd"],["District Of Columbia","district_columbia_per","district_columbia_ytd"],["Florida","florida_per","florida_ytd"],["Georgia","georgia_per","georgia_ytd"],[" Hawaii","hawaii_per","hawaii_ytd"],["Idaho","idaho_per","idaho_ytd"],["Illinois","illinois_per","illinois_ytd"],["Indiana","indiana_per","indiana_ytd"],["Iowa","iowa_per","iowa_ytd"],["Kansas","kansas_per","kansas_ytd"],["Kentucky","kentucky_per","kentucky_ytd"],["Louisiana","louisiana_per","louisiana_ytd"],["Maine","maine_per","maine_ytd"],["Maryland","maryland_per","maryland_ytd"],["Massachusetts","massachusetts_per","massachusetts_ytd"],["Michigan","michigan_per","michigan_ytd"],["Minnesota","minnesota_per","minnesota_ytd"],["Mississippi","mississippi_per","mississippi_ytd"],["Missouri","missouri_per","missouri_ytd"],[" Montana","montana_per","montana_ytd"],["Nebraska","nebraska_per","nebraska_ytd"],["Nevada","nevada_per","nevada_ytd"],["New Hampshire","new_hampshire_per","new_hampshire_ytd"],["New Jersey","new_jersey_per","new_jersey_ytd"],["New Mexico","new_mexico_per","new_mexico_ytd"],["New York","new_york_per","new_york_ytd"],["North Carolina","north_carolina_per","north_carolina_ytd"],["North Dakota","north_dakota_per","north_dakota_ytd"],["Ohio","ohio_per","ohio_ytd"],["Oklahoma","oklahoma_per","oklahoma_ytd"],["Oregon","oregon_per","oregon_ytd"],["Pennsylvania","pennsylvania_per","pennsylvania_ytd"],["Rhode Island","rhode_island_per","rhode_island_ytd"],["South Carolina","south_carolina_per","south_carolina_ytd"],["South Dakota","south_dakota_per","south_dakota_ytd"],["Tennessee","tennessee_per","tennessee_ytd"],["Texas","texas_per","texas_ytd"],["Utah","utah_per","utah_ytd"],["Vermont","vermont_per","vermont_ytd"],["Virginia","virginia_per","virginia_ytd"],["Washington","washington_per","washington_ytd"],["West Virginia","west_virginia_per","west_virginia_ytd"],["Wisconsin","wisconsin_per","wisconsin_ytd"],["Wyoming","wyoming_per","wyoming_ytd"],["Puerto Rico","puerto_rico_per","puerto_rico_ytd"],["Guam","guam_per","guam_ytd"],["Virgin Islands","virgin_islands_per","virgin_islands_ytd"],["total","ttl_per","ttl_ytd"]]
+[
+  ["federal funds", "fed_funds_per", "fed_funds_ytd"],
+  [
+    "individual itemized contributions",
+    "indv_item_contb_per",
+    "indv_item_contb_ytd"
+  ],
+  [
+    "individual unitemized contributions",
+    "indv_unitem_contb_per",
+    "indv_unitem_contb_ytd"
+  ],
+  ["total individual contributions", "indv_contb_per", "indv_contb_ytd"],
+  [
+    "political party committee contributions",
+    "pol_pty_cmte_contb_per",
+    "pol_pty_cmte_contb_ytd"
+  ],
+  [
+    "other political committee contributions",
+    "other_pol_cmte_contb_per",
+    "other_pol_cmte_contb_ytd"
+  ],
+  ["candidate contribution", "cand_contb_per", "cand_contb_ytd"],
+  ["total contributions", "ttl_contb_per", "ttl_contb_ytd"],
+  [
+    "transfers from other affiliated committee",
+    "tranf_from_affilated_cmte_per",
+    "tranf_from_affiliated_cmte_ytd"
+  ],
+  [
+    "loans received from candidate",
+    "loans_received_from_cand_per",
+    "loans_received_from_cand_ytd"
+  ],
+  [
+    "other loans received",
+    "other_loans_received_per",
+    "other_loans_received_ytd"
+  ],
+  ["total loans received", "ttl_loans_received_per", "ttl_loans_received_ytd"],
+  [
+    "offsets to operating expenditures",
+    "offsets_to_op_exp_per",
+    "offsets_to_op_exp_ytd"
+  ],
+  [
+    "offsets to fundraising expenditures",
+    "offsets_to_fndrsg_exp_per",
+    "offsets_to_fndrsg_exp_ytd"
+  ],
+  [
+    "offsets to legal accounting",
+    "offsets_to_legal_acctg_per",
+    "offsets_to_legal_acctg_ytd"
+  ],
+  [
+    "total offsets to operating expenditures",
+    "ttl_offsets_to_op_exp_per",
+    "ttl_offsets_to_op_exp_ytd"
+  ],
+  ["other receipts", "other_receipts_per", "other_receipts_ytd"],
+  ["total receipts", "ttl_receipts_per", "ttl_receipts_ytd"],
+  ["operating expenditures", "op_exp_per", "op_exp_ytd"],
+  [
+    "transfers to other authorized committee",
+    "tranf_to_other_auth_cmte_per",
+    "tranf_to_other_auth_cmte_ytd"
+  ],
+  ["fundraising disbursements", "fndrsg_disb_per", "fndrsg_disb_ytd"],
+  [
+    "exempt legal accounting disbursement",
+    "exempt_legal_acctg_disb_per",
+    "exempt_legal_acctg_disb_ytd"
+  ],
+  [
+    "repayments loans made by candidate",
+    "repymts_loans_made_by_cand_per",
+    "repymts_loans_made_cand_ytd"
+  ],
+  [
+    "repayments other loans",
+    "repymts_other_loans_per",
+    "repymts_other_loans_ytd"
+  ],
+  [
+    "total loan repayments made",
+    "ttl_loan_repymts_made_per",
+    "ttl_loan_repymts_made_ytd"
+  ],
+  [
+    "refunded individual contributions",
+    "ref_indv_contb_per",
+    "ref_indv_contb_ytd"
+  ],
+  [
+    "refunded political party committee contributions",
+    "ref_pol_pty_cmte_contb_per",
+    "ref_pol_pty_cmte_contb_ytd"
+  ],
+  [
+    "refunded other political committee contributions",
+    "ref_other_pol_cmte_contb_per",
+    "ref_other_pol_cmte_contb_ytd"
+  ],
+  ["total contribution refunds", "ttl_contb_ref_per", "ttl_contb_ref_ytd"],
+  ["other disbursements", "other_disb_per", "other_disb_ytd"],
+  ["total disbursements", "ttl_disb_per", "ttl_disb_ytd"],
+  ["items on hand liquidated", "items_on_hand_liquidated", "N/A"],
+  ["Alabama", "alabama_per", "alabama_ytd"],
+  ["Alaska", "alaska_per", "alaska_ytd"],
+  ["Arizona", "arizona_per", "arizona_ytd"],
+  ["Arkansas", "arkansas_per", "arkansas_ytd"],
+  ["California", "california_per", "california_ytd"],
+  ["Colorado", "colorado_per", "colorado_ytd"],
+  ["Connecticut", "connecticut_per", "connecticut_ytd"],
+  ["Delaware", "delaware_per", "delaware_ytd"],
+  ["District Of Columbia", "district_columbia_per", "district_columbia_ytd"],
+  ["Florida", "florida_per", "florida_ytd"],
+  ["Georgia", "georgia_per", "georgia_ytd"],
+  [" Hawaii", "hawaii_per", "hawaii_ytd"],
+  ["Idaho", "idaho_per", "idaho_ytd"],
+  ["Illinois", "illinois_per", "illinois_ytd"],
+  ["Indiana", "indiana_per", "indiana_ytd"],
+  ["Iowa", "iowa_per", "iowa_ytd"],
+  ["Kansas", "kansas_per", "kansas_ytd"],
+  ["Kentucky", "kentucky_per", "kentucky_ytd"],
+  ["Louisiana", "louisiana_per", "louisiana_ytd"],
+  ["Maine", "maine_per", "maine_ytd"],
+  ["Maryland", "maryland_per", "maryland_ytd"],
+  ["Massachusetts", "massachusetts_per", "massachusetts_ytd"],
+  ["Michigan", "michigan_per", "michigan_ytd"],
+  ["Minnesota", "minnesota_per", "minnesota_ytd"],
+  ["Mississippi", "mississippi_per", "mississippi_ytd"],
+  ["Missouri", "missouri_per", "missouri_ytd"],
+  [" Montana", "montana_per", "montana_ytd"],
+  ["Nebraska", "nebraska_per", "nebraska_ytd"],
+  ["Nevada", "nevada_per", "nevada_ytd"],
+  ["New Hampshire", "new_hampshire_per", "new_hampshire_ytd"],
+  ["New Jersey", "new_jersey_per", "new_jersey_ytd"],
+  ["New Mexico", "new_mexico_per", "new_mexico_ytd"],
+  ["New York", "new_york_per", "new_york_ytd"],
+  ["North Carolina", "north_carolina_per", "north_carolina_ytd"],
+  ["North Dakota", "north_dakota_per", "north_dakota_ytd"],
+  ["Ohio", "ohio_per", "ohio_ytd"],
+  ["Oklahoma", "oklahoma_per", "oklahoma_ytd"],
+  ["Oregon", "oregon_per", "oregon_ytd"],
+  ["Pennsylvania", "pennsylvania_per", "pennsylvania_ytd"],
+  ["Rhode Island", "rhode_island_per", "rhode_island_ytd"],
+  ["South Carolina", "south_carolina_per", "south_carolina_ytd"],
+  ["South Dakota", "south_dakota_per", "south_dakota_ytd"],
+  ["Tennessee", "tennessee_per", "tennessee_ytd"],
+  ["Texas", "texas_per", "texas_ytd"],
+  ["Utah", "utah_per", "utah_ytd"],
+  ["Vermont", "vermont_per", "vermont_ytd"],
+  ["Virginia", "virginia_per", "virginia_ytd"],
+  ["Washington", "washington_per", "washington_ytd"],
+  ["West Virginia", "west_virginia_per", "west_virginia_ytd"],
+  ["Wisconsin", "wisconsin_per", "wisconsin_ytd"],
+  ["Wyoming", "wyoming_per", "wyoming_ytd"],
+  ["Puerto Rico", "puerto_rico_per", "puerto_rico_ytd"],
+  ["Guam", "guam_per", "guam_ytd"],
+  ["Virgin Islands", "virgin_islands_per", "virgin_islands_ytd"],
+  ["total", "ttl_per", "ttl_ytd"]
+]

@@ -151,7 +151,7 @@ class ScheduleA(BaseItemized):
     conduit_committee_street2 = db.Column('conduit_cmte_st2', db.String)
     conduit_committee_city = db.Column('conduit_cmte_city', db.String)
     conduit_committee_state = db.Column('conduit_cmte_st', db.String)
-    conduit_committee_zip = db.Column('conduit_cmte_zip', db.Integer)
+    conduit_committee_zip = db.Column('conduit_cmte_zip', db.String)
 
     donor_committee_name = db.Column('donor_cmte_nm', db.String)
     national_committee_nonfederal_account = db.Column('national_cmte_nonfed_acct', db.String)
@@ -211,7 +211,7 @@ class ScheduleAEfile(BaseRawItemized):
     conduit_committee_street2 = db.Column('other_str2', db.String)
     conduit_committee_city = db.Column('other_city', db.String)
     conduit_committee_state = db.Column('other_state', db.String)
-    conduit_committee_zip = db.Column('other_zip', db.Integer)
+    conduit_committee_zip = db.Column('other_zip', db.String)
     pgo = db.Column(db.String)
 
     committee = db.relationship(
@@ -358,7 +358,7 @@ class ScheduleB(BaseItemized):
     conduit_committee_street2 = db.Column('conduit_cmte_st2', db.String)
     conduit_committee_city = db.Column('conduit_cmte_city', db.String)
     conduit_committee_state = db.Column('conduit_cmte_st', db.String)
-    conduit_committee_zip = db.Column('conduit_cmte_zip', db.Integer)
+    conduit_committee_zip = db.Column('conduit_cmte_zip', db.String)
 
     ref_disp_excess_flg = db.Column('ref_disp_excess_flg', db.String)
     comm_dt = db.Column('comm_dt', db.Date)
@@ -439,7 +439,7 @@ class ScheduleC(PdfMixin, BaseItemized):
     loan_source_street_2 = db.Column('loan_src_st2', db.String)
     loan_source_city = db.Column('loan_src_city', db.String)
     loan_source_state = db.Column('loan_src_st', db.String)
-    loan_source_zip = db.Column('loan_src_zip', db.Integer)
+    loan_source_zip = db.Column('loan_src_zip', db.String)
     loan_source_name = db.Column('loan_src_nm', db.String, doc=docs.LOAN_SOURCE)
     loan_source_name_text = db.Column(TSVECTOR)
     entity_type = db.Column('entity_tp', db.String)
@@ -603,7 +603,7 @@ class ScheduleE(PdfMixin, BaseItemized):
     conduit_committee_street2 = db.Column('conduit_cmte_st2', db.String)
     conduit_committee_city = db.Column('conduit_cmte_city', db.String)
     conduit_committee_state = db.Column('conduit_cmte_st', db.String)
-    conduit_committee_zip = db.Column('conduit_cmte_zip', db.Integer)
+    conduit_committee_zip = db.Column('conduit_cmte_zip', db.String)
     # Transaction meta info
     independent_sign_name = db.Column('indt_sign_nm', db.String)
     independent_sign_date = db.Column('indt_sign_dt', db.Date)
@@ -791,7 +791,7 @@ class ScheduleF(PdfMixin, BaseItemized):
     conduit_committee_street2 = db.Column('conduit_cmte_st2', db.String)
     conduit_committee_city = db.Column('conduit_cmte_city', db.String)
     conduit_committee_state = db.Column('conduit_cmte_st', db.String)
-    conduit_committee_zip = db.Column('conduit_cmte_zip', db.Integer)
+    conduit_committee_zip = db.Column('conduit_cmte_zip', db.String)
     action_code = db.Column('action_cd', db.String)
     action_code_full = db.Column('action_cd_desc', db.String)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)

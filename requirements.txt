@@ -10,12 +10,13 @@ Flask-RESTful==0.3.9
 Flask-SQLAlchemy==2.5.1
 gevent==23.9.1
 gunicorn==19.10.0
-GitPython==3.1.35
+GitPython==3.1.41
 icalendar==4.0.2
 invoke==0.15.0
 kombu==5.2.4 # Starting from celery 5.x release, the minimum required version is Kombu 5.x
 networkx==2.6.2
 prance[osv]==0.22.11.4.0
+pre-commit==2.21.0 #client-side hook triggered by operations like git commit
 psycopg2-binary==2.9.1
 python-dateutil==2.8.1
 python-dotenv>=0.20.0 # Sets variable defaults in .flaskenv file
