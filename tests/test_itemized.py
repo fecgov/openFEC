@@ -1022,6 +1022,16 @@ class TestScheduleB(ApiBaseTest):
             assert len(results) == 1
             assert results[0][column.key] == values[0]
 
+    def test_schedule_b_disbursement_purpose_category_filter(self):
+        factories.ScheduleBFactory(disbursement_purpose_category='POLLING')
+        factories.ScheduleBFactory(disbursement_purpose_category='EVENTS')
+        factories.ScheduleBFactory(disbursement_purpose_category='REFUNDS')
+
+        results = self._results(
+            api.url_for(ScheduleBView, disbursement_purpose_category=['polling', 'refunds'])
+        )
+        self.assertEqual(len(results), 2)
+
 
 # Test endpoints:
 # /schedules/schedule_e/ (sched_e.ScheduleEView)

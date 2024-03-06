@@ -105,7 +105,7 @@ class TestCommitteeAggregates(ApiBaseTest):
         aggregate = factories.ScheduleBByPurposeFactory(
             committee_id=committee.committee_id,
             cycle=committee.cycle,
-            purpose='ADMINISTRATIVE EXPENSES',
+            purpose='ADMINISTRATIVE',
         )
         results = self._results(
             api.url_for(
@@ -118,7 +118,7 @@ class TestCommitteeAggregates(ApiBaseTest):
         self.assertEqual(len(results), 1)
         expected = {
             'committee_id': committee.committee_id,
-            'purpose': 'ADMINISTRATIVE EXPENSES',
+            'purpose': 'ADMINISTRATIVE',
             'cycle': 2012,
             'total': aggregate.total,
             'count': aggregate.count,
