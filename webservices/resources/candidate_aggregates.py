@@ -7,7 +7,7 @@ from webservices import utils
 from webservices import docs
 from webservices import filters
 from webservices import schemas
-from webservices.common.views import ApiResource
+from webservices.common.views import ApiResource, NoCapResource
 from webservices.common import models
 from webservices.common.models import (
     CandidateCommitteeLink,
@@ -82,7 +82,7 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
 @doc(
     tags=['receipts'], description=docs.SCHEDULE_A_SIZE_CANDIDATE_TAG,
 )
-class ScheduleABySizeCandidateView(ApiResource):
+class ScheduleABySizeCandidateView(NoCapResource):
     schema = schemas.ScheduleABySizeCandidateSchema
     page_schema = schemas.ScheduleABySizeCandidatePageSchema()
     sort_option = [
@@ -117,12 +117,14 @@ class ScheduleABySizeCandidateView(ApiResource):
 
 # used for 'schedules/schedule_a/by_state/by_candidate/'
 # under tag: receipts
-# Ex: http://127.0.0.1:5000/v1/schedules/schedule_a/by_state/by_candidate/?sort=state&candidate_id=H8CA05035
+# Ex1: http://127.0.0.1:5000/v1/schedules/schedule_a/by_state/by_candidate/?sort=state&candidate_id=H8CA05035
 # &cycle=2022&election_full=true
+# Ex2: http://127.0.0.1:5000/v1/schedules/schedule_a/by_state/by_candidate/?sort=state&candidate_id=P00014530&
+# candidate_id=P80000722&candidate_id=P80001571&cycle=2020&election_full=true&per_page=200
 @doc(
     tags=['receipts'], description=docs.SCHEDULE_A_STATE_CANDIDATE_TAG,
 )
-class ScheduleAByStateCandidateView(ApiResource):
+class ScheduleAByStateCandidateView(NoCapResource):
     schema = schemas.ScheduleAByStateCandidateSchema
     page_schema = schemas.ScheduleAByStateCandidatePageSchema()
     sort_option = [
@@ -164,7 +166,7 @@ class ScheduleAByStateCandidateView(ApiResource):
 @doc(
     tags=['receipts'], description=docs.SCHEDULE_A_STATE_CANDIDATE_TOTAL_TAG,
 )
-class ScheduleAByStateCandidateTotalsView(ApiResource):
+class ScheduleAByStateCandidateTotalsView(NoCapResource):
     schema = schemas.ScheduleAByStateCandidateSchema
     page_schema = schemas.ScheduleAByStateCandidatePageSchema()
     sort_option = [

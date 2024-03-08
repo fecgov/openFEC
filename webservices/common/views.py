@@ -132,3 +132,35 @@ class ItemizedResource(ApiResource):
                 ),
                 status_code=422,
             )
+
+
+# return all results, per_page without cap (cap=0). It is used for:
+# ScheduleABySizeCandidateView
+# ScheduleAByStateCandidateView
+# ScheduleAByStateCandidateTotalsView
+class NoCapResource(utils.Resource):
+
+    args = {}
+    model = None
+    schema = None
+    page_schema = None
+    index_column = None
+    unique_column = None
+    filter_match_fields = []
+    filter_multi_fields = []
+    filter_range_fields = []
+    filter_fulltext_fields = []
+    filter_overlap_fields = []
+    query_options = []
+    join_columns = {}
+    aliases = {}
+    cap = ''
+
+    @use_kwargs(Ref('args'))
+    @marshal_with(Ref('page_schema'))
+    def get(self, *args, **kwargs):
+        query = self.build_query(*args, **kwargs)
+        multi = False
+        if isinstance(kwargs['sort'], (list, tuple)):
+            multi = True
+        return utils.fetch_page(query, kwargs, multi=multi, cap=0, is_count_exact=True)
