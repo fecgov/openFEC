@@ -146,7 +146,7 @@ RESTRICT_MESSAGE = "We apologize for the inconvenience, but we are temporarily "
     "blocking API traffic. Please contact apiinfo@fec.gov if this is an urgent issue."
 
 # list of blocked user agent strings: ex: Googlebot, Bingbot, etc that will be result in the request
-# being blocked if the user-agent header contains any of the specified strings 
+# being blocked if the user-agent header contains any of the specified strings
 BLOCKED_USER_AGENTS = utils.split_env_var(env.get_credential('FEC_API_BLOCKED_USER_AGENTS', ''))
 
 
@@ -182,9 +182,8 @@ def limit_access_based_on_request():
                     abort(503, RESTRICT_MESSAGE)
     user_agent = request.headers.get('User-Agent')
     if user_agent and BLOCKED_USER_AGENTS:
-        for blocked_agent in BLOCKED_USER_AGENTS:
-            if  len(blocked_agent) > 0 and blocked_agent in user_agent:
-                abort(403)  # Too many requests
+        if user_agent in BLOCKED_USER_AGENTS:
+            abort(403)  # Forbidden
 
 
 def get_cache_header(url):
