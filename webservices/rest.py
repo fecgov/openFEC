@@ -181,11 +181,11 @@ def limit_access_based_on_request():
                     # Service unavailable
                     abort(503, RESTRICT_MESSAGE)
     user_agent = request.headers.get('User-Agent')
-    if user_agent and BLOCKED_USER_AGENTS:
-        for blocked_agent in BLOCKED_USER_AGENTS:
-            # user agent contains blocked agent string
-            if blocked_agent in user_agent:
-                abort(403)  # Forbidden
+    # if user_agent and BLOCKED_USER_AGENTS:
+    #     for blocked_agent in BLOCKED_USER_AGENTS:
+    #         # user agent contains blocked agent string
+    #         if blocked_agent in user_agent:
+    #             abort(403)  # Forbidden
 
 
 def get_cache_header(url):
