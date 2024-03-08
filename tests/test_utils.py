@@ -326,6 +326,18 @@ class TestEnvVarSplit(TestCase):
             result = utils.split_env_var(test_case)
             self.assertEqual(result, expected)
 
+    def test_empty_env_var_split(self):
+        "When env var is blank or falsy, return empty list"
+        test_cases = [
+            None,
+            "",
+            [],
+        ]
+        expected = []
+        for test_case in test_cases:
+            result = utils.split_env_var(test_case)
+            self.assertEqual(result, expected)
+
 
 class TestPercentages(TestCase):
     def test_get_percentage(self):
