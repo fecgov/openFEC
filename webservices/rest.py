@@ -145,9 +145,13 @@ RESTRICT_TRAFFIC = env.get_credential('FEC_API_RESTRICT_TRAFFIC', False)
 RESTRICT_MESSAGE = "We apologize for the inconvenience, but we are temporarily " \
     "blocking API traffic. Please contact apiinfo@fec.gov if this is an urgent issue."
 
+# list of blocked user agent strings: ex: Googlebot, Bingbot, etc that will be result in the request
+# being blocked if the user-agent header contains any of the specified strings 
+BLOCKED_USER_AGENTS = utils.split_env_var(env.get_credential('FEC_API_BLOCKED_USER_AGENTS', ''))
+
 
 @app.before_request
-def limit_remote_addr():
+def limit_access_based_on_request():
     """
     If `FEC_API_USE_PROXY` is set:
     - Reject all requests that are not routed through the API Umbrella
@@ -176,6 +180,10 @@ def limit_remote_addr():
                 if request_api_key_id not in BYPASS_RESTRICTION_API_KEY_IDS:
                     # Service unavailable
                     abort(503, RESTRICT_MESSAGE)
+    user_agent = request.headers.get('User-Agent')
+    for blocked_agent in BLOCKED_USER_AGENTS:
+        if  len(blocked_agent) > 0 and blocked_agent in user_agent:
+            abort(429)  # Too many requests
 
 
 def get_cache_header(url):
