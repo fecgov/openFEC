@@ -147,7 +147,7 @@ RESTRICT_MESSAGE = "We apologize for the inconvenience, but we are temporarily "
 
 # list of blocked user agent strings: ex: Googlebot, Bingbot, etc that will be result in the request
 # being blocked if the user-agent header contains any of the specified strings
-BLOCKED_USER_AGENTS = utils.split_env_var(env.get_credential('FEC_API_BLOCKED_USER_AGENTS', ''))
+BLOCKED_USER_AGENTS = utils.split_env_var(env.get_credential('FEC_API_BLOCKED_USER_AGENTS'))
 
 
 @app.before_request
