@@ -286,6 +286,19 @@ def make_seek_args(field=fields.Int, description=None):
     }
 
 
+disbursment_purpose_list = ['ADMINISTRATIVE',
+                            'ADVERTISING',
+                            'CONTRIBUTIONS',
+                            'EVENTS',
+                            'FUNDRAISING',
+                            'LOAN-REPAYMENTS',
+                            'MATERIALS',
+                            'OTHER',
+                            'POLLING',
+                            'REFUNDS',
+                            'TRANSFERS',
+                            'TRAVEL']
+
 names = {
     'q': fields.List(Keyword, required=True, description='Name (candidate or committee) to search for'),
 }
@@ -743,7 +756,8 @@ schedule_a_by_contributor = {
 
 schedule_b_by_purpose = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'purpose': fields.List(Keyword, description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
+    'purpose': fields.List(IStr(validate=validate.OneOf(disbursment_purpose_list)),
+                           description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
 }
 
@@ -762,7 +776,8 @@ schedule_b_by_recipient_id = {
 schedule_b = {
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
     'disbursement_description': fields.List(Keyword, description=docs.DISBURSEMENT_DESCRIPTION),
-    'disbursement_purpose_category': fields.List(IStr, description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
+    'disbursement_purpose_category': fields.List(IStr(validate=validate.OneOf(disbursment_purpose_list)),
+                                                 description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
     'last_disbursement_amount': fields.Float(missing=None, description=docs.LAST_DISBURSEMENT_AMOUNT),
     'last_disbursement_date': Date(missing=None, description=docs.LAST_DISBURSEMENT_DATE),
     'line_number': fields.Str(description=docs.LINE_NUMBER),

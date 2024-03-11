@@ -173,9 +173,7 @@ class ScheduleBByPurposeView(AggregateResource):
     filter_multi_fields = [
         ('cycle', models.ScheduleBByPurpose.cycle),
         ('committee_id', models.ScheduleBByPurpose.committee_id),
-    ]
-    filter_fulltext_fields = [
-        ('purpose', models.ScheduleBByPurpose.purpose),
+        ('purpose', models.ScheduleBByPurpose.purpose)
     ]
 
 
