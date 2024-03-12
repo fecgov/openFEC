@@ -47,7 +47,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
 
 1. Ensure you have the following requirements installed:
 
-   - Python (the latest 3.9 release, which includes `pip` and a built-in version of `virtualenv` called `venv`).
+   - Python (the latest 3.10 release, which includes `pip` and a built-in version of `virtualenv` called `venv`).
    - The latest long term support (LTS) or stable release of Node.js (which includes npm)
    - PostgreSQL (the latest 13 release).
      - Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
