@@ -105,7 +105,7 @@ class TestCommitteeAggregates(ApiBaseTest):
         aggregate = factories.ScheduleBByPurposeFactory(
             committee_id=committee.committee_id,
             cycle=committee.cycle,
-            purpose='ADMINISTRATIVE EXPENSES',
+            purpose='ADMINISTRATIVE',
         )
         results = self._results(
             api.url_for(
@@ -118,7 +118,7 @@ class TestCommitteeAggregates(ApiBaseTest):
         self.assertEqual(len(results), 1)
         expected = {
             'committee_id': committee.committee_id,
-            'purpose': 'ADMINISTRATIVE EXPENSES',
+            'purpose': 'ADMINISTRATIVE',
             'cycle': 2012,
             'total': aggregate.total,
             'count': aggregate.count,
@@ -587,7 +587,7 @@ class TestScheduleACandidateAggregates(ApiBaseTest):
             fec_election_year=self.next_cycle,
         )
 
-# start --- test '/schedules/schedule_a/by_size/by_candidate/' (candidate_aggregates.ScheduleABySizeCandidateView)
+    # start --- test '/schedules/schedule_a/by_size/by_candidate/' (candidate_aggregates.ScheduleABySizeCandidateView)
     def test_schedule_a_by_size_candidate(self):
         [
             factories.ScheduleABySizeFactory(
@@ -646,6 +646,18 @@ class TestScheduleACandidateAggregates(ApiBaseTest):
             'count': 40,
         }
         assert results[0] == expected
+
+    def test_schedule_a_by_size_candidate_no_cap_per_page(self):
+        # when per_page >100 (=101), api call no error that means no cap for per_page value
+        response = self.app.get(
+            api.url_for(
+                ScheduleABySizeCandidateView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                per_page=101
+            )
+        )
+        self.assertEqual(response.status_code, 200)
 
     def test_sort_validation_schedule_a_by_size_candidate(self):
         [
@@ -774,6 +786,18 @@ class TestScheduleACandidateAggregates(ApiBaseTest):
         }
         assert results[0] == expected
 
+    def test_schedule_a_by_state_candidate_no_cap_per_page(self):
+        # when per_page =101 (>100), api call no error that means no cap for per_page value
+        response = self.app.get(
+            api.url_for(
+                ScheduleAByStateCandidateView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                per_page=101
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+
     def test_sort_validation_schedule_a_by_state_candidate(self):
         [
             factories.ScheduleAByStateFactory(
@@ -883,6 +907,18 @@ class TestScheduleACandidateAggregates(ApiBaseTest):
             'count': 100,
         }
         assert results[0] == expected
+
+    def test_schedule_a_by_state_candidate_totals_no_cap_per_page(self):
+        # when per_page =101 (>100), api call no error that means no cap for per_page value
+        response = self.app.get(
+            api.url_for(
+                ScheduleAByStateCandidateTotalsView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                per_page=101
+            )
+        )
+        self.assertEqual(response.status_code, 200)
 
     def test_sort_validation_schedule_a_by_state_candidate_totals(self):
         [
