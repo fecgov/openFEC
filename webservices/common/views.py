@@ -19,6 +19,7 @@ class ApiResource(utils.Resource):
     filter_multi_fields = []
     filter_range_fields = []
     filter_fulltext_fields = []
+    filter_fulltext_fields_NA = []
     filter_overlap_fields = []
     query_options = []
     join_columns = {}
@@ -53,6 +54,7 @@ class ApiResource(utils.Resource):
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields)
         query = filters.filter_range(query, kwargs, self.filter_range_fields)
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
+        query = filters.filter_fulltext_NA(query, kwargs, self.filter_fulltext_fields_NA)
         query = filters.filter_overlap(query, kwargs, self.filter_overlap_fields)
         if _apply_options:
             query = query.options(*self.query_options)

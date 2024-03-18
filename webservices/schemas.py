@@ -1075,9 +1075,33 @@ augment_itemized_aggregate_models(
     models.ScheduleAByZip,
     models.ScheduleABySize,
     models.ScheduleAByState,
-    models.ScheduleAByEmployer,
-    models.ScheduleAByOccupation,
+    # models.ScheduleAByEmployer,
+    # models.ScheduleAByOccupation,
     models.ScheduleBByPurpose,
+)
+
+ScheduleAByEmployerSchema = make_schema(
+    models.ScheduleAByEmployer,
+    fields={
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'employer': ma.fields.Str(),
+    },
+    options={'exclude': ('idx', 'committee', 'employer_text',)}
+)
+ScheduleAByEmployerPageSchema = make_page_schema(
+    ScheduleAByEmployerSchema
+)
+
+ScheduleAByOccupationSchema = make_schema(
+    models.ScheduleAByOccupation,
+    fields={
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'employer': ma.fields.Str(),
+    },
+    options={'exclude': ('idx', 'committee', 'occupation_text',)}
+)
+ScheduleAByOccupationPageSchema = make_page_schema(
+    ScheduleAByOccupationSchema
 )
 
 make_aggregate_schema = functools.partial(
