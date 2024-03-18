@@ -140,9 +140,7 @@ class TestCommitteeAggregates(ApiBaseTest):
                 ScheduleBByRecipientView,
                 committee_id=committee.committee_id,
                 cycle=2012,
-                recipient_name='Starboard Strategies',
-            )
-        )
+                recipient_name='Starboard Strategies',))
         self.assertEqual(len(results), 1)
         expected = {
             'committee_id': committee.committee_id,
