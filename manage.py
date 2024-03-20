@@ -156,12 +156,14 @@ def check_long_queries(minutes):
     SQL = """
         SELECT *
         FROM pg_stat_activity
-        WHERE lower(query) like 'select %'
+        WHERE datname <>'rdsadmin'
+        and usename ='fec_api'
+        and lower(query) like 'select %'
         and lower(query) not like '%refresh%'
         and lower(query) not like '%rollback%'
         and (now() - pg_stat_activity.query_start) >= interval :minutes
         order by pg_stat_activity.query_start desc
-        LIMIT 3;
+        LIMIT 5;
         """
 
     results = db.engine.execute(sa.text(SQL), minutes=f"{minutes} minutes")
@@ -181,7 +183,9 @@ def clear_long_queries(minutes):
     SQL = """
         SELECT pg_terminate_backend(pid)
         FROM pg_stat_activity
-        WHERE lower(query) like 'select %'
+        WHERE datname <>'rdsadmin'
+        and usename ='fec_api'
+        and lower(query) like 'select %'
         and lower(query) not like '%refresh%'
         and lower(query) not like '%rollback%'
         and (now() - pg_stat_activity.query_start) >= interval :minutes
