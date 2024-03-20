@@ -148,6 +148,57 @@ def cf_startup():
         subprocess.Popen(["python", "cli.py", "refresh_materialized"])
 
 
+def check_long_queries(minutes):
+    """
+    Check for queries running longer than interval, default is 5
+    """
+
+    SQL = """
+        SELECT *
+        FROM pg_stat_activity
+        WHERE datname <>'rdsadmin'
+        and usename ='fec_api'
+        and lower(query) like 'select %'
+        and lower(query) not like '%refresh%'
+        and lower(query) not like '%rollback%'
+        and (now() - pg_stat_activity.query_start) >= interval :minutes
+        order by pg_stat_activity.query_start desc;
+        """
+
+    results = db.engine.execute(sa.text(SQL), minutes=f"{minutes} minutes")
+    rows = results.fetchall()
+
+    for row in rows:
+        print(row)
+    total_rows = results.rowcount
+    print("Total: ", total_rows)
+
+
+def clear_long_queries(minutes):
+    """
+    Check for queries running longer than interval minutes, default is 5
+    """
+
+    SQL = """
+        SELECT pg_terminate_backend(pid)
+        FROM pg_stat_activity
+        WHERE datname <>'rdsadmin'
+        and usename ='fec_api'
+        and lower(query) like 'select %'
+        and lower(query) not like '%refresh%'
+        and lower(query) not like '%rollback%'
+        and (now() - pg_stat_activity.query_start) >= interval :minutes
+        order by pg_stat_activity.query_start desc;
+        """
+
+    results = db.engine.execute(sa.text(SQL), minutes=f"{minutes} minutes")
+    rows = (results.fetchall())
+    total_rows = results.rowcount
+
+    print(rows)
+    print("Terminated ", total_rows, " queries")
+
+
 def slack_message(message):
     """ Sends a message to the bots channel. you can add this command to ping you when a task is done, etc.
     run ./manage.py slack_message 'The message you want to post'
