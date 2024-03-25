@@ -100,6 +100,33 @@ def filter_fulltext(query, kwargs, fields):
     return query
 
 
+# support N/A search
+def filter_fulltext_NA(query, kwargs, fields):
+    for key, column, column_org in fields:
+        if kwargs.get(key):
+            exclude_list = build_exclude_list(kwargs.get(key))
+            include_list = build_include_list(kwargs.get(key))
+            if exclude_list:
+                filters = []
+                for value in exclude_list:
+                    if value.strip().upper() == "N/A":
+                        query = query.filter(column_org != 'N/A')
+                    else:
+                        filters.append(sa.not_(column.match(utils.parse_fulltext(value))))
+                query = query.filter(sa.and_(*filters))
+            if include_list:
+                filters = []
+                for value in include_list:
+                    if value.strip().upper() == "N/A":
+                        query = query.filter(column_org == 'N/A')
+                    else:
+                        filters.append(column.match(utils.parse_fulltext(value)))
+                        if value.upper() == 'NULL':
+                            filters.append(column.is_(None))
+                query = query.filter(sa.or_(*filters))
+    return query
+
+
 def filter_multi_start_with(query, kwargs, fields):
     for key, column in fields:
         if kwargs.get(key):
