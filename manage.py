@@ -179,7 +179,7 @@ def clear_long_queries(minutes):
     """
     Terminate queries running longer than interval minutes, default is 5
     """
-    SLACK_BOTS = "#test-bot"
+    SLACK_BOTS = "#bots"
 
     SQL = """
         SELECT pg_terminate_backend(pid)
