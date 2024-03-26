@@ -164,20 +164,22 @@ def check_long_queries(minutes):
         and (now() - pg_stat_activity.query_start) >= interval :minutes
         order by pg_stat_activity.query_start desc;
         """
-
-    results = db.engine.execute(sa.text(SQL), minutes=f"{minutes} minutes")
-    rows = results.fetchall()
-
-    for row in rows:
-        print(row)
-    total_rows = results.rowcount
-    print("Total: ", total_rows)
+    try:
+        results = db.engine.execute(sa.text(SQL), minutes=f"{minutes} minutes")
+        rows = (results.fetchall())
+        for row in rows:
+            logger.info(row)
+        total_rows = results.rowcount
+        logger.info("Total: {}".format(total_rows))
+    except Exception as error:
+        logger.exception(error)
 
 
 def clear_long_queries(minutes):
     """
-    Check for queries running longer than interval minutes, default is 5
+    Terminate queries running longer than interval minutes, default is 5
     """
+    SLACK_BOTS = "#test-bot"
 
     SQL = """
         SELECT pg_terminate_backend(pid)
@@ -190,13 +192,17 @@ def clear_long_queries(minutes):
         and (now() - pg_stat_activity.query_start) >= interval :minutes
         order by pg_stat_activity.query_start desc;
         """
-
-    results = db.engine.execute(sa.text(SQL), minutes=f"{minutes} minutes")
-    rows = (results.fetchall())
-    total_rows = results.rowcount
-
-    print(rows)
-    print("Terminated ", total_rows, " queries")
+    try:
+        results = db.engine.execute(sa.text(SQL), minutes=f"{minutes} minutes")
+        total_rows = results.rowcount
+        slack_message = "Terminated {} queries".format(total_rows)
+        logger.info(slack_message)
+        post_to_slack(slack_message, SLACK_BOTS)
+    except Exception as error:
+        logger.exception(error)
+        slack_message = "*ERROR* long running query termination failed."
+        slack_message = slack_message + "\n Error message: " + str(error)
+        post_to_slack(slack_message, SLACK_BOTS)
 
 
 def slack_message(message):
