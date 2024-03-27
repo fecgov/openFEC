@@ -689,7 +689,7 @@ class TestEfileForm1(ApiBaseTest):
         results = self._results(api.url_for(F1EFilingsView, image_number=789012))
 
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["image_number"], 789012)
+        self.assertEqual(results[0]["image_number"], "789012")
 
     def test_filter_committee_type(self):
         factories.Form1EFilingFactory(committee_type="S")
