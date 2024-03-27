@@ -216,3 +216,46 @@ class F2EFilingsView(ApiResource):
     @property
     def index_column(self):
         return self.model.file_number
+
+
+@doc(
+    tags=["efiling"],
+    description=docs.EFILE_FILES,
+)
+class F1EFilingsView(ApiResource):
+
+    model = models.Form1
+    schema = schemas.Form1Schema
+    page_schema = schemas.Form1PageSchema
+
+    filter_multi_fields = [
+        ("file_number", models.Form1.file_number),
+        ("committee_id", models.Form1.committee_id),
+        ("candidate_id", models.Form1.candidate_id),
+        ("election_state", models.Form1.election_state),
+        ("candidate_office", models.Form1.candidate_office),
+        ("candidate_district", models.Form1.candidate_district),
+        ("candidate_party", models.Form1.candidate_party),
+        ("image_number", models.Form1.image_number),
+        ("committee_type", models.Form1.committee_type),
+        ("organization_type", models.Form1.organization_type),
+
+    ]
+    filter_range_fields = [
+        (("min_load_timestamp", "max_load_timestamp"), models.Form1.load_timestamp),
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.form1efilings,
+            args.make_sort_args(
+                default="-load_timestamp",
+                validator=args.IndexValidator(self.model, extra=['load_timestamp', 'file_number'],),
+            )
+        )
+
+    @property
+    def index_column(self):
+        return self.model.file_number

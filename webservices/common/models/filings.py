@@ -231,3 +231,76 @@ class Form2(db.Model):
     def pdf_url(self):
         image_number = str(self.image_number)
         return utils.DOCQUERY_URL + '/pdf/{0}/{1}/{1}.pdf'.format(image_number[-3:], image_number)
+
+
+class Form1(db.Model):
+    __table_args__ = {'schema': 'real_efile'}
+    __tablename__ = 'f1'
+
+    affiliated_committee_name = db.Column('ac_name', db.String, doc=docs.AFFILIATED_COMMITTEE_NAME)
+    affiliated_committee_city = db.Column('accity', db.String)
+    affiliated_committee_state = db.Column('acstate', db.String)
+    affiliated_committee_str1 = db.Column('acstr1', db.String)
+    affiliated_committee_str2 = db.Column('acstr2', db.String)
+    affiliated_committee_zip = db.Column('aczip', db.String)
+    affiliated_candidate_id = db.Column('aff_canid', db.String)
+    affiliated_committee_id = db.Column('aff_comid', db.String)
+    affiliated_relationship_code = db.Column('affrel_code', db.String)
+
+    candidate_first_name = db.Column('can_fname', db.String, doc=docs.CANDIDATE_FIRST_NAME)
+    candidate_last_name = db.Column('can_lname', db.String, doc=docs.CANDIDATE_LAST_NAME)
+    candidate_middle_name = db.Column('can_mname', db.String, doc=docs.CANDIDATE_MIDDLE_NAME)
+    candidate_id = db.Column('canid', db.String, index=True, doc=docs.CANDIDATE_ID)
+    candidate_office = db.Column('office', db.String, index=True, doc=docs.OFFICE)
+    candidate_party = db.Column('party', db.String, index=True, doc=docs.PARTY)
+    candidate_district = db.Column('district', db.String, index=True, doc=docs.ELECTION_DISTRICT)
+
+    committee_type = db.Column('cmte_type', db.String, index=True, doc=docs.COMMITTEE_TYPE)
+    committee_city = db.Column('com_city', db.String, doc=docs.COMMITTEE_CITY)
+    committee_name = db.Column('com_name', db.String, doc=docs.COMMITTEE_NAME)
+    committee_state = db.Column('com_state', db.String, doc=docs.COMMITTEE_STATE)
+    committee_str1 = db.Column('com_str1', db.String, doc=docs.COMMITTEE_STREET_1)
+    committee_str2 = db.Column('com_str2', db.String, doc=docs.COMMITTEE_STREET_2)
+    committee_zip = db.Column('com_zip', db.String, doc=docs.COMMITTEE_ZIP)
+    committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
+    email = db.Column(db.String, doc=docs.COMMITTEE_EMAIL)
+
+    election_state = db.Column('el_state', db.String, index=True, doc=docs.ELECTION_STATE)
+    state = db.Column(db.String, doc=docs.STATE)
+    street_1 = db.Column('str1', db.String)
+    street_2 = db.Column('str2', db.String)
+    zip = db.Column(db.String, doc=docs.ZIP_CODE)
+    city = db.Column(db.String)
+    organization_type = db.Column('organ_type', db.String, index=True, doc=docs.ORGANIZATION_TYPE)
+
+    treasurer_first_name = db.Column('t_fname', db.String, doc=docs.TREASURER_NAME_1)
+    treasurer_last_name = db.Column('t_lname', db.String)
+    treasurer_middle_name = db.Column('t_mname', db.String, doc=docs.TREASURER_NAME_MIDDLE)
+    treasurer_city = db.Column('tcity', db.String, doc=docs.TREASURER_CITY)
+    treasurer_state = db.Column('tstate', db.String, doc=docs.TREASURER_STATE)
+    treasurer_str1 = db.Column('tstr1', db.String, doc=docs.TREASURER_STREET_1)
+    treasurer_str2 = db.Column('tstr2', db.String, doc=docs.TREASURER_STREET_2)
+    treasurer_zip = db.Column('tzip', db.String, doc=docs.TREASURER_ZIP)
+
+    file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
+    load_timestamp = db.Column('create_dt', db.DateTime, index=True, doc=docs.LOAD_DATE)
+    image_number = db.Column('imageno', db.BigInteger, index=True, doc=docs.IMAGE_NUMBER)
+
+    @hybrid_property
+    def candidate_name(self):
+        name = name_generator(
+            self.candidate_last_name,
+            self.candidate_first_name,
+            self.candidate_middle_name,
+        )
+        name = (
+            name
+            if name
+            else None
+        )
+        return name
+
+    @property
+    def pdf_url(self):
+        image_number = str(self.image_number)
+        return utils.DOCQUERY_URL + '/pdf/{0}/{1}/{1}.pdf'.format(image_number[-3:], image_number)
