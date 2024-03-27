@@ -1374,6 +1374,7 @@ augment_schemas(Form2Schema)
 Form1Schema = make_schema(
     models.Form1,
     fields={
+        'image_number': ma.fields.Str(),
         'candidate_name': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
         'load_timestamp': ma.fields.Str(),
