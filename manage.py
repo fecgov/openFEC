@@ -152,7 +152,7 @@ def check_long_queries(minutes: int):
     """
     Check for queries running longer than interval, default is 5
     """
-    SLACK_BOTS = "#bots"
+    SLACK_BOTS = "#tst-bot"
 
     # sets minimum minutes interval at 2
     if minutes < 2:
@@ -161,8 +161,7 @@ def check_long_queries(minutes: int):
     SQL = """
         SELECT *
         FROM pg_stat_activity
-        WHERE datname <>'rdsadmin'
-        and usename ='fec_api'
+        WHERE usename ='clucas'
         and lower(query) like 'select %'
         and lower(query) not like '%refresh%'
         and lower(query) not like '%rollback%'
@@ -189,7 +188,7 @@ def clear_long_queries(minutes: int):
     """
     Terminate queries running longer than interval minutes, default is 5
     """
-    SLACK_BOTS = "#bots"
+    SLACK_BOTS = "#test-bot"
 
     # sets minimum minutes interval at 2
     if minutes < 2:
@@ -198,8 +197,7 @@ def clear_long_queries(minutes: int):
     SQL = """
         SELECT pg_terminate_backend(pid)
         FROM pg_stat_activity
-        WHERE datname <>'rdsadmin'
-        and usename ='fec_api'
+        WHERE usename ='clucas'
         and lower(query) like 'select %'
         and lower(query) not like '%refresh%'
         and lower(query) not like '%rollback%'
