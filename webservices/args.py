@@ -115,6 +115,22 @@ class ImageNumber(fields.Str):
                 status_code=422)
 
 
+class FileNumber(fields.Str):
+
+    def _validate(self, value):
+        super()._validate(value)
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            raise exceptions.ApiError(
+                exceptions.FILE_NUMBER_ERROR,
+                status_code=422)
+        if value < 0:
+            raise exceptions.ApiError(
+                exceptions.FILE_NUMBER_ERROR,
+                status_code=422)
+
+
 class Keyword(fields.Str):
 
     def _validate(self, value):
@@ -504,6 +520,26 @@ form2efilings = {
     'image_number': fields.List(IStr, description=docs.IMAGE_NUMBER),
     'min_load_timestamp': Date(description=docs.LOAD_DATE),
     'max_load_timestamp': Date(description=docs.LOAD_DATE),
+}
+
+form1efilings = {
+    'file_number': fields.List(FileNumber, description=docs.FILE_NUMBER),
+    'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
+    'candidate_id': fields.List(Candidate_ID, description=docs.CANDIDATE_ID),
+    'election_state': fields.List(IStr, description=docs.ELECTION_STATE),
+    'candidate_office': fields.List(fields.Str(
+        validate=validate.OneOf(['', 'H', 'S', 'P'])),
+        description=docs.OFFICE),
+    'candidate_district': fields.List(IStr, description=docs.ELECTION_DISTRICT),
+    'candidate_party': fields.List(IStr, description=docs.PARTY),
+    'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
+    'min_load_timestamp': Date(description=docs.LOAD_DATE),
+    'max_load_timestamp': Date(description=docs.LOAD_DATE),
+    'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
+    'organization_type': fields.List(
+        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
+        description=docs.ORGANIZATION_TYPE,
+    ),
 }
 
 reports = {
