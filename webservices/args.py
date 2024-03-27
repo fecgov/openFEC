@@ -506,6 +506,26 @@ form2efilings = {
     'max_load_timestamp': Date(description=docs.LOAD_DATE),
 }
 
+form1efilings = {
+    'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'election_state': fields.List(IStr, description=docs.ELECTION_STATE),
+    'candidate_office': fields.List(fields.Str(
+        validate=validate.OneOf(['', 'H', 'S', 'P'])),
+        description=docs.OFFICE),
+    'candidate_district': fields.List(IStr, description=docs.ELECTION_DISTRICT),
+    'candidate_party': fields.List(IStr, description=docs.PARTY),
+    'image_number': fields.List(IStr, description=docs.IMAGE_NUMBER),
+    'min_load_timestamp': Date(description=docs.LOAD_DATE),
+    'max_load_timestamp': Date(description=docs.LOAD_DATE),
+    'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
+    'organization_type': fields.List(
+        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
+        description=docs.ORGANIZATION_TYPE,
+    ),
+}
+
 reports = {
     'year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
