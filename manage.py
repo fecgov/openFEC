@@ -148,10 +148,15 @@ def cf_startup():
         subprocess.Popen(["python", "cli.py", "refresh_materialized"])
 
 
-def check_long_queries(minutes):
+def check_long_queries(minutes: int):
     """
     Check for queries running longer than interval, default is 5
     """
+    SLACK_BOTS = "#bots"
+
+    # sets minimum minutes interval at 2
+    if minutes < 2:
+        raise ValueError("Interval must be greater than 2 minutes")
 
     SQL = """
         SELECT *
@@ -170,16 +175,25 @@ def check_long_queries(minutes):
         for row in rows:
             logger.info(row)
         total_rows = results.rowcount
-        logger.info("Total: {}".format(total_rows))
+        slack_message = "Currently {} queries running longer than {} minutes".format(total_rows, minutes)
+        logger.info(slack_message)
+        post_to_slack(slack_message, SLACK_BOTS)
     except Exception as error:
         logger.exception(error)
+        slack_message = "*ERROR* long running query check failed."
+        slack_message = slack_message + "\n Error message: " + str(error)
+        post_to_slack(slack_message, SLACK_BOTS)
 
 
-def clear_long_queries(minutes):
+def clear_long_queries(minutes: int):
     """
     Terminate queries running longer than interval minutes, default is 5
     """
     SLACK_BOTS = "#bots"
+
+    # sets minimum minutes interval at 2
+    if minutes < 2:
+        raise ValueError("Interval must be greater than 2 minutes")
 
     SQL = """
         SELECT pg_terminate_backend(pid)
@@ -195,7 +209,7 @@ def clear_long_queries(minutes):
     try:
         results = db.engine.execute(sa.text(SQL), minutes=f"{minutes} minutes")
         total_rows = results.rowcount
-        slack_message = "Terminated {} queries".format(total_rows)
+        slack_message = "Terminated {} queries running longer than {} minutes".format(total_rows, minutes)
         logger.info(slack_message)
         post_to_slack(slack_message, SLACK_BOTS)
     except Exception as error:
