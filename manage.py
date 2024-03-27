@@ -152,7 +152,7 @@ def check_long_queries(minutes: int):
     """
     Check for queries running longer than interval, default is 5
     """
-    SLACK_BOTS = "#tst-bot"
+    SLACK_BOTS = "#test-bot"
 
     # sets minimum minutes interval at 2
     if minutes < 2:
