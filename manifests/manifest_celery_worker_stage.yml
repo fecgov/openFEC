@@ -12,6 +12,7 @@ applications:
     buildpacks:
       - python_buildpack
     services:
+      - api-creds-stage
       - fec-api-elasticsearch
       - fec-elasticache-redis
       - fec-creds-stage

@@ -11,6 +11,7 @@ applications:
     - python_buildpack
   health-check-type: process
   services:
+    - api-creds-feature
     - fec-api-elasticsearch
     - fec-elasticache-redis
     - fec-creds-feature
