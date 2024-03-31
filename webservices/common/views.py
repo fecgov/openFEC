@@ -155,12 +155,32 @@ class NoCapResource(utils.Resource):
     join_columns = {}
     aliases = {}
     cap = ''
+    filters_with_max_count = []
+    max_count = 10
 
     @use_kwargs(Ref('args'))
     @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
+        self.validate_kwargs(kwargs)
         query = self.build_query(*args, **kwargs)
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
         return utils.fetch_page(query, kwargs, multi=multi, cap=0, is_count_exact=True)
+
+    def validate_kwargs(self, kwargs):
+        """
+        - Filters with max count (ex: candidate_id)
+        """
+        over_limit_fields = [
+            field
+            for field in self.filters_with_max_count
+            if len(kwargs.get(field, [])) > self.max_count
+        ]
+        if over_limit_fields:
+            raise exceptions.ApiError(
+                "Can only specify up to {0} values for `{1}`".format(
+                    self.max_count, "`, `".join(over_limit_fields)
+                ),
+                status_code=422,
+            )
