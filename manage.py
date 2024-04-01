@@ -112,7 +112,9 @@ def refresh_materialized(concurrent=True):
         "sched_b_by_recipient": ["ofec_sched_b_aggregate_recipient_mv"],
         "totals_inaugural_donations": ["ofec_totals_inaugural_donations_mv"],
         "sched_h4": ["ofec_sched_h4_mv"],
-        "schedule_d": ["ofec_sched_d_mv"]
+        "schedule_d": ["ofec_sched_d_mv"],
+        "schedule_a_nat_party": ["ofec_sched_a_nat_party_mv"],
+        "schedule_b_nat_party": ["ofec_sched_b_nat_party_mv"],
     }
 
     graph = flow.get_graph()
