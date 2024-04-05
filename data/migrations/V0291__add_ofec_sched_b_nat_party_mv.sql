@@ -1,8 +1,12 @@
--- View: public.ofec_sched_b_nat_party_mv_tmp_hc
+/*
+This migration file is for #5733
 
--- DROP MATERIALIZED VIEW IF EXISTS public.ofec_sched_b_nat_party_mv;
+1) Create ofec_sched_b_national_party_mv which includes all disbursements of national party accounts
+*/
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS public.ofec_sched_b_nat_party_mv
+-- DROP MATERIALIZED VIEW IF EXISTS public.ofec_sched_b_national_party_mv;
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS public.ofec_sched_b_national_party_mv
 AS
  SELECT sb.cmte_id,
     v.name AS cmte_nm,
@@ -123,35 +127,35 @@ AS
     AND sb.disb_tp IN ('40', '40T', '40Y', '40Z', '41', '41T', '41Y', '41Z', '42', '42T', '42Y', '42Z')
 WITH DATA;
 
-ALTER TABLE IF EXISTS public.ofec_sched_b_nat_party_mv OWNER TO fec;
+ALTER TABLE IF EXISTS public.ofec_sched_b_national_party_mv OWNER TO fec;
 
-GRANT ALL ON TABLE public.ofec_sched_b_nat_party_mv TO fec;
-GRANT SELECT ON TABLE public.ofec_sched_b_nat_party_mv TO fec_read;
+GRANT ALL ON TABLE public.ofec_sched_b_national_party_mv TO fec;
+GRANT SELECT ON TABLE public.ofec_sched_b_national_party_mv TO fec_read;
 
-CREATE UNIQUE INDEX idx_ofec_sched_b_nat_party_mv_subid
-    ON public.ofec_sched_b_nat_party_mv USING btree
+CREATE UNIQUE INDEX idx_ofec_sched_b_national_party_mv_subid
+    ON public.ofec_sched_b_national_party_mv USING btree
     (sub_id);
-CREATE INDEX idx_ofec_sched_b_nat_party_mv_cln_rcpt_cmte_id
-    ON public.ofec_sched_b_nat_party_mv USING btree
+CREATE INDEX idx_ofec_sched_b_national_party_mv_cln_rcpt_cmte_id
+    ON public.ofec_sched_b_national_party_mv USING btree
     (clean_recipient_cmte_id);
-CREATE INDEX idx_ofec_sched_b_nat_party_mv_desc_text
-    ON public.ofec_sched_b_nat_party_mv USING gin
+CREATE INDEX idx_ofec_sched_b_national_party_mv_desc_text
+    ON public.ofec_sched_b_national_party_mv USING gin
     (disbursement_description_text);
-CREATE INDEX idx_ofec_sched_b_nat_party_mv_disb_dt
-    ON public.ofec_sched_b_nat_party_mv USING btree
+CREATE INDEX idx_ofec_sched_b_national_party_mv_disb_dt
+    ON public.ofec_sched_b_national_party_mv USING btree
     (disb_dt);
-CREATE INDEX idx_ofec_sched_b_nat_party_mv_image_num
-    ON public.ofec_sched_b_nat_party_mv USING btree
+CREATE INDEX idx_ofec_sched_b_national_party_mv_image_num
+    ON public.ofec_sched_b_national_party_mv USING btree
     (image_num);
-CREATE INDEX idx_ofec_sched_b_nat_party_mv_rcpt_city
-    ON public.ofec_sched_b_nat_party_mv USING btree
+CREATE INDEX idx_ofec_sched_b_national_party_mv_rcpt_city
+    ON public.ofec_sched_b_national_party_mv USING btree
     (recipient_city);
-CREATE INDEX idx_ofec_sched_b_nat_party_mv_rcpt_name_text
-    ON public.ofec_sched_b_nat_party_mv USING gin
+CREATE INDEX idx_ofec_sched_b_national_party_mv_rcpt_name_text
+    ON public.ofec_sched_b_national_party_mv USING gin
     (recipient_name_text);
-CREATE INDEX idx_ofec_sched_b_nat_party_mv_rcpt_st
-    ON public.ofec_sched_b_nat_party_mv USING btree
+CREATE INDEX idx_ofec_sched_b_national_party_mv_rcpt_st
+    ON public.ofec_sched_b_national_party_mv USING btree
     (recipient_st);
-CREATE INDEX idx_ofec_sched_b_nat_party_mv_rpt_yr
-    ON public.ofec_sched_b_nat_party_mv USING btree
+CREATE INDEX idx_ofec_sched_b_national_party_mv_rpt_yr
+    ON public.ofec_sched_b_national_party_mv USING btree
     (rpt_yr);

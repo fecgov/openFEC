@@ -50,8 +50,8 @@ def get_graph():
         'totals_inaugural_donations',
         'sched_h4',
         'schedule_d',
-        'schedule_a_nat_party',
-        'schedule_b_nat_party'
+        'schedule_a_national_party',
+        'schedule_b_national_party'
     ]
     graph.add_nodes_from(MATERIALIZED_VIEWS)
 
