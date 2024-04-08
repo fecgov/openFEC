@@ -176,7 +176,7 @@ def check_long_queries(minutes: int):
             logger.info(row)
         total_rows = results.rowcount
         space = env.app.get("space_name")
-        slack_message = "Currently {} queries running longer than {} minutes [{}]".format(total_rows, minutes, space)
+        slack_message = "Currently {} queries running longer than {} minutes in {}".format(total_rows, minutes, space)
         logger.info(slack_message)
         post_to_slack(slack_message, SLACK_BOTS)
     except Exception as error:
@@ -211,7 +211,7 @@ def clear_long_queries(minutes: int):
         results = db.engine.execute(sa.text(SQL), minutes=f"{minutes} minutes")
         total_rows = results.rowcount
         space = env.app.get("space_name")
-        slack_message = "Terminated {} queries running longer than {} minutes [{}]".format(total_rows, minutes, space)
+        slack_message = "Terminated {} queries running longer than {} minutes in {}".format(total_rows, minutes, space)
         logger.info(slack_message)
         post_to_slack(slack_message, SLACK_BOTS)
     except Exception as error:
