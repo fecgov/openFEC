@@ -15,6 +15,9 @@ LINE_NUMBER_OBSOLETE_ERROR = """Obsolete, please use form_line_number.\
 IMAGE_NUMBER_ERROR = """Invalid image_number detected. A valid image_number is numeric only.\
 """
 
+FILE_NUMBER_ERROR = """Invalid file_number detected. A valid file_number is numeric only.\
+"""
+
 KEYWORD_LENGTH_ERROR = """Invalid keyword. The keyword must be at least 3 characters in length.\
 """
 
