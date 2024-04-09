@@ -586,6 +586,11 @@ def api_ui():
     )
 
 
+@app.route('/robots.txt/')
+def robots():
+    return render_template('robots.txt')
+
+
 @app.route('/report-csp-violation/', methods=['POST'])
 def report():
     """
