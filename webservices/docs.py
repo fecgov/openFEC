@@ -2441,3 +2441,7 @@ This endpoint provides information about an inaugural committee's Form 13 report
 The data is aggregated by the contributor and the two-year period. We refer to two-year periods as a `cycle`.
 
 '''
+
+NATIONAL_PARTY = '''
+This endpoint provides information about national party committees
+'''

@@ -32,6 +32,10 @@ TAGS = [
         'description': format_docstring(docs.COMMITTEE_TAG),
     },
     {
+        'name': 'national party',
+        'description': format_docstring(docs.NATIONAL_PARTY),
+    },
+    {
         'name': 'dates',
         'description': format_docstring(docs.DATES_TAG),
     },

@@ -1347,3 +1347,69 @@ Inaugural_donations_by_contributor = {
     'contributor_name': fields.List(IStr, description=docs.CONTRIBUTOR_NAME),
     'cycle': fields.List(fields.Int(), description=docs.COMMITTEE_CYCLE)
 }
+
+# Used for endpoint `/national_party/schedule_a/`
+# under tag: national party
+national_party_schedule_a = {
+    'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
+    'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
+    'two_year_transaction_period': fields.List(
+        TwoYearTransactionPeriod,
+        description=docs.TWO_YEAR_TRANSACTION_PERIOD,
+    ),
+    'min_date': Date(description='Minimum date'),
+    'max_date': Date(description='Maximum date'),
+    'contributor_name': fields.List(Keyword, description=docs.CONTRIBUTOR_NAME),
+    'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
+    'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
+    'contributor_zip': fields.List(IStr, description=docs.CONTRIBUTOR_ZIP),
+    'contributor_occupation': fields.List(Keyword, description=docs.CONTRIBUTOR_OCCUPATION),
+    'contributor_employer': fields.List(Keyword, description=docs.CONTRIBUTOR_EMPLOYER),
+    'image_number': fields.List(IStr, description=docs.IMAGE_NUMBER),
+    'contributor_committee_type': fields.List(Keyword, description=docs.CONTRIBUTOR_EMPLOYER),
+    'contribution_receipt_date': Date(
+        missing=None,
+        description='When sorting by `contb_receipt_dt`, this is populated with the \
+        `contb_receipt_dt` of the last result. However, you will need to pass the index \
+        of that last result to `last_index` to get the next page.'
+    ),
+    'contribution_receipt_amount': fields.Float(
+        missing=None,
+        description='When sorting by `contb_receipt_amt`, this is populated with the \
+        `contb_receipt_amt` of the last result. However, you will need to pass the index \
+        of that last result to `last_index` to get the next page.'
+    ),
+    'line_number': fields.Str(description=docs.LINE_NUMBER),
+    'is_individual': fields.Bool(missing=None, description=docs.IS_INDIVIDUAL),
+    'contributor_type': fields.List(
+        fields.Str(validate=validate.OneOf(['individual', 'committee'])),
+        description='Filters individual or committee contributions based on line number'
+    ),
+    'committee_contributor_type': fields.List(
+        IStr(validate=validate.OneOf([
+            '', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q',
+            'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
+        description=docs.COMMITTEE_TYPE,
+    ),
+    # 'committee_contributor_organization_type': fields.List(
+    #     IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
+    #     description=docs.ORGANIZATION_TYPE,
+    # ),
+    'committee_contributor_designation': fields.List(
+        IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
+        description=docs.DESIGNATION,
+    ),
+    'min_amount': Currency(description='Filter for all amounts greater than a value.'),
+    'max_amount': Currency(description='Filter for all amounts less than a value.'),
+    'party_account_type': fields.List(
+        IStr(validate=validate.OneOf(['', 'CONVENTION', 'HEADQUARTERS', 'RECOUNT'])),
+        description='National party account type',
+    ),
+    'party_account_receipt_type': fields.List(
+        IStr(validate=validate.OneOf([
+            '30', '30E', '30F', '30G', '30J', '30K', '30T',
+            '31', '31E', '31F', '31G', '31J', '31K', '31T',
+            '32', '32E', '32F', '32G', '32J', '32K', '32T'])),
+        description='National party account receipt type',
+    ),
+}
