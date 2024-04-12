@@ -51,7 +51,9 @@ def get_graph():
         'sched_h4',
         'schedule_d',
         'schedule_a_national_party',
-        'schedule_b_national_party'
+        'schedule_b_national_party',
+        'ofec_sched_a_aggregate_employer',
+        'ofec_sched_a_aggregate_occupation'
     ]
     graph.add_nodes_from(MATERIALIZED_VIEWS)
 
