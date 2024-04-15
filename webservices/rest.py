@@ -19,6 +19,7 @@ from flask import jsonify
 from flask import url_for
 from flask import redirect
 from flask import render_template
+from flask import send_from_directory
 from flask import Flask
 from flask import Blueprint
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -584,6 +585,11 @@ def api_ui():
         PRODUCTION=env.get_credential('PRODUCTION'),
         api_key_signup_key=env.get_credential('API_UMBRELLA_SIGNUP_KEY'),
     )
+
+
+@app.route('/robots.txt/')
+def robots():
+    return send_from_directory(app.static_folder, 'robots.txt')
 
 
 @app.route('/report-csp-violation/', methods=['POST'])
