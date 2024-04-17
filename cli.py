@@ -203,18 +203,6 @@ def slack_message_cli(message):
     manage.slack_message(message)
 
 
-@app.cli.command('check_long_queries')
-@click.argument('minutes', default=5, required=False)
-def check_long_queries_cli(minutes):
-    manage.check_long_queries(minutes)
-
-
-@app.cli.command('clear_long_queries')
-@click.argument('minutes', default=5, required=False)
-def clear_long_queries_cli(minutes):
-    manage.clear_long_queries(minutes)
-
-
 @app.shell_context_processor
 def make_shell_context():
     return {'app': app, 'db': db, 'models': models}
