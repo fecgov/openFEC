@@ -1060,10 +1060,13 @@ ScheduleBByRecipientSchema = make_schema(
         'recipient_disbursement_percent': ma.fields.Float(),
         'committee_total_disbursements': ma.fields.Float(),
         'total': ma.fields.Float(),
-        'memo_total': ma.fields.Float()
+        'memo_total': ma.fields.Float(),
+        'recipient_name': ma.fields.Str(),
+
     },
-    options={'exclude': ('idx', 'committee')}
+    options={'exclude': ('idx', 'committee', 'recipient_name_text')}
 )
+
 
 ScheduleBByRecipientPageSchema = make_page_schema(ScheduleBByRecipientSchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(ScheduleBByRecipientSchema)
@@ -1075,8 +1078,6 @@ augment_itemized_aggregate_models(
     models.ScheduleAByZip,
     models.ScheduleABySize,
     models.ScheduleAByState,
-    # models.ScheduleAByEmployer,
-    # models.ScheduleAByOccupation,
     models.ScheduleBByPurpose,
 )
 
@@ -1096,7 +1097,7 @@ ScheduleAByOccupationSchema = make_schema(
     models.ScheduleAByOccupation,
     fields={
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
-        'employer': ma.fields.Str(),
+        'occupation': ma.fields.Str(),
     },
     options={'exclude': ('idx', 'committee', 'occupation_text',)}
 )

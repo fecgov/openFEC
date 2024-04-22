@@ -54,9 +54,7 @@ class ScheduleAByEmployerView(AggregateResource):
         ('cycle', models.ScheduleAByEmployer.cycle),
         ('committee_id', models.ScheduleAByEmployer.committee_id),
     ]
-    # filter_fulltext_fields = [
-    #     ('employer', models.ScheduleAByEmployer.employer),
-    # ]
+
     filter_fulltext_fields_NA = [
         ('employer', models.ScheduleAByEmployer.employer_text, models.ScheduleAByEmployer.employer),
     ]
@@ -197,8 +195,9 @@ class ScheduleBByRecipientView(AggregateResource):
         ('cycle', models.ScheduleBByRecipient.cycle),
         ('committee_id', models.ScheduleBByRecipient.committee_id),
     ]
-    filter_fulltext_fields = [
-        ('recipient_name', models.ScheduleBByRecipient.recipient_name),
+
+    filter_fulltext_fields_NA = [
+        ('recipient_name', models.ScheduleBByRecipient.recipient_name_text, models.ScheduleBByRecipient.recipient_name),
     ]
 
 
