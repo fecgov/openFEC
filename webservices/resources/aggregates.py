@@ -54,7 +54,6 @@ class ScheduleAByEmployerView(AggregateResource):
         ('cycle', models.ScheduleAByEmployer.cycle),
         ('committee_id', models.ScheduleAByEmployer.committee_id),
     ]
-
     filter_fulltext_fields_NA = [
         ('employer', models.ScheduleAByEmployer.employer_text, models.ScheduleAByEmployer.employer),
     ]
