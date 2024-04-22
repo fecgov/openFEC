@@ -2443,5 +2443,13 @@ The data is aggregated by the contributor and the two-year period. We refer to t
 '''
 
 NATIONAL_PARTY = '''
-This endpoint provides information about national party committees
+Collection of these endpoints provide information about national party account receipts and disbursements
+'''
+
+NATIONAL_PARTY_SCHED_A = '''
+This endpoint includes national party account receipts
+'''
+
+NATIONAL_PARTY_SCHED_B = '''
+This endpoint includes national party account disbursements
 '''

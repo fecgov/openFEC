@@ -4,7 +4,7 @@ from tests import factories
 from tests.common import ApiBaseTest
 from webservices.rest import api
 from webservices.schemas import NationalPartyScheduleASchema
-from webservices.resources.national_party import NationalParty_ScheduleAView
+from webservices.resources.national_party import NationalParty_ScheduleAView, NationalParty_ScheduleBView
 
 
 class TestNationalParty(ApiBaseTest):
@@ -193,25 +193,25 @@ class TestNationalParty(ApiBaseTest):
         )
         self.assertEqual(response.status_code, 422)
 
-    def test_committee_contributor_type_filter(self):
+    def test_contributor_committee_type_filter(self):
         [
-            factories.NationalParty_ScheduleAFactory(committee_contributor_type='S'),
-            factories.NationalParty_ScheduleAFactory(committee_contributor_type='S'),
-            factories.NationalParty_ScheduleAFactory(committee_contributor_type='P'),
+            factories.NationalParty_ScheduleAFactory(contributor_committee_type='S'),
+            factories.NationalParty_ScheduleAFactory(contributor_committee_type='S'),
+            factories.NationalParty_ScheduleAFactory(contributor_committee_type='P'),
         ]
         results = self._results(
-            api.url_for(NationalParty_ScheduleAView, committee_contributor_type='S', **self.kwargs)
+            api.url_for(NationalParty_ScheduleAView, contributor_committee_type='S', **self.kwargs)
         )
         self.assertEqual(len(results), 2)
 
-    def test_committee_contributor_designation_type_filter(self):
+    def test_contributor_committee_designation_type_filter(self):
         [
-            factories.NationalParty_ScheduleAFactory(committee_contributor_designation='J'),
-            factories.NationalParty_ScheduleAFactory(committee_contributor_designation='U'),
-            factories.NationalParty_ScheduleAFactory(committee_contributor_designation='J'),
+            factories.NationalParty_ScheduleAFactory(contributor_committee_designation='J'),
+            factories.NationalParty_ScheduleAFactory(contributor_committee_designation='U'),
+            factories.NationalParty_ScheduleAFactory(contributor_committee_designation='J'),
         ]
         results = self._results(
-            api.url_for(NationalParty_ScheduleAView, committee_contributor_designation='J', **self.kwargs)
+            api.url_for(NationalParty_ScheduleAView, contributor_committee_designation='J', **self.kwargs)
         )
         self.assertEqual(len(results), 2)
 
@@ -255,9 +255,9 @@ class TestNationalParty(ApiBaseTest):
             factories.NationalParty_ScheduleAFactory(
                 committee_id='C00000001',
                 committee_name='NRCC',
-                committee_contributor_name='',
-                committee_contributor_designation='U',
-                committee_contributor_state='VA',
+                contributor_committee_name='',
+                contributor_committee_designation='U',
+                contributor_committee_state='VA',
                 contributor_city='PLEASANTON',
                 contributor_employer='RETIRED',
                 contributor_first_name='CAROL',
@@ -273,7 +273,7 @@ class TestNationalParty(ApiBaseTest):
                 party_full='REPUBLICAN PARTY',
                 pdf_url='https://docquery.fec.gov/cgi-bin/fecimg/?202403209627299691',
                 receipt_desc='CONTRIBUTION',
-                party_account_receipt_type='32E',
+                receipt_type='32E',
                 receipt_type_desc='EARMARKED – RECOUNT',
                 recipient_committee_designation='U',
                 report_type='M3',
@@ -287,9 +287,9 @@ class TestNationalParty(ApiBaseTest):
             factories.NationalParty_ScheduleAFactory(
                 committee_id='C00000002',
                 committee_name='NRCC',
-                committee_contributor_name='',
-                committee_contributor_designation='U',
-                committee_contributor_state='VA',
+                contributor_committee_name='',
+                contributor_committee_designation='U',
+                contributor_committee_state='VA',
                 contributor_city='PLEASANTON',
                 contributor_employer='RETIRED',
                 contributor_first_name='CAROL',
@@ -305,7 +305,7 @@ class TestNationalParty(ApiBaseTest):
                 party_full='REPUBLICAN PARTY',
                 pdf_url='https://docquery.fec.gov/cgi-bin/fecimg/?202403209627299691',
                 receipt_desc='CONTRIBUTION',
-                party_account_receipt_type='32E',
+                receipt_type='32E',
                 receipt_type_desc='EARMARKED – RECOUNT',
                 recipient_committee_designation='U',
                 report_type='M3',
@@ -319,9 +319,9 @@ class TestNationalParty(ApiBaseTest):
             factories.NationalParty_ScheduleAFactory(
                 committee_id='C00000003',
                 committee_name='NRCC',
-                committee_contributor_name='',
-                committee_contributor_designation='U',
-                committee_contributor_state='VA',
+                contributor_committee_name='',
+                contributor_committee_designation='U',
+                contributor_committee_state='VA',
                 contributor_city='PLEASANTON',
                 contributor_employer='RETIRED',
                 contributor_first_name='CAROL',
@@ -337,7 +337,7 @@ class TestNationalParty(ApiBaseTest):
                 party_full='REPUBLICAN PARTY',
                 pdf_url='https://docquery.fec.gov/cgi-bin/fecimg/?202403209627299691',
                 receipt_desc='CONTRIBUTION',
-                party_account_receipt_type='32E',
+                receipt_type='32E',
                 receipt_type_desc='EARMARKED – RECOUNT',
                 recipient_committee_designation='U',
                 report_type='M3',
@@ -359,3 +359,66 @@ class TestNationalParty(ApiBaseTest):
             api.url_for(NationalParty_ScheduleAView, party_account_type='RECOUNT', **self.kwargs)
         )
         self.assertEqual(len(results), 2)
+
+
+class TestNationalPartyScheduleB(ApiBaseTest):
+    kwargs = {'two_year_transaction_period': 2024}
+
+    def test_schedule_b_multiple_two_year_transaction_period(self):
+        """
+        testing schedule_b api can take multiple cycles now
+        """
+        [  # noqa
+            factories.NationalParty_ScheduleBFactory(
+                report_year=2014, two_year_transaction_period=2014
+            ),
+            factories.NationalParty_ScheduleBFactory(
+                report_year=2016, two_year_transaction_period=2016
+            ),
+            factories.NationalParty_ScheduleBFactory(
+                report_year=2018, two_year_transaction_period=2018
+            ),
+        ]
+        response = self._response(
+            api.url_for(NationalParty_ScheduleBView, two_year_transaction_period=[2016, 2018],)
+        )
+        self.assertEqual(len(response['results']), 2)
+
+    def test_spender_committee_type_filter(self):
+        [
+            factories.NationalParty_ScheduleBFactory(spender_committee_type='S'),
+            factories.NationalParty_ScheduleBFactory(spender_committee_type='S'),
+            factories.NationalParty_ScheduleBFactory(spender_committee_type='P'),
+        ]
+        results = self._results(
+            api.url_for(NationalParty_ScheduleBView, spender_committee_type='S', **self.kwargs)
+        )
+        self.assertEqual(len(results), 2)
+
+    def test_spender_org_type_filter(self):
+        [
+            factories.NationalParty_ScheduleBFactory(spender_committee_org_type='W'),
+            factories.NationalParty_ScheduleBFactory(spender_committee_org_type='W'),
+            factories.NationalParty_ScheduleBFactory(spender_committee_org_type='C'),
+        ]
+        results = self._results(
+            api.url_for(NationalParty_ScheduleBView, spender_committee_org_type='W', **self.kwargs)
+        )
+        self.assertEqual(len(results), 2)
+
+    def test_line_number(self):
+        [
+            factories.NationalParty_ScheduleBFactory(line_number='21b', filing_form='F3X'),
+            factories.NationalParty_ScheduleBFactory(line_number='29', filing_form='F3X'),
+        ]
+
+        results = self._results(
+            api.url_for(NationalParty_ScheduleBView, line_number='F3X-29')
+        )
+        self.assertEqual(len(results), 1)
+
+        # invalid line_number
+        response = self.app.get(
+            api.url_for(NationalParty_ScheduleBView, line_number='123')
+        )
+        self.assertEqual(response.status_code, 400)

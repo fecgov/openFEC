@@ -668,3 +668,17 @@ class NationalParty_ScheduleAFactory(BaseFactory):
         obj.contributor_occupation_text = sa.func.to_tsvector(
             obj.contributor_occupation
         )
+
+
+class NationalParty_ScheduleBFactory(BaseFactory):
+    class Meta:
+        model = models.NationalParty_ScheduleB
+
+    sub_id = factory.Sequence(lambda n: n)
+    report_year = 2024
+    two_year_transaction_period = 2024
+
+    @factory.post_generation
+    def update_fulltext(obj, create, extracted, **kwargs):
+        obj.disbursement_description_text = sa.func.to_tsvector(obj.disbursement_description_text)
+        obj.recipient_name_text = sa.func.to_tsvector(obj.recipient_name_text)

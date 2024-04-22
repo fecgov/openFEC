@@ -1366,36 +1366,26 @@ national_party_schedule_a = {
     'contributor_occupation': fields.List(Keyword, description=docs.CONTRIBUTOR_OCCUPATION),
     'contributor_employer': fields.List(Keyword, description=docs.CONTRIBUTOR_EMPLOYER),
     'image_number': fields.List(IStr, description=docs.IMAGE_NUMBER),
-    'contributor_committee_type': fields.List(Keyword, description=docs.CONTRIBUTOR_EMPLOYER),
     'contribution_receipt_date': Date(
         missing=None,
-        description='When sorting by `contb_receipt_dt`, this is populated with the \
-        `contb_receipt_dt` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'
+        description=' Filter by contribution receipt date '
     ),
     'contribution_receipt_amount': fields.Float(
         missing=None,
-        description='When sorting by `contb_receipt_amt`, this is populated with the \
-        `contb_receipt_amt` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'
+        description='Filter  by contribution receipt amount'
     ),
-    'line_number': fields.Str(description=docs.LINE_NUMBER),
     'is_individual': fields.Bool(missing=None, description=docs.IS_INDIVIDUAL),
     'contributor_type': fields.List(
         fields.Str(validate=validate.OneOf(['individual', 'committee'])),
         description='Filters individual or committee contributions based on line number'
     ),
-    'committee_contributor_type': fields.List(
+    'contributor_committee_type': fields.List(
         IStr(validate=validate.OneOf([
             '', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q',
             'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
         description=docs.COMMITTEE_TYPE,
     ),
-    # 'committee_contributor_organization_type': fields.List(
-    #     IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
-    #     description=docs.ORGANIZATION_TYPE,
-    # ),
-    'committee_contributor_designation': fields.List(
+    'contributor_committee_designation': fields.List(
         IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
         description=docs.DESIGNATION,
     ),
@@ -1405,11 +1395,44 @@ national_party_schedule_a = {
         IStr(validate=validate.OneOf(['', 'CONVENTION', 'HEADQUARTERS', 'RECOUNT'])),
         description='National party account type',
     ),
-    'party_account_receipt_type': fields.List(
+    'receipt_type': fields.List(
         IStr(validate=validate.OneOf([
             '30', '30E', '30F', '30G', '30J', '30K', '30T',
             '31', '31E', '31F', '31G', '31J', '31K', '31T',
             '32', '32E', '32F', '32G', '32J', '32K', '32T'])),
         description='National party account receipt type',
+        ),
+    }
+
+national_party_schedule_b = {
+    'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
+    'disbursement_description': fields.List(Keyword, description=docs.DISBURSEMENT_DESCRIPTION),
+    'disbursement_purpose_category': fields.List(IStr(validate=validate.OneOf(disbursment_purpose_list)),
+                                                 description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
+    'disbursement_amount': fields.Float(missing=None, description=docs.LAST_DISBURSEMENT_AMOUNT),
+    'disbursement_date': Date(missing=None, description=docs.LAST_DISBURSEMENT_DATE),
+    # 'line_number': fields.List(IStr, description=docs.LINE_NUMBER),
+    'line_number': fields.Str(description=docs.LINE_NUMBER),
+    'recipient_city': fields.List(IStr, description=docs.RECIPIENT_CITY),
+    'recipient_committee_id': fields.List(Committee_ID, description=docs.RECIPIENT_COMMITTEE_ID),
+    'recipient_name': fields.List(Keyword, description=docs.RECIPIENT_NAME),
+    'recipient_state': fields.List(IStr, description=docs.RECIPIENT_STATE),
+    'spender_committee_designation': fields.List(
+        IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
+        description=docs.DESIGNATION,
+    ),
+    'spender_committee_org_type': fields.List(
+        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
+        description=docs.ORGANIZATION_TYPE,
+    ),
+    'spender_committee_type': fields.List(
+        IStr(validate=validate.OneOf([
+            '', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q',
+            'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
+        description=docs.COMMITTEE_TYPE,
+    ),
+    'two_year_transaction_period': fields.List(
+        TwoYearTransactionPeriod,
+        description=docs.TWO_YEAR_TRANSACTION_PERIOD,
     ),
 }
