@@ -54,9 +54,7 @@ class ScheduleAByEmployerView(AggregateResource):
         ('cycle', models.ScheduleAByEmployer.cycle),
         ('committee_id', models.ScheduleAByEmployer.committee_id),
     ]
-    # filter_fulltext_fields = [
-    #     ('employer', models.ScheduleAByEmployer.employer),
-    # ]
+
     filter_fulltext_fields_NA = [
         ('employer', models.ScheduleAByEmployer.employer_text, models.ScheduleAByEmployer.employer),
     ]
@@ -182,7 +180,8 @@ class ScheduleBByPurposeView(AggregateResource):
 
 # used for endpoint:`/schedules/schedule_b/by_recipient/`
 # under tag: disbursements
-# Ex: http://127.0.0.1:5000/v1/schedules/schedule_b/by_recipient/
+# Ex: http://127.0.0.1:5000/v1/schedules/schedule_b/by_recipient/?cycle=2022
+# &committee_id=C00160937&recipient_name=zoom.com
 @doc(
     tags=['disbursements'],
     description=docs.SCHEDULE_B_BY_RECIPIENT,
@@ -197,8 +196,8 @@ class ScheduleBByRecipientView(AggregateResource):
         ('cycle', models.ScheduleBByRecipient.cycle),
         ('committee_id', models.ScheduleBByRecipient.committee_id),
     ]
-    filter_fulltext_fields = [
-        ('recipient_name', models.ScheduleBByRecipient.recipient_name),
+    filter_fulltext_fields_NA = [
+        ('recipient_name', models.ScheduleBByRecipient.recipient_name_text, models.ScheduleBByRecipient.recipient_name),
     ]
 
 

@@ -34,17 +34,13 @@ class ScheduleAByZip(BaseAggregate):
 
 
 class ScheduleAByEmployer(BaseAggregate):
-    # __table_args__ = {'schema': 'disclosure'}
-    # __tablename__ = 'dsc_sched_a_aggregate_employer'
-    __tablename__ = 'ofec_sched_a_aggregate_employer_mv_tmp_jl'
+    __tablename__ = 'ofec_sched_a_aggregate_employer_mv'
     employer = db.Column(db.String, primary_key=True, doc=docs.EMPLOYER)
     employer_text = db.Column(TSVECTOR)
 
 
 class ScheduleAByOccupation(BaseAggregate):
-    # __table_args__ = {'schema': 'disclosure'}
-    # __tablename__ = 'dsc_sched_a_aggregate_occupation'
-    __tablename__ = 'ofec_sched_a_aggregate_occupation_mv_tmp_jl'
+    __tablename__ = 'ofec_sched_a_aggregate_occupation_mv'
     occupation = db.Column(db.String, primary_key=True, doc=docs.OCCUPATION)
     occupation_text = db.Column(TSVECTOR)
 
@@ -63,6 +59,7 @@ class ScheduleBByRecipient(BaseDisbursementAggregate):
 
     recipient_name = db.Column('recipient_nm', db.String, primary_key=True, doc=docs.RECIPIENT_NAME)
     committee_total_disbursements = db.Column('disbursements', db.Numeric(30, 2), index=True, doc=docs.DISBURSEMENTS)
+    recipient_name_text = db.Column('recipient_nm_text', TSVECTOR)
 
     @property
     def recipient_disbursement_percent(self):

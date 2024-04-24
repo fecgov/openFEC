@@ -1,3 +1,4 @@
+import sqlalchemy as sa
 from tests import factories
 from tests.common import ApiBaseTest, assert_dicts_subset
 
@@ -133,7 +134,8 @@ class TestCommitteeAggregates(ApiBaseTest):
         aggregate = factories.ScheduleBByRecipientFactory(
             committee_id=committee.committee_id,
             cycle=committee.cycle,
-            recipient_name='STARBOARD STRATEGIES, INC.',
+            recipient_name_text=sa.func.to_tsvector('STARBOARD STRATEGIES, INC.'),
+            recipient_name='STARBOARD STRATEGIES, INC.'
         )
         results = self._results(
             api.url_for(

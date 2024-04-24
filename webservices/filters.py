@@ -100,9 +100,9 @@ def filter_fulltext(query, kwargs, fields):
     return query
 
 
-# support N/A search
+# Support N/A search, 'column' is tsvector datatype, 'original_column' is varchar datatype.
 def filter_fulltext_NA(query, kwargs, fields):
-    for key, column, column_org in fields:
+    for key, column, original_column in fields:
         if kwargs.get(key):
             exclude_list = build_exclude_list(kwargs.get(key))
             include_list = build_include_list(kwargs.get(key))
@@ -110,7 +110,7 @@ def filter_fulltext_NA(query, kwargs, fields):
                 filters = []
                 for value in exclude_list:
                     if value.strip().upper() == "N/A":
-                        query = query.filter(column_org != 'N/A')
+                        query = query.filter(original_column != 'N/A')
                     else:
                         filters.append(sa.not_(column.match(utils.parse_fulltext(value))))
                 query = query.filter(sa.and_(*filters))
@@ -118,7 +118,7 @@ def filter_fulltext_NA(query, kwargs, fields):
                 filters = []
                 for value in include_list:
                     if value.strip().upper() == "N/A":
-                        query = query.filter(column_org == 'N/A')
+                        query = query.filter(original_column == 'N/A')
                     else:
                         filters.append(column.match(utils.parse_fulltext(value)))
                         if value.upper() == 'NULL':
