@@ -661,14 +661,6 @@ class NationalParty_ScheduleAFactory(BaseFactory):
     report_year = 2024
     two_year_transaction_period = 2024
 
-    @factory.post_generation
-    def update_fulltext(obj, create, extracted, **kwargs):
-        obj.contributor_name_text = sa.func.to_tsvector(obj.contributor_name)
-        obj.contributor_employer_text = sa.func.to_tsvector(obj.contributor_employer)
-        obj.contributor_occupation_text = sa.func.to_tsvector(
-            obj.contributor_occupation
-        )
-
 
 class NationalParty_ScheduleBFactory(BaseFactory):
     class Meta:
@@ -677,8 +669,3 @@ class NationalParty_ScheduleBFactory(BaseFactory):
     sub_id = factory.Sequence(lambda n: n)
     report_year = 2024
     two_year_transaction_period = 2024
-
-    @factory.post_generation
-    def update_fulltext(obj, create, extracted, **kwargs):
-        obj.disbursement_description_text = sa.func.to_tsvector(obj.disbursement_description_text)
-        obj.recipient_name_text = sa.func.to_tsvector(obj.recipient_name_text)

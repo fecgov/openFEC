@@ -2535,3 +2535,7 @@ Minimum disbursement amount
 MAX_DISBURSEMENT_AMOUNT = '''
 Maximum disbursement amount
 '''
+
+RECIPIENT_ZIP = '''
+Zipcode of recipient
+'''

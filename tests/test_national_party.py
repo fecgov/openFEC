@@ -1,4 +1,5 @@
 import datetime
+import sqlalchemy as sa
 
 from tests import factories
 from tests.common import ApiBaseTest
@@ -235,20 +236,38 @@ class TestNationalParty(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_city'], 'NEW YORK')
 
-    def test_filter_fulltext(self):
-        """
-        Note: this is the only test for filter_fulltext.
-        If this is removed, please add a test to test_filters.py
-        """
-        names = ['David Koch', 'George Soros']
+    def test_filter_fulltext_contributor_name(self):
         [
-            factories.NationalParty_ScheduleAFactory(contributor_name=name) for name in names
+            factories.NationalParty_ScheduleAFactory(
+                contributor_name_text=sa.func.to_tsvector('SOROS, ALEXANDER GEORGE'),
+                contributor_name='SOROS, ALEXANDER GEORGE'),
+            factories.NationalParty_ScheduleAFactory(
+                contributor_name_text=sa.func.to_tsvector('George Soros'),
+                contributor_name='George Soros'),
+            factories.NationalParty_ScheduleAFactory(
+                contributor_name_text=sa.func.to_tsvector('COX, BOBBY D. MR.'),
+                contributor_name='COX, BOBBY D. MR.'),
+            factories.NationalParty_ScheduleAFactory(
+                contributor_name_text=sa.func.to_tsvector('LOQUERCIO, BOB'),
+                contributor_name='LOQUERCIO, BOB'),
+            factories.NationalParty_ScheduleAFactory(
+                contributor_name_text=sa.func.to_tsvector('FLORENTZ, BOBBY'),
+                contributor_name='FLORENTZ, BOBBY'),
         ]
         results = self._results(
-            api.url_for(NationalParty_ScheduleAView, contributor_name='soros', **self.kwargs)
+            api.url_for(NationalParty_ScheduleAView, contributor_name='bob', **self.kwargs)
         )
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['contributor_name'], 'George Soros')
+        self.assertEqual(len(results), 3)
+
+        results = self._results(
+            api.url_for(NationalParty_ScheduleAView, contributor_name='george')
+        )
+        self.assertEqual(len(results), 2)
+
+        results = self._results(
+            api.url_for(NationalParty_ScheduleAView, contributor_name='N/A')
+        )
+        self.assertEqual(len(results), 0)
 
     def test_filter_party_account_type(self):
         [
@@ -384,25 +403,50 @@ class TestNationalPartyScheduleB(ApiBaseTest):
         )
         self.assertEqual(len(response['results']), 2)
 
-    def test_spender_committee_type_filter(self):
+    def test_spender_committee_designation_filter(self):
         [
-            factories.NationalParty_ScheduleBFactory(spender_committee_type='S'),
-            factories.NationalParty_ScheduleBFactory(spender_committee_type='S'),
-            factories.NationalParty_ScheduleBFactory(spender_committee_type='P'),
+            factories.NationalParty_ScheduleBFactory(spender_committee_designation='A'),
+            factories.NationalParty_ScheduleBFactory(spender_committee_designation='B'),
+            factories.NationalParty_ScheduleBFactory(spender_committee_designation='B'),
         ]
         results = self._results(
-            api.url_for(NationalParty_ScheduleBView, spender_committee_type='S', **self.kwargs)
+            api.url_for(NationalParty_ScheduleBView, spender_committee_designation='B', **self.kwargs)
         )
         self.assertEqual(len(results), 2)
 
-    def test_spender_org_type_filter(self):
+    def test_spender_committee_type_filter(self):
         [
-            factories.NationalParty_ScheduleBFactory(spender_committee_org_type='W'),
-            factories.NationalParty_ScheduleBFactory(spender_committee_org_type='W'),
-            factories.NationalParty_ScheduleBFactory(spender_committee_org_type='C'),
+            factories.NationalParty_ScheduleBFactory(spender_committee_type='W'),
+            factories.NationalParty_ScheduleBFactory(spender_committee_type='W'),
+            factories.NationalParty_ScheduleBFactory(spender_committee_type='Z'),
         ]
         results = self._results(
-            api.url_for(NationalParty_ScheduleBView, spender_committee_org_type='W', **self.kwargs)
+            api.url_for(NationalParty_ScheduleBView, spender_committee_type='W', **self.kwargs)
+        )
+        self.assertEqual(len(results), 2)
+
+    def test_disbursement_description_filter(self):
+        [
+            factories.NationalParty_ScheduleBFactory(
+                disbursement_description_text=sa.func.to_tsvector('RECOUNT - TRAVEL'),
+                disbursement_description='RECOUNT - TRAVEL'),
+            factories.NationalParty_ScheduleBFactory(
+                disbursement_description_text=sa.func.to_tsvector('LEGAL/RECOUNT TRAVEL'),
+                disbursement_description='LEGAL/RECOUNT TRAVEL'),
+            factories.NationalParty_ScheduleBFactory(
+                disbursement_description_text=sa.func.to_tsvector('LEGAL FEES'),
+                disbursement_description='LEGAL FEES'),
+            factories.NationalParty_ScheduleBFactory(
+                disbursement_description_text=sa.func.to_tsvector('N/A'),
+                disbursement_description='N/A'),
+        ]
+        results = self._results(
+            api.url_for(NationalParty_ScheduleBView, disbursement_description='N/A', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+
+        results = self._results(
+            api.url_for(NationalParty_ScheduleBView, disbursement_description='LEGAL')
         )
         self.assertEqual(len(results), 2)
 

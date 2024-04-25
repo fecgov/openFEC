@@ -5,8 +5,7 @@ from webservices import docs
 
 class NationalParty_ScheduleA(db.Model):
     __table_args__ = {'schema': 'public'}
-    # __tablename__ = 'ofec_sched_a_national_party_mv'
-    __tablename__ = 'ofec_sched_a_national_party_mv_tmp_pk'
+    __tablename__ = 'ofec_sched_a_national_party_mv'
 
     amendment_indicator = db.Column('action_cd', db.String)
     amendment_indicator_desc = db.Column('action_cd_desc', db.String)
@@ -40,13 +39,6 @@ class NationalParty_ScheduleA(db.Model):
     committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_NAME)
     recipient_committee_type = db.Column('cmte_tp', db.String, doc=docs.COMMITTEE_TYPE)
     committee_type_full = db.Column(db.String)
-    conduit_committee_city = db.Column('conduit_cmte_city', db.String)
-    conduit_committee_id = db.Column('conduit_cmte_id', db.String)
-    conduit_committee_name = db.Column('conduit_cmte_nm', db.String)
-    conduit_committee_state = db.Column('conduit_cmte_st', db.String)
-    conduit_committee_street1 = db.Column('conduit_cmte_st1', db.String)
-    conduit_committee_street2 = db.Column('conduit_cmte_st2', db.String)
-    conduit_committee_zip = db.Column('conduit_cmte_zip', db.String)
     contributor_aggregate_ytd = db.Column('contb_aggregate_ytd', db.Numeric(14, 2))
     contribution_receipt_amount = db.Column('contb_receipt_amt', db.Numeric(14, 2))
     contribution_receipt_date = db.Column('contb_receipt_dt', db.Date)
@@ -90,8 +82,6 @@ class NationalParty_ScheduleA(db.Model):
     memo_cd_desc = db.Column(db.String)
     memo_text = db.Column(db.String)
     national_cmte_nonfed_acct = db.Column(db.String)
-    recipient_committee_org_type = db.Column('org_tp', db.String)
-    organization_type_full = db.Column(db.String)
     orig_sub_id = db.Column(db.Numeric)
     party = db.Column(db.String)
     party_account_type = db.Column('party_account', db.String)
@@ -114,8 +104,7 @@ class NationalParty_ScheduleA(db.Model):
 
 class NationalParty_ScheduleB(db.Model):
     __table_args__ = {'schema': 'public'}
-    # __tablename__ = 'ofec_sched_b_national_party_mv'
-    __tablename__ = 'ofec_sched_b_national_party_mv_tmp_pk'
+    __tablename__ = 'ofec_sched_b_national_party_mv'
 
     amendment_indicator = db.Column('action_cd', db.String)
     amendment_indicator_desc = db.Column('action_cd_desc', db.String)
@@ -142,14 +131,8 @@ class NationalParty_ScheduleB(db.Model):
     spender_committee_type = db.Column('cmte_tp', db.String, doc=docs.COMMITTEE_TYPE)
     committee_type = db.Column(db.String)
     committee_type_full = db.Column(db.String)
-    conduit_committee_city = db.Column('conduit_cmte_city', db.String)
-    conduit_committee_name = db.Column('conduit_cmte_nm', db.String)
-    conduit_committee_state = db.Column('conduit_cmte_st', db.String)
-    conduit_committee_street1 = db.Column('conduit_cmte_st1', db.String)
-    conduit_committee_street2 = db.Column('conduit_cmte_st2', db.String)
-    conduit_committee_zip = db.Column('conduit_cmte_zip', db.String)
     disbursement_amount = db.Column('disb_amt', db.Numeric, index=True)
-    disbursement_desc = db.Column('disb_desc', db.String)
+    disbursement_description = db.Column('disb_desc', db.String)
     disbursement_date = db.Column('disb_dt', db.Date,  index=True)
     disbursement_type = db.Column('disb_tp', db.String)
     disbursement_type_desc = db.Column('disb_tp_desc', db.String)
@@ -173,8 +156,6 @@ class NationalParty_ScheduleB(db.Model):
     memo_cd_desc = db.Column(db.String)
     memo_text = db.Column(db.String)
     national_cmte_nonfed_acct = db.Column('national_cmte_nonfed_acct', db.String)
-    spender_committee_org_type = db.Column('org_tp', db.String)
-    organization_type_full = db.Column('organization_type', db.String)
     orig_sub_id = db.Column(db.Numeric)
     party = db.Column(db.String)
     party_account = db.Column('party_account', db.String)
