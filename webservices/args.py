@@ -1349,7 +1349,7 @@ Inaugural_donations_by_contributor = {
 }
 
 # Used for endpoint `/national_party/schedule_a/`
-# under tag: national party
+# under tag: national party accounts
 national_party_schedule_a = {
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
     'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
@@ -1357,8 +1357,6 @@ national_party_schedule_a = {
         TwoYearTransactionPeriod,
         description=docs.TWO_YEAR_TRANSACTION_PERIOD,
     ),
-    'min_date': Date(description='Minimum date'),
-    'max_date': Date(description='Maximum date'),
     'contributor_name': fields.List(Keyword, description=docs.CONTRIBUTOR_NAME),
     'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
     'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
@@ -1366,18 +1364,12 @@ national_party_schedule_a = {
     'contributor_occupation': fields.List(Keyword, description=docs.CONTRIBUTOR_OCCUPATION),
     'contributor_employer': fields.List(Keyword, description=docs.CONTRIBUTOR_EMPLOYER),
     'image_number': fields.List(IStr, description=docs.IMAGE_NUMBER),
-    'contribution_receipt_date': Date(
-        missing=None,
-        description=' Filter by contribution receipt date '
-    ),
-    'contribution_receipt_amount': fields.Float(
-        missing=None,
-        description='Filter  by contribution receipt amount'
-    ),
+    'min_contribution_receipt_date': Date(description=docs.MIN_RECEIPT_DATE),
+    'max_contribution_receipt_date': Date(description=docs.MAX_RECEIPT_DATE),
     'is_individual': fields.Bool(missing=None, description=docs.IS_INDIVIDUAL),
     'contributor_type': fields.List(
         fields.Str(validate=validate.OneOf(['individual', 'committee'])),
-        description='Filters individual or committee contributions based on line number'
+        description=docs.CONTRIBUTOR_TYPE
     ),
     'contributor_committee_type': fields.List(
         IStr(validate=validate.OneOf([
@@ -1389,30 +1381,39 @@ national_party_schedule_a = {
         IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
         description=docs.DESIGNATION,
     ),
-    'min_amount': Currency(description='Filter for all amounts greater than a value.'),
-    'max_amount': Currency(description='Filter for all amounts less than a value.'),
+    'min_contribution_receipt_amount': Currency(description=docs.MIN_RECEIPT_AMOUNT),
+    'max_contribution_receipt_amount': Currency(description=docs.MAX_RECEIPT_AMOUNT),
     'party_account_type': fields.List(
         IStr(validate=validate.OneOf(['', 'CONVENTION', 'HEADQUARTERS', 'RECOUNT'])),
-        description='National party account type',
+        description=docs.NATIONAL_PARTY_ACCOUNT_TYPE,
     ),
     'receipt_type': fields.List(
         IStr(validate=validate.OneOf([
             '30', '30E', '30F', '30G', '30J', '30K', '30T',
             '31', '31E', '31F', '31G', '31J', '31K', '31T',
             '32', '32E', '32F', '32G', '32J', '32K', '32T'])),
-        description='National party account receipt type',
+        description=docs.RECEIPT_TYPE_CODES
         ),
     }
 
+# Used for endpoint `/national_party/schedule_b/`
+# under tag: national party accounts
 national_party_schedule_b = {
     'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
+    'disbursement_type': fields.List(
+        IStr(validate=validate.OneOf([
+            '40', '40T', '40Y', '40Z', '41', '41T', '41Y',
+            '41Z', '42', '42T', '42Y', '42Z'])),
+        description=docs.DISBURSEMENT_TYPE_CODES
+        ),
     'disbursement_description': fields.List(Keyword, description=docs.DISBURSEMENT_DESCRIPTION),
     'disbursement_purpose_category': fields.List(IStr(validate=validate.OneOf(disbursment_purpose_list)),
                                                  description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
-    'disbursement_amount': fields.Float(missing=None, description=docs.LAST_DISBURSEMENT_AMOUNT),
-    'disbursement_date': Date(missing=None, description=docs.LAST_DISBURSEMENT_DATE),
-    # 'line_number': fields.List(IStr, description=docs.LINE_NUMBER),
-    'line_number': fields.Str(description=docs.LINE_NUMBER),
+    'line_number': fields.Str(description=docs.NATIONAL_PARTY_SB_LINE_NUMBER),
+    'min_disbursement_amount': Currency(description=docs.MIN_DISBURSEMENT_AMOUNT),
+    'max_disbursement_amount': Currency(description=docs.MAX_DISBURSEMENT_AMOUNT),
+    'min_disbursement_date': Date(description=docs.MIN_DISBURSEMENT_DATE),
+    'max_disbursement_date': Date(description=docs.MAX_DISBURSEMENT_DATE),
     'recipient_city': fields.List(IStr, description=docs.RECIPIENT_CITY),
     'recipient_committee_id': fields.List(Committee_ID, description=docs.RECIPIENT_COMMITTEE_ID),
     'recipient_name': fields.List(Keyword, description=docs.RECIPIENT_NAME),
@@ -1420,10 +1421,6 @@ national_party_schedule_b = {
     'spender_committee_designation': fields.List(
         IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
         description=docs.DESIGNATION,
-    ),
-    'spender_committee_org_type': fields.List(
-        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
-        description=docs.ORGANIZATION_TYPE,
     ),
     'spender_committee_type': fields.List(
         IStr(validate=validate.OneOf([
@@ -1434,5 +1431,9 @@ national_party_schedule_b = {
     'two_year_transaction_period': fields.List(
         TwoYearTransactionPeriod,
         description=docs.TWO_YEAR_TRANSACTION_PERIOD,
+    ),
+    'party_account_type': fields.List(
+        IStr(validate=validate.OneOf(['', 'CONVENTION', 'HEADQUARTERS', 'RECOUNT'])),
+        description=docs.NATIONAL_PARTY_ACCOUNT_TYPE,
     ),
 }

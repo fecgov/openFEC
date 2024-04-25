@@ -32,10 +32,6 @@ TAGS = [
         'description': format_docstring(docs.COMMITTEE_TAG),
     },
     {
-        'name': 'national party',
-        'description': format_docstring(docs.NATIONAL_PARTY),
-    },
-    {
         'name': 'dates',
         'description': format_docstring(docs.DATES_TAG),
     },
@@ -86,6 +82,10 @@ TAGS = [
     {
         'name': 'filer resources',
         'description': format_docstring(docs.FILER_RESOURCES),
+    },
+    {
+        'name': 'national party accounts',
+        'description': format_docstring(docs.NATIONAL_PARTY_ACCOUNTS),
     },
     {
         'name': 'efiling',

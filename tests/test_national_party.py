@@ -364,7 +364,7 @@ class TestNationalParty(ApiBaseTest):
 class TestNationalPartyScheduleB(ApiBaseTest):
     kwargs = {'two_year_transaction_period': 2024}
 
-    def test_schedule_b_multiple_two_year_transaction_period(self):
+    def test_multiple_two_year_transaction_period(self):
         """
         testing schedule_b api can take multiple cycles now
         """

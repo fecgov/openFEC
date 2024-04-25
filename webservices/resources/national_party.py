@@ -15,7 +15,7 @@ from webservices.common.views import ApiResource
 # under tag: national party
 # Ex: http://127.0.0.1:5000/v1/national_party/schedule_a/
 @doc(
-    tags=['national party'],
+    tags=['national party accounts'],
     description=docs.NATIONAL_PARTY_SCHED_A,
 )
 class NationalParty_ScheduleAView(ApiResource):
@@ -58,8 +58,10 @@ class NationalParty_ScheduleAView(ApiResource):
     ]
 
     filter_range_fields = [
-        (('min_date', 'max_date'), models.NationalParty_ScheduleA.contribution_receipt_date),
-        (('min_amount', 'max_amount'), models.NationalParty_ScheduleA.contribution_receipt_amount),
+        (('min_contribution_receipt_date', 'max_contribution_receipt_date'),
+            models.NationalParty_ScheduleA.contribution_receipt_date),
+        (('min_contribution_receipt_amount', 'max_contribution_receipt_amount'),
+            models.NationalParty_ScheduleA.contribution_receipt_amount),
     ]
 
     @property
@@ -98,7 +100,7 @@ class NationalParty_ScheduleAView(ApiResource):
 # under tag: national party
 # Ex: http://127.0.0.1:5000/v1/national_party/schedule_b/
 @doc(
-    tags=['national party'],
+    tags=['national party accounts'],
     description=docs.NATIONAL_PARTY_SCHED_B,
 )
 class NationalParty_ScheduleBView(ApiResource):
@@ -138,8 +140,8 @@ class NationalParty_ScheduleBView(ApiResource):
     ]
 
     filter_range_fields = [
-        (('min_amount', 'max_amount'), models.NationalParty_ScheduleB.disbursement_amount),
-        (('min_date', 'max_date'), models.NationalParty_ScheduleB.disbursement_date),
+        (('min_disbursement_amount', 'max_disbursement_amount'), models.NationalParty_ScheduleB.disbursement_amount),
+        (('min_disbursement_date', 'max_disbursement_date'), models.NationalParty_ScheduleB.disbursement_date),
     ]
 
     @property
