@@ -115,6 +115,8 @@ def refresh_materialized(concurrent=True):
         "schedule_d": ["ofec_sched_d_mv"],
         "schedule_a_national_party": ["ofec_sched_a_national_party_mv"],
         "schedule_b_national_party": ["ofec_sched_b_national_party_mv"],
+        "ofec_sched_a_aggregate_employer": ["ofec_sched_a_aggregate_employer_mv"],
+        "ofec_sched_a_aggregate_occupation": ["ofec_sched_a_aggregate_occupation_mv"]
     }
 
     graph = flow.get_graph()
