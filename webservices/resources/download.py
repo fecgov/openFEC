@@ -33,7 +33,7 @@ class DownloadView(utils.Resource):
                 'status': 'complete',
                 'url': cached_file,
             }
-        resource = download.call_resource(path, request.query_string)
+        resource = download.call_resource(path, request.query_string.decode('UTF-8'))
         if resource['count'] > MAX_RECORDS:
             raise exceptions.ApiError(
                 'Cannot request downloads with more than {} records'.format(MAX_RECORDS),
