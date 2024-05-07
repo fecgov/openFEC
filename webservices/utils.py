@@ -572,8 +572,14 @@ def post_to_slack(message, channel):
 
 
 def split_env_var(env_var):
-    """ Remove whitespace and split to a list based of comma delimiter"""
-    return env_var.replace(" ", "").split(",")
+    """
+    Remove whitespace and split to a list based of comma delimiter.
+    If env var is None or blank string, return empty list
+    """
+    if env_var:
+        return env_var.replace(" ", "").split(",")
+    else:
+        return []
 
 
 # To display the open_date and close_date of JSON format inside object "mur"
