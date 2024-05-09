@@ -350,6 +350,28 @@ def update_credentials_by_guid(token, GUID, merged_creds):
         raise
 
 
+def check_token(token):
+    error_message = "Error occured when checking bearer token, check logs"
+
+    header = {
+        "Authorization": token,
+        "Content-Type": "application/json"
+    }
+
+    url = "https://api.fr.cloud.gov/v3/routes"
+
+    response = requests.get(url, headers=header)
+
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as error:
+        if response.status_code == 401:
+            logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
+        slack_message(error_message)
+        logger.error("Error occured with updating credentials: {}".format(error))
+        raise
+
+
 def create_and_update_public_api_key(
         space,
         service_instance_name,
@@ -358,6 +380,8 @@ def create_and_update_public_api_key(
         first_rate_limit_duration,
         second_rate_limit,
         second_rate_limit_duration):
+
+    check_token(token)
 
     new_api_key = create_public_api_key(
         space,
