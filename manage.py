@@ -96,6 +96,8 @@ def refresh_materialized(concurrent=True):
         "ofec_pcc_to_pac": ["ofec_pcc_to_pac_mv"],
         "ofec_sched_a_agg_state": ["ofec_sched_a_agg_state_mv"],
         "ofec_sched_e_mv": ["ofec_sched_e_mv"],
+        "ofec_sched_a_aggregate_employer": ["ofec_sched_a_aggregate_employer_mv"],
+        "ofec_sched_a_aggregate_occupation": ["ofec_sched_a_aggregate_occupation_mv"],
         "reports_house_senate": ["ofec_reports_house_senate_mv"],
         "reports_ie": ["ofec_reports_ie_only_mv"],
         "reports_pac_party": ["ofec_reports_pac_party_mv"],
@@ -105,18 +107,17 @@ def refresh_materialized(concurrent=True):
             "ofec_sched_a_aggregate_state_recipient_totals_mv"
         ],
         "sched_e_by_candidate": ["ofec_sched_e_aggregate_candidate_mv"],
+        "schedule_a_national_party": ["ofec_sched_a_national_party_mv"],
+        "schedule_b_national_party": ["ofec_sched_b_national_party_mv"],
+        "sched_b_by_recipient": ["ofec_sched_b_aggregate_recipient_mv"],
+        "sched_h4": ["ofec_sched_h4_mv"],
+        "schedule_d": ["ofec_sched_d_mv"],
         "totals_combined": ["ofec_totals_combined_mv"],
         "totals_house_senate": ["ofec_totals_house_senate_mv"],
         "totals_ie": ["ofec_totals_ie_only_mv"],
         "totals_presidential": ["ofec_totals_presidential_mv"],
-        "sched_b_by_recipient": ["ofec_sched_b_aggregate_recipient_mv"],
         "totals_inaugural_donations": ["ofec_totals_inaugural_donations_mv"],
-        "sched_h4": ["ofec_sched_h4_mv"],
-        "schedule_d": ["ofec_sched_d_mv"],
-        "schedule_a_national_party": ["ofec_sched_a_national_party_mv"],
-        "schedule_b_national_party": ["ofec_sched_b_national_party_mv"],
-        "ofec_sched_a_aggregate_employer": ["ofec_sched_a_aggregate_employer_mv"],
-        "ofec_sched_a_aggregate_occupation": ["ofec_sched_a_aggregate_occupation_mv"]
+        "totals_national_party": ["ofec_totals_national_party_mv"]
     }
 
     graph = flow.get_graph()
