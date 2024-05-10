@@ -165,9 +165,9 @@ def create_public_api_key(
 
     create_api_key_params = {
         "first_name": space,
-        "last_name": "Public API Key",
+        "last_name": "test_task",
         "email": env.get_credential("FEC_EMAIL"),
-        "use_description": "FEC_WEB_API_KEY_PUBLIC for prod environment. Rate limited key per IP. Created {}".format(
+        "use_description": "test_task. Created {}".format(
             datetime.datetime.today()),
         "registration_source": "update_public_api_key task",
         "throttle_by_ip": True,
@@ -202,7 +202,7 @@ def create_public_api_key(
         response.raise_for_status()
     except requests.exceptions.HTTPError as error:
         error_message = "Error occured when creating API key, check logs"
-        slack_message(error_message)
+        post_to_slack(error_message, "#test-bot")
         logger.error("Error occured with creating API key: {}".format(error))
         raise
 
@@ -236,7 +236,7 @@ def get_space_guid(token, space):
     except requests.exceptions.HTTPError as error:
         if response.status_code == 401:
             logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
-        slack_message(error_message)
+        post_to_slack(error_message, "#test-bot")
         logger.error(error)
         raise
 
@@ -274,7 +274,7 @@ def get_service_instance_guid(token, space_guid, service_instance_name):
     except requests.exceptions.HTTPError as error:
         if response.status_code == 401:
             logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
-        slack_message(error_message)
+        post_to_slack(error_message, "#test-bot")
         logger.error("Error occured with retrieving service instances: {}".format(error))
         raise
 
@@ -284,7 +284,7 @@ def get_service_instance_guid(token, space_guid, service_instance_name):
         GUID = response_json["resources"][0]["guid"]
 
     if GUID == "":
-        slack_message(error_message)
+        post_to_slack(error_message, "#test-bot")
         raise Exception("Service instance GUID not found for service instance: {}".format(service_instance_name))
 
     return GUID
@@ -307,7 +307,7 @@ def get_credentials_by_guid(token, GUID):
     except requests.exceptions.HTTPError as error:
         if response.status_code == 401:
             logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
-        slack_message(error_message)
+        post_to_slack(error_message, "#test-bot")
         logger.error("Error occured with retrieving credentials: {}".format(error))
         raise
 
@@ -345,7 +345,7 @@ def update_credentials_by_guid(token, GUID, merged_creds):
     except requests.exceptions.HTTPError as error:
         if response.status_code == 401:
             logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
-        slack_message(error_message)
+        post_to_slack(error_message, "#test-bot")
         logger.error("Error occured with updating credentials: {}".format(error))
         raise
 
@@ -367,7 +367,7 @@ def check_token(token):
     except requests.exceptions.HTTPError as error:
         if response.status_code == 401:
             logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
-        slack_message(error_message)
+        post_to_slack(error_message, "#test-bot")
         logger.error("Error occured with updating credentials: {}".format(error))
         raise
 
@@ -412,7 +412,7 @@ def update_env_vars(space, service_instance_name, token, credentials_dict):
         service_instance_name,
         space)
 
-    slack_message(message)
+    post_to_slack(message, "#test-bot")
 
     logger.info(message)
 
