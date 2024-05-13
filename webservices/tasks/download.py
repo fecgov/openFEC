@@ -38,7 +38,7 @@ def call_resource(path, qs):
     return {
         "path": path,
         "qs": qs,
-        "name": get_s3_name(path, qs),
+        "name": get_s3_name(path, qs.encode('utf-8')),
         "query": query,
         "schema": schema or resource.schema,
         "resource": resource,
@@ -52,7 +52,7 @@ def call_resource(path, qs):
 def parse_kwargs(resource, qs):
     annotation = resolve_annotations(resource.get, "args", parent=resource)
     fields = utils.extend(*[option["args"] for option in annotation.options])
-    with task_utils.get_app().test_request_context(b"?" + qs):
+    with task_utils.get_app().test_request_context("?" + qs):
         kwargs = flaskparser.parser.parse(fields, location='query')
     return fields, kwargs
 
@@ -141,11 +141,11 @@ def make_bundle(resource):
 
 @app.task(base=QueueOnce, once={"graceful": True})
 def export_query(path, qs):
-    qs = base64.b64decode(qs.encode("UTF-8"))
+    qs = base64.b64decode(qs)
 
     try:
         logger.info("Download query: {0}".format(qs))
-        resource = call_resource(path, qs)
+        resource = call_resource(path, qs.decode('utf-8'))
         logger.info("Download resource: {0}".format(qs))
         make_bundle(resource)
         logger.info("Bundled: {0}".format(qs))
