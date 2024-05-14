@@ -2458,7 +2458,7 @@ This endpoint includes national party committee account disbursements for presid
 national party headquarters buildings, and election recounts and contests and other legal proceedings accounts
 '''
 
-RECEIPT_TYPE_CODES = 'National party account transaction codes for receipts:\n\
+RECEIPT_TYPE_CODES = 'National party account receipt types:\n\
     -30	 CONVENTION ACCOUNT RECEIPT - INDIVIDUAL\n\
     -30E EARMARKED – CONVENTION\n\
     -30F MEMO RECEIPT FROM REGISTERED FILER - JF CONVENTION   ACCOUNT\n\
@@ -2501,7 +2501,7 @@ RECEIPT_AMOUNT = '''
 Filter by contributions of any amount received by committees
 '''
 
-DISBURSEMENT_TYPE_CODES = 'National party account transaction codes for disbursements:\n\
+DISBURSEMENT_TYPE_CODES = 'National party account disbursement types:\n\
     -40	 CONVENTION ACCOUNT DISBURSEMENT\n\
     -40T CONVENTION ACCOUNT REFUND - TRIBAL\n\
     -40Y CONVENTION ACCOUNT REFUND - INDIVIDUAL\n\
