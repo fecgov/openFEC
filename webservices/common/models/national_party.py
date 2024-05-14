@@ -38,7 +38,7 @@ class NationalParty_ScheduleA(db.Model):
     committee_id = db.Column('cmte_id', db.String(9), doc=docs.COMMITTEE_ID)
     committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_NAME)
     recipient_committee_type = db.Column('cmte_tp', db.String, doc=docs.COMMITTEE_TYPE)
-    committee_type_full = db.Column(db.String)
+    recipient_committee_type_full = db.Column('committee_type_full', db.String)
     contributor_aggregate_ytd = db.Column('contb_aggregate_ytd', db.Numeric(14, 2))
     contribution_receipt_amount = db.Column('contb_receipt_amt', db.Numeric(14, 2))
     contribution_receipt_date = db.Column('contb_receipt_dt', db.Date)

@@ -403,25 +403,25 @@ class TestNationalPartyScheduleB(ApiBaseTest):
         )
         self.assertEqual(len(response['results']), 2)
 
-    def test_spender_committee_designation_filter(self):
+    def test_recipient_committee_designation_filter(self):
         [
-            factories.NationalParty_ScheduleBFactory(spender_committee_designation='A'),
-            factories.NationalParty_ScheduleBFactory(spender_committee_designation='B'),
-            factories.NationalParty_ScheduleBFactory(spender_committee_designation='B'),
+            factories.NationalParty_ScheduleBFactory(recipient_committee_designation='A'),
+            factories.NationalParty_ScheduleBFactory(recipient_committee_designation='B'),
+            factories.NationalParty_ScheduleBFactory(recipient_committee_designation='B'),
         ]
         results = self._results(
-            api.url_for(NationalParty_ScheduleBView, spender_committee_designation='B', **self.kwargs)
+            api.url_for(NationalParty_ScheduleBView, recipient_committee_designation='B', **self.kwargs)
         )
         self.assertEqual(len(results), 2)
 
-    def test_spender_committee_type_filter(self):
+    def test_recipient_committee_type_filter(self):
         [
-            factories.NationalParty_ScheduleBFactory(spender_committee_type='W'),
-            factories.NationalParty_ScheduleBFactory(spender_committee_type='W'),
-            factories.NationalParty_ScheduleBFactory(spender_committee_type='Z'),
+            factories.NationalParty_ScheduleBFactory(recipient_committee_type='Y'),
+            factories.NationalParty_ScheduleBFactory(recipient_committee_type='Y'),
+            factories.NationalParty_ScheduleBFactory(recipient_committee_type='Z'),
         ]
         results = self._results(
-            api.url_for(NationalParty_ScheduleBView, spender_committee_type='W', **self.kwargs)
+            api.url_for(NationalParty_ScheduleBView, recipient_committee_type='Y', **self.kwargs)
         )
         self.assertEqual(len(results), 2)
 

@@ -1419,11 +1419,11 @@ national_party_schedule_b = {
     'recipient_name': fields.List(Keyword, description=docs.RECIPIENT_NAME),
     'recipient_state': fields.List(IStr, description=docs.RECIPIENT_STATE),
     'recipient_zip': fields.List(IStr, description=docs.RECIPIENT_ZIP),
-    'spender_committee_designation': fields.List(
+    'recipient_committee_designation': fields.List(
         IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
         description=docs.DESIGNATION,
     ),
-    'spender_committee_type': fields.List(
+    'recipient_committee_type': fields.List(
         IStr(validate=validate.OneOf([
             '', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q',
             'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
