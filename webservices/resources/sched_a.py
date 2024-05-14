@@ -68,10 +68,16 @@ class ScheduleAView(ItemizedResource):
         (('min_image_number', 'max_image_number'), models.ScheduleA.image_number),
         (('min_load_date', 'max_load_date'), models.ScheduleA.load_date),
     ]
-    filter_fulltext_fields = [
-        ('contributor_name', models.ScheduleA.contributor_name_text),
-        ('contributor_employer', models.ScheduleA.contributor_employer_text),
-        ('contributor_occupation', models.ScheduleA.contributor_occupation_text),
+    filter_fulltext_fields_NA = [
+        ('contributor_name',
+         models.ScheduleA.contributor_name_text,
+         models.ScheduleA.contributor_name),
+        ('contributor_employer',
+         models.ScheduleA.contributor_employer_text,
+         models.ScheduleA.contributor_employer),
+        ('contributor_occupation',
+         models.ScheduleA.contributor_occupation_text,
+         models.ScheduleA.contributor_occupation),
     ]
     filter_multi_start_with_fields = [
         ('contributor_zip', models.ScheduleA.contributor_zip),
