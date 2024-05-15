@@ -52,3 +52,6 @@ pytest==8.0.2
 pytest-cov==4.1.0
 setuptools==68.0.0 #pin to remediate snyk ReDoS#5477
 webtest==2.0.34
+idna>=3.7 # not directly required, pinned by Snyk to avoid a vulnerability
+jinja2>=3.1.4 # not directly required, pinned by Snyk to avoid a vulnerability
+waitress>=2.1.1 # not directly required, pinned by Snyk to avoid a vulnerability
