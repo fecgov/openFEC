@@ -651,3 +651,21 @@ class JFCCommitteeFactory(BaseFactory):
 class TotalsInauguralDonationsFactory(BaseFactory):
     class Meta:
         model = models.InauguralDonations
+
+
+class NationalParty_ScheduleAFactory(BaseFactory):
+    class Meta:
+        model = models.NationalParty_ScheduleA
+
+    sub_id = factory.Sequence(lambda n: n)
+    report_year = 2024
+    two_year_transaction_period = 2024
+
+
+class NationalParty_ScheduleBFactory(BaseFactory):
+    class Meta:
+        model = models.NationalParty_ScheduleB
+
+    sub_id = factory.Sequence(lambda n: n)
+    report_year = 2024
+    two_year_transaction_period = 2024

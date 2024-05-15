@@ -84,6 +84,10 @@ TAGS = [
         'description': format_docstring(docs.FILER_RESOURCES),
     },
     {
+        'name': 'national party accounts',
+        'description': format_docstring(docs.NATIONAL_PARTY_ACCOUNTS),
+    },
+    {
         'name': 'efiling',
         'description': format_docstring(docs.EFILING_TAG),
     },
