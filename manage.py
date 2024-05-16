@@ -167,7 +167,8 @@ def create_public_api_key(
         "first_name": space,
         "last_name": "Public API Key",
         "email": env.get_credential("FEC_EMAIL"),
-        "use_description": "FEC_WEB_API_KEY_PUBLIC for prod environment. Rate limited key per IP. Created {}".format(
+        "use_description": "FEC_WEB_API_KEY_PUBLIC for {} environment. Rate limited key per IP. Created {}".format(
+            space,
             datetime.datetime.today()),
         "registration_source": "update_public_api_key task",
         "throttle_by_ip": True,
@@ -313,17 +314,11 @@ def get_credentials_by_guid(token, GUID):
 
     creds = response.json()
 
-    logger.info("Existing Credentials:")
-    logger.info(creds)
-
     return creds
 
 
 def update_credentials(creds, update_data):
     creds.update(update_data)
-
-    logger.info("Updated Credentials:")
-    logger.info(creds)
 
     return {"credentials": creds}
 
