@@ -25,7 +25,7 @@ import json
 logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line:
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
 
@@ -35,6 +35,7 @@ INNER_HITS = {
         "require_field_match": False,
         "fields": {"documents.text": {}, "documents.description": {}},
     },
+    "size": 10,
 }
 
 ALL_DOCUMENT_TYPES = [
