@@ -93,7 +93,7 @@ app.config['SQLALCHEMY_FOLLOWERS'] = [
 ]
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
-# app.config['SQLALCHEMY_ECHO'] = True
+app.config['SQLALCHEMY_ECHO'] = True
 
 # Modify app configuration and logging level for production
 if not app.debug:
@@ -303,6 +303,7 @@ def forbidden(exception):
 
 api.add_resource(national_party.NationalParty_ScheduleAView, '/national_party/schedule_a/')
 api.add_resource(national_party.NationalParty_ScheduleBView, '/national_party/schedule_b/')
+api.add_resource(national_party.NationalPartyTotalsView, '/national_party/totals/')
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')
 api.add_resource(
@@ -467,6 +468,7 @@ apidoc = FlaskApiSpec(app)
 
 apidoc.register(national_party.NationalParty_ScheduleAView, blueprint='v1')
 apidoc.register(national_party.NationalParty_ScheduleBView, blueprint='v1')
+apidoc.register(national_party.NationalPartyTotalsView, blueprint='v1')
 apidoc.register(search.CandidateNameSearch, blueprint='v1')
 apidoc.register(search.CommitteeNameSearch, blueprint='v1')
 apidoc.register(candidates.CandidateView, blueprint='v1')
