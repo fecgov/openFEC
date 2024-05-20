@@ -35,6 +35,8 @@ def get_graph():
         'ofec_pcc_to_pac',
         'ofec_sched_a_agg_state',
         'ofec_sched_e_mv',
+        'ofec_sched_a_aggregate_employer',
+        'ofec_sched_a_aggregate_occupation',
         'reports_house_senate',
         'reports_ie',
         'reports_pac_party',
@@ -42,18 +44,17 @@ def get_graph():
         'sched_a_by_size_merged',
         'sched_a_by_state_recipient_totals',
         'sched_e_by_candidate',
+        'sched_b_by_recipient',
+        'schedule_a_national_party',
+        'schedule_b_national_party',
+        'sched_h4',
+        'schedule_d',
         'totals_combined',
         'totals_house_senate',
         'totals_ie',
         'totals_presidential',
-        'sched_b_by_recipient',
         'totals_inaugural_donations',
-        'sched_h4',
-        'schedule_d',
-        'schedule_a_national_party',
-        'schedule_b_national_party',
-        'ofec_sched_a_aggregate_employer',
-        'ofec_sched_a_aggregate_occupation'
+        'totals_national_party'
     ]
     graph.add_nodes_from(MATERIALIZED_VIEWS)
 
@@ -132,5 +133,10 @@ def get_graph():
 
     graph.add_edge('ofec_pcc_to_pac', 'committee_history'),
     graph.add_edge('totals_combined', 'sched_b_by_recipient'),
+
+    graph.add_edges_from([
+        ('schedule_a_national_party', 'totals_national_party'),
+        ('schedule_b_national_party', 'totals_national_party'),
+    ])
 
     return graph
