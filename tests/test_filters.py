@@ -1,10 +1,13 @@
+import sqlalchemy as sa
 from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices import filters
+from webservices.rest import api
 from webservices.common import models
 from webservices.resources.dates import CalendarDatesView
 from webservices.resources.committees import CommitteeList
+from webservices.resources.sched_a import ScheduleAView
 
 
 class TestFilterMatch(ApiBaseTest):
@@ -313,3 +316,103 @@ class TestFilterOverlap(ApiBaseTest):
             set(query_committees.all()),
             set(each for each in self.committees if each.sponsor_candidate_ids == ['S001']),
         )
+
+
+class TestFilterFulltext_NA(ApiBaseTest):
+    def setUp(self):
+        super(TestFilterFulltext_NA, self).setUp()
+        self.receipts = [
+            factories.ScheduleAFactory(committee_id='C00000001',
+                                       contributor_employer_text=sa.func.to_tsvector('N/A'),
+                                       contributor_employer='N/A'),
+
+            factories.ScheduleAFactory(committee_id='C00000002',
+                                       contributor_employer_text=sa.func.to_tsvector('amazon.com'),
+                                       contributor_employer='amazon.com'),
+
+            factories.ScheduleAFactory(committee_id='C00000003',
+                                       contributor_employer_text=sa.func.to_tsvector('amazon com'),
+                                       contributor_employer='amazon com'),
+
+            factories.ScheduleAFactory(committee_id='C00000004',
+                                       contributor_employer_text=sa.func.to_tsvector('New York'),
+                                       contributor_employer='New York'),
+
+            factories.ScheduleAFactory(committee_id='C00000005',
+                                       contributor_employer_text=sa.func.to_tsvector('AAA BBB'),
+                                       contributor_employer='AAA BBB'),
+        ]
+
+    def test_filter_fulltext_NA_include(self):
+        query_receipts = filters.filter_fulltext_NA(
+            models.ScheduleA.query,
+            {'contributor_employer': ['amzaon.com',]},
+            ScheduleAView.filter_fulltext_fields_NA,
+        )
+        self.assertEqual(
+            set(query_receipts.all()),
+            set(
+                each
+                for each in self.receipts
+                if 'amzaon.com' in each.contributor_employer
+            ),
+        )
+
+    def test_filter_fulltext_NA_include_NA(self):
+        query_receipts = filters.filter_fulltext_NA(
+            models.ScheduleA.query,
+            {'contributor_employer': ['N/A',]},
+            ScheduleAView.filter_fulltext_fields_NA,
+        )
+        self.assertEqual(
+            set(query_receipts.all()),
+            set(
+                each
+                for each in self.receipts
+                if 'N/A' in each.contributor_employer
+            ),
+        )
+
+        results = self._results(
+            api.url_for(ScheduleAView, contributor_employer='N/A')
+        )
+        self.assertEqual(len(results), 1)
+
+        results = self._results(
+            api.url_for(ScheduleAView, contributor_employer='amazon')
+        )
+        self.assertEqual(len(results), 2)
+
+    def test_filter_fulltext_NA_exclude(self):
+        query_receipts = filters.filter_fulltext_NA(
+            models.ScheduleA.query,
+            {'contributor_employer': ['-amazon',]},
+            ScheduleAView.filter_fulltext_fields_NA,
+        )
+        self.assertEqual(
+            set(query_receipts.all()),
+            set(
+                each
+                for each in self.receipts
+                if 'amazon' not in each.contributor_employer
+            ),
+        )
+
+    def test_filter_fulltext_NA_exclude_NA(self):
+        query_receipts = filters.filter_fulltext_NA(
+            models.ScheduleA.query,
+            {'contributor_employer': ['-N/A',]},
+            ScheduleAView.filter_fulltext_fields_NA,
+        )
+        self.assertEqual(
+            set(query_receipts.all()),
+            set(
+                each
+                for each in self.receipts
+                if 'N/A' not in each.contributor_employer
+            ),
+        )
+        results = self._results(
+            api.url_for(ScheduleAView, contributor_employer='-N/A')
+        )
+        self.assertEqual(len(results), 4)

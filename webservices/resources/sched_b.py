@@ -52,10 +52,11 @@ class ScheduleBView(ItemizedResource):
         ('two_year_transaction_period',
          models.ScheduleB.two_year_transaction_period),
     ]
-    filter_fulltext_fields = [
-        ('recipient_name', models.ScheduleB.recipient_name_text),
+    filter_fulltext_fields_NA = [
+        ('recipient_name', models.ScheduleB.recipient_name_text, models.ScheduleB.recipient_name),
         ('disbursement_description',
-         models.ScheduleB.disbursement_description_text),
+         models.ScheduleB.disbursement_description_text,
+         models.ScheduleB.disbursement_description),
     ]
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleB.disbursement_date),

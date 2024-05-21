@@ -2441,3 +2441,101 @@ This endpoint provides information about an inaugural committee's Form 13 report
 The data is aggregated by the contributor and the two-year period. We refer to two-year periods as a `cycle`.
 
 '''
+
+NATIONAL_PARTY_ACCOUNTS = '''
+Collection of endpoints that provide information about national party committee accounts
+including presidential nominating conventions, national party headquarters buildings,
+and election recounts and contests and other legal proceedings accounts.
+'''
+
+NATIONAL_PARTY_SCHED_A = '''
+This endpoint includes national party committee account receipts for presidential nominating conventions,
+national party headquarters buildings, and election recounts and contests and other legal proceedings accounts.
+'''
+
+NATIONAL_PARTY_SCHED_B = '''
+This endpoint includes national party committee account disbursements for presidential nominating conventions,
+national party headquarters buildings, and election recounts and contests and other legal proceedings accounts
+'''
+
+RECEIPT_TYPE_CODES = 'National party account receipt types:\n\
+    -30	 CONVENTION ACCOUNT RECEIPT - INDIVIDUAL\n\
+    -30E EARMARKED – CONVENTION\n\
+    -30F MEMO RECEIPT FROM REGISTERED FILER - JF CONVENTION   ACCOUNT\n\
+    -30G TRANSFER IN - CONVENTION ACCOUNT\n\
+    -30J MEMO RECEIPT FROM INDIVIDUAL - JF CONVENTION ACCOUNT\n\
+    -30K CONVENTION ACCOUNT RECEIPT - REGISTERED FILER\n\
+    -30T CONVENTION ACCOUNT RECEIPT - TRIBAL\n\
+    -31	 HEADQUARTERS ACCOUNT RECEIPT- INDIVIDUAL\n\
+    -31E EARMARKED – HEADQUARTERS\n\
+    -31F MEMO RECEIPT FROM REGISTERED FILER - JF HEADQUARTERS ACCOUNT\n\
+    -31G TRANSFER IN  - HEADQUARTERS ACCOUNT\n\
+    -31J MEMO RECEIPT FROM INDIVIDUAL - JF HEADQUARTERS ACCOUNT\n\
+    -31K HEADQUARTERS ACCOUNT RECEIPT - REGISTERED FILER\n\
+    -31T HEADQUARTERS ACCOUNT RECEIPT - TRIBAL\n\
+    -32	 RECOUNT ACCOUNT RECEIPT- INDIVIDUAL\n\
+    -32E EARMARKED – RECOUNT\n\
+    -32F MEMO RECEIPT FROM REGISTERED FILER - JF RECOUNT ACCOUNT\n\
+    -32G TRANSFER IN  - RECOUNT ACCOUNT\n\
+    -32J MEMO RECEIPT FROM INDIVIDUAL -  JF RECOUNT ACCOUNT\n\
+    -32K RECOUNT ACCOUNT RECEIPT- REGISTERED FILER\n\
+    -32T RECOUNT ACCOUNT RECEIPT - TRIBAL\n\
+'
+NATIONAL_PARTY_ACCOUNT_TYPE = 'Type of national party account:\n\
+        - CONVENTION\n\
+        - HEADQUARTERS\n\
+        - RECOUNT\n\
+'
+CONTRIBUTOR_TYPE = '''
+Filters individual or committee contributions based on line number
+'''
+
+MIN_RECEIPT_AMOUNT = '''
+Minimum receipts amount
+'''
+
+MAX_RECEIPT_AMOUNT = '''
+Maximum receipts amount
+'''
+RECEIPT_AMOUNT = '''
+Filter by contributions of any amount received by committees
+'''
+
+DISBURSEMENT_TYPE_CODES = 'National party account disbursement types:\n\
+    -40	 CONVENTION ACCOUNT DISBURSEMENT\n\
+    -40T CONVENTION ACCOUNT REFUND - TRIBAL\n\
+    -40Y CONVENTION ACCOUNT REFUND - INDIVIDUAL\n\
+    -40Z CONVENTION ACCOUNT REFUND - REGISTERED FILER\n\
+    -41  HEADQUARTERS ACCOUNT DISBURSEMENT\n\
+    -41T HEADQUARTERS  ACCOUNT REFUND - TRIBAL\n\
+    -41Y HEADQUARTERS  ACCOUNT REFUND - INDIVIDUAL\n\
+    -41Z HEADQUARTERS  ACCOUNT REFUND - REGISTERED FILER\n\
+    -42	 RECOUNT ACCOUNT DISBURSEMENT\n\
+    -42T RECOUNT ACCOUNT REFUND  - TRIBAL\n\
+    -42Y RECOUNT ACCOUNT REFUND - INDIVIDUAL\n\
+    -42Z RECOUNT ACCOUNT REFUND - REGISTERED FILER\n\
+'
+NATIONAL_PARTY_SB_LINE_NUMBER = '''Filter for form and line number using the following format:
+`<form_number-line_number>`. For example F3X-21b or F3X-29 would filter
+down to all entries from form `F3X` and line number `21b` or form `F3X` and line number `29`.
+'''
+
+MIN_DISBURSEMENT_DATE = '''
+Selects all disbursements received after this date(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MAX_DISBURSEMENT_DATE = '''
+Selects all disbursements received before this date(MM/DD/YYYY or YYYY-MM-DD)
+'''
+
+MIN_DISBURSEMENT_AMOUNT = '''
+Minimum disbursement amount
+'''
+
+MAX_DISBURSEMENT_AMOUNT = '''
+Maximum disbursement amount
+'''
+
+RECIPIENT_ZIP = '''
+Zipcode of recipient
+'''
