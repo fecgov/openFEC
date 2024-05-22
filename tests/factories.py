@@ -669,3 +669,8 @@ class NationalParty_ScheduleBFactory(BaseFactory):
     sub_id = factory.Sequence(lambda n: n)
     report_year = 2024
     two_year_transaction_period = 2024
+
+
+class NationalPartyTotalsFactory(BaseFactory):
+    class Meta:
+        model = models.NationalPartyTotals
