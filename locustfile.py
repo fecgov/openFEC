@@ -787,6 +787,12 @@ class Tasks(TaskSet):
             )
         log_response(self, "ao202312", params, resp)
 
+    @task
+    def get_mur_inner_hits(self):
+        params = {"q": "reason", "type": "murs", "case_no": "4530", "case_doc_category_id": "1", "api_key": API_KEY}
+        resp = self.client.get("legal/search", name="get_mur_inner_hits", params=params, timeout=timeout)
+        log_response(self, "mur_inner_hits", params, resp)
+
 
 class Swarm(user.HttpUser):
     tasks = [Tasks]
