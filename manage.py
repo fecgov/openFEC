@@ -210,7 +210,7 @@ def create_public_api_key(
     response_json = response.json()
     new_api_key = response_json["user"]["api_key"]
 
-    logger.info("New API key: {}".format(new_api_key))
+    logger.info("New API key: {}".format(new_api_key[:5]))
 
     return new_api_key
 
