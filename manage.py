@@ -313,17 +313,11 @@ def get_credentials_by_guid(token, GUID):
 
     creds = response.json()
 
-    logger.info("Existing Credentials:")
-    logger.info(creds)
-
     return creds
 
 
 def update_credentials(creds, update_data):
     creds.update(update_data)
-
-    logger.info("Updated Credentials:")
-    logger.info(creds)
 
     return {"credentials": creds}
 
