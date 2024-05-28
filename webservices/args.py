@@ -1438,3 +1438,13 @@ national_party_schedule_b = {
         description=docs.NATIONAL_PARTY_ACCOUNT_TYPE,
     ),
 }
+
+# Used for endpoint `/national_party/totals/`
+# under tag: national party accounts
+national_party_totals = {
+ 'committee_id': fields.List(Committee_ID, description=docs.COMMITTEE_ID),
+ 'two_year_transaction_period': fields.List(
+        TwoYearTransactionPeriod,
+        description=docs.TWO_YEAR_TRANSACTION_PERIOD,
+    ),
+}

@@ -2457,6 +2457,11 @@ NATIONAL_PARTY_SCHED_B = '''
 This endpoint includes national party committee account disbursements for presidential nominating conventions,
 national party headquarters buildings, and election recounts and contests and other legal proceedings accounts
 '''
+NATIONAL_PARTY_TOTALS = '''
+This endpoint includes national party committee account total receipts and total disbursements for \n
+presidential nominating conventions, national party headquarters buildings, and election recounts \n
+and contests and other legal proceedings accounts for a given two year cycle.
+'''
 
 RECEIPT_TYPE_CODES = 'National party account receipt types:\n\
     -30	 CONVENTION ACCOUNT RECEIPT - INDIVIDUAL\n\

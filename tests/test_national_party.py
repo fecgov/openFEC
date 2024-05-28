@@ -5,7 +5,11 @@ from tests import factories
 from tests.common import ApiBaseTest
 from webservices.rest import api
 from webservices.schemas import NationalPartyScheduleASchema
-from webservices.resources.national_party import NationalParty_ScheduleAView, NationalParty_ScheduleBView
+from webservices.resources.national_party import (
+    NationalParty_ScheduleAView,
+    NationalParty_ScheduleBView,
+    NationalPartyTotalsView
+)
 
 
 class TestNationalParty(ApiBaseTest):
@@ -466,3 +470,53 @@ class TestNationalPartyScheduleB(ApiBaseTest):
             api.url_for(NationalParty_ScheduleBView, line_number='123')
         )
         self.assertEqual(response.status_code, 400)
+
+
+class TestNationalPartyTotals(ApiBaseTest):
+    kwargs = {'two_year_transaction_period': 2024}
+
+    def test_national_party_totals(self):
+        [
+            factories. NationalPartyTotalsFactory(
+                two_year_transaction_period=2016,
+                committee_id='C00075820',
+                committee_name='NRCC',
+                total_disbursements=100.00,
+                total_receipts=50.00,
+            ),
+            factories.NationalPartyTotalsFactory(
+               two_year_transaction_period=2018,
+               committee_id='C00075820',
+               committee_name='NRCC',
+               total_disbursements=120.00,
+               total_receipts=70.00,
+            ),
+            factories.NationalPartyTotalsFactory(
+               two_year_transaction_period=2020,
+               committee_id='C00075820',
+               committee_name='NRCC',
+               total_disbursements=130.00,
+               total_receipts=90.00,
+            ),
+            factories.NationalPartyTotalsFactory(
+               two_year_transaction_period=2024,
+               committee_id='C00255695',
+               committee_name='LIBERTARIAN NATIONAL COMMITTEE, INC.',
+               total_disbursements=100.00,
+               total_receipts=90.00,
+            ),
+        ]
+        response = self._response(
+            api.url_for(NationalPartyTotalsView, committee_id='C00075820')
+        )
+        self.assertEqual(len(response['results']), 3)
+
+        response = self._response(
+            api.url_for(NationalPartyTotalsView, committee_id='C00075820', two_year_transaction_period=2016)
+        )
+        self.assertEqual(len(response['results']), 1)
+
+        response = self._response(
+            api.url_for(NationalPartyTotalsView, committee_id='C00255695',)
+        )
+        self.assertEqual(len(response['results']), 1)
