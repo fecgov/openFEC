@@ -143,7 +143,7 @@ def _detect_space(repo, branch=None, yes=False):
 DEPLOY_RULES = (
     ('prod', _detect_prod),
     ('stage', lambda _, branch: branch.startswith('release')),
-    ('dev', lambda _, branch: branch == 'test-create-api-key'),
+    ('dev', lambda _, branch: branch == 'test-branch-for-api-key-creation'),
 )
 
 
