@@ -454,23 +454,6 @@ class TestNationalPartyScheduleB(ApiBaseTest):
         )
         self.assertEqual(len(results), 2)
 
-    def test_line_number(self):
-        [
-            factories.NationalParty_ScheduleBFactory(line_number='21b', filing_form='F3X'),
-            factories.NationalParty_ScheduleBFactory(line_number='29', filing_form='F3X'),
-        ]
-
-        results = self._results(
-            api.url_for(NationalParty_ScheduleBView, line_number='F3X-29')
-        )
-        self.assertEqual(len(results), 1)
-
-        # invalid line_number
-        response = self.app.get(
-            api.url_for(NationalParty_ScheduleBView, line_number='123')
-        )
-        self.assertEqual(response.status_code, 400)
-
 
 class TestNationalPartyTotals(ApiBaseTest):
     kwargs = {'two_year_transaction_period': 2024}

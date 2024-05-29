@@ -1409,7 +1409,6 @@ national_party_schedule_b = {
     'disbursement_description': fields.List(Keyword, description=docs.DISBURSEMENT_DESCRIPTION),
     'disbursement_purpose_category': fields.List(IStr(validate=validate.OneOf(disbursment_purpose_list)),
                                                  description=docs.DISBURSEMENT_PURPOSE_CATEGORY),
-    'line_number': fields.Str(description=docs.NATIONAL_PARTY_SB_LINE_NUMBER),
     'min_disbursement_amount': Currency(description=docs.MIN_DISBURSEMENT_AMOUNT),
     'max_disbursement_amount': Currency(description=docs.MAX_DISBURSEMENT_AMOUNT),
     'min_disbursement_date': Date(description=docs.MIN_DISBURSEMENT_DATE),

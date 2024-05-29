@@ -2520,10 +2520,6 @@ DISBURSEMENT_TYPE_CODES = 'National party account disbursement types:\n\
     -42Y RECOUNT ACCOUNT REFUND - INDIVIDUAL\n\
     -42Z RECOUNT ACCOUNT REFUND - REGISTERED FILER\n\
 '
-NATIONAL_PARTY_SB_LINE_NUMBER = '''Filter for form and line number using the following format:
-`<form_number-line_number>`. For example F3X-21b or F3X-29 would filter
-down to all entries from form `F3X` and line number `21b` or form `F3X` and line number `29`.
-'''
 
 MIN_DISBURSEMENT_DATE = '''
 Selects all disbursements received after this date(MM/DD/YYYY or YYYY-MM-DD)
