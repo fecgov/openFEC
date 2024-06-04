@@ -4,7 +4,7 @@ from webservices import rest
 from tests import factories
 from tests.common import ApiBaseTest
 from webservices.rest import api
-from webservices.resources.filings import FilingsView, FilingsList, EFilingsView, F2EFilingsView, F1EFilingsView
+from webservices.resources.filings import FilingsView, FilingsList, EFilingsView, F2EFilingsView, F1EFilingsView, TestF1EFilingsView
 
 
 # Test 3 endpoints:
@@ -707,6 +707,171 @@ class TestEfileForm1(ApiBaseTest):
         factories.Form1EFilingFactory(organization_type="M")
 
         results = self._results(api.url_for(F1EFilingsView, organization_type="L"))
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["organization_type"], "L")
+
+
+class TestTestEfileForm1(ApiBaseTest):
+
+    def test_Form1Efilings(self):
+        factories.TestForm1EFilingFactory(candidate_id="H00000001")
+        factories.TestForm1EFilingFactory(candidate_id="S00000002")
+        factories.TestForm1EFilingFactory(committee_id="C00000002")
+
+        results = self._results(api.url_for(TestF1EFilingsView))
+        self.assertEqual(len(results), 3)
+
+    def test_filter_load_timestamp(self):
+        factories.TestForm1EFilingFactory(
+            candidate_id="H01000000",
+            file_number=2,
+            load_timestamp=datetime.date(2012, 1, 1),
+        )
+        factories.TestForm1EFilingFactory(
+            candidate_id="S00000011",
+            file_number=3,
+            load_timestamp=datetime.date(2013, 1, 1),
+        )
+        factories.TestForm1EFilingFactory(
+            candidate_id="P00000012",
+            file_number=4,
+            load_timestamp=datetime.date(2014, 1, 1),
+        )
+        factories.TestForm1EFilingFactory(
+            candidate_id="H00000013",
+            file_number=5,
+            load_timestamp=datetime.date(2015, 1, 1),
+        )
+
+        min_load_timestamp = datetime.date(2013, 1, 1)
+        results = self._results(api.url_for(F1EFilingsView, min_load_timestamp=min_load_timestamp))
+        self.assertTrue(
+            all(each for each in results if each["load_timestamp"] >= min_load_timestamp.isoformat())
+        )
+        max_load_timestamp = datetime.date(2014, 1, 1)
+        results = self._results(api.url_for(F1EFilingsView, max_load_timestamp=max_load_timestamp))
+        self.assertTrue(
+            all(each for each in results if each["load_timestamp"] <= max_load_timestamp.isoformat())
+        )
+        results = self._results(
+            api.url_for(
+                F1EFilingsView, min_load_timestamp=min_load_timestamp, max_load_timestamp=max_load_timestamp
+            )
+        )
+        self.assertTrue(
+            all(
+                each
+                for each in results
+                if min_load_timestamp.isoformat() <= each["load_timestamp"] <= max_load_timestamp.isoformat()
+            )
+        )
+
+    def test_filter_file_number(self):
+        file_number = 1124839
+        factories.TestForm1EFilingFactory(file_number=file_number)
+        factories.TestForm1EFilingFactory()
+
+        results = self._results(api.url_for(TestF1EFilingsView, file_number=file_number))
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["file_number"], file_number)
+
+    def test_filter_committee_id(self):
+        factories.TestForm1EFilingFactory(committee_id="C00000001")
+        factories.TestForm1EFilingFactory(committee_id="C00000002")
+
+        results = self._results(api.url_for(TestF1EFilingsView, committee_id="C00000002"))
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["committee_id"], "C00000002")
+
+    def test_candidate_filters(self):
+
+        factories.TestForm1EFilingFactory(
+            election_state="AK",
+            candidate_district=1,
+            candidate_office="H",
+            candidate_id="H8UGH0000",
+
+        )
+        factories.TestForm1EFilingFactory(
+            election_state="IN",
+            candidate_district=7,
+            candidate_office="H",
+            candidate_id="H00000000",
+        )
+        factories.TestForm1EFilingFactory(
+            election_state="IN",
+            candidate_district="null",
+            candidate_office="S",
+            candidate_id="S00000000",
+        )
+        factories.TestForm1EFilingFactory(
+            election_state="null",
+            candidate_district="null",
+            candidate_office="P",
+            candidate_id="P00000000",
+
+        )
+
+        results = self._results(
+            api.url_for(
+                TestF1EFilingsView,
+                election_state='IN',
+            )
+        )
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results[0]["election_state"], "IN")
+
+        results = self._results(
+            api.url_for(
+                TestF1EFilingsView,
+                candidate_office='P',
+            )
+        )
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["candidate_office"], "P")
+
+        results = self._results(
+            api.url_for(
+                TestF1EFilingsView,
+                candidate_district='1',
+            )
+        )
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["candidate_district"], "1")
+
+        results = self._results(api.url_for(TestF1EFilingsView, candidate_id="H00000000"))
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["candidate_id"], "H00000000")
+
+    def test_filter_image_number(self):
+        factories.TestForm1EFilingFactory(image_number=123456)
+        factories.TestForm1EFilingFactory(image_number=789012)
+
+        results = self._results(api.url_for(TestF1EFilingsView, image_number=789012))
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["image_number"], "789012")
+
+    def test_filter_committee_type(self):
+        factories.TestForm1EFilingFactory(committee_type="S")
+        factories.TestForm1EFilingFactory(committee_type="X")
+        factories.TestForm1EFilingFactory(committee_type="Y")
+
+        results = self._results(api.url_for(TestF1EFilingsView, committee_type="Y"))
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["committee_type"], "Y")
+
+    def test_filter_organization_type(self):
+        factories.TestForm1EFilingFactory(organization_type="C")
+        factories.TestForm1EFilingFactory(organization_type="L")
+        factories.TestForm1EFilingFactory(organization_type="M")
+
+        results = self._results(api.url_for(TestF1EFilingsView, organization_type="L"))
 
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["organization_type"], "L")
