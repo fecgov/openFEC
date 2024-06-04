@@ -5,7 +5,8 @@ import subprocess
 import multiprocessing
 import networkx as nx
 import sqlalchemy as sa
-
+import datetime
+import requests
 from webservices import flow
 from webservices.env import env
 from webservices.rest import db
@@ -96,6 +97,8 @@ def refresh_materialized(concurrent=True):
         "ofec_pcc_to_pac": ["ofec_pcc_to_pac_mv"],
         "ofec_sched_a_agg_state": ["ofec_sched_a_agg_state_mv"],
         "ofec_sched_e_mv": ["ofec_sched_e_mv"],
+        "ofec_sched_a_aggregate_employer": ["ofec_sched_a_aggregate_employer_mv"],
+        "ofec_sched_a_aggregate_occupation": ["ofec_sched_a_aggregate_occupation_mv"],
         "reports_house_senate": ["ofec_reports_house_senate_mv"],
         "reports_ie": ["ofec_reports_ie_only_mv"],
         "reports_pac_party": ["ofec_reports_pac_party_mv"],
@@ -105,18 +108,17 @@ def refresh_materialized(concurrent=True):
             "ofec_sched_a_aggregate_state_recipient_totals_mv"
         ],
         "sched_e_by_candidate": ["ofec_sched_e_aggregate_candidate_mv"],
+        "schedule_a_national_party": ["ofec_sched_a_national_party_mv"],
+        "schedule_b_national_party": ["ofec_sched_b_national_party_mv"],
+        "sched_b_by_recipient": ["ofec_sched_b_aggregate_recipient_mv"],
+        "sched_h4": ["ofec_sched_h4_mv"],
+        "schedule_d": ["ofec_sched_d_mv"],
         "totals_combined": ["ofec_totals_combined_mv"],
         "totals_house_senate": ["ofec_totals_house_senate_mv"],
         "totals_ie": ["ofec_totals_ie_only_mv"],
         "totals_presidential": ["ofec_totals_presidential_mv"],
-        "sched_b_by_recipient": ["ofec_sched_b_aggregate_recipient_mv"],
         "totals_inaugural_donations": ["ofec_totals_inaugural_donations_mv"],
-        "sched_h4": ["ofec_sched_h4_mv"],
-        "schedule_d": ["ofec_sched_d_mv"],
-        "schedule_a_national_party": ["ofec_sched_a_national_party_mv"],
-        "schedule_b_national_party": ["ofec_sched_b_national_party_mv"],
-        "ofec_sched_a_aggregate_employer": ["ofec_sched_a_aggregate_employer_mv"],
-        "ofec_sched_a_aggregate_occupation": ["ofec_sched_a_aggregate_occupation_mv"]
+        "totals_national_party": ["ofec_totals_national_party_mv"]
     }
 
     graph = flow.get_graph()
@@ -143,6 +145,272 @@ def refresh_materialized(concurrent=True):
                 logger.error("Error refreshing node {}: not found.".format(node))
 
     logger.info("Finished refreshing materialized views.")
+
+
+def create_public_api_key(
+        space,
+        first_rate_limit,
+        first_rate_limit_duration,
+        second_rate_limit,
+        second_rate_limit_duration):
+
+    logger.info("Creating new public API key for {} environment".format(space))
+    UMBRELLA_ADMIN_AUTH_TOKEN = env.get_credential("UMBRELLA_ADMIN_AUTH_TOKEN")
+    API_KEY = env.get_credential("FEC_WEB_API_KEY_PUBLIC")
+
+    header = {
+        "X-Admin-Auth-Token": UMBRELLA_ADMIN_AUTH_TOKEN,
+        "X-Api-Key": API_KEY,
+        "Content-Type": "application/json; charset=UTF-8",
+    }
+
+    create_api_key_params = {
+        "first_name": space,
+        "last_name": "Public API Key",
+        "email": env.get_credential("FEC_EMAIL"),
+        "use_description": "FEC_WEB_API_KEY_PUBLIC for {} environment. Rate limited key per IP. Created {}".format(
+            space,
+            datetime.datetime.today()),
+        "registration_source": "update_public_api_key task",
+        "throttle_by_ip": True,
+        "terms_and_conditions": True,
+        "created_at": datetime.datetime.now().isoformat(),
+        "creator": {
+            "username": "auto-generated"
+        },
+        "settings": {
+            "rate_limit_mode": "custom",
+            "rate_limits": [{
+                "limit_by": "apiKey",
+                "response_headers": True,
+                "limit": first_rate_limit,
+                "duration": first_rate_limit_duration
+                },
+                {
+                "limit_by": "apiKey",
+                "response_headers": False,
+                "limit": second_rate_limit,
+                "duration": second_rate_limit_duration,
+                }
+            ]
+        }
+    }
+
+    url = "https://api.data.gov/api-umbrella/v1/users.json"
+
+    response = requests.post(url, json=create_api_key_params, headers=header)
+
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as error:
+        error_message = "Error occured when creating API key, check logs"
+        slack_message(error_message)
+        logger.error("Error occured with creating API key: {}".format(error))
+        raise
+
+    response_json = response.json()
+    new_api_key = response_json["user"]["api_key"]
+
+    logger.info("New API key: {}".format(new_api_key[:5]))
+
+    return new_api_key
+
+
+def get_space_guid(token, space):
+    space_guid = ""
+
+    error_message = "Error occured when retrieving space GUID, check logs"
+
+    header = {
+        "Authorization": token,
+    }
+
+    data = {
+        "names": [space.lower(), ]
+    }
+
+    url = "https://api.fr.cloud.gov/v3/spaces"
+
+    response = requests.get(url, params=data, headers=header)
+
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as error:
+        if response.status_code == 401:
+            logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
+        slack_message(error_message)
+        logger.error(error)
+        raise
+
+    response_json = response.json()
+
+    if response_json["resources"][0]["name"] == space.lower():
+        space_guid = response_json["resources"][0]["guid"]
+
+    if space_guid == "":
+        raise Exception("Space GUID not found")
+
+    return space_guid
+
+
+def get_service_instance_guid(token, space_guid, service_instance_name):
+    GUID = ""
+
+    error_message = "Error occured when retrieving service instance GUID, check logs"
+
+    header = {
+        "Authorization": token,
+    }
+
+    data = {
+        "names": [service_instance_name,],
+        "space_guids": [space_guid,]
+    }
+
+    url = "https://api.fr.cloud.gov/v3/service_instances"
+
+    response = requests.get(url, params=data, headers=header)
+
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as error:
+        if response.status_code == 401:
+            logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
+        slack_message(error_message)
+        logger.error("Error occured with retrieving service instances: {}".format(error))
+        raise
+
+    response_json = response.json()
+
+    if response_json["resources"][0]["name"] == service_instance_name:
+        GUID = response_json["resources"][0]["guid"]
+
+    if GUID == "":
+        slack_message(error_message)
+        raise Exception("Service instance GUID not found for service instance: {}".format(service_instance_name))
+
+    return GUID
+
+
+def get_credentials_by_guid(token, GUID):
+
+    error_message = "Error occured when retrieving credentials, check logs"
+
+    header = {
+        "Authorization": token,
+    }
+
+    url = "https://api.fr.cloud.gov/v3/service_instances/{}/credentials".format(GUID)
+
+    response = requests.get(url, headers=header)
+
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as error:
+        if response.status_code == 401:
+            logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
+        slack_message(error_message)
+        logger.error("Error occured with retrieving credentials: {}".format(error))
+        raise
+
+    creds = response.json()
+
+    return creds
+
+
+def update_credentials(creds, update_data):
+    creds.update(update_data)
+
+    return {"credentials": creds}
+
+
+def update_credentials_by_guid(token, GUID, merged_creds):
+    error_message = "Error occured when updating environment variables, check logs"
+
+    header = {
+        "Authorization": token,
+        "Content-Type": "application/json"
+    }
+
+    url = "https://api.fr.cloud.gov/v3/service_instances/{}".format(GUID)
+
+    response = requests.patch(url, json=merged_creds, headers=header)
+
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as error:
+        if response.status_code == 401:
+            logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
+        slack_message(error_message)
+        logger.error("Error occured with updating credentials: {}".format(error))
+        raise
+
+
+def check_token(token):
+    error_message = "Error occured when checking bearer token, check logs"
+
+    header = {
+        "Authorization": token,
+        "Content-Type": "application/json"
+    }
+
+    url = "https://api.fr.cloud.gov/v3/routes"
+
+    response = requests.get(url, headers=header)
+
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as error:
+        if response.status_code == 401:
+            logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
+        slack_message(error_message)
+        logger.error("Error occured with updating credentials: {}".format(error))
+        raise
+
+
+def create_and_update_public_api_key(
+        space,
+        service_instance_name,
+        token,
+        first_rate_limit,
+        first_rate_limit_duration,
+        second_rate_limit,
+        second_rate_limit_duration):
+
+    check_token(token)
+
+    new_api_key = create_public_api_key(
+        space,
+        first_rate_limit,
+        first_rate_limit_duration,
+        second_rate_limit,
+        second_rate_limit_duration)
+
+    update_env_vars(space, service_instance_name, token, {"FEC_WEB_API_KEY_PUBLIC": new_api_key})
+
+
+def update_env_vars(space, service_instance_name, token, credentials_dict):
+
+    logger.info("Updating environment variable(s) for {} service instance in {} space."
+                .format(service_instance_name, space))
+
+    space_guid = get_space_guid(token, space)
+
+    service_guid = get_service_instance_guid(token, space_guid, service_instance_name)
+
+    creds = get_credentials_by_guid(token, service_guid)
+
+    merged_creds = update_credentials(creds, credentials_dict)
+
+    update_credentials_by_guid(token, service_guid, merged_creds)
+
+    message = "Environment variables have been updated for {} service instance in {} space".format(
+        service_instance_name,
+        space)
+
+    slack_message(message)
+
+    logger.info(message)
 
 
 def cf_startup():

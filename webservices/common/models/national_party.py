@@ -199,3 +199,13 @@ class NationalParty_ScheduleB(db.Model):
     tran_id = db.Column(db.String)
     treasurer_name = db.Column(db.String)
     two_year_transaction_period = db.Column(db.Numeric)
+
+
+class NationalPartyTotals(db.Model):
+    __tablename__ = 'ofec_totals_national_party_mv'
+
+    committee_id = db.Column('cmte_id', db.String, primary_key=True, index=True)
+    committee_name = db.Column('cmte_nm', db.String)
+    two_year_transaction_period = db.Column(db.Numeric, primary_key=True, index=True)
+    total_receipts = db.Column('contribution', db.Numeric)
+    total_disbursements = db.Column('disbursement', db.Numeric)

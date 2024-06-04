@@ -197,6 +197,32 @@ def cf_startup_cli():
     manage.cf_startup()
 
 
+@app.cli.command('update_public_api_key')
+@click.argument('space', default=None, required=True)
+@click.argument('service_instance_name', default=None, required=True)
+@click.argument('token', default=None, required=True)
+@click.argument('first_rate_limit', default=250, required=False)
+@click.argument('first_rate_limit_duration', default=60000, required=False)
+@click.argument('second_rate_limit', default=30000, required=False)
+@click.argument('second_rate_limit_duration', default=86400000, required=False)
+def create_and_update_public_api_key_cli(
+        space,
+        service_instance_name,
+        token,
+        first_rate_limit,
+        first_rate_limit_duration,
+        second_rate_limit,
+        second_rate_limit_duration):
+    manage.create_and_update_public_api_key(
+        space,
+        service_instance_name,
+        token,
+        first_rate_limit,
+        first_rate_limit_duration,
+        second_rate_limit,
+        second_rate_limit_duration)
+
+
 @app.cli.command('slack_message')
 @click.argument('message')
 def slack_message_cli(message):

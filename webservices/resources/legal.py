@@ -35,6 +35,7 @@ INNER_HITS = {
         "require_field_match": False,
         "fields": {"documents.text": {}, "documents.description": {}},
     },
+    "size": 100,
 }
 
 ALL_DOCUMENT_TYPES = [

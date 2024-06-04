@@ -189,3 +189,39 @@ class NationalParty_ScheduleBView(ApiResource):
                     status_code=400,
                 )
         return query
+
+
+# used for endpoint: '/national_party/totals/'
+# under tag: national party
+# Ex: http://127.0.0.1:5000/v1/national_party/totals/
+@doc(
+    tags=['national party accounts'],
+    description=docs.NATIONAL_PARTY_TOTALS,
+)
+class NationalPartyTotalsView(ApiResource):
+    model = models.NationalPartyTotals
+    schema = schemas.NationalPartyTotalsSchema
+    page_schema = schemas.NationalPartyTotalsPageSchema
+
+    sort_options = [
+        'committee_id',
+        'two_year_transaction_period',
+    ]
+
+    filter_multi_fields = [
+        ('committee_id', models.NationalPartyTotals.committee_id),
+        ('two_year_transaction_period',
+         models.NationalPartyTotals.two_year_transaction_period),
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.national_party_totals,
+            args.make_sort_args(
+                default='-two_year_transaction_period',
+                validator=args.OptionValidator(self.sort_options),
+                show_nulls_last_arg=False,
+            ),
+        )
