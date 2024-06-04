@@ -73,3 +73,6 @@ static/swagger-ui/js
 # Pycharm
 .idea
 .vscode/launch.json
+
+# token file
+token.txt
