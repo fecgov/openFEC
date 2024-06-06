@@ -45,7 +45,7 @@ class NationalParty_ScheduleA(db.Model):
     contributor_city = db.Column('contbr_city', db.String, index=True, doc=docs.CONTRIBUTOR_CITY)
     contributor_employer = db.Column('contbr_employer', db.String, index=True, doc=docs.CONTRIBUTOR_EMPLOYER)
     contributor_employer_text = db.Column(TSVECTOR)
-    contributor_id = db.Column('clean_contbr_id', db.String, index=True, doc=docs.CONTRIBUTOR_ID)
+    contributor_id = db.Column('contbr_id', db.String, index=True, doc=docs.CONTRIBUTOR_ID)
     contributor_middle_name = db.Column('contbr_m_nm', db.String)
     contributor_name = db.Column('contbr_nm', db.String, index=True)
     contributor_name_text = db.Column(TSVECTOR)
