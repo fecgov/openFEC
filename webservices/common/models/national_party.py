@@ -192,7 +192,7 @@ class NationalParty_ScheduleB(db.Model):
     spender_committee_designation = db.Column('cmte_dsgn', db.String)
     spender_committee_designation_full = db.Column('designation_full', db.String)
     spender_committee_type = db.Column('cmte_tp', db.String, doc=docs.COMMITTEE_TYPE)
-    spender_committee_type_full = db.Column(db.String)
+    spender_committee_type_full = db.Column('committee_type_full', db.String)
     state = db.Column(db.String)
     state_full = db.Column(db.String)
     sub_id = db.Column(db.Numeric(19), primary_key=True, index=True)
