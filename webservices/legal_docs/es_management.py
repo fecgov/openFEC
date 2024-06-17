@@ -11,10 +11,10 @@ from webservices.utils import (
 )
 from webservices.env import env
 from webservices.tasks.utils import get_bucket
-
+from elasticsearch_dsl import Search, Q
 logger = logging.getLogger(__name__)
 # for debug, uncomment this line
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 CASE_INDEX = "case_index"
 CASE_ALIAS = "case_alias"
@@ -1103,3 +1103,28 @@ def delete_murs_from_s3():
     bucket = get_bucket()
     for obj in bucket.objects.filter(Prefix="legal/murs"):
         obj.delete()
+
+
+def test_citation_endpoint(citation_type, index):
+    es_client = create_es_client()
+
+    query = (
+            Search()
+            .using(es_client)
+            .query(
+                "bool",
+                must=[
+                    Q("term", type="citations"),
+                    Q("match", citation_type=citation_type),
+                ],
+                minimum_should_match=1,
+            )
+            .extra(size=10)
+            .index(index)
+        )
+
+    es_results = query.execute()
+
+    results = {"citations": [hit.to_dict() for hit in es_results]}
+
+    logger.debug(results)

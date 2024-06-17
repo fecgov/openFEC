@@ -192,6 +192,13 @@ def refresh_materialized_cli(concurrent=True):
     manage.refresh_materialized()
 
 
+@app.cli.command('test_citation')
+@click.argument('citation_type', default="regulation")
+@click.argument('index', default="search_alias")
+def test_citation(citation_type, index):
+    legal_docs.test_citation_endpoint(citation_type, index)
+
+
 @app.cli.command('cf_startup')
 def cf_startup_cli():
     manage.cf_startup()
