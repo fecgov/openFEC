@@ -2370,7 +2370,7 @@ Filter by candidate_id and/or election_year
 
 CANDIDATE_ID_PRESIDENTIAL = CANDIDATE_ID + """\
   -P00000001    All candidates\n\
-  -P00000002    Democrasts\n\
+  -P00000002    Democrats\n\
   -P00000003    Republicans\n\
 """
 

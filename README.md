@@ -594,7 +594,7 @@ This section covers a few topics we think might help developers after setup.
 
 ### API umbrella
 
-The staging and production environments use the [API Umbrella](https://apiumbrella.io) for
+The staging and production environments use the [API Umbrella](https://api.data.gov/) for
 rate limiting, authentication, caching, and HTTPS termination and redirection. Both
 environments use the `FEC_API_USE_PROXY` flag to reject requests that are not routed
 through the API Umbrella.
@@ -602,7 +602,7 @@ through the API Umbrella.
 ### Caching
 
 All API responses are set to expire after one hour (`Cache-Control: public, max-age=3600`).
-In production, the [API Umbrella](https://apiumbrella.io) will check this response header
+In production, the [API Umbrella](https://api.data.gov/) will check this response header
 and cache responses for the specified interval, such that repeated requests to a given
 endpoint will only reach the Flask application once. This means that responses may be
 stale for up to an hour following the nightly refresh of the materialized views.
@@ -769,7 +769,7 @@ cf run-task api --command "python cli.py load_archived_murs" --name upload_arch_
 The OpenFEC API is a Flask application deployed using the gunicorn WSGI server behind
 an nginx reverse proxy. Static files are compressed and served directly through nginx;
 dynamic content is routed to the Flask application via `proxy_pass`. The entire application
-is served through the [API Umbrella](https://apiumbrella.io), which handles API keys,
+is served through the [API Umbrella](https://api.data.gov/), which handles API keys,
 caching, and rate limiting.
 
 ### Sorting fields
