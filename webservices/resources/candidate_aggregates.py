@@ -90,6 +90,9 @@ class ScheduleABySizeCandidateView(NoCapResource):
             'size',
             'count'
     ]
+    filters_with_max_count = [
+        'candidate_id',
+    ]
 
     @property
     def args(self):
@@ -133,6 +136,9 @@ class ScheduleAByStateCandidateView(NoCapResource):
             'state',
             'state_full',
     ]
+    filters_with_max_count = [
+        'candidate_id',
+    ]
 
     @property
     def args(self):
@@ -172,6 +178,9 @@ class ScheduleAByStateCandidateTotalsView(NoCapResource):
     sort_option = [
             'total',
             'count',
+    ]
+    filters_with_max_count = [
+        'candidate_id',
     ]
 
     @property

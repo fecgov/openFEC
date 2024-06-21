@@ -659,6 +659,17 @@ class TestScheduleACandidateAggregates(ApiBaseTest):
         )
         self.assertEqual(response.status_code, 200)
 
+    def test_schedule_a_by_size_candidate_max_filter_count(self):
+        max_count = 10
+        filters_with_max_count = [
+            ('candidate_id', [str(number) for number in range(max_count + 1)]),
+        ]
+        for label, values in filters_with_max_count:
+            response = self.app.get(
+                api.url_for(ScheduleABySizeCandidateView, **{label: values})
+            )
+            self.assertEqual(response.status_code, 422)
+
     def test_sort_validation_schedule_a_by_size_candidate(self):
         [
             factories.ScheduleABySizeFactory(
@@ -798,6 +809,17 @@ class TestScheduleACandidateAggregates(ApiBaseTest):
         )
         self.assertEqual(response.status_code, 200)
 
+    def test_schedule_a_by_state_candidate_max_filter_count(self):
+        max_count = 10
+        filters_with_max_count = [
+            ('candidate_id', [str(number) for number in range(max_count + 1)]),
+        ]
+        for label, values in filters_with_max_count:
+            response = self.app.get(
+                api.url_for(ScheduleAByStateCandidateView, **{label: values})
+            )
+            self.assertEqual(response.status_code, 422)
+
     def test_sort_validation_schedule_a_by_state_candidate(self):
         [
             factories.ScheduleAByStateFactory(
@@ -919,6 +941,17 @@ class TestScheduleACandidateAggregates(ApiBaseTest):
             )
         )
         self.assertEqual(response.status_code, 200)
+
+    def test_schedule_a_by_state_candidate__total_max_filter_count(self):
+        max_count = 10
+        filters_with_max_count = [
+            ('candidate_id', [str(number) for number in range(max_count + 1)]),
+        ]
+        for label, values in filters_with_max_count:
+            response = self.app.get(
+                api.url_for(ScheduleAByStateCandidateTotalsView, **{label: values})
+            )
+            self.assertEqual(response.status_code, 422)
 
     def test_sort_validation_schedule_a_by_state_candidate_totals(self):
         [
