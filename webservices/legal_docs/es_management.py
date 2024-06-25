@@ -147,7 +147,9 @@ MUR_MAPPING = {
     "doc_id": {"type": "keyword"},
     "no": {"type": "keyword"},
     "case_serial": {"type": "integer"},
-    "name": {"type": "text", "analyzer": "english"},
+    # Switch es anlayzer to standard
+    # "name": {"type": "text", "analyzer": "english"},
+    "name": {"type": "text"},
     "published_flg": {"type": "boolean"},
     "commission_votes": {
         "properties": {
@@ -405,11 +407,13 @@ ARCH_MUR_MAPPING = {
 }
 # ==== end define ARCH_MUR_MAPPING for index: ARCH_MUR_INDEX
 
+# Switch analyzer to standard
 ANALYZER_SETTING = {
     "analysis": {
         "analyzer": {
             "default": {
-                "type": "english"
+                # "type": "english"
+                "type": "standard"
             }
         }
     },
