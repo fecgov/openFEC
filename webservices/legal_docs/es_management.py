@@ -326,6 +326,8 @@ AO_MAPPING = {
         "requestor_types": {"type": "keyword"},
         "commenter_names": {"type": "text"},
         "representative_names": {"type": "text"},
+        "citation_type": {"type": "keyword"},
+        "citation_text": {"type": "text"},
         "entities": {
             "properties": {
                 "role": {"type": "keyword"},

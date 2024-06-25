@@ -471,6 +471,17 @@ class TestNationalPartyScheduleB(ApiBaseTest):
         )
         self.assertEqual(response.status_code, 400)
 
+    def test_image_number(self):
+        [
+            factories.NationalParty_ScheduleBFactory(image_number='202405209646237729'),
+            factories.NationalParty_ScheduleBFactory(image_number='202405209646231234'),
+        ]
+
+        results = self._results(
+            api.url_for(NationalParty_ScheduleBView, image_number='202405209646237729')
+        )
+        self.assertEqual(len(results), 1)
+
 
 class TestNationalPartyTotals(ApiBaseTest):
     kwargs = {'two_year_transaction_period': 2024}
