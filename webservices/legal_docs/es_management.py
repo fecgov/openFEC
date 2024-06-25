@@ -68,7 +68,8 @@ ADMIN_FINE_MAPPING = {
     "doc_id": {"type": "keyword"},
     "no": {"type": "keyword"},
     "case_serial": {"type": "integer"},
-    "name": {"type": "text", "analyzer": "english"},
+    # "name": {"type": "text", "analyzer": "english"},
+    "name": {"type": "text"},
     "published_flg": {"type": "boolean"},
     "commission_votes": {
         "properties": {
@@ -147,7 +148,7 @@ MUR_MAPPING = {
     "doc_id": {"type": "keyword"},
     "no": {"type": "keyword"},
     "case_serial": {"type": "integer"},
-    # Switch es anlayzer to standard
+    # Switch es analyzer to standard
     # "name": {"type": "text", "analyzer": "english"},
     "name": {"type": "text"},
     "published_flg": {"type": "boolean"},
@@ -196,7 +197,9 @@ ADR_MAPPING = {
     "doc_id": {"type": "keyword"},
     "no": {"type": "keyword"},
     "case_serial": {"type": "integer"},
-    "name": {"type": "text", "analyzer": "english"},
+    # Switch es analyzer to standard
+    # "name": {"type": "text", "analyzer": "english"},
+    "name": {"type": "text"},
     "published_flg": {"type": "boolean"},
     "complainant": {"type": "text"},
     "commission_votes": {
