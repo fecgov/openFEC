@@ -40,7 +40,6 @@ INNER_HITS = {
 
 ALL_DOCUMENT_TYPES = [
     "statutes",
-    "regulations",
     "advisory_opinions",
     "murs",
     "adrs",
@@ -53,7 +52,6 @@ ACCEPTED_DATE_FORMATS = "strict_date_optional_time_nanos||MM/dd/yyyy||M/d/yyyy||
 # under tag: legal
 # test urls:
 # http://127.0.0.1:5000/v1/legal/docs/statutes/9001/
-# http://127.0.0.1:5000/v1/legal/docs/regulations/1.1/
 # http://127.0.0.1:5000/v1/legal/docs/advisory_opinions/2022-25/
 # http://127.0.0.1:5000/v1/legal/docs/murs/8070/
 # http://127.0.0.1:5000/v1/legal/docs/adrs/1091/
@@ -106,7 +104,6 @@ class UniversalSearch(Resource):
     def get(self, q="", from_hit=0, hits_returned=20, **kwargs):
         query_builders = {
             "statutes": generic_query_builder,
-            "regulations": generic_query_builder,
             "advisory_opinions": ao_query_builder,
             "murs": case_query_builder,
             "adrs": case_query_builder,
@@ -701,7 +698,7 @@ def execute_query(query):
         formatted_hit["document_highlights"] = {}
         formatted_hits.append(formatted_hit)
 
-        # 1)When doc_type=[regulations, statutes], The 'highlight' section is in hit.meta
+        # 1)When doc_type=[statutes], The 'highlight' section is in hit.meta
         # hit.meta={'index': 'docs', 'id': '100_29', 'score': None, 'highlight'...}
         if "highlight" in hit.meta:
             for key in hit.meta.highlight:
