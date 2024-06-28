@@ -205,6 +205,9 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         must_clauses = [
             Q("terms", documents__category=kwargs.get("case_document_category"))
         ]
+
+    if kwargs.get("case_respondents"):
+        must_clauses.append(Q("query_string", query=kwargs.get("case_respondents"), fields=["respondents"]))
     query = query.query("bool", must=must_clauses)
 
     logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
@@ -307,8 +310,6 @@ def apply_mur_specific_query_params(query, **kwargs):
 
     if kwargs.get("mur_type"):
         must_clauses.append(Q("match", mur_type=kwargs.get("mur_type")))
-    if kwargs.get("case_respondents"):
-        must_clauses.append(Q("match", respondents=kwargs.get("case_respondents")))
     if kwargs.get("case_dispositions"):
         must_clauses.append(
             Q("term", disposition__data__disposition=kwargs.get("case_dispositions"))
@@ -443,8 +444,6 @@ def apply_adr_specific_query_params(query, **kwargs):
 
     if kwargs.get("mur_type"):
         must_clauses.append(Q("match", mur_type=kwargs.get("mur_type")))
-    if kwargs.get("case_respondents"):
-        must_clauses.append(Q("match", respondents=kwargs.get("case_respondents")))
     if kwargs.get("case_dispositions"):
         must_clauses.append(
             Q("term", disposition__data__disposition=kwargs.get("case_dispositions"))
