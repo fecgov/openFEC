@@ -68,7 +68,8 @@ ADMIN_FINE_MAPPING = {
     "doc_id": {"type": "keyword"},
     "no": {"type": "keyword"},
     "case_serial": {"type": "integer"},
-    "name": {"type": "text", "analyzer": "english"},
+    # "name": {"type": "text", "analyzer": "english"},
+    "name": {"type": "text"},
     "published_flg": {"type": "boolean"},
     "commission_votes": {
         "properties": {
@@ -147,7 +148,9 @@ MUR_MAPPING = {
     "doc_id": {"type": "keyword"},
     "no": {"type": "keyword"},
     "case_serial": {"type": "integer"},
-    "name": {"type": "text", "analyzer": "english"},
+    # Switch es analyzer to standard
+    # "name": {"type": "text", "analyzer": "english"},
+    "name": {"type": "text"},
     "published_flg": {"type": "boolean"},
     "commission_votes": {
         "properties": {
@@ -194,7 +197,9 @@ ADR_MAPPING = {
     "doc_id": {"type": "keyword"},
     "no": {"type": "keyword"},
     "case_serial": {"type": "integer"},
-    "name": {"type": "text", "analyzer": "english"},
+    # Switch es analyzer to standard
+    # "name": {"type": "text", "analyzer": "english"},
+    "name": {"type": "text"},
     "published_flg": {"type": "boolean"},
     "complainant": {"type": "text"},
     "commission_votes": {
@@ -405,11 +410,13 @@ ARCH_MUR_MAPPING = {
 }
 # ==== end define ARCH_MUR_MAPPING for index: ARCH_MUR_INDEX
 
+# Switch analyzer to standard
 ANALYZER_SETTING = {
     "analysis": {
         "analyzer": {
             "default": {
-                "type": "english"
+                # "type": "english"
+                "type": "standard"
             }
         }
     },
