@@ -207,7 +207,8 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         ]
 
     if kwargs.get("case_respondents"):
-        must_clauses.append(Q("simple_query_string", query=kwargs.get("case_respondents"), fields=["respondents"]))
+        must_clauses.append(Q("simple_query_string", query=kwargs.get("case_respondents"), fields=["respondents"],
+                            minimum_should_match=2))
     query = query.query("bool", must=must_clauses)
 
     logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
