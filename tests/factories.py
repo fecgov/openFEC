@@ -361,6 +361,13 @@ class Form1EFilingFactory(BaseFactory):
         model = models.Form1
 
 
+class TestForm1EFilingFactory(BaseFactory):
+    file_number = factory.Sequence(lambda n: n)
+
+    class Meta:
+        model = models.TestForm1
+
+
 class BaseFilingFactory(BaseFactory):
     file_number = factory.Sequence(lambda n: n)
 
