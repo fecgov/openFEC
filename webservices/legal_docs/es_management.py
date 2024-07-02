@@ -14,7 +14,7 @@ from webservices.tasks.utils import get_bucket
 
 logger = logging.getLogger(__name__)
 # for debug, uncomment this line
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 CASE_INDEX = "case_index"
 CASE_ALIAS = "case_alias"
