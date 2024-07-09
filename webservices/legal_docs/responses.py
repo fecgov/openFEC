@@ -167,10 +167,6 @@ LEGAL_SEARCH_RESPONSE = {
                     "type": "integer",
                     "description": "Total number of Statutes matching the search criteria"
                 },
-                "total_regulations": {
-                    "type": "integer",
-                    "description": "Total number of Regulations matching the search criteria"
-                },
                 "total_advisory_opinions": {
                     "type": "integer",
                     "description": "Total number of Advisory Opinions matching the search criteria"
@@ -190,35 +186,6 @@ LEGAL_SEARCH_RESPONSE = {
                 "total_all": {
                     "type": "integer",
                     "description": "Total number of legal documents matching the search criteria"
-                },
-                "regulations": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "name": {
-                                "type": "string",
-                            },
-                            "no": {
-                                "type": "string"
-                            },
-                            "doc_id": {
-                                "type": "string"
-                            },
-                            "url": {
-                                "type": "string"
-                            },
-                            "highlights": {
-                                "type": "array",
-                                "items": {
-                                    "type": "string"
-                                }
-                            },
-                            "document_highlights": {
-                                "type": "object"  # Dynamic dictionary
-                            }
-                        }
-                    }
                 },
                 "statutes": {
                     "type": "array",
@@ -545,8 +512,6 @@ LEGAL_SEARCH_RESPONSE = {
             "example": {
                 "statutes": [],
                 "total_statutes": 0,
-                "regulations": [],
-                "total_regulations": 0,
                 "advisory_opinions": [
                     {
                         "name": "Primerica, Inc.",

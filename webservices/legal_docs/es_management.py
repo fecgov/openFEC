@@ -232,15 +232,6 @@ ADR_MAPPING = {
     "close_date": {"type": "date", "format": "dateOptionalTime"},
 }
 
-REGULATION_MAPPING = {
-    "type": {"type": "keyword"},
-    "doc_id": {"type": "keyword"},
-    "name": {"type": "text", "analyzer": "english"},
-    "text": {"type": "text", "analyzer": "english"},
-    "no": {"type": "text"},
-    "url": {"type": "text", "index": False},
-}
-
 STATUTE_MAPPING = {
     "type": {"type": "keyword"},
     "doc_id": {"type": "keyword"},
@@ -258,7 +249,6 @@ ALL_MAPPING.update(ADMIN_FINE_MAPPING)
 ALL_MAPPING.update(CITATION_MAPPING)
 ALL_MAPPING.update(ADR_MAPPING)
 ALL_MAPPING.update(MUR_MAPPING)
-ALL_MAPPING.update(REGULATION_MAPPING)
 ALL_MAPPING.update(STATUTE_MAPPING)
 ALL_MAPPING.update(SORT_MAPPING)
 
@@ -435,7 +425,7 @@ def create_index(index_name=None):
     """
     Creating an index for storing legal data on Elasticsearch based on 'INDEX_DICT'.
     - 'INDEX_DICT' description:
-    1) CASE_INDEX includes DOCUMENT_TYPE=('statutes','regulations','murs','adrs','admin_fines')
+    1) CASE_INDEX includes DOCUMENT_TYPE=('statutes','murs','adrs','admin_fines')
     'murs' means current mur only.
     2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions')
     3) ARCH_MUR_INDEX includes DOCUMENT_TYPE=('murs'), archived mur only

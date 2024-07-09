@@ -18,9 +18,6 @@ from .statutes import (  # noqa
     load_statutes,
 )
 
-from .regulations import (  # noqa
-    load_regulations,
-)
 
 from .es_management import (  # noqa
     INDEX_DICT,
@@ -64,7 +61,7 @@ def reload_all_data_by_index(index_name=None):
     'INDEX_DICT' description:
     1) CASE_INDEX includes DOCUMENT_TYPE=('murs','adrs','admin_fines')
     'murs' means current mur only.
-    2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions','statutes','regulations')
+    2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions','statutes')
     3) ARCH_MUR_INDEX includes DOCUMENT_TYPE=('murs'), archived mur only
 
     - How to call task command:
@@ -82,7 +79,6 @@ def reload_all_data_by_index(index_name=None):
         elif index_name == AO_INDEX:
             load_advisory_opinions()
             load_statutes()
-            load_regulations()
         elif index_name == ARCH_MUR_INDEX:
             load_archived_murs()
     else:
@@ -96,7 +92,7 @@ def initialize_legal_data(index_name=None):
     'INDEX_DICT' description:
     1) CASE_INDEX includes DOCUMENT_TYPE=('murs','adrs','admin_fines')
     'murs' means current mur only.
-    2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions','statutes','regulations')
+    2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions','statutes')
     3) ARCH_MUR_INDEX includes DOCUMENT_TYPE=('murs'), archived mur only
     - Loads legal data to XXXX_INDEX
     - How to call task command:
