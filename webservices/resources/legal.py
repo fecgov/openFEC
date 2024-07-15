@@ -191,13 +191,19 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         else:
             query = query.sort({"case_serial": {"order": "desc"}})
 
-#  =====test "should"=====
-    # should_query = [
-    #     get_case_document_query(q, **kwargs),
-    #     Q("query_string", query=q, fields=["no", "name"]),
-    # ]
-    # query = query.query("bool", should=should_query, minimum_should_match=1)
-#  =====test "should"=====
+    # q contains `exclude: (-` operator
+    if q and ("(-" in q):
+        should_query = [
+            get_case_document_query_exclude(q, **kwargs),
+            # Q("query_string", query=q, fields=["no", "name"]),
+        ]
+        query = query.query("bool", must_not=should_query, minimum_should_match=1)   
+    else:
+        should_query = [
+            get_case_document_query(q, **kwargs),
+            # Q("query_string", query=q, fields=["no", "name"]),
+        ]
+        query = query.query("bool", should=should_query, minimum_should_match=1)
 
     must_clauses = []
     if kwargs.get("case_no"):
@@ -208,23 +214,6 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
             Q("terms", documents__category=kwargs.get("case_document_category"))
         ]
     query = query.query("bool", must=must_clauses)
-
-#  =====test "must"=====
-# if q contains "(-":
-# must
-
-# else
-# should
-
-    must_clauses_q = [
-        get_case_document_query(q, **kwargs),
-    ]
-    query = query.query("bool", must=must_clauses_q)
-    must_clauses_q = [
-        Q("query_string", query=q, fields=["no", "name"]),
-    ]
-    query = query.query("bool", must=must_clauses_q)
-#  =====test "must"=====
 
     # logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
@@ -252,7 +241,6 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 # AF document category
 # - 2001 - Administrative Fine Case
 
-
 def get_case_document_query(q, **kwargs):
     combined_query = []
     category_queries = []
@@ -269,8 +257,8 @@ def get_case_document_query(q, **kwargs):
     combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
 
     if q:
-        combined_query.append(Q("query_string", query=q, fields=["documents.text"]))
-
+        combined_query = Q("query_string", query=q, fields=["documents.text"])
+    
     return Q(
         "nested",
         path="documents",
@@ -278,6 +266,27 @@ def get_case_document_query(q, **kwargs):
         query=Q("bool", must=combined_query),
     )
 
+def get_case_document_query_exclude(q, **kwargs):
+    combined_query = []
+    category_queries = []
+    if kwargs.get("case_doc_category_id"):
+        for doc_category_id in kwargs.get("case_doc_category_id"):
+            category_queries.append(
+                Q(
+                    "match",
+                    documents__doc_order_id=doc_category_id,
+                ),
+            )
+
+    combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
+    combined_query = Q("query_string", query=q, fields=["documents.text"])
+ 
+    return Q(
+        "nested",
+        path="documents",
+        inner_hits=INNER_HITS,
+        query=Q("bool", must_not=combined_query),
+    )
 
 def apply_af_specific_query_params(query, **kwargs):
     must_clauses = []
