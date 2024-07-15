@@ -16,7 +16,7 @@ SET search_path = test_efile, pg_catalog;
 -- Name: test_f1; Type: TABLE; Schema: test_efile; Owner: fec
 --
 
-CREATE TABLE test_f1 (
+CREATE TABLE test_efile.test_f1 (
     repid numeric NOT NULL,
     comid character varying(9),
     com_name character varying(200),
@@ -122,9 +122,9 @@ CREATE TABLE test_f1 (
 );
 
 
-ALTER TABLE test_f1 OWNER TO fec;
-GRANT SELECT ON TABLE test_f1 TO fec_read;
-GRANT UPDATE, SELECT, DELETE, INSERT ON TABLE test_f1 TO real_file;
+ALTER TABLE test_efile.test_f1 OWNER TO fec;
+GRANT SELECT ON TABLE test_efile.test_f1 TO fec_read;
+GRANT UPDATE, SELECT, DELETE, INSERT ON TABLE test_efile.test_f1 TO real_file;
 
-ALTER TABLE ONLY test_f1
+ALTER TABLE test_efile.test_f1
     ADD CONSTRAINT real_efile_test_f1_pkey PRIMARY KEY (repid);
