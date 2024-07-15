@@ -123,6 +123,8 @@ CREATE TABLE test_f1 (
 
 
 ALTER TABLE test_f1 OWNER TO fec;
+GRANT SELECT ON TABLE test_f1 TO fec_read;
+GRANT UPDATE, SELECT, DELETE, INSERT ON TABLE test_f1 TO real_file;
 
 ALTER TABLE ONLY test_f1
     ADD CONSTRAINT real_efile_test_f1_pkey PRIMARY KEY (repid);
