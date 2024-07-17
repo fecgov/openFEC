@@ -146,6 +146,7 @@ RESTRICT_DOWNLOADS = env.get_credential('FEC_API_RESTRICT_DOWNLOADS', False)
 RESTRICT_TRAFFIC = env.get_credential('FEC_API_RESTRICT_TRAFFIC', False)
 RESTRICT_MESSAGE = "We apologize for the inconvenience, but we are temporarily " \
     "blocking API traffic. Please contact apiinfo@fec.gov if this is an urgent issue."
+SHOW_TEST_F1 = env.get_credential('FEC_SHOW_TEST_F1', False)
 
 
 @app.before_request
@@ -458,6 +459,8 @@ api.add_resource(presidential.PresidentialSummaryView, '/presidential/financial_
 api.add_resource(presidential.PresidentialBySizeView, '/presidential/contributions/by_size/')
 api.add_resource(presidential.PresidentialByStateView, '/presidential/contributions/by_state/')
 api.add_resource(presidential.PresidentialCoverageView, '/presidential/coverage_end_date/')
+if SHOW_TEST_F1:
+    api.add_resource(filings.TestF1EFilingsView, '/efile/test-form1/')
 
 app.config.update({
     'APISPEC_SWAGGER_URL': None,
@@ -555,6 +558,8 @@ if bool(env.get_credential('FEC_FEATURE_PRESIDENTIAL', '')):
     apidoc.register(presidential.PresidentialBySizeView, blueprint='v1')
     apidoc.register(presidential.PresidentialByStateView, blueprint='v1')
     apidoc.register(presidential.PresidentialCoverageView, blueprint='v1')
+if SHOW_TEST_F1:
+    apidoc.register(filings.TestF1EFilingsView, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)

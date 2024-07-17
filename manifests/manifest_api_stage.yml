@@ -20,4 +20,5 @@ applications:
     env:
       FEC_API_USE_PROXY: true
       FEC_API_RESTRICT_DOWNLOADS: true
+      FEC_SHOW_TEST_F1: true
       APP_NAME: fec | api | stage
