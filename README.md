@@ -663,7 +663,7 @@ cf run-task api --command "python cli.py delete_repository <repo_name>" -m 4G --
 
 #### Display, Create and Delete an index
 
-We have three indexes for FEC legal documents, that are defined in INDEX_DICT 1) CASE_INDEX includes DOCUMENT_TYPE=('statutes','regulations','murs','adrs','admin_fines')
+We have three indexes for FEC legal documents, that are defined in INDEX_DICT 1) CASE_INDEX includes DOCUMENT_TYPE=('statutes','murs','adrs','admin_fines')
 current mur only. 2) AO_INDEX includes DOCUMENT_TYPE=('advisory_opinions') 3) ARCH_MUR_INDEX includes DOCUMENT_TYPE=('murs'), archived mur only
 
 ```
@@ -735,14 +735,6 @@ cf run-task api --command "python cli.py load_adrs [ADR_NO]"  -m 4G --name load_
 ```
 cf run-task api --command "python cli.py load_admin_fines [AF_NO]" --name load_admin_fines
 ```
-
-#### Loading regulations
-
-```
-cf run-task api --command "python cli.py load_regulations" --name load_regulations
-```
-
-This command requires that the environment variable `FEC_EREGS_API` is set to the API endpoint of a valid `eregs` instance.
 
 #### Loading statutes
 

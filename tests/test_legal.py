@@ -139,7 +139,7 @@ class TestLegalSearch(unittest.TestCase):
                 }
                 result_data.update(one_type_data)
 
-        result_data.update({"total_all": 12})
+        result_data.update({"total_all": 10})
         assert result == result_data
 
     @patch("webservices.rest.legal.es_client.search", legal_search_data)

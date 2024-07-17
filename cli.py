@@ -15,11 +15,6 @@ cli = FlaskGroup(app)
 logger = logging.getLogger("cli")
 
 
-@app.cli.command('load_regulations')
-def load_regulations_cli():
-    legal_docs.load_regulations()
-
-
 @app.cli.command('load_statutes')
 def load_statutes_cli():
     legal_docs.load_statutes()
