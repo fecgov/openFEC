@@ -118,7 +118,9 @@ CREATE TABLE test_efile.test_f1 (
     url character varying(90),
     fax character varying(12),
     imageno numeric,
-    create_dt timestamp without time zone
+    create_dt timestamp without time zone,
+    super_pac_lobbyist varchar(1),
+    hybrid_pac_lobbyist varchar(1)
 );
 
 
