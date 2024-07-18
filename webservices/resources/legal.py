@@ -192,12 +192,32 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
             query = query.sort({"case_serial": {"order": "desc"}})
 
     # q contains `exclude: (-` operator
+    exclude_delimiter = "(-"
     if q and ("(-" in q):
-        should_query = [
-            get_case_document_query_exclude(q, **kwargs),
+        print(q)
+        operator_index = q.find(exclude_delimiter)
+        print(operator_index)
+
+        if operator_index != 0:
+            q_exclude = q[-operator_index+2:]
+            print(q_exclude)
+            q_not_exclude = q[:-operator_index-2]
+            print(q_not_exclude)
+            must_not_query = [
+                get_case_document_query_exclude(q_exclude, **kwargs),
             # Q("query_string", query=q, fields=["no", "name"]),
-        ]
-        query = query.query("bool", must_not=should_query, minimum_should_match=1)   
+            ]
+            query = query.query("bool", must_not=must_not_query, minimum_should_match=1) 
+
+            must_query = [
+                get_case_document_query(q_not_exclude, **kwargs),
+            ]
+            query = query.query("bool", must=must_query, minimum_should_match=1) 
+        else:
+            must_not_query = [
+                get_case_document_query_exclude(q, **kwargs),
+            ]
+            query = query.query("bool", must_not=must_not_query, minimum_should_match=1)        
     else:
         should_query = [
             get_case_document_query(q, **kwargs),
