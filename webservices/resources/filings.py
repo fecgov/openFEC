@@ -263,7 +263,7 @@ class F1EFilingsView(ApiResource):
 
 @doc(
     tags=["efiling"],
-    description=docs.EFILE_FILES,
+    description=docs.TEST_EFILE_FILES,
 )
 class TestF1EFilingsView(ApiResource):
 
