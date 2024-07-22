@@ -191,41 +191,43 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         else:
             query = query.sort({"case_serial": {"order": "desc"}})
 
-    # q contains `exclude: (-` operator
+    must_clauses = []
+    should_query = []
     exclude_delimiter = "(-"
     if q and ("(-" in q):
+        # q contains `exclude: (-` operator
         print(q)
         operator_index = q.find(exclude_delimiter)
+        print(len(q))
         print(operator_index)
+        # q_exclude = q[-operator_index+1:(len(q)-1)]
+        i = (len(q)-operator_index)
+        print (i)
+        q_exclude = q[-i:]
+        print("q_exclude=" + q_exclude)
+        must_not_query = [
+            get_case_document_query_exclude(q_exclude, **kwargs),
+        # Q("query_string", query=q, fields=["no", "name"]),
+        ]
+        query = query.query("bool", must_not=must_not_query, minimum_should_match=1) 
 
+        # q contains other operator
         if operator_index != 0:
-            q_exclude = q[-operator_index+2:]
-            print(q_exclude)
-            q_not_exclude = q[:-operator_index-2]
-            print(q_not_exclude)
-            must_not_query = [
-                get_case_document_query_exclude(q_exclude, **kwargs),
-            # Q("query_string", query=q, fields=["no", "name"]),
-            ]
-            query = query.query("bool", must_not=must_not_query, minimum_should_match=1) 
+            # q_include = q[:-operator_index-2]
+            q_include = q[:-i-4]
+            print("q_include=" + q_include)
 
             must_query = [
-                get_case_document_query(q_not_exclude, **kwargs),
+                get_case_document_query(q_include, **kwargs),
             ]
             query = query.query("bool", must=must_query, minimum_should_match=1) 
-        else:
-            must_not_query = [
-                get_case_document_query_exclude(q, **kwargs),
-            ]
-            query = query.query("bool", must_not=must_not_query, minimum_should_match=1)        
     else:
+        # q does not contain `exclude: (-` operator
         should_query = [
             get_case_document_query(q, **kwargs),
-            # Q("query_string", query=q, fields=["no", "name"]),
         ]
         query = query.query("bool", should=should_query, minimum_should_match=1)
 
-    must_clauses = []
     if kwargs.get("case_no"):
         must_clauses.append(Q("terms", no=kwargs.get("case_no")))
 
@@ -265,7 +267,6 @@ def get_case_document_query(q, **kwargs):
     combined_query = []
     category_queries = []
     if kwargs.get("case_doc_category_id"):
-
         for doc_category_id in kwargs.get("case_doc_category_id"):
             category_queries.append(
                 Q(
@@ -273,12 +274,11 @@ def get_case_document_query(q, **kwargs):
                     documents__doc_order_id=doc_category_id,
                 ),
             )
-
-    combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
+        combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
 
     if q:
-        combined_query = Q("query_string", query=q, fields=["documents.text"])
-    
+        combined_query.append(Q("query_string", query=q, fields=["documents.text"]))
+   
     return Q(
         "nested",
         path="documents",
@@ -297,10 +297,9 @@ def get_case_document_query_exclude(q, **kwargs):
                     documents__doc_order_id=doc_category_id,
                 ),
             )
+        combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
 
-    combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
-    combined_query = Q("query_string", query=q, fields=["documents.text"])
- 
+    combined_query.append(Q("query_string", query=q, fields=["documents.text"]))
     return Q(
         "nested",
         path="documents",
