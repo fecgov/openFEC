@@ -25,7 +25,7 @@ import json
 logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line:
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
 
@@ -83,7 +83,7 @@ class GetLegalDocument(Resource):
         )
 
         results = {"docs": [hit.to_dict() for hit in es_results]}
-        logger.debug("GetLegalDocument() results =" + json.dumps(results, indent=3, cls=DateTimeEncoder))
+        # logger.debug("GetLegalDocument() results =" + json.dumps(results, indent=3, cls=DateTimeEncoder))
 
         if len(results["docs"]) > 0:
             return results
@@ -145,7 +145,7 @@ class UniversalSearch(Resource):
             results[type_] = formatted_hits
             results["total_%s" % type_] = count_by_type
             total_count += count_by_type
-            logger.debug("total count={0}".format(str(total_count)))
+            # logger.debug("total count={0}".format(str(total_count)))
         results["total_all"] = total_count
         return results
 
@@ -170,7 +170,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .sort("sort1", "sort2")
     )
 
-    logger.debug("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return query
 
 
@@ -188,13 +188,43 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         else:
             query = query.sort({"case_serial": {"order": "desc"}})
 
-    should_query = [
-        get_case_document_query(q, **kwargs),
-        Q("query_string", query=q, fields=["no", "name"]),
-    ]
-    query = query.query("bool", should=should_query, minimum_should_match=1)
-
     must_clauses = []
+    should_query = []
+    exclude_delimiter = "(-"
+    if q and ("(-" in q):
+        # q contains `exclude: (-` operator
+        print(q)
+        operator_index = q.find(exclude_delimiter)
+        print(len(q))
+        print(operator_index)
+        # q_exclude = q[-operator_index+1:(len(q)-1)]
+        i = (len(q)-operator_index)
+        print (i)
+        q_exclude = q[-i:]
+        print("q_exclude=" + q_exclude)
+        must_not_query = [
+            get_case_document_query_exclude(q_exclude, **kwargs),
+        # Q("query_string", query=q, fields=["no", "name"]),
+        ]
+        query = query.query("bool", must_not=must_not_query, minimum_should_match=1) 
+
+        # q contains other operator
+        if operator_index != 0:
+            # q_include = q[:-operator_index-2]
+            q_include = q[:-i-2]
+            print("q_include=" + q_include)
+
+            must_query = [
+                get_case_document_query(q_include, **kwargs),
+            ]
+            query = query.query("bool", must=must_query, minimum_should_match=1) 
+    else:
+        # q does not contain `exclude: (-` operator
+        should_query = [
+            get_case_document_query(q, **kwargs),
+        ]
+        query = query.query("bool", should=should_query, minimum_should_match=1)
+
     if kwargs.get("case_no"):
         must_clauses.append(Q("terms", no=kwargs.get("case_no")))
 
@@ -204,7 +234,7 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         ]
     query = query.query("bool", must=must_clauses)
 
-    logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     if type_ == "admin_fines":
         return apply_af_specific_query_params(query, **kwargs)
@@ -247,7 +277,7 @@ def get_case_document_query(q, **kwargs):
     combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
 
     if q:
-        combined_query.append(Q("query_string", query=q, fields=["documents.text"]))
+        combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))
 
     return Q(
         "nested",
@@ -256,6 +286,26 @@ def get_case_document_query(q, **kwargs):
         query=Q("bool", must=combined_query),
     )
 
+def get_case_document_query_exclude(q, **kwargs):
+    combined_query = []
+    category_queries = []
+    if kwargs.get("case_doc_category_id"):
+        for doc_category_id in kwargs.get("case_doc_category_id"):
+            category_queries.append(
+                Q(
+                    "match",
+                    documents__doc_order_id=doc_category_id,
+                ),
+            )
+        combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
+
+    combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))
+    return Q(
+        "nested",
+        path="documents",
+        inner_hits=INNER_HITS,
+        query=Q("bool", must_not=combined_query),
+    )
 
 def apply_af_specific_query_params(query, **kwargs):
     must_clauses = []
@@ -294,7 +344,7 @@ def apply_af_specific_query_params(query, **kwargs):
         )
 
     query = query.query("bool", must=must_clauses)
-    logger.debug("apply_af_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("apply_af_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     return query
 
@@ -336,7 +386,7 @@ def apply_mur_specific_query_params(query, **kwargs):
         must_clauses.append(Q("range", close_date=date_range))
 
     query = query.query("bool", must=must_clauses)
-    logger.debug("apply_mur_adr_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("apply_mur_adr_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     if kwargs.get("case_regulatory_citation") or kwargs.get("case_statutory_citation"):
         return case_apply_citation_params(
@@ -431,7 +481,7 @@ def case_apply_citation_params(query, regulatory_citation, statutory_citation, c
         must_clauses.append(Q("bool", should=citation_queries, minimum_should_match=1))
 
     query = query.query("bool", must=must_clauses)
-    logger.debug("apply_citation_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("apply_citation_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return query
 
 
@@ -472,7 +522,7 @@ def apply_adr_specific_query_params(query, **kwargs):
         must_clauses.append(Q("range", close_date=date_range))
 
     query = query.query("bool", must=must_clauses)
-    logger.debug("apply_mur_adr_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("apply_mur_adr_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     return query
 
@@ -497,7 +547,7 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         Q("query_string", query=q, fields=["no", "name", "summary"]),
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
-    logger.debug("ao_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("ao_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return apply_ao_specific_query_params(query, **kwargs)
 
 
@@ -681,15 +731,15 @@ def apply_ao_specific_query_params(query, **kwargs):
         )
 
     query = query.query("bool", must=must_clauses)
-    logger.debug("apply_ao_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("apply_ao_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     return query
 
 
 def execute_query(query):
     es_results = query.execute()
-    logger.debug("UniversalSearch() execute_query() es_results =" + json.dumps(
-        es_results.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("UniversalSearch() execute_query() es_results =" + json.dumps(
+    #     es_results.to_dict(), indent=3, cls=DateTimeEncoder))
 
     formatted_hits = []
     for hit in es_results:
@@ -720,7 +770,7 @@ def execute_query(query):
                     # put "highlights" in return hit
                     for key in inner_hit.meta.highlight:
                         formatted_hit["highlights"].extend(inner_hit.meta.highlight[key])
-    logger.debug("formatted_hits =" + json.dumps(formatted_hits, indent=3, cls=DateTimeEncoder))
+    # logger.debug("formatted_hits =" + json.dumps(formatted_hits, indent=3, cls=DateTimeEncoder))
 
 # Since ES7 the `total` becomes an object : "total": {"value": 1,"relation": "eq"}
 # We can set rest_total_hits_as_int=true, default is false.
