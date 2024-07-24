@@ -199,14 +199,14 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         print(operator_index)
         # q_exclude = q[-operator_index+1:(len(q)-1)]
         i = (len(q)-operator_index)
-        print (i)
+        print(i)
         q_exclude = q[-i:]
         print("q_exclude=" + q_exclude)
         must_not_query = [
             get_case_document_query_exclude(q_exclude, **kwargs),
-        # Q("query_string", query=q, fields=["no", "name"]),
+            # Q("query_string", query=q, fields=["no", "name"]),
         ]
-        query = query.query("bool", must_not=must_not_query, minimum_should_match=1) 
+        query = query.query("bool", must_not=must_not_query, minimum_should_match=1)
 
         # q contains other operator
         if operator_index != 0:
@@ -217,7 +217,7 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
             must_query = [
                 get_case_document_query(q_include, **kwargs),
             ]
-            query = query.query("bool", must=must_query, minimum_should_match=1) 
+            query = query.query("bool", must=must_query, minimum_should_match=1)
     else:
         # q does not contain `exclude: (-` operator
         should_query = [
@@ -286,6 +286,7 @@ def get_case_document_query(q, **kwargs):
         query=Q("bool", must=combined_query),
     )
 
+
 def get_case_document_query_exclude(q, **kwargs):
     combined_query = []
     category_queries = []
@@ -300,12 +301,14 @@ def get_case_document_query_exclude(q, **kwargs):
         combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
 
     combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))
+
     return Q(
         "nested",
         path="documents",
         inner_hits=INNER_HITS,
         query=Q("bool", must_not=combined_query),
     )
+
 
 def apply_af_specific_query_params(query, **kwargs):
     must_clauses = []
