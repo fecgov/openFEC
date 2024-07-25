@@ -25,7 +25,7 @@ import json
 logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line:
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
 
@@ -169,6 +169,10 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .index(SEARCH_ALIAS)
         .sort("sort1", "sort2")
     )
+    must_not = []
+    if kwargs.get("q_exclude"):
+        must_not.append(Q("nested", path="documents", query=Q("match", documents__text=kwargs.get("q_exclude"))))
+    query = query.query("bool", must_not=must_not)
 
     logger.debug("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return query
@@ -304,8 +308,8 @@ def apply_mur_specific_query_params(query, **kwargs):
 
     if kwargs.get("mur_type"):
         must_clauses.append(Q("match", mur_type=kwargs.get("mur_type")))
-    if kwargs.get("case_respondents"):
-        must_clauses.append(Q("match", respondents=kwargs.get("case_respondents")))
+    # if kwargs.get("case_respondents"):
+        # must_clauses.append(Q("match", respondents=kwargs.get("case_respondents")))
     if kwargs.get("case_dispositions"):
         must_clauses.append(
             Q("term", disposition__data__disposition=kwargs.get("case_dispositions"))
@@ -440,8 +444,8 @@ def apply_adr_specific_query_params(query, **kwargs):
 
     if kwargs.get("mur_type"):
         must_clauses.append(Q("match", mur_type=kwargs.get("mur_type")))
-    if kwargs.get("case_respondents"):
-        must_clauses.append(Q("match", respondents=kwargs.get("case_respondents")))
+    # if kwargs.get("case_respondents"):
+        # must_clauses.append(Q("match", respondents=kwargs.get("case_respondents")))
     if kwargs.get("case_dispositions"):
         must_clauses.append(
             Q("term", disposition__data__disposition=kwargs.get("case_dispositions"))
