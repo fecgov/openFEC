@@ -361,6 +361,7 @@ legal_universal_search = {
     'case_regulatory_citation': fields.List(IStr, required=False, description=docs.REGULATORY_CITATION),
     'case_statutory_citation': fields.List(IStr, required=False, description=docs.STATUTORY_CITATION),
     'case_citation_require_all': fields.Bool(description=docs.CITATION_REQUIRE_ALL),
+    'q_exclude': IStr(required=False, description=docs.Q_EXCLUDE),
 
     # case_doc_category_id is the key of case_document_category
     'case_doc_category_id': fields.List(IStr(
