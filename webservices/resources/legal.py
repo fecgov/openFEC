@@ -154,7 +154,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q("term", type=type_)]
 
     if q:
-        must_query.append(Q("query_string", query=q))
+        must_query.append(Q("simple_query_string", query=q))
 
     query = (
         Search()
@@ -194,7 +194,7 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
     should_query = [
         get_case_document_query(q, **kwargs),
-        Q("query_string", query=q, fields=["no", "name"]),
+        Q("simple_query_string", query=q, fields=["no", "name"]),
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
 
@@ -206,6 +206,10 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         must_clauses = [
             Q("terms", documents__category=kwargs.get("case_document_category"))
         ]
+
+    if kwargs.get("case_respondents"):
+        must_clauses.append(Q("simple_query_string",
+                            query=kwargs.get("case_respondents"), fields=["respondents"]))
     query = query.query("bool", must=must_clauses)
 
     logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
@@ -251,7 +255,7 @@ def get_case_document_query(q, **kwargs):
     combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
 
     if q:
-        combined_query.append(Q("query_string", query=q, fields=["documents.text"]))
+        combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))
 
     return Q(
         "nested",
@@ -498,7 +502,7 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
     should_query = [
         get_ao_document_query(q, **kwargs),
-        Q("query_string", query=q, fields=["no", "name", "summary"]),
+        Q("simple_query_string", query=q, fields=["no", "name", "summary"]),
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
     logger.debug("ao_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
@@ -523,7 +527,7 @@ def get_ao_document_query(q, **kwargs):
         combined_query = []
 
     if q:
-        combined_query.append(Q("query_string", query=q, fields=["documents.text"]))
+        combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))
 
     return Q(
         "nested",
