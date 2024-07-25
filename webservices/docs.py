@@ -2169,8 +2169,8 @@ CASE_ELECTION_CYCLES = '''
 Cases election cycles
 '''
 
-CASE_EXCLUDE = '''
-EXCLUDE
+Q_EXCLUDE = '''
+Exclude documents containing this term
 '''
 
 CASE_MIN_OPEN_DATE = '''

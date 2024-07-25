@@ -169,6 +169,10 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .index(SEARCH_ALIAS)
         .sort("sort1", "sort2")
     )
+    must_not = []
+    if kwargs.get("q_exclude"):
+        must_not.append(Q("nested", path="documents", query=Q("match", documents__text=kwargs.get("q_exclude"))))
+    query = query.query("bool", must_not=must_not)
 
     logger.debug("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return query
@@ -193,11 +197,6 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         Q("query_string", query=q, fields=["no", "name"]),
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
-
-    must_not = []
-    if kwargs.get("case_exclude"):
-        must_not.append(Q("nested", path="documents", query=Q("match", documents__text=kwargs.get("case_exclude"))))
-    query = query.query("bool", must_not=must_not)
 
     must_clauses = []
     if kwargs.get("case_no"):
