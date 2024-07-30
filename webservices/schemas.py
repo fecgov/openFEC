@@ -1407,6 +1407,19 @@ Form1Schema = make_schema(
 
 augment_schemas(Form1Schema)
 
+Form1TestSchema = make_schema(
+    models.TestForm1,
+    fields={
+        'image_number': ma.fields.Str(),
+        'candidate_name': ma.fields.Str(),
+        'pdf_url': ma.fields.Str(),
+        'load_timestamp': ma.fields.Str(),
+
+    },
+)
+
+augment_schemas(Form1TestSchema)
+
 ItemizedScheduleBfilingsSchema = make_schema(
     models.ScheduleBEfile,
     fields={

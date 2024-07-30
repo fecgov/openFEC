@@ -1787,6 +1787,7 @@ the processed and coded data that you can find on other endpoints.
 '''
 
 EFILE_FILES = 'Basic information about electronic files coming into the FEC, posted as they are received.'
+TEST_EFILE_FILES = 'Test Form 1 webforms, posted as they are received. Not real Form 1 data, used for FECFile testing.'
 FILE_NUMBER = 'Filing ID number'
 
 AMENDMENT_CHAIN = '''
