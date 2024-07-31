@@ -165,9 +165,9 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         )
         .highlight_options(require_field_match=False)
         .source(exclude=["text", "documents.text", "sort1", "sort2"])
-        .extra(size=hits_returned, from_=from_hit)
+        .extra(size=hits_returned, from_=from_hit, min_score=1.0)
         .index(SEARCH_ALIAS)
-        .sort("sort1", "sort2")
+        .sort("_score")  # _score is the default
     )
     must_not = []
     if kwargs.get("q_exclude"):
@@ -262,6 +262,7 @@ def get_case_document_query(q, **kwargs):
         path="documents",
         inner_hits=INNER_HITS,
         query=Q("bool", must=combined_query),
+        # score_mode="max",  # this changes the aggregation of inner hits, default is avg
     )
 
 
