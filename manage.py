@@ -375,11 +375,11 @@ def check_token(token):
         raise
 
 
-def remove_env_var(space, service_instance_name, var_to_remove, token):
+def remove_env_var(space, service_instance_name, key_to_remove, token):
 
     check_token(token)
 
-    update_env_vars(space, service_instance_name, token, var_to_remove)
+    update_env_vars(space, service_instance_name, token, key_to_remove)
 
 
 def add_update_env_var(space, service_instance_name, key_to_add, value_to_add, token):
