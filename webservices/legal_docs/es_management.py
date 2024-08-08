@@ -68,7 +68,7 @@ ADMIN_FINE_MAPPING = {
     "doc_id": {"type": "keyword"},
     "no": {"type": "keyword"},
     "case_serial": {"type": "integer"},
-    "name": {"type": "text", "analyzer": "english"},
+    "name": {"type": "text"},
     "published_flg": {"type": "boolean"},
     "commission_votes": {
         "properties": {
@@ -147,7 +147,7 @@ MUR_MAPPING = {
     "doc_id": {"type": "keyword"},
     "no": {"type": "keyword"},
     "case_serial": {"type": "integer"},
-    "name": {"type": "text", "analyzer": "english"},
+    "name": {"type": "text"},
     "published_flg": {"type": "boolean"},
     "commission_votes": {
         "properties": {
@@ -194,7 +194,7 @@ ADR_MAPPING = {
     "doc_id": {"type": "keyword"},
     "no": {"type": "keyword"},
     "case_serial": {"type": "integer"},
-    "name": {"type": "text", "analyzer": "english"},
+    "name": {"type": "text"},
     "published_flg": {"type": "boolean"},
     "complainant": {"type": "text"},
     "commission_votes": {
@@ -235,8 +235,8 @@ ADR_MAPPING = {
 STATUTE_MAPPING = {
     "type": {"type": "keyword"},
     "doc_id": {"type": "keyword"},
-    "name": {"type": "text", "analyzer": "english"},
-    "text": {"type": "text", "analyzer": "english"},
+    "name": {"type": "text"},
+    "text": {"type": "text"},
     "no": {"type": "keyword"},
     "title": {"type": "text"},
     "chapter": {"type": "text"},
@@ -265,8 +265,8 @@ AO_MAPPING = {
         "ao_serial": {"type": "integer"},
         "ao_year": {"type": "integer"},
         "doc_id": {"type": "keyword"},
-        "name": {"type": "text", "analyzer": "english"},
-        "summary": {"type": "text", "analyzer": "english"},
+        "name": {"type": "text"},
+        "summary": {"type": "text"},
         "request_date": {"type": "date", "format": "dateOptionalTime"},
         "issue_date": {"type": "date", "format": "dateOptionalTime"},
         "is_pending": {"type": "boolean"},
@@ -399,7 +399,7 @@ ANALYZER_SETTING = {
     "analysis": {
         "analyzer": {
             "default": {
-                "type": "english"
+                "type": "standard"
             }
         }
     },

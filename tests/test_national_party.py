@@ -4,7 +4,7 @@ import sqlalchemy as sa
 from tests import factories
 from tests.common import ApiBaseTest
 from webservices.rest import api
-from webservices.schemas import NationalPartyScheduleASchema
+from webservices.schemas import NationalPartyTotalsSchema
 from webservices.resources.national_party import (
     NationalParty_ScheduleAView,
     NationalParty_ScheduleBView,
@@ -18,7 +18,7 @@ class TestNationalParty(ApiBaseTest):
     def test_fields(self):
 
         params = [
-            (factories.NationalParty_ScheduleAFactory, NationalParty_ScheduleAView, NationalPartyScheduleASchema)
+            (factories.NationalPartyTotalsFactory, NationalPartyTotalsView, NationalPartyTotalsSchema)
         ]
         for factory, resource, schema in params:
             factory()
