@@ -323,7 +323,10 @@ def update_credentials(creds, update_data):
     if type(update_data) is dict:
         creds.update(update_data)
     else:
-        del creds[update_data]
+        if update_data in creds:
+            del creds[update_data]
+        else:
+            raise Exception("Error, key does not exist in credentials")
 
     return {"credentials": creds}
 
