@@ -674,3 +674,6 @@ class NationalParty_ScheduleBFactory(BaseFactory):
 class NationalPartyTotalsFactory(BaseFactory):
     class Meta:
         model = models.NationalPartyTotals
+
+    committee_id = 'C000000001'
+    two_year_transaction_period = 2024

@@ -2104,7 +2104,16 @@ register_schema(CandidateTotalsDetailHouseSenatePageSchema)
 # NationalPartyScheduleA schema - Start
 NationalPartyScheduleASchema = make_schema(
     models.NationalParty_ScheduleA,
-    # fields={'total': ma.fields.Float()},
+    fields={'contributor_aggregate_ytd': ma.fields.Float(),
+            'contribution_receipt_amount': ma.fields.Float(),
+            'contribution_receipt_date': ma.fields.Date(),
+            'file_number': ma.fields.Int(),
+            'link_id': ma.fields.Int(),
+            'original_sub_id': ma.fields.Int(),
+            'report_year': ma.fields.Int(),
+            'sub_id': ma.fields.Int(),
+            'two_year_transaction_period': ma.fields.Int(),
+            },
     options={
         'exclude': (
             'contributor_name_text',
@@ -2122,6 +2131,16 @@ register_schema(NationalPartyScheduleAPageSchema)
 # NationalPartyScheduleB schema - Start
 NationalPartyScheduleBSchema = make_schema(
     models.NationalParty_ScheduleB,
+    fields={'disbursement_amount': ma.fields.Float(),
+            'disbursement_date': ma.fields.Date(),
+            'file_number': ma.fields.Int(),
+            'link_id': ma.fields.Int(),
+            'original_sub_id': ma.fields.Int(),
+            'report_year': ma.fields.Int(),
+            'semi_an_bundled_refund': ma.fields.Float(),
+            'sub_id': ma.fields.Int(),
+            'two_year_transaction_period': ma.fields.Int(),
+            },
     options={
         'exclude': (
             'disbursement_description_text',
@@ -2138,7 +2157,11 @@ register_schema(NationalPartyScheduleBPageSchema)
 
 # NationalPartyTotals schema - Start
 NationalPartyTotalsSchema = make_schema(
-    models.NationalPartyTotals
+    models.NationalPartyTotals,
+    fields={'total_receipts': ma.fields.Float(),
+            'total_disbursements': ma.fields.Float(),
+            'two_year_transaction_period': ma.fields.Int()
+            },
 )
 NationalPartyTotalsPageSchema = make_page_schema(
    NationalPartyTotalsSchema
