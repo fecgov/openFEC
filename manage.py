@@ -425,7 +425,8 @@ def update_env_vars(space, service_instance_name, token, credentials):
 
     update_credentials_by_guid(token, service_guid, merged_creds)
 
-    message = "Environment variables have been updated for {} service instance in {} space".format(
+    message = "Environment variable '{}' has been modified for service instance '{}' in {} space".format(
+        list(credentials)[0],
         service_instance_name,
         space)
 
