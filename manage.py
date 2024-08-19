@@ -379,16 +379,16 @@ def create_and_update_public_api_key(
         second_rate_limit,
         second_rate_limit_duration):
 
-    #check_token(token)
+    # check_token(token)
 
-    new_api_key = create_public_api_key(
+    create_public_api_key(
         space,
         first_rate_limit,
         first_rate_limit_duration,
         second_rate_limit,
         second_rate_limit_duration)
 
-    #update_env_vars(space, service_instance_name, token, {"FEC_WEB_API_KEY_PUBLIC": new_api_key})
+    # update_env_vars(space, service_instance_name, token, {"FEC_WEB_API_KEY_PUBLIC": new_api_key})
 
 
 def update_env_vars(space, service_instance_name, token, credentials_dict):
