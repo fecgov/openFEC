@@ -379,7 +379,7 @@ def create_and_update_public_api_key(
         second_rate_limit,
         second_rate_limit_duration):
 
-    check_token(token)
+    #check_token(token)
 
     new_api_key = create_public_api_key(
         space,
