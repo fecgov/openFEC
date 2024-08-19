@@ -168,7 +168,7 @@ def create_public_api_key(
         "first_name": space,
         "last_name": "test API Key creation",
         "email": "ppayton@fec.gov",
-        "use_description": "Test API key createion  for {} environment. Created {}".format(
+        "use_description": "Test API key creation for {} environment. Created {}".format(
             space,
             datetime.datetime.today()),
         "registration_source": "update_public_api_key task",
