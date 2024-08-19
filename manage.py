@@ -426,4 +426,4 @@ def slack_message(message):
     """ Sends a message to the bots channel. you can add this command to ping you when a task is done, etc.
     run ./manage.py slack_message 'The message you want to post'
     """
-    post_to_slack(message, "#bots")
+    post_to_slack(message, "#test-bot")
