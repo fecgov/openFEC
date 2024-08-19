@@ -166,9 +166,9 @@ def create_public_api_key(
 
     create_api_key_params = {
         "first_name": space,
-        "last_name": "Public API Key",
-        "email": env.get_credential("FEC_EMAIL"),
-        "use_description": "FEC_WEB_API_KEY_PUBLIC for {} environment. Rate limited key per IP. Created {}".format(
+        "last_name": "test API Key creation",
+        "email": "ppayton@fec.gov",
+        "use_description": "Test API key createion  for {} environment. Created {}".format(
             space,
             datetime.datetime.today()),
         "registration_source": "update_public_api_key task",
@@ -388,7 +388,7 @@ def create_and_update_public_api_key(
         second_rate_limit,
         second_rate_limit_duration)
 
-    update_env_vars(space, service_instance_name, token, {"FEC_WEB_API_KEY_PUBLIC": new_api_key})
+    #update_env_vars(space, service_instance_name, token, {"FEC_WEB_API_KEY_PUBLIC": new_api_key})
 
 
 def update_env_vars(space, service_instance_name, token, credentials_dict):
