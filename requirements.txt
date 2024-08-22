@@ -31,7 +31,6 @@ werkzeug==3.0.3
 
 # Marshalling
 flask-apispec==0.11.4
-git+https://github.com/fecgov/marshmallow-pagination@master
 marshmallow==3.0.0
 marshmallow-sqlalchemy==0.23.1
 
@@ -50,5 +49,5 @@ importlib-metadata==3.10.1 #pinned to fix the pytest deprecation warning: Select
 nplusone==0.8.0
 pytest==8.0.2
 pytest-cov==4.1.0
-setuptools==70.3.0 #pin to remediate snyk vulnerability 
+setuptools==71.1.0 #pin to remediate snyk vulnerability 
 webtest==2.0.34
