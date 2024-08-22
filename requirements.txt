@@ -39,7 +39,6 @@ smart_open==1.8.0
 
 # Task queue
 celery==5.2.2 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
-celery-once==3.0.0
 redis==4.5.4
 
 # testing and build in circle
@@ -51,3 +50,6 @@ pytest==8.0.2
 pytest-cov==4.1.0
 setuptools==71.1.0 #pin to remediate snyk vulnerability 
 webtest==2.0.34
+--extra-index-url https://test.pypi.org/simple/
+fec-marshmallow-pagination==4.0.0
+celery-once==3.0.0
