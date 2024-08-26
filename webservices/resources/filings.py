@@ -272,20 +272,20 @@ class TestF1EFilingsView(ApiResource):
     page_schema = schemas.Form1PageSchema
 
     filter_multi_fields = [
-        ("file_number", models.Form1.file_number),
-        ("committee_id", models.Form1.committee_id),
-        ("candidate_id", models.Form1.candidate_id),
-        ("election_state", models.Form1.election_state),
-        ("candidate_office", models.Form1.candidate_office),
-        ("candidate_district", models.Form1.candidate_district),
-        ("candidate_party", models.Form1.candidate_party),
-        ("image_number", models.Form1.image_number),
-        ("committee_type", models.Form1.committee_type),
-        ("organization_type", models.Form1.organization_type),
+        ("file_number", models.TestForm1.file_number),
+        ("committee_id", models.TestForm1.committee_id),
+        ("candidate_id", models.TestForm1.candidate_id),
+        ("election_state", models.TestForm1.election_state),
+        ("candidate_office", models.TestForm1.candidate_office),
+        ("candidate_district", models.TestForm1.candidate_district),
+        ("candidate_party", models.TestForm1.candidate_party),
+        ("image_number", models.TestForm1.image_number),
+        ("committee_type", models.TestForm1.committee_type),
+        ("organization_type", models.TestForm1.organization_type),
 
     ]
     filter_range_fields = [
-        (("min_load_timestamp", "max_load_timestamp"), models.Form1.load_timestamp),
+        (("min_load_timestamp", "max_load_timestamp"), models.TestForm1.load_timestamp),
     ]
 
     @property

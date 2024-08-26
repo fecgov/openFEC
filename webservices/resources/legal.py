@@ -33,6 +33,7 @@ INNER_HITS = {
     "_source": False,
     "highlight": {
         "require_field_match": False,
+        "number_of_fragments": 10,
         "fields": {"documents.text": {}, "documents.description": {}},
     },
     "size": 100,
@@ -83,7 +84,7 @@ class GetLegalDocument(Resource):
         )
 
         results = {"docs": [hit.to_dict() for hit in es_results]}
-        logger.debug("GetLegalDocument() results =" + json.dumps(results, indent=3, cls=DateTimeEncoder))
+        # logger.debug("GetLegalDocument() results =" + json.dumps(results, indent=3, cls=DateTimeEncoder))
 
         if len(results["docs"]) > 0:
             return results
@@ -174,7 +175,12 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         must_not.append(Q("nested", path="documents", query=Q("match", documents__text=kwargs.get("q_exclude"))))
     query = query.query("bool", must_not=must_not)
 
-    logger.debug("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    if kwargs.get("q_exclude"):
+        must_not = []
+        must_not.append(Q("nested", path="documents", query=Q("match", documents__text=kwargs.get("q_exclude"))))
+        query = query.query("bool", must_not=must_not)
+
+    # logger.debug("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return query
 
 
@@ -212,7 +218,7 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
                             query=kwargs.get("case_respondents"), fields=["respondents"]))
     query = query.query("bool", must=must_clauses)
 
-    logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     if type_ == "admin_fines":
         return apply_af_specific_query_params(query, **kwargs)
@@ -303,7 +309,7 @@ def apply_af_specific_query_params(query, **kwargs):
         )
 
     query = query.query("bool", must=must_clauses)
-    logger.debug("apply_af_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("apply_af_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     return query
 
@@ -344,7 +350,7 @@ def apply_mur_specific_query_params(query, **kwargs):
         must_clauses.append(Q("range", close_date=date_range))
 
     query = query.query("bool", must=must_clauses)
-    logger.debug("apply_mur_adr_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("apply_mur_adr_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     if kwargs.get("case_regulatory_citation") or kwargs.get("case_statutory_citation"):
         return case_apply_citation_params(
@@ -439,7 +445,7 @@ def case_apply_citation_params(query, regulatory_citation, statutory_citation, c
         must_clauses.append(Q("bool", should=citation_queries, minimum_should_match=1))
 
     query = query.query("bool", must=must_clauses)
-    logger.debug("apply_citation_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("apply_citation_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return query
 
 
@@ -479,7 +485,7 @@ def apply_adr_specific_query_params(query, **kwargs):
         must_clauses.append(Q("range", close_date=date_range))
 
     query = query.query("bool", must=must_clauses)
-    logger.debug("apply_mur_adr_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("apply_mur_adr_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     return query
 
@@ -504,7 +510,7 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         Q("simple_query_string", query=q, fields=["no", "name", "summary"]),
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
-    logger.debug("ao_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("ao_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return apply_ao_specific_query_params(query, **kwargs)
 
 
@@ -688,15 +694,15 @@ def apply_ao_specific_query_params(query, **kwargs):
         )
 
     query = query.query("bool", must=must_clauses)
-    logger.debug("apply_ao_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("apply_ao_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     return query
 
 
 def execute_query(query):
     es_results = query.execute()
-    logger.debug("UniversalSearch() execute_query() es_results =" + json.dumps(
-        es_results.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("UniversalSearch() execute_query() es_results =" + json.dumps(
+    #     es_results.to_dict(), indent=3, cls=DateTimeEncoder))
 
     formatted_hits = []
     for hit in es_results:
@@ -727,7 +733,7 @@ def execute_query(query):
                     # put "highlights" in return hit
                     for key in inner_hit.meta.highlight:
                         formatted_hit["highlights"].extend(inner_hit.meta.highlight[key])
-    logger.debug("formatted_hits =" + json.dumps(formatted_hits, indent=3, cls=DateTimeEncoder))
+    # logger.debug("formatted_hits =" + json.dumps(formatted_hits, indent=3, cls=DateTimeEncoder))
 
 # Since ES7 the `total` becomes an object : "total": {"value": 1,"relation": "eq"}
 # We can set rest_total_hits_as_int=true, default is false.
