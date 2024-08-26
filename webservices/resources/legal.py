@@ -34,6 +34,7 @@ INNER_HITS = {
     "highlight": {
         "require_field_match": False,
         "number_of_fragments": 10,
+        "order": "score",
         "fields": {"documents.text": {}, "documents.description": {}},
     },
     "size": 100,
@@ -701,8 +702,8 @@ def apply_ao_specific_query_params(query, **kwargs):
 
 def execute_query(query):
     es_results = query.execute()
-    # logger.debug("UniversalSearch() execute_query() es_results =" + json.dumps(
-    #     es_results.to_dict(), indent=3, cls=DateTimeEncoder))
+    logger.debug("UniversalSearch() execute_query() es_results =" + json.dumps(
+         es_results.to_dict(), indent=3, cls=DateTimeEncoder))
 
     formatted_hits = []
     for hit in es_results:
