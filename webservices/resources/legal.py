@@ -33,7 +33,7 @@ INNER_HITS = {
     "_source": False,
     "highlight": {
         "require_field_match": False,
-        "number_of_fragments": 10,
+        "number_of_fragments": 15,
         "fields": {"documents.text": {}, "documents.description": {}},
     },
     "size": 100,
