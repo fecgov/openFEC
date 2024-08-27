@@ -793,6 +793,18 @@ class Tasks(TaskSet):
         resp = self.client.get("legal/search", name="get_mur_inner_hits", params=params, timeout=timeout)
         log_response(self, "mur_inner_hits", params, resp)
 
+    @task
+    def get_mur_inner_hits_all(self):
+        params = {"q": "reason", "type": "murs", "api_key": API_KEY}
+        resp = self.client.get("legal/search", name="get_mur_inner_hits_all", params=params, timeout=timeout)
+        log_response(self, "mur_inner_hits_all", params, resp)
+
+    @task
+    def get_inner_hits_all(self):
+        params = {"q": "committee", "api_key": API_KEY}
+        resp = self.client.get("legal/search", name="get_inner_hits_all", params=params, timeout=timeout)
+        log_response(self, "get_inner_hits_all", params, resp)
+
 
 class Swarm(user.HttpUser):
     tasks = [Tasks]
