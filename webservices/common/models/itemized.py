@@ -628,6 +628,7 @@ class ScheduleE(PdfMixin, BaseItemized):
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     pdf_url = db.Column(db.String)
     spender_name_text = db.Column(TSVECTOR)
+    disbursement_dt = db.Column(db.Date)
 
     @hybrid_property
     def form_line_number(self):
