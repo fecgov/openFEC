@@ -179,6 +179,7 @@ def create_public_api_key(
             "username": "auto-generated"
         },
         "settings": {
+            "allowed_referers": ["*",],
             "rate_limit_mode": "custom",
             "rate_limits": [{
                 "limit_by": "apiKey",
@@ -192,7 +193,8 @@ def create_public_api_key(
                 "limit": second_rate_limit,
                 "duration": second_rate_limit_duration,
                 }
-            ]
+            ],
+
         }
     }
 
