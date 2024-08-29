@@ -25,7 +25,7 @@ import json
 logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line:
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
 
@@ -160,15 +160,18 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         Search()
         .using(es_client)
         .query(Q("bool", must=must_query))
-        .highlight(
-            "text", "name", "no", "summary", "documents.text", "documents.description"
-        )
         .highlight_options(require_field_match=False)
         .source(exclude=["text", "documents.text", "sort1", "sort2"])
         .extra(size=hits_returned, from_=from_hit)
         .index(SEARCH_ALIAS)
         .sort("sort1", "sort2")
     )
+    if type_ == "advisory_opinions":
+        query = query.highlight("summary", "documents.text", "documents.description")
+    elif type_ == "statutes":
+        query = query.highlight("name", "no")
+    else:
+        query = query.highlight("documents.text", "documents.description")
 
     if kwargs.get("q_exclude"):
         must_not = []
@@ -501,7 +504,7 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
     should_query = [
         get_ao_document_query(q, **kwargs),
-        Q("simple_query_string", query=q, fields=["no", "name", "summary"]),
+        Q("simple_query_string", query=q, fields=["summary"]),
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
     # logger.debug("ao_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
