@@ -169,7 +169,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     if type_ == "advisory_opinions":
         query = query.highlight("summary", "documents.text", "documents.description")
     elif type_ == "statutes":
-        query = query.highlight("text", "name", "no")
+        query = query.highlight("name", "no")
     else:
         query = query.highlight("documents.text", "documents.description")
 
