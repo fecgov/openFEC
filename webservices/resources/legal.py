@@ -25,7 +25,7 @@ import json
 logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line:
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
 
@@ -168,8 +168,10 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     )
     if type_ == "advisory_opinions":
         query = query.highlight("summary", "documents.text", "documents.description")
+    elif type_ == "statutes":
+        query = query.highlight("text", "name", "no")
     else:
-        query = query.highlight("text", "name", "no", "summary", "documents.text", "documents.description")
+        query = query.highlight("documents.text", "documents.description")
 
     if kwargs.get("q_exclude"):
         must_not = []
