@@ -1,6 +1,7 @@
 from collections import defaultdict
 import logging
 import re
+import requests
 from webservices.rest import db
 from webservices.utils import (
     create_es_client,
@@ -161,7 +162,7 @@ def ao_stage_to_status(ao_no, stage):
 
 def get_advisory_opinions(from_ao_no):
     bucket = get_bucket()
-
+    from_ao_no = "2023-01"
     ao_names = get_ao_names()
     ao_no_to_component_map = {a: tuple(map(int, a.split("-"))) for a in ao_names}
 
@@ -345,6 +346,8 @@ def fix_citations(ao_no, citation_type, citations):
 def get_citations(ao_names):
     ao_component_to_name_map = {tuple(map(int, a.split("-"))): a for a in ao_names}
 
+    reg_titles = get_regulatory_titles()
+
     logger.info(" Getting AO citations...")
 
     rs = db.engine.execute(
@@ -420,17 +423,20 @@ def get_citations(ao_names):
     es_client = create_es_client()
 
     for citation in all_regulatory_citations:
+        title = check_regulatory_citations(str(citation[0]), reg_titles)
         entry = {
             "type": "citations",
-            "citation_text": "%d CFR §%d.%d" % (citation[0], citation[1], citation[2]),
+            "citation_text": "%d CFR §%d.%d" % (title, citation[1], citation[2]),
             "citation_type": "regulation",
         }
         es_client.index(AO_ALIAS, entry, id=entry["citation_text"])
 
     for citation in all_statutory_citations:
+        title = check_statutory_citations(str(citation[0]))
+        # print(cit)
         entry = {
             "type": "citations",
-            "citation_text": "%d U.S.C. §%s" % (citation[0], citation[1]),
+            "citation_text": "%d U.S.C. §%s" % (title, citation[1]),
             "citation_type": "statute",
         }
         es_client.index(AO_ALIAS, entry, id=entry["citation_text"])
@@ -450,6 +456,35 @@ def parse_ao_citations(text, ao_component_to_name_map):
             if (year, serial_no) in ao_component_to_name_map:
                 matches.add(ao_component_to_name_map[(year, serial_no)])
     return matches
+
+
+def get_regulatory_titles():
+    url = 'https://www.ecfr.gov/api/search/v1/counts/titles'
+
+    response = requests.get(url)
+
+    titles = response.json()["titles"]
+
+    return titles
+
+
+def check_regulatory_citations(reg_citation, titles):
+    if reg_citation in titles:
+        return int(reg_citation)
+    else:
+        return check_regulatory_citations(reg_citation[1:], titles)
+
+
+def check_statutory_citations(title):
+    # print(title)
+    url = 'https://www.govinfo.gov/link/uscode/latest/' + title
+
+    response = requests.get(url)
+    # print(response.status_code)
+    if response.status_code == 400 and len(title) > 1:
+        return check_statutory_citations(title[1:])
+    else:
+        return int(title)
 
 
 def validate_statute_citation(title, section):
