@@ -25,7 +25,7 @@ import json
 logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line:
-logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
 
@@ -198,7 +198,6 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
     should_query = [
         get_case_document_query(q, **kwargs),
-        Q("simple_query_string", query=q, fields=["no", "name"]),
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
 
