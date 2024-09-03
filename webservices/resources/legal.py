@@ -197,8 +197,7 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
             query = query.sort({"case_serial": {"order": "desc"}})
 
     should_query = [
-        get_case_document_query(q, **kwargs),
-        Q("simple_query_string", query=q, fields=["no", "name"]),
+        get_case_document_query(q, **kwargs)
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
 
