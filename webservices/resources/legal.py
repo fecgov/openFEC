@@ -154,7 +154,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q("term", type=type_)]
 
     if q:
-        must_query.append(Q("query_string", query=q))
+        must_query.append(Q("simple_query_string", query=q))
 
     query = (
         Search()
@@ -169,6 +169,11 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .index(SEARCH_ALIAS)
         .sort("sort1", "sort2")
     )
+
+    if kwargs.get("q_exclude"):
+        must_not = []
+        must_not.append(Q("nested", path="documents", query=Q("match", documents__text=kwargs.get("q_exclude"))))
+        query = query.query("bool", must_not=must_not)
 
     # logger.debug("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return query
@@ -190,7 +195,7 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
     should_query = [
         get_case_document_query(q, **kwargs),
-        Q("query_string", query=q, fields=["no", "name"]),
+        Q("simple_query_string", query=q, fields=["no", "name"]),
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
 
@@ -202,6 +207,10 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         must_clauses = [
             Q("terms", documents__category=kwargs.get("case_document_category"))
         ]
+
+    if kwargs.get("case_respondents"):
+        must_clauses.append(Q("simple_query_string",
+                            query=kwargs.get("case_respondents"), fields=["respondents"]))
     query = query.query("bool", must=must_clauses)
 
     # logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
@@ -247,7 +256,7 @@ def get_case_document_query(q, **kwargs):
     combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
 
     if q:
-        combined_query.append(Q("query_string", query=q, fields=["documents.text"]))
+        combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))
 
     return Q(
         "nested",
@@ -304,8 +313,7 @@ def apply_mur_specific_query_params(query, **kwargs):
 
     if kwargs.get("mur_type"):
         must_clauses.append(Q("match", mur_type=kwargs.get("mur_type")))
-    if kwargs.get("case_respondents"):
-        must_clauses.append(Q("match", respondents=kwargs.get("case_respondents")))
+
     if kwargs.get("case_dispositions"):
         must_clauses.append(
             Q("term", disposition__data__disposition=kwargs.get("case_dispositions"))
@@ -440,8 +448,7 @@ def apply_adr_specific_query_params(query, **kwargs):
 
     if kwargs.get("mur_type"):
         must_clauses.append(Q("match", mur_type=kwargs.get("mur_type")))
-    if kwargs.get("case_respondents"):
-        must_clauses.append(Q("match", respondents=kwargs.get("case_respondents")))
+
     if kwargs.get("case_dispositions"):
         must_clauses.append(
             Q("term", disposition__data__disposition=kwargs.get("case_dispositions"))
@@ -494,7 +501,7 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
     should_query = [
         get_ao_document_query(q, **kwargs),
-        Q("query_string", query=q, fields=["no", "name", "summary"]),
+        Q("simple_query_string", query=q, fields=["no", "name", "summary"]),
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
     # logger.debug("ao_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
@@ -519,7 +526,7 @@ def get_ao_document_query(q, **kwargs):
         combined_query = []
 
     if q:
-        combined_query.append(Q("query_string", query=q, fields=["documents.text"]))
+        combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))
 
     return Q(
         "nested",

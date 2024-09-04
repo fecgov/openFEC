@@ -2169,6 +2169,10 @@ CASE_ELECTION_CYCLES = '''
 Cases election cycles
 '''
 
+Q_EXCLUDE = '''
+Exclude documents containing this term
+'''
+
 CASE_MIN_OPEN_DATE = '''
 The earliest date opened of case
 '''

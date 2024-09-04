@@ -319,7 +319,14 @@ def get_credentials_by_guid(token, GUID):
 
 
 def update_credentials(creds, update_data):
-    creds.update(update_data)
+
+    if type(update_data) is dict:
+        creds.update(update_data)
+    else:
+        if update_data in creds:
+            del creds[update_data]
+        else:
+            raise Exception("Error, key does not exist in credentials")
 
     return {"credentials": creds}
 
@@ -368,6 +375,20 @@ def check_token(token):
         raise
 
 
+def remove_env_var(space, service_instance_name, key_to_remove, token):
+
+    check_token(token)
+
+    update_env_vars(space, service_instance_name, token, key_to_remove)
+
+
+def add_update_env_var(space, service_instance_name, key_to_add, value_to_add, token):
+
+    check_token(token)
+
+    update_env_vars(space, service_instance_name, token, {key_to_add: value_to_add})
+
+
 def create_and_update_public_api_key(
         space,
         service_instance_name,
@@ -389,7 +410,7 @@ def create_and_update_public_api_key(
     update_env_vars(space, service_instance_name, token, {"FEC_WEB_API_KEY_PUBLIC": new_api_key})
 
 
-def update_env_vars(space, service_instance_name, token, credentials_dict):
+def update_env_vars(space, service_instance_name, token, credentials):
 
     logger.info("Updating environment variable(s) for {} service instance in {} space."
                 .format(service_instance_name, space))
@@ -400,11 +421,12 @@ def update_env_vars(space, service_instance_name, token, credentials_dict):
 
     creds = get_credentials_by_guid(token, service_guid)
 
-    merged_creds = update_credentials(creds, credentials_dict)
+    merged_creds = update_credentials(creds, credentials)
 
     update_credentials_by_guid(token, service_guid, merged_creds)
 
-    message = "Environment variables have been updated for {} service instance in {} space".format(
+    message = "Environment variable '{}' has been modified for service instance '{}' in {} space".format(
+        list(credentials)[0],
         service_instance_name,
         space)
 
