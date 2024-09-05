@@ -486,13 +486,13 @@ def parse_statutory_citations(text):
     if text:
         for citation in SINGLE_STATUTE_CITATION_REGEX.finditer(text):
             new_title, new_section = reclassify_statutory_citation(
-                citation.group("title"), citation.group("section")
+                remove_footnotes(citation.group("title")), citation.group("section")
             )
             matches.add((int(new_title), str(new_section)))
         for possible_multiple_citation in MULTIPLE_STATUTE_CITATION_REGEX.finditer(
             text
         ):
-            citations_title = possible_multiple_citation.group("title")
+            citations_title = remove_footnotes(possible_multiple_citation.group("title"))
             possible_sections = possible_multiple_citation.group("possible_sections")
 
             for section in STATUTE_SECTION_ONLY_REGEX.finditer(possible_sections):
@@ -545,9 +545,12 @@ def parse_regulatory_citations(text):
     matches = set()
     if text:
         for citation in SINGLE_REGULATION_CITATION_REGEX.finditer(text):
+            new_title = remove_footnotes(
+                citation.group("title")
+            )
             matches.add(
                 (
-                    int(citation.group("title")),
+                    int(new_title),
                     int(citation.group("part")),
                     int(citation.group("section")),
                 )
@@ -556,7 +559,7 @@ def parse_regulatory_citations(text):
         for possible_multiple_citation in MULTIPLE_REGULATION_CITATION_REGEX.finditer(
             text
         ):
-            citations_title = possible_multiple_citation.group("title")
+            citations_title = remove_footnotes(possible_multiple_citation.group("title"))
             possible_parts_and_sections = possible_multiple_citation.group(
                 "possible_parts_and_sections"
             )
@@ -584,3 +587,12 @@ def parse_regulatory_citations(text):
                         )
                     )
     return matches
+
+
+def remove_footnotes(title):
+    """
+    Check to see if a footnote is included in the title and then remove if so
+    """
+    if len(title) > 2:
+        title = title[-2:]
+    return title
