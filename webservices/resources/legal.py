@@ -511,21 +511,13 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
 
 def get_ao_document_query(q, **kwargs):
-    categories = {
-        "F": "Final Opinion",
-        "V": "Votes",
-        "D": "Draft Documents",
-        "R": "AO Request, Supplemental Material, and Extensions of Time",
-        "W": "Withdrawal of Request",
-        "C": "Comments and Ex parte Communications",
-        "S": "Commissioner Statements",
-    }
-
-    if kwargs.get("ao_category"):
-        ao_category = [categories[c] for c in kwargs.get("ao_category")]
-        combined_query = [Q("terms", documents__category=ao_category)]
-    else:
-        combined_query = []
+    category_query = []
+    combined_query = []
+    if kwargs.get("ao_doc_category_id") and (len(kwargs.get("ao_doc_category_id")) > 0):
+        for ao_doc_category_id in kwargs.get("ao_doc_category_id"):
+            if len(ao_doc_category_id) > 0:
+                category_query.append(Q("term", documents__ao_doc_category_id=ao_doc_category_id))
+        combined_query.append(Q("bool", should=category_query, minimum_should_match=1))
 
     if q:
         combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))

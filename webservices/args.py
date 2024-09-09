@@ -336,8 +336,8 @@ legal_universal_search = {
     'ao_max_issue_date': Date(description=docs.AO_MAX_ISSUE_DATE),
     'ao_min_request_date': Date(description=docs.AO_MIN_REQUEST_DATE),
     'ao_max_request_date': Date(description=docs.AO_MAX_REQUEST_DATE),
-    'ao_category': fields.List(
-        IStr(validate=validate.OneOf(['F', 'V', 'D', 'R', 'W', 'C', 'S'])),
+    'ao_doc_category_id': fields.List(
+        IStr(validate=validate.OneOf(['', 'F', 'V', 'D', 'R', 'W', 'C', 'S'])),
         description=docs.AO_CATEGORY),
     'ao_is_pending': fields.Bool(description=docs.AO_IS_PENDING),
     'ao_status': fields.Str(description=docs.AO_STATUS),
