@@ -25,7 +25,7 @@ import json
 logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line:
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
 
@@ -185,6 +185,16 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     query = generic_query_builder(None, type_, from_hit, hits_returned, **kwargs)
 
+    if kwargs.get("max_gap") is not None:
+        intervals_inner_query = Q('intervals', documents__text={
+                    'match':  {'query': q, 'max_gaps': kwargs.get("max_gap")}
+                    })
+        intervals_query = Q(
+                "nested",
+                path="documents",
+                query=intervals_inner_query)
+
+        query = query.query("bool", must=intervals_query)
     # sorting works in all three cases: ('murs','admin_fines','adrs').
     # so far only be able to sort by 'case_no', default sort is descending order.
     # descending order: 'sort=-case_no'; ascending order; sort=case_no
@@ -257,7 +267,7 @@ def get_case_document_query(q, **kwargs):
 
     combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
 
-    if q:
+    if q and kwargs.get("max_gap") is None:
         combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))
 
     return Q(
