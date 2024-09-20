@@ -24,7 +24,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
-# for debug, uncomment this line:
+# To debug, uncomment the line below:
 # logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
@@ -201,6 +201,13 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
 
+    # add mur_dispositions_category_id filter
+    if type_ == "murs":
+        should_query_mur_disposition = [
+            get_mur_disposition_query(q, **kwargs),
+        ]
+        query = query.query("bool", should=should_query_mur_disposition, minimum_should_match=1)
+
     must_clauses = []
     if kwargs.get("case_no"):
         must_clauses.append(Q("terms", no=kwargs.get("case_no")))
@@ -245,17 +252,17 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 def get_case_document_query(q, **kwargs):
     combined_query = []
     category_queries = []
-    if kwargs.get("case_doc_category_id"):
-
+    if kwargs.get("case_doc_category_id") and (len(kwargs.get("case_doc_category_id")) > 0):
         for doc_category_id in kwargs.get("case_doc_category_id"):
-            category_queries.append(
-                Q(
-                    "match",
-                    documents__doc_order_id=doc_category_id,
-                ),
-            )
+            if len(doc_category_id) > 0:
+                category_queries.append(
+                    Q(
+                        "match",
+                        documents__doc_order_id=doc_category_id,
+                    ),
+                )
 
-    combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
+        combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
 
     if q:
         combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))
@@ -263,6 +270,29 @@ def get_case_document_query(q, **kwargs):
     return Q(
         "nested",
         path="documents",
+        inner_hits=INNER_HITS,
+        query=Q("bool", must=combined_query),
+    )
+
+
+def get_mur_disposition_query(q, **kwargs):
+    combined_query = []
+    category_queries = []
+    if kwargs.get("mur_disposition_category_id") and (len(kwargs.get("mur_disposition_category_id")) > 0):
+
+        for mur_disposition_category_id in kwargs.get("mur_disposition_category_id"):
+            if len(mur_disposition_category_id) > 0:
+                category_queries.append(
+                    Q(
+                        "match",
+                        dispositions__mur_disposition_category_id=mur_disposition_category_id,
+                    ),
+                )
+        combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
+
+    return Q(
+        "nested",
+        path="dispositions",
         inner_hits=INNER_HITS,
         query=Q("bool", must=combined_query),
     )
@@ -315,11 +345,6 @@ def apply_mur_specific_query_params(query, **kwargs):
 
     if kwargs.get("mur_type"):
         must_clauses.append(Q("match", mur_type=kwargs.get("mur_type")))
-
-    if kwargs.get("case_dispositions"):
-        must_clauses.append(
-            Q("term", disposition__data__disposition=kwargs.get("case_dispositions"))
-        )
 
     if kwargs.get("case_election_cycles"):
         must_clauses.append(

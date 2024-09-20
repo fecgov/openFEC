@@ -352,7 +352,6 @@ legal_universal_search = {
 
     'case_no': fields.List(IStr, required=False, description=docs.CASE_NO),
     'case_respondents': IStr(required=False, description=docs.CASE_RESPONDONTS),
-    'case_dispositions': fields.List(IStr, required=False, description=docs.CASE_DISPOSTIONS),
     'case_election_cycles': fields.Int(required=False, description=docs.CASE_ELECTION_CYCLES),
     'case_min_open_date': Date(required=False, description=docs.CASE_MIN_OPEN_DATE),
     'case_max_open_date': Date(required=False, description=docs.CASE_MAX_OPEN_DATE),
@@ -362,15 +361,22 @@ legal_universal_search = {
     'case_statutory_citation': fields.List(IStr, required=False, description=docs.STATUTORY_CITATION),
     'case_citation_require_all': fields.Bool(description=docs.CITATION_REQUIRE_ALL),
     'q_exclude': IStr(required=False, description=docs.Q_EXCLUDE),
-
-    # case_doc_category_id is the key of case_document_category
     'case_doc_category_id': fields.List(IStr(
         validate=validate.OneOf(
-            ['1', '2', '3', '4', '5', '6', '1001', '1002', '1003', '1004', '1005', '1006', '2001'])),
+            ['', '1', '2', '3', '4', '5', '6', '1001', '1002', '1003', '1004', '1005', '1006', '2001'])),
         description=docs.CASE_DOCUMENT_CATEGORY_DESCRIPTION),
 
     'mur_type': fields.Str(
         required=False, validate=validate.OneOf(["archived", "current"]), description=docs.MUR_TYPE),
+    'mur_disposition_category_id': fields.List(IStr(
+        validate=validate.OneOf([
+            '', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
+            '11', '12', '13', '14', '15', '16', '17', '18', '19', '20',
+            '21', '22', '23', '24', '25', '26', '27', '28', '29', '30',
+            '31', '32', '33', '34', '35', '36', '37', '38', '39', '40',
+            '41', '42', '43', '44', '45', '46', '47', '48'])),
+        description=docs.MUR_DISPOSITION_CATEGORY_DISCRIPTION
+    ),
 
     'af_name': fields.List(IStr, required=False, description=docs.AF_NAME),
     'af_committee_id': Committee_ID(required=False, description=docs.AF_COMMITTEE_ID),

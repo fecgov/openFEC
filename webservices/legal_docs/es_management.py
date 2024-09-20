@@ -13,7 +13,7 @@ from webservices.env import env
 from webservices.tasks.utils import get_bucket
 
 logger = logging.getLogger(__name__)
-# for debug, uncomment this line
+# To debug, uncomment the line below:
 # logger.setLevel(logging.DEBUG)
 
 CASE_INDEX = "case_index"
@@ -183,6 +183,7 @@ MUR_MAPPING = {
             "disposition": {"type": "text"},
             "penalty": {"type": "double"},
             "respondent": {"type": "text"},
+            "mur_disposition_catagory_id": {"type": "keyword"},
         }
     },
     "open_date": {"type": "date", "format": "dateOptionalTime"},
