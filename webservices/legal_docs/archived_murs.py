@@ -3,6 +3,7 @@ from elasticsearch_dsl import Search
 import logging
 import re
 from webservices.rest import db
+from webservices.tasks.utils import get_bucket
 from webservices.utils import (
     create_es_client,
     create_eregs_link,
@@ -167,6 +168,7 @@ def get_murs(mur_no=None):
 
 
 def get_single_mur(mur_no):
+    bucket = get_bucket()
     with db.engine.connect() as conn:
         rs = conn.execute(SINGLE_MUR, mur_no)
         row = rs.first()
@@ -187,7 +189,7 @@ def get_single_mur(mur_no):
             mur["respondents"] = get_respondents(mur_id)
             mur["citations"] = get_citations_arch_mur(mur_id)
             mur["subject"] = get_subjects(mur_id)
-            mur["documents"] = get_documents(mur_id)
+            mur["documents"] = get_documents(mur_id, bucket)
             return mur
         else:
             logger.error("Not a valid archived mur number.")
@@ -287,7 +289,7 @@ def get_subjects(mur_id):
     return subject_lv1
 
 
-def get_documents(mur_id):
+def get_documents(mur_id, bucket):
     documents = []
     with db.engine.connect() as conn:
         rs = conn.execute(MUR_DOCUMENTS, mur_id)
@@ -299,17 +301,18 @@ def get_documents(mur_id):
                 "url": (row["url"] or "/files/legal/murs/{0}.pdf".format(mur_id))
             })
         try:
-                    # bucket is None on local, don't need upload pdf to s3
-                    if bucket:
-                        logger.debug("S3: Uploading {}".format(mur_id))
-                        bucket.put_object(
-                            Key=mur_id,
-                            Body=bytes(row["url"]),
-                            ContentType="application/pdf",
-                            ACL="public-read",
-                        )
-                except Exception:
-                    pass
+            # bucket is None on local, don't need upload pdf to s3
+            if bucket:
+                logger.info("S3: Uploading {}".format(mur_id))
+                bucket.put_object(
+                    Key=mur_id,
+                    Body=bytes(row["url"]),
+                    ContentType="application/pdf",
+                    ACL="public-read",
+                )
+            logger.info("Successfully uploaded {} to S3".format(mur_id))
+        except Exception:
+            pass
     return documents
 
 
