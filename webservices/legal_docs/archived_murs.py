@@ -298,6 +298,18 @@ def get_documents(mur_id):
                 "text": row["pdf_text"],
                 "url": (row["url"] or "/files/legal/murs/{0}.pdf".format(mur_id))
             })
+        try:
+                    # bucket is None on local, don't need upload pdf to s3
+                    if bucket:
+                        logger.debug("S3: Uploading {}".format(mur_id))
+                        bucket.put_object(
+                            Key=mur_id,
+                            Body=bytes(row["url"]),
+                            ContentType="application/pdf",
+                            ACL="public-read",
+                        )
+                except Exception:
+                    pass
     return documents
 
 
