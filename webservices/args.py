@@ -324,7 +324,7 @@ names = {
 legal_universal_search = {
     'q': fields.Str(required=False, description=docs.TEXT_SEARCH),
     'q_proximity': fields.List(fields.Str,),
-    'max_gaps': fields.Int(required=False,),
+    'max_gap': fields.Int(required=False,),
     "filters": fields.Str(validate=validate.OneOf(["after", "before", "contained_by",
                                                    "containing", "not_contained_by", "not_containing",
                                                    "not_overlapping", "overlapping"]),),
