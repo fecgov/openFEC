@@ -209,7 +209,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     query = generic_query_builder(None, type_, from_hit, hits_returned, **kwargs)
 
-    if kwargs.get("q_proximity") and kwargs.get("max_gaps"):
+    if kwargs.get("q_proximity") and kwargs.get("max_gap"):
         query = get_proximity_query(q, query, **kwargs)
 
     # sorting works in all three cases: ('murs','admin_fines','adrs').
@@ -300,25 +300,36 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 def get_proximity_query(q, query, **kwargs):
     q_proximity = kwargs.get("q_proximity")
     intervals_list = []
+    contains_filter = False
+
+    if kwargs.get("filters") and kwargs.get("filter_search"):
+        contains_filter = True
+        filter = kwargs.get("filters")
+        filters = {filter: {'match': {'query': kwargs.get("filter_search")}}}
 
     if len(q_proximity) == 1:
-        if kwargs.get("filters") and kwargs.get("filter_search"):
-            filter = kwargs.get("filters")
-            filters = {filter: {'match': {'query': kwargs.get("filter_search")}}}
+        if contains_filter:
             intervals_inner_query = Q('intervals', documents__text={
-                'match':  {'query': q_proximity[0], 'max_gaps': kwargs.get("max_gaps"), "filter": filters}
+                'match':  {'query': q_proximity[0], 'max_gaps': kwargs.get("max_gap"), "filter": filters}
                 })
         else:
             intervals_inner_query = Q('intervals', documents__text={
-                'match':  {'query': q_proximity[0], 'max_gaps': kwargs.get("max_gaps")}
+                'match':  {'query': q_proximity[0], 'max_gaps': kwargs.get("max_gap")}
                 })
     else:
         for q in q_proximity:
             dict_item = {"match": {"query": q, "max_gaps": 0, }}
             intervals_list.append(dict_item)
-        intervals_inner_query = Q('intervals', documents__text={
-                'all_of':  {'max_gaps': kwargs.get("max_gaps"), "intervals": intervals_list}
-                })
+
+        if contains_filter:
+            intervals_inner_query = Q('intervals', documents__text={
+                    'all_of':  {'max_gaps': kwargs.get("max_gap"), "intervals": intervals_list, "filter": filters}
+                    })
+        else:
+            intervals_inner_query = Q('intervals', documents__text={
+                    'all_of':  {'max_gaps': kwargs.get("max_gap"), "intervals": intervals_list}
+                    })
+
     intervals_query = Q(
             "nested",
             path="documents",
