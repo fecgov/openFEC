@@ -209,16 +209,9 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     query = generic_query_builder(None, type_, from_hit, hits_returned, **kwargs)
 
-    if kwargs.get("max_gap") is not None:
-        intervals_inner_query = Q('intervals', documents__text={
-                    'match':  {'query': q, 'max_gaps': kwargs.get("max_gap")}
-                    })
-        intervals_query = Q(
-                "nested",
-                path="documents",
-                query=intervals_inner_query)
+    if kwargs.get("q_proximity") and kwargs.get("max_gaps"):
+        query = get_proximity_query(q, query, **kwargs)
 
-        query = query.query("bool", must=intervals_query)
     # sorting works in all three cases: ('murs','admin_fines','adrs').
     # so far only be able to sort by 'case_no', default sort is descending order.
     # descending order: 'sort=-case_no'; ascending order; sort=case_no
@@ -302,6 +295,36 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 # - 1006 - Statement of Reasons
 # AF document category
 # - 2001 - Administrative Fine Case
+
+
+def get_proximity_query(q, query, **kwargs):
+    q_proximity = kwargs.get("q_proximity")
+    intervals_list = []
+
+    if len(q_proximity) == 1:
+        if kwargs.get("filters") and kwargs.get("filter_search"):
+            filter = kwargs.get("filters")
+            filters = {filter: {'match': {'query': kwargs.get("filter_search")}}}
+            intervals_inner_query = Q('intervals', documents__text={
+                'match':  {'query': q_proximity[0], 'max_gaps': kwargs.get("max_gaps"), "filter": filters}
+                })
+        else:
+            intervals_inner_query = Q('intervals', documents__text={
+                'match':  {'query': q_proximity[0], 'max_gaps': kwargs.get("max_gaps")}
+                })
+    else:
+        for q in q_proximity:
+            dict_item = {"match": {"query": q, "max_gaps": 0, }}
+            intervals_list.append(dict_item)
+        intervals_inner_query = Q('intervals', documents__text={
+                'all_of':  {'max_gaps': kwargs.get("max_gaps"), "intervals": intervals_list}
+                })
+    intervals_query = Q(
+            "nested",
+            path="documents",
+            query=intervals_inner_query)
+
+    return query.query("bool", must=intervals_query)
 
 
 def get_case_document_query(q, **kwargs):

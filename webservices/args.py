@@ -323,7 +323,12 @@ names = {
 # for endpoint: /legal/search/ (resources/legal.py/UniversalSearch)
 legal_universal_search = {
     'q': fields.Str(required=False, description=docs.TEXT_SEARCH),
-    'max_gap': fields.Int(required=False,),
+    'q_proximity': fields.List(fields.Str,),
+    'max_gaps': fields.Int(required=False,),
+    "filters": fields.Str(validate=validate.OneOf(["after", "before", "contained_by",
+                                                   "containing", "not_contained_by", "not_containing",
+                                                   "not_overlapping", "overlapping"]),),
+    'filter_search': fields.Str(required=False,),
     'from_hit': fields.Int(required=False, description=docs.FROM_HIT),
     'hits_returned': fields.Int(required=False, description=docs.HITS_RETURNED),
     'type': fields.Str(
