@@ -188,7 +188,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .source(exclude=["text", "documents.text", "sort1", "sort2"])
         .extra(size=hits_returned, from_=from_hit)
         .index(SEARCH_ALIAS)
-        .sort("sort1", "sort2")
+        .sort("_score")  # _score is the default
     )
     if type_ == "advisory_opinions":
         query = query.highlight("summary", "documents.text", "documents.description")
@@ -794,8 +794,8 @@ def apply_ao_specific_query_params(query, **kwargs):
 
 def execute_query(query):
     es_results = query.execute()
-    # logger.debug("UniversalSearch() execute_query() es_results =" + json.dumps(
-    #     es_results.to_dict(), indent=3, cls=DateTimeEncoder))
+    logger.debug("UniversalSearch() execute_query() es_results =" + json.dumps(
+        es_results.to_dict(), indent=3, cls=DateTimeEncoder))
 
     formatted_hits = []
     for hit in es_results:
