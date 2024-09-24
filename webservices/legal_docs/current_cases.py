@@ -147,7 +147,7 @@ AF_DISPOSITION_DATA = """
 
 """
 
-DISPOSITION_DATA = """
+MUR_ADR_DISPOSITION_DATA = """
     SELECT fecmur.event.event_name,
         fecmur.settlement.final_amount, fecmur.entity.name,
         violations.statutory_citation, violations.regulatory_citation
@@ -241,11 +241,62 @@ AF_COMMISSION_VOTES = """
 """
 
 """ For ADR's populate case_status based on event_name"""
-adr_case_status_map = {
+ADR_CASE_STATUS_MAP = {
     "Dismissed": "Case Dismissed",
     "Settlement Agreement - Complaint Unsubstantiated": "Negotiated Settlement Approved",
     "Dismissed - Agreement Rejected": "Negotiated Settlement Rejected by Commission",
     "Dismissed - Failed to Approve": "Case Dismissed"
+}
+
+MUR_ADR_DISPOSITION_CATEGORY_MAP = {
+    'Approved by Commission': '1',
+    'Approved In Part Recs': '2',
+    'Approved Recs': '3',
+    'Case Activated': '4',
+    'Case Activation': '5',
+    'Conciliation-PC': '6',
+    'Conciliation-PPC': '7',
+    'Dismiss and Remind': '8',
+    'Dismissed': '9',
+    'Dismissed - Agreement Rejected': '10',
+    'Dismissed-Low Rated': '11',
+    'Dismissed-Other': '12',
+    'Dismissed-Stale': '13',
+    'Dismiss pursuant to prosecutorial discretion': '14',
+    'Dismiss pursuant to prosecutorial discretion, and caution': '15',
+    'Enforcement - Disposition - Dismissed "Dismiss" - Dismiss and Caution': '16',
+    'Failed to Approve Recs.': '17',
+    'First General Counsel Report': '18',
+    'Formal Discovery Authorized': '19',
+    'Investigative Activity': '20',
+    'Mailed to Respondent': '21',
+    'Merged': '22',
+    'No PCTB': '23',
+    'No RTB': '24',
+    'Offer from Respondent Received': '25',
+    'Other': '26',
+    'PC Brief': '27',
+    'PC Conciliation Approved': '28',
+    'PC/NFA': '29',
+    'PCTB Finding': '30',
+    'Pre-PCC Commenced': '31',
+    'Received': '32',
+    'Received from Audit Division': '33',
+    'Received from Commission': '34',
+    'Received from OGC': '35',
+    'Received from RAD': '36',
+    'Request for Extension of Time Approved': '37',
+    'Request for Extension of Time Approved/Denied': '38',
+    'Request for Extension of Time Received': '39',
+    'Response Received': '40',
+    'RTB Finding': '41',
+    'RTB/NFA': '42',
+    'Settlement Agreement': '43',
+    'Suit Authorization': '44',
+    'Take no action': '45',
+    'Take No Further Action': '46',
+    'To Respondent': '47',
+    'Transferred to ADR': '48',
 }
 
 STATUTE_REGEX = re.compile(r"(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)")
@@ -284,16 +335,6 @@ def load_admin_fines(specific_af_no=None):
     S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
     """
     load_cases("AF", specific_af_no)
-
-
-def get_es_type(case_type):
-    case_type = case_type.upper()
-    if case_type == "AF":
-        return "admin_fines"
-    elif case_type == "ADR":
-        return "adrs"
-    else:
-        return "murs"
 
 
 def get_full_name(case_type):
@@ -376,7 +417,15 @@ def get_single_case(case_type, case_no, bucket):
                 "sort1": sort1,
                 "sort2": sort2,
             }
-            if case_type == "ADR":
+            case["documents"] = get_documents(case_id, bucket)
+            case["url"] = "/legal/{0}/{1}/".format(get_full_name(case_type), row["case_no"])
+
+            if case_type == "AF":
+                case["commission_votes"] = get_af_mur_commission_votes(case_type, case_id)
+                case = extend(case, get_af_specific_fields(case_id))
+                return case
+
+            elif case_type == "ADR":
                 case["commission_votes"] = get_adr_commission_votes(case_id)
                 case["complainant"] = get_adr_complainant(case_id)
                 case["non_monetary_terms"] = get_adr_non_monetary_terms(case_id)
@@ -384,16 +433,12 @@ def get_single_case(case_type, case_no, bucket):
                 case["citations"] = get_adr_citations(case_id)
                 case["adr_dispositions"] = get_adr_dispositions(case_id)
                 case["case_status"] = get_adr_case_status(case_id)
-            else:
-                case["commission_votes"] = get_commission_votes(case_type, case_id)
-            case["documents"] = get_documents(case_id, bucket)
-            case["url"] = "/legal/{0}/{1}/".format(get_full_name(case_type), row["case_no"])
-            if case_type == "AF":
-                case = extend(case, get_af_specific_fields(case_id))
-                return case
-            if case_type == "MUR":
+
+            elif case_type == "MUR":
                 case["mur_type"] = "current"
-                case["dispositions"] = get_dispositions(case_id)
+                case["dispositions"] = get_mur_dispositions(case_id)
+                case["commission_votes"] = get_af_mur_commission_votes(case_type, case_id)
+
             case["subjects"] = get_subjects(case_id)
             case["election_cycles"] = get_election_cycles(case_id)
             participants = get_participants(case_id)
@@ -404,6 +449,21 @@ def get_single_case(case_type, case_no, bucket):
         else:
             logger.error("Not a valid {0} number.".format(case_type))
             return None
+
+
+def get_sort_fields(case_no):
+    match = CASE_NO_REGEX.match(case_no)
+    return -int(match.group("serial")), None
+
+
+def get_es_type(case_type):
+    case_type = case_type.upper()
+    if case_type == "AF":
+        return "admin_fines"
+    elif case_type == "ADR":
+        return "adrs"
+    else:
+        return "murs"
 
 
 def get_af_specific_fields(case_id):
@@ -432,60 +492,6 @@ def get_af_specific_fields(case_id):
     return case
 
 
-def get_election_cycles(case_id):
-    election_cycles = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(CASE_ELECTION_CYCLES, case_id)
-        for row in rs:
-            election_cycles.append(row["election_cycle"])
-    return election_cycles
-
-
-def get_open_and_close_dates(case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(OPEN_AND_CLOSE_DATES, case_id)
-        open_date, close_date = rs.fetchone()
-    return open_date, close_date
-
-
-def get_dispositions(case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(DISPOSITION_DATA.format(case_id))
-        disposition_data = []
-        for row in rs:
-            citations = parse_statutory_citations(row["statutory_citation"], case_id, row["name"])
-            citations.extend(parse_regulatory_citations(row["regulatory_citation"], case_id, row["name"]))
-            disposition_data.append(
-                {"disposition": row["event_name"], "penalty": row["final_amount"],
-                 "respondent": row["name"], "citations": citations}
-            )
-        return disposition_data
-
-
-def get_adr_dispositions(case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(DISPOSITION_DATA.format(case_id))
-        adr_dispositions = []
-        for row in rs:
-            adr_dispositions.append({"disposition": row["event_name"], "penalty": row["final_amount"],
-                                     "respondent": row["name"]})
-
-        return adr_dispositions
-
-
-def get_adr_case_status(case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(DISPOSITION_DATA.format(case_id))
-        case_status = []
-        for row in rs:
-            disposition_description = row["event_name"]
-            if adr_case_status_map.get(disposition_description) is not None:
-                case_status = adr_case_status_map.get(disposition_description)
-            else:
-                case_status = "No status found"
-        return case_status
-
-
 def get_af_dispositions(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(AF_DISPOSITION_DATA, case_id)
@@ -493,11 +499,10 @@ def get_af_dispositions(case_id):
         for row in rs:
             disposition_data.append({"disposition_description": row["description"],
                                      "disposition_date": row["dates"], "amount": row["amount"]})
-
         return disposition_data
 
 
-def get_commission_votes(case_type, case_id):
+def get_af_mur_commission_votes(case_type, case_id):
     with db.engine.connect() as conn:
         if case_type == "AF":
             rs = conn.execute(AF_COMMISSION_VOTES, case_id)
@@ -517,6 +522,15 @@ def get_adr_commission_votes(case_id):
             commission_votes.append({"vote_date": row["vote_date"], "action": row["action"],
                                      "commissioner_name": row["commissioner_name"], "vote_type": row["vote_type"]})
         return commission_votes
+
+
+def get_adr_complainant(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(ADR_COMPLAINANT, case_id)
+        complainant = []
+        for row in rs:
+            complainant.append(row["complainant_name"])
+        return complainant
 
 
 def get_adr_non_monetary_terms(case_id):
@@ -547,13 +561,141 @@ def get_adr_citations(case_id):
         return citations
 
 
-def get_adr_complainant(case_id):
+def get_adr_dispositions(case_id):
     with db.engine.connect() as conn:
-        rs = conn.execute(ADR_COMPLAINANT, case_id)
-        complainant = []
+        rs = conn.execute(MUR_ADR_DISPOSITION_DATA.format(case_id))
+        adr_dispositions = []
         for row in rs:
-            complainant.append(row["complainant_name"])
-        return complainant
+            adr_dispositions.append({"disposition": row["event_name"], "penalty": row["final_amount"],
+                                     "respondent": row["name"]})
+
+        return adr_dispositions
+
+
+def get_adr_case_status(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(MUR_ADR_DISPOSITION_DATA.format(case_id))
+        case_status = []
+        for row in rs:
+            disposition_description = row["event_name"]
+            if ADR_CASE_STATUS_MAP.get(disposition_description) is not None:
+                case_status = ADR_CASE_STATUS_MAP.get(disposition_description)
+            else:
+                case_status = "No status found"
+        return case_status
+
+
+def get_mur_dispositions(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(MUR_ADR_DISPOSITION_DATA.format(case_id))
+        disposition_data = []
+        for row in rs:
+            citations = parse_statutory_citations(row["statutory_citation"], case_id, row["name"])
+            citations.extend(parse_regulatory_citations(row["regulatory_citation"], case_id, row["name"]))
+            disposition_data.append({
+                "citations": citations,
+                "disposition": row["event_name"],
+                "mur_disposition_category_id": MUR_ADR_DISPOSITION_CATEGORY_MAP[row["event_name"]],
+                "penalty": row["final_amount"],
+                "respondent": row["name"], },
+            )
+        return disposition_data
+
+
+def parse_statutory_citations(statutory_citation, case_id, entity_id):
+    citations = []
+    if statutory_citation:
+        statutory_citation = remove_reclassification_notes(statutory_citation)
+        matches = list(STATUTE_REGEX.finditer(statutory_citation))
+        for index, match in enumerate(matches):
+            section = match.group("section")
+            orig_title, new_title, new_section = reclassify_statutory_citation_without_title(section)
+            url = "https://www.govinfo.gov/link/uscode/{0}/{1}".format(new_title, new_section)
+            if index == len(matches) - 1:
+                match_text = statutory_citation[match.start():]
+            else:
+                match_text = statutory_citation[match.start():matches[index + 1].start()]
+            text = match_text.rstrip(" ,;")
+            citations.append({"text": text, "type": "statute", "title": orig_title, "url": url})
+        if not citations:
+            logger.warn("Cannot parse statutory citation %s for Entity %s in case %s",
+                        statutory_citation, entity_id, case_id)
+    return citations
+
+
+def remove_reclassification_notes(statutory_citation):
+    """ Statutory citations include notes on reclassification of the form
+    "30120 (formerly 441d)" and "30120 (formerly 432(e)(1))". These need to be
+    removed as we explicitly perform the necessary reclassifications.
+    """
+    UNPARENTHESIZED_FORMERLY_REGEX = re.compile(r" formerly \S*")
+    PARENTHESIZED_FORMERLY_REGEX = re.compile(r"\(formerly ")
+
+    def remove_to_matching_parens(citation):
+        """ In the case of reclassification notes of the form "(formerly ...",
+        remove all characters up to the matching closing ")" allowing for nested
+        parentheses pairs.
+        """
+        match = PARENTHESIZED_FORMERLY_REGEX.search(citation)
+        pos = match.end()
+        paren_count = 0
+        while pos < len(citation):
+            if citation[pos] == ")":
+                if paren_count == 0:
+                    return citation[:match.start()] + citation[pos + 1:]
+                else:
+                    paren_count -= 1
+            elif citation[pos] == "(":
+                paren_count += 1
+            pos += 1
+        return citation[:match.start()]  # Degenerate case - no matching ")"
+
+    cleaned_citation = UNPARENTHESIZED_FORMERLY_REGEX.sub(" ", statutory_citation)
+    while PARENTHESIZED_FORMERLY_REGEX.search(cleaned_citation):
+        cleaned_citation = remove_to_matching_parens(cleaned_citation)
+    return cleaned_citation
+
+
+def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
+    citations = []
+    if regulatory_citation:
+        matches = list(REGULATION_REGEX.finditer(regulatory_citation))
+        for index, match in enumerate(matches):
+            part = match.group("part")
+            section = match.group("section")
+            url = create_eregs_link(part, section)
+            if index == len(matches) - 1:
+                match_text = regulatory_citation[match.start():]
+            else:
+                match_text = regulatory_citation[match.start():matches[index + 1].start()]
+            text = match_text.rstrip(" ,;")
+            citations.append({"text": text, "type": "regulation", "title": "11", "url": url})
+        if not citations:
+            logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
+                        regulatory_citation, entity_id, case_id)
+    return citations
+
+
+def get_subjects(case_id):
+    subjects = []
+    with db.engine.connect() as conn:
+        rs = conn.execute(CASE_SUBJECTS, case_id)
+        for row in rs:
+            if row["rel"]:
+                subject_str = row["subj"] + "-" + row["rel"]
+            else:
+                subject_str = row["subj"]
+            subjects.append(subject_str)
+    return subjects
+
+
+def get_election_cycles(case_id):
+    election_cycles = []
+    with db.engine.connect() as conn:
+        rs = conn.execute(CASE_ELECTION_CYCLES, case_id)
+        for row in rs:
+            election_cycles.append(row["election_cycle"])
+    return election_cycles
 
 
 def get_participants(case_id):
@@ -579,72 +721,11 @@ def get_sorted_respondents(participants):
     return respondents
 
 
-def get_subjects(case_id):
-    subjects = []
+def get_open_and_close_dates(case_id):
     with db.engine.connect() as conn:
-        rs = conn.execute(CASE_SUBJECTS, case_id)
-        for row in rs:
-            if row["rel"]:
-                subject_str = row["subj"] + "-" + row["rel"]
-            else:
-                subject_str = row["subj"]
-            subjects.append(subject_str)
-    return subjects
-
-
-def assign_citations(participants, case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(CASE_VIOLATIONS, case_id)
-        for row in rs:
-            entity_id = row["entity_id"]
-            if entity_id not in participants:
-                logger.warn("Entity %s from violations not found in participants for case %s", entity_id, case_id)
-                continue
-            participants[entity_id]["citations"][row["stage"]].extend(
-                parse_statutory_citations(row["statutory_citation"], case_id, entity_id))
-            participants[entity_id]["citations"][row["stage"]].extend(
-                parse_regulatory_citations(row["regulatory_citation"], case_id, entity_id))
-
-
-def parse_statutory_citations(statutory_citation, case_id, entity_id):
-    citations = []
-    if statutory_citation:
-        statutory_citation = remove_reclassification_notes(statutory_citation)
-        matches = list(STATUTE_REGEX.finditer(statutory_citation))
-        for index, match in enumerate(matches):
-            section = match.group("section")
-            orig_title, new_title, new_section = reclassify_statutory_citation_without_title(section)
-            url = "https://www.govinfo.gov/link/uscode/{0}/{1}".format(new_title, new_section)
-            if index == len(matches) - 1:
-                match_text = statutory_citation[match.start():]
-            else:
-                match_text = statutory_citation[match.start():matches[index + 1].start()]
-            text = match_text.rstrip(" ,;")
-            citations.append({"text": text, "type": "statute", "title": orig_title, "url": url})
-        if not citations:
-            logger.warn("Cannot parse statutory citation %s for Entity %s in case %s",
-                        statutory_citation, entity_id, case_id)
-    return citations
-
-
-def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
-    citations = []
-    if regulatory_citation:
-        matches = list(REGULATION_REGEX.finditer(regulatory_citation))
-        for index, match in enumerate(matches):
-            part = match.group("part")
-            section = match.group("section")
-            url = create_eregs_link(part, section)
-            if index == len(matches) - 1:
-                match_text = regulatory_citation[match.start():]
-            else:
-                match_text = regulatory_citation[match.start():matches[index + 1].start()]
-            text = match_text.rstrip(" ,;")
-            citations.append({"text": text, "type": "regulation", "title": "11", "url": url})
-        if not citations:
-            logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
-                        regulatory_citation, entity_id, case_id)
-    return citations
+        rs = conn.execute(OPEN_AND_CLOSE_DATES, case_id)
+        open_date, close_date = rs.fetchone()
+    return open_date, close_date
 
 
 def get_documents(case_id, bucket):
@@ -687,39 +768,15 @@ def get_documents(case_id, bucket):
     return documents
 
 
-def remove_reclassification_notes(statutory_citation):
-    """ Statutory citations include notes on reclassification of the form
-    "30120 (formerly 441d)" and "30120 (formerly 432(e)(1))". These need to be
-    removed as we explicitly perform the necessary reclassifications.
-    """
-    UNPARENTHESIZED_FORMERLY_REGEX = re.compile(r" formerly \S*")
-    PARENTHESIZED_FORMERLY_REGEX = re.compile(r"\(formerly ")
-
-    def remove_to_matching_parens(citation):
-        """ In the case of reclassification notes of the form "(formerly ...",
-        remove all characters up to the matching closing ")" allowing for nested
-        parentheses pairs.
-        """
-        match = PARENTHESIZED_FORMERLY_REGEX.search(citation)
-        pos = match.end()
-        paren_count = 0
-        while pos < len(citation):
-            if citation[pos] == ")":
-                if paren_count == 0:
-                    return citation[:match.start()] + citation[pos + 1:]
-                else:
-                    paren_count -= 1
-            elif citation[pos] == "(":
-                paren_count += 1
-            pos += 1
-        return citation[:match.start()]  # Degenerate case - no matching ")"
-
-    cleaned_citation = UNPARENTHESIZED_FORMERLY_REGEX.sub(" ", statutory_citation)
-    while PARENTHESIZED_FORMERLY_REGEX.search(cleaned_citation):
-        cleaned_citation = remove_to_matching_parens(cleaned_citation)
-    return cleaned_citation
-
-
-def get_sort_fields(case_no):
-    match = CASE_NO_REGEX.match(case_no)
-    return -int(match.group("serial")), None
+# def assign_citations(participants, case_id):
+#     with db.engine.connect() as conn:
+#         rs = conn.execute(CASE_VIOLATIONS, case_id)
+#         for row in rs:
+#             entity_id = row["entity_id"]
+#             if entity_id not in participants:
+#                 logger.warn("Entity %s from violations not found in participants for case %s", entity_id, case_id)
+#                 continue
+#             participants[entity_id]["citations"][row["stage"]].extend(
+#                 parse_statutory_citations(row["statutory_citation"], case_id, entity_id))
+#             participants[entity_id]["citations"][row["stage"]].extend(
+#                 parse_regulatory_citations(row["regulatory_citation"], case_id, entity_id))
