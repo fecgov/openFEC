@@ -250,8 +250,8 @@ ADR_CASE_STATUS_MAP = {
 
 MUR_ADR_DISPOSITION_CATEGORY_MAP = {
     'Approved by Commission': '1',
-    'Approved In Part Recs': '2',
-    'Approved Recs': '3',
+    'Approved In Part Recs.': '2',
+    'Approved Recs.': '3',
     'Case Activated': '4',
     'Case Activation': '5',
     'Conciliation-PC': '6',
