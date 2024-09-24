@@ -303,6 +303,7 @@ AO_MAPPING = {
             "type": "nested",
             "properties": {
                 "document_id": {"type": "long"},
+                "ao_doc_category_id": {"type": "keyword"},
                 "category": {"type": "keyword"},
                 "description": {"type": "text"},
                 "text": {

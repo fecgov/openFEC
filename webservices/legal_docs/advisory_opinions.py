@@ -209,6 +209,17 @@ def get_advisory_opinions(from_ao_no):
             yield ao
 
 
+CATEGORY_MAP = {
+    "Final Opinion": "F",
+    "Votes": "V",
+    "Draft Documents": "D",
+    "AO Request, Supplemental Material, and Extensions of Time": "R",
+    "Withdrawal of Request": "W",
+    "Comments and Ex parte Communications": "C",
+    "Commissioner Statements": "S",
+    }
+
+
 def get_entities(ao_id):
     requestor_names = []
     commenter_names = []
@@ -260,6 +271,7 @@ def get_documents(ao_id, bucket):
             document = {
                 "document_id": row["document_id"],
                 "category": row["category"],
+                "ao_doc_category_id": CATEGORY_MAP.get(row["category"]),
                 "description": row["description"],
                 "text": row["ocrtext"],
                 "date": row["document_date"],
