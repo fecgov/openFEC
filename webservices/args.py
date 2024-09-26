@@ -390,6 +390,13 @@ legal_universal_search = {
     'sort': IStr(required=False, description=docs.SORT),
 }
 
+citation = {
+    'doc_type': fields.Str(
+                required=False, validate=validate.OneOf(["adrs", "advisory_opinions", "murs"]),
+                description=docs.CITATION_DOC_TYPE
+            )
+}
+
 candidate_detail = {
     'cycle': fields.List(fields.Int, description=docs.CANDIDATE_CYCLE),
     'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),

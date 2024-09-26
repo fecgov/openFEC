@@ -2140,6 +2140,10 @@ AO_REQUESTOR_TYPE = '''
 Code of the advisory opinion requestor type.
 '''
 
+CITATION_DOC_TYPE = '''
+The document type that referenced a citation.
+'''
+
 REGULATORY_CITATION = '''
 Regulatory citations
 '''

@@ -140,6 +140,7 @@ CITATION_MAPPING = {
     "type": {"type": "keyword"},
     "citation_type": {"type": "keyword"},
     "citation_text": {"type": "text"},
+    "doc_type": {"type": "keyword"},
 }
 
 MUR_MAPPING = {
@@ -320,6 +321,7 @@ AO_MAPPING = {
         "representative_names": {"type": "text"},
         "citation_type": {"type": "keyword"},
         "citation_text": {"type": "text"},
+        "doc_type": {"type": "keyword"},
         "entities": {
             "properties": {
                 "role": {"type": "keyword"},
