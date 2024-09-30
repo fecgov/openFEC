@@ -725,7 +725,7 @@ PRIMARY_SUBJECT_MAP = {
     'Expenditures': '7',
     'Express Advocacy': '8',
     'Foreign Nationals': '9',
-    'Fraudulent misrepresentations': '10',
+    'Fraudulent misrepresentation': '10',
     'Issue Advocacy': '11',
     'Knowing and Willful': '12',
     'Loans': '13',

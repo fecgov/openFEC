@@ -2316,7 +2316,7 @@ Primary Subject Description:\n\
     - 7 - Expenditures\n\
     - 8 - Express Advocacy\n\
     - 9 - Foreign Nationals\n\
-    - 10 - Fraudulent misrepresentations\n\
+    - 10 - Fraudulent misrepresentation\n\
     - 11 - Issue Advocacy\n\
     - 12 - Knowing and Willful\n\
     - 13 - Loans\n\
