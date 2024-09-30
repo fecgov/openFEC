@@ -212,10 +212,13 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     if kwargs.get("case_no"):
         must_clauses.append(Q("terms", no=kwargs.get("case_no")))
 
-    if kwargs.get("case_document_category"):
-        must_clauses = [
-            Q("terms", documents__category=kwargs.get("case_document_category"))
-        ]
+    if kwargs.get("primary_subject_id") and '' not in kwargs.get("primary_subject_id"):
+        must_clauses.append(Q("nested", path="subjects",
+                            query=Q("terms", subjects__primary_subject_id=kwargs.get("primary_subject_id"))))
+
+    if kwargs.get("secondary_subject_id") and '' not in kwargs.get("secondary_subject_id"):
+        must_clauses.append(Q("nested", path="subjects",
+                            query=Q("terms", subjects__secondary_subject_id=kwargs.get("secondary_subject_id"))))
 
     if kwargs.get("case_respondents"):
         must_clauses.append(Q("simple_query_string",
