@@ -2164,7 +2164,7 @@ CASE_DOCUMENT_CATEGORY = '''
 Case category of associated documents
 '''
 
-CASE_RESPONDONTS = '''
+CASE_RESPONDENTS = '''
 Cases respondents
 '''
 
@@ -2302,7 +2302,53 @@ The latest Final Determination date
 '''
 
 AF_FD_FINE_AMOUNT = '''
-Final Determination fine amount
+   Final Determination fine amount
+'''
+
+PRIMARY_SUBJECT_DESCRIPTION = '''
+Primary Subject Description:\n\
+    - 1 - Allocation\n\
+    - 2 - Committees\n\
+    - 3 - Contributions\n\
+    - 4 - Disclaimer\n\
+    - 5 - Disbursements
+    - 6 - Electioneering\n\
+    - 7 - Expenditures\n\
+    - 8 - Express Advocacy\n\
+    - 9 - Foreign Nationals\n\
+    - 10 - Fraudulent misrepresentation\n\
+    - 11 - Issue Advocacy\n\
+    - 12 - Knowing and Willful\n\
+    - 13 - Loans\n\
+    - 14 - Non-federal\n\
+    - 15 - Other\n\
+    - 16 - Personal use\n\
+    - 17 - Presidential\n\
+    - 18 - Reporting\n\
+    - 19 - Soft Money\n\
+    - 20 - Solicitation\n\
+'''
+
+SECONDARY_SUBJECT_DESCRIPTION = '''
+Secondary Subject Description:\n\
+    - 1 - Candidate\n\
+    - 2 - Multi-candidate\n\
+    - 3 - Non-party\n\
+    - 4 - PAC\n\
+    - 5 - Party\n\
+    - 6 - Political\n\
+    - 7 - Presidential\n\
+    - 8 - Corporations\n\
+    - 9 - Excessive\n\
+    - 10 - Exemptions\n\
+    - 11 - In the name of another\n\
+    - 12 - Labor unions\n\
+    - 13 - Limitations\n\
+    - 14 - National bank\n\
+    - 15 - Prohibited\n\
+    - 16 - Coordinated\n\
+    - 17 - Limits\n\
+    - 18 - Prohibitions\n\
 '''
 # ======== legal end =========
 
