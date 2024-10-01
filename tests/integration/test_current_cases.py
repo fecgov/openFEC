@@ -422,6 +422,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'dispositions': [
                 {
                     'disposition': 'Conciliation-PPC',
+                    'mur_disposition_category_id': '7',
                     'respondent': 'Open Elections LLC',
                     'penalty': Decimal('50000.00'),
                     'citations': [
