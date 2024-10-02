@@ -202,7 +202,7 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     query = query.query("bool", should=should_query, minimum_should_match=1)
 
     # add mur_dispositions_category_id filter
-    if type_ == "murs":
+    if kwargs.get("mur_disposition_category_id") and type_ == "murs":
         should_query_mur_disposition = [
             get_mur_disposition_query(q, **kwargs),
         ]
