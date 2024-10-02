@@ -158,7 +158,14 @@ MUR_MAPPING = {
     "documents": CASE_DOCUMENT_MAPPING,
     "url": {"type": "text", "index": False},
     "mur_type": {"type": "keyword"},
-    "subjects": {"type": "text"},
+    "subjects": {
+        "type": "nested",
+        "properties": {
+            "subject": {"type": "text"},
+            "primary_subject_id": {"type": "keyword"},
+            "secondary_subject_id": {"type": "keyword"},
+        }
+    },
     "election_cycles": {"type": "long"},
     "participants": {
         "properties": {
@@ -211,7 +218,14 @@ ADR_MAPPING = {
     "documents": CASE_DOCUMENT_MAPPING,
     "url": {"type": "text", "index": False},
     "mur_type": {"type": "keyword"},
-    "subjects": {"type": "text"},
+    "subjects": {
+        "type": "nested",
+        "properties": {
+            "subject": {"type": "text"},
+            "primary_subject_id": {"type": "keyword"},
+            "secondary_subject_id": {"type": "keyword"},
+        }
+    },
     "election_cycles": {"type": "long"},
     "participants": {
         "properties": {
