@@ -139,7 +139,7 @@ ADMIN_FINE_MAPPING = {
 CITATION_MAPPING = {
     "type": {"type": "keyword"},
     "citation_type": {"type": "keyword"},
-    "citation_text": {"type": "text"},
+    "citation_text": {"type": "keyword"},
     "doc_type": {"type": "keyword"},
 }
 
@@ -334,7 +334,7 @@ AO_MAPPING = {
         "commenter_names": {"type": "text"},
         "representative_names": {"type": "text"},
         "citation_type": {"type": "keyword"},
-        "citation_text": {"type": "text"},
+        "citation_text": {"type": "keyword"},
         "doc_type": {"type": "keyword"},
         "entities": {
             "properties": {
