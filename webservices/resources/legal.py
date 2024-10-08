@@ -547,6 +547,20 @@ def get_ao_document_query(q, **kwargs):
                 category_query.append(Q("term", documents__ao_doc_category_id=ao_doc_category_id))
         combined_query.append(Q("bool", should=category_query, minimum_should_match=1))
 
+    categories = {
+        "F": "Final Opinion",
+        "V": "Votes",
+        "D": "Draft Documents",
+        "R": "AO Request, Supplemental Material, and Extensions of Time",
+        "W": "Withdrawal of Request",
+        "C": "Comments and Ex parte Communications",
+        "S": "Commissioner Statements",
+    }
+
+    if kwargs.get("ao_category"):
+        ao_category = [categories[c] for c in kwargs.get("ao_category")]
+        combined_query = [Q("terms", documents__category=ao_category)]
+
     if q:
         combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))
 
