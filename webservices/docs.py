@@ -2113,6 +2113,15 @@ AO_MAX_REQUEST_DATE = '''
 Latest request date of advisory opinion
 '''
 
+AO_MIN_DOCUMENT_DATE = '''
+Selects all advisory opinion documents dated on or after this date. Date must be formatted as MM/DD/YYYY or YYYY-MM-DD."
+'''
+
+AO_MAX_DOCUMENT_DATE = '''
+Selects all advisory opinion documents dated on or before this date. Date must be
+formatted as MM/DD/YYYY or YYYY-MM-DD."
+'''
+
 AO_CATEGORY = '''
 `DEPRECATED` please use AO_DOC_CATEGORY_ID
 Category of the document
@@ -2210,6 +2219,14 @@ The earliest date closed of case
 
 CASE_MAX_CLOSE_DATE = '''
 The latest date closed of case
+'''
+
+CASE_MIN_DOCUMENT_DATE = '''
+Selects all case documents dated on or after this date. Date must be formatted as MM/DD/YYYY or YYYY-MM-DD."
+'''
+
+CASE_MAX_DOCUMENT_DATE = '''
+Selects all case documents dated on or before this date. Date must be formatted as MM/DD/YYYY or YYYY-MM-DD."
 '''
 
 CASE_DOCUMENT_CATEGORY_DESCRIPTION = '''
