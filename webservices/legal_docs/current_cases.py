@@ -410,12 +410,10 @@ def get_cases(case_type, case_no=None):
 
             if case_type in ("ADR", "AF"):
                 rs = conn.execute(ALL_ADR_AF_CASES, case_type)
-                for row in rs:
-                    yield get_single_case(case_type, row["case_no"], bucket)
             elif case_type in ("MUR"):
                 rs = conn.execute(ALL_MUR_CASES, case_type)
-                for row in rs:
-                    yield get_single_case(case_type, row["case_no"], bucket)
+            for row in rs:
+                yield get_single_case(case_type, row["case_no"], bucket)
     else:
         yield get_single_case(case_type, case_no, bucket)
 
