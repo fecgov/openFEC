@@ -676,19 +676,6 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
     return citations
 
 
-def get_subjects(case_id):
-    subjects = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(CASE_SUBJECTS, case_id)
-        for row in rs:
-            if row["rel"]:
-                subject_str = row["subj"] + "-" + row["rel"]
-            else:
-                subject_str = row["subj"]
-            subjects.append(subject_str)
-    return subjects
-
-
 def get_election_cycles(case_id):
     election_cycles = []
     with db.engine.connect() as conn:
@@ -726,6 +713,77 @@ def get_open_and_close_dates(case_id):
         rs = conn.execute(OPEN_AND_CLOSE_DATES, case_id)
         open_date, close_date = rs.fetchone()
     return open_date, close_date
+
+
+PRIMARY_SUBJECT_MAP = {
+    'Allocation': '1',
+    'Committees': '2',
+    'Contributions': '3',
+    'Disclaimer': '4',
+    'Disbursements': '5',
+    'Electioneering': '6',
+    'Expenditures': '7',
+    'Express Advocacy': '8',
+    'Foreign Nationals': '9',
+    'Fraudulent misrepresentation': '10',
+    'Issue Advocacy': '11',
+    'Knowing and Willful': '12',
+    'Loans': '13',
+    'Non-federal': '14',
+    'Other': '15',
+    'Personal use': '16',
+    'Presidential': '17',
+    'Reporting': '18',
+    'Soft Money': '19',
+    'Solicitation': '20'
+}
+
+
+SECONDARY_SUBJECT_MAP = {
+    'Candidate': '1',
+    'Multi-candidate': '2',
+    'Non-Party': '3',
+    'PAC': '4',
+    'Party': '5',
+    'Political': '6',
+    'Presidential': '7',
+    'Corporations': '8',
+    'Excessive': '9',
+    'Exemptions': '10',
+    'In the name of another': '11',
+    'Labor Unions': '12',
+    'Limitations': '13',
+    'National Bank': '14',
+    'Prohibited': '15',
+    'Coordinated': '16',
+    'Limits': '17',
+    'Prohibitions': '18'
+}
+
+
+def get_subjects(case_id):
+    subjects_data = []
+    with db.engine.connect() as conn:
+        rs = conn.execute(CASE_SUBJECTS, case_id)
+        for row in rs:
+            if row["rel"]:
+                subject_str = row["subj"] + "-" + row["rel"]
+                subjects_data.append(
+                    {
+                        "subject": subject_str,
+                        "primary_subject_id": PRIMARY_SUBJECT_MAP.get(row["subj"]),
+                        "secondary_subject_id": SECONDARY_SUBJECT_MAP.get(row["rel"])
+                    }
+                )
+            else:
+                subject_str = row["subj"]
+                subjects_data.append(
+                    {
+                        "subject": subject_str,
+                        "primary_subject_id": PRIMARY_SUBJECT_MAP.get(row["subj"])
+                    }
+                )
+    return subjects_data
 
 
 def get_documents(case_id, bucket):
@@ -766,17 +824,3 @@ def get_documents(case_id, bucket):
                 except Exception:
                     pass
     return documents
-
-
-# def assign_citations(participants, case_id):
-#     with db.engine.connect() as conn:
-#         rs = conn.execute(CASE_VIOLATIONS, case_id)
-#         for row in rs:
-#             entity_id = row["entity_id"]
-#             if entity_id not in participants:
-#                 logger.warn("Entity %s from violations not found in participants for case %s", entity_id, case_id)
-#                 continue
-#             participants[entity_id]["citations"][row["stage"]].extend(
-#                 parse_statutory_citations(row["statutory_citation"], case_id, entity_id))
-#             participants[entity_id]["citations"][row["stage"]].extend(
-#                 parse_regulatory_citations(row["regulatory_citation"], case_id, entity_id))

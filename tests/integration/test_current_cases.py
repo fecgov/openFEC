@@ -35,7 +35,12 @@ class TestLoadCurrentCases(BaseTestCase):
             'case_serial': 1,
             'published_flg': True,
             'participants': [],
-            'subjects': [mur_subject],
+            'subjects': [
+                {
+                    'primary_subject_id': '10',
+                    'subject': mur_subject,
+                }
+            ],
             'respondents': [],
             'documents': [],
             'commission_votes': [],
@@ -59,7 +64,7 @@ class TestLoadCurrentCases(BaseTestCase):
 
     @patch('webservices.legal_docs.current_cases.get_bucket')
     def test_unpublished_mur(self, get_bucket):
-        mur_subject = 'Unpublished MUR'
+        mur_subject = 'Allocation'
         expected_mur = {
             "type": "murs",
             'no': '101',
@@ -70,7 +75,13 @@ class TestLoadCurrentCases(BaseTestCase):
             'case_serial': 101,
             'published_flg': False,
             'participants': [],
-            'subjects': [mur_subject],
+
+            'subjects': [
+                {
+                    'primary_subject_id': '1',
+                    'subject': mur_subject,
+                }
+            ],
             'respondents': [],
             'documents': [],
             'commission_votes': [],
@@ -107,7 +118,12 @@ class TestLoadCurrentCases(BaseTestCase):
             'participants': [],
             'non_monetary_terms': [],
             'non_monetary_terms_respondents': ['Commander Data'],
-            'subjects': [adr_subject],
+            'subjects': [
+                {
+                    'primary_subject_id': '16',
+                    'subject': adr_subject,
+                }
+            ],
             'respondents': [],
             'documents': [],
             'commission_votes': [],
@@ -290,7 +306,12 @@ class TestLoadCurrentCases(BaseTestCase):
             'published_flg': True,
             'election_cycles': [2016],
             'doc_id': 1,
-            'subjects': [mur_subject],
+            'subjects': [
+                {
+                    'primary_subject_id': '10',
+                    'subject': mur_subject,
+                }
+            ],
             'respondents': ["Bilbo Baggins", "Thorin Oakenshield"],
             "documents": [expected_document],
         }
@@ -441,7 +462,12 @@ class TestLoadCurrentCases(BaseTestCase):
                     ],
                 }
             ],
-            'subjects': ['Fraudulent misrepresentation'],
+            'subjects': [
+                {
+                    'primary_subject_id': '10',
+                    'subject': mur_subject,
+                }
+            ],
             'respondents': [],
             'documents': [],
             'participants': [],
@@ -473,7 +499,12 @@ class TestLoadCurrentCases(BaseTestCase):
             'case_serial': 1,
             'published_flg': True,
             'participants': [],
-            'subjects': [mur_subject],
+            'subjects': [
+                {
+                    'primary_subject_id': '10',
+                    'subject': mur_subject,
+                }
+            ],
             'respondents': [],
             'documents': [],
             'commission_votes': [],
@@ -494,7 +525,12 @@ class TestLoadCurrentCases(BaseTestCase):
             'case_serial': 2,
             'published_flg': True,
             'participants': [],
-            'subjects': [mur_subject],
+            'subjects': [
+                {
+                    'primary_subject_id': '10',
+                    'subject': mur_subject,
+                }
+            ],
             'respondents': [],
             'documents': [],
             'commission_votes': [],
@@ -515,7 +551,12 @@ class TestLoadCurrentCases(BaseTestCase):
             'case_serial': 3,
             'published_flg': True,
             'participants': [],
-            'subjects': [mur_subject],
+            'subjects': [
+                {
+                    'primary_subject_id': '10',
+                    'subject': mur_subject,
+                }
+            ],
             'respondents': [],
             'documents': [],
             'commission_votes': [],

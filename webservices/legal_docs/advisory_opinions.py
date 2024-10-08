@@ -436,6 +436,7 @@ def get_citations(ao_names):
             "type": "citations",
             "citation_text": "%d CFR §%d.%d" % (citation[0], citation[1], citation[2]),
             "citation_type": "regulation",
+            "doc_type": "advisory_opinions",
         }
         es_client.index(AO_ALIAS, entry, id=entry["citation_text"])
 
@@ -444,6 +445,7 @@ def get_citations(ao_names):
             "type": "citations",
             "citation_text": "%d U.S.C. §%s" % (citation[0], citation[1]),
             "citation_type": "statute",
+            "doc_type": "advisory_opinions",
         }
         es_client.index(AO_ALIAS, entry, id=entry["citation_text"])
     logger.info(" AO Citations loaded.")

@@ -212,10 +212,13 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     if kwargs.get("case_no"):
         must_clauses.append(Q("terms", no=kwargs.get("case_no")))
 
-    if kwargs.get("case_document_category"):
-        must_clauses = [
-            Q("terms", documents__category=kwargs.get("case_document_category"))
-        ]
+    if kwargs.get("primary_subject_id") and '' not in kwargs.get("primary_subject_id"):
+        must_clauses.append(Q("nested", path="subjects",
+                            query=Q("terms", subjects__primary_subject_id=kwargs.get("primary_subject_id"))))
+
+    if kwargs.get("secondary_subject_id") and '' not in kwargs.get("secondary_subject_id"):
+        must_clauses.append(Q("nested", path="subjects",
+                            query=Q("terms", subjects__secondary_subject_id=kwargs.get("secondary_subject_id"))))
 
     if kwargs.get("case_respondents"):
         must_clauses.append(Q("simple_query_string",
@@ -771,28 +774,26 @@ def execute_query(query):
 
 # endpoint path: /legal/citation/<citation_type>/<citation>
 class GetLegalCitation(Resource):
-    @property
-    def args(self):
-        return {
-            "citation_type": fields.Str(
-                required=True, description="Citation type (regulation or statute)"
-            ),
-            "citation": fields.Str(
-                required=True, description="Citation to search for."
-            ),
-        }
 
-    def get(self, citation_type, citation, **kwargs):
+    @use_kwargs(args.citation)
+    def get(self, citation_type=None, citation=None, **kwargs):
         citation = "*%s*" % citation
+
+        must_clauses = [
+                    Q("term", type="citations"),
+                    Q("match", citation_type=citation_type),
+                ]
+
+        if kwargs.get("doc_type"):
+            doc_type_clause = Q("match", doc_type=kwargs.get("doc_type"))
+            must_clauses.append(doc_type_clause)
+
         query = (
             Search()
             .using(es_client)
             .query(
                 "bool",
-                must=[
-                    Q("term", type="citations"),
-                    Q("match", citation_type=citation_type),
-                ],
+                must=must_clauses,
                 should=[
                     Q("wildcard", citation_text=citation),
                     Q("wildcard", formerly=citation),
@@ -803,7 +804,8 @@ class GetLegalCitation(Resource):
             .index(SEARCH_ALIAS)
         )
 
-        es_results = query.execute()
+        # logger.debug("Citation final query =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
+        es_results = query.execute()
         results = {"citations": [hit.to_dict() for hit in es_results]}
         return results
