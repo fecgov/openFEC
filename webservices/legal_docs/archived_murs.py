@@ -7,12 +7,14 @@ from webservices.utils import (
     create_es_client,
     create_eregs_link,
     DateTimeEncoder,
+    upload_citations,
 )
 from .reclassify_statutory_citation import reclassify_statutory_citation
 import json
 from .es_management import (  # noqa
-    ARCH_MUR_ALIAS,
+    ARCH_MUR_ALIAS, CASE_ALIAS
 )
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -63,9 +65,9 @@ MUR_RESPONDENT = """
 
 MUR_CITES = """
     SELECT
-        citation as cite
+        distinct citation as cite, mur_id
     FROM MUR_ARCH.ARCHIVED_MURS
-    WHERE mur_id = %s AND citation is not null
+    WHERE citation is not null
     ORDER BY citation
 """
 
@@ -127,6 +129,14 @@ INSERT_DOCUMENT = """
     ) VALUES (:document_id, :mur_no, :pdf_text, :mur_id, :length, :url)
 """
 
+MUR_REGULATORY_CITATIONS = set()
+MUR_STATUTORY_CITATIONS = set()
+ALL_STATUTORY_CITATIONS = defaultdict(list)
+ALL_REGULATORY_CITATIONS = defaultdict(list)
+
+STATUTE_REGEX = re.compile(r"(?P<title>[0-9]+) U\.S\.C\. (?P<section>[0-9a-z-]+)(?P<paragraphs>.*)")
+REGULATION_REGEX = re.compile(r"(?P<title>[0-9]+) C\.F\.R\. (?P<part>[0-9]+)(?:\.(?P<section>[0-9]+))?")
+
 
 def load_archived_murs(mur_no=None):
     """
@@ -137,7 +147,13 @@ def load_archived_murs(mur_no=None):
     # TO DO: check if ARCH_MUR_ALIAS exist before uploading.
     es_client = create_es_client()
     mur_count = 0
+
     if es_client.indices.exists(index=ARCH_MUR_ALIAS):
+        logger.info(" Getting ARCH MUR citations...")
+        get_all_mur_citations()
+        upload_citations(MUR_STATUTORY_CITATIONS, MUR_REGULATORY_CITATIONS, CASE_ALIAS, "murs", es_client)
+        logger.info(" ARCH MUR Citations loaded.")
+
         for mur in get_murs(mur_no):
             if mur is not None:
                 try:
@@ -175,6 +191,8 @@ def get_single_mur(mur_no):
         row = rs.first()
         if row is not None:
             mur_id = row["mur_id"]
+            citation = {"us_code": ALL_STATUTORY_CITATIONS[mur_id], "regulations": ALL_REGULATORY_CITATIONS[mur_id]}
+
             mur = {
                 "type": get_es_type(),
                 "doc_id": "mur_{0}".format(row["mur_no"]),
@@ -188,7 +206,7 @@ def get_single_mur(mur_no):
             }
             mur["complainants"] = get_complainants(mur_id)
             mur["respondents"] = get_respondents(mur_id)
-            mur["citations"] = get_citations_arch_mur(mur_id)
+            mur["citations"] = citation
             mur["subject"] = get_subjects(mur_id)
             mur["documents"] = get_documents(mur_id)
             return mur
@@ -219,6 +237,21 @@ def get_respondents(mur_id):
     return respondents
 
 
+def get_all_mur_citations():
+    with db.engine.connect() as conn:
+        rs = conn.execute(MUR_CITES)
+        for row in rs:
+            if row["cite"]:
+                us_code_match = re.match(STATUTE_REGEX, row["cite"])
+                regulation_match = re.match(REGULATION_REGEX, row["cite"])
+
+                if us_code_match:
+                    ALL_STATUTORY_CITATIONS[row["mur_id"]].append(parse_statutory_citations(us_code_match))
+                elif regulation_match:
+                    ALL_REGULATORY_CITATIONS[row["mur_id"]].append(parse_regulatory_citations(regulation_match,
+                                                                                              row["cite"]))
+
+
 # citation sample data:
 # 1) us_code :
 #   ex1: original us_code: 2 U.S.C. 441a(a)(5)
@@ -230,35 +263,30 @@ def get_respondents(mur_id):
 
 # 2) regulation: 11 C.F.R. 9002.11(b)(3)
 #    url: /regulations/9002-11/CURRENT
+def parse_statutory_citations(us_code_match):
+    us_code_title, us_code_section = reclassify_statutory_citation(
+        us_code_match.group("title"), us_code_match.group("section"))
 
-def get_citations_arch_mur(mur_id):
-    us_codes = []
-    regulations = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(MUR_CITES, mur_id)
-        for row in rs:
-            if row["cite"]:
-                us_code_match = re.match(
-                    r"(?P<title>[0-9]+) U\.S\.C\. (?P<section>[0-9a-z-]+)(?P<paragraphs>.*)", row["cite"])
+    citation_text = "%s U.S.C. %s%s" % (
+        us_code_title, us_code_section, us_code_match.group("paragraphs"))
 
-                regulation_match = re.match(
-                    r"(?P<title>[0-9]+) C\.F\.R\. (?P<part>[0-9]+)(?:\.(?P<section>[0-9]+))?", row["cite"])
+    url = "https://www.govinfo.gov/link/uscode/{0}/{1}".format(us_code_title, us_code_section)
 
-                if us_code_match:
-                    us_code_title, us_code_section = reclassify_statutory_citation(
-                        us_code_match.group("title"), us_code_match.group("section"))
-                    citation_text = "%s U.S.C. %s%s" % (
-                        us_code_title, us_code_section, us_code_match.group("paragraphs"))
-                    url = "https://www.govinfo.gov/link/uscode/{0}/{1}".format(us_code_title, us_code_section)
+    MUR_STATUTORY_CITATIONS.add(us_code_title + " U.S.C. §" + us_code_section)
 
-                    us_codes.append({"text": citation_text, "url": url})
+    return {"text": citation_text, "url": url}
 
-                elif regulation_match:
-                    url = create_eregs_link(regulation_match.group("part"), regulation_match.group("section"))
-                    regulations.append({"text": row["cite"], "url": url})
-                else:
-                    raise Exception("Could not parse archived mur's citation.")
-        return {"us_code": us_codes, "regulations": regulations}
+
+def parse_regulatory_citations(regulation_match, citation):
+    url = create_eregs_link(regulation_match.group("part"), regulation_match.group("section"))
+    citation_text = regulation_match.group("title") + " CFR §" + regulation_match.group("part")
+
+    if regulation_match.group("section"):
+        citation_text += "." + regulation_match.group("section")
+
+    MUR_REGULATORY_CITATIONS.add(citation_text)
+
+    return {"text": citation, "url": url}
 
 
 def get_subjects(mur_id):

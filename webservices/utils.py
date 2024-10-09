@@ -546,6 +546,29 @@ def print_literal_query_string(query):
     )
 
 
+def upload_citations(statutory_citations, regulatory_citations, index, doc_type, es_client):
+    try:
+        for citation in statutory_citations:
+            entry = {
+                "type": "citations",
+                "citation_text": citation,
+                "citation_type": "statute",
+                "doc_type": doc_type,
+            }
+            es_client.index(index, entry, id=doc_type + "_" + citation)
+
+        for citation in regulatory_citations:
+            entry = {
+                "type": "citations",
+                "citation_text": citation,
+                "citation_type": "regulation",
+                "doc_type": doc_type,
+            }
+            es_client.index(index, entry, id=doc_type + "_" + citation)
+    except Exception:
+        logger.error("An error occurred while uploading {} citations".format(doc_type))
+
+
 def create_eregs_link(part, section):
     url_part_section = part
     if section:
