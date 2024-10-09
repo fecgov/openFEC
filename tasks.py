@@ -142,10 +142,9 @@ def _detect_space(repo, branch=None, yes=False):
 
 DEPLOY_RULES = (
     ('prod', _detect_prod),
-    # ('stage', lambda _, branch: branch.startswith('release')),
-    ('stage', lambda _, branch: branch.startswith('test/arch_current_mur_sort')),
-    ('dev', lambda _, branch: branch == 'develop'),
-    # ('dev', lambda _, branch: branch == 'feature/fix_arch_current_mur_sort'),
+    ('stage', lambda _, branch: branch.startswith('release')),
+    # ('dev', lambda _, branch: branch == 'develop'),
+    ('dev', lambda _, branch: branch == 'test/arch_current_mur_sort'),
 )
 
 
