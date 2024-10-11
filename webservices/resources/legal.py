@@ -190,11 +190,11 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     # descending order: 'sort=-case_no'; ascending order; sort=case_no
     # https://fec-dev-api.app.cloud.gov/v1/legal/search/?type=murs&sort=-case_no
     # https://fec-dev-api.app.cloud.gov/v1/legal/search/?type=murs&sort=case_no
-    if kwargs.get("sort"):
-        if kwargs.get("sort").upper() == "CASE_NO":
-            query = query.sort({"case_serial": {"order": "asc"}})
-        else:
-            query = query.sort({"case_serial": {"order": "desc"}})
+
+    if kwargs.get("sort") and kwargs.get("sort").upper() == "CASE_NO":
+        query = query.sort({"case_serial": {"order": "asc"}, "mur_type": {"order": "desc"}})
+    else:
+        query = query.sort({"case_serial": {"order": "desc"}, "mur_type": {"order": "desc"}})
 
     should_query = [
         get_case_document_query(q, **kwargs),

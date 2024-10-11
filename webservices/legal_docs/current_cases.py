@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # for debug, uncomment this line
 # logger.setLevel(logging.DEBUG)
 
-ALL_CASES = """
+ALL_ADR_AF_CASES = """
     SELECT
         case_id,
         case_no,
@@ -30,6 +30,22 @@ ALL_CASES = """
         published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
     WHERE case_type = %s
+    ORDER BY case_serial desc
+"""
+
+ALL_MUR_CASES = """
+    SELECT
+        current_case.case_id,
+        current_case.case_no,
+        current_case.case_serial,
+        name,
+        case_type,
+        published_flg
+    FROM fecmur.cases_with_parsed_case_serial_numbers_vw current_case
+    JOIN fecmur.arch_current_mur_sorting_vw mur_sort on current_case.case_serial = mur_sort.case_serial
+    WHERE case_type = %s
+    AND mur_sort.mur_type ='current'
+    AND current_case.case_no = mur_sort.case_no
     ORDER BY case_serial desc
 """
 
@@ -391,7 +407,11 @@ def get_cases(case_type, case_no=None):
 
     if case_no is None:
         with db.engine.connect() as conn:
-            rs = conn.execute(ALL_CASES, case_type)
+
+            if case_type in ("ADR", "AF"):
+                rs = conn.execute(ALL_ADR_AF_CASES, case_type)
+            elif case_type in ("MUR"):
+                rs = conn.execute(ALL_MUR_CASES, case_type)
             for row in rs:
                 yield get_single_case(case_type, row["case_no"], bucket)
     else:
