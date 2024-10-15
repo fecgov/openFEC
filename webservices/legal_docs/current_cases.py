@@ -185,10 +185,12 @@ MUR_ADR_DISPOSITION_DATA = """
 """
 
 MUR_CITATION_DATA = """
-    SELECT distinct violations.statutory_citation,
+  SELECT distinct violations.statutory_citation,
     violations.regulatory_citation,
-    violations.case_id
+    violations.case_id,
+    fecmur.entity.name
     FROM fecmur.calendar
+    INNER JOIN fecmur.entity USING (entity_id)
     INNER JOIN fecmur.event USING (event_id)
     LEFT JOIN
         (SELECT *
@@ -611,11 +613,13 @@ def get_all_mur_citations():
         rs = conn.execute(MUR_CITATION_DATA)
         for row in rs:
             if row["statutory_citation"]:
-                ALL_STATUTORY_CITATIONS[row["case_id"]] = parse_statutory_citations(row["statutory_citation"],
-                                                                                    row["case_id"], None, "mur")
+                ALL_STATUTORY_CITATIONS[str(row["case_id"]) + row["name"]] = parse_statutory_citations(
+                    row["statutory_citation"],
+                    row["case_id"], None, "mur")
             if row["regulatory_citation"]:
-                ALL_REGULATORY_CITATIONS[row["case_id"]] = parse_regulatory_citations(row["regulatory_citation"],
-                                                                                      row["case_id"], None, "mur")
+                ALL_REGULATORY_CITATIONS[str(row["case_id"]) + row["name"]] = parse_regulatory_citations(
+                    row["regulatory_citation"],
+                    row["case_id"], None, "mur")
 
 
 def clean_mur_citation_text(text, cit_type):
@@ -660,10 +664,10 @@ def get_mur_dispositions(case_id):
         disposition_data = []
         for row in rs:
             citations = []
-            if ALL_STATUTORY_CITATIONS.get(case_id):
-                citations += ALL_STATUTORY_CITATIONS.get(case_id)
-            if ALL_REGULATORY_CITATIONS.get(case_id):
-                citations += ALL_REGULATORY_CITATIONS.get(case_id)
+            if ALL_STATUTORY_CITATIONS.get(str(case_id) + row["name"]):
+                citations += ALL_STATUTORY_CITATIONS.get(str(case_id) + row["name"])
+            if ALL_REGULATORY_CITATIONS.get(str(case_id) + row["name"]):
+                citations += ALL_REGULATORY_CITATIONS.get(str(case_id) + row["name"])
             disposition_data.append({
                 "citations": citations,
                 "disposition": row["event_name"],
