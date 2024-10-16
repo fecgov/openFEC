@@ -139,7 +139,8 @@ ADMIN_FINE_MAPPING = {
 CITATION_MAPPING = {
     "type": {"type": "keyword"},
     "citation_type": {"type": "keyword"},
-    "citation_text": {"type": "text"},
+    "citation_text": {"type": "keyword"},
+    "doc_type": {"type": "keyword"},
 }
 
 MUR_MAPPING = {
@@ -158,7 +159,14 @@ MUR_MAPPING = {
     "documents": CASE_DOCUMENT_MAPPING,
     "url": {"type": "text", "index": False},
     "mur_type": {"type": "keyword"},
-    "subjects": {"type": "text"},
+    "subjects": {
+        "type": "nested",
+        "properties": {
+            "subject": {"type": "text"},
+            "primary_subject_id": {"type": "keyword"},
+            "secondary_subject_id": {"type": "keyword"},
+        }
+    },
     "election_cycles": {"type": "long"},
     "participants": {
         "properties": {
@@ -211,7 +219,14 @@ ADR_MAPPING = {
     "documents": CASE_DOCUMENT_MAPPING,
     "url": {"type": "text", "index": False},
     "mur_type": {"type": "keyword"},
-    "subjects": {"type": "text"},
+    "subjects": {
+        "type": "nested",
+        "properties": {
+            "subject": {"type": "text"},
+            "primary_subject_id": {"type": "keyword"},
+            "secondary_subject_id": {"type": "keyword"},
+        }
+    },
     "election_cycles": {"type": "long"},
     "participants": {
         "properties": {
@@ -319,7 +334,8 @@ AO_MAPPING = {
         "commenter_names": {"type": "text"},
         "representative_names": {"type": "text"},
         "citation_type": {"type": "keyword"},
-        "citation_text": {"type": "text"},
+        "citation_text": {"type": "keyword"},
+        "doc_type": {"type": "keyword"},
         "entities": {
             "properties": {
                 "role": {"type": "keyword"},

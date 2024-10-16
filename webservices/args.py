@@ -353,9 +353,19 @@ legal_universal_search = {
     'ao_entity_name': fields.List(IStr, required=False, description=docs.AO_ENTITY_NAME),
 
     'case_no': fields.List(IStr, required=False, description=docs.CASE_NO),
-    'case_respondents': IStr(required=False, description=docs.CASE_RESPONDONTS),
+    'case_respondents': IStr(required=False, description=docs.CASE_RESPONDENTS),
     'case_election_cycles': fields.Int(required=False, description=docs.CASE_ELECTION_CYCLES),
     'case_min_open_date': Date(required=False, description=docs.CASE_MIN_OPEN_DATE),
+    'primary_subject_id': fields.List(IStr(
+        validate=validate.OneOf(
+            ['', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11',
+                '12', '13',  '14', '15', '16',  '17', '18', '19', '20'])),
+            description=docs.PRIMARY_SUBJECT_DESCRIPTION),
+    'secondary_subject_id': fields.List(IStr(
+        validate=validate.OneOf(
+            ['', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11',
+                '12', '13',  '14', '15', '16',  '17', '18'])),
+            description=docs.SECONDARY_SUBJECT_DESCRIPTION),
     'case_max_open_date': Date(required=False, description=docs.CASE_MAX_OPEN_DATE),
     'case_min_close_date': Date(required=False, description=docs.CASE_MIN_CLOSE_DATE),
     'case_max_close_date': Date(required=False, description=docs.CASE_MAX_CLOSE_DATE),
@@ -390,6 +400,13 @@ legal_universal_search = {
     'af_max_fd_date': Date(required=False, description=docs.AF_MAX_FD_DATE),
     'af_fd_fine_amount': fields.Int(required=False, description=docs.AF_FD_FINE_AMOUNT),
     'sort': IStr(required=False, description=docs.SORT),
+}
+
+citation = {
+    'doc_type': fields.Str(
+                required=False, validate=validate.OneOf(["adrs", "advisory_opinions", "murs"]),
+                description=docs.CITATION_DOC_TYPE
+            )
 }
 
 candidate_detail = {
