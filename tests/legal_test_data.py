@@ -736,4 +736,717 @@ second_test_mur = {
       "url": "/legal/matter-under-review/101/"
     }
 
-all_test_murs = [first_test_mur, second_test_mur]
+first_archived_mur = {
+      "case_serial": 103,
+      "citations": {
+        "regulations": [
+          {
+            "text": "11 C.F.R. 110.11",
+            "url": "/regulations/110-11/CURRENT"
+          }
+        ],
+        "us_code": [
+          {
+            "text": "52 U.S.C. 30120(a)(1)",
+            "url": "https://www.govinfo.gov/link/uscode/52/30120"
+          }
+        ]
+      },
+      "close_date": "1998-10-27T00:00:00",
+      "complainants": [
+        "Internal"
+      ],
+      "doc_id": "mur_103",
+      "documents": [
+        {
+          "document_id": 1,
+          "length": 2657609,
+          "url": "/files/legal/murs/103.pdf",
+          "text": "This is sample text for the first document for an archived mur"
+        }
+      ],
+      "mur_name": 'Fake Mur Name',
+      "mur_type": "archived",
+      "no": "103",
+      "open_date": "1998-06-18T00:00:00",
+      "respondents": [
+        "Dyer, Yolanda; treasurer",
+        "Naolitano, Grace Flores for Congress Committee"
+      ],
+      "subject": [
+        {
+          "children": [
+            {
+              "text": "Authorization/nonauthorization notice"
+            },
+            {
+              "text": "Campaign materials"
+            },
+            {
+              "text": "Direct Mail"
+            },
+            {
+              "text": "Disclaimers"
+            }
+          ],
+          "text": "Advertising/Solicitation"
+        },
+        {
+          "children": [
+            {
+              "text": "No Action"
+            },
+            {
+              "text": "Enforcement/statement of reasons"
+            }
+          ],
+          "text": "enforcement"
+        },
+        {
+          "text": "Vendor"
+        }
+      ],
+      "type": "murs",
+      "url": "/legal/matter-under-review/103/"
+}
+
+second_archived_mur = {
+    "case_serial": 104,
+    "citations": {
+      "regulations": [],
+      "us_code": [
+        {
+          "text": "52 U.S.C. 30101(4)",
+          "url": "https://www.govinfo.gov/link/uscode/52/30101"
+        },
+        {
+          "text": "52 U.S.C. 30104(a)(4)(A)(ii)",
+          "url": "https://www.govinfo.gov/link/uscode/52/30104"
+        }
+      ]
+    },
+    "close_date": "1988-03-09T00:00:00",
+    "complainants": [
+      "Internal"
+    ],
+    "doc_id": "mur_104",
+    "documents": [
+      {
+        "document_id": 1,
+        "length": 4983645,
+        "url": "/files/legal/murs/104.pdf",
+        "text": "This is sample text for the first document of the second archived mur"
+      }
+    ],
+    "mur_name": "NATIONAL ASSOCIATION OF SOCIAL WORKERS POLITICAL ACTION FOR CANDIDATE ELECTION",
+    "mur_type": "archived",
+    "no": "104",
+    "open_date": "1987-05-22T00:00:00",
+    "respondents": [
+      "National Assoc of Social Workers Pol Action for Candidate Election",
+      "Spencer, Betty M; Treasurer"
+    ],
+    "subject": [
+      {
+        "children": [
+          {
+            "text": "Political committee"
+          }
+        ],
+        "text": "Definitions"
+      },
+      {
+        "children": [
+          {
+            "text": "Civil Penalty"
+          },
+          {
+            "text": "Conciliation Agreement"
+          },
+          {
+            "text": "Knowing and willful"
+          }
+        ],
+        "text": "enforcement"
+      },
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "text": "untimely reporting"
+              }
+            ],
+            "text": "Report"
+          }
+        ],
+        "text": "Reports/Reporting"
+      }
+    ],
+    "type": "murs",
+    "url": "/legal/matter-under-review/104/"
+}
+
+first_adr = {
+    "adr_dispositions": [
+      {
+        "disposition": "Received from RAD",
+        "penalty": 1250,
+        "respondent": "Jayme Stevenson for Congress"
+      },
+      {
+        "disposition": "Received from RAD",
+        "penalty": 1250,
+        "respondent": "Parrett, William G."
+      },
+      {
+        "disposition": "Settlement Agreement",
+        "penalty": 1250,
+        "respondent": "Jayme Stevenson for Congress"
+      },
+      {
+        "disposition": "Settlement Agreement",
+        "penalty": 1250,
+        "respondent": "Parrett, William G."
+      }
+    ],
+    "case_serial": 105,
+    "case_status": "No status found",
+    "citations": [
+      {
+        "text": "30104(a)(1)",
+        "title": "52",
+        "type": "statute",
+        "url": "https://www.govinfo.gov/link/uscode/52/30104"
+      },
+      {
+        "text": "30104(b)(4)",
+        "title": "52",
+        "type": "statute",
+        "url": "https://www.govinfo.gov/link/uscode/52/30104"
+      },
+      {
+        "text": "104.1",
+        "title": "11",
+        "type": "regulation",
+        "url": "/regulations/104-1/CURRENT"
+      },
+      {
+        "text": "104.3(b)",
+        "title": "11",
+        "type": "regulation",
+        "url": "/regulations/104-3/CURRENT"
+      }
+    ],
+    "close_date": "2024-06-20T00:00:00",
+    "commission_votes": [
+      {
+        "action": """The Commission decided by a vote of 6-0 to take the following actions in ADR 105/RAD 24L-04 and ADR
+        1158/MUR 8121:Approve the Negotiated Settlement of Jayme Stevenson for Congress and William G. Parrett,
+        Treasurer, as recommended in the Memorandum from the Chief Compliance Officer and the ADR Office dated June 11,
+        2024.Approve the appropriate letters.Close the file on these matters.""",
+        "commissioner_name": "Broussard, Shana M.",
+        "vote_date": "2024-06-20T00:00:00",
+        "vote_type": "Affirmed"
+      },
+      {
+        "action": """The Commission decided by a vote of 6-0 to take the following actions in ADR 105/RAD 24L-04 and ADR
+        1158/MUR 8121:Approve the Negotiated Settlement of Jayme Stevenson for Congress and William G. Parrett,
+        Treasurer, as recommended in the Memorandum from the Chief Compliance Officer and the ADR Office dated June 11,
+        2024.Approve the appropriate letters.Close the file on these matters.""",
+        "commissioner_name": "Cooksey, Sean J.",
+        "vote_date": "2024-06-20T00:00:00",
+        "vote_type": "Affirmed"
+      },
+      {
+        "action": """The Commission decided by a vote of 6-0 to take the following actions in ADR 105/RAD 24L-04 and ADR
+        1158/MUR 8121:Approve the Negotiated Settlement of Jayme Stevenson for Congress and William G. Parrett,
+        Treasurer, as recommended in the Memorandum from the Chief Compliance Officer and the ADR Office dated June 11,
+        2024.Approve the appropriate letters.Close the file on these matters.""",
+        "commissioner_name": "Dickerson, Allen",
+        "vote_date": "2024-06-20T00:00:00",
+        "vote_type": "Affirmed"
+      },
+      {
+        "action": """The Commission decided by a vote of 6-0 to take the following actions in ADR 105/RAD 24L-04 and ADR
+        1158/MUR 8121:Approve the Negotiated Settlement of Jayme Stevenson for Congress and William G. Parrett,
+        Treasurer, as recommended in the Memorandum from the Chief Compliance Officer and the ADR Office dated June 11,
+        2024.Approve the appropriate letters.Close the file on these matters.""",
+        "commissioner_name": "Lindenbaum, Dara",
+        "vote_date": "2024-06-20T00:00:00",
+        "vote_type": "Affirmed"
+      },
+      {
+        "action": """The Commission decided by a vote of 6-0 to take the following actions in ADR 105/RAD 24L-04 and ADR
+        1158/MUR 8121:Approve the Negotiated Settlement of Jayme Stevenson for Congress and William G. Parrett,
+        Treasurer, as recommended in the Memorandum from the Chief Compliance Officer and the ADR Office dated June 11,
+        2024.Approve the appropriate letters.Close the file on these matters.""",
+        "commissioner_name": "Trainor, James E. \"Trey\"",
+        "vote_date": "2024-06-20T00:00:00",
+        "vote_type": "Affirmed"
+      },
+      {
+        "action": """The Commission decided by a vote of 6-0 to take the following actions in ADR 105/RAD 24L-04 and ADR
+        1158/MUR 8121:Approve the Negotiated Settlement of Jayme Stevenson for Congress and William G. Parrett,
+        Treasurer, as recommended in the Memorandum from the Chief Compliance Officer and the ADR Office dated June 11,
+        2024.Approve the appropriate letters.Close the file on these matters.""",
+        "commissioner_name": "Weintraub, Ellen L.",
+        "vote_date": "2024-06-20T00:00:00",
+        "vote_type": "Affirmed"
+      }
+    ],
+    "complainant": [],
+    "doc_id": "adr_105",
+    "documents": [
+      {
+        "category": "ADR Settlement Agreements",
+        "description": "Jayme Stevenson for Congress and William G. Parrett, Treasurer",
+        "doc_order_id": 1001,
+        "document_date": "2024-06-25T00:00:00",
+        "document_id": 200511727,
+        "length": 911706,
+        "url": "/files/legal/adrs/105/105_07.pdf",
+        "text": "This is sample document text for the first document of the first adr"
+      },
+      {
+        "category": "ADR Memoranda, Notifications and Responses",
+        "description": "Recommendation to Approve Negotiated Settlement",
+        "doc_order_id": 1003,
+        "document_date": "2024-06-11T00:00:00",
+        "document_id": 200511726,
+        "length": 891799,
+        "url": "/files/legal/adrs/105/105_05.pdf",
+        "text": "This is sample document text for the second document of the first adr"
+      },
+      {
+        "category": "ADR Memoranda, Notifications and Responses",
+        "description": """Commitment to Submit Matter to ADR Program and Statement of Designation of
+        Representative/Counsel""",
+        "doc_order_id": 1003,
+        "document_date": "2024-03-19T00:00:00",
+        "document_id": 200511725,
+        "length": 809756,
+        "url": "/files/legal/adrs/105/105_04.pdf",
+        "text": "This is sample document text for the third document of the first adr"
+      },
+      {
+        "category": "ADR Memoranda, Notifications and Responses",
+        "description": "Notification to Jayme Stevenson for Congress and William G. Parrett, Treasurer",
+        "doc_order_id": 1003,
+        "document_date": "2024-03-05T00:00:00",
+        "document_id": 200511724,
+        "length": 877712,
+        "url": "/files/legal/adrs/105/105_03.pdf",
+        "text": "This is sample document text for the fourth document of the first adr"
+      },
+      {
+        "category": "ADR Memoranda, Notifications and Responses",
+        "description": "Informational Memo on Assignment",
+        "doc_order_id": 1003,
+        "document_date": "2024-02-14T00:00:00",
+        "document_id": 200511723,
+        "length": 920679,
+        "url": "/files/legal/adrs/105/105_02.pdf",
+        "text": "This is sample document text for the fifth document of the first adr"
+      },
+      {
+        "category": "ADR Memoranda, Notifications and Responses",
+        "description": "Reports Analysis Division Referral to Alternative Dispute Resolution Office",
+        "doc_order_id": 1003,
+        "document_date": "2024-01-23T00:00:00",
+        "document_id": 200511722,
+        "length": 698048,
+        "url": "/files/legal/adrs/105/105_01.pdf",
+        "text": "This is sample document text for the sixth document of the first adr"
+      },
+      {
+        "category": "Certifications",
+        "description": """Jayme Stevenson for Congress and William G. Parrett, Treasurer (RAD 24L-04) (MUR 8121)
+        (C00807610) (Recommendation to Approve Negotiated Settlement)""",
+        "doc_order_id": 1004,
+        "document_date": "2024-06-20T00:00:00",
+        "document_id": 200511728,
+        "length": 737484,
+        "url": "/files/legal/adrs/105/105_06.pdf",
+        "text": "This is sample document text for the seventh document of the first adr"
+      }
+    ],
+    "election_cycles": [2022],
+    "name": "Jayme Stevenson for Congress",
+    "no": "105",
+    "non_monetary_terms": [
+      "Committee will file for termination"
+    ],
+    "non_monetary_terms_respondents": [
+      "Jayme Stevenson for Congress",
+      "Parrett, William G."
+    ],
+    "open_date": "2024-01-23T00:00:00",
+    "participants": [
+      {
+        "name": "Tyrrell, III, James E.",
+        "role": "Representative"
+      },
+      {
+        "name": "Jayme Stevenson for Congress",
+        "role": "Respondent"
+      },
+      {
+        "name": "Parrett, William G.",
+        "role": "Treasurer"
+      }
+    ],
+    "published_flg": True,
+    "respondents": [
+      "Jayme Stevenson for Congress"
+    ],
+    "subjects": [],
+    "type": "adrs",
+    "url": "/legal/alternative-dispute-resolution/105/"
+}
+
+second_adr = {
+  "adr_dispositions": [
+    {
+      "disposition": "Received from RAD",
+      "penalty": 2700,
+      "respondent": "Helgesen, Francis Xavier"
+    },
+    {
+      "disposition": "Received from RAD",
+      "penalty": 2700,
+      "respondent": "Hometown Values PAC"
+    },
+    {
+      "disposition": "Settlement Agreement",
+      "penalty": 2700,
+      "respondent": "Hometown Values PAC"
+    },
+    {
+      "disposition": "Settlement Agreement",
+      "penalty": 2700,
+      "respondent": "Helgesen, Francis Xavier"
+    }
+  ],
+  "case_serial": 106,
+  "case_status": "No status found",
+  "citations": [
+    {
+      "text": "30104(g)(2)",
+      "title": "52",
+      "type": "statute",
+      "url": "https://www.govinfo.gov/link/uscode/52/30104"
+    },
+    {
+      "text": "104.4(b)(2)",
+      "title": "11",
+      "type": "regulation",
+      "url": "/regulations/104-4/CURRENT"
+    }
+  ],
+  "close_date": "2021-06-08T00:00:00",
+  "commission_votes": [
+    {
+      "action": """The Commission decided by a vote of 6-0 to take the following actions in ADR
+      \r\n106 (RAD 20L-30):\r\n1. Approve the Negotiated Settlement of Hometown Values PAC and Francis Xavier
+      \r\nHelgesen, Treasurer, as recommended in the Memorandum from the Chief Compliance \r\nOfficer and the ADR
+      Office dated May 19, 2021.\r\n\r\n2. Approve the appropriate letters.\r\n\r\n3. Close the file on this matter.\r
+      \n\r\n""",
+      "commissioner_name": "Broussard, Shana M.",
+      "vote_date": "2021-06-08T00:00:00",
+      "vote_type": "Affirmed"
+    },
+    {
+      "action": """The Commission decided by a vote of 6-0 to take the following actions in ADR
+      \r\n106 (RAD 20L-30):\r\n1. Approve the Negotiated Settlement of Hometown Values PAC and Francis Xavier
+      \r\nHelgesen, Treasurer, as recommended in the Memorandum from the Chief Compliance \r\nOfficer and the ADR
+      Office dated May 19, 2021.\r\n\r\n2. Approve the appropriate letters.\r\n\r\n3. Close the file on this matter.
+      \r\n\r\n""",
+      "commissioner_name": "Cooksey, Sean J.",
+      "vote_date": "2021-06-08T00:00:00",
+      "vote_type": "Affirmed"
+    },
+    {
+      "action": """The Commission decided by a vote of 6-0 to take the following actions in ADR \r\n106 (RAD 20L-30):
+      \r\n1. Approve the Negotiated Settlement of Hometown Values PAC and Francis Xavier \r\nHelgesen, Treasurer, as
+      recommended in the Memorandum from the Chief Compliance \r\nOfficer and the ADR Office dated May 19, 2021.\r\n\r\
+      n2. Approve the appropriate letters.\r\n\r\n3. Close the file on this matter.\r\n\r\n""",
+      "commissioner_name": "Dickerson, Allen",
+      "vote_date": "2021-06-08T00:00:00",
+      "vote_type": "Affirmed"
+    },
+    {
+      "action": """The Commission decided by a vote of 6-0 to take the following actions in ADR \r\n106 (RAD 20L-30):
+      \r\n1. Approve the Negotiated Settlement of Hometown Values PAC and Francis Xavier \r\nHelgesen, Treasurer, as
+      recommended in the Memorandum from the Chief Compliance \r\nOfficer and the ADR Office dated May 19, 2021.\r\n\r
+      \n2. Approve the appropriate letters.\r\n\r\n3. Close the file on this matter.\r\n\r\n""",
+      "commissioner_name": "Trainor, James E. \"Trey\"",
+      "vote_date": "2021-06-08T00:00:00",
+      "vote_type": "Affirmed"
+    },
+    {
+      "action": """The Commission decided by a vote of 6-0 to take the following actions in ADR \r\n106 (RAD 20L-30):
+      \r\n1. Approve the Negotiated Settlement of Hometown Values PAC and Francis Xavier \r\nHelgesen, Treasurer, as
+      recommended in the Memorandum from the Chief Compliance \r\nOfficer and the ADR Office dated May 19, 2021.
+      \r\n\r\n2. Approve the appropriate letters.\r\n\r\n3. Close the file on this matter.\r\n\r\n""",
+      "commissioner_name": "Walther, Steven T.",
+      "vote_date": "2021-06-08T00:00:00",
+      "vote_type": "Affirmed"
+    },
+    {
+      "action": """The Commission decided by a vote of 6-0 to take the following actions in ADR \r\n106 (RAD 20L-30):
+      \r\n1. Approve the Negotiated Settlement of Hometown Values PAC and Francis Xavier \r\nHelgesen, Treasurer, as
+      recommended in the Memorandum from the Chief Compliance \r\nOfficer and the ADR Office dated May 19, 2021
+      \r\n\r\n2. Approve the appropriate letters.\r\n\r\n3. Close the file on this matter.\r\n\r\n""",
+      "commissioner_name": "Weintraub, Ellen L.",
+      "vote_date": "2021-06-08T00:00:00",
+      "vote_type": "Affirmed"
+    }
+  ],
+  "complainant": [],
+  "doc_id": "adr_106",
+  "documents": [
+    {
+      "category": "ADR Settlement Agreements",
+      "description": "Hometown Values PAC and Francis Xavier Helgesen, Treasurer",
+      "doc_order_id": 1001,
+      "document_date": "2021-06-14T00:00:00",
+      "document_id": 200498052,
+      "length": 1065613,
+      "url": "/files/legal/adrs/106/106_07.pdf",
+      "text": "This is sample document text for the first document of the second adr"
+    },
+    {
+      "category": "ADR Memoranda, Notifications and Responses",
+      "description": "Recommendation to Approve Negotiated Settlement",
+      "doc_order_id": 1003,
+      "document_date": "2021-05-19T00:00:00",
+      "document_id": 200498051,
+      "length": 884639,
+      "url": "/files/legal/adrs/106/106_05.pdf",
+      "text": "This is sample document text for the second document of the second adr"
+    },
+    {
+      "category": "ADR Memoranda, Notifications and Responses",
+      "description": "Commitment to Submit Matter to ADR Program",
+      "doc_order_id": 1003,
+      "document_date": "2021-03-04T00:00:00",
+      "document_id": 200498050,
+      "length": 696467,
+      "url": "/files/legal/adrs/106/106_04.pdf",
+      "text": "This is sample document text for the third document of the second adr"
+    },
+    {
+      "category": "ADR Memoranda, Notifications and Responses",
+      "description": "Notification to Hometown Values PAC and Francis Xavier Helgesen, Treasurer",
+      "doc_order_id": 1003,
+      "document_date": "2021-02-10T00:00:00",
+      "document_id": 200498049,
+      "length": 757846,
+      "url": "/files/legal/adrs/106/106_03.pdf",
+      "text": "This is sample document text for the fourth document of the second adr"
+    },
+    {
+      "category": "ADR Memoranda, Notifications and Responses",
+      "description": "Informational Memo on Assignment",
+      "doc_order_id": 1003,
+      "document_date": "2021-02-02T00:00:00",
+      "document_id": 200498048,
+      "length": 824859,
+      "url": "/files/legal/adrs/106/106_02.pdf",
+      "text": "This is sample document text for the fifth document of the second adr"
+    },
+    {
+      "category": "ADR Memoranda, Notifications and Responses",
+      "description": "Reports Analysis Division Referral to Alternative Dispute Resolution Office",
+      "doc_order_id": 1003,
+      "document_date": "2021-01-21T00:00:00",
+      "document_id": 200498047,
+      "length": 1390051,
+      "url": "/files/legal/adrs/106/106_01.pdf",
+      "text": "This is sample document text for the sixth document of the second adr"
+    },
+    {
+      "category": "Certifications",
+      "description": """Hometown Values PAC and Francis Xavier Helgesen, Treasurer (RAD 20L-30) (C00721886)
+      (Recommendation to Approve Negotiated Settlement)""",
+      "doc_order_id": 1004,
+      "document_date": "2021-06-08T00:00:00",
+      "document_id": 200498053,
+      "length": 709165,
+      "url": "/files/legal/adrs/106/106_06.pdf",
+      "text": "This is sample document text for the seventh document of the second adr"
+    }
+  ],
+  "election_cycles": [2020],
+  "name": "Hometown Values PAC",
+  "no": "106",
+  "non_monetary_terms": [
+    "Committee will file for termination"
+  ],
+  "non_monetary_terms_respondents": [
+    "Hometown Values PAC",
+    "Helgesen, Francis Xavier"
+  ],
+  "open_date": "2021-01-21T00:00:00",
+  "participants": [
+    {
+      "name": "Helgesen, Francis Xavier",
+      "role": "Treasurer"
+    },
+    {
+      "name": "Hometown Values PAC",
+      "role": "Respondent"
+    }
+  ],
+  "published_flg": True,
+  "respondents": [
+    "Hometown Values PAC"
+  ],
+  "subjects": [],
+  "type": "adrs",
+  "url": "/legal/alternative-dispute-resolution/106/"
+}
+
+first_admin_fine = {
+    "af_dispositions": [
+        {
+          "amount": 5258,
+          "disposition_date": "2024-03-22",
+          "disposition_description": "Initial finding and penalty assessed"
+        },
+        {
+          "amount": None,
+          "disposition_date": "2024-03-25",
+          "disposition_description": "Challenged"
+        },
+        {
+          "amount": 5258,
+          "disposition_date": "2024-08-14",
+          "disposition_description": "Initial finding and penalty upheld"
+        }
+      ],
+    "case_serial": 107,
+    "challenge_outcome": "RTB Finding and Fine Upheld",
+    "challenge_receipt_date": "2024-03-25T00:00:00",
+    "civil_penalty_due_date": "2024-10-27T00:00:00",
+    "civil_penalty_payment_status": "Paid In Full",
+    "commission_votes": [
+      {
+        "action": """The Commission decided by a vote of 6-0 to take the following actions in AF 107: Adopt the
+        Reviewing Officer recommendation for AF# 107 involving Social Progress in Union with Economic Growth and Trina
+        Estelle, in their official capacity as Treasurer, in making the final determination. Make a final determination
+        in AF# 107 that Social Progress in Union with Economic Growth and Trina Estelle, in their official capacity as
+        Treasurer, violated 52 U.S.C. § 30104(a) and assess a $5,258 civil money penalty.
+        Send the appropriate letter.""",
+        "vote_date": "2024-08-14T00:00:00"
+      }
+    ],
+    "committee_id": "C00833665",
+    "doc_id": "af_107",
+    "documents": [
+      {
+        "category": "Administrative Fine Case",
+        "description": "Status of Payment",
+        "doc_order_id": 2001,
+        "document_date": "2024-09-30T00:00:00",
+        "document_id": 300512738,
+        "length": 582505,
+        "url": "/files/legal/admin_fines/107/107_02.pdf",
+        "text": "Test document data for the first document of the first admin_fine"
+      },
+      {
+        "category": "Administrative Fine Case",
+        "description": "AF 107",
+        "doc_order_id": 2001,
+        "document_date": "2024-09-17T00:00:00",
+        "document_id": 300512538,
+        "length": 4919211,
+        "url": "/files/legal/admin_fines/107/107_01.pdf",
+        "text": "Test document data for the second document of the first admin_fine"
+      }
+    ],
+    "final_determination_amount": 5258,
+    "final_determination_date": "2024-08-14T00:00:00",
+    "name": "SOCIAL PROGRESS IN UNION WITH ECONOMIC GROWTH",
+    "no": "107",
+    "payment_amount": None,
+    "petition_court_decision_date": None,
+    "petition_court_filing_date": None,
+    "published_flg": True,
+    "reason_to_believe_action_date": "2024-03-22T00:00:00",
+    "reason_to_believe_fine_amount": 5258,
+    "report_type": "YE",
+    "report_year": "2023",
+    "treasury_referral_amount": None,
+    "treasury_referral_date": None,
+    "type": "admin_fines",
+    "url": "/legal/administrative-fine/107/"
+    }
+
+second_admin_fine = {
+      "af_dispositions": [
+        {
+          "amount": 3300,
+          "disposition_date": "2015-03-31",
+          "disposition_description": "Initial finding and penalty assessed"
+        },
+        {
+          "amount": 3300,
+          "disposition_date": "2015-06-12",
+          "disposition_description": "Initial finding and penalty upheld"
+        }
+      ],
+      "case_serial": 108,
+      "challenge_outcome": None,
+      "challenge_receipt_date": None,
+      "civil_penalty_due_date": "2015-07-15T00:00:00",
+      "civil_penalty_payment_status": "Paid In Full",
+      "commission_votes": [
+        {
+          "action": """(1) find reason to believe that ICE PAC, and LEBEAU, REID as treasurer violated 52 U.S.C.
+          30104(a) (formerly 2 U.S.C. 434(a)) and make a preliminary determination that the civil money penalty would
+          be the amount indicated on the report; (2) send the appropriate letter.""",
+          "vote_date": "2015-03-31T00:00:00"
+        }
+      ],
+      "committee_id": "C00484667",
+      "doc_id": "af_108",
+      "documents": [
+        {
+          "category": "Administrative Fine Case",
+          "description": "AF 108",
+          "doc_order_id": 2001,
+          "document_date": "2015-07-13T00:00:00",
+          "document_id": 111134,
+          "length": 1026328,
+          "url": "/files/legal/admin_fines/108/15092703776.pdf",
+          "text": "Test document data for the first document of the second admin_fine"
+        }
+      ],
+      "final_determination_amount": 3300,
+      "final_determination_date": "2015-06-12T00:00:00",
+      "name": "ICE PAC",
+      "no": "108",
+      "payment_amount": 3300,
+      "petition_court_decision_date": None,
+      "petition_court_filing_date": None,
+      "published_flg": True,
+      "reason_to_believe_action_date": "2015-03-31T00:00:00",
+      "reason_to_believe_fine_amount": 3300,
+      "report_type": "12G",
+      "report_year": "2014",
+      "treasury_referral_amount": None,
+      "treasury_referral_date": None,
+      "type": "admin_fines",
+      "url": "/legal/administrative-fine/108/"
+}
+
+document_dictionary = {
+    "murs": [first_test_mur, second_test_mur],
+    "archived_murs": [first_archived_mur, second_archived_mur],
+    "adrs": [first_adr, second_adr],
+    "admin_fines": [first_admin_fine, second_admin_fine],
+    "statutes": [],
+    "advisory_opinions": []
+}
