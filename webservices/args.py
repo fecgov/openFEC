@@ -336,6 +336,8 @@ legal_universal_search = {
     'ao_max_issue_date': Date(description=docs.AO_MAX_ISSUE_DATE),
     'ao_min_request_date': Date(description=docs.AO_MIN_REQUEST_DATE),
     'ao_max_request_date': Date(description=docs.AO_MAX_REQUEST_DATE),
+    'ao_min_document_date': Date(description=docs.AO_MIN_DOCUMENT_DATE),
+    'ao_max_document_date': Date(description=docs.AO_MAX_DOCUMENT_DATE),
     'ao_doc_category_id': fields.List(
         IStr(validate=validate.OneOf(['', 'F', 'V', 'D', 'R', 'W', 'C', 'S'])),
         description=docs.AO_DOC_CATEGORY_ID),
@@ -369,6 +371,8 @@ legal_universal_search = {
     'case_max_open_date': Date(required=False, description=docs.CASE_MAX_OPEN_DATE),
     'case_min_close_date': Date(required=False, description=docs.CASE_MIN_CLOSE_DATE),
     'case_max_close_date': Date(required=False, description=docs.CASE_MAX_CLOSE_DATE),
+    'case_min_document_date': Date(required=False, description=docs.CASE_MIN_DOCUMENT_DATE),
+    'case_max_document_date': Date(required=False, description=docs.CASE_MAX_DOCUMENT_DATE),
     'case_regulatory_citation': fields.List(IStr, required=False, description=docs.REGULATORY_CITATION),
     'case_statutory_citation': fields.List(IStr, required=False, description=docs.STATUTORY_CITATION),
     'case_citation_require_all': fields.Bool(description=docs.CITATION_REQUIRE_ALL),
