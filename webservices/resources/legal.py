@@ -225,6 +225,13 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
                             query=kwargs.get("case_respondents"), fields=["respondents"]))
     query = query.query("bool", must=must_clauses)
 
+    if kwargs.get("case_regulatory_citation") or kwargs.get("case_statutory_citation"):
+        return case_apply_citation_params(
+            query,
+            kwargs.get("case_regulatory_citation"),
+            kwargs.get("case_statutory_citation"),
+            kwargs.get("case_citation_require_all"), **kwargs)
+
     # logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     if type_ == "admin_fines":
@@ -375,15 +382,7 @@ def apply_mur_specific_query_params(query, **kwargs):
 
     query = query.query("bool", must=must_clauses)
     # logger.debug("apply_mur_adr_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
-
-    if kwargs.get("case_regulatory_citation") or kwargs.get("case_statutory_citation"):
-        return case_apply_citation_params(
-            query,
-            kwargs.get("case_regulatory_citation"),
-            kwargs.get("case_statutory_citation"),
-            kwargs.get("case_citation_require_all"), **kwargs)
-    else:
-        return query
+    return query
 
 
 def case_apply_citation_params(query, regulatory_citation, statutory_citation, citation_require_all, **kwargs):

@@ -118,7 +118,7 @@ ADMIN_FINE_MAPPING = {
         "type": "date",
         "format": "dateOptionalTime",
     },
-    "af_dispositions": {
+    "dispositions": {
         "properties": {
             "disposition_description": {
                 "type": "text",
@@ -236,9 +236,18 @@ ADR_MAPPING = {
     },
     "respondents": {"type": "text"},
     "case_status": {"type": "text"},
-    "adr_dispositions": {
+    "dispositions": {
         "type": "nested",
         "properties": {
+            "citations": {
+                "type": "nested",
+                "properties": {
+                    "text": {"type": "text"},
+                    "title": {"type": "text"},
+                    "type": {"type": "text"},
+                    "url": {"type": "text"},
+                }
+            },
             "disposition": {"type": "text"},
             "penalty": {"type": "double"},
             "respondent": {"type": "text"},
@@ -403,7 +412,7 @@ ARCH_MUR_MAPPING = {
         "close_date": {"type": "date", "format": "dateOptionalTime"},
         "url": {"type": "text", "index": False},
         "complainants": {"type": "text"},
-        "respondent": {"type": "text"},
+        "respondents": {"type": "text"},
         "documents": ARCH_MUR_DOCUMENT_MAPPING,
         "citations": ARCH_MUR_CITATION_MAPPING,
         "subject": ARCH_MUR_SUBJECT_MAPPING,
