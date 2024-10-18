@@ -127,7 +127,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'respondents': [],
             'documents': [],
             'commission_votes': [],
-            'adr_dispositions': [],
+            'dispositions': [],
             'close_date': None,
             'open_date': None,
             'url': '/legal/alternative-dispute-resolution/1/',
@@ -226,7 +226,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'url': '/legal/administrative-fine/1/',
             'civil_penalty_due_date': None,
             'civil_penalty_payment_status': 'Paid In Full',
-            'af_dispositions': [
+            'dispositions': [
                 {
                     'amount': Decimal('350'),
                     'disposition_description': 'Challenged',

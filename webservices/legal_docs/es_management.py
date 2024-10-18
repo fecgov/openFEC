@@ -118,7 +118,7 @@ ADMIN_FINE_MAPPING = {
         "type": "date",
         "format": "dateOptionalTime",
     },
-    "af_dispositions": {
+    "dispositions": {
         "properties": {
             "disposition_description": {
                 "type": "text",
@@ -236,9 +236,18 @@ ADR_MAPPING = {
     },
     "respondents": {"type": "text"},
     "case_status": {"type": "text"},
-    "adr_dispositions": {
+    "dispositions": {
         "type": "nested",
         "properties": {
+            "citations": {
+                "type": "nested",
+                "properties": {
+                    "text": {"type": "text"},
+                    "title": {"type": "text"},
+                    "type": {"type": "text"},
+                    "url": {"type": "text"},
+                }
+            },
             "disposition": {"type": "text"},
             "penalty": {"type": "double"},
             "respondent": {"type": "text"},
