@@ -133,7 +133,6 @@ class TestLoadCurrentCases(BaseTestCase):
             'url': '/legal/alternative-dispute-resolution/1/',
             'complainant': [],
             'case_status': [],
-            'citations': [],
             'sort1': -1,
             'sort2': None,
         }
