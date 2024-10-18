@@ -412,7 +412,7 @@ ARCH_MUR_MAPPING = {
         "close_date": {"type": "date", "format": "dateOptionalTime"},
         "url": {"type": "text", "index": False},
         "complainants": {"type": "text"},
-        "respondent": {"type": "text"},
+        "respondents": {"type": "text"},
         "documents": ARCH_MUR_DOCUMENT_MAPPING,
         "citations": ARCH_MUR_CITATION_MAPPING,
         "subject": ARCH_MUR_SUBJECT_MAPPING,
