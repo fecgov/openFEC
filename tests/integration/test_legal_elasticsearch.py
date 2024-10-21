@@ -16,7 +16,12 @@ class TestLegalSearch():
     def setup_class(self):
         self.app = rest.app.test_client()
         for index in ALL_INDICES:
-            create_index(index)
+            create_index(index, testing=True)
+
+    @classmethod
+    def delete_indices(self):
+        for index in ALL_INDICES:
+            self.es_client.indices.delete(index)
 
     @classmethod
     def teardown_class(self):
@@ -42,6 +47,25 @@ class TestLegalSearch():
         result = self.es_client.search(index=index, body=query)
         assert result['hits']['total']['value'] == len(document_dictionary[doc_type])
 
+    @classmethod
+    def check_filters(self, filter_name, field_name, expected_return, doc_type):
+        url = f"{self.base_search_url}{filter_name}={expected_return}"
+        response = self.app.get(url)
+
+        assert response.status_code == 200
+        assert all(x[field_name] == expected_return for x in response.json[doc_type])
+
+    @classmethod
+    def check_bad_values(self, filter_name, bad_value, doc_type, raiseError):
+        url = f"{self.base_search_url}{filter_name}={bad_value}"
+        response = self.app.get(url)
+
+        if raiseError:
+            assert response.status_code == 422
+        else:
+            assert response.status_code == 200
+            assert response.json[doc_type] == 0
+
     def test_index_creation(self):
         for index in ALL_INDICES:
             exists = self.es_client.indices.get(index)
@@ -63,7 +87,7 @@ class TestLegalSearch():
 
 # ---------------------- Test all case filters  ------------------------------------------------
 
-    def test_all_doc_types(self):  # would catch hotfix
+    def test_all_doc_types(self):
         response = self.app.get(self.base_search_url)
 
         total_all = 0
@@ -109,10 +133,7 @@ class TestLegalSearch():
         )
 
         election_cycle = "abc"
-        url = "{}case_election_cycles={}".format(self.base_search_url, election_cycle)
-        response = self.app.get(url)
-
-        assert response.status_code == 422
+        self.check_bad_values("case_election_cycles", election_cycle, "", True)
 
     def test_case_date_filters(self):
         # for murs and adrs only
@@ -139,6 +160,9 @@ class TestLegalSearch():
         assert all(
             datetime.strptime(mur["open_date"], "%Y-%m-%dT%H:%M:%S") <= query_date
             for mur in response.json["murs"]
+        ) and all(
+            datetime.strptime(adr["open_date"], "%Y-%m-%dT%H:%M:%S") <= query_date
+            for adr in response.json["adrs"]
         )
 
         close_date = "2022-11-29"
@@ -172,27 +196,24 @@ class TestLegalSearch():
         )
 
         wrong_date_format = "01/20/24"
-        url = "{}case_min_close_date={}".format(self.base_search_url, wrong_date_format)
+        filters = ["case_min_close_date", "case_max_close_date", "case_min_open_date", "case_max_open_date"]
 
-        response = self.app.get(url)
-        assert response.status_code == 422
+        for filter in filters:
+            self.check_bad_values(filter, wrong_date_format, "", True)
 
 # ---------------------- Start MUR only filters ------------------------------------------------
 
     def test_mur_type_filter(self):
-        mur_types = ["current", "archived"]
+        filters = [
+            ["mur_type", "mur_type", "current", True],
+            ["mur_type", "mur_type", "archived", True]
 
-        for type in mur_types:
-            url = "{}mur_type={}".format(self.base_search_url, type)
-            response = self.app.get(url)
+        ]
+        bad_value = "wrongType"
 
-            assert response.status_code == 200
-            assert all(mur["mur_type"] == type for mur in response.json["murs"])
-
-        mur_type = "wrongType"
-        url = "{}mur_type={}".format(self.base_search_url, mur_type)
-        response = self.app.get(url)
-        assert response.status_code == 422
+        for filter in filters:
+            self.check_filters(filter[0], filter[1], filter[2], "murs")
+            self.check_bad_values(filter[0], bad_value, "total_murs", filter[3])
 
     def test_mur_citation_filters(self):
         # filter for current murs only
@@ -228,21 +249,26 @@ class TestLegalSearch():
 
         for mur in response.json["murs"]:
             assert mur["mur_type"] == "current"
-            found = any(
-                (citations["title"] == statutory_title and statutory_text in citations["text"]) or
-                (citations["title"] == regulatory_title and regulatory_text in citations["text"])
+
+            statutory_found = any(
+                citations["title"] == statutory_title and statutory_text in citations["text"]
                 for dispositions in mur["dispositions"]
                 for citations in dispositions["citations"]
             )
-            assert found
 
-        statutory_citation = "52 U.S.C. §308989"
-        url = "{}case_statutory_citation={}".format(self.base_search_url, statutory_citation)
+            regulatory_found = any(
+                citations["title"] == regulatory_title and regulatory_text in citations["text"]
+                for dispositions in mur["dispositions"]
+                for citations in dispositions["citations"]
+            )
+        assert statutory_found and regulatory_found
 
-        response = self.app.get(url)
-
-        assert response.status_code == 200
-        assert response.json["total_murs"] == 0
+        filters = [
+            ["case_statutory_citation", "524 U.S.C. §30106444"],
+            ["case_regulatory_citation", "1111 CFR §112.4111"]
+        ]
+        for filter in filters:
+            self.check_bad_values(filter[0], filter[1], "total_murs", False)
 
     def test_mur_disposition_filter(self):
         # filter for current murs only
@@ -279,32 +305,73 @@ class TestLegalSearch():
         )
 
         category = "49"
-        url = "{}mur_disposition_category_id={}".format(self.base_search_url, category)
+        self.check_bad_values("mur_disposition_category_id", category, "total_murs", True)
 
-        response = self.app.get(url)
-        assert response.status_code == 422
 # ---------------------- End MUR only filters ------------------------------------------------
 # ---------------------- Start AF only filters ------------------------------------------------
 
     def test_af_filters(self):
-        filters = {"af_name": "ICE PAC",
-                   "af_committee_id": "C00833665",
-                   "af_report_year": "2014"
-                   }
+        filters = [
+            ["af_name", "name", "ICE PAC", False],
+            ["af_committee_id", "committee_id", "C00833665", True],
+            ["af_report_year", "report_year", "2014", False],
+            ["af_rtb_fine_amount", "reason_to_believe_fine_amount", 3300, True],
+            ["af_fd_fine_amount", "final_determination_amount", 3300, True]
+        ]
         bad_value = "this is an incorrect value"
 
-        for key, value in filters.items():
-            url = "{}{}={}".format(self.base_search_url, key, value)
+        for filter in filters:
+            self.check_filters(filter[0], filter[1], filter[2], "admin_fines")
+            self.check_bad_values(filter[0], bad_value, "total_admin_fines", filter[3])
 
-            response = self.app.get(url)
-            assert response.status_code == 200
-            assert all(af[key[3:]] == value for af in response.json["admin_fines"])
+    def test_af_date_filters(self):
+        rtb = "2017-10-01"
+        query_date = datetime.strptime(rtb, "%Y-%m-%d")
+        url = "{}af_min_rtb_date={}".format(self.base_search_url, rtb)
 
-            url = "{}{}={}".format(self.base_search_url, key, bad_value)
-            response = self.app.get(url)
+        response = self.app.get(url)
 
-            if key == "af_committee_id":
-                assert response.status_code == 422
-            else:
-                assert response.status_code == 200
-                assert response.json["total_admin_fines"] == 0
+        assert response.status_code == 200
+        assert all(
+            datetime.strptime(af["reason_to_believe_action_date"], "%Y-%m-%dT%H:%M:%S") >= query_date
+            for af in response.json["admin_fines"]
+        )
+
+        url = "{}af_max_rtb_date={}".format(self.base_search_url, rtb)
+
+        response = self.app.get(url)
+
+        assert response.status_code == 200
+        assert all(
+            datetime.strptime(af["reason_to_believe_action_date"], "%Y-%m-%dT%H:%M:%S") <= query_date
+            for af in response.json["admin_fines"]
+        )
+
+        fd_date = "2024-08-13"
+        query_date = datetime.strptime(fd_date, "%Y-%m-%d")
+
+        url = "{}af_min_fd_date={}".format(self.base_search_url, fd_date)
+
+        response = self.app.get(url)
+
+        assert response.status_code == 200
+
+        assert all(
+            datetime.strptime(af["final_determination_date"], "%Y-%m-%dT%H:%M:%S") >= query_date
+            for af in response.json["admin_fines"]
+        )
+
+        url = "{}af_max_fd_date={}".format(self.base_search_url, fd_date)
+
+        response = self.app.get(url)
+
+        assert response.status_code == 200
+        assert all(
+            datetime.strptime(af["final_determination_date"], "%Y-%m-%dT%H:%M:%S") <= query_date
+            for af in response.json["admin_fines"]
+        )
+        wrong_date_format = "01/20/24"
+        filters = ["af_min_rtb_date", "af_max_rtb_date", "af_min_fd_date", "af_max_fd_date"]
+
+        for filter in filters:
+            self.check_bad_values(filter, wrong_date_format, "", True)

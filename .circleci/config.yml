@@ -90,7 +90,7 @@ jobs:
 
       - run:
           name: Wait for Elasticsearch
-          command: dockerize -wait http://localhost:9200 -timeout 2m
+          command: dockerize -wait http://localhost:9200 -timeout 1m
 
       - run:
           name: Run tests
