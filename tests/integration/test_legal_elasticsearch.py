@@ -36,7 +36,7 @@ class TestLegalSearch():
 
         if doc_type == "archived_murs":
             query = {"query": {"term": {"type": "murs"}}}
-        else: 
+        else:
             query = {"query": {"term": {"type": doc_type}}}
 
         result = self.es_client.search(index=index, body=query)
