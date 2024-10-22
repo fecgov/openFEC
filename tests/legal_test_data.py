@@ -113,7 +113,7 @@ first_test_mur = {
               "document_id": 100512624,
               "length": 1679517,
               "url": "/files/legal/murs/100/100_11.pdf",
-              "text": "This is random text for document one"
+              "text": "This is sample text for document one"
           },
           {
               "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -124,7 +124,7 @@ first_test_mur = {
               "document_id": 100512623,
               "length": 740526,
               "url": "/files/legal/murs/100/100_05.pdf",
-              "text": "This is random text for document two"
+              "text": "This is sample text for document two"
           },
           {
               "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -135,7 +135,7 @@ first_test_mur = {
               "document_id": 100512622,
               "length": 808056,
               "url": "/files/legal/murs/100/100_04.pdf",
-              "text": "This is random text for document three"
+              "text": "This is sample text for document three"
           },
           {
               "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -145,7 +145,7 @@ first_test_mur = {
               "document_id": 100512621,
               "length": 683122,
               "url": "/files/legal/murs/100/100_03.pdf",
-              "text": "This is random text for document four"
+              "text": "This is sample text for document four"
           },
           {
               "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -156,7 +156,7 @@ first_test_mur = {
               "document_id": 100512620,
               "length": 804482,
               "url": "/files/legal/murs/100/100_02.pdf",
-              "text": "This is random text for document five"
+              "text": "This is sample text for document five"
           },
           {
               "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -166,7 +166,7 @@ first_test_mur = {
               "document_id": 100512619,
               "length": 769982,
               "url": "/files/legal/murs/100/100_01.pdf",
-              "text": "This is random text for document six"
+              "text": "This is sample text for document six"
           },
           {
               "category": "General Counsel Reports, Briefs, Notifications and Responses",
@@ -176,7 +176,7 @@ first_test_mur = {
               "document_id": 100512627,
               "length": 789682,
               "url": "/files/legal/murs/100/100_09.pdf",
-              "text": "This is random text for document seven"
+              "text": "This is sample text for document seven"
           },
           {
               "category": "General Counsel Reports, Briefs, Notifications and Responses",
@@ -187,7 +187,7 @@ first_test_mur = {
               "document_id": 100512626,
               "length": 969084,
               "url": "/files/legal/murs/100/100_08.pdf",
-              "text": "This is random text for document eight"
+              "text": "This is sample text for document eight"
           },
           {
               "category": "General Counsel Reports, Briefs, Notifications and Responses",
@@ -197,7 +197,7 @@ first_test_mur = {
               "document_id": 100512625,
               "length": 1069740,
               "url": "/files/legal/murs/100/100_06.pdf",
-              "text": "This is random text for document nine"
+              "text": "This is sample text for document nine"
           },
           {
               "category": "Certifications",
@@ -208,7 +208,7 @@ first_test_mur = {
               "document_id": 100512618,
               "length": 718416,
               "url": "/files/legal/murs/100/100_10.pdf",
-              "text": "This is random text for document ten"
+              "text": "This is sample text for document ten"
           },
           {
               "category": "Certifications",
@@ -219,7 +219,7 @@ first_test_mur = {
               "document_id": 100512617,
               "length": 737820,
               "url": "/files/legal/murs/100/100_07.pdf",
-              "text": "This is random text for document eleven"
+              "text": "This is sample text for document eleven"
           }
       ],
       "election_cycles": [2022],
@@ -485,7 +485,7 @@ second_test_mur = {
           "document_id": 100507731,
           "length": 688461,
           "url": "/files/legal/murs/101/101_21.pdf",
-          "text": "This is some random text for the first document"
+          "text": "This is some sample text for the first document"
         },
         {
           "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -495,7 +495,7 @@ second_test_mur = {
           "document_id": 100507711,
           "length": 687489,
           "url": "/files/legal/murs/101/101_20.pdf",
-          "text": "This is some random text for the second document"
+          "text": "This is some sample text for the second document"
         },
         {
           "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -505,7 +505,7 @@ second_test_mur = {
           "document_id": 100507729,
           "length": 979677,
           "url": "/files/legal/murs/101/101_11.pdf",
-          "text": "This is some random text for the third document"
+          "text": "This is some sample text for the third document"
         },
         {
           "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -524,7 +524,7 @@ second_test_mur = {
           "document_id": 100507727,
           "length": 656371,
           "url": "/files/legal/murs/101/101_09.pdf",
-          "text": "This is some random text for the fourth document"
+          "text": "This is some sample text for the fourth document"
         },
         {
           "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -534,7 +534,7 @@ second_test_mur = {
           "document_id": 100507726,
           "length": 656413,
           "url": "/files/legal/murs/101/101_08.pdf",
-          "text": "This is some random text for the fifth document"
+          "text": "This is some sample text for the fifth document"
         },
         {
           "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -544,7 +544,7 @@ second_test_mur = {
           "document_id": 100507725,
           "length": 717698,
           "url": "/files/legal/murs/101/101_07.pdf",
-          "text": "This is some random text for the sixth document"
+          "text": "This is some sample text for the sixth document"
         },
         {
           "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -554,7 +554,7 @@ second_test_mur = {
           "document_id": 100507724,
           "length": 653992,
           "url": "/files/legal/murs/101/101_06.pdf",
-          "text": "This is some random text for the seventh document"
+          "text": "This is some sample text for the seventh document"
         },
         {
           "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -564,7 +564,7 @@ second_test_mur = {
           "document_id": 100507723,
           "length": 654041,
           "url": "/files/legal/murs/101/101_05.pdf",
-          "text": "This is some random text for the eigth document"
+          "text": "This is some sample text for the eigth document"
         },
         {
           "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -574,7 +574,7 @@ second_test_mur = {
           "document_id": 100507722,
           "length": 653757,
           "url": "/files/legal/murs/101/101_04.pdf",
-          "text": "This is some random text for the ninth document"
+          "text": "This is some sample text for the ninth document"
         },
         {
           "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -585,7 +585,7 @@ second_test_mur = {
           "document_id": 100507721,
           "length": 654240,
           "url": "/files/legal/murs/101/101_03.pdf",
-          "text": "This is some random text for the eleventh document"
+          "text": "This is some sample text for the eleventh document"
         },
         {
           "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -595,7 +595,7 @@ second_test_mur = {
           "document_id": 100507720,
           "length": 654120,
           "url": "/files/legal/murs/101/101_02.pdf",
-          "text": "This is some random text for the twelfth document"
+          "text": "This is some sample text for the twelfth document"
         },
         {
           "category": "Complaint, Responses, Designation of Counsel and Extensions of Time",
@@ -605,7 +605,7 @@ second_test_mur = {
           "document_id": 100507719,
           "length": 640469,
           "url": "/files/legal/murs/101/101_01.pdf",
-          "text": "This is some random text for the thirteenth document"
+          "text": "This is some sample text for the thirteenth document"
         },
         {
           "category": "General Counsel Reports, Briefs, Notifications and Responses",
@@ -615,7 +615,7 @@ second_test_mur = {
           "document_id": 100507717,
           "length": 917345,
           "url": "/files/legal/murs/101/101_30.pdf",
-          "text": "This is some random text for the fourteenth document"
+          "text": "This is some sample text for the fourteenth document"
         },
         {
           "category": "General Counsel Reports, Briefs, Notifications and Responses",
@@ -625,7 +625,7 @@ second_test_mur = {
           "document_id": 100507716,
           "length": 914846,
           "url": "/files/legal/murs/101/101_29.pdf",
-          "text": "This is some random text for the fifteenth document"
+          "text": "This is some sample text for the fifteenth document"
         },
         {
           "category": "General Counsel Reports, Briefs, Notifications and Responses",
@@ -635,7 +635,7 @@ second_test_mur = {
           "document_id": 100507715,
           "length": 780367,
           "url": "/files/legal/murs/101/101_28.pdf",
-          "text": "This is some random text for the sixteenth document"
+          "text": "This is some sample text for the sixteenth document"
         }
       ],
       "election_cycles": [2020, 2020],
@@ -1071,7 +1071,7 @@ first_adr = {
         "text": "This is sample document text for the seventh document of the first adr"
       }
     ],
-    "election_cycles": [2022],
+    "election_cycles": [2016],
     "name": "Jayme Stevenson for Congress",
     "no": "105",
     "non_monetary_terms": [
@@ -1214,7 +1214,7 @@ second_adr = {
       "document_id": 200498052,
       "length": 1065613,
       "url": "/files/legal/adrs/106/106_07.pdf",
-      "text": "This is sample document text for the first document of the second adr"
+      "text": "This is sample text for the first document of the second adr"
     },
     {
       "category": "ADR Memoranda, Notifications and Responses",
@@ -1224,7 +1224,7 @@ second_adr = {
       "document_id": 200498051,
       "length": 884639,
       "url": "/files/legal/adrs/106/106_05.pdf",
-      "text": "This is sample document text for the second document of the second adr"
+      "text": "This is sample text for the second document of the second adr"
     },
     {
       "category": "ADR Memoranda, Notifications and Responses",
@@ -1234,7 +1234,7 @@ second_adr = {
       "document_id": 200498050,
       "length": 696467,
       "url": "/files/legal/adrs/106/106_04.pdf",
-      "text": "This is sample document text for the third document of the second adr"
+      "text": "This is sample text for the third document of the second adr"
     },
     {
       "category": "ADR Memoranda, Notifications and Responses",
@@ -1244,7 +1244,7 @@ second_adr = {
       "document_id": 200498049,
       "length": 757846,
       "url": "/files/legal/adrs/106/106_03.pdf",
-      "text": "This is sample document text for the fourth document of the second adr"
+      "text": "This is sample text for the fourth document of the second adr"
     },
     {
       "category": "ADR Memoranda, Notifications and Responses",
@@ -1254,7 +1254,7 @@ second_adr = {
       "document_id": 200498048,
       "length": 824859,
       "url": "/files/legal/adrs/106/106_02.pdf",
-      "text": "This is sample document text for the fifth document of the second adr"
+      "text": "This is sample text for the fifth document of the second adr"
     },
     {
       "category": "ADR Memoranda, Notifications and Responses",
@@ -1264,7 +1264,7 @@ second_adr = {
       "document_id": 200498047,
       "length": 1390051,
       "url": "/files/legal/adrs/106/106_01.pdf",
-      "text": "This is sample document text for the sixth document of the second adr"
+      "text": "This is sample text for the sixth document of the second adr"
     },
     {
       "category": "Certifications",
@@ -1275,7 +1275,7 @@ second_adr = {
       "document_id": 200498053,
       "length": 709165,
       "url": "/files/legal/adrs/106/106_06.pdf",
-      "text": "This is sample document text for the seventh document of the second adr"
+      "text": "This is sample text for the seventh document of the second adr"
     }
   ],
   "election_cycles": [2020],
@@ -1368,7 +1368,7 @@ first_admin_fine = {
         "document_id": 300512738,
         "length": 582505,
         "url": "/files/legal/admin_fines/107/107_02.pdf",
-        "text": "Test document data for the first document of the first admin_fine"
+        "text": "sample text for the first document of the first admin_fine"
       },
       {
         "category": "Administrative Fine Case",
@@ -1378,7 +1378,7 @@ first_admin_fine = {
         "document_id": 300512538,
         "length": 4919211,
         "url": "/files/legal/admin_fines/107/107_01.pdf",
-        "text": "Test document data for the second document of the first admin_fine"
+        "text": "sample text for the second document of the first admin_fine"
       }
     ],
     "final_determination_amount": 5258,
@@ -1436,7 +1436,7 @@ second_admin_fine = {
           "document_id": 111134,
           "length": 1026328,
           "url": "/files/legal/admin_fines/108/15092703776.pdf",
-          "text": "Test document data for the first document of the second admin_fine"
+          "text": "sample text for the first document of the second admin_fine"
         }
       ],
       "final_determination_amount": 3300,

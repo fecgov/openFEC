@@ -13,27 +13,22 @@ class TestLegalSearch():
     es_client = create_es_client()
     base_search_url = "/v1/legal/search/?"
 
-    @classmethod
     def setup_class(self):
         self.app = rest.app.test_client()
         for index in ALL_INDICES:
             create_index(index, testing=True)
 
-    @classmethod
     def delete_indices(self):
         for index in ALL_INDICES:
             self.es_client.indices.delete(index)
 
-    @classmethod
     def teardown_class(self):
         for index in ALL_INDICES:
             self.es_client.indices.delete(index)
 
-    @classmethod
     def wait_for_refresh(self, index_name):
         self.es_client.indices.refresh(index=index_name)
 
-    @classmethod
     def insert_documents(self, doc_type, index):
         for doc in document_dictionary[doc_type]:
             self.es_client.index(index=index, body=doc)
@@ -48,12 +43,6 @@ class TestLegalSearch():
         result = self.es_client.search(index=index, body=query)
         assert result['hits']['total']['value'] == len(document_dictionary[doc_type])
 
-    @classmethod
-    def check_all_doc_types(self, filter_name, field_name, expected_return):
-        for doc_type in ALL_DOCUMENT_TYPES:
-            self.check_filters(filter_name, field_name, expected_return, doc_type)
-
-    @classmethod
     def check_filters(self, filter_name, field_name, expected_return, doc_type):
         url = f"{self.base_search_url}{filter_name}={expected_return}"
         response = self.app.get(url)
@@ -61,7 +50,6 @@ class TestLegalSearch():
         assert response.status_code == 200
         assert all(x[field_name] == expected_return for x in response.json[doc_type])
 
-    @classmethod
     def check_bad_values(self, filter_name, bad_value, doc_type, raiseError):
         url = f"{self.base_search_url}{filter_name}={bad_value}"
         response = self.app.get(url)
@@ -71,6 +59,14 @@ class TestLegalSearch():
         else:
             assert response.status_code == 200
             assert response.json[doc_type] == 0
+
+    def check_sort_asc(self, doc_dict):
+        for i in range(len(doc_dict) - 1):
+            assert doc_dict[i]["case_serial"] <= doc_dict[i + 1]["case_serial"]
+
+    def check_sort_desc(self, doc_dict):
+        for i in range(len(doc_dict) - 1):
+            assert doc_dict[i]["case_serial"] >= doc_dict[i + 1]["case_serial"]
 
     def test_index_creation(self):
         for index in ALL_INDICES:
@@ -91,8 +87,7 @@ class TestLegalSearch():
     def test_af_insert(self):
         self.insert_documents("admin_fines", CASE_INDEX)
 
-# ---------------------- Test all case filters  ------------------------------------------------
-
+# ---------------------- Start all case filters  ------------------------------------------------
     def test_all_doc_types(self):
         response = self.app.get(self.base_search_url)
 
@@ -109,7 +104,7 @@ class TestLegalSearch():
 
     def test_type_filter(self):
         for type in ALL_DOCUMENT_TYPES:
-            url = self.base_search_url + "type=" + type
+            url = f"{self.base_search_url}type={type}"
             response = self.app.get(url)
 
             if type == "murs":
@@ -123,8 +118,12 @@ class TestLegalSearch():
             assert response.json["total_all"] == total
             assert response.json["total_" + type] == total
 
+        bad_value = "Wrong Type"
+        self.check_bad_values("type", bad_value, None, True)
+
     def test_case_no(self):
-        case_numbers = [108, 101, 104]
+        # archived and current murs, adrs, and afs
+        case_numbers = ["108", "101", "104", "106"]
 
         params = {
             "case_no": case_numbers
@@ -134,25 +133,96 @@ class TestLegalSearch():
 
         assert response.status_code == 200
         assert all(
-            ("case_no" not in mur or mur["case_no"] in case_numbers)
+            mur["no"] in case_numbers
             for mur in response.json["murs"]
         ) and all(
-            ("case_no" not in adr or adr["case_no"] in case_numbers)
-            for adr in response.json["advisory_opinions"]
-        ) and all(
-            ("case_no" not in af or af["case_no"] in case_numbers)
+            af["no"] in case_numbers
             for af in response.json["admin_fines"]
+        ) and all(
+            adr["no"] in case_numbers
+            for adr in response.json["adrs"]
         )
 
-    def test_election_cycles_filter(self):
-        # for current mur and adrs only
-        election_cycle = 2020
-        url = "{}case_election_cycles={}".format(self.base_search_url, election_cycle)
+    def test_case_doc_cat_id_filter(self):
+        # for archived and current murs, adrs, and afs
+        case_doc_category_ids = [2, 1, 2001]
+        params = {
+            "case_doc_category_id": case_doc_category_ids
+        }
+        url = self.base_search_url + urlencode(params, doseq=True)
         response = self.app.get(url)
 
         assert response.status_code == 200
         assert all(
-            (election_cycle in mur["election_cycles"] and mur["mur_type"] == "current")
+            any(doc["doc_order_id"] in case_doc_category_ids
+                for doc in mur["documents"])
+            for mur in response.json["murs"]
+        ) and all(
+            any(doc["doc_order_id"] in case_doc_category_ids
+                for doc in adr["documents"])
+            for adr in response.json["adrs"]
+        ) and all(
+            any(doc["doc_order_id"] in case_doc_category_ids
+                for doc in af["documents"])
+            for af in response.json["admin_fines"])
+
+        bad_value = 5555
+        self.check_bad_values("case_doc_category_id", bad_value, None, True)
+
+    def test_q_filters(self):
+        # for archived and current murs, adrs, and afs
+        search_phrase = "sample"
+
+        url = f"{self.base_search_url}q={search_phrase}"
+        response = self.app.get(url)
+        assert response.status_code == 200
+        assert all(
+            all(search_phrase in highlight
+                for highlight in mur["highlights"])
+            for mur in response.json["murs"]
+        ) and all(
+            all(search_phrase in highlight
+                for highlight in adr["highlights"])
+            for adr in response.json["adrs"]
+        ) and all(
+            all(search_phrase in highlight
+                for highlight in af["highlights"])
+            for af in response.json["admin_fines"])
+
+        exclude_phrase = "admin_fine"
+        url = f"{self.base_search_url}q_exclude={exclude_phrase}"
+        response = self.app.get(url)
+        assert response.status_code == 200
+        assert response.json["total_admin_fines"] == 0
+
+    def test_sort(self):
+        sort_value = "case_no"
+        url = f"{self.base_search_url}sort={sort_value}"
+        response = self.app.get(url)
+
+        assert response.status_code == 200
+        for doc_type in ALL_DOCUMENT_TYPES:
+            self.check_sort_asc(response.json[doc_type])
+
+        url = f"{self.base_search_url}sort=-{sort_value}"
+        response = self.app.get(url)
+
+        assert response.status_code == 200
+        for doc_type in ALL_DOCUMENT_TYPES:
+            self.check_sort_desc(response.json[doc_type])
+
+# ---------------------- End all case filters  ------------------------------------------------
+# ---------------------- Start MUR and ADR filters ------------------------------------------------
+    def test_election_cycles_filter(self):
+        # for current murs and adrs only
+        election_cycle = 2026
+
+        url = f"{self.base_search_url}case_election_cycles={election_cycle}"
+        response = self.app.get(url)
+
+        assert response.status_code == 200
+        assert all(
+            election_cycle in mur["election_cycles"] and mur["mur_type"] == "current"
             for mur in response.json["murs"]
         ) and all(
             election_cycle in adr["election_cycles"]
@@ -160,16 +230,16 @@ class TestLegalSearch():
         )
 
         election_cycle = "abc"
-        self.check_bad_values("case_election_cycles", election_cycle, "", True)
+        self.check_bad_values("case_election_cycles", election_cycle, None, True)
 
     def test_case_date_filters(self):
-        # for murs and adrs only
+        # for archived murs, current murs, and adrs only
         open_date = "2020-10-01"
         query_date = datetime.strptime(open_date, "%Y-%m-%d")
-        url = "{}case_min_open_date={}".format(self.base_search_url, open_date)
+        url = f"{self.base_search_url}case_min_open_date={open_date}"
 
         response = self.app.get(url)
-
+        print(response.json)
         assert response.status_code == 200
         assert all(
             datetime.strptime(mur["open_date"], "%Y-%m-%dT%H:%M:%S") >= query_date
@@ -179,7 +249,7 @@ class TestLegalSearch():
             for adr in response.json["adrs"]
         )
 
-        url = "{}case_max_open_date={}".format(self.base_search_url, open_date)
+        url = f"{self.base_search_url}case_max_open_date={open_date}"
 
         response = self.app.get(url)
 
@@ -195,7 +265,7 @@ class TestLegalSearch():
         close_date = "2022-11-29"
         query_date = datetime.strptime(close_date, "%Y-%m-%d")
 
-        url = "{}case_min_close_date={}".format(self.base_search_url, close_date)
+        url = f"{self.base_search_url}case_min_close_date={close_date}"
 
         response = self.app.get(url)
 
@@ -209,8 +279,7 @@ class TestLegalSearch():
             for adr in response.json["adrs"]
         )
 
-        url = "{}case_max_close_date={}".format(self.base_search_url, close_date)
-
+        url = f"{self.base_search_url}case_max_close_date={close_date}"
         response = self.app.get(url)
 
         assert response.status_code == 200
@@ -226,11 +295,11 @@ class TestLegalSearch():
         filters = ["case_min_close_date", "case_max_close_date", "case_min_open_date", "case_max_open_date"]
 
         for filter in filters:
-            self.check_bad_values(filter, wrong_date_format, "", True)
+            self.check_bad_values(filter, wrong_date_format, None, True)
 
     def test_subject_id(self):
-        # for current mur and adrs only
-        primary = ["3", "16"]
+        # for current murs and adrs only
+        primary = ["3", "16", "19"]
         secondary = ["13", "15"]
 
         params = {
@@ -251,7 +320,7 @@ class TestLegalSearch():
             subject["primary_subject_id"] in primary
             for subject in adr["subjects"]
         )
-            for adr in response.json["advisory_opinions"]
+            for adr in response.json["adrs"]
         )
 
         params = {
@@ -267,44 +336,41 @@ class TestLegalSearch():
                 for subject in mur["subjects"]
             )
             for mur in response.json["murs"]
-        ) and (any(
+        ) and all(any(
             subject["secondary_subject_id"] in secondary
             for subject in adr["subjects"]
         )
-            for adr in response.json["advisory_opinions"]
+            for adr in response.json["adrs"]
         )
 
         category = "555"
         filters = ["primary_subject_id", "secondary_subject_id"]
 
         for filter in filters:
-            self.check_bad_values(filter, category, "", True)
+            self.check_bad_values(filter, category, None, True)
 
     def test_case_respondents(self):
-        # for archived murs, current murs, and adr only
-        respondents = ["Hometown Values PAC",]
-        #["Smith, John",]
-##"Naolitano, Grace Flores for Congress Committee", "Hometown Values PAC"
+        # for archived murs, current murs, and adrs only
+        respondents = ["John", "Naolitano", "Jayme"]
+
         for respondent in respondents:
-            url = "{}case_respondents={}".format(self.base_search_url, respondent)
+            url = f"{self.base_search_url}case_respondents={respondent}"
             response = self.app.get(url)
 
             assert response.status_code == 200
-            print(response.json)
-            assert all(
-               ("respondents" not in mur or respondent in mur["respondents"])
-               for mur in response.json["murs"]
-            ) and (
-               ("respondents" not in adr or respondent in adr["respondents"])
-               for adr in response.json["advisory_opinions"]
-            )
+            assert all(any(respondent in rsp
+                           for rsp in mur["respondents"])
+                       for mur in response.json["murs"]
+                       ) and all(any(respondent in rsp
+                                     for rsp in adr["respondents"]
+                                     ) for adr in response.json["adrs"])
 
-        bad_value = "This is a bad value"
-        self.check_bad_values("case_respondents", bad_value, "murs", False)
-        self.check_bad_values("case_respondents", bad_value, "adrs", False)
+        bad_value = "Bad value"
+        self.check_bad_values("case_respondents", bad_value, "total_murs", False)
+        self.check_bad_values("case_respondents", bad_value, "total_adrs", False)
 
+# ---------------------- End MUR and ADR filters ------------------------------------------------
 # ---------------------- Start MUR only filters ------------------------------------------------
-
     def test_mur_type_filter(self):
         filters = [
             ["mur_type", "mur_type", "current", True],
@@ -334,7 +400,6 @@ class TestLegalSearch():
         response = self.app.get(url)
 
         assert response.status_code == 200
-
         for mur in response.json["murs"]:
             assert mur["mur_type"] == "current"
             found = any(
@@ -345,12 +410,7 @@ class TestLegalSearch():
             )
             assert found
 
-        params = {
-            "case_statutory_citation": "{} U.S.C. §{}".format(statutory_title, statutory_text),
-            "case_regulatory_citation": "{} CFR §{}".format(regulatory_title, regulatory_text),
-            "case_citation_require_all": "true"
-        }
-
+        params["case_citation_require_all"] = "true"
         url = self.base_search_url + urlencode(params)
 
         response = self.app.get(url)
@@ -434,6 +494,20 @@ class TestLegalSearch():
             for af in response.json["admin_fines"]
         )
 
+    def check_af_date_filters(self, response, filter_name, query_date, doc_type, lteOrGte):
+
+        assert response.status_code == 200
+        if lteOrGte == "gte":
+            assert all(
+                datetime.strptime(doc[filter_name], "%Y-%m-%dT%H:%M:%S") >= query_date
+                for doc in response.json[doc_type]
+            )
+        else:
+            assert all(
+                datetime.strptime(doc[filter_name], "%Y-%m-%dT%H:%M:%S") >= query_date
+                for doc in response.json[doc_type]
+            )
+
     def test_af_filters(self):
         filters = [
             ["af_name", "name", "ICE PAC", False],
@@ -451,7 +525,7 @@ class TestLegalSearch():
     def test_af_date_filters(self):
         rtb = "2017-10-01"
         query_date = datetime.strptime(rtb, "%Y-%m-%d")
-        url = "{}af_min_rtb_date={}".format(self.base_search_url, rtb)
+        url = f"{self.base_search_url}af_min_rtb_date={rtb}"
 
         response = self.app.get(url)
 
@@ -461,8 +535,7 @@ class TestLegalSearch():
             for af in response.json["admin_fines"]
         )
 
-        url = "{}af_max_rtb_date={}".format(self.base_search_url, rtb)
-
+        url = f"{self.base_search_url}af_max_rtb_date={rtb}"
         response = self.app.get(url)
 
         assert response.status_code == 200
@@ -473,8 +546,7 @@ class TestLegalSearch():
 
         fd_date = "2024-08-13"
         query_date = datetime.strptime(fd_date, "%Y-%m-%d")
-
-        url = "{}af_min_fd_date={}".format(self.base_search_url, fd_date)
+        url = f"{self.base_search_url}af_min_fd_date={fd_date}"
 
         response = self.app.get(url)
 
@@ -485,8 +557,7 @@ class TestLegalSearch():
             for af in response.json["admin_fines"]
         )
 
-        url = "{}af_max_fd_date={}".format(self.base_search_url, fd_date)
-
+        url = f"{self.base_search_url}af_max_fd_date={fd_date}"
         response = self.app.get(url)
 
         assert response.status_code == 200
@@ -498,4 +569,5 @@ class TestLegalSearch():
         filters = ["af_min_rtb_date", "af_max_rtb_date", "af_min_fd_date", "af_max_fd_date"]
 
         for filter in filters:
-            self.check_bad_values(filter, wrong_date_format, "", True)
+            self.check_bad_values(filter, wrong_date_format, None, True)
+# ---------------------- End AF only filters ------------------------------------------------
