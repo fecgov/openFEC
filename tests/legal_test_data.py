@@ -1303,7 +1303,22 @@ second_adr = {
   "respondents": [
     "Hometown Values PAC"
   ],
-  "subjects": [],
+  "subjects": [
+      {
+        "primary_subject_id": "3",
+        "secondary_subject_id":  "15",
+        "subject": "Contributions-Prohibited"
+      },
+      {
+        "primary_subject_id": "3",
+        "secondary_subject_id":  "8",
+        "subject": "Contributions-Corporations"
+      },
+      {
+        "primary_subject_id": "18",
+        "subject": "Reporting"
+      }
+  ],
   "type": "adrs",
   "url": "/legal/alternative-dispute-resolution/106/"
 }

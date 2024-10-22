@@ -4,6 +4,7 @@ from tests.legal_test_data import document_dictionary
 from webservices.resources.legal import ALL_DOCUMENT_TYPES
 from webservices import rest
 from datetime import datetime
+from urllib.parse import urlencode
 
 ALL_INDICES = [CASE_INDEX, AO_INDEX, ARCH_MUR_INDEX]
 
@@ -46,6 +47,11 @@ class TestLegalSearch():
 
         result = self.es_client.search(index=index, body=query)
         assert result['hits']['total']['value'] == len(document_dictionary[doc_type])
+
+    @classmethod
+    def check_all_doc_types(self, filter_name, field_name, expected_return):
+        for doc_type in ALL_DOCUMENT_TYPES:
+            self.check_filters(filter_name, field_name, expected_return, doc_type)
 
     @classmethod
     def check_filters(self, filter_name, field_name, expected_return, doc_type):
@@ -117,8 +123,29 @@ class TestLegalSearch():
             assert response.json["total_all"] == total
             assert response.json["total_" + type] == total
 
+    def test_case_no(self):
+        case_numbers = [108, 101, 104]
+
+        params = {
+            "case_no": case_numbers
+        }
+        url = self.base_search_url + urlencode(params, doseq=True)
+        response = self.app.get(url)
+
+        assert response.status_code == 200
+        assert all(
+            ("case_no" not in mur or mur["case_no"] in case_numbers)
+            for mur in response.json["murs"]
+        ) and all(
+            ("case_no" not in adr or adr["case_no"] in case_numbers)
+            for adr in response.json["advisory_opinions"]
+        ) and all(
+            ("case_no" not in af or af["case_no"] in case_numbers)
+            for af in response.json["admin_fines"]
+        )
+
     def test_election_cycles_filter(self):
-        # for mur and adrs only
+        # for current mur and adrs only
         election_cycle = 2020
         url = "{}case_election_cycles={}".format(self.base_search_url, election_cycle)
         response = self.app.get(url)
@@ -201,6 +228,81 @@ class TestLegalSearch():
         for filter in filters:
             self.check_bad_values(filter, wrong_date_format, "", True)
 
+    def test_subject_id(self):
+        # for current mur and adrs only
+        primary = ["3", "16"]
+        secondary = ["13", "15"]
+
+        params = {
+            "primary_subject_id": primary
+        }
+
+        url = self.base_search_url + urlencode(params, doseq=True)
+        response = self.app.get(url)
+
+        assert response.status_code == 200
+        assert all(
+            mur["mur_type"] == "current" and any(
+                subject["primary_subject_id"] in primary
+                for subject in mur["subjects"]
+            )
+            for mur in response.json["murs"]
+        ) and (any(
+            subject["primary_subject_id"] in primary
+            for subject in adr["subjects"]
+        )
+            for adr in response.json["advisory_opinions"]
+        )
+
+        params = {
+            "secondary_subject_id": secondary
+        }
+
+        url = self.base_search_url + urlencode(params, doseq=True)
+        response = self.app.get(url)
+        assert response.status_code == 200
+        assert all(
+            mur["mur_type"] == "current" and any(
+                subject["secondary_subject_id"] in secondary
+                for subject in mur["subjects"]
+            )
+            for mur in response.json["murs"]
+        ) and (any(
+            subject["secondary_subject_id"] in secondary
+            for subject in adr["subjects"]
+        )
+            for adr in response.json["advisory_opinions"]
+        )
+
+        category = "555"
+        filters = ["primary_subject_id", "secondary_subject_id"]
+
+        for filter in filters:
+            self.check_bad_values(filter, category, "", True)
+
+    def test_case_respondents(self):
+        # for archived murs, current murs, and adr only
+        respondents = ["Hometown Values PAC",]
+        #["Smith, John",]
+##"Naolitano, Grace Flores for Congress Committee", "Hometown Values PAC"
+        for respondent in respondents:
+            url = "{}case_respondents={}".format(self.base_search_url, respondent)
+            response = self.app.get(url)
+
+            assert response.status_code == 200
+            print(response.json)
+            assert all(
+               ("respondents" not in mur or respondent in mur["respondents"])
+               for mur in response.json["murs"]
+            ) and (
+               ("respondents" not in adr or respondent in adr["respondents"])
+               for adr in response.json["advisory_opinions"]
+            )
+
+        bad_value = "This is a bad value"
+        self.check_bad_values("case_respondents", bad_value, "murs", False)
+        self.check_bad_values("case_respondents", bad_value, "adrs", False)
+
 # ---------------------- Start MUR only filters ------------------------------------------------
 
     def test_mur_type_filter(self):
@@ -222,8 +324,12 @@ class TestLegalSearch():
         regulatory_title = "11"
         regulatory_text = "104.3"
 
-        url = "{}case_statutory_citation={} U.S.C. §{}&case_regulatory_citation={} CFR §{}".format(
-            self.base_search_url, statutory_title, statutory_text, regulatory_title, regulatory_text)
+        params = {
+            "case_statutory_citation": "{} U.S.C. §{}".format(statutory_title, statutory_text),
+            "case_regulatory_citation": "{} CFR §{}".format(regulatory_title, regulatory_text)
+        }
+
+        url = self.base_search_url + urlencode(params)
 
         response = self.app.get(url)
 
@@ -239,9 +345,13 @@ class TestLegalSearch():
             )
             assert found
 
-        url = """{}case_statutory_citation={} U.S.C. §{}&case_regulatory_citation={} CFR §{}
-        &case_citation_require_all=true""".format(
-            self.base_search_url, statutory_title, statutory_text, regulatory_title, regulatory_text)
+        params = {
+            "case_statutory_citation": "{} U.S.C. §{}".format(statutory_title, statutory_text),
+            "case_regulatory_citation": "{} CFR §{}".format(regulatory_title, regulatory_text),
+            "case_citation_require_all": "true"
+        }
+
+        url = self.base_search_url + urlencode(params)
 
         response = self.app.get(url)
 
@@ -272,26 +382,27 @@ class TestLegalSearch():
 
     def test_mur_disposition_filter(self):
         # filter for current murs only
-        category_1 = "7"
-        category_2 = "24"
-
-        url = "{}mur_disposition_category_id={}&mur_disposition_category_id={}".format(self.base_search_url,
-                                                                                       category_1, category_2)
-
+        categories = ["7", "24"]
+        params = {
+            "mur_disposition_category_id": categories
+        }
+        url = self.base_search_url + urlencode(params, doseq=True)
         response = self.app.get(url)
 
         assert response.status_code == 200
         assert all(
             mur["mur_type"] == "current" and any(
-                category_1 == dispositions["mur_disposition_category_id"] or
-                category_2 == dispositions["mur_disposition_category_id"]
+                dispositions["mur_disposition_category_id"] in categories
                 for dispositions in mur["dispositions"]
             )
             for mur in response.json["murs"]
         )
 
         category = "14"
-        url = "{}mur_disposition_category_id={}".format(self.base_search_url, category)
+        params = {
+            "mur_disposition_category_id": category
+        }
+        url = self.base_search_url + urlencode(params)
         response = self.app.get(url)
 
         assert response.status_code == 200
@@ -309,6 +420,19 @@ class TestLegalSearch():
 
 # ---------------------- End MUR only filters ------------------------------------------------
 # ---------------------- Start AF only filters ------------------------------------------------
+    def test_af_name_multiple_filter(self):
+        names_list = ["ICE PAC", "SOCIAL PROGRESS IN UNION WITH ECONOMIC GROWTH"]
+        params = {
+            "af_name": names_list
+        }
+        url = self.base_search_url + urlencode(params, doseq=True)
+        response = self.app.get(url)
+
+        assert response.status_code == 200
+        assert all(
+            af["name"] in names_list
+            for af in response.json["admin_fines"]
+        )
 
     def test_af_filters(self):
         filters = [
