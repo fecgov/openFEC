@@ -267,6 +267,14 @@ def get_case_document_query(q, **kwargs):
 
         combined_query.append(Q("bool", should=category_queries, minimum_should_match=1))
 
+    case_document_date_range = {}
+    if kwargs.get("case_min_document_date"):
+        case_document_date_range["gte"] = kwargs.get("case_min_document_date")
+    if kwargs.get("case_max_document_date"):
+        case_document_date_range["lte"] = kwargs.get("case_max_document_date")
+    if case_document_date_range:
+        case_document_date_range["format"] = ACCEPTED_DATE_FORMATS
+        combined_query.append(Q("range", documents__document_date=case_document_date_range))
     if q:
         combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))
 
@@ -560,6 +568,15 @@ def get_ao_document_query(q, **kwargs):
     if kwargs.get("ao_category"):
         ao_category = [categories[c] for c in kwargs.get("ao_category")]
         combined_query = [Q("terms", documents__category=ao_category)]
+
+    ao_document_date_range = {}
+    if kwargs.get("ao_min_document_date"):
+        ao_document_date_range["gte"] = kwargs.get("ao_min_document_date")
+    if kwargs.get("ao_max_document_date"):
+        ao_document_date_range["lte"] = kwargs.get("ao_max_document_date")
+    if ao_document_date_range:
+        ao_document_date_range["format"] = ACCEPTED_DATE_FORMATS
+        combined_query.append(Q("range", documents__date=ao_document_date_range))
 
     if q:
         combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))
