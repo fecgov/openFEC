@@ -11,9 +11,16 @@ from webservices.resources.legal import (  # noqa
     ALL_DOCUMENT_TYPES,
 )
 
+ALL_CASE_DOCUMENT_TYPES = [
+    "murs",
+    "adrs",
+    "admin_fines",
+]
 
 # TODO: integrate more with API Schema so that __API_VERSION__ is returned
 # self.assertEqual(result["api_version"], __API_VERSION__)
+
+
 def get_path(obj, path):
     parts = path.split(".")
     first = parts[0]
@@ -43,7 +50,7 @@ def get_path(obj, path):
 #         }
 #     }
 # }
-
+#
 
 def legal_search_data(**kwargs):
     type_ = kwargs["body"]["query"]["bool"]["must"][0]["term"]["type"]
@@ -61,6 +68,7 @@ def legal_search_data(**kwargs):
                             "_source": {
                                 "type": one_doc_type,
                                 "no": "1111",
+                                "case_serial": 1111,
                                 "highlights": [],
                                 "document_highlights": {},
                                 "documents": [
@@ -74,6 +82,7 @@ def legal_search_data(**kwargs):
                             "_source": {
                                 "type": one_doc_type,
                                 "no": "2222",
+                                "case_serial": 2222,
                                 "highlights": [],
                                 "document_highlights": {},
                                 "documents": [
@@ -82,7 +91,17 @@ def legal_search_data(**kwargs):
                                         "text": "ccc ddd",
                                     }],
                             },
-                        }
+                        },
+                    ],
+                    "sort": [
+                        {
+                            "case_serial": {
+                                "order": "asc"
+                            },
+                            "mur_type": {
+                                "order": "asc"
+                            }
+                        },
                     ],
                     "total_all": 2,
                 }
@@ -115,6 +134,7 @@ class TestLegalSearch(unittest.TestCase):
                         {
                             "type": one_doc_type,
                             "no": "1111",
+                            "case_serial": 1111,
                             "highlights": [],
                             "document_highlights": {},
                             "documents": [
@@ -126,6 +146,7 @@ class TestLegalSearch(unittest.TestCase):
                         {
                             "type": one_doc_type,
                             "no": "2222",
+                            "case_serial": 2222,
                             "highlights": [],
                             "document_highlights": {},
                             "documents": [
@@ -159,6 +180,7 @@ class TestLegalSearch(unittest.TestCase):
                         {
                             "type": one_doc_type,
                             "no": "1111",
+                            "case_serial": 1111,
                             "highlights": [],
                             "document_highlights": {},
                             "documents": [
@@ -170,6 +192,50 @@ class TestLegalSearch(unittest.TestCase):
                         {
                             "type": one_doc_type,
                             "no": "2222",
+                            "case_serial": 2222,
+                            "highlights": [],
+                            "document_highlights": {},
+                            "documents": [
+                                {
+                                    "document_id": 200,
+                                    "text": "ccc ddd",
+                                }],
+                        },
+                    ],
+                    ("total_" + one_doc_type): 2,
+                    "total_all": 2,
+                }
+
+    @patch("webservices.rest.legal.es_client.search", legal_search_data)
+    def test_case_sort(self):
+        for one_doc_type in ALL_CASE_DOCUMENT_TYPES:
+            response = self.app.get(
+                "/v1/legal/search/?type=" + one_doc_type + "&sort=case_no&api_key=1234"
+            )
+            assert response.status_code == 200
+            result = json.loads(codecs.decode(response.data))
+
+            type_ = result[one_doc_type][0]["type"]
+
+            if type_ == one_doc_type:
+                assert result == {
+                    one_doc_type: [
+                        {
+                            "type": one_doc_type,
+                            "no": "1111",
+                            "case_serial": 1111,
+                            "highlights": [],
+                            "document_highlights": {},
+                            "documents": [
+                                {
+                                    "document_id": 100,
+                                    "text": "aaa bbb",
+                                }],
+                        },
+                        {
+                            "type": one_doc_type,
+                            "no": "2222",
+                            "case_serial": 2222,
                             "highlights": [],
                             "document_highlights": {},
                             "documents": [
@@ -189,6 +255,8 @@ class TestLegalSearch(unittest.TestCase):
             "/v1/legal/search/?%20AND%20OR&type=advisory_opinions"
         )
         assert response.status_code == 400
+
+
 # ========End test endpoint: '/legal/search/'========
 
 
@@ -199,7 +267,8 @@ class TestLegalSearch(unittest.TestCase):
 def legal_doc_data(*args, **kwargs):
     return {
         "hits": {
-            "hits": [{
+            "hits":
+            [{
                 "_source": {
                     "type": "document type",
                     "no": "100",

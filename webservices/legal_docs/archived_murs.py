@@ -25,6 +25,8 @@ ALL_ARCHIVED_MURS = """
         mur_number as mur_no,
         mur_id as case_serial
     FROM MUR_ARCH.ARCHIVED_MURS
+    JOIN fecmur.arch_current_mur_sorting_vw mur_sort on mur_id = mur_sort.case_serial
+    WHERE mur_sort.mur_type = 'archived'
     ORDER BY mur_id desc
 """
 
@@ -37,6 +39,7 @@ SINGLE_MUR = """
         open_date,
         close_date
     FROM MUR_ARCH.ARCHIVED_MURS
+    JOIN fecmur.arch_current_mur_sorting_vw mur_sort on mur_id = mur_sort.case_serial
     WHERE mur_number = %s
 """
 

@@ -6,7 +6,7 @@ import pytest
 
 
 from webservices import rest
-from webservices.legal_docs.current_cases import get_cases
+from webservices.legal_docs.current_cases import get_cases, load_mur_citations
 
 from tests.common import TEST_CONN, BaseTestCase
 
@@ -429,6 +429,8 @@ class TestLoadCurrentCases(BaseTestCase):
         self.create_commission(
             commission_id, agenda_date, vote_date, action, case_id, pg_date
         )
+
+        load_mur_citations()
 
         actual_mur = next(get_cases('MUR'))
 
