@@ -491,6 +491,7 @@ def create_index(index_name=None, testing=None):
         es_client.indices.create(
             index=index_name,
             body=body,
+            ignore=[400, 404],
         )
         logger.info(" The index '{0}' is created successfully.".format(index_name))
         if alias1 and alias2:
