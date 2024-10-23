@@ -13,16 +13,18 @@ class TestLegalSearch():
     es_client = create_es_client()
     base_search_url = "/v1/legal/search/?"
 
+    @classmethod
     def setup_class(self):
         self.app = rest.app.test_client()
         for idx in ALL_INDICES:
-            create_index(idx)
+            create_index(idx, testing=True)
             self.es_client.indices.refresh(index=idx)
 
     def delete_indices(self):
         for index in ALL_INDICES:
             self.es_client.indices.delete(index)
 
+    @classmethod
     def teardown_class(self):
         for index in ALL_INDICES:
             self.es_client.indices.delete(index)
