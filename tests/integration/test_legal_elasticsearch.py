@@ -15,8 +15,9 @@ class TestLegalSearch():
 
     def setup_class(self):
         self.app = rest.app.test_client()
-        for index in ALL_INDICES:
-            create_index(index, testing=True)
+        for idx in ALL_INDICES:
+            create_index(idx, testing=True)
+            self.es_client.indices.refresh(index=idx)
 
     def delete_indices(self):
         for index in ALL_INDICES:
@@ -26,14 +27,11 @@ class TestLegalSearch():
         for index in ALL_INDICES:
             self.es_client.indices.delete(index)
 
-    def wait_for_refresh(self, index_name):
-        self.es_client.indices.refresh(index=index_name)
-
     def insert_documents(self, doc_type, index):
         for doc in document_dictionary[doc_type]:
             self.es_client.index(index=index, body=doc)
 
-        self.wait_for_refresh(index)
+        self.es_client.indices.refresh(index=index)
 
         if doc_type == "archived_murs":
             query = {"query": {"term": {"type": "murs"}}}
