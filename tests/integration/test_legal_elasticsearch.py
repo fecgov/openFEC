@@ -5,7 +5,6 @@ from webservices.resources.legal import ALL_DOCUMENT_TYPES
 from webservices import rest
 from datetime import datetime
 from urllib.parse import urlencode
-
 ALL_INDICES = [CASE_INDEX, AO_INDEX, ARCH_MUR_INDEX]
 
 
@@ -13,22 +12,27 @@ class TestLegalSearch():
     es_client = create_es_client()
     base_search_url = "/v1/legal/search/?"
 
+    @classmethod
     def setup_class(self):
         self.app = rest.app.test_client()
         for index in ALL_INDICES:
-            create_index(index, testing=True)
+            create_index(index)
 
+    @classmethod
     def delete_indices(self):
         for index in ALL_INDICES:
             self.es_client.indices.delete(index)
 
+    @classmethod
     def teardown_class(self):
         for index in ALL_INDICES:
             self.es_client.indices.delete(index)
 
+    @classmethod
     def wait_for_refresh(self, index_name):
         self.es_client.indices.refresh(index=index_name)
 
+    @classmethod
     def insert_documents(self, doc_type, index):
         for doc in document_dictionary[doc_type]:
             self.es_client.index(index=index, body=doc)

@@ -439,7 +439,7 @@ INDEX_DICT = {
 }
 
 
-def create_index(index_name=None, testing=None):
+def create_index(index_name=None):
     """
     Creating an index for storing legal data on Elasticsearch based on 'INDEX_DICT'.
     - 'INDEX_DICT' description:
@@ -476,7 +476,7 @@ def create_index(index_name=None, testing=None):
 
     if index_name in INDEX_DICT.keys():
         # Before creating index, delete this index and corresponding aliases first.
-        delete_index(index_name, testing)
+        delete_index(index_name)
 
         mapping, alias1, alias2 = INDEX_DICT.get(index_name)[:3]
         body.update({"mappings": mapping})
@@ -491,7 +491,6 @@ def create_index(index_name=None, testing=None):
         es_client.indices.create(
             index=index_name,
             body=body,
-            ignore=[400, 404],
         )
         logger.info(" The index '{0}' is created successfully.".format(index_name))
         if alias1 and alias2:
@@ -543,7 +542,7 @@ def display_mapping(index_name=None):
         json.dumps(es_client.indices.get_mapping(index=index_name), indent=3)))
 
 
-def delete_index(index_name, testing=None):
+def delete_index(index_name):
     """
     Delete an index, the argument 'index_name' is required
     -How to call this function in python code:
@@ -568,8 +567,7 @@ def delete_index(index_name, testing=None):
             logger.info(" Deleting index '{0}'...".format(index_name))
             es_client.indices.delete(index_name)
             # sleep 60 seconds (1 min)
-            if testing is None:
-                time.sleep(60)
+            time.sleep(60)
             logger.info(" The index '{0}' is deleted successfully.".format(index_name))
         except Exception:
             pass
