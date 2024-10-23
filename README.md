@@ -288,6 +288,12 @@ export SQLA_TEST_CONN=<psql:address-to-box>
 
 The connection URL has to strictly adhere to the structure `postgresql://<username>:<password>@<hostname>:<port>/<database_name>`. Note that the database_name should be specified explicitly, unlike URLs for SQLAlchemy connections.
 
+Start the elasticsearch server locally:
+
+```
+./elasticsearch
+```
+
 Running the tests:
 
 ```
