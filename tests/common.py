@@ -11,9 +11,15 @@ from jdbc_utils import to_jdbc_url
 from webservices import rest
 from webservices import __API_VERSION__
 
+from webservices.legal_docs import (create_index, CASE_INDEX, ARCH_MUR_INDEX, AO_INDEX,
+                                    CASE_ALIAS, ARCH_MUR_ALIAS, AO_ALIAS)
+from webservices.utils import create_es_client
+from tests.legal_test_data import document_dictionary
+
 TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
 rest.app.config['NPLUSONE_RAISE'] = True
 NPlusOne(rest.app)
+ALL_INDICES = [CASE_INDEX, AO_INDEX, ARCH_MUR_INDEX]
 
 
 def _setup_extensions():
@@ -108,6 +114,65 @@ class ApiBaseTest(BaseTestCase):
     def _results(self, qry):
         response = self._response(qry)
         return response['results']
+
+
+class ElasticSearchBaseTest(BaseTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super(ElasticSearchBaseTest, cls).setUpClass()
+        cls.es_client = create_es_client()
+        # ensure environment is completely clean before starting
+        _delete_all_indices(cls.es_client)
+        _create_all_indices()
+        _insert_all_documents(cls.es_client)
+
+    @classmethod
+    def tearDownClass(cls):
+        super(ElasticSearchBaseTest, cls).tearDownClass()
+        _delete_all_indices(cls.es_client)
+
+    def setUp(self):
+        self.request_context = rest.app.test_request_context()
+        self.request_context.push()
+
+    def tearDown(self):
+        self.request_context.pop()
+
+    def _response(self, qry):
+        response = self.app.get(qry)
+        self.assertEqual(response.status_code, 200)
+        result = json.loads(codecs.decode(response.data))
+        self.assertNotEqual(result["total_all"], 0)
+        return result
+
+
+def _create_all_indices():
+    for index in ALL_INDICES:
+        create_index(index)
+
+
+def _delete_all_indices(es_client):
+    es_client.indices.delete("*")
+
+
+def wait_for_refresh(es_client, index_name):
+    es_client.indices.refresh(index=index_name)
+
+
+def _insert_all_documents(es_client):
+    insert_documents("murs", CASE_ALIAS, es_client)
+    insert_documents("archived_murs", ARCH_MUR_ALIAS, es_client)
+    insert_documents("adrs", CASE_ALIAS, es_client)
+    insert_documents("admin_fines", CASE_ALIAS, es_client)
+    insert_documents("statutes", AO_ALIAS, es_client)
+    insert_documents("advisory_opinions", AO_ALIAS, es_client)
+
+
+def insert_documents(doc_type, index, es_client):
+    for doc in document_dictionary[doc_type]:
+        es_client.index(index=index, body=doc)
+
+    wait_for_refresh(es_client, index)
 
 
 def assert_dicts_subset(first, second):
