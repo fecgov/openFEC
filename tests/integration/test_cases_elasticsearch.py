@@ -1,51 +1,12 @@
-from webservices.legal_docs import create_index, CASE_INDEX, ARCH_MUR_INDEX, AO_INDEX, CASE_ALIAS, ARCH_MUR_ALIAS
-from webservices.utils import create_es_client
-from tests.legal_test_data import document_dictionary
-from webservices import rest
 from datetime import datetime
 from webservices.resources.legal import ALL_DOCUMENT_TYPES
 from urllib.parse import urlencode
-ALL_INDICES = [CASE_INDEX, AO_INDEX, ARCH_MUR_INDEX]
+from tests.common import ElasticSearchBaseTest, ALL_INDICES, document_dictionary
 
 
-class TestElasticsearch:
-    es_client = create_es_client()
+class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
     base_search_url = "/v1/legal/search/?"
-
-    @classmethod
-    def setup_class(self):
-        self.app = rest.app.test_client()
-        # ensure environment is completely clean before starting
-        self.delete_all_indices()
-        for index in ALL_INDICES:
-            create_index(index)
-
-    @classmethod
-    def delete_all_indices(self):
-        self.es_client.indices.delete("*")
-
-    @classmethod
-    def teardown_class(self):
-        self.delete_all_indices()
-
-    @classmethod
-    def wait_for_refresh(self, index_name):
-        self.es_client.indices.refresh(index=index_name)
-
-    @classmethod
-    def insert_documents(self, doc_type, index):
-        for doc in document_dictionary[doc_type]:
-            self.es_client.index(index=index, body=doc)
-
-        self.wait_for_refresh(index)
-
-        if doc_type == "archived_murs":
-            query = {"query": {"term": {"type": "murs"}}}
-        else:
-            query = {"query": {"term": {"type": doc_type}}}
-
-        result = self.es_client.search(index=index, body=query)
-        assert result['hits']['total']['value'] == len(document_dictionary[doc_type])
+    wrong_date_format = "01/20/24"
 
     def check_filters(self, filter_name, field_name, expected_return, doc_type):
         url = f"{self.base_search_url}{filter_name}={expected_return}"
@@ -78,20 +39,6 @@ class TestElasticsearch:
             exists = self.es_client.indices.get(index)
             assert exists, f"Error creating {index}"
 
-# ---------------------- Test document inserts  ------------------------------------------------
-
-    def test_mur_insert(self):
-        self.insert_documents("murs", CASE_ALIAS)
-
-    def test_arch_mur_insert(self):
-        self.insert_documents("archived_murs", ARCH_MUR_ALIAS)
-
-    def test_adr_insert(self):
-        self.insert_documents("adrs", CASE_ALIAS)
-
-    def test_af_insert(self):
-        self.insert_documents("admin_fines", CASE_ALIAS)
-
 # ---------------------- Start all case filters  ------------------------------------------------
     def test_all_doc_types(self):
         response = self.app.get(self.base_search_url)
@@ -100,7 +47,6 @@ class TestElasticsearch:
         total_all += sum(len(document_dictionary[doc_type]) for doc_type in document_dictionary)
 
         all_murs = len(document_dictionary["archived_murs"]) + len(document_dictionary["murs"])
-
         assert response.status_code == 200
         assert response.json["total_all"] == total_all
         assert response.json["total_murs"] == all_murs
@@ -174,6 +120,52 @@ class TestElasticsearch:
         bad_value = 5555
         self.check_bad_values("case_doc_category_id", bad_value, None, True)
 
+    def test_case_doc_date(self):
+        # for current murs, adrs, and afs
+        document_date = "2022-12-01"
+        query_date = datetime.strptime(document_date, "%Y-%m-%d")
+        url = f"{self.base_search_url}case_min_document_date={document_date}"
+
+        response = self.app.get(url)
+        assert response.status_code == 200
+        assert all(any(
+                datetime.strptime(doc["document_date"], "%Y-%m-%dT%H:%M:%S") >= query_date
+                for doc in mur["documents"])
+            for mur in response.json["murs"]
+        ) and all(any(
+                datetime.strptime(doc["document_date"], "%Y-%m-%dT%H:%M:%S") >= query_date
+                for doc in adr["documents"])
+            for adr in response.json["adrs"]
+        ) and all(any(
+                datetime.strptime(doc["document_date"], "%Y-%m-%dT%H:%M:%S") >= query_date
+                for doc in af["documents"])
+            for af in response.json["admin_fines"]
+        )
+
+        url = f"{self.base_search_url}case_max_document_date={document_date}"
+
+        response = self.app.get(url)
+
+        assert response.status_code == 200
+        assert all(any(
+                datetime.strptime(doc["document_date"], "%Y-%m-%dT%H:%M:%S") <= query_date
+                for doc in mur["documents"])
+            for mur in response.json["murs"]
+        ) and all(any(
+                datetime.strptime(doc["document_date"], "%Y-%m-%dT%H:%M:%S") <= query_date
+                for doc in adr["documents"])
+            for adr in response.json["adrs"]
+        ) and all(any(
+                datetime.strptime(doc["document_date"], "%Y-%m-%dT%H:%M:%S") <= query_date
+                for doc in af["documents"])
+            for af in response.json["admin_fines"]
+        )
+
+        filters = ["case_min_document_date", "case_max_document_date",]
+
+        for filter in filters:
+            self.check_bad_values(filter, self.wrong_date_format, None, True)
+
     def test_q_filters(self):
         # for archived and current murs, adrs, and afs
         search_phrase = "sample"
@@ -244,7 +236,6 @@ class TestElasticsearch:
         url = f"{self.base_search_url}case_min_open_date={open_date}"
 
         response = self.app.get(url)
-        print(response.json)
         assert response.status_code == 200
         assert all(
             datetime.strptime(mur["open_date"], "%Y-%m-%dT%H:%M:%S") >= query_date
@@ -296,11 +287,10 @@ class TestElasticsearch:
             for adr in response.json["adrs"]
         )
 
-        wrong_date_format = "01/20/24"
         filters = ["case_min_close_date", "case_max_close_date", "case_min_open_date", "case_max_open_date"]
 
         for filter in filters:
-            self.check_bad_values(filter, wrong_date_format, None, True)
+            self.check_bad_values(filter, self.wrong_date_format, None, True)
 
     def test_subject_id(self):
         # for current murs and adrs only
@@ -570,9 +560,8 @@ class TestElasticsearch:
             datetime.strptime(af["final_determination_date"], "%Y-%m-%dT%H:%M:%S") <= query_date
             for af in response.json["admin_fines"]
         )
-        wrong_date_format = "01/20/24"
         filters = ["af_min_rtb_date", "af_max_rtb_date", "af_min_fd_date", "af_max_fd_date"]
 
         for filter in filters:
-            self.check_bad_values(filter, wrong_date_format, None, True)
+            self.check_bad_values(filter, self.wrong_date_format, None, True)
 # ---------------------- End AF only filters ------------------------------------------------
