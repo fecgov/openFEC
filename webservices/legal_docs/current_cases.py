@@ -477,8 +477,7 @@ def get_single_case(case_type, case_no, bucket):
                 case["complainant"] = get_adr_complainant(case_id)
                 case["non_monetary_terms"] = get_adr_non_monetary_terms(case_id)
                 case["non_monetary_terms_respondents"] = get_adr_non_monetary_terms_respondents(case_id)
-                case["citations"] = get_adr_citations(case_id)
-                case["adr_dispositions"] = get_adr_dispositions(case_id)
+                case["dispositions"] = get_adr_dispositions(case_id)
                 case["case_status"] = get_adr_case_status(case_id)
 
             elif case_type == "MUR":
@@ -535,7 +534,7 @@ def get_af_specific_fields(case_id):
             case["petition_court_decision_date"] = row["petition_court_decision_date"]
             case["civil_penalty_due_date"] = row["civil_penalty_due_date"]
             case["civil_penalty_payment_status"] = row["civil_penalty_pymt_status_flg"]
-            case["af_dispositions"] = get_af_dispositions(case_id)
+            case["dispositions"] = get_af_dispositions(case_id)
     return case
 
 
@@ -545,7 +544,7 @@ def get_af_dispositions(case_id):
         disposition_data = []
         for row in rs:
             disposition_data.append({"disposition_description": row["description"],
-                                     "disposition_date": row["dates"], "amount": row["amount"]})
+                                     "disposition_date": row["dates"], "penalty": row["amount"]})
         return disposition_data
 
 
@@ -637,12 +636,13 @@ def clean_mur_citation_text(text, cit_type):
 def get_adr_dispositions(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(MUR_ADR_DISPOSITION_DATA.format(case_id))
-        adr_dispositions = []
+        dispositions = []
+        citations = []
+        citations = get_adr_citations(case_id)
         for row in rs:
-            adr_dispositions.append({"disposition": row["event_name"], "penalty": row["final_amount"],
-                                     "respondent": row["name"]})
-
-        return adr_dispositions
+            dispositions.append({"disposition": row["event_name"], "penalty": row["final_amount"],
+                                "respondent": row["name"], "citations": citations})
+        return dispositions
 
 
 def get_adr_case_status(case_id):
