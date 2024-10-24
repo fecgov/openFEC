@@ -223,7 +223,6 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     if kwargs.get("case_respondents"):
         must_clauses.append(Q("simple_query_string",
                             query=kwargs.get("case_respondents"), fields=["respondents"]))
-    query = query.query("bool", must=must_clauses)
 
     if kwargs.get("case_regulatory_citation") or kwargs.get("case_statutory_citation"):
         return case_apply_citation_params(
@@ -231,6 +230,18 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
             kwargs.get("case_regulatory_citation"),
             kwargs.get("case_statutory_citation"),
             kwargs.get("case_citation_require_all"), **kwargs)
+
+    penalty_range = {}
+    if kwargs.get("min_penalty_amount") and kwargs.get("min_penalty_amount") != '':
+        penalty_range["gte"] = kwargs.get("min_penalty_amount")
+
+    if kwargs.get("max_penalty_amount") and kwargs.get("max_penalty_amount") != '':
+        penalty_range["lte"] = kwargs.get("max_penalty_amount")
+
+    if penalty_range:
+        must_clauses.append(Q("nested", path="dispositions",
+                            query=Q("range", dispositions__penalty=penalty_range)))
+    query = query.query("bool", must=must_clauses)
 
     # logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 

@@ -227,7 +227,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'civil_penalty_payment_status': 'Paid In Full',
             'dispositions': [
                 {
-                    'amount': Decimal('350'),
+                    'penalty': Decimal('350'),
                     'disposition_description': 'Challenged',
                     "disposition_date": date(2021, 6, 25)
                 }
@@ -237,7 +237,7 @@ class TestLoadCurrentCases(BaseTestCase):
         }
 
         expected_af_case_disposition = {
-            'amount': Decimal('350'),
+            'penalty': Decimal('350'),
             'disposition_description': 'Challenged',
             'disposition_date': date(2021, 6, 25),
         }
@@ -271,7 +271,7 @@ class TestLoadCurrentCases(BaseTestCase):
 
         self.create_af_case_disposition(
             case_id,
-            expected_af_case_disposition['amount'],
+            expected_af_case_disposition['penalty'],
             expected_af_case_disposition['disposition_description'],
             expected_af_case_disposition['disposition_date'],
         )

@@ -128,9 +128,10 @@ ADMIN_FINE_MAPPING = {
                 "type": "date",
                 "format": "dateOptionalTime",
             },
-            "amount": {
-                "type": "long",
+            "penalty": {
+                "type": "integer",
                 "index": False,
+                "null_value": -1
             },
         }
     },
@@ -189,7 +190,7 @@ MUR_MAPPING = {
                 }
             },
             "disposition": {"type": "text"},
-            "penalty": {"type": "double"},
+            "penalty": {"type": "integer", "null_value": -1},
             "respondent": {"type": "text"},
             "mur_disposition_catagory_id": {"type": "keyword"},
         }
@@ -249,7 +250,7 @@ ADR_MAPPING = {
                 }
             },
             "disposition": {"type": "text"},
-            "penalty": {"type": "double"},
+            "penalty": {"type": "integer", "null_value": -1},
             "respondent": {"type": "text"},
         }
     },

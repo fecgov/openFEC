@@ -544,7 +544,7 @@ def get_af_dispositions(case_id):
         disposition_data = []
         for row in rs:
             disposition_data.append({"disposition_description": row["description"],
-                                     "disposition_date": row["dates"], "amount": row["amount"]})
+                                     "disposition_date": row["dates"], "penalty": row["amount"]})
         return disposition_data
 
 
