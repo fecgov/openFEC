@@ -115,7 +115,7 @@ class ApiBaseTest(BaseTestCase):
         return response['results']
 
 
-class ElasticSearchBaseTest(ApiBaseTest):
+class ElasticSearchBaseTest(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(ElasticSearchBaseTest, cls).setUpClass()
@@ -131,10 +131,11 @@ class ElasticSearchBaseTest(ApiBaseTest):
         _delete_all_indices(cls.es_client)
 
     def setUp(self):
-        super(ElasticSearchBaseTest, self).setUp()
+        self.request_context = rest.app.test_request_context()
+        self.request_context.push()
 
     def tearDown(self):
-        super(ElasticSearchBaseTest, self).tearDown()
+        self.request_context.pop()
 
 
 def _create_all_indices():
