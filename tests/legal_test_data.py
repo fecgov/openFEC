@@ -1457,11 +1457,177 @@ second_admin_fine = {
       "url": "/legal/administrative-fine/108/"
 }
 
+first_statute = {
+      "chapter": "95",
+      "doc_id": "/us/usc/t26/s9001",
+      "name": "Short title",
+      "no": "9001",
+      "title": "26",
+      "type": "statutes",
+      "url": "https://www.govinfo.gov/link/uscode/26/9001"
+}
+
+first_ao = {
+      "ao_citations": [
+        {
+          "name": "Farrell",
+          "no": "2004-20"
+        },
+        {
+          "name": "Busby",
+          "no": "2006-06"
+        },
+        {
+          "name": "National Republican Congressional Committee",
+          "no": "2022-08"
+        }
+      ],
+      "ao_no": "2024-12",
+      "ao_serial": 12,
+      "ao_year": 2024,
+      "aos_cited_by": [],
+      "commenter_names": [],
+      "doc_id": "advisory_opinions_2024-12",
+      "documents": [
+        {
+          "ao_doc_category_id": "V",
+          "category": "Votes",
+          "date": "2024-09-19T00:00:00",
+          "description": "Vote",
+          "document_id": 88638,
+          "text": "Random document text for first document",
+          "url": "/files/legal/aos/2024-12/202412V_1.pdf"
+        },
+        {
+          "ao_doc_category_id": "C",
+          "category": "Comments and Ex parte Communications",
+          "date": "2024-09-18T00:00:00",
+          "description": "Comment on Draft AO 2024-12, Agenda Document Nos. 24-38-A and 24-38-B, by Shaun McCutcheon",
+          "document_id": 88639,
+          "text": "Random document text for the second document",
+          "url": "/files/legal/aos/2024-12/202412C_3.pdf"
+        },
+        {
+          "ao_doc_category_id": "R",
+          "category": "AO Request, Supplemental Material, and Extensions of Time",
+          "date": "2024-07-23T00:00:00",
+          "description": "Request by Shaun McCutcheon (Comments due on August 19, 2024)",
+          "document_id": 88640,
+          "text": "Random document text for the third document",
+          "url": "/files/legal/aos/2024-12/202412R_1.pdf"
+        },
+        {
+          "ao_doc_category_id": "C",
+          "category": "Comments and Ex parte Communications",
+          "date": "2024-08-19T00:00:00",
+          "description": "Comment on AOR 2024-12 by League of Women Voters of Maine, RepresentUS, and Fair Vote",
+          "document_id": 88641,
+          "text": "Random document text for the fourth document",
+          "url": "/files/legal/aos/2024-12/202412C_1.pdf"
+        },
+        {
+          "ao_doc_category_id": "F",
+          "category": "Final Opinion",
+          "date": "2024-09-19T00:00:00",
+          "description": "AO 2024-12",
+          "document_id": 88637,
+          "text": "Random document text for the fifth document",
+          "url": "/files/legal/aos/2024-12/2024-12.pdf"
+        },
+        {
+          "ao_doc_category_id": "C",
+          "category": "Comments and Ex parte Communications",
+          "date": "2024-08-19T00:00:00",
+          "description": "Comment on AOR 2024-12 by Campaign Legal Center",
+          "document_id": 88642,
+          "text": "Random document text for the sixth document",
+          "url": "/files/legal/aos/2024-12/202412C_2.pdf"
+        },
+        {
+          "ao_doc_category_id": "D",
+          "category": "Draft Documents",
+          "date": "2024-09-12T00:00:00",
+          "description": "Draft AO, Agenda Document No. 24-38-A (Comments due on September 18, 2024 by 12:00pm ET)",
+          "document_id": 88643,
+          "text": "Random document text for the seventh document",
+          "url": "/files/legal/aos/2024-12/202412.pdf"
+        },
+        {
+          "ao_doc_category_id": "D",
+          "category": "Draft Documents",
+          "date": "2024-09-12T00:00:00",
+          "description": "Draft AO, Agenda Document No. 24-38-B (Comments due on September 18, 2024 by 12:00pm ET)",
+          "document_id": 88644,
+          "text": "Random document text for the eighth document",
+          "url": "/files/legal/aos/2024-12/202412_1.pdf"
+        }
+      ],
+      "entities": [
+        {
+          "name": "Mr. Shaun McCutcheon ",
+          "role": "Requestor",
+          "type": "Individual"
+        },
+        {
+          "name": "Chalmers, Adams, Backer & Kaufman, LLC",
+          "role": "Counsel/Representative",
+          "type": "Law Firm"
+        },
+        {
+          "name": "Mr. Dan Backer Esq.",
+          "role": "Counsel/Representative",
+          "type": "Individual"
+        }
+      ],
+      "is_pending": False,
+      "issue_date": "2024-09-19",
+      "name": "McCutcheon",
+      "no": "2024-12",
+      "regulatory_citations": [
+        {
+          "part": 100,
+          "section": 2,
+          "title": 11
+        },
+        {
+          "part": 110,
+          "section": 1,
+          "title": 11
+        }
+      ],
+      "representative_names": [
+        "Chalmers, Adams, Backer & Kaufman, LLC",
+        ""
+      ],
+      "request_date": "2024-07-23",
+      "requestor_names": [
+        ""
+      ],
+      "requestor_types": [
+        "Individual"
+      ],
+      "status": "Final",
+      "statutory_citations": [
+        {
+          "section": "30101",
+          "title": 52
+        },
+        {
+          "section": "30108",
+          "title": 52
+        }
+      ],
+      "summary": """Whether for purposes of contribution limits the first round of a ranked choice voting election
+      constitutes a general election, and each subsequent round, if any, is a distinct runoff election.""",
+      "type": "advisory_opinions"
+}
+
+
 document_dictionary = {
     "murs": [first_test_mur, second_test_mur],
     "archived_murs": [first_archived_mur, second_archived_mur],
     "adrs": [first_adr, second_adr],
     "admin_fines": [first_admin_fine, second_admin_fine],
-    "statutes": [],
-    "advisory_opinions": []
+    "statutes": [first_statute,],
+    "advisory_opinions": [first_ao,]
 }

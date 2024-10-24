@@ -11,7 +11,8 @@ from jdbc_utils import to_jdbc_url
 from webservices import rest
 from webservices import __API_VERSION__
 
-from webservices.legal_docs import create_index, CASE_INDEX, ARCH_MUR_INDEX, AO_INDEX, CASE_ALIAS, ARCH_MUR_ALIAS
+from webservices.legal_docs import (create_index, CASE_INDEX, ARCH_MUR_INDEX, AO_INDEX,
+                                    CASE_ALIAS, ARCH_MUR_ALIAS, AO_ALIAS)
 from webservices.utils import create_es_client
 from tests.legal_test_data import document_dictionary
 
@@ -137,6 +138,17 @@ class ElasticSearchBaseTest(BaseTestCase):
     def tearDown(self):
         self.request_context.pop()
 
+    def _response(self, qry):
+        response = self.app.get(qry)
+        self.assertEqual(response.status_code, 200)
+        result = json.loads(codecs.decode(response.data))
+        self.assertNotEqual(result["total_all"], 0)
+        return result
+
+    def _results(self, qry):
+        response = self._response(qry)
+        return response
+
 
 def _create_all_indices():
     for index in ALL_INDICES:
@@ -147,7 +159,7 @@ def _delete_all_indices(es_client):
     es_client.indices.delete("*")
 
 
-def _wait_for_refresh(es_client, index_name):
+def wait_for_refresh(es_client, index_name):
     es_client.indices.refresh(index=index_name)
 
 
@@ -156,13 +168,15 @@ def _insert_all_documents(es_client):
     insert_documents("archived_murs", ARCH_MUR_ALIAS, es_client)
     insert_documents("adrs", CASE_ALIAS, es_client)
     insert_documents("admin_fines", CASE_ALIAS, es_client)
+    insert_documents("statutes", AO_ALIAS, es_client)
+    insert_documents("advisory_opinions", AO_ALIAS, es_client)
 
 
 def insert_documents(doc_type, index, es_client):
     for doc in document_dictionary[doc_type]:
         es_client.index(index=index, body=doc)
 
-    _wait_for_refresh(es_client, index)
+    wait_for_refresh(es_client, index)
 
 
 def assert_dicts_subset(first, second):
