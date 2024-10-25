@@ -86,4 +86,5 @@ class Electioneering(db.Model):
 
     @property
     def election_type(self):
-        return self.election_type_raw[:1]
+        if self.election_type_raw:
+            return self.election_type_raw[:1]
