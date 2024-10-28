@@ -1193,8 +1193,8 @@ result sets are approximate; you will want to page through the records until no 
 
 FORM_CATEGORY = '''
 The forms filed are categorized based on the nature of the filing:\n\
-    - REPORT F3, F3X, F3P, F3L, F4, F5, F7, F13\n\
-    - NOTICE F5, F24, F6, F9, F10, F11\n\
+    - REPORT F3, F3X, F3P, F3L, F4, F5, F7, F13, F24\n\
+    - NOTICE F6, F9, F10, F11\n\
     - STATEMENT F1, F2\n\
     - OTHER F1M, F8, F99, F12, FRQ\n\
 '''
@@ -1398,6 +1398,7 @@ FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 
     - F1   Statement of Organization\n\
     - F1M  Notification of Multicandidate Status\n\
     - F2   Statement of Candidacy\n\
+    - F24  24/48 Hour Report of Independent Expenditures\n\
     - F3   Report of Receipts and Disbursements for an Authorized Committee\n\
     - F3P  Report of Receipts and Disbursements by an Authorized Committee of a Candidate for \
     The Office of President or Vice President\n\
@@ -1418,6 +1419,7 @@ FORM_TYPE_EFILING = 'The form where the underlying data comes from, for example 
     - F1   Statement of Organization\n\
     - F1M  Notification of Multicandidate Status\n\
     - F2   Statement of Candidacy\n\
+    - F24  24/48 Hour Report of Independent Expenditures\n\
     - F3   Report of Receipts and Disbursements for an Authorized Committee\n\
     - F3P  Report of Receipts and Disbursements by an Authorized Committee of a Candidate for \
     The Office of President or Vice President\n\
@@ -1476,8 +1478,9 @@ BASE_REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
 REPORT_TYPE = BASE_REPORT_TYPE + '\
     - 90S Post Inaugural Supplement\n\
     - 90D Post Inaugural\n\
-    - 48  48 Hour Notification\n\
-    - 24  24 Hour Notification\n\
+    - 24  24 Hour Notification (F6, F9)\n\
+    - 24  24 Hour Report of Independent Expenditures (F5, F24/F3X)\n\
+    - 48  48 Hour Report of Independent Expenditures (F5, F24/F3X)\n\
     - M7S July Monthly/Semi-Annual\n\
     - MSA Monthly Semi-Annual (MY)\n\
     - MYS Monthly Year End/Semi-Annual\n\
