@@ -6,6 +6,7 @@ from webservices.utils import (
     create_es_client,
     create_eregs_link,
     DateTimeEncoder,
+    upload_citations,
 )
 from webservices.tasks.utils import get_bucket
 from .es_management import (  # noqa
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 # for debug, uncomment this line
 # logger.setLevel(logging.DEBUG)
 
-ALL_CASES = """
+ALL_ADR_AF_CASES = """
     SELECT
         case_id,
         case_no,
@@ -30,6 +31,22 @@ ALL_CASES = """
         published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
     WHERE case_type = %s
+    ORDER BY case_serial desc
+"""
+
+ALL_MUR_CASES = """
+    SELECT
+        current_case.case_id,
+        current_case.case_no,
+        current_case.case_serial,
+        name,
+        case_type,
+        published_flg
+    FROM fecmur.cases_with_parsed_case_serial_numbers_vw current_case
+    JOIN fecmur.arch_current_mur_sorting_vw mur_sort on current_case.case_serial = mur_sort.case_serial
+    WHERE case_type = %s
+    AND mur_sort.mur_type ='current'
+    AND current_case.case_no = mur_sort.case_no
     ORDER BY case_serial desc
 """
 
@@ -149,8 +166,7 @@ AF_DISPOSITION_DATA = """
 
 MUR_ADR_DISPOSITION_DATA = """
     SELECT fecmur.event.event_name,
-        fecmur.settlement.final_amount, fecmur.entity.name,
-        violations.statutory_citation, violations.regulatory_citation
+        fecmur.settlement.final_amount, fecmur.entity.name
     FROM fecmur.calendar
     INNER JOIN fecmur.event USING (event_id)
     INNER JOIN fecmur.entity USING (entity_id)
@@ -163,15 +179,25 @@ MUR_ADR_DISPOSITION_DATA = """
         AND fecmur.settlement.case_id = {0}) AS relatedobjects
         ON relatedobjects.entity_id = fecmur.calendar.entity_id
     LEFT JOIN fecmur.settlement USING (settlement_id)
-    LEFT JOIN
-        (SELECT *
-        FROM fecmur.violations
-        WHERE stage = 'Closed'
-            AND case_id = {0}) AS violations
-        ON violations.entity_id = fecmur.calendar.entity_id
     WHERE fecmur.calendar.case_id = {0}
         AND event_name NOT IN ('Complaint/Referral', 'Disposition')
     ORDER BY fecmur.event.event_name ASC, fecmur.settlement.final_amount DESC NULLS LAST, event_date DESC;
+"""
+
+MUR_CITATION_DATA = """
+  SELECT distinct violations.statutory_citation,
+    violations.regulatory_citation,
+    violations.case_id,
+    fecmur.entity.name
+    FROM fecmur.calendar
+    INNER JOIN fecmur.entity USING (entity_id)
+    INNER JOIN fecmur.event USING (event_id)
+    LEFT JOIN
+        (SELECT *
+        FROM fecmur.violations
+        WHERE stage = 'Closed') AS violations
+        ON violations.entity_id = fecmur.calendar.entity_id
+    WHERE event_name NOT IN ('Complaint/Referral', 'Disposition');
 """
 
 MUR_COMMISSION_VOTES = """
@@ -303,6 +329,11 @@ STATUTE_REGEX = re.compile(r"(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)")
 REGULATION_REGEX = re.compile(r"(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?")
 CASE_NO_REGEX = re.compile(r"(?P<serial>\d+)")
 
+MUR_REGULATORY_CITATIONS = set()
+MUR_STATUTORY_CITATIONS = set()
+ALL_REGULATORY_CITATIONS = {}
+ALL_STATUTORY_CITATIONS = {}
+
 
 def load_current_murs(specific_mur_no=None):
     """
@@ -351,6 +382,10 @@ def load_cases(case_type, case_no=None):
     if case_type in ("MUR", "ADR", "AF"):
         es_client = create_es_client()
         if es_client.indices.exists(index=CASE_ALIAS):
+
+            if case_type == "MUR":
+                load_mur_citations()
+
             logger.info("Loading {0}(s)".format(case_type))
             case_count = 0
             for case in get_cases(case_type, case_no):
@@ -381,6 +416,14 @@ def load_cases(case_type, case_no=None):
         logger.error("Invalid case type: must be 'MUR', 'ADR', or 'AF'.")
 
 
+def load_mur_citations():
+    es_client = create_es_client()
+    logger.info(" Getting MUR citations...")
+    get_all_mur_citations()
+    upload_citations(MUR_STATUTORY_CITATIONS, MUR_REGULATORY_CITATIONS, CASE_ALIAS, "murs", es_client)
+    logger.info(" MUR Citations loaded.")
+
+
 def get_cases(case_type, case_no=None):
     """
     Takes a specific case to load.
@@ -391,7 +434,11 @@ def get_cases(case_type, case_no=None):
 
     if case_no is None:
         with db.engine.connect() as conn:
-            rs = conn.execute(ALL_CASES, case_type)
+
+            if case_type in ("ADR", "AF"):
+                rs = conn.execute(ALL_ADR_AF_CASES, case_type)
+            elif case_type in ("MUR"):
+                rs = conn.execute(ALL_MUR_CASES, case_type)
             for row in rs:
                 yield get_single_case(case_type, row["case_no"], bucket)
     else:
@@ -561,6 +608,32 @@ def get_adr_citations(case_id):
         return citations
 
 
+def get_all_mur_citations():
+    with db.engine.connect() as conn:
+        rs = conn.execute(MUR_CITATION_DATA)
+        for row in rs:
+            if row["statutory_citation"]:
+                ALL_STATUTORY_CITATIONS[str(row["case_id"]) + row["name"]] = parse_statutory_citations(
+                    row["statutory_citation"],
+                    row["case_id"], None, "mur")
+            if row["regulatory_citation"]:
+                ALL_REGULATORY_CITATIONS[str(row["case_id"]) + row["name"]] = parse_regulatory_citations(
+                    row["regulatory_citation"],
+                    row["case_id"], None, "mur")
+
+
+def clean_mur_citation_text(text, cit_type):
+    text = text.partition('(')[0]
+
+    if cit_type == "statute":
+        text = re.sub(r'[^A-Za-z0-9-]', '', text)
+        pass
+    else:
+        text = re.sub(r'[^0-9.]', '', text)
+        text = re.sub(r'\.{2,}|\.(?!\d)', lambda m: '.' if m.group(0) == '..' else '', text)
+    return text
+
+
 def get_adr_dispositions(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(MUR_ADR_DISPOSITION_DATA.format(case_id))
@@ -590,8 +663,11 @@ def get_mur_dispositions(case_id):
         rs = conn.execute(MUR_ADR_DISPOSITION_DATA.format(case_id))
         disposition_data = []
         for row in rs:
-            citations = parse_statutory_citations(row["statutory_citation"], case_id, row["name"])
-            citations.extend(parse_regulatory_citations(row["regulatory_citation"], case_id, row["name"]))
+            citations = []
+            if ALL_STATUTORY_CITATIONS.get(str(case_id) + row["name"]):
+                citations += ALL_STATUTORY_CITATIONS.get(str(case_id) + row["name"])
+            if ALL_REGULATORY_CITATIONS.get(str(case_id) + row["name"]):
+                citations += ALL_REGULATORY_CITATIONS.get(str(case_id) + row["name"])
             disposition_data.append({
                 "citations": citations,
                 "disposition": row["event_name"],
@@ -602,7 +678,7 @@ def get_mur_dispositions(case_id):
         return disposition_data
 
 
-def parse_statutory_citations(statutory_citation, case_id, entity_id):
+def parse_statutory_citations(statutory_citation, case_id, entity_id, doc_type=None):
     citations = []
     if statutory_citation:
         statutory_citation = remove_reclassification_notes(statutory_citation)
@@ -617,9 +693,14 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
                 match_text = statutory_citation[match.start():matches[index + 1].start()]
             text = match_text.rstrip(" ,;")
             citations.append({"text": text, "type": "statute", "title": orig_title, "url": url})
+
+        if doc_type == "mur":
+            match_text = clean_mur_citation_text(match_text, "statute")
+            MUR_STATUTORY_CITATIONS.add(orig_title + " U.S.C. §" + match_text)
+
         if not citations:
-            logger.warn("Cannot parse statutory citation %s for Entity %s in case %s",
-                        statutory_citation, entity_id, case_id)
+            logger.warning("Cannot parse statutory citation %s for Entity %s in case %s",
+                           statutory_citation, entity_id, case_id)
     return citations
 
 
@@ -656,7 +737,7 @@ def remove_reclassification_notes(statutory_citation):
     return cleaned_citation
 
 
-def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
+def parse_regulatory_citations(regulatory_citation, case_id, entity_id, doc_type=None):
     citations = []
     if regulatory_citation:
         matches = list(REGULATION_REGEX.finditer(regulatory_citation))
@@ -670,9 +751,14 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
                 match_text = regulatory_citation[match.start():matches[index + 1].start()]
             text = match_text.rstrip(" ,;")
             citations.append({"text": text, "type": "regulation", "title": "11", "url": url})
+
+            if doc_type == "mur":
+                match_text = clean_mur_citation_text(match_text, "reg")
+                MUR_REGULATORY_CITATIONS.add("11 CFR §" + match_text)
+
         if not citations:
-            logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
-                        regulatory_citation, entity_id, case_id)
+            logger.warning("Cannot parse regulatory citation %s for Entity %s in case %s",
+                           regulatory_citation, entity_id, case_id)
     return citations
 
 
