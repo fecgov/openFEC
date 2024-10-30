@@ -190,21 +190,24 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
         # logging.info(response)
 
         self.assertEqual(response["total_admin_fines"], 0)
-        self.assertEqual(response["total_all"], 8)
+        self.assertEqual(response["total_all"], 10)
 
     def test_sort(self):
         sort_value = "case_no"
+        ignore_type = ["advisory_opinions", "statutes"]
         response = self._response(api.url_for(UniversalSearch, sort=sort_value))
         # logging.info(response)
 
         for doc_type in ALL_DOCUMENT_TYPES:
-            self.check_sort_asc(response[doc_type])
+            if doc_type not in ignore_type:
+                self.check_sort_asc(response[doc_type])
 
         response = self._response(api.url_for(UniversalSearch, sort="-" + sort_value))
         # logging.info(response)
 
         for doc_type in ALL_DOCUMENT_TYPES:
-            self.check_sort_desc(response[doc_type])
+            if doc_type not in ignore_type:
+                self.check_sort_desc(response[doc_type])
 
 # ---------------------- End all case filters  ------------------------------------------------
 # ---------------------- Start MUR and ADR filters ------------------------------------------------

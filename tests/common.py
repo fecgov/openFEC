@@ -145,6 +145,16 @@ class ElasticSearchBaseTest(BaseTestCase):
         self.assertNotEqual(result["total_all"], 0)
         return result
 
+    def _results_ao(self, qry):
+        response = self._response(qry)
+        self.assertNotEqual(response["total_advisory_opinions"], 0)
+        return response["advisory_opinions"]
+
+    def _results_statute(self, qry):
+        response = self._response(qry)
+        self.assertNotEqual(response["total_statutes"], 0)
+        return response["statutes"]
+
 
 def _create_all_indices():
     for index in ALL_INDICES:
