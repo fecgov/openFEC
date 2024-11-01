@@ -400,8 +400,8 @@ legal_universal_search = {
     'af_max_fd_date': Date(required=False, description=docs.AF_MAX_FD_DATE),
     'af_fd_fine_amount': fields.Int(required=False, description=docs.AF_FD_FINE_AMOUNT),
     'sort': IStr(required=False, description=docs.SORT),
-    'min_penalty_amount': fields.Str(required=False, description=docs.MIN_PENALTY_AMOUNT),
-    'max_penalty_amount': fields.Str(required=False, description=docs.MAX_PENALTY_AMOUNT),
+    'case_min_penalty_amount': fields.Str(required=False, description=docs.CASE_MIN_PENALTY_AMOUNT),
+    'case_max_penalty_amount': fields.Str(required=False, description=docs.CASE_MAX_PENALTY_AMOUNT),
 }
 
 citation = {

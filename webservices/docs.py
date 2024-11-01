@@ -2367,11 +2367,11 @@ Secondary Subject Description:\n\
     - 18 - Prohibitions\n\
 '''
 
-MIN_PENALTY_AMOUNT = '''
+CASE_MIN_PENALTY_AMOUNT = '''
 Show cases with a penalty greater than this amount
 '''
 
-MAX_PENALTY_AMOUNT = '''
+CASE_MAX_PENALTY_AMOUNT = '''
 Show cases with a penalty less than this amount
 
 '''
