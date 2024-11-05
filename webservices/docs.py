@@ -2383,6 +2383,15 @@ Secondary Subject Description:\n\
     - 17 - Limits\n\
     - 18 - Prohibitions\n\
 '''
+
+CASE_MIN_PENALTY_AMOUNT = '''
+Show cases with a penalty greater than this amount
+'''
+
+CASE_MAX_PENALTY_AMOUNT = '''
+Show cases with a penalty less than this amount
+
+'''
 # ======== legal end =========
 
 
