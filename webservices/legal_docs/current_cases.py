@@ -274,56 +274,15 @@ ADR_CASE_STATUS_MAP = {
     "Dismissed - Failed to Approve": "Case Dismissed"
 }
 
-MUR_ADR_DISPOSITION_CATEGORY_MAP = {
-    'Approved by Commission': '1',
-    'Approved In Part Recs.': '2',
-    'Approved Recs.': '3',
-    'Case Activated': '4',
-    'Case Activation': '5',
-    'Conciliation-PC': '6',
-    'Conciliation-PPC': '7',
-    'Dismiss and Remind': '8',
-    'Dismissed': '9',
-    'Dismissed - Agreement Rejected': '10',
-    'Dismissed-Low Rated': '11',
-    'Dismissed-Other': '12',
-    'Dismissed-Stale': '13',
-    'Dismiss pursuant to prosecutorial discretion': '14',
-    'Dismiss pursuant to prosecutorial discretion, and caution': '15',
-    'Enforcement - Disposition - Dismissed "Dismiss" - Dismiss and Caution': '16',
-    'Failed to Approve Recs.': '17',
-    'First General Counsel Report': '18',
-    'Formal Discovery Authorized': '19',
-    'Investigative Activity': '20',
-    'Mailed to Respondent': '21',
-    'Merged': '22',
-    'No PCTB': '23',
-    'No RTB': '24',
-    'Offer from Respondent Received': '25',
-    'Other': '26',
-    'PC Brief': '27',
-    'PC Conciliation Approved': '28',
-    'PC/NFA': '29',
-    'PCTB Finding': '30',
-    'Pre-PCC Commenced': '31',
-    'Received': '32',
-    'Received from Audit Division': '33',
-    'Received from Commission': '34',
-    'Received from OGC': '35',
-    'Received from RAD': '36',
-    'Request for Extension of Time Approved': '37',
-    'Request for Extension of Time Approved/Denied': '38',
-    'Request for Extension of Time Received': '39',
-    'Response Received': '40',
-    'RTB Finding': '41',
-    'RTB/NFA': '42',
-    'Settlement Agreement': '43',
-    'Suit Authorization': '44',
-    'Take no action': '45',
-    'Take No Further Action': '46',
-    'To Respondent': '47',
-    'Transferred to ADR': '48',
-}
+CASE_DISPOSITION_CATEGORY = """
+    SELECT category_name,
+    category_id,
+    doc_type
+    from fecmur.ref_case_disposition_category
+    WHERE published_flg = true
+    AND doc_type = %s
+"""
+
 
 STATUTE_REGEX = re.compile(r"(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)")
 REGULATION_REGEX = re.compile(r"(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?")
@@ -661,21 +620,53 @@ def get_adr_case_status(case_id):
 def get_mur_dispositions(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(MUR_ADR_DISPOSITION_DATA.format(case_id))
+
+        # Get the allowed displayed MUR disposition category list from table fecmur.ref_case_disposition_category
+        category_list = [dict(row) for row in conn.execute(CASE_DISPOSITION_CATEGORY, "MUR")]
+        # print(category_list):
+        # [{'category': 'Conciliation-PPC', 'category_id': 1},
+        # {'category': 'Conciliation-PC', 'category_id': 2},
+        # {'category': 'Dismiss and Remind', 'category_id': 3},
+        # {'category': 'Dismissed', 'category_id': 4},
+        # {'category': 'Dismissed-Low Rated', 'category_id': 5},
+        # {'category': 'Dismissed-Other', 'category_id': 6},
+        # {'category': 'Dismissed-Stale', 'category_id': 7},
+        # {'category': 'Dismiss pursuant to prosecutorial discretion', 'category_id': 8},
+        # {'category': 'Dismiss pursuant to prosecutorial discretion, and caution', 'category_id': 9},
+        # {'category': 'Enforcement - Disposition - Dismissed Dismiss - Dismiss and Caution', 'category_id': 10},
+        # {'category': 'No PCTB', 'category_id': 11},
+        # {'category': 'No RTB', 'category_id': 12},
+        # {'category': 'PCTB Finding', 'category_id': 13},
+        # {'category': 'PC/NFA', 'category_id': 14},
+        # {'category': 'RTB Finding', 'category_id': 15},
+        # {'category': 'RTB/NFA', 'category_id': 16},
+        # {'category': 'Take no action', 'category_id': 17},
+        # {'category': 'Take No Further Action', 'category_id': 18}]
+
         disposition_data = []
         for row in rs:
-            citations = []
-            if ALL_STATUTORY_CITATIONS.get(str(case_id) + row["name"]):
-                citations += ALL_STATUTORY_CITATIONS.get(str(case_id) + row["name"])
-            if ALL_REGULATORY_CITATIONS.get(str(case_id) + row["name"]):
-                citations += ALL_REGULATORY_CITATIONS.get(str(case_id) + row["name"])
-            disposition_data.append({
-                "citations": citations,
-                "disposition": row["event_name"],
-                "mur_disposition_category_id": MUR_ADR_DISPOSITION_CATEGORY_MAP[row["event_name"]],
-                "penalty": row["final_amount"],
-                "respondent": row["name"], },
-            )
+            category_id = get_display_case_disposition_category_id(category_list, row["event_name"], "MUR")
+            if category_id:
+                citations = []
+                if ALL_STATUTORY_CITATIONS.get(str(case_id) + row["name"]):
+                    citations += ALL_STATUTORY_CITATIONS.get(str(case_id) + row["name"])
+                if ALL_REGULATORY_CITATIONS.get(str(case_id) + row["name"]):
+                    citations += ALL_REGULATORY_CITATIONS.get(str(case_id) + row["name"])
+
+                disposition_data.append({
+                    "citations": citations,
+                    "disposition": row["event_name"],
+                    "mur_disposition_category_id": category_id,
+                    "penalty": row["final_amount"],
+                    "respondent": row["name"], },
+                )
         return disposition_data
+
+
+def get_display_case_disposition_category_id(category_list, category_name, doc_type):
+    for one_row in category_list:
+        if one_row["category_name"] == category_name and one_row["doc_type"] == doc_type:
+            return one_row["category_id"]
 
 
 def parse_statutory_citations(statutory_citation, case_id, entity_id, doc_type=None):
