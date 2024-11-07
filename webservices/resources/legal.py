@@ -25,7 +25,7 @@ import json
 logger = logging.getLogger(__name__)
 
 # To debug, uncomment the line below:
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
 
@@ -691,22 +691,22 @@ def apply_ao_specific_query_params(query, **kwargs):
 
     if kwargs.get("ao_requestor_type"):
         requestor_types = {
-            1: "Federal candidate/candidate committee/officeholder",
-            2: "Publicly funded candidates/committees",
-            3: "Party committee, national",
-            4: "Party committee, state or local",
-            5: "Nonconnected political committee",
-            6: "Separate segregated fund",
-            7: "Labor Organization",
-            8: "Trade Association",
-            9: "Membership Organization, Cooperative, Corporation W/O Capital Stock",
-            10: "Corporation (including LLCs electing corporate status)",
-            11: "Partnership (including LLCs electing partnership status)",
-            12: "Governmental entity",
-            13: "Research/Public Interest/Educational Institution",
-            14: "Law Firm",
-            15: "Individual",
-            16: "Other",
+            'Federal candidate/candidate committee/officeholder': '1',
+            'Publicly funded candidates/committees': '2',
+            'Party committee, national': '3',
+            'Party committee, state or local': '4',
+            'Nonconnected political committee': '5',
+            'Separate segregated fund': '6',
+            'Labor Organization': '7',
+            'Trade Association': '8',
+            'Membership Organization, Cooperative, Corporation W/O Capital Stock': '9',
+            'Corporation (including LLCs electing corporate status)': '10',
+            'Partnership (including LLCs electing partnership status)': '11',
+            'Governmental entity': '12',
+            'Research/Public Interest/Educational Institution': '13',
+            'Law Firm': '14',
+            'Individual': '15',
+            'Other': '16',
         }
         must_clauses.append(
             Q(
@@ -751,7 +751,7 @@ def apply_ao_specific_query_params(query, **kwargs):
         )
 
     query = query.query("bool", must=must_clauses)
-    # logger.debug("apply_ao_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    logger.debug("apply_ao_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     return query
 

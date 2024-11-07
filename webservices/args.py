@@ -326,8 +326,8 @@ legal_universal_search = {
     'from_hit': fields.Int(required=False, description=docs.FROM_HIT),
     'hits_returned': fields.Int(required=False, description=docs.HITS_RETURNED),
     'type': fields.Str(
-            validate=validate.OneOf(["admin_fines", "adrs", "advisory_opinions",
-                                     "murs", "statutes"]),
+            validate=validate.OneOf(['', 'admin_fines', 'adrs', 'advisory_opinions',
+                                     'murs', 'statutes']),
             description=docs.LEGAL_DOC_TYPE),
 
     'ao_no': fields.List(IStr, required=False, description=docs.AO_NUMBER),
@@ -346,9 +346,14 @@ legal_universal_search = {
     'ao_is_pending': fields.Bool(description=docs.AO_IS_PENDING),
     'ao_status': fields.Str(description=docs.AO_STATUS),
     'ao_requestor': fields.Str(description=docs.AO_REQUESTOR),
-    'ao_requestor_type': fields.List(
-        fields.Integer(validate=validate.OneOf(range(1, 17))),
-        description=docs.AO_REQUESTOR_TYPE),
+    # 'ao_requestor_type': fields.List(
+    #     fields.Integer(validate=validate.OneOf(range(1, 17))),
+    #     description=docs.AO_REQUESTOR_TYPE),
+    'ao_requestor_type': fields.List(IStr(
+        validate=validate.OneOf(
+            ['', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11',
+                '12', '13', '14', '15', '16'])),
+            description=docs.AO_REQUESTOR_TYPE),
     'ao_regulatory_citation': fields.List(IStr, required=False, description=docs.REGULATORY_CITATION),
     'ao_statutory_citation': fields.List(IStr, required=False, description=docs.STATUTORY_CITATION),
     'ao_citation_require_all': fields.Bool(description=docs.CITATION_REQUIRE_ALL),
@@ -383,7 +388,7 @@ legal_universal_search = {
         description=docs.CASE_DOCUMENT_CATEGORY_DESCRIPTION),
 
     'mur_type': fields.Str(
-        required=False, validate=validate.OneOf(["archived", "current"]), description=docs.MUR_TYPE),
+        required=False, validate=validate.OneOf(['', 'archived', 'current']), description=docs.MUR_TYPE),
     'mur_disposition_category_id': fields.List(IStr(
         validate=validate.OneOf([
             '', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
@@ -404,13 +409,11 @@ legal_universal_search = {
     'af_max_fd_date': Date(required=False, description=docs.AF_MAX_FD_DATE),
     'af_fd_fine_amount': fields.Int(required=False, description=docs.AF_FD_FINE_AMOUNT),
     'sort': IStr(required=False, description=docs.SORT),
-    'case_min_penalty_amount': fields.Str(required=False, description=docs.CASE_MIN_PENALTY_AMOUNT),
-    'case_max_penalty_amount': fields.Str(required=False, description=docs.CASE_MAX_PENALTY_AMOUNT),
 }
 
 citation = {
     'doc_type': fields.Str(
-                required=False, validate=validate.OneOf(["adrs", "advisory_opinions", "murs"]),
+                required=False, validate=validate.OneOf(['', 'adrs', 'advisory_opinions', 'murs']),
                 description=docs.CITATION_DOC_TYPE
             )
 }
