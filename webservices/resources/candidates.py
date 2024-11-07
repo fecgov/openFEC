@@ -63,19 +63,17 @@ class CandidateList(ApiResource):
         )
 
     def build_query(self, **kwargs):
+        if "q" not in kwargs and kwargs["sort"] in {"receipts", "-receipts"}:
+            raise exceptions.ApiError(
+                "Cannot sort on receipts when parameter 'q' is not set",
+                status_code=422,
+            )
+
         if kwargs.get('name'):
             kwargs['q'] = kwargs['name']
 
         query = super().build_query(**kwargs)
         candidate_detail = models.Candidate
-
-        if {'receipts', '-receipts'}.intersection(
-            kwargs.get('sort', [])
-        ) and 'q' not in kwargs:
-            raise exceptions.ApiError(
-                'Cannot sort on receipts when parameter "q" is not set',
-                status_code=422,
-            )
 
         if 'has_raised_funds' in kwargs:
             query = query.filter(
