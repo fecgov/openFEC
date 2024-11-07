@@ -623,26 +623,7 @@ def get_mur_dispositions(case_id):
 
         # Get the allowed displayed MUR disposition category list from table fecmur.ref_case_disposition_category
         category_list = [dict(row) for row in conn.execute(CASE_DISPOSITION_CATEGORY, "MUR")]
-        # print(category_list):
-        # [{'category': 'Conciliation-PPC', 'category_id': 1},
-        # {'category': 'Conciliation-PC', 'category_id': 2},
-        # {'category': 'Dismiss and Remind', 'category_id': 3},
-        # {'category': 'Dismissed', 'category_id': 4},
-        # {'category': 'Dismissed-Low Rated', 'category_id': 5},
-        # {'category': 'Dismissed-Other', 'category_id': 6},
-        # {'category': 'Dismissed-Stale', 'category_id': 7},
-        # {'category': 'Dismiss pursuant to prosecutorial discretion', 'category_id': 8},
-        # {'category': 'Dismiss pursuant to prosecutorial discretion, and caution', 'category_id': 9},
-        # {'category': 'Enforcement - Disposition - Dismissed Dismiss - Dismiss and Caution', 'category_id': 10},
-        # {'category': 'No PCTB', 'category_id': 11},
-        # {'category': 'No RTB', 'category_id': 12},
-        # {'category': 'PCTB Finding', 'category_id': 13},
-        # {'category': 'PC/NFA', 'category_id': 14},
-        # {'category': 'RTB Finding', 'category_id': 15},
-        # {'category': 'RTB/NFA', 'category_id': 16},
-        # {'category': 'Take no action', 'category_id': 17},
-        # {'category': 'Take No Further Action', 'category_id': 18}]
-
+        logger.debug("category_list =" + json.dumps(category_list, indent=3, cls=DateTimeEncoder))
         disposition_data = []
         for row in rs:
             category_id = get_display_case_disposition_category_id(category_list, row["event_name"], "MUR")
