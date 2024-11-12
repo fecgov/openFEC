@@ -461,7 +461,7 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
 
     def test_mur_disposition_filter(self):
         # filter for current murs
-        categories = ["7", "24"]
+        categories = ["7", "8"]
         response = self._results_mur(api.url_for(UniversalSearch, mur_disposition_category_id=categories))
         # logging.info(response)
 
