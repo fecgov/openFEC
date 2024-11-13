@@ -115,11 +115,6 @@ class UniversalSearch(Resource):
         else:
             doc_types = [kwargs.get("type")]
 
-            # if doc_types is not in one of ALL_DOCUMENT_TYPES
-            # then reset type = all (= ALL_DOCUMENT_TYPES)
-            if doc_types[0] not in ALL_DOCUMENT_TYPES:
-                doc_types = ALL_DOCUMENT_TYPES
-
         hits_returned = min([200, hits_returned])
 
         results = {}
@@ -496,11 +491,6 @@ def apply_adr_specific_query_params(query, **kwargs):
 
     if kwargs.get("mur_type"):
         must_clauses.append(Q("match", mur_type=kwargs.get("mur_type")))
-
-    if kwargs.get("case_dispositions"):
-        must_clauses.append(
-            Q("term", disposition__data__disposition=kwargs.get("case_dispositions"))
-        )
 
     if kwargs.get("case_election_cycles"):
         must_clauses.append(
