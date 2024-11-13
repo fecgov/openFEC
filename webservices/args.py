@@ -346,8 +346,9 @@ legal_universal_search = {
     'ao_is_pending': fields.Bool(description=docs.AO_IS_PENDING),
     'ao_status': fields.Str(description=docs.AO_STATUS),
     'ao_requestor': fields.Str(description=docs.AO_REQUESTOR),
-    'ao_requestor_type': fields.List(
-        fields.Integer(validate=validate.OneOf(range(1, 17))),
+    'ao_requestor_type': fields.List(IStr(
+        validate=validate.OneOf(['', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11',
+                                '12', '13', '14', '15', '16'])),
         description=docs.AO_REQUESTOR_TYPE),
     'ao_regulatory_citation': fields.List(IStr, required=False, description=docs.REGULATORY_CITATION),
     'ao_statutory_citation': fields.List(IStr, required=False, description=docs.STATUTORY_CITATION),

@@ -2162,6 +2162,23 @@ The requestor of the advisory opinion
 
 AO_REQUESTOR_TYPE = '''
 Code of the advisory opinion requestor type.
+Select one or more codes to filter by advisory opinion requestor type:\n\
+        - 1 - Federal candidate/candidate committee/officeholder\n\
+        - 2 - Publicly funded candidates/committees\n\
+        - 3 - Party committee, national\n\
+        - 4 - Party committee, state or local\n\
+        - 5 - Nonconnected political committee\n\
+        - 6 - Separate segregated fun \n\
+        - 7 - Labor Organization\n\
+        - 8 - Trade Association\n\
+        - 9 - Membership Organization, Cooperative, Corporation W/O Capital Stocks\n\
+        - 10 - Corporation (including LLCs electing corporate status)\n\
+        - 11 - Partnership (including LLCs electing partnership status)\n\
+        - 12 - Governmental entity \n\
+        - 13 - Research/Public Interest/Educational Institution\n\
+        - 14 - Law Firm\n\
+        - 15 - Individual\n\
+        - 16 - Other\n\
 '''
 
 CITATION_DOC_TYPE = '''

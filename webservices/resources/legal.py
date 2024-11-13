@@ -679,24 +679,25 @@ def apply_ao_specific_query_params(query, **kwargs):
     else:
         must_clauses.append(Q("bool", should=citation_queries, minimum_should_match=1))
 
-    if kwargs.get("ao_requestor_type"):
+    if kwargs.get("ao_requestor_type") and '' not in kwargs.get("ao_requestor_type"):
+        print('LENGHTHHHHHHHHHHHHHHH', len(kwargs.get("ao_requestor_type")))
         requestor_types = {
-            1: "Federal candidate/candidate committee/officeholder",
-            2: "Publicly funded candidates/committees",
-            3: "Party committee, national",
-            4: "Party committee, state or local",
-            5: "Nonconnected political committee",
-            6: "Separate segregated fund",
-            7: "Labor Organization",
-            8: "Trade Association",
-            9: "Membership Organization, Cooperative, Corporation W/O Capital Stock",
-            10: "Corporation (including LLCs electing corporate status)",
-            11: "Partnership (including LLCs electing partnership status)",
-            12: "Governmental entity",
-            13: "Research/Public Interest/Educational Institution",
-            14: "Law Firm",
-            15: "Individual",
-            16: "Other",
+            "1": "Federal candidate/candidate committee/officeholder",
+            "2": "Publicly funded candidates/committees",
+            "3": "Party committee, national",
+            "4": "Party committee, state or local",
+            "5": "Nonconnected political committee",
+            "6": "Separate segregated fund",
+            "7": "Labor Organization",
+            "8": "Trade Association",
+            "9": "Membership Organization, Cooperative, Corporation W/O Capital Stock",
+            "10": "Corporation (including LLCs electing corporate status)",
+            "11": "Partnership (including LLCs electing partnership status)",
+            "12": "Governmental entity",
+            "13": "Research/Public Interest/Educational Institution",
+            "14": "Law Firm",
+            "15": "Individual",
+            "16": "Other",
         }
         must_clauses.append(
             Q(
