@@ -138,12 +138,16 @@ class ElasticSearchBaseTest(BaseTestCase):
     def tearDown(self):
         self.request_context.pop()
 
-    def _response(self, qry):
+    def _results(self, qry):
         response = self.app.get(qry)
         self.assertEqual(response.status_code, 200)
         result = json.loads(codecs.decode(response.data))
-        self.assertNotEqual(result["total_all"], 0)
         return result
+
+    def _response(self, qry):
+        response = self._results(qry)
+        self.assertNotEqual(response["total_all"], 0)
+        return response
 
     def _results_case(self, qry):
         response = self._response(qry)
@@ -164,6 +168,16 @@ class ElasticSearchBaseTest(BaseTestCase):
         response = self._response(qry)
         self.assertNotEqual(response["total_admin_fines"], 0)
         return response
+
+    def _results_docs(self, qry):
+        response = self._results(qry)
+        self.assertEqual(len(response["docs"]), 1)
+        return response["docs"]
+
+    def _results_citations(self, qry):
+        response = self._results(qry)
+        self.assertNotEqual(len(response["citations"]), 0)
+        return response["citations"]
 
 
 def _create_all_indices():
@@ -186,6 +200,8 @@ def _insert_all_documents(es_client):
     insert_documents("admin_fines", CASE_ALIAS, es_client)
     insert_documents("statutes", AO_ALIAS, es_client)
     insert_documents("advisory_opinions", AO_ALIAS, es_client)
+    insert_documents("ao_citations", AO_ALIAS, es_client)
+    insert_documents("mur_citations", CASE_ALIAS, es_client)
 
 
 def insert_documents(doc_type, index, es_client):
