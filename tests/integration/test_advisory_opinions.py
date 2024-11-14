@@ -169,7 +169,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         actual_ao = next(get_advisory_opinions(None))
         assert actual_ao["entities"] == [
             {"role": "Commenter",
-                "name": " Tom Dolan ",
+                "name": "Tom Dolan",
                 "type": "Individual"}]
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")

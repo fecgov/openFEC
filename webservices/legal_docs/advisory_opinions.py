@@ -220,6 +220,12 @@ CATEGORY_MAP = {
     }
 
 
+def get_full_name(row):
+    if row["entity_type_description"] == "Individual":
+        return f"{row['prefix']} {row['firstname']} {row['lastname']} {row['suffix']}".strip()
+    return row["name"]
+
+
 def get_entities(ao_id):
     requestor_names = []
     commenter_names = []
@@ -229,31 +235,21 @@ def get_entities(ao_id):
     with db.engine.connect() as conn:
         rs = conn.execute(AO_ENTITIES, ao_id)
         for row in rs:
+            full_name = get_full_name(row)
+            entities.append(
+                {
+                    "role": row["role_description"],
+                    "name": full_name,
+                    "type": row["entity_type_description"],
+                }
+            )
             if row["role_description"] == "Requestor":
-                requestor_names.append(row["name"])
+                requestor_names.append(full_name)
                 requestor_types.add(row["entity_type_description"])
             elif row["role_description"] == "Commenter":
-                commenter_names.append(row["name"])
+                commenter_names.append(full_name)
             elif row["role_description"] == "Counsel/Representative":
-                representative_names.append(row["name"])
-            # For entity type "individual" populate the name column by combining
-            # prefix, firstname, lastname and suffix.
-            if row["entity_type_description"] == "Individual":
-                entities.append(
-                    {
-                        "role": row["role_description"],
-                        "name": row["prefix"] + " " + row["firstname"] + " " + row["lastname"] + " " + row["suffix"],
-                        "type": row["entity_type_description"],
-                    }
-                )
-            else:
-                entities.append(
-                    {
-                        "role": row["role_description"],
-                        "name": row["name"],
-                        "type": row["entity_type_description"],
-                    }
-                )
+                representative_names.append(full_name)
     return (
         requestor_names,
         list(requestor_types),
