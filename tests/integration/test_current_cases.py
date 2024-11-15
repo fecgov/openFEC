@@ -127,13 +127,12 @@ class TestLoadCurrentCases(BaseTestCase):
             'respondents': [],
             'documents': [],
             'commission_votes': [],
-            'adr_dispositions': [],
+            'dispositions': [],
             'close_date': None,
             'open_date': None,
             'url': '/legal/alternative-dispute-resolution/1/',
             'complainant': [],
             'case_status': [],
-            'citations': [],
             'sort1': -1,
             'sort2': None,
         }
@@ -226,9 +225,9 @@ class TestLoadCurrentCases(BaseTestCase):
             'url': '/legal/administrative-fine/1/',
             'civil_penalty_due_date': None,
             'civil_penalty_payment_status': 'Paid In Full',
-            'af_dispositions': [
+            'dispositions': [
                 {
-                    'amount': Decimal('350'),
+                    'penalty': Decimal('350'),
                     'disposition_description': 'Challenged',
                     "disposition_date": date(2021, 6, 25)
                 }
@@ -238,7 +237,7 @@ class TestLoadCurrentCases(BaseTestCase):
         }
 
         expected_af_case_disposition = {
-            'amount': Decimal('350'),
+            'penalty': Decimal('350'),
             'disposition_description': 'Challenged',
             'disposition_date': date(2021, 6, 25),
         }
@@ -272,7 +271,7 @@ class TestLoadCurrentCases(BaseTestCase):
 
         self.create_af_case_disposition(
             case_id,
-            expected_af_case_disposition['amount'],
+            expected_af_case_disposition['penalty'],
             expected_af_case_disposition['disposition_description'],
             expected_af_case_disposition['disposition_date'],
         )
@@ -430,6 +429,20 @@ class TestLoadCurrentCases(BaseTestCase):
             commission_id, agenda_date, vote_date, action, case_id, pg_date
         )
 
+        category_id = 1
+        category_name = "Conciliation-PPC"
+        display_category_name = "Conciliation-PPC"
+        published_flg = True
+        doc_type = "MUR"
+
+        self.create_disposition_category(
+            category_id,
+            category_name,
+            display_category_name,
+            published_flg,
+            doc_type
+        )
+
         load_mur_citations()
 
         actual_mur = next(get_cases('MUR'))
@@ -445,7 +458,7 @@ class TestLoadCurrentCases(BaseTestCase):
             'dispositions': [
                 {
                     'disposition': 'Conciliation-PPC',
-                    'mur_disposition_category_id': '7',
+                    'mur_disposition_category_id': 1,
                     'respondent': 'Open Elections LLC',
                     'penalty': Decimal('50000.00'),
                     'citations': [
@@ -799,6 +812,25 @@ class TestLoadCurrentCases(BaseTestCase):
             is_key_date,
             check_primary_respondent,
             pg_date,
+        )
+
+    def create_disposition_category(
+            self,
+            category_id,
+            category_name,
+            display_category_name,
+            published_flg,
+            doc_type,
+     ):
+        self.connection.execute(
+            "INSERT INTO fecmur.ref_case_disposition_category (category_id, category_name, "
+            "display_category_name, published_flg, doc_type) "
+            "VALUES (%s, %s, %s, %s, %s)",
+            category_id,
+            category_name,
+            display_category_name,
+            published_flg,
+            doc_type,
         )
 
     def create_relatedobjects(self, master_key, detail_key, relation_id):

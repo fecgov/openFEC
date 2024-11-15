@@ -118,7 +118,7 @@ ADMIN_FINE_MAPPING = {
         "type": "date",
         "format": "dateOptionalTime",
     },
-    "af_dispositions": {
+    "dispositions": {
         "properties": {
             "disposition_description": {
                 "type": "text",
@@ -128,9 +128,11 @@ ADMIN_FINE_MAPPING = {
                 "type": "date",
                 "format": "dateOptionalTime",
             },
-            "amount": {
-                "type": "long",
+            "penalty": {
+                "type": "scaled_float",
+                "scaling_factor": 100,
                 "index": False,
+                "null_value": -1
             },
         }
     },
@@ -189,7 +191,7 @@ MUR_MAPPING = {
                 }
             },
             "disposition": {"type": "text"},
-            "penalty": {"type": "double"},
+            "penalty": {"type": "scaled_float", "scaling_factor": 100, "null_value": -1},
             "respondent": {"type": "text"},
             "mur_disposition_catagory_id": {"type": "keyword"},
         }
@@ -236,11 +238,20 @@ ADR_MAPPING = {
     },
     "respondents": {"type": "text"},
     "case_status": {"type": "text"},
-    "adr_dispositions": {
+    "dispositions": {
         "type": "nested",
         "properties": {
+            "citations": {
+                "type": "nested",
+                "properties": {
+                    "text": {"type": "text"},
+                    "title": {"type": "text"},
+                    "type": {"type": "text"},
+                    "url": {"type": "text"},
+                }
+            },
             "disposition": {"type": "text"},
-            "penalty": {"type": "double"},
+            "penalty": {"type": "scaled_float", "scaling_factor": 100, "null_value": -1},
             "respondent": {"type": "text"},
         }
     },
@@ -403,7 +414,7 @@ ARCH_MUR_MAPPING = {
         "close_date": {"type": "date", "format": "dateOptionalTime"},
         "url": {"type": "text", "index": False},
         "complainants": {"type": "text"},
-        "respondent": {"type": "text"},
+        "respondents": {"type": "text"},
         "documents": ARCH_MUR_DOCUMENT_MAPPING,
         "citations": ARCH_MUR_CITATION_MAPPING,
         "subject": ARCH_MUR_SUBJECT_MAPPING,

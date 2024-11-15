@@ -42,6 +42,10 @@ from .es_management import (  # noqa
     delete_murs_from_s3,
     delete_doctype_from_es,
     delete_single_doctype_from_es,
+    CASE_ALIAS,
+    AO_ALIAS,
+    ARCH_MUR_ALIAS,
+    SEARCH_ALIAS
 )
 
 from .show_legal_data import ( # noqa

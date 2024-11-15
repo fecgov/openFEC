@@ -274,56 +274,15 @@ ADR_CASE_STATUS_MAP = {
     "Dismissed - Failed to Approve": "Case Dismissed"
 }
 
-MUR_ADR_DISPOSITION_CATEGORY_MAP = {
-    'Approved by Commission': '1',
-    'Approved In Part Recs.': '2',
-    'Approved Recs.': '3',
-    'Case Activated': '4',
-    'Case Activation': '5',
-    'Conciliation-PC': '6',
-    'Conciliation-PPC': '7',
-    'Dismiss and Remind': '8',
-    'Dismissed': '9',
-    'Dismissed - Agreement Rejected': '10',
-    'Dismissed-Low Rated': '11',
-    'Dismissed-Other': '12',
-    'Dismissed-Stale': '13',
-    'Dismiss pursuant to prosecutorial discretion': '14',
-    'Dismiss pursuant to prosecutorial discretion, and caution': '15',
-    'Enforcement - Disposition - Dismissed "Dismiss" - Dismiss and Caution': '16',
-    'Failed to Approve Recs.': '17',
-    'First General Counsel Report': '18',
-    'Formal Discovery Authorized': '19',
-    'Investigative Activity': '20',
-    'Mailed to Respondent': '21',
-    'Merged': '22',
-    'No PCTB': '23',
-    'No RTB': '24',
-    'Offer from Respondent Received': '25',
-    'Other': '26',
-    'PC Brief': '27',
-    'PC Conciliation Approved': '28',
-    'PC/NFA': '29',
-    'PCTB Finding': '30',
-    'Pre-PCC Commenced': '31',
-    'Received': '32',
-    'Received from Audit Division': '33',
-    'Received from Commission': '34',
-    'Received from OGC': '35',
-    'Received from RAD': '36',
-    'Request for Extension of Time Approved': '37',
-    'Request for Extension of Time Approved/Denied': '38',
-    'Request for Extension of Time Received': '39',
-    'Response Received': '40',
-    'RTB Finding': '41',
-    'RTB/NFA': '42',
-    'Settlement Agreement': '43',
-    'Suit Authorization': '44',
-    'Take no action': '45',
-    'Take No Further Action': '46',
-    'To Respondent': '47',
-    'Transferred to ADR': '48',
-}
+CASE_DISPOSITION_CATEGORY = """
+    SELECT category_name,
+    category_id,
+    doc_type
+    from fecmur.ref_case_disposition_category
+    WHERE published_flg = true
+    AND doc_type = %s
+"""
+
 
 STATUTE_REGEX = re.compile(r"(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)")
 REGULATION_REGEX = re.compile(r"(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?")
@@ -477,8 +436,7 @@ def get_single_case(case_type, case_no, bucket):
                 case["complainant"] = get_adr_complainant(case_id)
                 case["non_monetary_terms"] = get_adr_non_monetary_terms(case_id)
                 case["non_monetary_terms_respondents"] = get_adr_non_monetary_terms_respondents(case_id)
-                case["citations"] = get_adr_citations(case_id)
-                case["adr_dispositions"] = get_adr_dispositions(case_id)
+                case["dispositions"] = get_adr_dispositions(case_id)
                 case["case_status"] = get_adr_case_status(case_id)
 
             elif case_type == "MUR":
@@ -535,7 +493,7 @@ def get_af_specific_fields(case_id):
             case["petition_court_decision_date"] = row["petition_court_decision_date"]
             case["civil_penalty_due_date"] = row["civil_penalty_due_date"]
             case["civil_penalty_payment_status"] = row["civil_penalty_pymt_status_flg"]
-            case["af_dispositions"] = get_af_dispositions(case_id)
+            case["dispositions"] = get_af_dispositions(case_id)
     return case
 
 
@@ -545,7 +503,7 @@ def get_af_dispositions(case_id):
         disposition_data = []
         for row in rs:
             disposition_data.append({"disposition_description": row["description"],
-                                     "disposition_date": row["dates"], "amount": row["amount"]})
+                                     "disposition_date": row["dates"], "penalty": row["amount"]})
         return disposition_data
 
 
@@ -637,12 +595,13 @@ def clean_mur_citation_text(text, cit_type):
 def get_adr_dispositions(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(MUR_ADR_DISPOSITION_DATA.format(case_id))
-        adr_dispositions = []
+        dispositions = []
+        citations = []
+        citations = get_adr_citations(case_id)
         for row in rs:
-            adr_dispositions.append({"disposition": row["event_name"], "penalty": row["final_amount"],
-                                     "respondent": row["name"]})
-
-        return adr_dispositions
+            dispositions.append({"disposition": row["event_name"], "penalty": row["final_amount"],
+                                "respondent": row["name"], "citations": citations})
+        return dispositions
 
 
 def get_adr_case_status(case_id):
@@ -661,21 +620,34 @@ def get_adr_case_status(case_id):
 def get_mur_dispositions(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(MUR_ADR_DISPOSITION_DATA.format(case_id))
+
+        # Get the allowed displayed MUR disposition category list from table fecmur.ref_case_disposition_category
+        category_list = [dict(row) for row in conn.execute(CASE_DISPOSITION_CATEGORY, "MUR")]
+        logger.debug("category_list =" + json.dumps(category_list, indent=3, cls=DateTimeEncoder))
         disposition_data = []
         for row in rs:
-            citations = []
-            if ALL_STATUTORY_CITATIONS.get(str(case_id) + row["name"]):
-                citations += ALL_STATUTORY_CITATIONS.get(str(case_id) + row["name"])
-            if ALL_REGULATORY_CITATIONS.get(str(case_id) + row["name"]):
-                citations += ALL_REGULATORY_CITATIONS.get(str(case_id) + row["name"])
-            disposition_data.append({
-                "citations": citations,
-                "disposition": row["event_name"],
-                "mur_disposition_category_id": MUR_ADR_DISPOSITION_CATEGORY_MAP[row["event_name"]],
-                "penalty": row["final_amount"],
-                "respondent": row["name"], },
-            )
+            category_id = get_display_case_disposition_category_id(category_list, row["event_name"], "MUR")
+            if category_id:
+                citations = []
+                if ALL_STATUTORY_CITATIONS.get(str(case_id) + row["name"]):
+                    citations += ALL_STATUTORY_CITATIONS.get(str(case_id) + row["name"])
+                if ALL_REGULATORY_CITATIONS.get(str(case_id) + row["name"]):
+                    citations += ALL_REGULATORY_CITATIONS.get(str(case_id) + row["name"])
+
+                disposition_data.append({
+                    "citations": citations,
+                    "disposition": row["event_name"],
+                    "mur_disposition_category_id": category_id,
+                    "penalty": row["final_amount"],
+                    "respondent": row["name"], },
+                )
         return disposition_data
+
+
+def get_display_case_disposition_category_id(category_list, category_name, doc_type):
+    for one_row in category_list:
+        if one_row["category_name"] == category_name and one_row["doc_type"] == doc_type:
+            return one_row["category_id"]
 
 
 def parse_statutory_citations(statutory_citation, case_id, entity_id, doc_type=None):

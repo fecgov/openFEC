@@ -387,11 +387,8 @@ legal_universal_search = {
     'mur_disposition_category_id': fields.List(IStr(
         validate=validate.OneOf([
             '', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
-            '11', '12', '13', '14', '15', '16', '17', '18', '19', '20',
-            '21', '22', '23', '24', '25', '26', '27', '28', '29', '30',
-            '31', '32', '33', '34', '35', '36', '37', '38', '39', '40',
-            '41', '42', '43', '44', '45', '46', '47', '48'])),
-        description=docs.MUR_DISPOSITION_CATEGORY_DISCRIPTION
+            '11', '12', '13', '14', '15', '16', '17', '18'])),
+        description=docs.MUR_DISPOSITION_CATEGORY_DESCRIPTION
     ),
 
     'af_name': fields.List(IStr, required=False, description=docs.AF_NAME),
@@ -404,6 +401,8 @@ legal_universal_search = {
     'af_max_fd_date': Date(required=False, description=docs.AF_MAX_FD_DATE),
     'af_fd_fine_amount': fields.Int(required=False, description=docs.AF_FD_FINE_AMOUNT),
     'sort': IStr(required=False, description=docs.SORT),
+    'case_min_penalty_amount': fields.Str(required=False, description=docs.CASE_MIN_PENALTY_AMOUNT),
+    'case_max_penalty_amount': fields.Str(required=False, description=docs.CASE_MAX_PENALTY_AMOUNT),
 }
 
 citation = {

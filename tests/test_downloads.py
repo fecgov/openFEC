@@ -141,14 +141,14 @@ class TestDownloadResource(ApiBaseTest):
     def test_download(self, export, get_cached):
         get_cached.return_value = None
         res = self.client.post_json(
-            api.url_for(resource.DownloadView, path='candidates', office='S')
+            api.url_for(resource.DownloadView, path='candidates', office='S', q='joh', sort='receipts')
         )
         assert res.json == {'status': 'queued'}
         get_cached.assert_called_once_with(
-            '/v1/candidates/', b'office=S', filename=None
+            '/v1/candidates/', b'office=S&q=joh&sort=receipts', filename=None
         )
         export.delay.assert_called_once_with(
-            '/v1/candidates/', base64.b64encode(b'office=S').decode('UTF-8')
+            '/v1/candidates/', base64.b64encode(b'office=S&q=joh&sort=receipts').decode('UTF-8')
         )
 
     @mock.patch('webservices.resources.download.get_cached_file')
@@ -181,9 +181,9 @@ class TestDownloadResource(ApiBaseTest):
         [factories.CandidateFactory() for _ in range(5)]
         db.session.commit()
         res = self.client.post_json(
-            api.url_for(resource.DownloadView, path='candidates'), expect_errors=True,
+            api.url_for(resource.DownloadView, path='/candidates', expect_errors=True)
         )
-        assert res.status_code == 403
+        assert res.status_code == 308
         assert not export.delay.called
 
     @mock.patch('webservices.resources.download.get_download_url')
