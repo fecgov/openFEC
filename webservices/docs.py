@@ -2246,56 +2246,27 @@ Select one or more case document category id to filter by corresponding case doc
         - 2001 - Administrative Fine Case\n\
 '''
 
-MUR_DISPOSITION_CATEGORY_DISCRIPTION = '''
+
+MUR_DISPOSITION_CATEGORY_DESCRIPTION = '''
 Select one or more MUR disposition category id to filter by corresponding MUR disposition category:\n\
-        - 1 - Approved by Commission\n\
-        - 2 - Approved In Part Recs.\n\
-        - 3 - Approved Recs.\n\
-        - 4 - Case Activated\n\
-        - 5 - Case Activation\n\
-        - 6 - Conciliation-PC\n\
-        - 7 - Conciliation-PPC\n\
-        - 8 - Dismiss and Remind\n\
-        - 9 - Dismissed\n\
-        - 10 - Dismissed - Agreement Rejected\n\
-        - 11 - Dismissed-Low Rated\n\
-        - 12 - Dismissed-Other\n\
-        - 13 - Dismissed-Stale\n\
-        - 14 - Dismiss pursuant to prosecutorial discretion\n\
-        - 15 - Dismiss pursuant to prosecutorial discretion, and caution\n\
-        - 16 - Enforcement - Disposition - Dismissed "Dismiss" - Dismiss and Caution\n\
-        - 17 - Failed to Approve Recs.\n\
-        - 18 - First General Counsel Report\n\
-        - 19 - Formal Discovery Authorized\n\
-        - 20 - Investigative Activity\n\
-        - 21 - Mailed to Respondent\n\
-        - 22 - Merged\n\
-        - 23 - No PCTB\n\
-        - 24 - No RTB\n\
-        - 25 - Offer from Respondent Received\n\
-        - 26 - Other\n\
-        - 27 - PC Brief\n\
-        - 28 - PC Conciliation Approved\n\
-        - 29 - PC/NFA\n\
-        - 30 - PCTB Finding\n\
-        - 31 - Pre-PCC Commenced\n\
-        - 32 - Received\n\
-        - 33 - Received from Audit Division\n\
-        - 34 - Received from Commission\n\
-        - 35 - Received from OGC\n\
-        - 36 - Received from RAD\n\
-        - 37 - Request for Extension of Time Approved\n\
-        - 38 - Request for Extension of Time Approved/Denied\n\
-        - 39 - Request for Extension of Time Received\n\
-        - 40 - Response Received\n\
-        - 41 - RTB Finding\n\
-        - 42 - RTB/NFA\n\
-        - 43 - Settlement Agreement\n\
-        - 44 - Suit Authorization\n\
-        - 45 - Take no action\n\
-        - 46 - Take No Further Action\n\
-        - 47 - To Respondent\n\
-        - 48 - Transferred to ADR\n\
+        - 1 - Conciliation-PPC\n\
+        - 2 - Conciliation-PC\n\
+        - 3 - Dismiss and Remind\n\
+        - 4 - Dismissed\n\
+        - 5 - Dismissed-Low Rated\n\
+        - 6 - Dismissed-Other\n\
+        - 7 - Dismissed-Stale\n\
+        - 8 - Dismiss pursuant to prosecutorial discretion\n\
+        - 9 - Dismiss pursuant to prosecutorial discretion, and caution\n\
+        - 10 - Enforcement - Disposition - Dismissed Dismiss - Dismiss and Caution\n\
+        - 11 - No PCTB\n\
+        - 12 - No RTB\n\
+        - 13 - PCTB Finding\n\
+        - 14 - PC/NFA\n\
+        - 15 - RTB Finding\n\
+        - 16 - RTB/NFA\n\
+        - 17 - Take no action\n\
+        - 18 - Take No Further Action\n\
 '''
 
 MUR_TYPE = '''

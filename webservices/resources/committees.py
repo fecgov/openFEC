@@ -83,14 +83,13 @@ class CommitteeList(ApiResource):
         )
 
     def build_query(self, **kwargs):
-        query = super().build_query(**kwargs)
-
-        if {"receipts", "-receipts"}.intersection(kwargs.get("sort", [])) and "q" not in kwargs:
+        if "q" not in kwargs and kwargs["sort"] in {"receipts", "-receipts"}:
             raise exceptions.ApiError(
                 "Cannot sort on receipts when parameter 'q' is not set",
                 status_code=422,
             )
 
+        query = super().build_query(**kwargs)
         if kwargs.get("candidate_id"):
             query = query.filter(
                 models.Committee.candidate_ids.overlap(kwargs["candidate_id"])
