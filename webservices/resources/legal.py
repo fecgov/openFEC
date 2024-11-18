@@ -48,6 +48,35 @@ ALL_DOCUMENT_TYPES = [
 
 ACCEPTED_DATE_FORMATS = "strict_date_optional_time_nanos||MM/dd/yyyy||M/d/yyyy||MM/d/yyyy||M/dd/yyyy"
 
+REQUESTOR_TYPES = {
+            1: "Federal candidate/candidate committee/officeholder",
+            2: "Publicly funded candidates/committees",
+            3: "Party committee, national",
+            4: "Party committee, state or local",
+            5: "Nonconnected political committee",
+            6: "Separate segregated fund",
+            7: "Labor Organization",
+            8: "Trade Association",
+            9: "Membership Organization, Cooperative, Corporation W/O Capital Stock",
+            10: "Corporation (including LLCs electing corporate status)",
+            11: "Partnership (including LLCs electing partnership status)",
+            12: "Governmental entity",
+            13: "Research/Public Interest/Educational Institution",
+            14: "Law Firm",
+            15: "Individual",
+            16: "Other",
+}
+
+CATEGORIES = {
+        "F": "Final Opinion",
+        "V": "Votes",
+        "D": "Draft Documents",
+        "R": "AO Request, Supplemental Material, and Extensions of Time",
+        "W": "Withdrawal of Request",
+        "C": "Comments and Ex parte Communications",
+        "S": "Commissioner Statements",
+    }
+
 # endpoint path: /legal/docs/<doc_type>/<no>
 # under tag: legal
 # test urls:
@@ -555,18 +584,8 @@ def get_ao_document_query(q, **kwargs):
                 category_query.append(Q("term", documents__ao_doc_category_id=ao_doc_category_id))
         combined_query.append(Q("bool", should=category_query, minimum_should_match=1))
 
-    categories = {
-        "F": "Final Opinion",
-        "V": "Votes",
-        "D": "Draft Documents",
-        "R": "AO Request, Supplemental Material, and Extensions of Time",
-        "W": "Withdrawal of Request",
-        "C": "Comments and Ex parte Communications",
-        "S": "Commissioner Statements",
-    }
-
     if kwargs.get("ao_category"):
-        ao_category = [categories[c] for c in kwargs.get("ao_category")]
+        ao_category = [CATEGORIES[c] for c in kwargs.get("ao_category")]
         combined_query = [Q("terms", documents__category=ao_category)]
 
     ao_document_date_range = {}
@@ -680,29 +699,12 @@ def apply_ao_specific_query_params(query, **kwargs):
         must_clauses.append(Q("bool", should=citation_queries, minimum_should_match=1))
 
     if kwargs.get("ao_requestor_type"):
-        requestor_types = {
-            1: "Federal candidate/candidate committee/officeholder",
-            2: "Publicly funded candidates/committees",
-            3: "Party committee, national",
-            4: "Party committee, state or local",
-            5: "Nonconnected political committee",
-            6: "Separate segregated fund",
-            7: "Labor Organization",
-            8: "Trade Association",
-            9: "Membership Organization, Cooperative, Corporation W/O Capital Stock",
-            10: "Corporation (including LLCs electing corporate status)",
-            11: "Partnership (including LLCs electing partnership status)",
-            12: "Governmental entity",
-            13: "Research/Public Interest/Educational Institution",
-            14: "Law Firm",
-            15: "Individual",
-            16: "Other",
-        }
+
         must_clauses.append(
             Q(
                 "terms",
                 requestor_types=[
-                    requestor_types[r] for r in kwargs.get("ao_requestor_type")
+                    REQUESTOR_TYPES[r] for r in kwargs.get("ao_requestor_type")
                 ],
             )
         )
