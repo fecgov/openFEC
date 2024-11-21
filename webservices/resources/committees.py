@@ -83,11 +83,12 @@ class CommitteeList(ApiResource):
         )
 
     def build_query(self, **kwargs):
-        if "q" not in kwargs and kwargs["sort"] in {"receipts", "-receipts"}:
-            raise exceptions.ApiError(
-                "Cannot sort on receipts when parameter 'q' is not set",
-                status_code=422,
-            )
+        if kwargs.get("sort"):
+            if "q" not in kwargs and kwargs["sort"] in {"receipts", "-receipts"}:
+                raise exceptions.ApiError(
+                    "Cannot sort on receipts when parameter 'q' is not set",
+                    status_code=422,
+                )
 
         query = super().build_query(**kwargs)
         if kwargs.get("candidate_id"):
