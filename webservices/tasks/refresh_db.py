@@ -3,7 +3,7 @@ import logging
 
 import manage
 from webservices import utils
-from webservices.tasks import app, download
+from webservices.tasks import app, download_tasks
 from webservices.tasks.utils import get_app_name
 
 
@@ -21,7 +21,7 @@ def refresh_materialized_views():
     manage.logger.info(" Starting daily update materialized views...")
     try:
         manage.refresh_materialized()
-        download.clear_bucket()
+        download_tasks.clear_bucket()
         slack_message = "*Success* daily update materialized views for {0} completed.".format(get_app_name())
         utils.post_to_slack(slack_message, SLACK_BOTS)
         manage.logger.info(slack_message)

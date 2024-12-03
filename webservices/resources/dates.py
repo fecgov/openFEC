@@ -14,7 +14,7 @@ from webservices import schemas
 from webservices.common import models
 from webservices.utils import use_kwargs
 from webservices.common.views import ApiResource
-from webservices import calendar
+from webservices import calendar_utils
 
 
 # used for endpoint:'/calendar-dates/'
@@ -73,8 +73,8 @@ class CalendarDatesView(ApiResource):
 )
 class CalendarDatesExport(CalendarDatesView):
     renderers = {
-        'csv': (calendar.EventSchema, calendar.render_csv, 'text/csv'),
-        'ics': (calendar.ICalEventSchema, calendar.render_ical, 'text/calendar'),
+        'csv': (calendar_utils.EventSchema, calendar_utils.render_csv, 'text/csv'),
+        'ics': (calendar_utils.ICalEventSchema, calendar_utils.render_ical, 'text/calendar'),
     }
 
     @use_kwargs({

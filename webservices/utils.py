@@ -524,7 +524,7 @@ def create_es_client():
             )
         else:
             # create local elasticsearch client
-            url = "http://localhost:9200"
+            url = "http://elasticsearch:9200"
             es_client = Elasticsearch(
                 url,
                 timeout=30,

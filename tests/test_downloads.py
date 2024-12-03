@@ -8,8 +8,8 @@ from botocore.exceptions import ClientError
 
 from webservices.exceptions import ApiError
 from webservices.rest import db, api
-from webservices.tasks import download as tasks
-from webservices.resources import download as resource
+from webservices.tasks import download_tasks as tasks
+from webservices.resources import data_downloads as resource
 from webservices.resources import (
     aggregates,
     candidates,
@@ -67,7 +67,7 @@ class TestDownloadTask(ApiBaseTest):
             ExpiresIn=resource.URL_EXPIRY,
         )
 
-    @mock.patch('webservices.tasks.download.make_bundle')
+    @mock.patch('webservices.tasks.download_tasks.make_bundle')
     def test_views(self, make_bundle):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
@@ -136,8 +136,8 @@ class TestDownloadTask(ApiBaseTest):
 
 
 class TestDownloadResource(ApiBaseTest):
-    @mock.patch('webservices.resources.download.get_cached_file')
-    @mock.patch('webservices.resources.download.download.export_query')
+    @mock.patch('webservices.resources.data_downloads.get_cached_file')
+    @mock.patch('webservices.resources.data_downloads.download_tasks.export_query')
     def test_download(self, export, get_cached):
         get_cached.return_value = None
         res = self.client.post_json(
@@ -151,8 +151,8 @@ class TestDownloadResource(ApiBaseTest):
             '/v1/candidates/', base64.b64encode(b'office=S&q=joh&sort=receipts').decode('UTF-8')
         )
 
-    @mock.patch('webservices.resources.download.get_cached_file')
-    @mock.patch('webservices.resources.download.download.export_query')
+    @mock.patch('webservices.resources.data_downloads.get_cached_file')
+    @mock.patch('webservices.resources.data_downloads.download_tasks.export_query')
     def test_download_cached(self, export, get_cached):
         get_cached.return_value = '/download'
         res = self.client.post_json(
@@ -173,9 +173,9 @@ class TestDownloadResource(ApiBaseTest):
                 )
             )
 
-    @mock.patch('webservices.resources.download.MAX_RECORDS', 2)
-    @mock.patch('webservices.resources.download.get_cached_file')
-    @mock.patch('webservices.resources.download.download.export_query')
+    @mock.patch('webservices.resources.data_downloads.MAX_RECORDS', 2)
+    @mock.patch('webservices.resources.data_downloads.get_cached_file')
+    @mock.patch('webservices.resources.data_downloads.download_tasks.export_query')
     def test_download_too_big(self, export, get_cached):
         get_cached.return_value = None
         [factories.CandidateFactory() for _ in range(5)]
@@ -186,7 +186,7 @@ class TestDownloadResource(ApiBaseTest):
         assert res.status_code == 308
         assert not export.delay.called
 
-    @mock.patch('webservices.resources.download.get_download_url')
+    @mock.patch('webservices.resources.data_downloads.get_download_url')
     @mock.patch('webservices.tasks.utils.get_object')
     def test_get_cached_exists(self, get_object, get_download):
         mock_object = mock.Mock()

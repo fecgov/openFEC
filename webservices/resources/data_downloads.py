@@ -10,7 +10,7 @@ from flask import request
 
 from webservices import utils
 from webservices import exceptions
-from webservices.tasks import download
+from webservices.tasks import download_tasks
 from webservices.tasks import utils as task_utils
 from webservices.utils import use_kwargs_original
 
@@ -33,13 +33,13 @@ class DownloadView(utils.Resource):
                 'status': 'complete',
                 'url': cached_file,
             }
-        resource = download.call_resource(path, request.query_string.decode('UTF-8'))
+        resource = download_tasks.call_resource(path, request.query_string.decode('UTF-8'))
         if resource['count'] > MAX_RECORDS:
             raise exceptions.ApiError(
                 'Cannot request downloads with more than {} records'.format(MAX_RECORDS),
                 status_code=http.client.FORBIDDEN,
             )
-        download.export_query.delay(
+        download_tasks.export_query.delay(
             path,
             base64.b64encode(request.query_string).decode('UTF-8')
         )
@@ -47,7 +47,7 @@ class DownloadView(utils.Resource):
 
 
 def get_cached_file(path, qs, filename=None):
-    key = download.get_s3_name(path, qs)
+    key = download_tasks.get_s3_name(path, qs)
     obj = task_utils.get_object(key)
     try:
         obj.metadata

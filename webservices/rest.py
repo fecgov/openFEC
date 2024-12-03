@@ -40,7 +40,7 @@ from webservices.resources import sched_d
 from webservices.resources import sched_e
 from webservices.resources import sched_f
 from webservices.resources import sched_h4
-from webservices.resources import download
+from webservices.resources import data_downloads
 from webservices.resources import aggregates
 from webservices.resources import candidate_aggregates
 from webservices.resources import candidates
@@ -66,10 +66,19 @@ app.url_map.strict_slashes = False
 
 
 def sqla_conn_string():
+    # Try to get the connection string from the environment
     sqla_conn_string = env.get_credential('SQLA_CONN')
+
+    # If SQLA_CONN is not set, try SQLA_DOCKER_DB_CONN
     if not sqla_conn_string:
-        print("Environment variable SQLA_CONN is empty; running against " + "local `cfdm_test`")
+        print("Environment variable SQLA_CONN is empty; trying SQLA_DOCKER_DB_CONN")
+        sqla_conn_string = env.get_credential('SQLA_DOCKER_DB_CONN')
+
+    # If neither environment variable is set, fallback to the default connection string
+    if not sqla_conn_string:
+        print("Environment variable SQLA_DOCKER_DB_CONN is empty; using default connection string.")
         sqla_conn_string = 'postgresql://:@/cfdm_test'
+
     return sqla_conn_string
 
 
@@ -449,7 +458,7 @@ api.add_resource(
 )
 
 api.add_resource(filings.FilingsList, '/filings/')
-api.add_resource(download.DownloadView, '/download/<path:path>/')
+api.add_resource(data_downloads.DownloadView, '/download/<path:path>/')
 api.add_resource(legal.UniversalSearch, '/legal/search/')
 api.add_resource(legal.GetLegalCitation, '/legal/citation/<citation_type>/<citation>')
 api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
