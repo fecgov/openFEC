@@ -66,7 +66,7 @@ first_test_mur = {
                   }
               ],
               "disposition": "Conciliation-PPC",
-              "mur_disposition_category_id": "7",
+              "mur_disposition_category_id": 1,
               "penalty": 70000,
               "respondent": "Democratic Executive Committee of Florida"
           },
@@ -98,7 +98,7 @@ first_test_mur = {
                   }
               ],
               "disposition": "Conciliation-PPC",
-              "mur_disposition_category_id": "7",
+              "mur_disposition_category_id": 1,
               "penalty": 70000,
               "respondent": "Garcia, Fran"
               }
@@ -316,7 +316,7 @@ second_test_mur = {
             }
           ],
           "disposition": "Dismiss pursuant to prosecutorial discretion",
-          "mur_disposition_category_id": "14",
+          "mur_disposition_category_id": 8,
           "penalty": None,
           "respondent": "Ohio Democratic Party"
         },
@@ -336,7 +336,7 @@ second_test_mur = {
             }
           ],
           "disposition": "Dismiss pursuant to prosecutorial discretion",
-          "mur_disposition_category_id": "14",
+          "mur_disposition_category_id": 8,
           "penalty": None,
           "respondent": "Frost-Brooks, Patricia"
         },
@@ -362,7 +362,7 @@ second_test_mur = {
             }
           ],
           "disposition": "No RTB",
-          "mur_disposition_category_id": "24",
+          "mur_disposition_category_id": 12,
           "penalty": None,
           "respondent": "Shearer, Alaina"
         },
@@ -376,7 +376,7 @@ second_test_mur = {
             }
           ],
           "disposition": "No RTB",
-          "mur_disposition_category_id": "24",
+          "mur_disposition_category_id": 12,
           "penalty": None,
           "respondent": "Hubay, Scott M."
         },
@@ -396,7 +396,7 @@ second_test_mur = {
             }
           ],
           "disposition": "No RTB",
-          "mur_disposition_category_id": "24",
+          "mur_disposition_category_id": 12,
           "penalty": None,
           "respondent": "Frost-Brooks, Patricia"
         },
@@ -410,7 +410,7 @@ second_test_mur = {
             }
           ],
           "disposition": "No RTB",
-          "mur_disposition_category_id": "24",
+          "mur_disposition_category_id": 12,
           "penalty": None,
           "respondent": "Alaina Shearer for Congress"
         },
@@ -424,7 +424,7 @@ second_test_mur = {
             }
           ],
           "disposition": "No RTB",
-          "mur_disposition_category_id": "24",
+          "mur_disposition_category_id": 12,
           "penalty": None,
           "respondent": "Gem City Rise PAC (f/k/a Friends of Desiree Tims)"
         },
@@ -450,7 +450,7 @@ second_test_mur = {
             }
           ],
           "disposition": "No RTB",
-          "mur_disposition_category_id": "24",
+          "mur_disposition_category_id": 12,
           "penalty": None,
           "respondent": "Tims, Desiree"
         },
@@ -470,7 +470,7 @@ second_test_mur = {
             }
           ],
           "disposition": "No RTB",
-          "mur_disposition_category_id": "24",
+          "mur_disposition_category_id": 12,
           "penalty": None,
           "respondent": "Ohio Democratic Party"
         }
@@ -1587,6 +1587,16 @@ first_statute = {
       "url": "https://www.govinfo.gov/link/uscode/26/9001"
 }
 
+second_statute = {
+      "chapter": "96",
+      "doc_id": "/us/usc/t26/s9037",
+      "name": "Payments to eligible candidates",
+      "no": "9037",
+      "title": "26",
+      "type": "statutes",
+      "url": "https://www.govinfo.gov/link/uscode/26/9037"
+}
+
 first_ao = {
       "ao_citations": [
         {
@@ -1606,7 +1616,7 @@ first_ao = {
       "ao_serial": 12,
       "ao_year": 2024,
       "aos_cited_by": [],
-      "commenter_names": [],
+      "commenter_names": ["Francis Beaver"],
       "doc_id": "advisory_opinions_2024-12",
       "documents": [
         {
@@ -1615,7 +1625,7 @@ first_ao = {
           "date": "2024-09-19T00:00:00",
           "description": "Vote",
           "document_id": 88638,
-          "text": "Random document text for first document",
+          "text": "Random document text for first ao document",
           "url": "/files/legal/aos/2024-12/202412V_1.pdf"
         },
         {
@@ -1624,7 +1634,7 @@ first_ao = {
           "date": "2024-09-18T00:00:00",
           "description": "Comment on Draft AO 2024-12, Agenda Document Nos. 24-38-A and 24-38-B, by Shaun McCutcheon",
           "document_id": 88639,
-          "text": "Random document text for the second document",
+          "text": "Random document text for the second ao document",
           "url": "/files/legal/aos/2024-12/202412C_3.pdf"
         },
         {
@@ -1633,7 +1643,7 @@ first_ao = {
           "date": "2024-07-23T00:00:00",
           "description": "Request by Shaun McCutcheon (Comments due on August 19, 2024)",
           "document_id": 88640,
-          "text": "Random document text for the third document",
+          "text": "Random document text for the third ao document",
           "url": "/files/legal/aos/2024-12/202412R_1.pdf"
         },
         {
@@ -1642,7 +1652,7 @@ first_ao = {
           "date": "2024-08-19T00:00:00",
           "description": "Comment on AOR 2024-12 by League of Women Voters of Maine, RepresentUS, and Fair Vote",
           "document_id": 88641,
-          "text": "Random document text for the fourth document",
+          "text": "Random document text for the fourth ao document",
           "url": "/files/legal/aos/2024-12/202412C_1.pdf"
         },
         {
@@ -1651,7 +1661,7 @@ first_ao = {
           "date": "2024-09-19T00:00:00",
           "description": "AO 2024-12",
           "document_id": 88637,
-          "text": "Random document text for the fifth document",
+          "text": "Random document text for the fifth ao document",
           "url": "/files/legal/aos/2024-12/2024-12.pdf"
         },
         {
@@ -1660,7 +1670,7 @@ first_ao = {
           "date": "2024-08-19T00:00:00",
           "description": "Comment on AOR 2024-12 by Campaign Legal Center",
           "document_id": 88642,
-          "text": "Random document text for the sixth document",
+          "text": "Random document text for the sixth ao document",
           "url": "/files/legal/aos/2024-12/202412C_2.pdf"
         },
         {
@@ -1669,7 +1679,7 @@ first_ao = {
           "date": "2024-09-12T00:00:00",
           "description": "Draft AO, Agenda Document No. 24-38-A (Comments due on September 18, 2024 by 12:00pm ET)",
           "document_id": 88643,
-          "text": "Random document text for the seventh document",
+          "text": "Random document text for the seventh ao document",
           "url": "/files/legal/aos/2024-12/202412.pdf"
         },
         {
@@ -1678,13 +1688,13 @@ first_ao = {
           "date": "2024-09-12T00:00:00",
           "description": "Draft AO, Agenda Document No. 24-38-B (Comments due on September 18, 2024 by 12:00pm ET)",
           "document_id": 88644,
-          "text": "Random document text for the eighth document",
+          "text": "Random document text for the eighth ao document",
           "url": "/files/legal/aos/2024-12/202412_1.pdf"
         }
       ],
       "entities": [
         {
-          "name": "Mr. Shaun McCutcheon ",
+          "name": "Mr. Shaun McCutcheon",
           "role": "Requestor",
           "type": "Individual"
         },
@@ -1721,7 +1731,8 @@ first_ao = {
       ],
       "request_date": "2024-07-23",
       "requestor_names": [
-        ""
+        "Jane Doe",
+        "Jack Brown"
       ],
       "requestor_types": [
         "Individual"
@@ -1742,12 +1753,176 @@ first_ao = {
       "type": "advisory_opinions"
 }
 
+second_ao = {
+      "ao_citations": [
+        {
+          "name": "Iowa 1980 U.S. Senate Campaign Committee",
+          "no": "1977-16"
+        },
+        {
+          "name": "Westchester Citizens for Good Government",
+          "no": "1982-23"
+        },
+        {
+          "name": "WE LEAD",
+          "no": "2003-23"
+        },
+        {
+          "name": "ActBlue",
+          "no": "2006-30"
+        },
+        {
+          "name": "ActBlue",
+          "no": "2014-13"
+        }
+      ],
+      "ao_no": "2014-19",
+      "ao_serial": 19,
+      "ao_year": 2014,
+      "aos_cited_by": [
+        {
+          "name": "Gary Johnson Victory Fund",
+          "no": "2016-15"
+        },
+        {
+          "name": "It Starts Today",
+          "no": "2019-01"
+        },
+        {
+          "name": "Pro-Life Democratic Candidate PAC",
+          "no": "2019-11"
+        },
+        {
+          "name": "Democratic Party of Wisconsin Federal",
+          "no": "2022-09"
+        },
+        {
+          "name": "VoteDown PAC",
+          "no": "2023-11"
+        }
+      ],
+      "commenter_names": ["Jake Brown"],
+      "doc_id": "advisory_opinions_2014-19",
+      "documents": [
+        {
+          "ao_doc_category_id": "R",
+          "category": "AO Request, Supplemental Material, and Extensions of Time",
+          "date": "2014-12-03T00:00:00",
+          "description": "Request by ActBlue",
+          "document_id": 80835,
+          "text": "Document text for the first ao document",
+          "url": "/files/legal/aos/2014-19/1308389.pdf"
+        },
+        {
+          "ao_doc_category_id": "D",
+          "category": "Draft Documents",
+          "date": "2015-01-09T00:00:00",
+          "description": "Draft AO, Agenda Document No. 15-03-A",
+          "document_id": 80836,
+          "text": "Document text for the second ao document",
+          "url": "/files/legal/aos/2014-19/201419.pdf"
+        },
+        {
+          "ao_doc_category_id": "V",
+          "category": "Withdrawal of Request",
+          "date": "2015-01-15T00:00:00",
+          "description": "Vote",
+          "document_id": 80837,
+          "text": "Document text for the third ao document",
+          "url": "/files/legal/aos/2014-19/1310405.pdf"
+        },
+        {
+          "ao_doc_category_id": "F",
+          "category": "Final Opinion",
+          "date": "2015-01-16T00:00:00",
+          "description": "2014-19",
+          "document_id": 80838,
+          "text": "Document text for the fourth ao document",
+          "url": "/files/legal/aos/2014-19/AO_2014-19_(ActBlue)_Final_(1.15.15).pdf"
+        }
+      ],
+      "entities": [
+        {
+          "name": "ActBlue",
+          "role": "Requestor",
+          "type": "Nonconnected political committee"
+        },
+        {
+          "name": "Steven Gold Esq.",
+          "role": "Counsel/Representative",
+          "type": "Individual"
+        },
+        {
+          "name": "Melissa Flores Esq.",
+          "role": "Counsel/Representative",
+          "type": "Individual"
+        }
+      ],
+      "is_pending": True,
+      "issue_date": "2015-01-15",
+      "name": "ActBlue",
+      "no": "2014-19",
+      "regulatory_citations": [
+        {
+          "part": 101,
+          "section": 2,
+          "title": 11
+        },
+        {
+          "part": 101,
+          "section": 3,
+          "title": 11
+        },
+        {
+          "part": 110,
+          "section": 6,
+          "title": 11
+        }
+      ],
+      "representative_names": [
+        "Gold, Steven",
+        "Flores, Melissa"
+      ],
+      "request_date": "2014-12-03",
+      "requestor_names": [
+        "ActBlue"
+      ],
+      "requestor_types": [
+        "Nonconnected political committee",
+        "Federal candidate/candidate committee/officeholder",
+      ],
+      "status": "Pending",
+      "statutory_citations": [
+        {
+          "section": "30101",
+          "title": 52
+        },
+        {
+          "section": "30102",
+          "title": 52
+        },
+        {
+          "section": "30108",
+          "title": 52
+        },
+        {
+          "section": "30116",
+          "title": 52
+        },
+        {
+          "section": "30146",
+          "title": 52
+        }
+      ],
+      "summary": "Contributions to nominee and draft funds for potential presidential candidates.",
+      "type": "advisory_opinions"
+}
 
 document_dictionary = {
     "murs": [first_test_mur, second_test_mur],
     "archived_murs": [first_archived_mur, second_archived_mur],
     "adrs": [first_adr, second_adr],
     "admin_fines": [first_admin_fine, second_admin_fine],
-    "statutes": [first_statute,],
-    "advisory_opinions": [first_ao,]
+    "statutes": [first_statute, second_statute],
+    "advisory_opinions": [first_ao, second_ao]
 }
