@@ -23,9 +23,6 @@ RUN wget https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/11.0.0/f
     ln -s /flyway/flyway /usr/local/bin/flyway && \
     rm flyway-commandline-11.0.0-linux-x64.tar.gz
 
-    
-# Ensure npm and node are available globally
-ENV PATH "$NVM_DIR/versions/node/v22.1.0/bin:$PATH"
 
 # Copy application files
 COPY . /app
