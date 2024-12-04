@@ -35,7 +35,7 @@ COPY . /app
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir -r requirements-dev.txt
 
-# Expose ports for flask and locusr
+# Expose ports for flask and locust
 EXPOSE 5000
 EXPOSE 8089
 
