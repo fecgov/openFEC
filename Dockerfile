@@ -1,4 +1,3 @@
-# Force x86_64 base image for compatibility with Flyway
 FROM python:3.10-slim
 
 #  Set a working directory inside the container

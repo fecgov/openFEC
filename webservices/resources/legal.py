@@ -14,7 +14,6 @@ from webservices.utils import (
 from webservices.legal_docs.es_management import (  # noqa
     SEARCH_ALIAS,
 )
-
 from webservices.utils import use_kwargs
 from elasticsearch import RequestError
 from webservices.exceptions import ApiError
