@@ -3,8 +3,16 @@ FROM python:3.10-slim
 #  Set a working directory inside the container
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get clean
+
+RUN apt-get update \
+-o Acquire::http::No-Cache=true \
+-o Acquire::http::Pipeline-Depth=0 \
+-o Acquire::BrokenProxy=true \
+&& apt-get install -y --no-install-recommends \
+-o Acquire::http::No-Cache=true \
+-o Acquire::http::Pipeline-Depth=0 \
+-o Acquire::BrokenProxy=true \
     wget \
     tar \
     unzip \
