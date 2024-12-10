@@ -1918,11 +1918,42 @@ second_ao = {
       "type": "advisory_opinions"
 }
 
+first_citation = {
+      "citation_text": "2 U.S.C. §31021",
+      "citation_type": "statute",
+      "doc_type": "murs",
+      "type": "citations"
+    }
+
+
+second_citation = {
+      "citation_text": "18 U.S.C. 603",
+      "citation_type": "statute",
+      "doc_type": "advisory_opinions",
+      "type": "citations"
+    }
+
+third_citation = {
+      "citation_text": "11 CFR §104.12",
+      "citation_type": "regulation",
+      "doc_type": "murs",
+      "type": "citations"
+    }
+
+fourth_citation = {
+      "citation_text": "11 CFR §116.12",
+      "citation_type": "regulation",
+      "doc_type": "advisory_opinions",
+      "type": "citations"
+    }
+
 document_dictionary = {
     "murs": [first_test_mur, second_test_mur],
     "archived_murs": [first_archived_mur, second_archived_mur],
     "adrs": [first_adr, second_adr],
     "admin_fines": [first_admin_fine, second_admin_fine],
     "statutes": [first_statute, second_statute],
-    "advisory_opinions": [first_ao, second_ao]
+    "advisory_opinions": [first_ao, second_ao],
+    "ao_citations": [second_citation, fourth_citation],
+    "mur_citations": [first_citation, third_citation]
 }
