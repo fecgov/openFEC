@@ -188,7 +188,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .source(exclude=["text", "documents.text", "sort1", "sort2"])
         .extra(size=hits_returned, from_=from_hit)
         .index(SEARCH_ALIAS)
-        .sort("_score")  # _score is the default
+        .sort("sort1", "sort2")
     )
     if type_ == "advisory_opinions":
         query = query.highlight("summary", "documents.text", "documents.description")
