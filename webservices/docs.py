@@ -2125,18 +2125,6 @@ Selects all advisory opinion documents dated on or before this date. Date must b
 formatted as MM/DD/YYYY or YYYY-MM-DD."
 '''
 
-AO_CATEGORY = '''
-`DEPRECATED` please use AO_DOC_CATEGORY_ID
-Category of the document
-F - Final Opinion
-V - Votes
-D - Draft Documents
-R - AO Request, Supplemental Material, and Extensions of Time
-W - Withdrawal of Request
-C - Comments and Ex parte Communications
-S - Commissioner Statements
-'''
-
 AO_DOC_CATEGORY_ID = '''
 Category of the document
 F - Final Opinion
