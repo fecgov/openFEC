@@ -42,6 +42,7 @@ def reset_schema():
         "real_pfile",
         "rohan",
         "staging",
+        "test_efile",
     ]:
         rest.db.engine.execute('drop schema if exists %s cascade;' % schema)
     rest.db.engine.execute('create schema public;')
