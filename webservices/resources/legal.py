@@ -233,7 +233,7 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         query = query.query("bool", should=should_query_mur_disposition, minimum_should_match=1)
 
     must_clauses = []
-    if kwargs.get("case_no"):
+    if check_filter_exists(kwargs, "case_no"):
         must_clauses.append(Q("terms", no=kwargs.get("case_no")))
 
     if kwargs.get("primary_subject_id") and '' not in kwargs.get("primary_subject_id"):
@@ -353,7 +353,7 @@ def get_mur_disposition_query(q, **kwargs):
 
 def apply_af_specific_query_params(query, **kwargs):
     must_clauses = []
-    if kwargs.get("af_name"):
+    if check_filter_exists(kwargs, "af_name"):
         must_clauses.append(Q("match", name=" ".join(kwargs.get("af_name"))))
     if kwargs.get("af_committee_id"):
         must_clauses.append(Q("match", committee_id=kwargs.get("af_committee_id")))
@@ -610,10 +610,11 @@ def get_ao_document_query(q, **kwargs):
 
 def apply_ao_specific_query_params(query, **kwargs):
     must_clauses = []
-    if kwargs.get("ao_no"):
+
+    if check_filter_exists(kwargs, "ao_no"):
         must_clauses.append(Q("terms", no=kwargs.get("ao_no")))
 
-    if kwargs.get("ao_name"):
+    if check_filter_exists(kwargs, "ao_name"):
         must_clauses.append(Q("match", name=" ".join(kwargs.get("ao_name"))))
 
     if kwargs.get("ao_is_pending") is not None:
@@ -727,7 +728,7 @@ def apply_ao_specific_query_params(query, **kwargs):
         date_range["format"] = ACCEPTED_DATE_FORMATS
         must_clauses.append(Q("range", request_date=date_range))
 
-    if kwargs.get("ao_entity_name"):
+    if check_filter_exists(kwargs, "ao_entity_name"):
         must_clauses.append(
             Q(
                 "bool",
@@ -789,6 +790,16 @@ def execute_query(query):
 # but elasticsearch-dsl==7.3.0 has not supported this setting yet.
     count_dict = es_results.hits.total
     return formatted_hits, count_dict["value"]
+
+
+def check_filter_exists(kwargs, filter):
+    if kwargs.get(filter):
+        for val in kwargs.get(filter):
+            if len(val) > 0:
+                return True
+        return False
+    else:
+        return False
 
 
 # endpoint path: /legal/citation/<citation_type>/<citation>
