@@ -44,16 +44,19 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
     def test_all_doc_types(self):
         response = self._results_case(api.url_for(UniversalSearch))
         # logging.info(response)
+        all_legal_docs = document_dictionary.copy()
+        all_legal_docs.pop("ao_citations")
+        all_legal_docs.pop("mur_citations")
 
         total_all = 0
-        total_all += sum(len(document_dictionary[doc_type]) for doc_type in document_dictionary)
+        total_all += sum(len(all_legal_docs[doc_type]) for doc_type in all_legal_docs)
 
-        all_murs = len(document_dictionary["archived_murs"]) + len(document_dictionary["murs"])
+        all_murs = len(all_legal_docs["archived_murs"]) + len(all_legal_docs["murs"])
 
         self.assertEqual(response["total_all"], total_all)
         self.assertEqual(response["total_murs"], all_murs)
-        self.assertEqual(response["total_adrs"], len(document_dictionary["adrs"]))
-        self.assertEqual(response["total_admin_fines"], len(document_dictionary["admin_fines"]))
+        self.assertEqual(response["total_adrs"], len(all_legal_docs["adrs"]))
+        self.assertEqual(response["total_admin_fines"], len(all_legal_docs["admin_fines"]))
 
     def test_type_filter(self):
         for type in ALL_DOCUMENT_TYPES:
