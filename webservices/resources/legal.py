@@ -67,16 +67,6 @@ REQUESTOR_TYPES = {
             16: "Other",
 }
 
-CATEGORIES = {
-        "F": "Final Opinion",
-        "V": "Votes",
-        "D": "Draft Documents",
-        "R": "AO Request, Supplemental Material, and Extensions of Time",
-        "W": "Withdrawal of Request",
-        "C": "Comments and Ex parte Communications",
-        "S": "Commissioner Statements",
-    }
-
 # endpoint path: /legal/docs/<doc_type>/<no>
 # under tag: legal
 # test urls:
@@ -583,10 +573,6 @@ def get_ao_document_query(q, **kwargs):
             if len(ao_doc_category_id) > 0:
                 category_query.append(Q("term", documents__ao_doc_category_id=ao_doc_category_id))
         combined_query.append(Q("bool", should=category_query, minimum_should_match=1))
-
-    if kwargs.get("ao_category"):
-        ao_category = [CATEGORIES[c] for c in kwargs.get("ao_category")]
-        combined_query = [Q("terms", documents__category=ao_category)]
 
     ao_document_date_range = {}
     if kwargs.get("ao_min_document_date"):
