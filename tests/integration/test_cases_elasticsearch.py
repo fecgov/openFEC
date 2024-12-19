@@ -16,7 +16,7 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
         self.assertNotEqual(response["total_" + doc_type], 0)
         assert all(x[field_name] == list(params.values())[0] for x in response[doc_type])
 
-    def check_incorrect_values(self, params, doc_type, raiseError):
+    def check_incorrect_values(self, params, doc_types, raiseError):
         response = self.app.get(api.url_for(UniversalSearch, **params))
         # logging.info(response.json)
 
@@ -24,7 +24,11 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
             assert response.status_code == 422
         else:
             assert response.status_code == 200
-            assert response.json[doc_type] == 0
+            if isinstance(doc_types, list):
+                for typ in doc_types:
+                    assert response.json[typ] == 0
+            else:
+                assert response.json[doc_types] == 0
 
     def check_sort_asc(self, doc_dict):
         for i in range(len(doc_dict) - 1):
@@ -143,9 +147,7 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
             "case_min_penalty_amount": 999999
         }
 
-        self.check_incorrect_values(params, "total_murs", False)
-        self.check_incorrect_values(params, "total_admin_fines", False)
-        self.check_incorrect_values(params, "total_adrs", False)
+        self.check_incorrect_values(params, ["total_murs", "total_admin_fines", "total_adrs"], False)
 
     def test_case_doc_cat_id_filter(self):
         # for archived and current murs, adrs, and afs
@@ -243,6 +245,35 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
 
         self.assertEqual(response["total_admin_fines"], 0)
         self.assertEqual(response["total_all"], 10)
+
+    def test_q_proximity_filters(self):
+        # for archived and current murs, advisory_opinions, adrs, and afs
+        search_phrase = "first document archived mur"
+        proximity_filter = "after"
+        proximity_filter_term = "sample text"
+        max_gaps = 2
+
+        response = self._results_case(api.url_for(UniversalSearch,
+                                                  q_proximity=search_phrase,
+                                                  proximity_filter=proximity_filter,
+                                                  proximity_filter_term=proximity_filter_term,
+                                                  max_gaps=max_gaps))
+
+        self.assertEqual(response["total_murs"], 1)
+        self.assertEqual(response["total_admin_fines"], 0)
+        self.assertEqual(response["total_adrs"], 0)
+
+        multiple_phrases = ["second adr", "sample text"]
+        max_gaps = 6
+        response = self._results_case(api.url_for(UniversalSearch, q_proximity=multiple_phrases, max_gaps=max_gaps))
+
+        self.assertEqual(response["total_murs"], 0)
+        self.assertEqual(response["total_admin_fines"], 0)
+        self.assertEqual(response["total_adrs"], 1)
+
+        self.check_incorrect_values({"q_proximity": search_phrase, "max_gaps": 1},
+                                    ["total_murs", "total_admin_fines", "total_adrs"],
+                                    False)
 
     def test_sort(self):
         sort_value = "case_no"
@@ -392,8 +423,7 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
                                      for rsp in adr["respondents"]
                                      ) for adr in response["adrs"])
 
-        self.check_incorrect_values({"case_respondents": "Bad value"}, "total_murs", False)
-        self.check_incorrect_values({"case_respondents": "Bad value"}, "total_adrs", False)
+        self.check_incorrect_values({"case_respondents": "Bad value"}, ["total_murs", "total_adrs"], False)
 
     def test_citation_filters(self):
         # filter for current murs and adrs
@@ -447,8 +477,7 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
             ["case_regulatory_citation", "1111 CFR §112.4111"]
         ]
         for filter in filters:
-            self.check_incorrect_values({filter[0]: filter[1]}, "total_murs", False)
-            self.check_incorrect_values({filter[0]: filter[1]}, "total_adrs", False)
+            self.check_incorrect_values({filter[0]: filter[1]},  ["total_murs", "total_adrs"], False)
 
 # ---------------------- End MUR and ADR filters ------------------------------------------------
 # ---------------------- Start MUR  filters ------------------------------------------------

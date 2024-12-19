@@ -130,6 +130,34 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0]["ao_no"], "2014-19")
 
+    def test_q_proximity_filters(self):
+        search_phrase = "Random document third ao"
+        proximity_filter = "before"
+        proximity_filter_term = "document"
+        max_gaps = 3
+
+        response = self._results_ao(api.url_for(UniversalSearch,
+                                                q_proximity=search_phrase,
+                                                proximity_filter=proximity_filter,
+                                                proximity_filter_term=proximity_filter_term,
+                                                max_gaps=max_gaps))
+
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0]["ao_no"], "2024-12")
+
+        multiple_phrases = ["fourth ao", "proximity document"]
+        max_gaps = 3
+
+        response = self._results_ao(api.url_for(UniversalSearch,
+                                                q_proximity=multiple_phrases,
+                                                proximity_filter=proximity_filter,
+                                                proximity_filter_term=proximity_filter_term,
+                                                max_gaps=max_gaps))
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0]["ao_no"], "2014-19")
+
+        self.check_incorrect_values({"q_proximity": search_phrase, "max_gaps": 1}, False)
+
     def test_citation_filters(self):
         statutory_title = 52
         statutory_section = "30101"

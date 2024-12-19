@@ -1837,7 +1837,7 @@ second_ao = {
           "date": "2015-01-16T00:00:00",
           "description": "2014-19",
           "document_id": 80838,
-          "text": "Document text for the fourth ao document",
+          "text": "Proximity document text for the fourth ao document",
           "url": "/files/legal/aos/2014-19/AO_2014-19_(ActBlue)_Final_(1.15.15).pdf"
         }
       ],

@@ -2362,7 +2362,7 @@ multiple phrases, the maximum gap is applied between the phrases themselves.
 '''
 
 MAX_GAPS = '''
-The maximum number of positions allowed between matching terms specified in q_proximity
+The maximum number of positions allowed between terms specified in `q_proximity`
 '''
 
 PROXIMITY_FILTER = '''
@@ -2370,7 +2370,8 @@ Adds additional filters to the proximity search that provides options to specify
 '''
 
 PROXIMITY_FILTER_TERM = '''
-q_proximity phrase
+Specifies the term to which the `proximity_filter` option applies to and defines what must appear in relation to the \
+`q_proximity` phrase
 '''
 
 # ======== legal end =========
