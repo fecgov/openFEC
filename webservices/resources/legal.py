@@ -6,6 +6,7 @@ from flask import abort
 from flask_apispec import doc
 from webservices import docs
 from webservices import args
+from webservices import filters
 from webservices.utils import (
     create_es_client,
     Resource,
@@ -437,7 +438,7 @@ def apply_af_specific_query_params(query, **kwargs):
 def apply_mur_specific_query_params(query, **kwargs):
     must_clauses = []
 
-    if kwargs.get("mur_type"):
+    if check_filter_exists(kwargs, "mur_type"):
         must_clauses.append(Q("match", mur_type=kwargs.get("mur_type")))
 
     if kwargs.get("case_election_cycles"):
@@ -736,12 +737,19 @@ def apply_ao_specific_query_params(query, **kwargs):
     else:
         must_clauses.append(Q("bool", should=citation_queries, minimum_should_match=1))
 
-    if check_filter_exists(kwargs, "ao_requestor_type"):
+    # Get 'ao_requestor_type' from kwargs
+    ao_requestor_type = kwargs.get("ao_requestor_type", [])
+
+    # Validate 'ao_requestor_type'
+    valid_requestor_types = filters.validate_ao_requestor_type(ao_requestor_type)
+
+    # Always include valid values in the query construction
+    if valid_requestor_types:
         must_clauses.append(
             Q(
                 "terms",
                 requestor_types=[
-                    REQUESTOR_TYPES[r] for r in kwargs.get("ao_requestor_type")
+                    REQUESTOR_TYPES[r] for r in valid_requestor_types
                 ],
             )
         )

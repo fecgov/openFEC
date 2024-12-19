@@ -384,12 +384,12 @@ legal_universal_search = {
     'primary_subject_id': fields.List(IStr(
         validate=validate.OneOf(
             ['', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11',
-                '12', '13',  '14', '15', '16',  '17', '18', '19', '20'])),
+                '12', '13', '14', '15', '16', '17', '18', '19', '20'])),
             description=docs.PRIMARY_SUBJECT_DESCRIPTION),
     'secondary_subject_id': fields.List(IStr(
         validate=validate.OneOf(
             ['', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11',
-                '12', '13',  '14', '15', '16',  '17', '18'])),
+                '12', '13', '14', '15', '16', '17', '18'])),
             description=docs.SECONDARY_SUBJECT_DESCRIPTION),
     'case_max_open_date': Date(required=False, description=docs.CASE_MAX_OPEN_DATE),
     'case_min_close_date': Date(required=False, description=docs.CASE_MIN_CLOSE_DATE),
@@ -406,7 +406,7 @@ legal_universal_search = {
         description=docs.CASE_DOCUMENT_CATEGORY_DESCRIPTION),
 
     'mur_type': fields.Str(
-        required=False, validate=validate.OneOf(["archived", "current"]), description=docs.MUR_TYPE),
+        required=False, validate=validate.OneOf(['', 'archived', 'current']), description=docs.MUR_TYPE),
     'mur_disposition_category_id': fields.List(IStr(
         validate=validate.OneOf([
             '', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
@@ -434,7 +434,7 @@ legal_universal_search = {
 
 citation = {
     'doc_type': fields.Str(
-                required=False, validate=validate.OneOf(["adrs", "advisory_opinions", "murs"]),
+                required=False, validate=validate.OneOf(['', 'adrs', 'advisory_opinions', 'murs']),
                 description=docs.CITATION_DOC_TYPE
             )
 }
