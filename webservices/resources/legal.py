@@ -180,19 +180,28 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .index(SEARCH_ALIAS)
         .sort("sort1", "sort2")
     )
-    if type_ == "advisory_opinions":
-        query = query.highlight("summary", "documents.text", "documents.description")
-    elif type_ == "statutes":
-        query = query.highlight("name", "no")
-    else:
-        query = query.highlight("documents.text", "documents.description")
+    proximity_search = False
+
+    if kwargs.get("q_proximity") and kwargs.get("max_gaps") and type_ != "statutes":
+        proximity_search = True
+
+    if not proximity_search:
+        if type_ == "advisory_opinions":
+            query = query.highlight("summary", "documents.text", "documents.description")
+        elif type_ == "statutes":
+            query = query.highlight("name", "no")
+        else:
+            query = query.highlight("documents.text", "documents.description")
 
     if kwargs.get("q_exclude"):
         must_not = []
         must_not.append(Q("nested", path="documents", query=Q("match", documents__text=kwargs.get("q_exclude"))))
         query = query.query("bool", must_not=must_not)
 
-    # logger.debug("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    if proximity_search:
+        query = get_proximity_query(q, query, **kwargs)
+
+    # logging.warning("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return query
 
 
@@ -265,6 +274,48 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         return apply_mur_specific_query_params(query, **kwargs)
     else:
         return apply_adr_specific_query_params(query, **kwargs)
+
+
+def get_proximity_query(q, query, **kwargs):
+    q_proximity = kwargs.get("q_proximity")
+    max_gaps = kwargs.get("max_gaps")
+    intervals_list = []
+    contains_filter = False
+
+    if kwargs.get("proximity_filter") and kwargs.get("proximity_filter_term"):
+        contains_filter = True
+        filter = kwargs.get("proximity_filter")
+        filters = {filter: {'match': {'query': kwargs.get("proximity_filter_term")}}}
+
+    if len(q_proximity) == 1:
+        if contains_filter:
+            intervals_inner_query = Q('intervals', documents__text={
+                'match':  {'query': q_proximity[0], 'max_gaps': max_gaps, "filter": filters}
+                })
+        else:
+            intervals_inner_query = Q('intervals', documents__text={
+                'match':  {'query': q_proximity[0], 'max_gaps': max_gaps}
+                })
+    else:
+        for q in q_proximity:
+            dict_item = {"match": {"query": q, "max_gaps": 0, }}
+            intervals_list.append(dict_item)
+
+        if contains_filter:
+            intervals_inner_query = Q('intervals', documents__text={
+                    'all_of':  {'max_gaps': max_gaps, "intervals": intervals_list, "filter": filters}
+                    })
+        else:
+            intervals_inner_query = Q('intervals', documents__text={
+                    'all_of':  {'max_gaps': max_gaps, "intervals": intervals_list}
+                    })
+
+    intervals_query = Q(
+            "nested",
+            path="documents",
+            query=intervals_inner_query)
+
+    return query.query("bool", must=intervals_query)
 
 # Select one or more case_doc_category_id to filter by corresponding case_document_category
 # - 1 - Conciliation and Settlement Agreements
