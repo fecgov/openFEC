@@ -524,7 +524,10 @@ def create_es_client():
             )
         else:
             # create local elasticsearch client
-            url = "http://localhost:9200"
+            if env.get_credential("IS_USING_DOCKER"):
+                url = "http://elasticsearch:9200"
+            else:
+                url = "http://localhost:9200"
             es_client = Elasticsearch(
                 url,
                 timeout=30,

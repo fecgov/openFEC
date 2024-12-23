@@ -67,9 +67,15 @@ app.url_map.strict_slashes = False
 
 def sqla_conn_string():
     sqla_conn_string = env.get_credential('SQLA_CONN')
+
+    if not sqla_conn_string and env.get_credential("IS_USING_DOCKER"):
+        print("Environment variable SQLA_CONN is empty; trying SQLA_DOCKER_DB_CONN")
+        sqla_conn_string = env.get_credential('SQLA_DOCKER_DB_CONN')
+
     if not sqla_conn_string:
         print("Environment variable SQLA_CONN is empty; running against " + "local `cfdm_test`")
         sqla_conn_string = 'postgresql://:@/cfdm_test'
+
     return sqla_conn_string
 
 

@@ -81,6 +81,8 @@ def redis_url():
         redis_url = redis_env.credentials.get("uri")
 
         return redis_url
+    elif env.get_credential("IS_USING_DOCKER"):
+        return "redis://redis:6379/0"
 
     return env.get_credential("FEC_REDIS_URL", "redis://localhost:6379/0")
 

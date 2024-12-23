@@ -75,11 +75,13 @@ We are always trying to improve our documentation. If you have suggestions or ru
 
    - See [Database migrations](https://github.com/fecgov/openFEC#database-migration) for more information on installing and configuring flyway
 
-2. Set up your Node environment— learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
+2. Optionally, you can use [Docker Desktop](https://docs.docker.com/desktop/) to setup Python, Postgres, Elastic Search, and Flyway.
 
-3. Set up your Python environment— learn how to do this with our [Python Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/python.md).
+3. Set up your Node environment— learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
 
-4. Clone this repository.
+4. Set up your Python environment— learn how to do this with our [Python Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/python.md).
+
+5. Clone this repository.
 
 ### Project dependencies
 
@@ -337,6 +339,44 @@ To update the version-controlled test subset after rebuilding, run:
 ```
 invoke dump postgresql://:@/cfdm_test data/subset.dump
 ```
+
+## Docker Laptop Setup
+
+To run the application locally using Docker:
+
+1. Clone the repository
+2. Follow the instructions above to install JavaScript dependencies
+3. Set the required environment variables:
+
+```
+   export SQLA_CONN=<your dev database connection string>
+	export SQLA_SAMPLE_DB_CONN=postgresql://postgres:password@db:5432/cfdm_test
+	export SQLA_DOCKER_DB_CONN=postgresql://postgres:password@db:5432/cfdm_test
+	export SQLA_TEST_CONN=postgresql://postgres:password@db:5432/cfdm_unit_test
+```
+
+3. Build the image:
+
+```
+docker-compose build
+```
+
+4. Start all services:
+
+```
+docker-compose up -d openfec db elasticsearch
+```
+
+5. Create and populate your local development database:
+
+```
+docker-compose exec -it db createdb -U postgres cfdm_test
+docker-compose exec openfec invoke create_sample_db
+```
+
+6. Visit your local version of the site http://localhost:5000
+
+See the wiki for more information on configuring [Docker for local setup](https://github.com/fecgov/openFEC/wiki/Docker-Setup-for-Local-Development), running and tesing [Elastic Search](https://github.com/fecgov/openFEC/wiki/Docker-Setup-and-Test-Elasticsearch-Locally), [Redis, and Celery](https://github.com/fecgov/openFEC/wiki/Docker-Setup-and-Test-Redis-and-Celery-Locally) locally.
 
 ## Deployment (FEC team only)
 

@@ -1,0 +1,95 @@
+services:
+  openfec:
+    platform: linux/amd64
+    build:
+      context: .
+    ports:
+      - "5000:5000"
+      - "8089:8089"
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_PUBLIC_BUCKET=${AWS_PUBLIC_BUCKET}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - FEC_API_URL=http://localhost:5000
+      - FEC_CMS_URL=http://localhost:8000
+      - FEC_DOWNLOAD_API_KEY=${FEC_DOWNLOAD_API_KEY}
+      - FEC_WEB_API_KEY_PUBLIC=${FEC_WEB_API_KEY_PUBLIC}
+      - FLASK_APP=webservices.rest.py
+      - FLASK_DEBUG=1
+      - FLASK_RUN_HOST=0.0.0.0
+      - IS_USING_DOCKER=true
+      - SLACK_HOOK=${SLACK_HOOK}
+      - SQLA_CONN=${SQLA_CONN}
+      - SQLA_DOCKER_DB_CONN=${SQLA_DOCKER_DB_CONN}
+      - SQLA_SAMPLE_DB_CONN=${SQLA_SAMPLE_DB_CONN}
+      - SQLA_TEST_CONN=${SQLA_TEST_CONN}
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: localdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
+    platform: linux/amd64
+    environment:
+      - discovery.type=single-node
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - http.cors.allow-headers=X-Requested-With, Content-Type, Content-Length, Authorization
+      - http.cors.allow-methods=OPTIONS, HEAD, GET, POST, PUT, DELETE
+      - discovery.type=single-node
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+
+  redis:
+    image: redis:6.2
+    command: redis-server --save 60 1 --loglevel warning
+    ports:
+      - "6379:6379"
+
+  celery-worker:
+    build:
+      context: .
+    command: celery -A webservices.tasks  worker --loglevel=info
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_PUBLIC_BUCKET=${AWS_PUBLIC_BUCKET}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - IS_USING_DOCKER=true
+      - SQLA_DOCKER_DB_CONN=${SQLA_DOCKER_DB_CONN}
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+
+  celery-beat:
+    build:
+      context: .
+    command: celery -A webservices.tasks beat --loglevel=info
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - IS_USING_DOCKER=true
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+
+volumes:
+  pgdata:
+  esdata:
