@@ -105,6 +105,8 @@ class FullDate(fields.Str):
         value = value.strip()
         super()._validate(value)
         try:
+            if value.endswith("Z"):
+                value = value[:-1] + "+00:00"
             # Try parsing ISO 8601 format
             datetime.datetime.fromisoformat(value)
         except (TypeError, ValueError):
