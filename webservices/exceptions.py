@@ -27,6 +27,10 @@ NEXT_IN_CHAIN_DATA_ERROR = """next_in_chain data error, please contact apiinfo@f
 DATE_ERROR = """Invalid date. Date must be formatted as MM/DD/YYYY or YYYY-MM-DD.\
 """
 
+FULLDATE_ERROR = """Invalid date. Date must be formatted as MM/DD/YYYY, YYYY-MM-DD,\
+or ISO 8601 (YYYY-MM-DDTHH:MM:SS[+|-]HH:MM).\
+"""
+
 COMMITTEE_ID_ERROR = """Invalid committee_id. A valid committee_id begins with a 'C'\
  followed by 8 digits. For example: C00100005.\
 """
