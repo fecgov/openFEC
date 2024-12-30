@@ -350,8 +350,8 @@ legal_universal_search = {
     'from_hit': fields.Int(required=False, description=docs.FROM_HIT),
     'hits_returned': fields.Int(required=False, description=docs.HITS_RETURNED),
     'type': fields.Str(
-            validate=validate.OneOf(["admin_fines", "adrs", "advisory_opinions",
-                                     "murs", "statutes"]),
+            validate=validate.OneOf(['', 'admin_fines', 'adrs', 'advisory_opinions',
+                                     'murs', 'statutes']),
             description=docs.LEGAL_DOC_TYPE),
 
     'ao_no': fields.List(IStr, required=False, description=docs.AO_NUMBER),

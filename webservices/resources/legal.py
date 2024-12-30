@@ -129,8 +129,8 @@ class UniversalSearch(Resource):
             "adrs": case_query_builder,
             "admin_fines": case_query_builder,
         }
-
-        if kwargs.get("type", "all") == "all":
+        # Get the type from kwargs, defaulting to '' if not present
+        if kwargs.get("type", "") == "":
             doc_types = ALL_DOCUMENT_TYPES
         else:
             doc_types = [kwargs.get("type")]
@@ -739,9 +739,12 @@ def apply_ao_specific_query_params(query, **kwargs):
 
     # Get 'ao_requestor_type' from kwargs
     ao_requestor_type = kwargs.get("ao_requestor_type", [])
+    ao_requestor_type_valid_values = ['1', '2', '3', '4', '5', '6', '7', '8', '9',
+                                      '10', '11', '12', '13', '14', '15', '16']
 
-    # Validate 'ao_requestor_type'
-    valid_requestor_types = filters.validate_ao_requestor_type(ao_requestor_type)
+    # Validate 'ao_requestor_type filter'
+    valid_requestor_types = filters.validate_multiselect_filter(
+        ao_requestor_type, ao_requestor_type_valid_values)
 
     # Always include valid values in the query construction
     if valid_requestor_types:

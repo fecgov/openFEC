@@ -185,17 +185,12 @@ def get_cycle(kwargs):
     return kwargs['cycle']
 
 
-ao_requestor_type_valid_filter_values = ['1', '2', '3', '4', '5', '6', '7', '8', '9',
-                                         '10', '11', '12', '13', '14', '15', '16']
+def validate_multiselect_filter(filter, valid_values):
+    valid_results = []
 
-
-def validate_ao_requestor_type(ao_requestor_type):
-    valid_values = []
-
-    # Validate each value in ao_requestor_type
-    for value in ao_requestor_type:
+    # Validate each value in filter
+    for value in filter:
         if isinstance(value, str) and ' ' not in value:
-            if value in ao_requestor_type_valid_filter_values:
-                valid_values.append(value)
-
-        return valid_values
+            if value in valid_values:
+                valid_results.append(value)
+    return valid_results
