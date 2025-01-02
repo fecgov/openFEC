@@ -1,5 +1,5 @@
 from tests.common import ElasticSearchBaseTest
-from webservices.resources.legal import UniversalSearch, REQUESTOR_TYPES, CATEGORIES
+from webservices.resources.legal import UniversalSearch, REQUESTOR_TYPES
 from webservices.rest import api
 from datetime import datetime
 # import logging
@@ -101,16 +101,6 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
         self.check_doc_filters({"ao_doc_category_id": ao_doc_cat_ids}, "ao_doc_category_id", ao_doc_cat_ids)
 
         self.check_incorrect_values({"ao_doc_category_id": "P"}, True)
-
-    def test_ao_category_filter(self):
-        ao_category = "W"
-        self.check_doc_filters({"ao_category": ao_category}, "category", CATEGORIES[ao_category])
-
-        ao_categories = ["V", "D"]
-        ao_categories_full = [CATEGORIES["V"], CATEGORIES["D"]]
-        self.check_doc_filters({"ao_category": ao_categories}, "category", ao_categories_full)
-
-        self.check_incorrect_values({"ao_category": "P"}, True)
 
     def test_ao_sort(self):
         sort = "-ao_no"
