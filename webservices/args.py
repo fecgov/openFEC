@@ -425,6 +425,10 @@ legal_universal_search = {
     'sort': IStr(required=False, description=docs.SORT),
     'case_min_penalty_amount': fields.Str(required=False, description=docs.CASE_MIN_PENALTY_AMOUNT),
     'case_max_penalty_amount': fields.Str(required=False, description=docs.CASE_MAX_PENALTY_AMOUNT),
+    'q_proximity': fields.List(fields.Str, description=docs.Q_PROXIMITY),
+    'max_gaps': fields.Int(required=False, description=docs.MAX_GAPS),
+    "proximity_filter": fields.Str(validate=validate.OneOf(["after", "before"]), description=docs.PROXIMITY_FILTER),
+    'proximity_filter_term': fields.Str(required=False, description=docs.PROXIMITY_FILTER_TERM),
 }
 
 citation = {
