@@ -76,10 +76,7 @@ class TestElectionDates(ApiBaseTest):
 class TestCalendarDates(ApiBaseTest):
     def test_filters(self):
         factories.CalendarDateFactory(start_date=datetime.datetime(2016, 1, 2))
-        factories.CalendarDateFactory(location='Mississippi, CA')
         factories.CalendarDateFactory(event_id=123)
-        # deprecated while we figure out a better way to generate the data
-        # factories.CalendarDateFactory(state=['CA'])
         factories.CalendarDateFactory(calendar_category_id=7)
         factories.CalendarDateFactory(description='a really interesting event')
         factories.CalendarDateFactory(
@@ -91,8 +88,7 @@ class TestCalendarDates(ApiBaseTest):
             ('min_start_date', '01/01/2015'),
             ('calendar_category_id', 7),
             ('min_end_date', '2014-01-01'),
-            # this is not passing or working :/
-            # ('state', 'CA'),
+            ('max_end_date', '2023-12-27T14:30:00+05:30'),
             ('description', 'interesting event'),
             ('summary', 'solve all the problems'),
             ('event_id', 123),
