@@ -75,23 +75,21 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
 
         self.check_incorrect_values({"ao_requestor_type": 22}, True)
 
-    def test_ao_entity_name_filter(self):
-        entity_name = "Francis Beaver"
-        response = self._results_ao(api.url_for(UniversalSearch, ao_entity_name=entity_name))
+    def test_ao_commenter_filter(self):
+        commenter = "Francis Beaver"
+        response = self._results_ao(api.url_for(UniversalSearch, ao_commenter=commenter))
         # logging.info(response)
 
-        assert all(entity_name in doc["commenter_names"] or entity_name in doc["representative_names"]
-                   for doc in response)
+        assert all(commenter in doc["commenter_names"] for doc in response)
+        self.check_incorrect_values({"ao_commenter": "Incorrect"}, False)
 
-        entity_names = ["Jake Brown", "Francis Beaver"]
-        response = self._results_ao(api.url_for(UniversalSearch, ao_entity_name=entity_names))
+    def test_ao_representative_filter(self):
+        representative = "Chalmers, Adams, Backer & Kaufman, LLC"
+        response = self._results_ao(api.url_for(UniversalSearch, ao_representative=representative))
         # logging.info(response)
 
-        assert all(set(entity_names).intersection(doc["commenter_names"]) or set(entity_names).intersection(
-            doc["representative_names"])
-                   for doc in response)
-
-        self.check_incorrect_values({"ao_entity_name": "Bad Value"}, False)
+        assert all(representative in doc["representative_names"] for doc in response)
+        self.check_incorrect_values({"ao_representative": "Incorrect"}, False)
 
     def test_doc_cat_id_filter(self):
         ao_doc_cat_id = "C"

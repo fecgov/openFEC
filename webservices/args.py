@@ -374,8 +374,8 @@ legal_universal_search = {
     'ao_regulatory_citation': fields.List(IStr, required=False, description=docs.REGULATORY_CITATION),
     'ao_statutory_citation': fields.List(IStr, required=False, description=docs.STATUTORY_CITATION),
     'ao_citation_require_all': fields.Bool(description=docs.CITATION_REQUIRE_ALL),
-    'ao_entity_name': fields.List(IStr, required=False, description=docs.AO_ENTITY_NAME),
-
+    'ao_commenter': fields.Str(description=docs.AO_COMMENTER),
+    'ao_representative': fields.Str(description=docs.AO_REPRESENTATIVE),
     'case_no': fields.List(IStr, required=False, description=docs.CASE_NO),
     'case_respondents': IStr(required=False, description=docs.CASE_RESPONDENTS),
     'case_election_cycles': fields.Int(required=False, description=docs.CASE_ELECTION_CYCLES),

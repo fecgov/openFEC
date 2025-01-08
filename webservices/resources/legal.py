@@ -663,6 +663,12 @@ def apply_ao_specific_query_params(query, **kwargs):
     if kwargs.get("ao_requestor"):
         must_clauses.append(Q("match", requestor_names=kwargs.get("ao_requestor")))
 
+    if kwargs.get("ao_commenter"):
+        must_clauses.append(Q("match", commenter_names=kwargs.get("ao_commenter")))
+
+    if kwargs.get("ao_representative"):
+        must_clauses.append(Q("match", representative_names=kwargs.get("ao_representative")))
+
     citation_queries = []
     if kwargs.get("ao_regulatory_citation"):
         for citation in kwargs.get("ao_regulatory_citation"):
@@ -764,21 +770,6 @@ def apply_ao_specific_query_params(query, **kwargs):
     if date_range:
         date_range["format"] = ACCEPTED_DATE_FORMATS
         must_clauses.append(Q("range", request_date=date_range))
-
-    if check_filter_exists(kwargs, "ao_entity_name"):
-        must_clauses.append(
-            Q(
-                "bool",
-                should=[
-                    Q("match", commenter_names=" ".join(kwargs.get("ao_entity_name"))),
-                    Q(
-                        "match",
-                        representative_names=" ".join(kwargs.get("ao_entity_name")),
-                    ),
-                ],
-                minimum_should_match=1,
-            )
-        )
 
     query = query.query("bool", must=must_clauses)
     # logger.debug("apply_ao_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))

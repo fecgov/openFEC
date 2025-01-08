@@ -2168,8 +2168,12 @@ CITATION_REQUIRE_ALL = '''
 Require all citations to be in document (default behavior is any)
 '''
 
-AO_ENTITY_NAME = '''
-Name of commenter or representative
+AO_COMMENTER = '''
+Name of commenter
+'''
+
+AO_REPRESENTATIVE = '''
+Name of representative
 '''
 
 CASE_NO = '''
