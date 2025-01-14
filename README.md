@@ -47,7 +47,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
 
 1. Ensure you have the following requirements installed:
 
-   - Python (the latest 3.10 release, which includes `pip` and a built-in version of `virtualenv` called `venv`).
+   - Python (the latest 3.11 release, which includes `pip` and a built-in version of `virtualenv` called `venv`).
    - The latest long term support (LTS) or stable release of Node.js (which includes npm)
    - PostgreSQL (the latest 13 release).
      - Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
@@ -108,13 +108,13 @@ dependencies on checking out or merging changes to `requirements.txt`. To
 enable the hooks, run:
 
 ```
-invoke add_hooks
+invoke add-hooks
 ```
 
 To disable, run:
 
 ```
-invoke remove_hooks
+invoke remove-hooks
 ```
 
 #### Create a test database
@@ -146,7 +146,7 @@ export SQLA_SAMPLE_DB_CONN="postgresql://<username>:<password>@localhost:<port -
 Load our sample data into the development database (`cfdm_test`) by running:
 
 ```
-invoke create_sample_db
+invoke create-sample-db
 ```
 
 This will run `flyway` migrations on the empty database to create the schema, and then load sample data into this database from `data/sample_db.sql`.
@@ -325,10 +325,10 @@ dropdb cfdm_test
 createdb cfdm_test
 ```
 
-Now use the `build_test` invoke task to populate the new database with the new subset:
+Now use the `build-test` invoke task to populate the new database with the new subset:
 
 ```
-invoke build_test <source> postgresql://:@/cfdm_test
+invoke build-test <source> postgresql://:@/cfdm_test
 ```
 
 where `source` is a valid PostgreSQL connection string.
