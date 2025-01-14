@@ -3,6 +3,7 @@ services:
     platform: linux/amd64
     build:
       context: .
+    image: openfec:latest
     ports:
       - "5000:5000"
       - "8089:8089"
@@ -60,8 +61,8 @@ services:
       - "6379:6379"
 
   celery-worker:
-    build:
-      context: .
+    image: openfec:latest
+    platform: linux/arm64
     command: celery -A webservices.tasks  worker --loglevel=info
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
@@ -78,8 +79,8 @@ services:
       - .:/app
 
   celery-beat:
-    build:
-      context: .
+    image: openfec:latest
+    platform: linux/arm64
     command: celery -A webservices.tasks beat --loglevel=info
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
