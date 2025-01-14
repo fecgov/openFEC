@@ -99,6 +99,30 @@ class Date(fields.Str):
                     status_code=422)
 
 
+class FullDate(fields.Str):
+
+    def _validate(self, value):
+        value = value.strip()
+        super()._validate(value)
+        try:
+            if value.endswith("Z"):
+                value = value[:-1] + "+00:00"
+            # Try parsing ISO 8601 format
+            datetime.datetime.fromisoformat(value)
+        except (TypeError, ValueError):
+            try:
+                # Try parsing YYYY-MM-DD
+                datetime.datetime.strptime(value, '%Y-%m-%d')
+            except (TypeError, ValueError):
+                try:
+                    # Try parsing MM/DD/YYYY
+                    datetime.datetime.strptime(value, '%m/%d/%Y')
+                except (TypeError, ValueError):
+                    raise exceptions.ApiError(
+                        exceptions.FULLDATE_ERROR,
+                        status_code=422)
+
+
 class ImageNumber(fields.Str):
 
     def _validate(self, value):
@@ -401,6 +425,10 @@ legal_universal_search = {
     'sort': IStr(required=False, description=docs.SORT),
     'case_min_penalty_amount': fields.Str(required=False, description=docs.CASE_MIN_PENALTY_AMOUNT),
     'case_max_penalty_amount': fields.Str(required=False, description=docs.CASE_MAX_PENALTY_AMOUNT),
+    'q_proximity': fields.List(fields.Str, description=docs.Q_PROXIMITY),
+    'max_gaps': fields.Int(required=False, description=docs.MAX_GAPS),
+    "proximity_filter": fields.Str(validate=validate.OneOf(["after", "before"]), description=docs.PROXIMITY_FILTER),
+    'proximity_filter_term': fields.Str(required=False, description=docs.PROXIMITY_FILTER_TERM),
 }
 
 citation = {
@@ -675,10 +703,10 @@ calendar_dates = {
     'calendar_category_id': fields.List(fields.Int, description=docs.CATEGORY),
     'description': fields.List(Keyword, description=docs.CAL_DESCRIPTION),
     'summary': fields.List(Keyword, description=docs.SUMMARY),
-    'min_start_date': Date(description=docs.MIN_START_DATE),
-    'min_end_date': Date(description=docs.MIN_END_DATE),
-    'max_start_date': Date(description=docs.MAX_START_DATE),
-    'max_end_date': Date(description=docs.MAX_END_DATE),
+    'min_start_date': FullDate(description=docs.MIN_START_DATE),
+    'min_end_date': FullDate(description=docs.MIN_END_DATE),
+    'max_start_date': FullDate(description=docs.MAX_START_DATE),
+    'max_end_date': FullDate(description=docs.MAX_END_DATE),
     'event_id': fields.Int(description=docs.EVENT_ID),
 }
 
