@@ -1,9 +1,13 @@
 from tests.common import ElasticSearchBaseTest
 from webservices.rest import api
 from webservices.resources.legal import GetLegalCitation
+from webservices.legal_docs import TEST_SEARCH_ALIAS
+
+import unittest.mock as mock
 # import logging
 
 
+@mock.patch("webservices.resources.legal.SEARCH_ALIAS", TEST_SEARCH_ALIAS)
 class TestCitationsElasticsearch(ElasticSearchBaseTest):
     def test_citations(self):
 

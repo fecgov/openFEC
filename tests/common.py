@@ -11,15 +11,15 @@ from jdbc_utils import to_jdbc_url
 from webservices import rest
 from webservices import __API_VERSION__
 
-from webservices.legal_docs import (create_index, CASE_INDEX, ARCH_MUR_INDEX, AO_INDEX,
-                                    CASE_ALIAS, ARCH_MUR_ALIAS, AO_ALIAS)
+from webservices.legal_docs import (create_test_indices, TEST_CASE_INDEX, TEST_ARCH_MUR_INDEX, TEST_AO_INDEX,
+                                    TEST_CASE_ALIAS, TEST_ARCH_MUR_ALIAS, TEST_AO_ALIAS)
 from webservices.utils import create_es_client
 from tests.test_legal_data import document_dictionary
 
 TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
 rest.app.config['NPLUSONE_RAISE'] = True
 NPlusOne(rest.app)
-ALL_INDICES = [CASE_INDEX, AO_INDEX, ARCH_MUR_INDEX]
+ALL_INDICES = [TEST_CASE_INDEX, TEST_AO_INDEX, TEST_ARCH_MUR_INDEX]
 
 
 def _setup_extensions():
@@ -191,12 +191,11 @@ class ElasticSearchBaseTest(BaseTestCase):
 
 
 def _create_all_indices():
-    for index in ALL_INDICES:
-        create_index(index)
+    create_test_indices()
 
 
 def _delete_all_indices(es_client):
-    es_client.indices.delete("*")
+    es_client.indices.delete(index=ALL_INDICES, ignore_unavailable=True)
 
 
 def wait_for_refresh(es_client, index_name):
@@ -204,14 +203,14 @@ def wait_for_refresh(es_client, index_name):
 
 
 def _insert_all_documents(es_client):
-    insert_documents("murs", CASE_ALIAS, es_client)
-    insert_documents("archived_murs", ARCH_MUR_ALIAS, es_client)
-    insert_documents("adrs", CASE_ALIAS, es_client)
-    insert_documents("admin_fines", CASE_ALIAS, es_client)
-    insert_documents("statutes", AO_ALIAS, es_client)
-    insert_documents("advisory_opinions", AO_ALIAS, es_client)
-    insert_documents("ao_citations", AO_ALIAS, es_client)
-    insert_documents("mur_citations", CASE_ALIAS, es_client)
+    insert_documents("murs", TEST_CASE_ALIAS, es_client)
+    insert_documents("archived_murs", TEST_ARCH_MUR_ALIAS, es_client)
+    insert_documents("adrs", TEST_CASE_ALIAS, es_client)
+    insert_documents("admin_fines", TEST_CASE_ALIAS, es_client)
+    insert_documents("statutes", TEST_AO_ALIAS, es_client)
+    insert_documents("advisory_opinions", TEST_AO_ALIAS, es_client)
+    insert_documents("ao_citations", TEST_AO_ALIAS, es_client)
+    insert_documents("mur_citations", TEST_CASE_ALIAS, es_client)
 
 
 def insert_documents(doc_type, index, es_client):
