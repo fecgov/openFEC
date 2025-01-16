@@ -45,7 +45,15 @@ from .es_management import (  # noqa
     CASE_ALIAS,
     AO_ALIAS,
     ARCH_MUR_ALIAS,
-    SEARCH_ALIAS
+    SEARCH_ALIAS,
+    TEST_CASE_INDEX,
+    TEST_CASE_ALIAS,
+    TEST_AO_INDEX,
+    TEST_AO_ALIAS,
+    TEST_SEARCH_ALIAS,
+    TEST_ARCH_MUR_INDEX,
+    TEST_ARCH_MUR_ALIAS,
+    create_test_indices
 )
 
 from .show_legal_data import ( # noqa

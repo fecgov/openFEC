@@ -38,6 +38,14 @@ SEARCH_ALIAS = "search_alias"
 S3_BACKUP_DIRECTORY = "es-backups"
 S3_PRIVATE_SERVICE_INSTANCE_NAME = "fec-s3-snapshot"
 
+TEST_CASE_INDEX = "test_case_index"
+TEST_CASE_ALIAS = "test_case_alias"
+TEST_AO_INDEX = "test_ao_index"
+TEST_AO_ALIAS = "test_ao_alias"
+TEST_ARCH_MUR_INDEX = "test_arch_mur_index"
+TEST_ARCH_MUR_ALIAS = "test_arch_mur_alias"
+TEST_SEARCH_ALIAS = "test_search_alias"
+
 DOCS_PATH = "docs"
 
 SORT_MAPPING = {
@@ -449,6 +457,12 @@ INDEX_DICT = {
     ARCH_MUR_SWAP_INDEX: (ARCH_MUR_MAPPING, "", "", "", "", ""),
 }
 
+TEST_INDEX_DICT = {
+        TEST_CASE_INDEX: (CASE_MAPPING, TEST_CASE_ALIAS, TEST_SEARCH_ALIAS),
+        TEST_AO_INDEX: (AO_MAPPING, TEST_AO_ALIAS, TEST_SEARCH_ALIAS),
+        TEST_ARCH_MUR_INDEX: (ARCH_MUR_MAPPING, TEST_ARCH_MUR_ALIAS, TEST_SEARCH_ALIAS)
+    }
+
 
 def create_index(index_name=None):
     """
@@ -511,6 +525,15 @@ def create_index(index_name=None):
                 alias2))
     else:
         logger.error(" Invalid index '{0}'.".format(index_name))
+
+
+def create_test_indices():
+
+    INDEX_DICT.update(TEST_INDEX_DICT)
+
+    for index_name in TEST_INDEX_DICT:
+        create_index(index_name)
+        INDEX_DICT.pop(index_name)
 
 
 def display_index_alias():
