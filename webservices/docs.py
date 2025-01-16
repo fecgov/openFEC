@@ -714,6 +714,10 @@ The minimum date this record was last updated.(MM/DD/YYYY or YYYY-MM-DD)
 MAX_UPDATE_DATE = '''
 The maximum date this record was last updated.(MM/DD/YYYY or YYYY-MM-DD)
 '''
+
+CANDIDATE_PCC_ID = 'The candidate\'s primary campaign committee ID'
+
+CANDIDATE_PCC_NAME = 'The candidate\'s primary campaign committee name'
 # ======== election end ===========
 
 
@@ -1270,6 +1274,8 @@ END_DATE = '''
 Date the event ends(MM/DD/YYYY or YYYY-MM-DD)
 '''
 
+END_DATE_ENTITY_CHART = 'The cumulative total for this month.'
+
 CALENDAR_EXPORT = '''
 Returns CSV or ICS for downloading directly into calendar applications like Google, Outlook or other applications.
 
@@ -1542,6 +1548,8 @@ CONTRIBUTOR_STATE = 'State of contributor'
 CONTRIBUTOR_EMPLOYER = 'Employer of contributor, filers need to make an effort to gather this information'
 CONTRIBUTOR_OCCUPATION = 'Occupation of contributor, filers need to make an effort to gather this information'
 CONTRIBUTOR_ZIP = 'Zip code of contributor'
+CONTRIBUTOR_AGGREGATE_YTD = 'Total amount received from this source for the year to date. \
+Starting 2000, it is aggregated on an election-cycle basis in F3 and F3P, and calendar year in F3X.'
 IS_INDIVIDUAL = 'Restrict to non-earmarked individual contributions where memo code is true. \
 Filtering individuals is useful to make sure contributions are not double reported and in creating \
 breakdowns of the amount of money coming from individuals.'
