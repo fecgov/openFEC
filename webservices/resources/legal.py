@@ -236,13 +236,33 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     if check_filter_exists(kwargs, "case_no"):
         must_clauses.append(Q("terms", no=kwargs.get("case_no")))
 
-    if kwargs.get("primary_subject_id") and '' not in kwargs.get("primary_subject_id"):
-        must_clauses.append(Q("nested", path="subjects",
-                            query=Q("terms", subjects__primary_subject_id=kwargs.get("primary_subject_id"))))
+    # Get 'primary_subject_id' from kwargs
+    primary_subject_id = kwargs.get("primary_subject_id", [])
+    primary_subject_id_valid_values = ['1', '2', '3', '4', '5', '6', '7', '8', '9',
+                                       '10', '11', '12', '13', '14', '15', '16',
+                                       '17', '18', '19', '20']
 
-    if kwargs.get("secondary_subject_id") and '' not in kwargs.get("secondary_subject_id"):
+    # Validate 'primary_subject_id filter'
+    valid_primary_subject_id = filters.validate_multiselect_filter(
+        primary_subject_id, primary_subject_id_valid_values)
+
+    if valid_primary_subject_id:
         must_clauses.append(Q("nested", path="subjects",
-                            query=Q("terms", subjects__secondary_subject_id=kwargs.get("secondary_subject_id"))))
+                            query=Q("terms", subjects__primary_subject_id=valid_primary_subject_id)))
+
+    # Get 'secondary_subject_id' from kwargs
+    secondary_subject_id = kwargs.get("secondary_subject_id", [])
+    secondary_subject_id_valid_values = ['1', '2', '3', '4', '5', '6', '7', '8', '9',
+                                         '10', '11', '12', '13', '14', '15', '16',
+                                         '17', '18']
+
+    # Validate 'secondary_subject_id filter'
+    valid_secondary_subject_id = filters.validate_multiselect_filter(
+        secondary_subject_id, secondary_subject_id_valid_values)
+
+    if valid_secondary_subject_id:
+        must_clauses.append(Q("nested", path="subjects",
+                            query=Q("terms", subjects__secondary_subject_id=valid_secondary_subject_id)))
 
     if kwargs.get("case_respondents"):
         must_clauses.append(Q("simple_query_string",
