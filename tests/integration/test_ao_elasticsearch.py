@@ -62,8 +62,8 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
         assert all(requestor in doc["requestor_names"] for doc in response)
         self.check_incorrect_values({"ao_requestor": "Incorrect"}, False)
 
-        types = [5, 15]
-        requstor_type_full = [REQUESTOR_TYPES[5], REQUESTOR_TYPES[15]]
+        types = ["5", "15"]
+        requstor_type_full = [REQUESTOR_TYPES["5"], REQUESTOR_TYPES["15"]]
         response = self._results_ao(api.url_for(UniversalSearch, ao_requestor_type=types))
         # logging.info(response)
 
@@ -71,13 +71,13 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
                        for requestor in doc["requestor_types"])
                    for doc in response)
 
-        type = 15
+        type = "15"
         response = self._results_ao(api.url_for(UniversalSearch, ao_requestor_type=type))
         # logging.info(response)
 
         assert all(REQUESTOR_TYPES[type] in doc["requestor_types"] for doc in response)
 
-        self.check_incorrect_values({"ao_requestor_type": 22}, True)
+        self.check_incorrect_values({"ao_requestor_type": "22"}, True)
 
     def test_ao_commenter_filter(self):
         commenter = "Francis Beaver"

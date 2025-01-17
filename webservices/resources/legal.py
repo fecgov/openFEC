@@ -6,6 +6,7 @@ from flask import abort
 from flask_apispec import doc
 from webservices import docs
 from webservices import args
+from webservices import filters
 from webservices.utils import (
     create_es_client,
     Resource,
@@ -49,22 +50,22 @@ ALL_DOCUMENT_TYPES = [
 ACCEPTED_DATE_FORMATS = "strict_date_optional_time_nanos||MM/dd/yyyy||M/d/yyyy||MM/d/yyyy||M/dd/yyyy"
 
 REQUESTOR_TYPES = {
-            1: "Federal candidate/candidate committee/officeholder",
-            2: "Publicly funded candidates/committees",
-            3: "Party committee, national",
-            4: "Party committee, state or local",
-            5: "Nonconnected political committee",
-            6: "Separate segregated fund",
-            7: "Labor Organization",
-            8: "Trade Association",
-            9: "Membership Organization, Cooperative, Corporation W/O Capital Stock",
-            10: "Corporation (including LLCs electing corporate status)",
-            11: "Partnership (including LLCs electing partnership status)",
-            12: "Governmental entity",
-            13: "Research/Public Interest/Educational Institution",
-            14: "Law Firm",
-            15: "Individual",
-            16: "Other",
+            "1": "Federal candidate/candidate committee/officeholder",
+            "2": "Publicly funded candidates/committees",
+            "3": "Party committee, national",
+            "4": "Party committee, state or local",
+            "5": "Nonconnected political committee",
+            "6": "Separate segregated fund",
+            "7": "Labor Organization",
+            "8": "Trade Association",
+            "9": "Membership Organization, Cooperative, Corporation W/O Capital Stock",
+            "10": "Corporation (including LLCs electing corporate status)",
+            "11": "Partnership (including LLCs electing partnership status)",
+            "12": "Governmental entity",
+            "13": "Research/Public Interest/Educational Institution",
+            "14": "Law Firm",
+            "15": "Individual",
+            "16": "Other",
 }
 
 # endpoint path: /legal/docs/<doc_type>/<no>
@@ -128,8 +129,8 @@ class UniversalSearch(Resource):
             "adrs": case_query_builder,
             "admin_fines": case_query_builder,
         }
-
-        if kwargs.get("type", "all") == "all":
+        # Get the type from kwargs, defaulting to '' if not present
+        if kwargs.get("type", "") == "":
             doc_types = ALL_DOCUMENT_TYPES
         else:
             doc_types = [kwargs.get("type")]
@@ -235,13 +236,33 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     if check_filter_exists(kwargs, "case_no"):
         must_clauses.append(Q("terms", no=kwargs.get("case_no")))
 
-    if kwargs.get("primary_subject_id") and '' not in kwargs.get("primary_subject_id"):
-        must_clauses.append(Q("nested", path="subjects",
-                            query=Q("terms", subjects__primary_subject_id=kwargs.get("primary_subject_id"))))
+    # Get 'primary_subject_id' from kwargs
+    primary_subject_id = kwargs.get("primary_subject_id", [])
+    primary_subject_id_valid_values = ['1', '2', '3', '4', '5', '6', '7', '8', '9',
+                                       '10', '11', '12', '13', '14', '15', '16',
+                                       '17', '18', '19', '20']
 
-    if kwargs.get("secondary_subject_id") and '' not in kwargs.get("secondary_subject_id"):
+    # Validate 'primary_subject_id filter'
+    valid_primary_subject_id = filters.validate_multiselect_filter(
+        primary_subject_id, primary_subject_id_valid_values)
+
+    if valid_primary_subject_id:
         must_clauses.append(Q("nested", path="subjects",
-                            query=Q("terms", subjects__secondary_subject_id=kwargs.get("secondary_subject_id"))))
+                            query=Q("terms", subjects__primary_subject_id=valid_primary_subject_id)))
+
+    # Get 'secondary_subject_id' from kwargs
+    secondary_subject_id = kwargs.get("secondary_subject_id", [])
+    secondary_subject_id_valid_values = ['1', '2', '3', '4', '5', '6', '7', '8', '9',
+                                         '10', '11', '12', '13', '14', '15', '16',
+                                         '17', '18']
+
+    # Validate 'secondary_subject_id filter'
+    valid_secondary_subject_id = filters.validate_multiselect_filter(
+        secondary_subject_id, secondary_subject_id_valid_values)
+
+    if valid_secondary_subject_id:
+        must_clauses.append(Q("nested", path="subjects",
+                            query=Q("terms", subjects__secondary_subject_id=valid_secondary_subject_id)))
 
     if kwargs.get("case_respondents"):
         must_clauses.append(Q("simple_query_string",
@@ -437,7 +458,7 @@ def apply_af_specific_query_params(query, **kwargs):
 def apply_mur_specific_query_params(query, **kwargs):
     must_clauses = []
 
-    if kwargs.get("mur_type"):
+    if check_filter_exists(kwargs, "mur_type"):
         must_clauses.append(Q("match", mur_type=kwargs.get("mur_type")))
 
     if kwargs.get("case_election_cycles"):
@@ -742,13 +763,22 @@ def apply_ao_specific_query_params(query, **kwargs):
     else:
         must_clauses.append(Q("bool", should=citation_queries, minimum_should_match=1))
 
-    if kwargs.get("ao_requestor_type"):
+    # Get 'ao_requestor_type' from kwargs
+    ao_requestor_type = kwargs.get("ao_requestor_type", [])
+    ao_requestor_type_valid_values = ['1', '2', '3', '4', '5', '6', '7', '8', '9',
+                                      '10', '11', '12', '13', '14', '15', '16']
 
+    # Validate 'ao_requestor_type filter'
+    valid_requestor_types = filters.validate_multiselect_filter(
+        ao_requestor_type, ao_requestor_type_valid_values)
+
+    # Always include valid values in the query construction
+    if valid_requestor_types:
         must_clauses.append(
             Q(
                 "terms",
                 requestor_types=[
-                    REQUESTOR_TYPES[r] for r in kwargs.get("ao_requestor_type")
+                    REQUESTOR_TYPES[r] for r in valid_requestor_types
                 ],
             )
         )
