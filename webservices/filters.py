@@ -183,3 +183,14 @@ def get_cycle(kwargs):
             )
         return kwargs['cycle'][0]
     return kwargs['cycle']
+
+
+def validate_multiselect_filter(filter, valid_values):
+    valid_results = []
+
+    # Validate each value in filter
+    for value in filter:
+        if isinstance(value, str) and ' ' not in value:
+            if value in valid_values:
+                valid_results.append(value)
+    return valid_results
