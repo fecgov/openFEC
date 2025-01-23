@@ -7,7 +7,7 @@ import marshmallow as ma
 from marshmallow_sqlalchemy import SQLAlchemySchema, SQLAlchemyAutoSchema
 from marshmallow_pagination import schemas as paging_schemas
 
-from webservices import utils, decoders
+from webservices import utils, decoders, docs
 from webservices.spec import spec
 from webservices.common import models
 from webservices import __API_VERSION__
@@ -999,7 +999,7 @@ ScheduleASchema = make_schema(
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'contributor': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'contribution_receipt_amount': ma.fields.Float(),
-        'contributor_aggregate_ytd': ma.fields.Float(),
+        'contributor_aggregate_ytd': ma.fields.Float(description=docs.CONTRIBUTOR_AGGREGATE_YTD),
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
@@ -1610,8 +1610,8 @@ class ElectionSchema(ma.Schema):
     incumbent_challenge_full = ma.fields.Str()
     party_full = ma.fields.Str()
     committee_ids = ma.fields.List(ma.fields.Str)
-    candidate_pcc_id = ma.fields.Str(doc="The candidate's primary campaign committee ID")
-    candidate_pcc_name = ma.fields.Str(doc="The candidate's primary campaign committee name")
+    candidate_pcc_id = ma.fields.Str(description=docs.CANDIDATE_PCC_ID)
+    candidate_pcc_name = ma.fields.Str(description=docs.CANDIDATE_PCC_NAME)
     total_receipts = ma.fields.Float()
     total_disbursements = ma.fields.Float()
     cash_on_hand_end_period = ma.fields.Float()
@@ -1675,7 +1675,7 @@ register_schema(RadAnalystPageSchema)
 EntityReceiptDisbursementTotalsSchema = make_schema(
     models.EntityReceiptDisbursementTotals,
     options={'exclude': ('idx', 'month', 'year')},
-    fields={'end_date': ma.fields.Date(doc='The cumulative total for this month.')},
+    fields={'end_date': ma.fields.Date(description=docs.END_DATE_ENTITY_CHART)}
 )
 EntityReceiptDisbursementTotalsPageSchema = make_page_schema(EntityReceiptDisbursementTotalsSchema)
 register_schema(EntityReceiptDisbursementTotalsSchema)
