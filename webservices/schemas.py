@@ -303,6 +303,9 @@ def augment_itemized_aggregate_models(factory, committee_model, *models, namespa
     for model in models:
         schema = factory(
             model,
+            fields={
+                'total': ma.fields.Float()
+            },
             options={
                 'exclude': ('idx', 'committee',),
                 'relationships': [
@@ -1084,6 +1087,7 @@ ScheduleAByEmployerSchema = make_schema(
     fields={
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'employer': ma.fields.Str(),
+        'total': ma.fields.Float(),
     },
     options={'exclude': ('idx', 'committee', 'employer_text',)}
 )
@@ -1096,6 +1100,7 @@ ScheduleAByOccupationSchema = make_schema(
     fields={
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'occupation': ma.fields.Str(),
+        'total': ma.fields.Float(),
     },
     options={'exclude': ('idx', 'committee', 'occupation_text',)}
 )
