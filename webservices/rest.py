@@ -22,6 +22,7 @@ from flask import render_template
 from flask import send_from_directory
 from flask import Flask
 from flask import Blueprint
+# from gevent.util import format_run_info
 from werkzeug.middleware.proxy_fix import ProxyFix
 from webargs.flaskparser import FlaskParser
 from flask_apispec import FlaskApiSpec
@@ -60,6 +61,12 @@ from webservices.resources import spending_by_others
 from webservices.env import env
 from webservices.tasks.response_exception import ResponseException
 from webservices.tasks.error_code import ErrorCode
+
+from psycogreen.gevent import patch_psycopg
+
+
+patch_psycopg()
+
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -602,6 +609,13 @@ def api_ui():
 @app.route('/robots.txt/')
 def robots():
     return send_from_directory(app.static_folder, 'robots.txt')
+
+
+'''
+@app.route("/gevent-stats/")
+def gevent_stats():
+    return jsonify({"run_info": format_run_info()})
+'''
 
 
 @app.route('/report-csp-violation/', methods=['POST'])
