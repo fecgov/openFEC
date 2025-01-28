@@ -12,7 +12,7 @@ gevent==24.11.1
 gunicorn==22.0.0
 GitPython==3.1.41
 icalendar==4.0.2
-invoke==0.15.0
+invoke==2.2.0
 kombu==5.2.4 # Starting from celery 5.x release, the minimum required version is Kombu 5.x
 networkx==2.6.2
 prance[osv]==0.22.11.4.0
