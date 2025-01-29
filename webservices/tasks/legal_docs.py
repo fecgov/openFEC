@@ -1,5 +1,5 @@
 import datetime
-import time
+import gevent
 import logging
 
 from celery_once import QueueOnce
@@ -207,7 +207,7 @@ def create_es_backup():
             create_es_snapshot(index_name)
             logger.info("elasticsearch snapshot on index: '{0}' created".format(index_name))
             index_name_message += index_name + ","
-            time.sleep(60)
+            gevent.sleep(60)
         logger.info(" Weekly (%s) elasticsearch snapshot backup completed", datetime.date.today().strftime("%A"))
         slack_message = "Weekly elasticsearch backup completed in {0} space on indices({1})".format(
             get_app_name(), index_name_message)
@@ -236,7 +236,7 @@ def delete_es_backup_monthly():
                 if (today - snapshot_date).days >= 30 and 'arch_mur' not in id:
                     delete_snapshot(repo_name, id)
                     logger.info("deleting snapshot: '{0}'".format(id))
-                    time.sleep(30)
+                    gevent.sleep(30)
             logger.info(" Monthly (%s) elasticsearch snapshot deletion completed", datetime.date.today().strftime("%A"))
             slack_message = "Monthly elasticsearch deletion completed in {0} space in repository: ({1})".format(
                 get_app_name(), repo_name)

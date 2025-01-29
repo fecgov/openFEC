@@ -1,7 +1,7 @@
 import logging
 import datetime
 import json
-import time
+import gevent
 
 from webservices.utils import (
     create_es_client,
@@ -601,7 +601,7 @@ def delete_index(index_name):
             logger.info(" Deleting index '{0}'...".format(index_name))
             es_client.indices.delete(index_name)
             # sleep 60 seconds (1 min)
-            time.sleep(60)
+            gevent.sleep(60)
             logger.info(" The index '{0}' is deleted successfully.".format(index_name))
         except Exception:
             pass
@@ -709,7 +709,7 @@ def restore_from_swapping_index(index_name=None):
         logger.error(" Reindex exception error = {0}".format(e.args))
 
     # sleep 30 second (0.5 min)
-    time.sleep(30)
+    gevent.sleep(30)
     logger.info(" Reindexed all documents from index '{0}' to index '{1}' successfully.".format(
         swapping_index, index_name)
     )
@@ -746,7 +746,7 @@ def switch_aliases_to_original_index(index_name=None):
     )
 
     # sleep 60 second (1 min)
-    time.sleep(60)
+    gevent.sleep(60)
 
     logger.info(" Deleting index '{0}'...".format(swapping_index))
     es_client.indices.delete(swapping_index)
@@ -954,7 +954,7 @@ def restore_es_snapshot(repo_name=None, snapshot_name=None, index_name=None):
         snapshot=snapshot_name,
         body=body,
     )
-    time.sleep(20)
+    gevent.sleep(20)
     if result.get("accepted"):
         logger.info(" The snapshot: {0} is restored successfully.".format(snapshot_name))
         if es_client.indices.exists(swapping_index):
@@ -1006,7 +1006,7 @@ def restore_es_snapshot_downtime(repo_name=None, snapshot_name=None, index_name=
         snapshot=snapshot_name,
         body=body,
     )
-    time.sleep(20)
+    gevent.sleep(20)
     if result.get("accepted"):
         logger.info(" Restored snapshot: '{0}' successfully.".format(snapshot_name))
     else:
