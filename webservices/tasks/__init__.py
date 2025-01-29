@@ -99,8 +99,6 @@ app.conf.update(
         "webservices.tasks.download",
         "webservices.tasks.legal_docs",
     ),
-    worker_pool='gevent',
-    worker_concurrency=2,
     beat_schedule=schedule,
     broker_connection_timeout=30,  # in seconds
     broker_connection_max_retries=0,  # for unlimited retries
