@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-import glob
 import subprocess
-import multiprocessing
 import networkx as nx
 import sqlalchemy as sa
 import datetime
@@ -10,36 +8,9 @@ import requests
 from webservices import flow
 from webservices.env import env
 from webservices.rest import db
-from webservices.config import SQL_CONFIG, check_config
-from webservices.common.util import get_full_path
+from webservices.config import check_config
 from webservices.utils import post_to_slack
 from cli import logger
-
-
-def execute_sql_file(path):
-    """This helper is typically used within a multiprocessing pool; create a new database
-    engine for each job.
-    """
-    db.engine.dispose()
-    logger.info(("Running {}".format(path)))
-    with open(path) as fp:
-        cmd = "\n".join(
-            [line for line in fp.readlines() if not line.strip().startswith("--")]
-        )
-        db.engine.execute(sa.text(cmd), **SQL_CONFIG)
-
-
-def execute_sql_folder(path, processes):
-    sql_dir = get_full_path(path)
-    if not sql_dir.endswith("/"):
-        sql_dir += "/"
-    paths = sorted(glob.glob(sql_dir + "*.sql"))
-    if processes > 1:
-        pool = multiprocessing.Pool(processes=processes)
-        pool.map(execute_sql_file, sorted(paths))
-    else:
-        for path in paths:
-            execute_sql_file(path)
 
 
 def refresh_materialized(concurrent=True):
