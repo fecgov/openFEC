@@ -5,7 +5,7 @@ import datetime
 
 from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
-import gevent.threadpool
+from gevent.threadpool import ThreadPool
 from postgres_copy import query_entities, copy_to
 from celery_once import QueueOnce
 from smart_open import smart_open
@@ -131,8 +131,8 @@ def make_bundle(resource):
             resource["query"],
             resource["schema"]
         )
-        pool = gevent.threadpool.ThreadPool(1)
-        pool.spawn(copy_to, query, fp, db.session.connection().engine, format="csv", header=True).join()
+        pool = ThreadPool(2)
+        pool.map(copy_to, query, fp, db.session.connection().engine, format="csv", header=True).join()
 
 
 @app.task(base=QueueOnce, once={"graceful": True})
