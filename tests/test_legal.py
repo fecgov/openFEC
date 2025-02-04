@@ -136,6 +136,7 @@ class TestLegalSearch(unittest.TestCase):
                             "no": "1111",
                             "case_serial": 1111,
                             "highlights": [],
+                            "source": [],
                             "document_highlights": {},
                             "documents": [
                                 {
@@ -148,6 +149,7 @@ class TestLegalSearch(unittest.TestCase):
                             "no": "2222",
                             "case_serial": 2222,
                             "highlights": [],
+                            "source": [],
                             "document_highlights": {},
                             "documents": [
                                 {
@@ -182,6 +184,7 @@ class TestLegalSearch(unittest.TestCase):
                             "no": "1111",
                             "case_serial": 1111,
                             "highlights": [],
+                            "source": [],
                             "document_highlights": {},
                             "documents": [
                                 {
@@ -194,6 +197,7 @@ class TestLegalSearch(unittest.TestCase):
                             "no": "2222",
                             "case_serial": 2222,
                             "highlights": [],
+                            "source": [],
                             "document_highlights": {},
                             "documents": [
                                 {
@@ -225,6 +229,7 @@ class TestLegalSearch(unittest.TestCase):
                             "no": "1111",
                             "case_serial": 1111,
                             "highlights": [],
+                            "source": [],
                             "document_highlights": {},
                             "documents": [
                                 {
@@ -237,6 +242,8 @@ class TestLegalSearch(unittest.TestCase):
                             "no": "2222",
                             "case_serial": 2222,
                             "highlights": [],
+                            "source": [],
+                            ""
                             "document_highlights": {},
                             "documents": [
                                 {
