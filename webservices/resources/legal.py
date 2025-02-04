@@ -172,7 +172,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     if q:
         must_query.append(Q("simple_query_string", query=q))
 
-    if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps"):
+    if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
         proximity_query = True
 
     query = (
@@ -374,7 +374,7 @@ def get_case_document_query(q, **kwargs):
         q_query = Q("simple_query_string", query=q, fields=["documents.text"])
         combined_query.append(q_query)
 
-    if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps"):
+    if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
         combined_query.append(get_proximity_query(**kwargs))
         proximity_inner_hits = {"_source": {"excludes": ["documents.text"]}, "size": 100}
 
@@ -669,7 +669,7 @@ def get_ao_document_query(q, **kwargs):
         q_query = Q("simple_query_string", query=q, fields=["documents.text"])
         combined_query.append(q_query)
 
-    if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps"):
+    if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
         combined_query.append(get_proximity_query(**kwargs))
         proximity_inner_hits = {"_source": {"excludes": ["documents.text"]}, "size": 100}
 
