@@ -45,12 +45,12 @@ class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.app = create_app(test_config="testing")
-        # cls.app = rest.app.test_client()
-        cls.app.context = cls.app.app_context()
+        cls.app_context = cls.app.app_context()
         cls.app_context.push()
         cls.db = cls.app.extensions['sqlalchemy'].db
         cls.db.create_all()
         cls.client = TestApp(cls.app)
+        # cls.app = rest.app.test_client()
         _setup_extensions(cls.db)
 
     def setUp(self):
@@ -58,12 +58,13 @@ class BaseTestCase(unittest.TestCase):
         self.transaction = self.connection.begin()
         # added session below???
         self.session = self.db.create_scoped_session()
+        # self.session = self.db.create_scoped_session(options='bind':self.connection)
         self.db.session = self.session
 
     def tearDown(self):
+        self.session.remove()
         self.transaction.rollback()
         self.connection.close()
-        self.db.session.remove()
 
     @classmethod
     def tearDownClass(cls):
