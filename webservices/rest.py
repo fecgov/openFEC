@@ -132,6 +132,10 @@ def create_app(test_config=None):
     else:
         # load the test config if passed in
         TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
+        app.config['SQLALCHEMY_FOLLOWERS'] = [sa.create_engine(follower.strip())
+                                              for follower in utils.split_env_var(
+                                              env.get_credential('SQLA_FOLLOWERS', ''))
+                                              if follower.strip()]
         app.config['NPLUSONE_RAISE'] = True
         app.config['SQLALCHEMY_DATABASE_URI'] = TEST_CONN
         app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False

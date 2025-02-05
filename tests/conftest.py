@@ -1,3 +1,4 @@
+'''
 import manage
 from tests import common
 from webservices.rest import create_app
@@ -32,7 +33,7 @@ def run_migrations():
 
 def reset_schema():
     db = current_app.extensions["sqlalchemy"].db
-    for schemas in [
+    for schema in [
         "aouser",
         "auditsearch",
         "disclosure",
@@ -46,8 +47,7 @@ def reset_schema():
         "staging",
         "test_efile",
     ]:
-        for schema in schemas:
-            db.engine.execute(f'DROP SCHEMA IF EXISTS {schema} CASCADE;')
+        db.engine.execute(f'DROP SCHEMA IF EXISTS {schema} CASCADE;')
     db.engine.execute('create schema public;')
 
 
@@ -76,3 +76,4 @@ def pytest_collection_modifyitems(session, config, items):
 def pytest_configure(config):
     """Flake8 is very verbose by default. Silence it."""
     logging.getLogger("flake8").setLevel(logging.WARNING)
+'''

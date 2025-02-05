@@ -4,7 +4,7 @@ import os
 import subprocess
 import unittest
 
-from webtest import TestApp
+# from webtest import TestApp
 
 from webservices.rest import create_app
 from webservices import __API_VERSION__
@@ -49,8 +49,9 @@ class BaseTestCase(unittest.TestCase):
         cls.app_context.push()
         cls.db = cls.app.extensions['sqlalchemy'].db
         cls.db.create_all()
-        cls.client = TestApp(cls.app)
-        # cls.app = rest.app.test_client()
+        # cls.client = TestApp(cls.app)
+        # we use response.body down below which is not TestApp
+        cls.client = cls.app.test_client()
         _setup_extensions(cls.db)
 
     def setUp(self):

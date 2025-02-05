@@ -3,6 +3,7 @@ import celery
 from sqlalchemy import orm
 from flask_sqlalchemy import SQLAlchemy as SQLAlchemyBase
 from flask_sqlalchemy import SignallingSession
+from flask import current_app
 
 
 class RoutingSession(SignallingSession):
@@ -13,15 +14,15 @@ class RoutingSession(SignallingSession):
 
     @property
     def followers(self):
-        return self.app.config['SQLALCHEMY_FOLLOWERS']
+        return current_app.config['SQLALCHEMY_FOLLOWERS']
 
     @property
     def follower_tasks(self):
-        return self.app.config['SQLALCHEMY_FOLLOWER_TASKS']
+        return current_app.config['SQLALCHEMY_FOLLOWER_TASKS']
 
     @property
     def restrict_follower_traffic_to_tasks(self):
-        return self.app.config['SQLALCHEMY_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS']
+        return current_app.config['SQLALCHEMY_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS']
 
     @property
     def use_follower(self):
