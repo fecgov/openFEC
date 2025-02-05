@@ -52,7 +52,8 @@ class RoutingSQLAlchemy(SQLAlchemyBase):
     to return a session factory that makes RoutingSession type sessions"""
 
     def create_session(self, options):
-        return orm.sessionmaker(class_=RoutingSession, db=self, **options)
+        SessionFactory = orm.sessionmaker(class_=RoutingSession, db=self, **options)
+        return orm.scoped_session(SessionFactory)
 
 
 db = RoutingSQLAlchemy()

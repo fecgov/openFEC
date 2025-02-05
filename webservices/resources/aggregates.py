@@ -277,7 +277,7 @@ class CandidateAggregateResource(AggregateResource):
                 self.model.cycle > (models.CandidateElection.cand_election_year - election_duration),
             ),
         )
-        return query.with_entities(
+        return query.with_only_columns(
             self.model.candidate_id,
             self.model.committee_id,
             cycle_column.label('cycle'),
@@ -445,7 +445,7 @@ class ECAggregatesView(AggregateResource):
 
 def join_cand_cmte_names(query):
     query = query.subquery()
-    return models.db.session.query(
+    return sa.select(
         query,
         models.CandidateHistory.candidate_id.label('candidate_id'),
         models.CommitteeHistory.committee_id.label('committee_id'),

@@ -74,6 +74,7 @@ def sqla_conn_string():
 
 
 # app.debug = True
+app.config['SQLALCHEMY_WARN_20'] = True  # Warn on 2.0 behavior
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -87,7 +88,7 @@ app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
     'webservices.tasks.download.export_query',
 ]
 app.config['SQLALCHEMY_FOLLOWERS'] = [
-    sa.create_engine(follower.strip())
+    sa.create_engine(follower.strip(), future=False)
     for follower in utils.split_env_var(env.get_credential('SQLA_FOLLOWERS', ''))
     if follower.strip()
 ]
@@ -300,6 +301,12 @@ def page_not_found(exception):
 def forbidden(exception):
     wrapped = ResponseException(str(exception), exception.code, type(exception))
     return wrapped.wrappedException, wrapped.status
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    """Ensure the session is removed after each request."""
+    db.session.remove()
 
 
 api.add_resource(national_party.NationalParty_ScheduleAView, '/national_party/schedule_a/')

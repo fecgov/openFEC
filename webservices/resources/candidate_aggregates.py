@@ -12,8 +12,7 @@ from webservices.common import models
 from webservices.common.models import (
     CandidateCommitteeLink,
     ScheduleABySize,
-    ScheduleAByState,
-    db,
+    ScheduleAByState
 )
 
 
@@ -31,16 +30,14 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
     Aggregated data are calculated per fec_cycle only, no odd year
 
     """
-    rows = (
-        db.session.query(
+    rows = sa.select(
             CandidateCommitteeLink.candidate_id.label('candidate_id'),
             CandidateCommitteeLink.committee_id.label('committee_id'),
             CandidateCommitteeLink.fec_election_year.label('fec_election_year'),
             CandidateCommitteeLink.election_yr_to_be_included.label(
                 'election_yr_to_be_included'
             ),
-        )
-        .filter(
+        ).filter(
             (
                 CandidateCommitteeLink.fec_election_year.in_(kwargs['cycle'])
                 if not kwargs.get('election_full')
@@ -50,10 +47,7 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
             ),
             CandidateCommitteeLink.candidate_id.in_(kwargs['candidate_id']),
             CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
-        )
-        .distinct()
-        .subquery()
-    )
+        ).distinct().subquery()
 
     cycle_column = (
         rows.c.election_yr_to_be_included
@@ -61,17 +55,14 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
         else rows.c.fec_election_year
     ).label('cycle')
 
-    aggregates = (
-        db.session.query(rows.c.candidate_id, cycle_column, *label_columns)
-        .join(
+    aggregates = sa.select(rows.c.candidate_id, cycle_column, *label_columns).join(
             aggregate_model,
             sa.and_(
                 rows.c.committee_id == aggregate_model.committee_id,
                 rows.c.fec_election_year == aggregate_model.cycle,
             ),
-        )
-        .group_by(rows.c.candidate_id, cycle_column, *group_columns)
-    )
+        ).group_by(rows.c.candidate_id, cycle_column, *group_columns)
+
     return rows, aggregates
 
 
@@ -206,7 +197,7 @@ class ScheduleAByStateCandidateTotalsView(NoCapResource):
             kwargs,
         )
         q = query.subquery()
-        query = db.session.query(
+        query = sa.select(
             sa.func.sum(q.c.total).label('total'),
             sa.func.sum(q.c.count).label('count'),
             q.c.candidate_id.label('candidate_id'),
@@ -289,7 +280,7 @@ class TotalsCandidateView(ApiResource):
     def build_query(self, **kwargs):
         history = models.CandidateHistoryWithFuture
         query = (
-            db.session.query(history.__table__, models.CandidateTotal.__table__)
+            sa.select(history.__table__, models.CandidateTotal.__table__)
             .join(
                 models.CandidateTotal,
                 sa.and_(
@@ -361,7 +352,7 @@ class CandidateTotalAggregateView(ApiResource):
     def build_query(self, **kwargs):
         total = models.CandidateTotal
 
-        query = db.session.query(
+        query = sa.select(
             total.election_year.label("election_year"),
             sa.func.sum(total.receipts).label(
                 "total_receipts"),
