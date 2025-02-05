@@ -1,6 +1,7 @@
 import manage
 from tests import common
-from webservices import rest
+from webservices.rest import create_app
+from flask import current_app
 
 import pytest
 import subprocess
@@ -9,9 +10,9 @@ import logging
 
 @pytest.fixture(scope="session")
 def migrate_db(request):
-    with rest.app.app_context():
-        rest.app.config['TESTING'] = True
-        rest.app.config['SQLALCHEMY_DATABASE_URI'] = common.TEST_CONN
+    app = create_app(test_config="testing")
+    with app.app_context():
+
         reset_schema()
         run_migrations()
         manage.refresh_materialized(concurrent=False)
@@ -30,7 +31,8 @@ def run_migrations():
 
 
 def reset_schema():
-    for schema in [
+    db = current_app.extensions["sqlalchemy"].db
+    for schemas in [
         "aouser",
         "auditsearch",
         "disclosure",
@@ -44,8 +46,9 @@ def reset_schema():
         "staging",
         "test_efile",
     ]:
-        rest.db.engine.execute('drop schema if exists %s cascade;' % schema)
-    rest.db.engine.execute('create schema public;')
+        for schema in schemas:
+            db.engine.execute(f'DROP SCHEMA IF EXISTS {schema} CASCADE;')
+    db.engine.execute('create schema public;')
 
 
 def pytest_addoption(parser):

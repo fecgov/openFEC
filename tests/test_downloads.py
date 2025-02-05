@@ -7,7 +7,7 @@ import pytest
 from botocore.exceptions import ClientError
 
 from webservices.exceptions import ApiError
-from webservices.rest import db, api
+from webservices.common.models import db, api
 from webservices.tasks import download as tasks
 from webservices.resources import download as resource
 from webservices.resources import (

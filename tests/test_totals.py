@@ -6,7 +6,7 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices import utils
-from webservices.rest import api
+from webservices.api_setup import api
 from webservices.resources.totals import (
     TotalsCommitteeView,
     TotalsByEntityTypeView,

@@ -5,8 +5,8 @@ from tests.common import ApiBaseTest
 
 from webservices import rest
 from webservices import schemas
-from webservices.rest import db
-from webservices.rest import api
+from webservices.common.models import db
+from webservices.api_setup import api
 from webservices.resources.candidates import CandidateList
 from webservices.resources.candidates import CandidateView
 from webservices.resources.candidates import CandidateSearch

@@ -15,7 +15,7 @@ from webservices.legal_docs.es_management import (  # noqa
     CASE_REPO,
 )
 
-from webservices.rest import db
+from webservices.common.models import db
 from webservices.tasks import app
 from webservices.tasks.utils import get_app_name
 

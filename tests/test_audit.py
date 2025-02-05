@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 from tests import factories
 from tests.common import ApiBaseTest
-from webservices.rest import api
+from webservices.api_setup import api
 from webservices import rest
 from webservices.resources.audit import (
     AuditCaseView,

@@ -12,7 +12,7 @@ from webservices import rest
 from webservices import sorting
 from webservices.resources import candidate_aggregates
 from webservices.resources import elections
-from webservices.rest import db
+from webservices.common.models import db
 from webservices import utils
 from webservices.common import models
 

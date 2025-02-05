@@ -5,7 +5,7 @@ import json
 import manage
 from tests.common import BaseTestCase
 from webservices import rest, __API_VERSION__
-from webservices.rest import db
+from webservices.common.models import db
 from webservices.resources.committees import CommitteeHistoryProfileView
 
 

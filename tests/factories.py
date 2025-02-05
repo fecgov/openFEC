@@ -3,7 +3,7 @@ import sqlalchemy as sa
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 
-from webservices.rest import db
+from webservices.common.models import db
 from webservices.common import models
 
 
