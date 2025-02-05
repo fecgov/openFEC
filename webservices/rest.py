@@ -60,6 +60,10 @@ from webservices.resources import spending_by_others
 from webservices.env import env
 from webservices.tasks.response_exception import ResponseException
 from webservices.tasks.error_code import ErrorCode
+from psycogreen.gevent import patch_psycopg
+
+patch_psycopg()
+
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
