@@ -6,7 +6,7 @@ import manage
 
 from tests import common
 from webservices import rest, __API_VERSION__
-from webservices.rest import db
+from webservices.common.models import db
 from webservices.resources.totals import CandidateTotalsDetailView, TotalsCommitteeView
 
 

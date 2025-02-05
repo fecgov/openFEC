@@ -4,63 +4,64 @@ import os
 import subprocess
 import unittest
 
+from flask import current_app
 from webtest import TestApp
-from nplusone.ext.flask_sqlalchemy import NPlusOne
 
-from jdbc_utils import to_jdbc_url
-from webservices import rest
+from webservices.rest import create_app, db
 from webservices import __API_VERSION__
+
 
 from webservices.legal_docs import (create_test_indices, TEST_CASE_INDEX, TEST_ARCH_MUR_INDEX, TEST_AO_INDEX,
                                     TEST_CASE_ALIAS, TEST_ARCH_MUR_ALIAS, TEST_AO_ALIAS)
 from webservices.utils import create_es_client
 from tests.test_legal_data import document_dictionary
+from jdbc_utils import to_jdbc_url
+
 
 TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
-rest.app.config['NPLUSONE_RAISE'] = True
-NPlusOne(rest.app)
 ALL_INDICES = [TEST_CASE_INDEX, TEST_AO_INDEX, TEST_ARCH_MUR_INDEX]
 
 
-def _setup_extensions():
-    rest.db.engine.execute('create extension if not exists btree_gin;')
+def _setup_extensions(db):
+    with db.engine.connect() as conn:
+        conn.execute('create extension if not exists btree_gin;')
 
 
-def _reset_schema():
-    rest.db.engine.execute('drop schema if exists public cascade;')
-    rest.db.engine.execute('drop schema if exists disclosure cascade;')
-    rest.db.engine.execute('drop schema if exists staging cascade;')
-    rest.db.engine.execute('drop schema if exists fecapp cascade;')
-    rest.db.engine.execute('drop schema if exists real_efile cascade;')
-    rest.db.engine.execute('drop schema if exists auditsearch cascade;')
-    rest.db.engine.execute('create schema public;')
-    rest.db.engine.execute('create schema disclosure;')
-    rest.db.engine.execute('create schema staging;')
-    rest.db.engine.execute('create schema fecapp;')
-    rest.db.engine.execute('create schema real_efile;')
-    rest.db.engine.execute('create schema auditsearch;')
+def _reset_schema(db):
+    if current_app.config['TESTING']:
+        with db.engine.connect() as conn:
+            conn.execute('drop schema if exists public cascade;')
+            conn.execute('drop schema if exists disclosure cascade;')
+            conn.execute('drop schema if exists staging cascade;')
+            conn.execute('drop schema if exists fecapp cascade;')
+            conn.execute('drop schema if exists real_efile cascade;')
+            conn.execute('drop schema if exists auditsearch cascade;')
+            conn.execute('create schema public;')
+            conn.execute('create schema disclosure;')
+            conn.execute('create schema staging;')
+            conn.execute('create schema fecapp;')
+            conn.execute('create schema real_efile;')
+            conn.execute('create schema auditsearch;')
 
 
 class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        rest.app.config['TESTING'] = True
-        rest.app.config['SQLALCHEMY_DATABASE_URI'] = TEST_CONN
-        rest.app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
-        cls.app = rest.app.test_client()
-        cls.client = TestApp(rest.app)
-        cls.app_context = rest.app.app_context()
+        cls.application = create_app(test_config="testing")
+        cls.app = cls.application.test_client()
+        cls.client = TestApp(cls.application)
+        cls.app_context = cls.application.app_context()
         cls.app_context.push()
-        _setup_extensions()
+        _setup_extensions(db)
 
     def setUp(self):
-        self.connection = rest.db.engine.connect()
+        self.connection = db.engine.connect()
         self.transaction = self.connection.begin()
 
     def tearDown(self):
         self.transaction.rollback()
+        db.session.remove()
         self.connection.close()
-        rest.db.session.remove()
 
     @classmethod
     def tearDownClass(cls):
@@ -71,7 +72,7 @@ class ApiBaseTest(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(ApiBaseTest, cls).setUpClass()
-        _reset_schema()
+        _reset_schema(db)
         with open(os.devnull, 'w') as null:
             subprocess.check_call(
                 [
@@ -83,20 +84,20 @@ class ApiBaseTest(BaseTestCase):
                 stdout=null,
             )
 
-        rest.db.metadata.create_all(
-            rest.db.engine,
+        db.metadata.create_all(
+            db.engine,
             tables=[
                 each.__table__
-                for each in rest.db.Model._decl_class_registry.values()
+                for each in db.Model._decl_class_registry.values()
                 if hasattr(each, '__table__')
-            ],
+            ]
         )
 
     def setUp(self):
         super(ApiBaseTest, self).setUp()
         self.longMessage = True
         self.maxDiff = None
-        self.request_context = rest.app.test_request_context()
+        self.request_context = self.application.test_request_context()
         self.request_context.push()
 
     def tearDown(self):
@@ -132,7 +133,7 @@ class ElasticSearchBaseTest(BaseTestCase):
         _delete_all_indices(cls.es_client)
 
     def setUp(self):
-        self.request_context = rest.app.test_request_context()
+        self.request_context = self.application.test_request_context()
         self.request_context.push()
 
     def tearDown(self):

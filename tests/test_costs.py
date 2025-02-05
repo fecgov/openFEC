@@ -1,7 +1,7 @@
 from tests import factories
 from tests.common import ApiBaseTest
 
-from webservices.rest import api
+from webservices.api_setup import api
 from webservices.common.models import CommunicationCost, Electioneering
 from webservices.schemas import CommunicationCostSchema, ElectioneeringSchema
 from webservices.resources.costs import CommunicationCostView, ElectioneeringView

@@ -3,10 +3,9 @@ import sqlalchemy as sa
 from tests import factories
 from tests.common import ApiBaseTest
 
-from webservices import rest
 from webservices import schemas
-from webservices.rest import db
-from webservices.rest import api
+from webservices.common.models import db
+from webservices.api_setup import api
 from webservices.resources.candidates import CandidateList
 from webservices.resources.candidates import CandidateView
 from webservices.resources.candidates import CandidateSearch
@@ -127,7 +126,6 @@ class CandidateFormatTest(ApiBaseTest):
         factories.CandidateSearchFactory(
             id=dana.candidate_id, fulltxt=sa.func.to_tsvector('Dana')
         )
-        rest.db.session.flush()
         results = self._results(api.url_for(CandidateList, q='danielle'))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['candidate_id'], danielle.candidate_id)

@@ -3,8 +3,8 @@ from celery import signals
 from celery.schedules import crontab
 
 from webservices.env import env
-from webservices.tasks import utils
 import ssl
+from flask import current_app
 
 # Feature and dev are sharing the same RDS box so we only want dev to update
 schedule = {}
@@ -86,6 +86,9 @@ def redis_url():
 
 
 app = celery.Celery("openfec")
+# some import app statements should be ok because they are importing the celery app
+# and not the flask app, we may need to switch to factory for celery but we should get tests running first
+
 app.conf.update(
     broker_url=redis_url(),
     broker_use_ssl={
@@ -118,8 +121,10 @@ context = {}
 
 @signals.task_prerun.connect
 def push_context(task_id, task, *args, **kwargs):
-    context[task_id] = utils.get_app().app_context()
+    context[task_id] = current_app.app_context()
     context[task_id].push()
+
+# double check this is working correctly--we may have to init cellery in the app factory
 
 
 @signals.task_postrun.connect

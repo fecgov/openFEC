@@ -1,9 +1,8 @@
 import datetime
 import sqlalchemy as sa
-from webservices import rest
 from tests import factories
 from tests.common import ApiBaseTest
-from webservices.rest import api
+from webservices.api_setup import api
 from webservices.resources.filings import FilingsView, FilingsList, EFilingsView, F2EFilingsView, F1EFilingsView
 
 
@@ -374,7 +373,6 @@ class TestEfileFiles(ApiBaseTest):
         factories.CommitteeSearchFactory(
             id="C00000002", fulltxt=sa.func.to_tsvector("Dana")
         )
-        rest.db.session.flush()
         results = self._results(api.url_for(EFilingsView, q_filer="Danielle"))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["committee_id"], "C00000001")
