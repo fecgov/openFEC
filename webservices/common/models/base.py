@@ -14,15 +14,15 @@ class RoutingSession(SignallingSession):
 
     @property
     def followers(self):
-        return current_app.config['SQLALCHEMY_FOLLOWERS']
+        return current_app.config.get('SQLALCHEMY_FOLLOWERS', [])
 
     @property
     def follower_tasks(self):
-        return current_app.config['SQLALCHEMY_FOLLOWER_TASKS']
+        return current_app.config.get('SQLALCHEMY_FOLLOWER_TASKS', [])
 
     @property
     def restrict_follower_traffic_to_tasks(self):
-        return current_app.config['SQLALCHEMY_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS']
+        return current_app.config.get('SQLALCHEMY_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS', [])
 
     @property
     def use_follower(self):
