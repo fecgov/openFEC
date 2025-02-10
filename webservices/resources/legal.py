@@ -450,11 +450,11 @@ def apply_af_specific_query_params(query, **kwargs):
         date_range["format"] = ACCEPTED_DATE_FORMATS
         must_clauses.append(Q("range", final_determination_date=date_range))
 
-    if kwargs.get("af_rtb_fine_amount"):
+    if kwargs.get("af_rtb_fine_amount") is not None:
         must_clauses.append(
             Q("term", reason_to_believe_fine_amount=kwargs.get("af_rtb_fine_amount"))
         )
-    if kwargs.get("af_fd_fine_amount"):
+    if kwargs.get("af_fd_fine_amount") is not None:
         must_clauses.append(
             Q("term", final_determination_amount=kwargs.get("af_fd_fine_amount"))
         )
