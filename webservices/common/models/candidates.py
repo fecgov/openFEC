@@ -78,7 +78,6 @@ class BaseConcreteCandidate(BaseCandidate):
 class Candidate(BaseConcreteCandidate):
     __table_args__ = {"extend_existing": True}
     __tablename__ = "ofec_candidate_detail_mv"
-
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
     candidate_inactive = db.Column(db.Boolean, doc=docs.ACTIVE_CANDIDATE)
     inactive_election_years = db.Column(
@@ -126,6 +125,11 @@ class CandidateDetail(BaseConcreteCandidate):
         db.Boolean, doc="True indicates that a candidate is inactive."
     )
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
+    candidate_first_name = db.Column(db.String(100), doc=docs.CANDIDATE_FIRST_NAME)
+    candidate_last_name = db.Column(db.String(100), doc=docs.CANDIDATE_LAST_NAME)
+    candidate_middle_name = db.Column(db.String(100), doc=docs.CANDIDATE_MIDDLE_NAME)
+    candidate_prefix = db.Column(db.String(100), doc=docs.CANDIDATE_PREFIX)
+    candidate_suffix = db.Column(db.String(100), doc=docs.CANDIDATE_SUFFIX)
 
 
 class CandidateHistory(BaseCandidate):
