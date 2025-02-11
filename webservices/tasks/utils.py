@@ -11,11 +11,6 @@ logging.getLogger("boto3").setLevel(logging.CRITICAL)
 logging.getLogger("smart_open").setLevel(logging.CRITICAL)
 
 
-def get_app():
-    from webservices.rest import app
-    return app
-
-
 def get_bucket():
     try:
         session = boto3.Session()

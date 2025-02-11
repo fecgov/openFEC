@@ -5,7 +5,7 @@ from tests.common import ApiBaseTest, assert_dicts_subset
 from webservices.utils import get_current_cycle
 
 from webservices import schemas
-from webservices.rest import db, api
+from webservices.common.models import db, api
 from webservices.resources.aggregates import (
     CommunicationCostByCandidateView,
     ElectioneeringByCandidateView,

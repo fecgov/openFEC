@@ -2,7 +2,7 @@ from sqlalchemy.sql import text
 from elasticsearch_dsl import Search
 import logging
 import re
-from webservices.rest import db
+from webservices.common.models import db
 from webservices.utils import (
     create_es_client,
     create_eregs_link,

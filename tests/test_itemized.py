@@ -3,7 +3,7 @@ import sqlalchemy as sa
 
 from tests import factories
 from tests.common import ApiBaseTest
-from webservices.rest import db, api
+from webservices.common.models import db, api
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
 from webservices.common.models import (

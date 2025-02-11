@@ -16,6 +16,7 @@ from webservices.legal_docs.es_management import S3_BACKUP_DIRECTORY
 
 from webservices.tasks import app
 from webservices.tasks import utils as task_utils
+from flask import current_app
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ IGNORE_FIELDS = {"page", "per_page", "sort", "sort_hide_null"}
 
 
 def call_resource(path, qs):
-    app = task_utils.get_app()
+    app = current_app
     endpoint, arguments = app.url_map.bind("").match(path)
     resource_type = app.view_functions[endpoint].view_class
     resource = resource_type()
@@ -52,7 +53,7 @@ def call_resource(path, qs):
 def parse_kwargs(resource, qs):
     annotation = resolve_annotations(resource.get, "args", parent=resource)
     fields = utils.extend(*[option["args"] for option in annotation.options])
-    with task_utils.get_app().test_request_context("?" + qs):
+    with current_app.test_request_context("?" + qs):
         kwargs = flaskparser.parser.parse(fields, location='query')
     return fields, kwargs
 

@@ -5,12 +5,12 @@ import json
 import manage
 
 from tests import common
-from webservices.rest import api
+from webservices.api_setup import api
 from webservices.resources.sched_a import ScheduleAView
 from webservices.resources.sched_a import ScheduleAEfileView
 from webservices.resources.sched_b import ScheduleBView
 from webservices import rest, __API_VERSION__
-from webservices.rest import db
+from webservices.common.models import db
 from webservices.utils import parse_fulltext
 
 
