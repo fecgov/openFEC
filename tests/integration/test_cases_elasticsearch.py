@@ -253,7 +253,7 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
     def test_q_proximity_filters(self):
         # for archived and current murs, advisory_opinions, adrs, and afs
         search_phrase = "first document archived mur"
-        proximity_filter = "after"
+        proximity_filter = "before"
         proximity_filter_term = "sample text"
         max_gaps = 2
 

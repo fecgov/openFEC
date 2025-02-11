@@ -12,7 +12,7 @@ class EntityReceiptDisbursementTotals(db.Model):
     cycle = db.Column(db.Integer, doc=docs.RECORD_CYCLE)
     month = db.Column(db.Integer, doc="Numeric representation of year")
     year = db.Column(db.Integer, doc="Numeric representation of month")
-    end_date = db.Column(db.Date, doc="Date representation of the month and year")
+    end_date = db.Column(db.Date)
     cumulative_candidate_receipts = db.Column(
         db.Float,
         doc="Cumulative candidate receipts in a two year period, adjusted to avoid double counting.",

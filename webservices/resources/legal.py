@@ -167,9 +167,13 @@ class UniversalSearch(Resource):
 
 def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q("term", type=type_)]
+    proximity_query = False
 
     if q:
         must_query.append(Q("simple_query_string", query=q))
+
+    if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
+        proximity_query = True
 
     query = (
         Search()
@@ -181,12 +185,8 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .index(SEARCH_ALIAS)
         .sort("sort1", "sort2")
     )
-    proximity_search = False
 
-    if kwargs.get("q_proximity") and kwargs.get("max_gaps") and type_ != "statutes":
-        proximity_search = True
-
-    if not proximity_search:
+    if not proximity_query:
         if type_ == "advisory_opinions":
             query = query.highlight("summary", "documents.text", "documents.description")
         elif type_ == "statutes":
@@ -198,9 +198,6 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         must_not = []
         must_not.append(Q("nested", path="documents", query=Q("match", documents__text=kwargs.get("q_exclude"))))
         query = query.query("bool", must_not=must_not)
-
-    if proximity_search:
-        query = get_proximity_query(q, query, **kwargs)
 
     # logging.warning("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return query
@@ -297,7 +294,7 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         return apply_adr_specific_query_params(query, **kwargs)
 
 
-def get_proximity_query(q, query, **kwargs):
+def get_proximity_query(**kwargs):
     q_proximity = kwargs.get("q_proximity")
     max_gaps = kwargs.get("max_gaps")
     intervals_list = []
@@ -305,7 +302,7 @@ def get_proximity_query(q, query, **kwargs):
 
     if kwargs.get("proximity_filter") and kwargs.get("proximity_filter_term"):
         contains_filter = True
-        filter = kwargs.get("proximity_filter")
+        filter = "before" if kwargs.get("proximity_filter") == "after" else "after"
         filters = {filter: {'match': {'query': kwargs.get("proximity_filter_term")}}}
 
     if len(q_proximity) == 1:
@@ -330,13 +327,7 @@ def get_proximity_query(q, query, **kwargs):
             intervals_inner_query = Q('intervals', documents__text={
                     'all_of':  {'max_gaps': max_gaps, "intervals": intervals_list}
                     })
-
-    intervals_query = Q(
-            "nested",
-            path="documents",
-            query=intervals_inner_query)
-
-    return query.query("bool", must=intervals_query)
+    return intervals_inner_query
 
 # Select one or more case_doc_category_id to filter by corresponding case_document_category
 # - 1 - Conciliation and Settlement Agreements
@@ -380,7 +371,26 @@ def get_case_document_query(q, **kwargs):
         case_document_date_range["format"] = ACCEPTED_DATE_FORMATS
         combined_query.append(Q("range", documents__document_date=case_document_date_range))
     if q:
-        combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))
+        q_query = Q("simple_query_string", query=q, fields=["documents.text"])
+        combined_query.append(q_query)
+
+    if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
+        combined_query.append(get_proximity_query(**kwargs))
+        proximity_inner_hits = {"_source": {"excludes": ["documents.text"]}, "size": 100}
+
+        if q:
+            proximity_inner_hits["highlight"] = {
+                "require_field_match": False,
+                "fields": {"documents.text": {}, "documents.description": {}, },
+                "highlight_query": q_query.to_dict()
+                }
+
+        return Q(
+            "nested",
+            path="documents",
+            inner_hits=proximity_inner_hits,
+            query=Q("bool", must=combined_query),
+        )
 
     return Q(
         "nested",
@@ -656,7 +666,26 @@ def get_ao_document_query(q, **kwargs):
         combined_query.append(Q("range", documents__date=ao_document_date_range))
 
     if q:
-        combined_query.append(Q("simple_query_string", query=q, fields=["documents.text"]))
+        q_query = Q("simple_query_string", query=q, fields=["documents.text"])
+        combined_query.append(q_query)
+
+    if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
+        combined_query.append(get_proximity_query(**kwargs))
+        proximity_inner_hits = {"_source": {"excludes": ["documents.text"]}, "size": 100}
+
+        if q:
+            proximity_inner_hits["highlight"] = {
+                "require_field_match": False,
+                "fields": {"documents.text": {}, "documents.description": {}, },
+                "highlight_query": q_query.to_dict()
+                }
+
+        return Q(
+            "nested",
+            path="documents",
+            inner_hits=proximity_inner_hits,
+            query=Q("bool", must=combined_query),
+        )
 
     return Q(
         "nested",
@@ -817,6 +846,7 @@ def execute_query(query):
         formatted_hit = hit.to_dict()
         formatted_hit["highlights"] = []
         formatted_hit["document_highlights"] = {}
+        formatted_hit["source"] = []
         formatted_hits.append(formatted_hit)
 
         # 1)When doc_type=[statutes], The 'highlight' section is in hit.meta
@@ -841,6 +871,11 @@ def execute_query(query):
                     # put "highlights" in return hit
                     for key in inner_hit.meta.highlight:
                         formatted_hit["highlights"].extend(inner_hit.meta.highlight[key])
+
+                if len(inner_hit.to_dict()) > 0:
+                    source = inner_hit.to_dict()
+                    formatted_hit["source"].append(source)
+
     # logger.debug("formatted_hits =" + json.dumps(formatted_hits, indent=3, cls=DateTimeEncoder))
 
 # Since ES7 the `total` becomes an object : "total": {"value": 1,"relation": "eq"}

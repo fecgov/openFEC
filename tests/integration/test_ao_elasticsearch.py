@@ -134,7 +134,7 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
 
     def test_q_proximity_filters(self):
         search_phrase = "Random document third ao"
-        proximity_filter = "before"
+        proximity_filter = "after"
         proximity_filter_term = "document"
         max_gaps = 3
 
