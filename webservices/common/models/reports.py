@@ -577,6 +577,7 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
         foreign_keys=file_number,
         uselist=True,
         lazy='subquery',
+
     )
 
     amendment = db.relationship(
@@ -586,6 +587,7 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
                             )''',
         foreign_keys=file_number,
         lazy='joined',
+        viewonly=True
     )
 
     @declared_attr
@@ -649,6 +651,7 @@ class BaseF3Filing(TreasurerMixin, BaseFiling):
         foreign_keys=file_number,
         uselist=True,
         lazy='subquery',
+        viewonly=True
     )
 
     @declared_attr
@@ -690,6 +693,7 @@ class BaseF3XFiling(BaseFiling):
                                 )''',
         foreign_keys=file_number,
         lazy='joined',
+        viewonly=True
     )
 
     @declared_attr

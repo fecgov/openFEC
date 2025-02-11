@@ -10,7 +10,6 @@ from webservices.common.models import (
     ElectioneeringByCandidate,
     ScheduleEByCandidate,
     CommunicationCostByCandidate,
-    db,
 )
 
 
@@ -20,7 +19,7 @@ def get_candidate_list(kwargs):
 
     """
     candidate = (
-        db.session.query(
+        sa.select(
             CandidateHistory.candidate_id.label('candidate_id'),
             CandidateHistory.two_year_period.label('two_year_period'),
             CandidateHistory.candidate_election_year.label('candidate_election_year'),
@@ -76,7 +75,7 @@ class ECTotalsByCandidateView(ApiResource):
         cycle_column, candidate = get_candidate_list(kwargs)
 
         query = (
-            db.session.query(
+            sa.select(
                 ElectioneeringByCandidate.candidate_id,
                 cycle_column,
                 sa.func.sum(ElectioneeringByCandidate.total).label('total'),
@@ -131,7 +130,7 @@ class IETotalsByCandidateView(ApiResource):
         cycle_column, candidate = get_candidate_list(kwargs)
 
         query = (
-            db.session.query(
+            sa.select(
                 ScheduleEByCandidate.candidate_id,
                 ScheduleEByCandidate.support_oppose_indicator,
                 cycle_column,
@@ -192,7 +191,7 @@ class CCTotalsByCandidateView(ApiResource):
         cycle_column, candidate = get_candidate_list(kwargs)
 
         query = (
-            db.session.query(
+            sa.select(
                 CommunicationCostByCandidate.candidate_id,
                 CommunicationCostByCandidate.support_oppose_indicator,
                 cycle_column,

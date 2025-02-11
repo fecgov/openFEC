@@ -5,6 +5,8 @@ from webservices import filters
 from webservices import exceptions
 from webservices.common import counts
 from webservices.utils import use_kwargs
+from webservices.common import models
+import sqlalchemy as sa
 
 
 class ApiResource(utils.Resource):
@@ -43,13 +45,13 @@ class ApiResource(utils.Resource):
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
         return utils.fetch_page(
-            query, kwargs, is_count_exact=self.is_count_exact,
+            query, kwargs, models.db.session, is_count_exact=self.is_count_exact,
             count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
             index_column=self.index_column, cap=self.cap, multi=multi,
         )
 
     def build_query(self, *args, _apply_options=True, **kwargs):
-        query = self.model.query
+        query = sa.select(self.model)
         query = filters.filter_match(query, kwargs, self.filter_match_fields)
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields)
         query = filters.filter_range(query, kwargs, self.filter_range_fields)
@@ -83,6 +85,7 @@ class ItemizedResource(ApiResource):
         return utils.fetch_seek_page(query,
                                      kwargs,
                                      self.index_column,
+                                     models.db.session,
                                      is_count_exact=self.is_count_exact,
                                      count=count,
                                      cap=self.cap)
@@ -168,7 +171,7 @@ class NoCapResource(utils.Resource):
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
-        return utils.fetch_page(query, kwargs, multi=multi, cap=0, is_count_exact=True)
+        return utils.fetch_page(query, kwargs, models.db.session, multi=multi, cap=0, is_count_exact=True)
 
     def validate_kwargs(self, kwargs):
         """
