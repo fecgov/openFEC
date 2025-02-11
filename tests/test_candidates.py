@@ -25,16 +25,22 @@ fields = dict(
     candidate_inactive=True,
     candidate_status='C',
     incumbent_challenge='I',
-    office='H',
     district='08',
     state='VA',
+    office='H',
     office_full='House',
+    candidate_first_name='John',
+    candidate_last_name='Hoynes',
+    candidate_middle_name='M',
+    candidate_prefix='MR',
+    candidate_suffix='JR'
 )
 
 
-class CandidateFormatTest(ApiBaseTest):
+# Test resource: candidates.CandidateView
+# endpoint: '/candidate/<candidate_id>/'
+class TestCandidateDetail(ApiBaseTest):
     """Test/Document expected formats"""
-
     def test_candidate(self):
         """Compare results to expected fields."""
         candidate = factories.CandidateDetailFactory(**fields)
@@ -73,6 +79,12 @@ class CandidateFormatTest(ApiBaseTest):
         assert result['candidate_inactive'] == candidate.candidate_inactive
         assert result['candidate_status'] == candidate.candidate_status
         assert result['incumbent_challenge'] == candidate.incumbent_challenge
+        # From candidate parsed name
+        assert result['candidate_first_name'] == candidate.candidate_first_name
+        assert result['candidate_last_name'] == candidate.candidate_last_name
+        assert result['candidate_middle_name'] == candidate.candidate_middle_name
+        assert result['candidate_prefix'] == candidate.candidate_prefix
+        assert result['candidate_suffix'] == candidate.candidate_suffix
 
     def test_candidates_search(self):
         principal_committee = factories.CommitteeFactory(designation='P')
@@ -225,7 +237,8 @@ class CandidateFormatTest(ApiBaseTest):
 
 
 # Test resource: candidates.CandidateHistoryView
-# API: '/candidate/<candidate_id>/history/'
+# endpoints:
+# '/candidate/<candidate_id>/history/'
 # '/candidate/<candidate_id>/history/<cycle>/'
 # '/committee/<committee_id>/candidates/history/'
 # '/committee/<committee_id>/candidates/history/<cycle>/'

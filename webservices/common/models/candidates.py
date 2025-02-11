@@ -39,8 +39,7 @@ class BaseCandidate(BaseModel):
     party_full = db.Column(db.String(255), doc=docs.PARTY_FULL)
     state = db.Column(db.String(2), index=True, doc=docs.STATE)
     district = db.Column(db.String(2), index=True, doc=docs.DISTRICT)
-    # ? difference between district and district_number
-    district_number = db.Column(db.Integer, index=True, doc=docs.CANDIDATE_STATUS)
+    district_number = db.Column(db.Integer, index=True, doc=docs.DISTRICT)
     election_districts = db.Column(ARRAY(db.String), index=True, doc=docs.DISTRICT)
     election_years = db.Column(
         ARRAY(db.Integer), index=True, doc=docs.CANDIDATE_ELECTION_YEARS
