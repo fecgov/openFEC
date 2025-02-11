@@ -302,7 +302,7 @@ def get_proximity_query(**kwargs):
 
     if kwargs.get("proximity_filter") and kwargs.get("proximity_filter_term"):
         contains_filter = True
-        filter = kwargs.get("proximity_filter")
+        filter = "before" if kwargs.get("proximity_filter") == "after" else "after"
         filters = {filter: {'match': {'query': kwargs.get("proximity_filter_term")}}}
 
     if len(q_proximity) == 1:
