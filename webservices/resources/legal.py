@@ -197,6 +197,8 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     if kwargs.get("q_exclude"):
         must_not = []
         must_not.append(Q("nested", path="documents", query=Q("match", documents__text=kwargs.get("q_exclude"))))
+        if type_ == "statutes":
+            must_not.append(Q("match", name=kwargs.get("q_exclude")))
         query = query.query("bool", must_not=must_not)
 
     # logging.warning("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
