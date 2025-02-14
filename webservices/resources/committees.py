@@ -203,6 +203,7 @@ class CommitteeHistoryProfileView(ApiResource):
     model = models.CommitteeHistoryProfile
     schema = schemas.CommitteeHistoryProfileSchema
     page_schema = schemas.CommitteeHistoryProfilePageSchema
+    contains_joined_load = True
     query_options = [
         sa.orm.joinedload(models.CommitteeHistoryProfile.jfc_committee),
     ]
@@ -311,6 +312,8 @@ class CommitteeHistoryProfileView(ApiResource):
                     # remove duplicate committee(s), mostly for Presidental and Senate candidate.
                     models.CommitteeHistoryProfile.committee_id,
                 )
+                self.contains_individual_columns = True
+                self.contains_joined_load = False
 
                 # union three queries: query_regular + query_leadership_pac + query_pcc_converted
                 query = query_regular.union(query_leadership_pac, query_pcc_converted).order_by(

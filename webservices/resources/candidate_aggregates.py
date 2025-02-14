@@ -166,6 +166,7 @@ class ScheduleAByStateCandidateView(NoCapResource):
 class ScheduleAByStateCandidateTotalsView(NoCapResource):
     schema = schemas.ScheduleAByStateCandidateSchema
     page_schema = schemas.ScheduleAByStateCandidatePageSchema()
+    contains_individual_columns = True
     sort_option = [
             'total',
             'count',
@@ -218,7 +219,7 @@ class TotalsCandidateView(ApiResource):
 
     schema = schemas.CandidateHistoryTotalSchema
     page_schema = schemas.CandidateHistoryTotalPageSchema
-
+    contains_individual_columns = True
     sort_options = [
         'election_year',
         'name',
@@ -338,6 +339,7 @@ class CandidateTotalAggregateView(ApiResource):
 
     schema = schemas.CandidateTotalAggregateSchema
     page_schema = schemas.CandidateTotalAggregatePageSchema
+    contains_individual_columns = True
 
     @property
     def args(self):

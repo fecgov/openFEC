@@ -31,6 +31,8 @@ class ApiResource(utils.Resource):
     estimated_count_threshold = 500000
     use_pk_for_count = False
     is_count_exact = ''
+    contains_individual_columns = False
+    contains_joined_load = False
 
     @use_kwargs(Ref('args'))
     @marshal_with(Ref('page_schema'))
@@ -48,6 +50,8 @@ class ApiResource(utils.Resource):
             query, kwargs, models.db.session, is_count_exact=self.is_count_exact,
             count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
             index_column=self.index_column, cap=self.cap, multi=multi,
+            contains_individual_columns=self.contains_individual_columns,
+            contains_joined_load=self.contains_joined_load
         )
 
     def build_query(self, *args, _apply_options=True, **kwargs):

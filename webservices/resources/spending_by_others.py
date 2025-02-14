@@ -46,7 +46,7 @@ def get_candidate_list(kwargs):
 
 # used for '/electioneering/totals/by_candidate/'
 # under tag: electioneering
-# Ex:http://127.0.0.1:5000/v1/electioneering/totals/by_candidate/?sort=-cycle&election_full=true
+# Ex: http://127.0.0.1:5000/v1/electioneering/totals/by_candidate/?sort=-cycle&election_full=true
 @doc(
     tags=['electioneering'], description=docs.ELECTIONEERING_TOTAL_BY_CANDIDATE,
 )
@@ -54,6 +54,7 @@ class ECTotalsByCandidateView(ApiResource):
 
     schema = schemas.ECTotalsByCandidateSchema
     page_schema = schemas.ECTotalsByCandidatePageSchema
+    contains_individual_columns = True
     sort_option = [
             'cycle',
             'candidate_id',
@@ -108,7 +109,7 @@ class IETotalsByCandidateView(ApiResource):
 
     schema = schemas.IETotalsByCandidateSchema
     page_schema = schemas.IETotalsByCandidatePageSchema
-
+    contains_individual_columns = True
     sort_option = [
             'cycle',
             'candidate_id',
@@ -169,7 +170,7 @@ class CCTotalsByCandidateView(ApiResource):
 
     schema = schemas.CCTotalsByCandidateSchema
     page_schema = schemas.CCTotalsByCandidatePageSchema
-
+    contains_individual_columns = True
     sort_option = [
             'cycle',
             'candidate_id',
