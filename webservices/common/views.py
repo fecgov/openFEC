@@ -166,6 +166,8 @@ class NoCapResource(utils.Resource):
     cap = ''
     filters_with_max_count = []
     max_count = 10
+    contains_individual_columns = False
+    contains_joined_load = False
 
     @use_kwargs(Ref('args'))
     @marshal_with(Ref('page_schema'))
@@ -175,7 +177,9 @@ class NoCapResource(utils.Resource):
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
-        return utils.fetch_page(query, kwargs, models.db.session, multi=multi, cap=0, is_count_exact=True)
+        return utils.fetch_page(query, kwargs, models.db.session, multi=multi, cap=0, is_count_exact=True,
+                                contains_individual_columns=self.contains_individual_columns,
+                                contains_joined_load=self.contains_joined_load)
 
     def validate_kwargs(self, kwargs):
         """
