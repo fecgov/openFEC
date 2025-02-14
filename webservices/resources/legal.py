@@ -194,11 +194,23 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         else:
             query = query.highlight("documents.text", "documents.description")
 
-    if kwargs.get("q_exclude"):
+    q_exclude = kwargs.get("q_exclude")
+    if q_exclude:
+        if not isinstance(q_exclude, list):
+            q_exclude = [q_exclude]
         must_not = []
-        must_not.append(Q("nested", path="documents", query=Q("match", documents__text=kwargs.get("q_exclude"))))
-        if type_ == "statutes":
-            must_not.append(Q("match", name=kwargs.get("q_exclude")))
+        fuzziness = kwargs.get("q_exclude_fuzziness", 0)
+        pattern = re.compile(r'^(.*)~(\d+)$')
+        last_term = q_exclude[-1]
+        match = pattern.match(last_term)
+        if match:
+            fuzziness = int(match.group(2))
+            q_exclude[-1] = match.group(1).strip()
+        for term in q_exclude:
+            must_not.append(Q("nested", path="documents", query=Q("match", documents__text={"query": term,
+                            "fuzziness": fuzziness})))
+            if type_ == "statutes":
+                must_not.append(Q("match", name={"query": term, "fuzziness": fuzziness}))
         query = query.query("bool", must_not=must_not)
 
     # logging.warning("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
