@@ -10,6 +10,7 @@ from webservices.common import models
 class BaseFactory(SQLAlchemyModelFactory):
     class Meta:
         sqlalchemy_session = db.session
+# I think this is where the session.remove issues is coming from??
 
 
 class CandidateSearchFactory(BaseFactory):

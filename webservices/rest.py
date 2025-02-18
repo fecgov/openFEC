@@ -139,6 +139,7 @@ def create_app(test_config=None):
         app.config['NPLUSONE_RAISE'] = True
         app.config['SQLALCHEMY_DATABASE_URI'] = TEST_CONN
         app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
+        app.config['TESTING'] = True
 
     # Initialize Extensions
     # may need with app context

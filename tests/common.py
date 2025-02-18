@@ -4,10 +4,11 @@ import os
 import subprocess
 import unittest
 
-# from webtest import TestApp
+from webtest import TestApp
 
 from webservices.rest import create_app
 from webservices import __API_VERSION__
+
 
 # from webservices.legal_docs import (create_test_indices, TEST_CASE_INDEX, TEST_ARCH_MUR_INDEX, TEST_AO_INDEX,
 # TEST_CASE_ALIAS, TEST_ARCH_MUR_ALIAS, TEST_AO_ALIAS)
@@ -44,32 +45,26 @@ def _reset_schema(db):
 class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.app = create_app(test_config="testing")
-        cls.app_context = cls.app.app_context()
+        cls.application = create_app(test_config="testing")
+        cls.app = cls.application.test_client()
+        cls.client = TestApp(cls.application)
+        cls.app_context = cls.application.app_context()
         cls.app_context.push()
-        cls.db = cls.app.extensions['sqlalchemy'].db
-        cls.db.create_all()
-        # cls.client = TestApp(cls.app)
-        # we use response.body down below which is not TestApp
-        cls.client = cls.app.test_client()
+        cls.db = cls.application.extensions['sqlalchemy'].db
         _setup_extensions(cls.db)
 
     def setUp(self):
         self.connection = self.db.engine.connect()
         self.transaction = self.connection.begin()
-        # added session below???
         self.session = self.db.create_scoped_session()
-        # self.session = self.db.create_scoped_session(options='bind':self.connection)
-        self.db.session = self.session
 
     def tearDown(self):
-        self.session.remove()
         self.transaction.rollback()
+        self.session.remove()
         self.connection.close()
 
     @classmethod
     def tearDownClass(cls):
-        cls.db.drop_all()  # added this line
         cls.app_context.pop()
 
 
@@ -88,13 +83,21 @@ class ApiBaseTest(BaseTestCase):
                 ],
                 stdout=null,
             )
-        cls.db.create_all()
+
+        cls.db.metadata.create_all(
+            cls.db.engine,
+            tables=[
+                each.__table__
+                for each in cls.db.Model._decl_class_registry.values()
+                if hasattr(each, '__table__')
+            ]
+        )
 
     def setUp(self):
         super(ApiBaseTest, self).setUp()
         self.longMessage = True
         self.maxDiff = None
-        self.request_context = self.app.test_request_context()
+        self.request_context = self.application.test_request_context()
         self.request_context.push()
 
     def tearDown(self):
@@ -102,7 +105,7 @@ class ApiBaseTest(BaseTestCase):
         self.request_context.pop()
 
     def _response(self, qry):
-        response = self.client.get(qry)
+        response = self.app.get(qry)
         self.assertEqual(response.status_code, 200)
         result = json.loads(codecs.decode(response.data))
         self.assertNotEqual(result, [], "Empty response!")

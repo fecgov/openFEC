@@ -1,5 +1,4 @@
 import sqlalchemy as sa
-# here's what I'm testing rn
 from tests import factories
 from tests.common import ApiBaseTest
 
@@ -21,20 +20,20 @@ class OverallTest(ApiBaseTest):
         factories.CandidateSearchFactory(
             id=candidate.candidate_id, fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
         )
-        self.db.session.flush()
         results = self._results(api.url_for(CandidateList, q='bartlet'))
         self.assertEqual(len(results), 1)
         self.assertIn('josiah', results[0]['name'].lower())
+        self.db.session.remove()
 
     def test_full_text_search_with_whitespace(self):
         candidate = factories.CandidateFactory(name='Josiah Bartlet')
         factories.CandidateSearchFactory(
             id=candidate.candidate_id, fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
         )
-        self.db.session.flush()
         results = self._results(api.url_for(CandidateList, q='bartlet josiah'))
         self.assertEqual(len(results), 1)
         self.assertIn('josiah', results[0]['name'].lower())
+        self.db.session.remove()
 
     def test_full_text_no_results(self):
         results = self._results(api.url_for(CandidateList, q='asdfasdf'))
@@ -93,23 +92,23 @@ class OverallTest(ApiBaseTest):
             )
             for idx in range(30)
         ]
-        self.db.session.flush()
         results = self._results(api.url_for(CandidateNameSearch, q='bartlet'))
         expected = [str(each.id) for each in rows[:-21:-1]]
         observed = [each['id'] for each in results]
         assert expected == observed
         assert all('bartlet' in each['name'].lower() for each in results)
         assert all(each['office_sought'] == 'P' for each in results)
+        self.db.session.remove()
 
     def test_typeahead_candidate_search_id(self):
         row = factories.CandidateSearchFactory(
             name='Bartlet', fulltxt=sa.func.to_tsvector('Bartlet P0123'),
         )
         decoy = factories.CandidateSearchFactory()  # noqa
-        self.db.session.flush()
         results = self._results(api.url_for(CandidateNameSearch, q='P0123'))
         assert len(results) == 1
         assert results[0]['name'] == row.name
+        self.db.session.remove()
 
     def test_typeahead_committee_search(self):
         rows = [
@@ -120,12 +119,12 @@ class OverallTest(ApiBaseTest):
             )
             for idx in range(30)
         ]
-        self.db.session.flush()
         results = self._results(api.url_for(CommitteeNameSearch, q='bartlet'))
         expected = [str(each.id) for each in rows[:-21:-1]]
         observed = [each['id'] for each in results]
         assert expected == observed
         assert all('bartlet' in each['name'].lower() for each in results)
+        self.db.session.remove()
 
     def test_has_primary_key_if_using_pk_for_count(self):
         for view in ApiResource.__subclasses__():
