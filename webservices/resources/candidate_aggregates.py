@@ -76,6 +76,7 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
 class ScheduleABySizeCandidateView(NoCapResource):
     schema = schemas.ScheduleABySizeCandidateSchema
     page_schema = schemas.ScheduleABySizeCandidatePageSchema()
+    contains_individual_columns = True
     sort_option = [
             'total',
             'size',
@@ -121,6 +122,7 @@ class ScheduleABySizeCandidateView(NoCapResource):
 class ScheduleAByStateCandidateView(NoCapResource):
     schema = schemas.ScheduleAByStateCandidateSchema
     page_schema = schemas.ScheduleAByStateCandidatePageSchema()
+    contains_individual_columns = True
     sort_option = [
             'total',
             'count',
