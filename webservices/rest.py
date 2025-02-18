@@ -74,6 +74,7 @@ def sqla_conn_string():
 
 
 # app.debug = True
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"future": True}
 app.config['SQLALCHEMY_WARN_20'] = True  # Warn on 2.0 behavior
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
@@ -88,7 +89,7 @@ app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
     'webservices.tasks.download.export_query',
 ]
 app.config['SQLALCHEMY_FOLLOWERS'] = [
-    sa.create_engine(follower.strip(), future=False)
+    sa.create_engine(follower.strip())
     for follower in utils.split_env_var(env.get_credential('SQLA_FOLLOWERS', ''))
     if follower.strip()
 ]
