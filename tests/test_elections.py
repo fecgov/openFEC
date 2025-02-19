@@ -2,7 +2,8 @@ import datetime
 from tests import factories
 from tests.common import ApiBaseTest, assert_dicts_subset
 
-from webservices.common.models import db, api
+from webservices.common.models import db
+from webservices.api_setup import api
 from webservices.resources.elections import (
     ElectionsListView,
     ElectionView,

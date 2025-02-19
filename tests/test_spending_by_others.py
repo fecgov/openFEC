@@ -1,7 +1,8 @@
 from tests import factories
 from tests.common import ApiBaseTest
 
-from webservices.common.models import db, api
+from webservices.common.models import db
+from webservices.api_setup import api
 from webservices.resources.spending_by_others import (
     ECTotalsByCandidateView,
     IETotalsByCandidateView,
