@@ -4,6 +4,7 @@ import os
 import subprocess
 import unittest
 
+from flask import current_app
 from webtest import TestApp
 
 from webservices.rest import create_app, db
@@ -27,19 +28,20 @@ def _setup_extensions(db):
 
 
 def _reset_schema(db):
-    with db.engine.connect() as conn:
-        conn.execute('drop schema if exists public cascade;')
-        conn.execute('drop schema if exists disclosure cascade;')
-        conn.execute('drop schema if exists staging cascade;')
-        conn.execute('drop schema if exists fecapp cascade;')
-        conn.execute('drop schema if exists real_efile cascade;')
-        conn.execute('drop schema if exists auditsearch cascade;')
-        conn.execute('create schema public;')
-        conn.execute('create schema disclosure;')
-        conn.execute('create schema staging;')
-        conn.execute('create schema fecapp;')
-        conn.execute('create schema real_efile;')
-        conn.execute('create schema auditsearch;')
+    if current_app.config['TESTING']:
+        with db.engine.connect() as conn:
+            conn.execute('drop schema if exists public cascade;')
+            conn.execute('drop schema if exists disclosure cascade;')
+            conn.execute('drop schema if exists staging cascade;')
+            conn.execute('drop schema if exists fecapp cascade;')
+            conn.execute('drop schema if exists real_efile cascade;')
+            conn.execute('drop schema if exists auditsearch cascade;')
+            conn.execute('create schema public;')
+            conn.execute('create schema disclosure;')
+            conn.execute('create schema staging;')
+            conn.execute('create schema fecapp;')
+            conn.execute('create schema real_efile;')
+            conn.execute('create schema auditsearch;')
 
 
 class BaseTestCase(unittest.TestCase):
