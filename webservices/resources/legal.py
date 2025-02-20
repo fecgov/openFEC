@@ -199,7 +199,8 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         if not isinstance(q_exclude, list):
             q_exclude = [q_exclude]
         must_not = []
-        fuzziness = kwargs.get("q_exclude_fuzziness", 0)
+        fuzziness = 0
+        # grabs terms and fuzziness parameter if available
         pattern = re.compile(r'^(.*)~(\d+)$')
         last_term = q_exclude[-1]
         match = pattern.match(last_term)
