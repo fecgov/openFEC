@@ -1,19 +1,17 @@
-'''
 import manage
 from tests import common
-from webservices.rest import create_app
-from flask import current_app
+from webservices.common.models import db
+
 
 import pytest
 import subprocess
 import logging
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="class")
 def migrate_db(request):
-    app = create_app(test_config="testing")
-    with app.app_context():
-
+    base_cls = request.cls
+    if base_cls.application.config['TESTING']:
         reset_schema()
         run_migrations()
         manage.refresh_materialized(concurrent=False)
@@ -32,7 +30,6 @@ def run_migrations():
 
 
 def reset_schema():
-    db = current_app.extensions["sqlalchemy"].db
     for schema in [
         "aouser",
         "auditsearch",
@@ -47,7 +44,7 @@ def reset_schema():
         "staging",
         "test_efile",
     ]:
-        db.engine.execute(f'DROP SCHEMA IF EXISTS {schema} CASCADE;')
+        db.engine.execute('drop schema if exists %s cascade;' % schema)
     db.engine.execute('create schema public;')
 
 
@@ -76,4 +73,3 @@ def pytest_collection_modifyitems(session, config, items):
 def pytest_configure(config):
     """Flake8 is very verbose by default. Silence it."""
     logging.getLogger("flake8").setLevel(logging.WARNING)
-'''

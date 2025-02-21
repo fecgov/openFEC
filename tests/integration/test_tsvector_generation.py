@@ -9,7 +9,7 @@ from webservices.api_setup import api
 from webservices.resources.sched_a import ScheduleAView
 from webservices.resources.sched_a import ScheduleAEfileView
 from webservices.resources.sched_b import ScheduleBView
-from webservices import rest, __API_VERSION__
+from webservices import __API_VERSION__
 from webservices.common.models import db
 from webservices.utils import parse_fulltext
 
@@ -20,9 +20,9 @@ class TriggerTestCase(common.BaseTestCase):
         super().setUp()
         self.longMessage = True
         self.maxDiff = None
-        self.request_context = rest.app.test_request_context()
+        self.request_context = self.application.test_request_context()
         self.request_context.push()
-        self.connection = rest.db.engine.connect()
+        self.connection = db.engine.connect()
 
     def _response(self, qry):
         response = self.app.get(qry)
