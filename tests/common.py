@@ -45,6 +45,8 @@ def _reset_schema(db):
 
 
 class BaseTestCase(unittest.TestCase):
+    _extensions_set_up = False  # prevent multiple clients for ext setup
+
     @classmethod
     def setUpClass(cls):
         cls.application = create_app(test_config="testing")
@@ -52,7 +54,10 @@ class BaseTestCase(unittest.TestCase):
         cls.client = TestApp(cls.application)
         cls.app_context = cls.application.app_context()
         cls.app_context.push()
-        _setup_extensions(db)
+
+        if not cls._extensions_set_up:
+            _setup_extensions(db)
+            cls._extensions_set_up = True
 
     def setUp(self):
         self.connection = db.engine.connect()
@@ -66,6 +71,7 @@ class BaseTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.app_context.pop()
+        db.engine.dispose()  # fix too many client issues
 
 
 class ApiBaseTest(BaseTestCase):
@@ -84,14 +90,15 @@ class ApiBaseTest(BaseTestCase):
                 stdout=null,
             )
 
-        db.metadata.create_all(
-            db.engine,
-            tables=[
-                each.__table__
-                for each in db.Model._decl_class_registry.values()
-                if hasattr(each, '__table__')
-            ]
-        )
+        with db.engine.connect() as connection:
+            db.metadata.create_all(
+                bind=connection,
+                tables=[
+                    each.__table__
+                    for each in db.Model._decl_class_registry.values()
+                    if hasattr(each, '__table__')
+                ]
+            )
 
     def setUp(self):
         super(ApiBaseTest, self).setUp()
