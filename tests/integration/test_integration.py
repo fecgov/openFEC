@@ -1,15 +1,13 @@
-'''
 import datetime
 
 import pytest
 
 import sqlalchemy as sa
 
-import manage
 from tests import common, factories
-from webservices.common.models import db
+from webservices.common import models
+from webservices.common.models import ScheduleA, db
 from webservices.config import SQL_CONFIG
-from webservices.common.models import ScheduleA
 
 REPORTS_MODELS = [
     models.CommitteeReportsPacParty,
@@ -179,4 +177,3 @@ class IntegrationTestCase(common.BaseTestCase):
 
         rows = ScheduleA.query.filter(is_individual).all()
         self.assertEqual(rows, individuals)
-'''
