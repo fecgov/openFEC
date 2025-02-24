@@ -51,7 +51,7 @@ class IntegrationTestCase(common.BaseTestCase):
             getattr(model, key), sa.func.unnest(model.cycles).label('cycle'),
         ).subquery()
         count = (
-            db.session.query(getattr(subquery.columns, key))
+            sa.select(getattr(subquery.columns, key))
             .group_by(getattr(subquery.columns, key))
             .having(
                 sa.func.max(subquery.columns.cycle) < SQL_CONFIG['START_YEAR']

@@ -77,7 +77,7 @@ class TotalsByEntityTypeView(ApiResource):
         query, totals_class, totals_schema = self.build_query(
             committee_id=committee_id, entity_type=entity_type, **kwargs
         )
-        page = utils.fetch_page(query, kwargs, is_count_exact=True, model=totals_class)
+        page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=totals_class)
         return totals_schema().dump(page)
 
     def build_query(self, committee_id=None, entity_type=None, **kwargs):
@@ -85,7 +85,7 @@ class TotalsByEntityTypeView(ApiResource):
             committee_type_map.get(entity_type),
             default_schemas,
         )
-        query = totals_class.query
+        query = sa.select(totals_class)
 
         # Committee ID needs to be handled separately because it's not in kwargs
         if committee_id is not None:
@@ -231,7 +231,7 @@ class TotalsCommitteeView(ApiResource):
         query, totals_class, totals_schema = self.build_query(
             committee_id=committee_id.upper(), committee_type=committee_type, **kwargs
         )
-        page = utils.fetch_page(query, kwargs, is_count_exact=True, model=totals_class)
+        page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=totals_class)
         return totals_schema().dump(page)
 
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
@@ -241,7 +241,8 @@ class TotalsCommitteeView(ApiResource):
             ),
             default_schemas,
         )
-        query = totals_class.query
+        query = sa.select(totals_class)
+
         if committee_id is not None:
             query = query.filter(totals_class.committee_id == committee_id)
         if kwargs.get('cycle'):
@@ -252,11 +253,12 @@ class TotalsCommitteeView(ApiResource):
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
         if committee_id is not None:
             utils.check_committee_id(committee_id)
-            query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
+            query = sa.select(models.CommitteeHistory)
+            query = query.filter_by(committee_id=committee_id)
             if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
             query = query.order_by(sa.desc(models.CommitteeHistory.cycle))
-            committee = query.first_or_404()
+            committee = models.db.first_or_404(query)
             return committee.committee_type
 
 
@@ -281,7 +283,7 @@ class CandidateTotalsDetailView(utils.Resource):
             validator = args.IndexValidator(totals_class)
             validator(kwargs['sort'])
 
-        page = utils.fetch_page(query, kwargs, is_count_exact=True, model=totals_class)
+        page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=totals_class)
         return totals_schema().dump(page)
 
     def build_query(self, candidate_id=None, **kwargs):
@@ -291,7 +293,7 @@ class CandidateTotalsDetailView(utils.Resource):
             totals_schema = schemas.CandidateTotalsDetailPresidentialPageSchema
         else:
             totals_schema = schemas.CandidateTotalsDetailHouseSenatePageSchema
-        query = totals_class.query
+        query = sa.select(totals_class)
         query = query.filter(totals_class.candidate_id == candidate_id.upper())
 
         if kwargs.get('election_full') is None:

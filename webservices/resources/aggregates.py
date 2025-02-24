@@ -226,7 +226,7 @@ class ScheduleBByRecipientIDView(AggregateResource):
 
 
 class CandidateAggregateResource(AggregateResource):
-
+    contains_individual_columns = True
     # Since candidate aggregates are aggregated on the fly, they don't have a
     # consistent unique index. We nullify `index_column` to avoiding sorting
     # on the unique index of the base model.
@@ -277,9 +277,9 @@ class CandidateAggregateResource(AggregateResource):
                 self.model.cycle > (models.CandidateElection.cand_election_year - election_duration),
             ),
         )
-        return query.with_entities(
-            self.model.candidate_id,
-            self.model.committee_id,
+        return query.with_only_columns(
+            self.model.candidate_id.label('cand_id'),
+            self.model.committee_id.label('cmte_id'),
             cycle_column.label('cycle'),
             sa.func.sum(self.model.total).label('total'),
             sa.func.sum(self.model.count).label('count'),
@@ -374,6 +374,7 @@ class CCAggregatesView(AggregateResource):
     schema = schemas.CCAggregatesSchema
     page_schema = schemas.CCAggregatesPageSchema
     query_args = utils.extend(args.CC_aggregates)
+    contains_individual_columns = True
 
     filter_multi_fields = [
         ('candidate_id', model.candidate_id),
@@ -436,6 +437,7 @@ class ECAggregatesView(AggregateResource):
     schema = schemas.ECAggregatesSchema
     page_schema = schemas.ECAggregatesPageSchema
     query_args = utils.extend(args.EC_aggregates)
+    contains_individual_columns = True
 
     filter_multi_fields = [
         ('candidate_id', model.candidate_id),
@@ -445,7 +447,7 @@ class ECAggregatesView(AggregateResource):
 
 def join_cand_cmte_names(query):
     query = query.subquery()
-    return models.db.session.query(
+    return sa.select(
         query,
         models.CandidateHistory.candidate_id.label('candidate_id'),
         models.CommitteeHistory.committee_id.label('committee_id'),

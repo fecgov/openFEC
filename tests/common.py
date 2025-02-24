@@ -95,7 +95,7 @@ class ApiBaseTest(BaseTestCase):
                 bind=connection,
                 tables=[
                     each.__table__
-                    for each in db.Model._decl_class_registry.values()
+                    for each in db.Model.registry._class_registry.values()
                     if hasattr(each, '__table__')
                 ]
             )
