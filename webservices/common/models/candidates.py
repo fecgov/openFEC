@@ -39,8 +39,7 @@ class BaseCandidate(BaseModel):
     party_full = db.Column(db.String(255), doc=docs.PARTY_FULL)
     state = db.Column(db.String(2), index=True, doc=docs.STATE)
     district = db.Column(db.String(2), index=True, doc=docs.DISTRICT)
-    # ? difference between district and district_number
-    district_number = db.Column(db.Integer, index=True, doc=docs.CANDIDATE_STATUS)
+    district_number = db.Column(db.Integer, index=True, doc=docs.DISTRICT)
     election_districts = db.Column(ARRAY(db.String), index=True, doc=docs.DISTRICT)
     election_years = db.Column(
         ARRAY(db.Integer), index=True, doc=docs.CANDIDATE_ELECTION_YEARS
@@ -78,7 +77,6 @@ class BaseConcreteCandidate(BaseCandidate):
 class Candidate(BaseConcreteCandidate):
     __table_args__ = {"extend_existing": True}
     __tablename__ = "ofec_candidate_detail_mv"
-
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
     candidate_inactive = db.Column(db.Boolean, doc=docs.ACTIVE_CANDIDATE)
     inactive_election_years = db.Column(
@@ -126,6 +124,11 @@ class CandidateDetail(BaseConcreteCandidate):
         db.Boolean, doc="True indicates that a candidate is inactive."
     )
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
+    candidate_first_name = db.Column(db.String(100), doc=docs.CANDIDATE_FIRST_NAME)
+    candidate_last_name = db.Column(db.String(100), doc=docs.CANDIDATE_LAST_NAME)
+    candidate_middle_name = db.Column(db.String(100), doc=docs.CANDIDATE_MIDDLE_NAME)
+    candidate_prefix = db.Column(db.String(100), doc=docs.CANDIDATE_PREFIX)
+    candidate_suffix = db.Column(db.String(100), doc=docs.CANDIDATE_SUFFIX)
 
 
 class CandidateHistory(BaseCandidate):
