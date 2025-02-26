@@ -3,7 +3,8 @@ import logging
 
 import manage
 from webservices import utils
-from webservices.tasks import app, download
+from webservices.tasks import download
+from celery import shared_task
 from webservices.tasks.utils import get_app_name
 
 
@@ -13,7 +14,7 @@ SLACK_BOTS = "#bots"
 SLACK_ALERTS = "#alerts"
 
 
-@app.task
+@shared_task
 def refresh_materialized_views():
     """
     Refresh public materialized views.

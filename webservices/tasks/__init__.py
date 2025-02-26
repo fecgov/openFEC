@@ -1,10 +1,6 @@
-import celery
-from celery import signals
 from celery.schedules import crontab
-
 from webservices.env import env
-import ssl
-from flask import current_app
+
 
 # Feature and dev are sharing the same RDS box so we only want dev to update
 schedule = {}
@@ -83,52 +79,3 @@ def redis_url():
         return redis_url
 
     return env.get_credential("FEC_REDIS_URL", "redis://localhost:6379/0")
-
-
-app = celery.Celery("openfec")
-# some import app statements should be ok because they are importing the celery app
-# and not the flask app, we may need to switch to factory for celery but we should get tests running first
-
-app.conf.update(
-    broker_url=redis_url(),
-    broker_use_ssl={
-        "ssl_cert_reqs": ssl.CERT_NONE,
-    },
-    redis_backend_use_ssl={
-        "ssl_cert_reqs": ssl.CERT_NONE,
-    },
-    imports=(
-        "webservices.tasks.refresh_db",
-        "webservices.tasks.download",
-        "webservices.tasks.legal_docs",
-    ),
-    beat_schedule=schedule,
-    broker_connection_timeout=30,  # in seconds
-    broker_connection_max_retries=0,  # for unlimited retries
-    task_acks_late=False
-)
-
-app.conf.ONCE = {
-    "backend": "celery_once.backends.Redis",
-    "settings": {
-        "url": redis_url() + "?ssl=true",
-        "default_timeout": 60 * 60
-    }
-}
-
-context = {}
-
-
-@signals.task_prerun.connect
-def push_context(task_id, task, *args, **kwargs):
-    context[task_id] = current_app.app_context()
-    context[task_id].push()
-
-# double check this is working correctly--we may have to init cellery in the app factory
-
-
-@signals.task_postrun.connect
-def pop_context(task_id, task, *args, **kwargs):
-    if task_id in context:
-        context[task_id].pop()
-        context.pop(task_id)

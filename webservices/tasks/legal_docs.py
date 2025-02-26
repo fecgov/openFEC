@@ -3,6 +3,7 @@ import time
 import logging
 
 from celery_once import QueueOnce
+from celery import shared_task
 
 from webservices import utils
 from webservices.legal_docs.advisory_opinions import load_advisory_opinions
@@ -16,7 +17,6 @@ from webservices.legal_docs.es_management import (  # noqa
 )
 
 from webservices.common.models import db
-from webservices.tasks import app
 from webservices.tasks.utils import get_app_name
 
 
@@ -55,7 +55,7 @@ DAILY_MODIFIED_CASES_SEND_ALERT = """
 SLACK_BOTS = "#bots"
 
 
-@app.task(once={"graceful": True}, base=QueueOnce)
+@shared_task(once={"graceful": True}, base=QueueOnce)
 def refresh_most_recent_legal_doc():
     """
         # Task 1: This task is launched every 5 minutes during 6am-7pmEST(13 hours).
@@ -120,7 +120,7 @@ def refresh_most_recent_cases(conn):
         logger.info(" No recently modified cases(MUR/AF/ADR) found.")
 
 
-@app.task(once={"graceful": True}, base=QueueOnce)
+@shared_task(once={"graceful": True}, base=QueueOnce)
 def daily_reload_all_aos_when_change():
     """
         # 1) Identify the daily modified AO(s) in past 24 hours(9pm-9pm EST)
@@ -155,7 +155,7 @@ def daily_reload_all_aos_when_change():
         utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
-@app.task(once={"graceful": True}, base=QueueOnce)
+@shared_task(once={"graceful": True}, base=QueueOnce)
 def weekly_reload_all_aos():
     """
     Reload all AOs only on Sunday.
@@ -167,7 +167,7 @@ def weekly_reload_all_aos():
     utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
-@app.task(once={"graceful": True}, base=QueueOnce)
+@shared_task(once={"graceful": True}, base=QueueOnce)
 def send_alert_daily_modified_legal_case():
     # When found modified case(s)(MUR/AF/ADR) during 6am-7pm EST, Send case detail information to Slack.
     slack_message = ""
@@ -192,7 +192,7 @@ def send_alert_daily_modified_legal_case():
         utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
-@app.task(once={"graceful": True}, base=QueueOnce)
+@shared_task(once={"graceful": True}, base=QueueOnce)
 def create_es_backup():
     """
         Take Elasticsearch `CASE_INDEX` and `AO_INDEX` snapshot weekly.
@@ -218,7 +218,7 @@ def create_es_backup():
         utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
-@app.task(once={"graceful": True}, base=QueueOnce)
+@shared_task(once={"graceful": True}, base=QueueOnce)
 def delete_es_backup_monthly():
     # Delete snapshots on the first of every month at 1am EST,
     # Send information to Slack.

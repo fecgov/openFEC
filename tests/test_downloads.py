@@ -83,6 +83,8 @@ class TestDownloadTask(ApiBaseTest):
 
         db.session.commit()
 
+        db.session.refresh(committee)
+
         # these are the major downloadable resources, we may want to add more later
         DOWNLOADABLE_RESOURCES = {
             aggregates.ScheduleABySizeView,

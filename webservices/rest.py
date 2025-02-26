@@ -6,6 +6,7 @@ full documentation visit: https://api.open.fec.gov/developers.
 import http
 import logging
 import os
+
 from marshmallow import EXCLUDE
 import ujson
 import sqlalchemy as sa
@@ -58,9 +59,11 @@ from webservices.resources import operations_log
 from webservices.resources import presidential
 from webservices.resources import spending_by_others
 from webservices.env import env
+from webservices.tasks.celery import celery_init_app
 from webservices.tasks.response_exception import ResponseException
 from webservices.tasks.error_code import ErrorCode
 from webservices.api_setup import api, v1
+from celery import signals
 
 
 # Variables NTC
@@ -148,6 +151,43 @@ def create_app(test_config=None):
     api.init_app(app)
     NPlusOne(app)  # may need init app
     # cli.init_app(app)
+
+    def redis_url():
+        """
+        Retrieve the URL needed to connect to a Redis instance, depending on environment.
+        When running in a cloud.gov environment, retrieve the uri credential for the 'aws-elasticache-redis' service.
+        """
+        # Is the app running in a cloud.gov environment
+        if env.space is not None:
+            redis_env = env.get_service(label="aws-elasticache-redis")
+            redis_url = redis_env.credentials.get("uri")
+
+            return redis_url
+
+        return env.get_credential("FEC_REDIS_URL", "redis://localhost:6379/0")
+
+    app.config.from_mapping(
+        CELERY=dict(
+            broker_url=redis_url(),
+            result_backend=None,  # may need to set
+            task_ignore_result=True,  # may need to unset
+        ),
+    )
+    context = {}
+
+    @signals.task_prerun.connect
+    def push_context(task_id, task, *args, **kwargs):
+        context[task_id] = app.app_context()
+        context[task_id].push()
+
+    @signals.task_postrun.connect
+    def pop_context(task_id, task, *args, **kwargs):
+        if task_id in context:
+            context[task_id].pop()
+            context.pop(task_id)
+
+    app.config.from_prefixed_env()
+    celery_init_app(app)
 
     # Register Blueprints
     app.register_blueprint(v1)
