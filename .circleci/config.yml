@@ -92,7 +92,11 @@ jobs:
           name: Wait for Elasticsearch
           command: dockerize -wait http://localhost:9200 -timeout 1m
 
-      # temporarily remove pytest from circleci
+      - run:
+          name: Run tests
+          command: |
+            . .env/bin/activate
+            pytest
 
       - run:
           name: Run pre-commit
