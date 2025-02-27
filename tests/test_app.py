@@ -21,3 +21,8 @@ class TestBaseTestCase(BaseTestCase):
     def test_redirect_page(self):
         response = self.client.get('/')
         assert response.status_code == 301
+
+    def test_cors_headers(self):
+        response = self.client.get('/swagger')
+        assert "Access-Control-Allow-Origin" in response.headers
+        assert response.headers["Access-Control-Allow-Origin"] == "*"

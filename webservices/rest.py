@@ -105,8 +105,7 @@ parser = FlaskRestParser()
 def create_app(test_config=None):
     app = Flask(__name__)
     app.url_map.strict_slashes = False
-    # app.config.from_pyfile(config_filename)
-    app.debug = True  # remove later
+    # app.debug = True
     app.config['APISPEC_FORMAT_RESPONSE'] = None
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_POOL_SIZE'] = 50
@@ -117,14 +116,14 @@ def create_app(test_config=None):
     app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
         'webservices.tasks.download.export_query',]
     app.config['PROPAGATE_EXCEPTIONS'] = True
+    # app.config['SQLALCHEMY_ECHO'] = True
 
+    # Modify app configuration and logging level for production
     if not app.debug:
         app.logger.addHandler(logging.StreamHandler())
         app.logger.setLevel(logging.INFO)
 
     if test_config is None:
-        # load the instance config, if it exists, when not testing
-        # app.config.from_pyfile("config.py", silent=True)
         app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
         app.config['SQLALCHEMY_FOLLOWERS'] = [sa.create_engine(follower.strip())
                                               for follower in utils.split_env_var(
@@ -133,7 +132,6 @@ def create_app(test_config=None):
         app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
 
     else:
-        # load the test config if passed in
         TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
         """ app.config['SQLALCHEMY_FOLLOWERS'] = [sa.create_engine(follower.strip())
                                               for follower in utils.split_env_var(
@@ -145,12 +143,10 @@ def create_app(test_config=None):
         app.config['TESTING'] = True
 
     # Initialize Extensions
-    # may need with app context
     db.init_app(app)
-    cors.CORS(app)  # may need to init app
+    cors.CORS(app)
     api.init_app(app)
-    NPlusOne(app)  # may need init app
-    # cli.init_app(app)
+    NPlusOne(app)
 
     def redis_url():
         """
@@ -196,7 +192,7 @@ def create_app(test_config=None):
         'APISPEC_SWAGGER_UI_URL': None,
         'APISPEC_SPEC': spec.spec,
         })
-    apidoc = FlaskApiSpec(app)  # may need to be moved out empty and then init app inside create app
+    apidoc = FlaskApiSpec(app)
 
     apidoc.register(national_party.NationalParty_ScheduleAView, blueprint='v1')
     apidoc.register(national_party.NationalParty_ScheduleBView, blueprint='v1')
@@ -326,17 +322,9 @@ def create_app(test_config=None):
     app.register_blueprint(docs)
     app.app_context().push()
 
-    # app.config['SQLALCHEMY_ECHO'] = True
-    # app.debug = True
-    # Modify app configuration and logging level for production
-    '''
-    if not app.debug:
-        app.logger.addHandler(logging.StreamHandler())
-        app.logger.setLevel(logging.INFO)
-    '''
     parser = FlaskRestParser()
     app.config['APISPEC_WEBARGS_PARSER'] = parser
-    # app.config['MAX_CACHE_AGE'] = env.get_credential('FEC_CACHE_AGE') I think this is old and unnecessary?
+    app.config['MAX_CACHE_AGE'] = env.get_credential('FEC_CACHE_AGE')
 
     @app.errorhandler(exceptions.ApiError)
     def handle_error(error):

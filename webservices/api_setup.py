@@ -38,7 +38,6 @@ api = restful.Api(v1)
 api.representations['application/json'] = util.output_json
 SHOW_TEST_F1 = env.get_credential('FEC_SHOW_TEST_F1', False)
 
-# app.api = api
 
 api.add_resource(national_party.NationalParty_ScheduleAView, '/national_party/schedule_a/')
 api.add_resource(national_party.NationalParty_ScheduleBView, '/national_party/schedule_b/')
