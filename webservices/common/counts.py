@@ -43,7 +43,7 @@ def get_count(resource, query):
         estimated_count = get_estimated_count(query)
         return estimated_count, is_estimate
     # Use exact counts for `use_estimated_counts == False` and small result sets
-    exact_count = models.db.session.scalars(select(func.count()).select_from(query)).one()
+    exact_count = models.db.session.scalar(select(func.count()).select_from(query))
     return exact_count, is_estimate
 
 

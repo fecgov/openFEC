@@ -170,7 +170,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             cursor = cursor.filter(filter)
 
         query = cursor.order_by(direction(self.index_column)).limit(limit)
-        return self.session.execute(query).unique().scalars().all() if eager else query
+        return self.session.execute(query).scalars().all() if eager else query
 
     def _get_index_values(self, result):
         """Get index values from last result, to be used in seeking to the next

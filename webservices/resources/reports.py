@@ -278,6 +278,7 @@ class EFilingHouseSenateSummaryView(views.ApiResource):
     model = models.BaseF3Filing
     schema = schemas.BaseF3FilingSchema
     page_schema = schemas.BaseF3FilingPageSchema
+    contains_joined_load = True
 
     filter_range_fields = [
         (('min_receipt_date', 'max_receipt_date'), models.BaseFiling.receipt_date),
@@ -325,6 +326,7 @@ class EFilingPresidentialSummaryView(views.ApiResource):
     model = models.BaseF3PFiling
     schema = schemas.BaseF3PFilingSchema
     page_schema = schemas.BaseF3PFilingPageSchema
+    contains_joined_load = True
 
     filter_range_fields = [
         (('min_receipt_date', 'max_receipt_date'), models.BaseFiling.receipt_date),
@@ -372,6 +374,7 @@ class EFilingPacPartySummaryView(views.ApiResource):
     model = models.BaseF3XFiling
     schema = schemas.BaseF3XFilingSchema
     page_schema = schemas.BaseF3XFilingPageSchema
+    contains_joined_load = True
 
     filter_range_fields = [
         (('min_receipt_date', 'max_receipt_date'), models.BaseFiling.receipt_date),

@@ -33,6 +33,7 @@ class ApiResource(utils.Resource):
     is_count_exact = ''
     contains_individual_columns = False
     contains_joined_load = False
+    union_query = None
 
     @use_kwargs(Ref('args'))
     @marshal_with(Ref('page_schema'))
@@ -51,7 +52,7 @@ class ApiResource(utils.Resource):
             count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
             index_column=self.index_column, cap=self.cap, multi=multi,
             contains_individual_columns=self.contains_individual_columns,
-            contains_joined_load=self.contains_joined_load
+            contains_joined_load=self.contains_joined_load, union_query=self.union_query
         )
 
     def build_query(self, *args, _apply_options=True, **kwargs):

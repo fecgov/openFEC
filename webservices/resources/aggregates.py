@@ -214,6 +214,8 @@ class ScheduleBByRecipientIDView(AggregateResource):
     schema = schemas.ScheduleBByRecipientIDSchema
     page_schema = schemas.ScheduleBByRecipientIDPageSchema
     query_args = args.schedule_b_by_recipient_id
+    contains_joined_load = True
+
     filter_multi_fields = [
         ('cycle', models.ScheduleBByRecipientID.cycle),
         ('recipient_id', models.ScheduleBByRecipientID.recipient_id),

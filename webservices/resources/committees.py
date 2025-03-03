@@ -8,6 +8,7 @@ from webservices import schemas
 from webservices import exceptions
 from webservices.common import models
 from webservices.common.views import ApiResource
+import logging
 
 
 def filter_year(model, query, years):
@@ -108,7 +109,7 @@ class CommitteeList(ApiResource):
 
         if kwargs.get("cycle"):
             query = query.filter(models.Committee.cycles.overlap(kwargs["cycle"]))
-
+        logging.warning(query)
         return query
 
 
@@ -205,6 +206,7 @@ class CommitteeHistoryProfileView(ApiResource):
     schema = schemas.CommitteeHistoryProfileSchema
     page_schema = schemas.CommitteeHistoryProfilePageSchema
     contains_joined_load = True
+
     query_options = [
         sa.orm.joinedload(models.CommitteeHistoryProfile.jfc_committee),
     ]
@@ -297,7 +299,7 @@ class CommitteeHistoryProfileView(ApiResource):
                     models.CommitteeHistoryProfile.committee_id,
                     sa.desc(models.CommitteeHistoryProfile.cycle),
                 ).distinct(
-                    # inside one candidate election year,
+                    # inside one candidate election year (election_yr_to_be_included),
                     # remove duplicate committee(s), mostly for Presidental and Senate candidate.
                     models.CommitteeHistoryProfile.committee_id,
                 )
@@ -309,18 +311,17 @@ class CommitteeHistoryProfileView(ApiResource):
                     models.CommitteeHistoryProfile.committee_id,
                     sa.desc(models.CommitteeHistoryProfile.cycle),
                 ).distinct(
-                    # inside one candidate election year,
+                    # inside one candidate election year (election_yr_to_be_included),
                     # remove duplicate committee(s), mostly for Presidental and Senate candidate.
                     models.CommitteeHistoryProfile.committee_id,
                 )
-                self.contains_individual_columns = True
-                self.contains_joined_load = False
-
-                # union three queries: query_regular + query_leadership_pac + query_pcc_converted
-                query = query_regular.union(query_leadership_pac, query_pcc_converted).order_by(
+                union_query = sa.union(query_regular, query_leadership_pac, query_pcc_converted).order_by(
                     models.CommitteeHistoryProfile.committee_id,
                     sa.desc(models.CommitteeHistoryProfile.cycle),
                 )
+                self.union_query = union_query
+
+                query = sa.select(self.model)
             else:
                 # for election_full=false
                 query = query.filter(models.CommitteeHistoryProfile.cycle == cycle)

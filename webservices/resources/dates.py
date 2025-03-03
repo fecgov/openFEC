@@ -151,6 +151,7 @@ class ReportingDatesView(ApiResource):
     model = models.ReportDate
     schema = schemas.ReportingDatesSchema
     page_schema = schemas.ReportingDatesPageSchema
+    contains_joined_load = True
 
     @property
     def args(self):

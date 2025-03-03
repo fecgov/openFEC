@@ -22,6 +22,7 @@ class ScheduleH4View(ItemizedResource):
     model = models.ScheduleH4
     schema = schemas.ScheduleH4Schema
     page_schema = schemas.ScheduleH4PageSchema
+    contains_joined_load = True
 
     @property
     def year_column(self):
@@ -75,6 +76,10 @@ class ScheduleH4View(ItemizedResource):
         'disbursement_purpose',
     ]
 
+    query_options = [
+        sa.orm.joinedload(models.ScheduleH4.committee),
+    ]
+
     @property
     def args(self):
         return utils.extend(
@@ -87,7 +92,6 @@ class ScheduleH4View(ItemizedResource):
 
     def build_query(self, **kwargs):
         query = super(ScheduleH4View, self).build_query(**kwargs)
-        query = query.options(sa.orm.joinedload(models.ScheduleH4.committee))
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         utils.check_form_line_number(kwargs)
