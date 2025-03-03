@@ -6,12 +6,13 @@ from webservices.common.models import db
 import pytest
 import subprocess
 import logging
+from webservices.rest import create_app
 
 
-@pytest.fixture(scope="class")
-def migrate_db(request):
-    base_cls = request.cls
-    if base_cls.application.config['TESTING']:
+@pytest.fixture(scope="session")
+def migrate_db():
+    app = create_app(test_config="testing")
+    with app.app_context():
         reset_schema()
         run_migrations()
         manage.refresh_materialized(concurrent=False)
