@@ -7,7 +7,8 @@ import pytest
 from botocore.exceptions import ClientError
 
 from webservices.exceptions import ApiError
-from webservices.rest import db, api
+from webservices.common.models import db
+from webservices.api_setup import api
 from webservices.tasks import download as tasks
 from webservices.resources import download as resource
 from webservices.resources import (
@@ -81,6 +82,8 @@ class TestDownloadTask(ApiBaseTest):
         )
 
         db.session.commit()
+
+        db.session.refresh(committee)
 
         # these are the major downloadable resources, we may want to add more later
         DOWNLOADABLE_RESOURCES = {

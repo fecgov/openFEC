@@ -5,7 +5,7 @@ from decimal import Decimal
 import pytest
 
 
-from webservices import rest
+from webservices.common.models import db
 from webservices.legal_docs.current_cases import get_cases, load_mur_citations
 
 from tests.common import TEST_CONN, BaseTestCase
@@ -14,13 +14,13 @@ from tests.common import TEST_CONN, BaseTestCase
 @pytest.mark.usefixtures("migrate_db")
 class TestLoadCurrentCases(BaseTestCase):
     def setUp(self):
-        self.connection = rest.db.engine.connect()
+        self.connection = db.engine.connect()
         subprocess.check_call(['psql', TEST_CONN, '-f', 'data/load_base_mur_data.sql'])
 
     def tearDown(self):
         self.clear_test_data()
         self.connection.close()
-        rest.db.session.remove()
+        db.session.remove()
 
     @patch('webservices.legal_docs.current_cases.get_bucket')
     def test_simple_mur(self, get_bucket):

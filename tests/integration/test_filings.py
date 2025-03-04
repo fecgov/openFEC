@@ -4,7 +4,10 @@ import json
 
 import manage
 from tests.common import BaseTestCase
-from webservices import rest, __API_VERSION__
+
+from webservices import __API_VERSION__
+from webservices.common.models import db
+from webservices.api_setup import api
 from webservices.resources.filings import FilingsView, FilingsList
 
 
@@ -39,12 +42,12 @@ class TestFilings(BaseTestCase):
         super().setUp()
         self.longMessage = True
         self.maxDiff = None
-        self.request_context = rest.app.test_request_context()
+        self.request_context = self.application.test_request_context()
         self.request_context.push()
-        self.connection = rest.db.engine.connect()
+        self.connection = db.engine.connect()
 
     def tearDown(self):
-        rest.db.session.remove()
+        db.session.remove()
         self.request_context.pop()
         self.clear_test_data()
         super().tearDown()
@@ -73,7 +76,7 @@ class TestFilings(BaseTestCase):
         # FilingsList view
         # /filings/ endpoint
         results = self._results(
-            rest.api.url_for(FilingsList, committee_id=expected_filing['cand_cmte_id'])
+            api.url_for(FilingsList, committee_id=expected_filing['cand_cmte_id'])
         )
         assert len(results) == 1
         list_result = results[0]
@@ -83,7 +86,7 @@ class TestFilings(BaseTestCase):
         # FilingsView view
         # /committee/<committee_id>/filings/ and /candidate/<candidate_id>/filings/
         results = self._results(
-            rest.api.url_for(FilingsView, committee_id=expected_filing['cand_cmte_id'])
+            api.url_for(FilingsView, committee_id=expected_filing['cand_cmte_id'])
         )
         assert len(results) == 1
         view_result = results[0]
@@ -100,7 +103,7 @@ class TestFilings(BaseTestCase):
         # FilingsList view
         # /filings/ endpoint
         results = self._results(
-            rest.api.url_for(FilingsList, candidate_id=expected_filing['cand_cmte_id'])
+            api.url_for(FilingsList, candidate_id=expected_filing['cand_cmte_id'])
         )
         assert len(results) == 1
         list_result = results[0]
@@ -110,7 +113,7 @@ class TestFilings(BaseTestCase):
         # FilingsView view
         # /committee/<committee_id>/filings/ and /candidate/<candidate_id>/filings/
         results = self._results(
-            rest.api.url_for(FilingsView, candidate_id=expected_filing['cand_cmte_id'])
+            api.url_for(FilingsView, candidate_id=expected_filing['cand_cmte_id'])
         )
         assert len(results) == 1
         view_result = results[0]
@@ -129,7 +132,7 @@ class TestFilings(BaseTestCase):
         # FilingsList view
         # /filings/ endpoint
         results = self._results(
-            rest.api.url_for(FilingsList, committee_id=expected_filing['cand_cmte_id'])
+            api.url_for(FilingsList, committee_id=expected_filing['cand_cmte_id'])
         )
         assert len(results) == 1
         list_result = results[0]
@@ -142,7 +145,7 @@ class TestFilings(BaseTestCase):
         # FilingsView view
         # /committee/<committee_id>/filings/ and /candidate/<candidate_id>/filings/
         results = self._results(
-            rest.api.url_for(FilingsView, committee_id=expected_filing['cand_cmte_id'])
+            api.url_for(FilingsView, committee_id=expected_filing['cand_cmte_id'])
         )
         assert len(results) == 1
         view_result = results[0]

@@ -1,6 +1,6 @@
 import logging
 import re
-from webservices.rest import db
+from webservices.common.models import db
 from webservices.utils import (
     extend,
     create_es_client,

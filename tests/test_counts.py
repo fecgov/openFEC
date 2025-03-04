@@ -6,7 +6,7 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices.resources import sched_a, sched_e
-from webservices.rest import db
+from webservices.common.models import db
 from webservices.common import models, counts
 
 

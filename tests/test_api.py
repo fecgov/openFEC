@@ -1,13 +1,12 @@
 import sqlalchemy as sa
-
 from tests import factories
 from tests.common import ApiBaseTest
 
-from webservices import rest
-from webservices.rest import api
+from webservices.api_setup import api
 from webservices.resources.search import CandidateNameSearch, CommitteeNameSearch
 from webservices.resources.candidates import CandidateList
 from webservices.common.views import ApiResource
+from webservices.common.models import db
 
 
 class OverallTest(ApiBaseTest):
@@ -22,7 +21,7 @@ class OverallTest(ApiBaseTest):
         factories.CandidateSearchFactory(
             id=candidate.candidate_id, fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
         )
-        rest.db.session.flush()
+        db.session.flush()
         results = self._results(api.url_for(CandidateList, q='bartlet'))
         self.assertEqual(len(results), 1)
         self.assertIn('josiah', results[0]['name'].lower())
@@ -32,8 +31,8 @@ class OverallTest(ApiBaseTest):
         factories.CandidateSearchFactory(
             id=candidate.candidate_id, fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
         )
-        rest.db.session.flush()
         results = self._results(api.url_for(CandidateList, q='bartlet josiah'))
+        db.session.flush()
         self.assertEqual(len(results), 1)
         self.assertIn('josiah', results[0]['name'].lower())
 
@@ -94,7 +93,7 @@ class OverallTest(ApiBaseTest):
             )
             for idx in range(30)
         ]
-        rest.db.session.flush()
+        db.session.flush()
         results = self._results(api.url_for(CandidateNameSearch, q='bartlet'))
         expected = [str(each.id) for each in rows[:-21:-1]]
         observed = [each['id'] for each in results]
@@ -107,7 +106,7 @@ class OverallTest(ApiBaseTest):
             name='Bartlet', fulltxt=sa.func.to_tsvector('Bartlet P0123'),
         )
         decoy = factories.CandidateSearchFactory()  # noqa
-        rest.db.session.flush()
+        db.session.flush()
         results = self._results(api.url_for(CandidateNameSearch, q='P0123'))
         assert len(results) == 1
         assert results[0]['name'] == row.name
@@ -121,7 +120,7 @@ class OverallTest(ApiBaseTest):
             )
             for idx in range(30)
         ]
-        rest.db.session.flush()
+        db.session.flush()
         results = self._results(api.url_for(CommitteeNameSearch, q='bartlet'))
         expected = [str(each.id) for each in rows[:-21:-1]]
         observed = [each['id'] for each in results]

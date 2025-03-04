@@ -13,6 +13,7 @@ from webservices import exceptions
 from webservices.tasks import download
 from webservices.tasks import utils as task_utils
 from webservices.utils import use_kwargs_original
+from flask import current_app
 
 client = boto3.client('s3')
 
@@ -33,7 +34,7 @@ class DownloadView(utils.Resource):
                 'status': 'complete',
                 'url': cached_file,
             }
-        resource = download.call_resource(path, request.query_string.decode('UTF-8'))
+        resource = download.call_resource(current_app, path, request.query_string.decode('UTF-8'))
         if resource['count'] > MAX_RECORDS:
             raise exceptions.ApiError(
                 'Cannot request downloads with more than {} records'.format(MAX_RECORDS),

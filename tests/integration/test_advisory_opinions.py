@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 from tests.common import TEST_CONN, BaseTestCase
 
-from webservices import rest
+from webservices.common.models import db
 from webservices.legal_docs.advisory_opinions import get_advisory_opinions
 
 EMPTY_SET = set()
@@ -14,7 +14,7 @@ EMPTY_SET = set()
 @pytest.mark.usefixtures("migrate_db")
 class TestLoadAdvisoryOpinions(BaseTestCase):
     def setUp(self):
-        self.connection = rest.db.engine.connect()
+        self.connection = db.engine.connect()
         subprocess.check_call(
             ["psql", TEST_CONN, "-f", "data/load_base_advisory_opinion_data.sql"]
         )
@@ -22,7 +22,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
     def tearDown(self):
         self.clear_test_data()
         self.connection.close()
-        rest.db.session.remove()
+        db.session.remove()
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
     @patch("webservices.legal_docs.advisory_opinions.create_es_client")

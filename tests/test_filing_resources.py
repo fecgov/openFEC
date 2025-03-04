@@ -1,7 +1,7 @@
 from tests import factories
 from tests.common import ApiBaseTest
 
-from webservices.rest import api
+from webservices.api_setup import api
 from webservices.resources.rad_analyst import RadAnalystView
 
 
