@@ -2,6 +2,7 @@ import sqlalchemy as sa
 from tests import factories
 from tests.common import ApiBaseTest
 from webservices.api_setup import api
+from webservices.common.models import db
 from webservices.resources.audit import (
     AuditCaseView,
     AuditCategoryView,
@@ -62,6 +63,7 @@ class TestAuditCandidateNameSearch(ApiBaseTest):
         factories.AuditCandidateSearchFactory(
             id='H4CA33119', fulltxt=sa.func.to_tsvector('LIEU, TED')
         )
+        db.session.flush()
         results = self._results(api.url_for(AuditCandidateNameSearch, q='TED'))
         self.assertEqual(len(results), 3)
         self.assertEqual(results[0]['id'], 'S2TX00312')
@@ -82,6 +84,7 @@ class TestAuditCommitteeNameSearch(ApiBaseTest):
         factories.AuditCommitteeSearchFactory(
             id='C00366773', fulltxt=sa.func.to_tsvector('JOHN SULLIVAN FOR CONGRESS')
         )
+        db.session.flush()
         results = self._results(api.url_for(AuditCommitteeNameSearch, q='JOHN'))
         self.assertEqual(len(results), 4)
         self.assertEqual(results[0]['id'], 'C00495622')

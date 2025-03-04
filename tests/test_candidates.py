@@ -126,6 +126,7 @@ class CandidateFormatTest(ApiBaseTest):
         factories.CandidateSearchFactory(
             id=dana.candidate_id, fulltxt=sa.func.to_tsvector('Dana')
         )
+        db.session.flush()
         results = self._results(api.url_for(CandidateList, q='danielle'))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['candidate_id'], danielle.candidate_id)

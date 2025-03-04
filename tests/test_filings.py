@@ -3,6 +3,7 @@ import sqlalchemy as sa
 from tests import factories
 from tests.common import ApiBaseTest
 from webservices.api_setup import api
+from webservices.common.models import db
 from webservices.resources.filings import FilingsView, FilingsList, EFilingsView, F2EFilingsView, F1EFilingsView
 
 
@@ -366,6 +367,7 @@ class TestEfileFiles(ApiBaseTest):
                 committee_name="Dana",
             ),
         ]
+        db.session.flush()
 
         factories.CommitteeSearchFactory(
             id="C00000001", fulltxt=sa.func.to_tsvector("Danielle")
