@@ -1,4 +1,5 @@
 import pytest
+import sqlalchemy as sa
 
 from unittest import TestCase
 from flask import request
@@ -24,9 +25,9 @@ class TestSort(ApiBaseTest):
             factories.CandidateFactory(district='02'),
         ]
         query, columns = sorting.sort(
-            models.Candidate.query, 'district', model=models.Candidate
+            sa.select(models.Candidate), 'district', model=models.Candidate
         )
-        self.assertEqual(query.all(), candidates)
+        self.assertEqual(db.session.execute(query).unique().scalars().all(), candidates)
 
     def test_single_column_reverse(self):
         candidates = [
@@ -34,9 +35,9 @@ class TestSort(ApiBaseTest):
             factories.CandidateFactory(district='02'),
         ]
         query, columns = sorting.sort(
-            models.Candidate.query, '-district', model=models.Candidate
+            sa.select(models.Candidate), '-district', model=models.Candidate
         )
-        self.assertEqual(query.all(), candidates[::-1])
+        self.assertEqual(db.session.execute(query).unique().scalars().all(), candidates[::-1])
 
     def test_multi_column(self):
         audit = [
@@ -91,9 +92,9 @@ class TestSort(ApiBaseTest):
             ),
         ]
         query, columns = sorting.multi_sort(
-            models.AuditCase.query, ['cycle', 'committee_name', ], model=models.AuditCase
+            sa.select(models.AuditCase), ['cycle', 'committee_name', ], model=models.AuditCase
         )
-        self.assertEqual(query.all(), audit)
+        self.assertEqual(db.session.execute(query).unique().scalars().all(), audit)
 
     def test_multi_column_reverse_first_column(self):
         audit = [
@@ -148,11 +149,11 @@ class TestSort(ApiBaseTest):
             ),
         ]
         query, columns = sorting.multi_sort(
-            models.AuditCase.query,
+            sa.select(models.AuditCase),
             ['-cycle', 'committee_name', ],
             model=models.AuditCase,
         )
-        self.assertEqual(query.all(), audit[::-1])
+        self.assertEqual(db.session.execute(query).unique().scalars().all(), audit[::-1])
 
     def test_hide_null(self):
         candidates = [
@@ -161,13 +162,13 @@ class TestSort(ApiBaseTest):
             factories.CandidateFactory(),
         ]
         query, columns = sorting.sort(
-            models.Candidate.query, 'district', model=models.Candidate
+            sa.select(models.Candidate), 'district', model=models.Candidate
         )
-        self.assertEqual(query.all(), candidates)
+        self.assertEqual(db.session.execute(query).unique().scalars().all(), candidates)
         query, columns = sorting.sort(
-            models.Candidate.query, 'district', model=models.Candidate, hide_null=True
+            sa.select(models.Candidate), 'district', model=models.Candidate, hide_null=True
         )
-        self.assertEqual(query.all(), candidates[:2])
+        self.assertEqual(db.session.execute(query).unique().scalars().all(), candidates[:2])
 
     def test_hide_null_candidate_totals(self):
         candidates = [

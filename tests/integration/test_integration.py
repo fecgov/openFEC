@@ -42,7 +42,7 @@ class IntegrationTestCase(common.BaseTestCase):
     def _check_financial_model(self, model):
         query = sa.select(model).filter(model.cycle < SQL_CONFIG['START_YEAR'])
 
-        count = db.session.scalar(sa.select(sa.func.count()).select_from(query))
+        count = db.session.scalar(sa.select(sa.func.count()).select_from(query.subquery()))
 
         self.assertEqual(count, 0)
 
@@ -58,7 +58,7 @@ class IntegrationTestCase(common.BaseTestCase):
                 sa.func.max(subquery.columns.cycle) < SQL_CONFIG['START_YEAR']
             )
         )
-        count = db.session.scalar(sa.select(sa.func.count()).select_from(query))
+        count = db.session.scalar(sa.select(sa.func.count()).select_from(query.subquery()))
 
         self.assertEqual(count, 0)
 
@@ -67,7 +67,7 @@ class IntegrationTestCase(common.BaseTestCase):
         counts = [
             db.session.scalar(sa.select(sa.func.count()).select_from(models.Committee)),
             db.session.scalar(sa.select(sa.func.count()).select_from(models.CommitteeDetail)),
-            db.session.scalar(sa.select(sa.func.count()).select_from(query)),
+            db.session.scalar(sa.select(sa.func.count()).select_from(query.subquery())),
             db.session.scalar(sa.select(sa.func.count()).select_from(models.CommitteeSearch)),
         ]
         assert len(set(counts)) == 1
@@ -77,7 +77,7 @@ class IntegrationTestCase(common.BaseTestCase):
         counts = [
             db.session.scalar(sa.select(sa.func.count()).select_from(models.Candidate)),
             db.session.scalar(sa.select(sa.func.count()).select_from(models.CandidateDetail)),
-            db.session.scalar(sa.select(sa.func.count()).select_from(query)),
+            db.session.scalar(sa.select(sa.func.count()).select_from(query.subquery())),
             db.session.scalar(sa.select(sa.func.count()).select_from(models.CandidateSearch)),
         ]
         assert len(set(counts)) == 1
@@ -100,7 +100,7 @@ class IntegrationTestCase(common.BaseTestCase):
         query = sa.select(models.CandidateHistory).filter(
             ~models.CandidateHistory.candidate_id.in_(unverified_candidate_ids)
         )
-        candidate_history_verified_count = db.session.scalar(sa.select(sa.func.count()).select_from(query))
+        candidate_history_verified_count = db.session.scalar(sa.select(sa.func.count()).select_from(query.subquery()))
 
         self.assertEqual(candidate_history_count, candidate_history_verified_count)
 
@@ -119,7 +119,7 @@ class IntegrationTestCase(common.BaseTestCase):
         query = sa.select(models.CommitteeHistory).filter(
             ~models.CommitteeHistory.committee_id.in_(unverified_committees_ids)
         )
-        committee_history_verified_count = db.session.scalar(sa.select(sa.func.count()).select_from(query))
+        committee_history_verified_count = db.session.scalar(sa.select(sa.func.count()).select_from(query.subquery()))
         self.assertEqual(committee_history_count, committee_history_verified_count)
 
     def test_last_day_of_month(self):
