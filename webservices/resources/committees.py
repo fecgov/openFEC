@@ -8,7 +8,6 @@ from webservices import schemas
 from webservices import exceptions
 from webservices.common import models
 from webservices.common.views import ApiResource
-import logging
 
 
 def filter_year(model, query, years):
@@ -109,7 +108,6 @@ class CommitteeList(ApiResource):
 
         if kwargs.get("cycle"):
             query = query.filter(models.Committee.cycles.overlap(kwargs["cycle"]))
-        logging.warning(query)
         return query
 
 
@@ -311,10 +309,12 @@ class CommitteeHistoryProfileView(ApiResource):
                     models.CommitteeHistoryProfile.committee_id,
                     sa.desc(models.CommitteeHistoryProfile.cycle),
                 ).distinct(
-                    # inside one candidate election year (election_yr_to_be_included),
+                    # inside one candidate election year,
                     # remove duplicate committee(s), mostly for Presidental and Senate candidate.
                     models.CommitteeHistoryProfile.committee_id,
                 )
+
+                # union three queries: query_regular + query_leadership_pac + query_pcc_converted
                 union_query = sa.union(query_regular, query_leadership_pac, query_pcc_converted).order_by(
                     models.CommitteeHistoryProfile.committee_id,
                     sa.desc(models.CommitteeHistoryProfile.cycle),

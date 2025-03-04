@@ -658,7 +658,6 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
                 election_full=True,
             )
         )
-
         assert len(results) == 2
         # Sort order isn't working properly - see #4012
         assert results[0]["committee_id"] == self.committees[0].committee_id
@@ -686,7 +685,6 @@ class TestCommitteeHistoryProfile(ApiBaseTest):
                 election_full=True,
             )
         )
-
         # although there are two committees[5] (dsgn=D)in 2006 and 2008,
         # candidate_election_year=2008 so the return will
         # remove the duplicated committee, result = 1

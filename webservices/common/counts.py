@@ -68,7 +68,6 @@ class explain(Executable, ClauseElement):
     inherit_cache = False
 
     def __init__(self, stmt, analyze=False):
-        # compiled_query = stmt.compile()
         self.statement = stmt
         self.analyze = analyze
         # helps with INSERT statements

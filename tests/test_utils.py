@@ -211,8 +211,7 @@ class TestSort(ApiBaseTest):
         query, columns = sorting.sort(
             tcv.build_query(election_full=False), 'disbursements', model=None
         )
-        results = db.session.execute(query)
-        results = results.all()
+        results = db.session.execute(query).all()
         self.assertEqual(len(results), len(candidates))
         query, columns = sorting.sort(
             tcv.build_query(election_full=False),
@@ -220,8 +219,7 @@ class TestSort(ApiBaseTest):
             model=None,
             hide_null=True,
         )
-        results = db.session.execute(query)
-        results = results.all()
+        results = db.session.execute(query).all()
 
         self.assertEqual(len(results), len(candidates) - 1)
         self.assertTrue(candidates[1].candidate_id in results[0])
