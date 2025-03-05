@@ -316,20 +316,20 @@ def get_proximity_query(**kwargs):
     if kwargs.get("proximity_filter") and kwargs.get("proximity_filter_term"):
         contains_filter = True
         filter = "before" if kwargs.get("proximity_filter") == "after" else "after"
-        filters = {filter: {'match': {'query': kwargs.get("proximity_filter_term")}}}
+        filters = {filter: {'match': {'query': kwargs.get("proximity_filter_term"), "max_gaps": 0, "ordered": True}}}
 
     if len(q_proximity) == 1:
         if contains_filter:
             intervals_inner_query = Q('intervals', documents__text={
-                'match':  {'query': q_proximity[0], 'max_gaps': max_gaps, "filter": filters}
+                'match':  {'query': q_proximity[0], 'max_gaps': max_gaps, "filter": filters, "ordered": True}
                 })
         else:
             intervals_inner_query = Q('intervals', documents__text={
-                'match':  {'query': q_proximity[0], 'max_gaps': max_gaps}
+                'match':  {'query': q_proximity[0], 'max_gaps': max_gaps, "ordered": True}
                 })
     else:
         for q in q_proximity:
-            dict_item = {"match": {"query": q, "max_gaps": 0, }}
+            dict_item = {"match": {"query": q, "max_gaps": 0, "ordered": True}}
             intervals_list.append(dict_item)
 
         if contains_filter:
