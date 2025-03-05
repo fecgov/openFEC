@@ -43,6 +43,7 @@ class CandidateList(ApiResource):
     filter_range_fields = filter_range_fields(models.Candidate)
     filter_fulltext_fields = [('q', models.CandidateSearch.fulltxt)]
     aliases = {'receipts': models.CandidateSearch.receipts}
+    contains_joined_load = True
 
     query_options = [
         sa.orm.joinedload(models.Candidate.flags),
@@ -147,9 +148,11 @@ class CandidateSearch(CandidateList):
 
     schema = schemas.CandidateSearchSchema
     page_schema = schemas.CandidateSearchPageSchema
+    contains_joined_load = True
+
     query_options = [
         sa.orm.joinedload(models.Candidate.flags),
-        sa.orm.subqueryload(models.Candidate.principal_committees),
+        sa.orm.joinedload(models.Candidate.principal_committees),
     ]
 
 
@@ -172,6 +175,7 @@ class CandidateView(ApiResource):
     schema = schemas.CandidateDetailSchema
     page_schema = schemas.CandidateDetailPageSchema
     filter_multi_fields = filter_multi_fields(models.CandidateDetail)
+    contains_joined_load = True
 
     query_options = [
         sa.orm.joinedload(models.CandidateDetail.flags),
@@ -250,6 +254,7 @@ class CandidateHistoryView(ApiResource):
     model = models.CandidateHistory
     schema = schemas.CandidateHistorySchema
     page_schema = schemas.CandidateHistoryPageSchema
+    contains_joined_load = True
 
     query_options = [
         sa.orm.joinedload(models.CandidateHistory.flags),

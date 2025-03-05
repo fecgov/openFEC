@@ -69,11 +69,11 @@ class ElectionsListView(utils.Resource):
     @marshal_with(schemas.ElectionsListPageSchema())
     def get(self, **kwargs):
         query = self._get_elections(kwargs)
-        return utils.fetch_page(query, kwargs, is_count_exact=True, model=ElectionsList, multi=True)
+        return utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=ElectionsList, multi=True)
 
     def _get_elections(self, kwargs):
         """Get elections from ElectionsList model."""
-        query = db.session.query(ElectionsList)
+        query = sa.select(ElectionsList)
         if kwargs.get('office'):
             values = [each[0].upper() for each in kwargs['office']]
             query = query.filter(ElectionsList.office.in_(values))
@@ -99,7 +99,7 @@ class ElectionsListView(utils.Resource):
     def _filter_zip(self, query, kwargs):
         """Filter query by zip codes."""
         districts = (
-            db.session.query(ZipsDistricts)
+            sa.select(ZipsDistricts)
             .filter(
                 cast(ZipsDistricts.zip_code, Integer).in_(kwargs['zip']),
                 ZipsDistricts.active == 'Y',
@@ -149,6 +149,7 @@ class ElectionView(ApiResource):
         return utils.fetch_page(
             query,
             kwargs,
+            models.db.session,
             is_count_exact=self.is_count_exact,
             count=count,
             model=self.model,
@@ -157,6 +158,7 @@ class ElectionView(ApiResource):
             index_column=self.index_column,
             cap=0,
             multi=multi,
+            contains_individual_columns=True
         )
 
     def build_query(self, **kwargs):
@@ -168,7 +170,7 @@ class ElectionView(ApiResource):
         candAggregates = self._get_candAggregates(aggregates).subquery()
 
         final_query = (
-            db.session.query(
+            sa.select(
                 candAggregates, BaseConcreteCommittee.name.label('candidate_pcc_name')
             )
             .outerjoin(
@@ -181,7 +183,8 @@ class ElectionView(ApiResource):
 
     def _get_basicPairs(self, totals_model, kwargs):
         # get basic data for election totals
-        basicPairs = CandidateHistory.query.with_entities(
+        query = sa.select(CandidateHistory)
+        basicPairs = query.with_only_columns(
             CandidateHistory.candidate_id,
             CandidateHistory.name,
             CandidateHistory.party_full,
@@ -246,7 +249,7 @@ class ElectionView(ApiResource):
             ],
         }
 
-        pairs = db.session.query(
+        pairs = sa.select(
             basicPairs.c.candidate_id,
             basicPairs.c.name,
             basicPairs.c.party_full,
@@ -269,7 +272,7 @@ class ElectionView(ApiResource):
 
     def _get_aggregates(self, pairs):
         # sum up values per candidate_id/candidate_election_year/cmte_id
-        aggregates = db.session.query(
+        aggregates = sa.select(
             pairs.c.candidate_id,
             pairs.c.candidate_election_year,
             pairs.c.committee_id,
@@ -295,7 +298,7 @@ class ElectionView(ApiResource):
 
     def _get_candAggregates(self, aggregates):
         # sum up values per candidate_id/candidate_election_year
-        candAggregates = db.session.query(
+        candAggregates = sa.select(
             aggregates.c.candidate_id,
             aggregates.c.candidate_election_year,
             sa.func.max(aggregates.c.candidate_name).label('candidate_name'),
@@ -333,20 +336,19 @@ class ElectionSummary(utils.Resource):
         utils.check_election_arguments(kwargs)
         aggregates = self._get_aggregates(kwargs).subquery()
         expenditures = self._get_expenditures(kwargs).subquery()
-        return (
-            db.session.query(
-                aggregates.c.count,
-                aggregates.c.receipts,
-                aggregates.c.disbursements,
-                expenditures.c.independent_expenditures,
-            )
-            .first()
-            ._asdict()
+
+        query = sa.select(
+            aggregates.c.count,
+            aggregates.c.receipts,
+            aggregates.c.disbursements,
+            expenditures.c.independent_expenditures,
         )
+
+        return (db.session.execute(query).first()._asdict())
 
     def _get_aggregates(self, kwargs):
         totals_model = office_totals_map[kwargs['office']]
-        aggregates = CandidateHistory.query.with_entities(
+        aggregates = sa.select(
             sa.func.count(sa.distinct(CandidateHistory.candidate_id)).label('count'),
             sa.func.sum(totals_model.receipts).label('receipts'),
             sa.func.sum(totals_model.disbursements).label('disbursements'),
@@ -357,7 +359,7 @@ class ElectionSummary(utils.Resource):
 
     def _get_expenditures(self, kwargs):
         expenditures = (
-            db.session.query(
+            sa.select(
                 sa.func.sum(ScheduleEByCandidate.total).label(
                     'independent_expenditures'
                 ),
@@ -399,7 +401,7 @@ def join_candidate_totals(query, kwargs, totals_model):
             CandidateCommitteeLink.fec_election_year == totals_model.cycle,
             CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
         ),
-    )
+    ).distinct()
 
 
 def filter_candidate_totals(query, kwargs):
