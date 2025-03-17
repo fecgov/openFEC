@@ -32,6 +32,7 @@ class ScheduleAView(ItemizedResource):
     model = models.ScheduleA
     schema = schemas.ScheduleASchema
     page_schema = schemas.ScheduleAPageSchema
+    contains_joined_load = True
 
     @property
     def year_column(self):

@@ -41,6 +41,7 @@ class CommitteeList(ApiResource):
     schema = schemas.CommitteeSchema
     page_schema = schemas.CommitteePageSchema
     aliases = {"receipts": models.CommitteeSearch.receipts}
+    contains_joined_load = True
 
     filter_multi_fields = [
         ("committee_id", models.Committee.committee_id),
@@ -203,6 +204,7 @@ class CommitteeHistoryProfileView(ApiResource):
     model = models.CommitteeHistoryProfile
     schema = schemas.CommitteeHistoryProfileSchema
     page_schema = schemas.CommitteeHistoryProfilePageSchema
+    contains_joined_load = True
     query_options = [
         sa.orm.joinedload(models.CommitteeHistoryProfile.jfc_committee),
     ]
@@ -313,10 +315,13 @@ class CommitteeHistoryProfileView(ApiResource):
                 )
 
                 # union three queries: query_regular + query_leadership_pac + query_pcc_converted
-                query = query_regular.union(query_leadership_pac, query_pcc_converted).order_by(
+                union_query = sa.union(query_regular, query_leadership_pac, query_pcc_converted).order_by(
                     models.CommitteeHistoryProfile.committee_id,
                     sa.desc(models.CommitteeHistoryProfile.cycle),
                 )
+                self.union_query = union_query
+
+                query = sa.select(self.model)
             else:
                 # for election_full=false
                 query = query.filter(models.CommitteeHistoryProfile.cycle == cycle)

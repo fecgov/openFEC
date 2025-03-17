@@ -1,4 +1,5 @@
 import pytest
+import sqlalchemy as sa
 
 from unittest import TestCase
 from flask import request
@@ -24,9 +25,9 @@ class TestSort(ApiBaseTest):
             factories.CandidateFactory(district='02'),
         ]
         query, columns = sorting.sort(
-            models.Candidate.query, 'district', model=models.Candidate
+            sa.select(models.Candidate), 'district', model=models.Candidate
         )
-        self.assertEqual(query.all(), candidates)
+        self.assertEqual(db.session.execute(query).unique().scalars().all(), candidates)
 
     def test_single_column_reverse(self):
         candidates = [
@@ -34,9 +35,9 @@ class TestSort(ApiBaseTest):
             factories.CandidateFactory(district='02'),
         ]
         query, columns = sorting.sort(
-            models.Candidate.query, '-district', model=models.Candidate
+            sa.select(models.Candidate), '-district', model=models.Candidate
         )
-        self.assertEqual(query.all(), candidates[::-1])
+        self.assertEqual(db.session.execute(query).unique().scalars().all(), candidates[::-1])
 
     def test_multi_column(self):
         audit = [
@@ -91,9 +92,9 @@ class TestSort(ApiBaseTest):
             ),
         ]
         query, columns = sorting.multi_sort(
-            models.AuditCase.query, ['cycle', 'committee_name', ], model=models.AuditCase
+            sa.select(models.AuditCase), ['cycle', 'committee_name', ], model=models.AuditCase
         )
-        self.assertEqual(query.all(), audit)
+        self.assertEqual(db.session.execute(query).unique().scalars().all(), audit)
 
     def test_multi_column_reverse_first_column(self):
         audit = [
@@ -148,11 +149,11 @@ class TestSort(ApiBaseTest):
             ),
         ]
         query, columns = sorting.multi_sort(
-            models.AuditCase.query,
+            sa.select(models.AuditCase),
             ['-cycle', 'committee_name', ],
             model=models.AuditCase,
         )
-        self.assertEqual(query.all(), audit[::-1])
+        self.assertEqual(db.session.execute(query).unique().scalars().all(), audit[::-1])
 
     def test_hide_null(self):
         candidates = [
@@ -161,13 +162,13 @@ class TestSort(ApiBaseTest):
             factories.CandidateFactory(),
         ]
         query, columns = sorting.sort(
-            models.Candidate.query, 'district', model=models.Candidate
+            sa.select(models.Candidate), 'district', model=models.Candidate
         )
-        self.assertEqual(query.all(), candidates)
+        self.assertEqual(db.session.execute(query).unique().scalars().all(), candidates)
         query, columns = sorting.sort(
-            models.Candidate.query, 'district', model=models.Candidate, hide_null=True
+            sa.select(models.Candidate), 'district', model=models.Candidate, hide_null=True
         )
-        self.assertEqual(query.all(), candidates[:2])
+        self.assertEqual(db.session.execute(query).unique().scalars().all(), candidates[:2])
 
     def test_hide_null_candidate_totals(self):
         candidates = [
@@ -210,15 +211,18 @@ class TestSort(ApiBaseTest):
         query, columns = sorting.sort(
             tcv.build_query(election_full=False), 'disbursements', model=None
         )
-        self.assertEqual(len(query.all()), len(candidates))
+        results = db.session.execute(query).all()
+        self.assertEqual(len(results), len(candidates))
         query, columns = sorting.sort(
             tcv.build_query(election_full=False),
             'disbursements',
             model=None,
             hide_null=True,
         )
-        self.assertEqual(len(query.all()), len(candidates) - 1)
-        self.assertTrue(candidates[1].candidate_id in query.all()[0])
+        results = db.session.execute(query).all()
+
+        self.assertEqual(len(results), len(candidates) - 1)
+        self.assertTrue(candidates[1].candidate_id in results[0])
 
     def test_hide_null_election(self):
         candidates = [
@@ -289,21 +293,22 @@ class TestSort(ApiBaseTest):
             'total_disbursements',
             model=None,
         )
-
+        results = db.session.execute(query).all()
         # print(str(query.statement.compile(dialect=postgresql.dialect())))
-        self.assertEqual(len(query.all()), len(candidates))
+        self.assertEqual(len(results), len(candidates))
         query, columns = sorting.sort(
             electionView.build_query(office='senate', cycle=2016, state='MO'),
             'total_disbursements',
             model=None,
             hide_null=True,
         )
+        results = db.session.execute(query).all()
         # Taking this assert statement out because I believe, at least how the FEC interprets null (i.e. none) primary
         # committees for a candidate is that they have in fact raised/spent 0.0 dollars, this can be shown as true
         # using the Alabama special election as an example
         # self.assertEqual(len(query.all()), len(candidates) - 1)
-        self.assertTrue(candidates[1].candidate_id in query.all()[0])
-        self.assertEqual(query.all()[0].total_disbursements, 0.0)
+        self.assertTrue(candidates[1].candidate_id in results[0])
+        self.assertEqual(results[0].total_disbursements, 0.0)
 
 
 class TestArgs(TestCase):

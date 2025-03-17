@@ -576,7 +576,8 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
             )''',
         foreign_keys=file_number,
         uselist=True,
-        lazy='subquery',
+        lazy='joined',
+
     )
 
     amendment = db.relationship(
@@ -586,6 +587,7 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
                             )''',
         foreign_keys=file_number,
         lazy='joined',
+        viewonly=True
     )
 
     @declared_attr
@@ -594,7 +596,7 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
             ReportType,
             primaryjoin="and_(BaseF3PFiling.report_type==ReportType.report_type)",
             foreign_keys=self.report_type,
-            lazy='subquery',
+            lazy='joined',
         )
 
 
@@ -648,7 +650,8 @@ class BaseF3Filing(TreasurerMixin, BaseFiling):
             )''',
         foreign_keys=file_number,
         uselist=True,
-        lazy='subquery',
+        lazy='joined',
+        viewonly=True
     )
 
     @declared_attr
@@ -657,7 +660,7 @@ class BaseF3Filing(TreasurerMixin, BaseFiling):
             ReportType,
             primaryjoin="and_(BaseF3Filing.report_type==ReportType.report_type)",
             foreign_keys=self.report_type,
-            lazy='subquery',
+            lazy='joined',
         )
 
 
@@ -680,7 +683,7 @@ class BaseF3XFiling(BaseFiling):
             )''',
         foreign_keys=file_number,
         uselist=True,
-        lazy='subquery',
+        lazy='joined',
     )
 
     amendment = db.relationship(
@@ -690,6 +693,7 @@ class BaseF3XFiling(BaseFiling):
                                 )''',
         foreign_keys=file_number,
         lazy='joined',
+        viewonly=True
     )
 
     @declared_attr
@@ -698,5 +702,5 @@ class BaseF3XFiling(BaseFiling):
             ReportType,
             primaryjoin="and_(BaseF3XFiling.report_type==ReportType.report_type)",
             foreign_keys=self.report_type,
-            lazy='subquery',
+            lazy='joined',
         )

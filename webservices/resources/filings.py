@@ -7,6 +7,8 @@ from webservices import schemas
 from webservices.common.views import ApiResource
 from webservices.common import models
 
+import sqlalchemy as sa
+
 
 @doc(
     tags=["filings"],
@@ -125,6 +127,11 @@ class EFilingsView(ApiResource):
     model = models.EFilings
     schema = schemas.EFilingsSchema
     page_schema = schemas.EFilingsPageSchema
+    contains_joined_load = True
+
+    query_options = [
+        sa.orm.joinedload(models.EFilings.amendment),
+    ]
 
     filter_multi_fields = [
         ("file_number", models.EFilings.file_number),
