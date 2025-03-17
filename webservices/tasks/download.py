@@ -97,9 +97,9 @@ def query_with_labels(query, schema, sort_columns=False):
         entities.sort(key=lambda x: x.name)
 
     if joins:
-        query = query.join(*joins).with_entities(*entities)
+        query = query.join(*joins).with_only_columns(*entities)
     else:
-        query = query.with_entities(*entities)
+        query = query.with_only_columns(*entities)
 
     return query
 
