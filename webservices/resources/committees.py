@@ -205,9 +205,6 @@ class CommitteeHistoryProfileView(ApiResource):
     schema = schemas.CommitteeHistoryProfileSchema
     page_schema = schemas.CommitteeHistoryProfilePageSchema
     contains_joined_load = True
-    query_options = [
-        sa.orm.joinedload(models.CommitteeHistoryProfile.jfc_committee),
-    ]
 
     filter_multi_fields = [
         ("designation", models.CommitteeHistoryProfile.designation),
