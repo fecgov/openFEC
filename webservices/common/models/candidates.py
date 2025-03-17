@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from webservices import docs
 
 from .base import db, BaseModel
+from webservices.common.models.links import CandidateCommitteeLink
 
 
 class CandidateSearch(BaseModel):
@@ -66,6 +67,7 @@ class BaseCandidate(BaseModel):
             primaryjoin=sa.orm.foreign(CandidateFlags.candidate_id)
             == self.candidate_id,
             uselist=False,
+            viewonly=True,
         )
 
 
@@ -88,15 +90,15 @@ class Candidate(BaseConcreteCandidate):
     # Customize join to restrict to principal committees
     principal_committees = db.relationship(
         "Committee",
-        secondary="ofec_cand_cmte_linkage_mv",
+        secondary=CandidateCommitteeLink.__table__,
         secondaryjoin="""and_(
-            Committee.committee_id == ofec_cand_cmte_linkage_mv.c.cmte_id,
-            ofec_cand_cmte_linkage_mv.c.cmte_dsgn == 'P',
+            Committee.committee_id == CandidateCommitteeLink.committee_id,
+            CandidateCommitteeLink.committee_designation == 'P',
         )""",
         order_by=(
-            "desc(ofec_cand_cmte_linkage_mv.c.cand_election_yr),"
+            "desc(CandidateCommitteeLink.fec_election_year),"
             "desc(Committee.last_file_date),"
-        ),
+        )
     )
 
 
