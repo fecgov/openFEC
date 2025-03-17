@@ -68,6 +68,7 @@ def check_cap(kwargs, cap):
 def fetch_page(
     query,
     kwargs,
+    session,
     is_count_exact=None,
     model=None,
     aliases=None,
@@ -77,6 +78,7 @@ def fetch_page(
     cap=100,
     index_column=None,
     multi=False,
+    **options
 ):
     check_cap(kwargs, cap)
     sort, hide_null, nulls_last = (
@@ -108,12 +110,14 @@ def fetch_page(
             index_column=index_column,
             nulls_last=nulls_last,
         )
-    paginator = paginators.OffsetPaginator(query, kwargs["per_page"], is_count_exact=is_count_exact, count=count)
-    return paginator.get_page(kwargs["page"])
+    paginator = paginators.OffsetPaginator(query, kwargs["per_page"],
+                                           session, is_count_exact=is_count_exact, count=count, **options)
+    return paginator.get_page(kwargs["page"], **options)
 
 
 class SeekCoalescePaginator(paginators.SeekPaginator):
-    def __init__(self, cursor, per_page, hide_null, index_column, is_count_exact=None, sort_column=None, count=None):
+    def __init__(self, cursor, per_page, hide_null, index_column, session,
+                 is_count_exact=None, sort_column=None, count=None):
         self.max_column_map = {
             "date": date.max,
             "float": float("inf"),
@@ -125,11 +129,12 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             "int": float("inf"),
         }
         self.hide_null = hide_null
+        self.session = session
         super(SeekCoalescePaginator, self).__init__(
-            cursor, per_page, index_column, is_count_exact, sort_column, count
+            cursor, per_page, index_column, session, is_count_exact, sort_column, count
         )
 
-    def _fetch(self, last_index, sort_index=None, limit=None, eager=True):
+    def _fetch(self, last_index, sort_index=None, limit=None):
         cursor = self.cursor
         direction = self.sort_column[1] if self.sort_column else sa.asc
         lhs, rhs = (), ()
@@ -165,7 +170,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             cursor = cursor.filter(filter)
 
         query = cursor.order_by(direction(self.index_column)).limit(limit)
-        return query.all() if eager else query
+        return self.session.execute(query).unique().scalars().all()
 
     def _get_index_values(self, result):
         """Get index values from last result, to be used in seeking to the next
@@ -192,17 +197,15 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
                 # single row matching the result.
                 # NOTE:  This ensures we maintain existing clauses such as the
                 # check constraint needed for partitioned tables.
-                sort_column_query = self.cursor.with_entities(
-                    self.sort_column[0]
-                ).filter(
+                sort_column_query = sa.select(self.sort_column[0]).filter(
                     getattr(result.__class__, self.index_column.key)
                     == getattr(result, self.index_column.key)
                 )
 
                 # Execute the new query to retrieve the value of the sort
                 # expression.
-                expression_value = db.engine.execute(
-                    sort_column_query.statement
+                expression_value = db.session.execute(
+                    sort_column_query
                 ).scalar()
 
                 # Serialize the value using the mapped marshmallow field
@@ -219,10 +222,10 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
 
 
 def fetch_seek_page(
-    query, kwargs, index_column, is_count_exact=None, clear=False, count=None, cap=100, eager=True
+    query, kwargs, index_column, session, is_count_exact=None, clear=False, count=None, cap=100
 ):
     paginator = fetch_seek_paginator(
-        query, kwargs, index_column, is_count_exact=is_count_exact, clear=clear, count=count, cap=cap
+        query, kwargs, index_column, session, is_count_exact=is_count_exact, clear=clear, count=count, cap=cap
     )
     if paginator.sort_column is not None:
         sort_index = kwargs["last_{0}".format(paginator.sort_column[2])]
@@ -244,11 +247,11 @@ def fetch_seek_page(
         sort_index = None
 
     return paginator.get_page(
-        last_index=kwargs["last_index"], sort_index=sort_index, eager=eager
+        last_index=kwargs["last_index"], sort_index=sort_index
     )
 
 
-def fetch_seek_paginator(query, kwargs, index_column, is_count_exact=None, clear=False, count=None, cap=100):
+def fetch_seek_paginator(query, kwargs, index_column, session, is_count_exact=None, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
     model = index_column.parent.class_
     sort, hide_null, nulls_last = (
@@ -269,9 +272,11 @@ def fetch_seek_paginator(query, kwargs, index_column, is_count_exact=None, clear
         sort_column = None
 
     return SeekCoalescePaginator(
-        query, kwargs["per_page"],
+        query,
+        kwargs["per_page"],
         kwargs["sort_hide_null"],
         index_column,
+        session,
         is_count_exact=is_count_exact,
         sort_column=sort_column,
         count=count
@@ -358,8 +363,7 @@ def check_candidate_id(candidate_id):
 
 def get_model(name):
     from webservices.common.models import db
-
-    return db.Model._decl_class_registry.get(name)
+    return db.Model.registry._class_registry.get(name)
 
 
 def related(

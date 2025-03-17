@@ -125,6 +125,7 @@ class EFilingsView(ApiResource):
     model = models.EFilings
     schema = schemas.EFilingsSchema
     page_schema = schemas.EFilingsPageSchema
+    contains_joined_load = True
 
     filter_multi_fields = [
         ("file_number", models.EFilings.file_number),

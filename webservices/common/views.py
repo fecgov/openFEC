@@ -5,6 +5,8 @@ from webservices import filters
 from webservices import exceptions
 from webservices.common import counts
 from webservices.utils import use_kwargs
+from webservices.common import models
+import sqlalchemy as sa
 
 
 class ApiResource(utils.Resource):
@@ -29,6 +31,9 @@ class ApiResource(utils.Resource):
     estimated_count_threshold = 500000
     use_pk_for_count = False
     is_count_exact = ''
+    contains_individual_columns = False
+    contains_joined_load = False
+    union_query = None
 
     @use_kwargs(Ref('args'))
     @marshal_with(Ref('page_schema'))
@@ -43,13 +48,15 @@ class ApiResource(utils.Resource):
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
         return utils.fetch_page(
-            query, kwargs, is_count_exact=self.is_count_exact,
+            query, kwargs, models.db.session, is_count_exact=self.is_count_exact,
             count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
             index_column=self.index_column, cap=self.cap, multi=multi,
+            contains_individual_columns=self.contains_individual_columns,
+            contains_joined_load=self.contains_joined_load, union_query=self.union_query
         )
 
     def build_query(self, *args, _apply_options=True, **kwargs):
-        query = self.model.query
+        query = sa.select(self.model)
         query = filters.filter_match(query, kwargs, self.filter_match_fields)
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields)
         query = filters.filter_range(query, kwargs, self.filter_range_fields)
@@ -83,6 +90,7 @@ class ItemizedResource(ApiResource):
         return utils.fetch_seek_page(query,
                                      kwargs,
                                      self.index_column,
+                                     models.db.session,
                                      is_count_exact=self.is_count_exact,
                                      count=count,
                                      cap=self.cap)
@@ -159,6 +167,8 @@ class NoCapResource(utils.Resource):
     cap = ''
     filters_with_max_count = []
     max_count = 10
+    contains_individual_columns = False
+    contains_joined_load = False
 
     @use_kwargs(Ref('args'))
     @marshal_with(Ref('page_schema'))
@@ -168,7 +178,9 @@ class NoCapResource(utils.Resource):
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
-        return utils.fetch_page(query, kwargs, multi=multi, cap=0, is_count_exact=True)
+        return utils.fetch_page(query, kwargs, models.db.session, multi=multi, cap=0, is_count_exact=True,
+                                contains_individual_columns=self.contains_individual_columns,
+                                contains_joined_load=self.contains_joined_load)
 
     def validate_kwargs(self, kwargs):
         """
