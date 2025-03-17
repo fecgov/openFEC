@@ -134,7 +134,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             cursor, per_page, index_column, session, is_count_exact, sort_column, count
         )
 
-    def _fetch(self, last_index, sort_index=None, limit=None, eager=True):
+    def _fetch(self, last_index, sort_index=None, limit=None):
         cursor = self.cursor
         direction = self.sort_column[1] if self.sort_column else sa.asc
         lhs, rhs = (), ()
@@ -170,7 +170,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             cursor = cursor.filter(filter)
 
         query = cursor.order_by(direction(self.index_column)).limit(limit)
-        return self.session.execute(query).scalars().all() if eager else query
+        return self.session.execute(query).unique().scalars().all()
 
     def _get_index_values(self, result):
         """Get index values from last result, to be used in seeking to the next
@@ -224,7 +224,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
 
 
 def fetch_seek_page(
-    query, kwargs, index_column, session, is_count_exact=None, clear=False, count=None, cap=100, eager=True
+    query, kwargs, index_column, session, is_count_exact=None, clear=False, count=None, cap=100
 ):
     paginator = fetch_seek_paginator(
         query, kwargs, index_column, session, is_count_exact=is_count_exact, clear=clear, count=count, cap=cap
@@ -249,7 +249,7 @@ def fetch_seek_page(
         sort_index = None
 
     return paginator.get_page(
-        last_index=kwargs["last_index"], sort_index=sort_index, eager=eager
+        last_index=kwargs["last_index"], sort_index=sort_index
     )
 
 

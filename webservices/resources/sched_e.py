@@ -24,7 +24,6 @@ class ScheduleEView(ItemizedResource):
     model = models.ScheduleE
     schema = schemas.ScheduleESchema
     page_schema = schemas.ScheduleEPageSchema
-    contains_joined_load = True
 
     @property
     def year_column(self):
