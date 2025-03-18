@@ -401,7 +401,7 @@ def join_candidate_totals(query, kwargs, totals_model):
             CandidateCommitteeLink.fec_election_year == totals_model.cycle,
             CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
         ),
-    ).distinct()
+    )
 
 
 def filter_candidate_totals(query, kwargs):

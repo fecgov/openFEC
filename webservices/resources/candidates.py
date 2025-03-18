@@ -152,7 +152,7 @@ class CandidateSearch(CandidateList):
 
     query_options = [
         sa.orm.joinedload(models.Candidate.flags),
-        sa.orm.joinedload(models.Candidate.principal_committees),
+        sa.orm.selectinload(models.Candidate.principal_committees),
     ]
 
 

@@ -36,13 +36,14 @@ def output_json(data, code, headers=None):
     return resp
 
 
-def get_class_by_tablename(tablename):
-    """Return class reference mapped to table.
-
-    :param tablename: String with name of table.
-    :return: Class reference or None.
-    """
-    from webservices.common.models import db
-    for c in db.Model.registry._class_registry.values():
-        if hasattr(c, '_sa_class_manager') and c._sa_class_manager.mapper.persist_selectable == tablename:
-            return c
+# def get_class_by_tablename(tablename):
+#    """Return class reference mapped to table.
+#
+#    :param tablename: String with name of table.
+#    :return: Class reference or None.
+#    """
+#    from webservices.common.models import db
+#    for c in db.Model.registry._class_registry.values():
+#        if hasattr(c, '__table__') and c.__table__.name == tablename:
+#            return c
+#    return None

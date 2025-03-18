@@ -29,9 +29,16 @@ def parse_option(option, model=None, aliases=None, join_columns=None, query=None
     else:
         if hasattr(query, 'column_descriptions'):
             for descr in query.column_descriptions:
+                # single_model = None
                 if descr.get('name') == column:
+                    # if desc['entity'] is not None:
+                    #    single_model = get_class_by_tablename(desc['entity'].__table__.name)
+                    #    print(single_model)
+                    # if not single_model:
                     column = descr.get('expr')
                     break
+                    # column = getattr(single_model, column)
+                    # break
             return column, order, relationship
     return column, order, relationship
 
@@ -73,8 +80,9 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
     # In this case, use the string name of the sort key.
     sort_model = (
         model
-        if (hasattr(query, 'column_descriptions') and
-            len(query.column_descriptions) == 1) or (hasattr(query, 'selects'))
+        if hasattr(query, 'column_descriptions') and
+        len(query.column_descriptions) == 1 and
+        hasattr(query.column_descriptions[0].get('entity'), '__mapper__')
         else None
     )
     column, order, relationship = parse_option(
