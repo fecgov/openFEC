@@ -867,6 +867,8 @@ def get_documents(case_id, bucket):
                     get_es_type(row["case_type"]), row["case_no"], row["filename"].replace(" ", "-")
                 )
                 document["url"] = "/files/" + pdf_key
+                fileno = row["filename"][:-4]
+                document["fileno"] = fileno
                 documents.append(document)
 
                 # bucket is None on local, don't need upload pdf to s3

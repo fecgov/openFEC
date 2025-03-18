@@ -295,6 +295,11 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     if penalty_range:
         must_clauses.append(Q("nested", path="dispositions",
                             query=Q("range", dispositions__penalty=penalty_range)))
+
+    if kwargs.get("fileno"):
+        must_clauses.append(Q("nested", path="documents",
+                            query=Q("match", documents__fileno=kwargs.get("fileno"))))
+
     query = query.query("bool", must=must_clauses)
 
     # logger.debug("case_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
@@ -731,6 +736,10 @@ def apply_ao_specific_query_params(query, **kwargs):
 
     if kwargs.get("ao_representative"):
         must_clauses.append(Q("match", representative_names=kwargs.get("ao_representative")))
+
+    if kwargs.get("fileno"):
+        must_clauses.append(Q("nested", path="documents",
+                            query=Q("match", documents__fileno=kwargs.get("fileno"))))
 
     citation_queries = []
     if kwargs.get("ao_regulatory_citation"):
