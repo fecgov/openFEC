@@ -724,13 +724,16 @@ def apply_ao_specific_query_params(query, **kwargs):
         must_clauses.append(Q("match", status=kwargs.get("ao_status")))
 
     if kwargs.get("ao_requestor"):
-        must_clauses.append(Q("match", requestor_names=kwargs.get("ao_requestor")))
+        must_clauses.append(Q("simple_query_string",
+                            query=kwargs.get("ao_requestor"), fields=["requestor_names"]))
 
     if kwargs.get("ao_commenter"):
-        must_clauses.append(Q("match", commenter_names=kwargs.get("ao_commenter")))
+        must_clauses.append(Q("simple_query_string",
+                            query=kwargs.get("ao_commenter"), fields=["commenter_names"]))
 
     if kwargs.get("ao_representative"):
-        must_clauses.append(Q("match", representative_names=kwargs.get("ao_representative")))
+        must_clauses.append(Q("simple_query_string",
+                            query=kwargs.get("ao_representative"), fields=["representative_names"]))
 
     citation_queries = []
     if kwargs.get("ao_regulatory_citation"):
