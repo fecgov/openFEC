@@ -104,6 +104,15 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
 
         self.check_incorrect_values({"ao_doc_category_id": "P"}, True)
 
+    def test_filename_filter(self):
+        filename = "AO_2014-19_(ActBlue)_Final_(1.15.15)"
+        self.check_doc_filters({"filename": filename}, "filename", filename)
+
+        filename = "202412R_1"
+        self.check_doc_filters({"filename": filename}, "filename", filename)
+
+        self.check_incorrect_values({"filename": "somefilename.pdf"}, False)
+
     def test_ao_sort(self):
         sort = "-ao_no"
         response = self._results_ao(api.url_for(UniversalSearch, sort=sort))

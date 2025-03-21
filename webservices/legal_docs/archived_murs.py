@@ -180,7 +180,6 @@ def get_single_mur(mur_no):
                 "doc_id": "mur_{0}".format(row["mur_no"]),
                 "no": row["mur_no"],
                 "case_serial": row["mur_id"],
-                "url": "/legal/matter-under-review/{0}/".format(row["mur_no"]),
                 "mur_type": "archived",
                 "mur_name": row["mur_name"],
                 "open_date": row["open_date"],
@@ -299,7 +298,8 @@ def get_documents(mur_id):
                 "document_id": int(row["document_id"] or 1),
                 "length": int(row["length"] or 0),
                 "text": row["pdf_text"],
-                "url": (row["url"] or "/files/legal/murs/{0}.pdf".format(mur_id))
+                "url": (row["url"] or "/files/legal/murs/{0}.pdf".format(mur_id)),
+                "filename": row["mur_no"]
             })
     return documents
 
