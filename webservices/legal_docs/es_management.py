@@ -67,6 +67,7 @@ CASE_DOCUMENT_MAPPING = {
         },
         "document_date": {"type": "date", "format": "dateOptionalTime"},
         "url": {"type": "text"},
+        "filename": {"type": "text"},
         "doc_order_id": {"type": "integer"},
     },
 }
@@ -346,6 +347,7 @@ AO_MAPPING = {
                 },
                 "date": {"type": "date", "format": "dateOptionalTime"},
                 "url": {"type": "text", "index": False},
+                "filename": {"type": "text"},
             },
         },
         "requestor_names": {"type": "text"},
@@ -379,6 +381,7 @@ ARCH_MUR_DOCUMENT_MAPPING = {
             "term_vector": "with_positions_offsets",
         },
         "url": {"type": "text", "index": False},
+        "filename": {"type": "text"}
     },
 }
 

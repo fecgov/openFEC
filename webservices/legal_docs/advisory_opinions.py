@@ -283,6 +283,8 @@ def get_documents(ao_id, bucket):
                     row["ao_no"], row["filename"].replace(" ", "-")
                 )
                 document["url"] = "/files/" + pdf_key
+                filename = row["filename"][:-4]
+                document["filename"] = filename
                 logger.debug("S3: Uploading {}".format(pdf_key))
                 documents.append(document)
 

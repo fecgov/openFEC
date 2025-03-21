@@ -286,12 +286,14 @@ def legal_doc_data(*args, **kwargs):
                             "category": "Final Opinion",
                             "description": "Closeout Letter",
                             "url": "files/legal/aos/100/111.pdf",
+                            "filename": "111",
                         },
                         {
                             "document_id": 222,
                             "category": "Draft Documents",
                             "description": "Vote",
                             "url": "files/legal/aos/100/222.pdf",
+                            "filename": "222",
                         }
                     ]
                 },
@@ -318,12 +320,15 @@ class TestLegalDoc(unittest.TestCase):
                         "category": "Final Opinion",
                         "description": "Closeout Letter",
                         "url": "files/legal/aos/100/111.pdf",
+                        "filename": "111",
                     },
                     {
                         "document_id": 222,
                         "category": "Draft Documents",
                         "description": "Vote",
                         "url": "files/legal/aos/100/222.pdf",
+                        "filename": "222",
+
                     }
                 ]
             }]

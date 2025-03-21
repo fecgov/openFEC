@@ -185,6 +185,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "description": "Some Description",
             "date": datetime.datetime(2017, 2, 9, 0, 0),
             "url": "/files/legal/aos/{0}/{1}".format(ao_no, filename.replace(' ', '-')),
+            "filename": filename[:-4]
         }
         expected_ao = {
             "no": ao_no,
