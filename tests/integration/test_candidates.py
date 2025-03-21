@@ -5,8 +5,9 @@ import json
 import manage
 
 from tests import common
-from webservices import rest, __API_VERSION__
-from webservices.rest import db
+from webservices import __API_VERSION__
+from webservices.common.models import db
+from webservices.api_setup import api
 from webservices.resources.candidates import CandidateList
 from webservices.resources.candidate_aggregates import TotalsCandidateView
 from webservices.resources.elections import ElectionView
@@ -18,7 +19,7 @@ class CandidatesTestCase(common.BaseTestCase):
         super().setUp()
         self.longMessage = True
         self.maxDiff = None
-        self.request_context = rest.app.test_request_context()
+        self.request_context = self.application.test_request_context()
         self.request_context.push()
         self.connection = db.engine.connect()
 
@@ -146,12 +147,12 @@ class CandidatesTestCase(common.BaseTestCase):
             'state': 'MD',
             'election_year': election_year,
         }
-        candidates_api = self._results(rest.api.url_for(CandidateList, **candidate_params))
+        candidates_api = self._results(api.url_for(CandidateList, **candidate_params))
         candidates_totals_api = self._results(
-            rest.api.url_for(TotalsCandidateView, **total_params)
+            api.url_for(TotalsCandidateView, **total_params)
         )
         elections_api = self._results(
-            rest.api.url_for(ElectionView, office='house', **election_params)
+            api.url_for(ElectionView, office='house', **election_params)
         )
         assert (
             len(results_tab)

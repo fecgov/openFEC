@@ -2,7 +2,7 @@ import datetime
 
 from tests import factories
 from tests.common import ApiBaseTest
-from webservices.rest import api
+from webservices.api_setup import api
 from webservices.common.models import ScheduleD
 from webservices.schemas import ScheduleDSchema
 from webservices.resources.sched_d import ScheduleDView, ScheduleDViewBySubId

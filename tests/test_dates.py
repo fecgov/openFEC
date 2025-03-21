@@ -10,7 +10,7 @@ from icalendar import Calendar
 from tests import factories
 from tests.common import ApiBaseTest
 
-from webservices.rest import api
+from webservices.api_setup import api
 from webservices.common.models import db
 from webservices.resources.dates import ElectionDatesView
 from webservices.resources.dates import (

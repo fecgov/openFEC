@@ -8,51 +8,52 @@ from flask_apispec.utils import resolve_annotations
 from postgres_copy import query_entities, copy_to
 from celery_once import QueueOnce
 from smart_open import smart_open
+from celery import shared_task
 
 from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
 from webservices.legal_docs.es_management import S3_BACKUP_DIRECTORY
 
-from webservices.tasks import app
 from webservices.tasks import utils as task_utils
+from flask import Flask, current_app
 
 logger = logging.getLogger(__name__)
 
 IGNORE_FIELDS = {"page", "per_page", "sort", "sort_hide_null"}
 
 
-def call_resource(path, qs):
-    app = task_utils.get_app()
-    endpoint, arguments = app.url_map.bind("").match(path)
-    resource_type = app.view_functions[endpoint].view_class
-    resource = resource_type()
-    fields, kwargs = parse_kwargs(resource, qs)
-    kwargs = utils.extend(arguments, kwargs)
+def call_resource(app: Flask, path, qs):
+    with app.app_context():
+        endpoint, arguments = app.url_map.bind("").match(path)
+        resource_type = app.view_functions[endpoint].view_class
+        resource = resource_type()
+        fields, kwargs = parse_kwargs(app, resource, qs)
+        kwargs = utils.extend(arguments, kwargs)
 
-    for field in IGNORE_FIELDS:
-        kwargs.pop(field, None)
+        for field in IGNORE_FIELDS:
+            kwargs.pop(field, None)
 
-    query, model, schema = unpack(resource.build_query(**kwargs), 3)
-    count, _ = counts.get_count(resource, query)
-    return {
-        "path": path,
-        "qs": qs,
-        "name": get_s3_name(path, qs.encode('utf-8')),
-        "query": query,
-        "schema": schema or resource.schema,
-        "resource": resource,
-        "count": count,
-        "timestamp": datetime.datetime.utcnow(),
-        "fields": fields,
-        "kwargs": kwargs,
-    }
+        query, model, schema = unpack(resource.build_query(**kwargs), 3)
+        count, _ = counts.get_count(resource, query)
+        return {
+            "path": path,
+            "qs": qs,
+            "name": get_s3_name(path, qs.encode('utf-8')),
+            "query": query,
+            "schema": schema or resource.schema,
+            "resource": resource,
+            "count": count,
+            "timestamp": datetime.datetime.utcnow(),
+            "fields": fields,
+            "kwargs": kwargs,
+        }
 
 
-def parse_kwargs(resource, qs):
+def parse_kwargs(app: Flask, resource, qs):
     annotation = resolve_annotations(resource.get, "args", parent=resource)
     fields = utils.extend(*[option["args"] for option in annotation.options])
-    with task_utils.get_app().test_request_context("?" + qs):
+    with app.test_request_context("?" + qs):
         kwargs = flaskparser.parser.parse(fields, location='query')
     return fields, kwargs
 
@@ -139,13 +140,13 @@ def make_bundle(resource):
         )
 
 
-@app.task(base=QueueOnce, once={"graceful": True})
+@shared_task(base=QueueOnce, once={"graceful": True})
 def export_query(path, qs):
     qs = base64.b64decode(qs)
 
     try:
         logger.info("Download query: {0}".format(qs))
-        resource = call_resource(path, qs.decode('utf-8'))
+        resource = call_resource(current_app, path, qs.decode('utf-8'))
         logger.info("Download resource: {0}".format(qs))
         make_bundle(resource)
         logger.info("Bundled: {0}".format(qs))
@@ -153,7 +154,7 @@ def export_query(path, qs):
         logger.exception("Download failed: {0}".format(qs))
 
 
-@app.task
+@shared_task
 def clear_bucket():
     permanent_dir = ("legal", "bulk-downloads", S3_BACKUP_DIRECTORY)
     for obj in task_utils.get_bucket().objects.all():
