@@ -1626,7 +1626,8 @@ first_ao = {
           "description": "Vote",
           "document_id": 88638,
           "text": "Random document text for first ao document",
-          "url": "/files/legal/aos/2024-12/202412V_1.pdf"
+          "url": "/files/legal/aos/2024-12/202412V_1.pdf",
+          "filename": "202412V_1",
         },
         {
           "ao_doc_category_id": "C",
@@ -1635,7 +1636,8 @@ first_ao = {
           "description": "Comment on Draft AO 2024-12, Agenda Document Nos. 24-38-A and 24-38-B, by Shaun McCutcheon",
           "document_id": 88639,
           "text": "Random document text for the second ao document",
-          "url": "/files/legal/aos/2024-12/202412C_3.pdf"
+          "url": "/files/legal/aos/2024-12/202412C_3.pdf",
+          "filename": "202412C_3",
         },
         {
           "ao_doc_category_id": "R",
@@ -1644,7 +1646,8 @@ first_ao = {
           "description": "Request by Shaun McCutcheon (Comments due on August 19, 2024)",
           "document_id": 88640,
           "text": "Random document text for the third ao document",
-          "url": "/files/legal/aos/2024-12/202412R_1.pdf"
+          "url": "/files/legal/aos/2024-12/202412R_1.pdf",
+          "filename": "202412R_1",
         },
         {
           "ao_doc_category_id": "C",
@@ -1653,7 +1656,9 @@ first_ao = {
           "description": "Comment on AOR 2024-12 by League of Women Voters of Maine, RepresentUS, and Fair Vote",
           "document_id": 88641,
           "text": "Random document text for the fourth ao document",
-          "url": "/files/legal/aos/2024-12/202412C_1.pdf"
+          "url": "/files/legal/aos/2024-12/202412C_1.pdf",
+          "filename": "202412C_1",
+
         },
         {
           "ao_doc_category_id": "F",
@@ -1662,7 +1667,9 @@ first_ao = {
           "description": "AO 2024-12",
           "document_id": 88637,
           "text": "Random document text for the fifth ao document",
-          "url": "/files/legal/aos/2024-12/2024-12.pdf"
+          "url": "/files/legal/aos/2024-12/2024-12.pdf",
+          "filename": "2024-12",
+
         },
         {
           "ao_doc_category_id": "C",
@@ -1671,7 +1678,8 @@ first_ao = {
           "description": "Comment on AOR 2024-12 by Campaign Legal Center",
           "document_id": 88642,
           "text": "Random document text for the sixth ao document",
-          "url": "/files/legal/aos/2024-12/202412C_2.pdf"
+          "url": "/files/legal/aos/2024-12/202412C_2.pdf",
+          "filename": "202412C_2",
         },
         {
           "ao_doc_category_id": "D",
@@ -1680,7 +1688,9 @@ first_ao = {
           "description": "Draft AO, Agenda Document No. 24-38-A (Comments due on September 18, 2024 by 12:00pm ET)",
           "document_id": 88643,
           "text": "Random document text for the seventh ao document",
-          "url": "/files/legal/aos/2024-12/202412.pdf"
+          "url": "/files/legal/aos/2024-12/202412.pdf",
+          "filename": "202412",
+
         },
         {
           "ao_doc_category_id": "D",
@@ -1689,7 +1699,8 @@ first_ao = {
           "description": "Draft AO, Agenda Document No. 24-38-B (Comments due on September 18, 2024 by 12:00pm ET)",
           "document_id": 88644,
           "text": "Random document text for the eighth ao document",
-          "url": "/files/legal/aos/2024-12/202412_1.pdf"
+          "url": "/files/legal/aos/2024-12/202412_1.pdf",
+          "filename": "202412_1",
         }
       ],
       "entities": [
@@ -1811,7 +1822,8 @@ second_ao = {
           "description": "Request by ActBlue",
           "document_id": 80835,
           "text": "Document text for the first ao document",
-          "url": "/files/legal/aos/2014-19/1308389.pdf"
+          "url": "/files/legal/aos/2014-19/1308389.pdf",
+          "filename": "1308389",
         },
         {
           "ao_doc_category_id": "D",
@@ -1820,7 +1832,8 @@ second_ao = {
           "description": "Draft AO, Agenda Document No. 15-03-A",
           "document_id": 80836,
           "text": "Document text for the second ao document",
-          "url": "/files/legal/aos/2014-19/201419.pdf"
+          "url": "/files/legal/aos/2014-19/201419.pdf",
+          "filename": "201419",
         },
         {
           "ao_doc_category_id": "V",
@@ -1829,7 +1842,8 @@ second_ao = {
           "description": "Vote",
           "document_id": 80837,
           "text": "Document text for the third ao document",
-          "url": "/files/legal/aos/2014-19/1310405.pdf"
+          "url": "/files/legal/aos/2014-19/1310405.pdf",
+          "filename": "1310405",
         },
         {
           "ao_doc_category_id": "F",
@@ -1838,7 +1852,8 @@ second_ao = {
           "description": "2014-19",
           "document_id": 80838,
           "text": "Proximity document text for the fourth ao document",
-          "url": "/files/legal/aos/2014-19/AO_2014-19_(ActBlue)_Final_(1.15.15).pdf"
+          "url": "/files/legal/aos/2014-19/AO_2014-19_(ActBlue)_Final_(1.15.15).pdf",
+          "filename": "AO_2014-19_(ActBlue)_Final_(1.15.15)",
         }
       ],
       "entities": [

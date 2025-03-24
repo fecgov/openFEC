@@ -2403,6 +2403,11 @@ Specifies the term to which the `proximity_filter` option applies to and defines
 `q_proximity` phrase
 '''
 
+FILENAME = '''
+Search documents by file name
+'''
+
+
 # ======== legal end =========
 
 
