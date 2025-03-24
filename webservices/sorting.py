@@ -29,17 +29,9 @@ def parse_option(option, model=None, aliases=None, join_columns=None, query=None
     else:
         if hasattr(query, 'column_descriptions'):
             for descr in query.column_descriptions:
-                # single_model = None
                 if descr.get('name') == column:
-                    # if desc['entity'] is not None:
-                    #    single_model = get_class_by_tablename(desc['entity'].__table__.name)
-                    #    print(single_model)
-                    # if not single_model:
                     column = descr.get('expr')
                     break
-                    # column = getattr(single_model, column)
-                    # break
-            return column, order, relationship
     return column, order, relationship
 
 
