@@ -1,5 +1,5 @@
 from tests.common import ElasticSearchBaseTest
-from webservices.rest import api
+from webservices.api_setup import api
 from webservices.resources.legal import GetLegalCitation
 from webservices.legal_docs import TEST_SEARCH_ALIAS
 

@@ -1,6 +1,6 @@
 import logging
 import re
-from webservices.rest import db
+from webservices.common.models import db
 from webservices.utils import (
     extend,
     create_es_client,
@@ -867,6 +867,8 @@ def get_documents(case_id, bucket):
                     get_es_type(row["case_type"]), row["case_no"], row["filename"].replace(" ", "-")
                 )
                 document["url"] = "/files/" + pdf_key
+                filename = row["filename"][:-4]
+                document["filename"] = filename
                 documents.append(document)
 
                 # bucket is None on local, don't need upload pdf to s3

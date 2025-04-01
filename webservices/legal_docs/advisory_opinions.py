@@ -1,7 +1,7 @@
 from collections import defaultdict
 import logging
 import re
-from webservices.rest import db
+from webservices.common.models import db
 from webservices.utils import (
     create_es_client,
     DateTimeEncoder,
@@ -283,6 +283,8 @@ def get_documents(ao_id, bucket):
                     row["ao_no"], row["filename"].replace(" ", "-")
                 )
                 document["url"] = "/files/" + pdf_key
+                filename = row["filename"][:-4]
+                document["filename"] = filename
                 logger.debug("S3: Uploading {}".format(pdf_key))
                 documents.append(document)
 

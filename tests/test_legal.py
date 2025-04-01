@@ -1,7 +1,6 @@
-from webservices import rest
 import json
 import codecs
-import unittest
+from tests.common import BaseTestCase
 from unittest.mock import patch
 from elasticsearch import RequestError
 from webservices.legal_docs.es_management import (  # noqa
@@ -112,9 +111,9 @@ def legal_invalid_search(*args, **kwargs):
     raise RequestError("invalid query")
 
 
-class TestLegalSearch(unittest.TestCase):
+class TestLegalSearch(BaseTestCase):
     def setUp(self):
-        self.app = rest.app.test_client()
+        super().setUp()
 
     @patch("webservices.rest.legal.es_client.search", legal_search_data)
     def test_default_search(self):
@@ -286,12 +285,14 @@ def legal_doc_data(*args, **kwargs):
                             "category": "Final Opinion",
                             "description": "Closeout Letter",
                             "url": "files/legal/aos/100/111.pdf",
+                            "filename": "111",
                         },
                         {
                             "document_id": 222,
                             "category": "Draft Documents",
                             "description": "Vote",
                             "url": "files/legal/aos/100/222.pdf",
+                            "filename": "222",
                         }
                     ]
                 },
@@ -300,11 +301,10 @@ def legal_doc_data(*args, **kwargs):
     }
 
 
-class TestLegalDoc(unittest.TestCase):
+class TestLegalDoc(BaseTestCase):
     @patch("webservices.rest.legal.es_client.search", legal_doc_data)
     def test_legal_doc(self):
-        app = rest.app.test_client()
-        response = app.get("/v1/legal/" + DOCS_PATH + "/doc_type/1?api_key=1234")
+        response = self.app.get("/v1/legal/" + DOCS_PATH + "/doc_type/1?api_key=1234")
         assert response.status_code == 200
         result = json.loads(codecs.decode(response.data))
         assert result == {
@@ -318,19 +318,21 @@ class TestLegalDoc(unittest.TestCase):
                         "category": "Final Opinion",
                         "description": "Closeout Letter",
                         "url": "files/legal/aos/100/111.pdf",
+                        "filename": "111",
                     },
                     {
                         "document_id": 222,
                         "category": "Draft Documents",
                         "description": "Vote",
                         "url": "files/legal/aos/100/222.pdf",
+                        "filename": "222",
+
                     }
                 ]
             }]
         }
 
     def test_legal_doc_wrong_path(self):
-        app = rest.app.test_client()
-        response = app.get("/v1/legal/wrong_path/doc_type/1?api_key=1234")
+        response = self.app.get("/v1/legal/wrong_path/doc_type/1?api_key=1234")
         assert response.status_code == 404
 # =====End test endpoint: '/legal/docs/<doc_type>/<no>'=====

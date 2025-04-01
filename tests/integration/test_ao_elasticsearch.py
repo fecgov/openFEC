@@ -1,6 +1,6 @@
 from tests.common import ElasticSearchBaseTest
 from webservices.resources.legal import UniversalSearch, REQUESTOR_TYPES
-from webservices.rest import api
+from webservices.api_setup import api
 from datetime import datetime
 from webservices.legal_docs import TEST_SEARCH_ALIAS
 
@@ -103,6 +103,15 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
         self.check_doc_filters({"ao_doc_category_id": ao_doc_cat_ids}, "ao_doc_category_id", ao_doc_cat_ids)
 
         self.check_incorrect_values({"ao_doc_category_id": "P"}, True)
+
+    def test_filename_filter(self):
+        filename = "AO_2014-19_(ActBlue)_Final_(1.15.15)"
+        self.check_doc_filters({"filename": filename}, "filename", filename)
+
+        filename = "202412R_1"
+        self.check_doc_filters({"filename": filename}, "filename", filename)
+
+        self.check_incorrect_values({"filename": "somefilename.pdf"}, False)
 
     def test_ao_sort(self):
         sort = "-ao_no"

@@ -4,11 +4,10 @@ import pytest
 
 import sqlalchemy as sa
 
-import manage
 from tests import common, factories
-from webservices.rest import db
 from webservices.common import models
-from webservices.common.models import ScheduleA
+from webservices.common.models import ScheduleA, db
+from webservices.config import SQL_CONFIG
 
 REPORTS_MODELS = [
     models.CommitteeReportsPacParty,
@@ -43,7 +42,7 @@ class IntegrationTestCase(common.BaseTestCase):
 
     def _check_financial_model(self, model):
         count = model.query.filter(
-            model.cycle < manage.SQL_CONFIG['START_YEAR']
+            model.cycle < SQL_CONFIG['START_YEAR']
         ).count()
         self.assertEqual(count, 0)
 
@@ -55,7 +54,7 @@ class IntegrationTestCase(common.BaseTestCase):
             db.session.query(getattr(subquery.columns, key))
             .group_by(getattr(subquery.columns, key))
             .having(
-                sa.func.max(subquery.columns.cycle) < manage.SQL_CONFIG['START_YEAR']
+                sa.func.max(subquery.columns.cycle) < SQL_CONFIG['START_YEAR']
             )
             .count()
         )

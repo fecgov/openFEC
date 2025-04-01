@@ -194,6 +194,12 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         else:
             query = query.highlight("documents.text", "documents.description")
 
+    if kwargs.get("filename"):
+        must_clauses = []
+        must_clauses.append(Q("nested", path="documents",
+                            query=Q("match", documents__filename=kwargs.get("filename"))))
+        query = query.query("bool", must=must_clauses)
+
     if kwargs.get("q_exclude"):
         must_not = []
         must_not.append(
@@ -316,20 +322,20 @@ def get_proximity_query(**kwargs):
     if kwargs.get("proximity_filter") and kwargs.get("proximity_filter_term"):
         contains_filter = True
         filter = "before" if kwargs.get("proximity_filter") == "after" else "after"
-        filters = {filter: {'match': {'query': kwargs.get("proximity_filter_term")}}}
+        filters = {filter: {'match': {'query': kwargs.get("proximity_filter_term"), "max_gaps": 0, "ordered": True}}}
 
     if len(q_proximity) == 1:
         if contains_filter:
             intervals_inner_query = Q('intervals', documents__text={
-                'match':  {'query': q_proximity[0], 'max_gaps': max_gaps, "filter": filters}
+                'match':  {'query': q_proximity[0], 'max_gaps': max_gaps, "filter": filters, "ordered": True}
                 })
         else:
             intervals_inner_query = Q('intervals', documents__text={
-                'match':  {'query': q_proximity[0], 'max_gaps': max_gaps}
+                'match':  {'query': q_proximity[0], 'max_gaps': max_gaps, "ordered": True}
                 })
     else:
         for q in q_proximity:
-            dict_item = {"match": {"query": q, "max_gaps": 0, }}
+            dict_item = {"match": {"query": q, "max_gaps": 0, "ordered": True}}
             intervals_list.append(dict_item)
 
         if contains_filter:
@@ -724,13 +730,16 @@ def apply_ao_specific_query_params(query, **kwargs):
         must_clauses.append(Q("match", status=kwargs.get("ao_status")))
 
     if kwargs.get("ao_requestor"):
-        must_clauses.append(Q("match", requestor_names=kwargs.get("ao_requestor")))
+        must_clauses.append(Q("simple_query_string",
+                            query=kwargs.get("ao_requestor"), fields=["requestor_names"]))
 
     if kwargs.get("ao_commenter"):
-        must_clauses.append(Q("match", commenter_names=kwargs.get("ao_commenter")))
+        must_clauses.append(Q("simple_query_string",
+                            query=kwargs.get("ao_commenter"), fields=["commenter_names"]))
 
     if kwargs.get("ao_representative"):
-        must_clauses.append(Q("match", representative_names=kwargs.get("ao_representative")))
+        must_clauses.append(Q("simple_query_string",
+                            query=kwargs.get("ao_representative"), fields=["representative_names"]))
 
     citation_queries = []
     if kwargs.get("ao_regulatory_citation"):

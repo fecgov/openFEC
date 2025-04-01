@@ -5,8 +5,9 @@ import json
 import manage
 
 from tests import common
-from webservices import rest, __API_VERSION__
-from webservices.rest import db
+from webservices import __API_VERSION__
+from webservices.common.models import db
+from webservices.api_setup import api
 from webservices.resources.totals import CandidateTotalsDetailView, TotalsCommitteeView
 
 
@@ -16,7 +17,7 @@ class TotalTestCase(common.BaseTestCase):
         super().setUp()
         self.longMessage = True
         self.maxDiff = None
-        self.request_context = rest.app.test_request_context()
+        self.request_context = self.application.test_request_context()
         self.request_context.push()
         self.connection = db.engine.connect()
 
@@ -145,7 +146,7 @@ class TotalTestCase(common.BaseTestCase):
             'committee_id': 'C00000001',
         }
         committee_totals_api = self._results(
-            rest.api.url_for(TotalsCommitteeView, **params_cmte)
+            api.url_for(TotalsCommitteeView, **params_cmte)
         )
         assert len(committee_totals_api) == 1
         assert committee_totals_api[0]['receipts'] == 300
@@ -156,7 +157,7 @@ class TotalTestCase(common.BaseTestCase):
             'election_full': True,
         }
         candidate_totals_api = self._results(
-            rest.api.url_for(CandidateTotalsDetailView, **params_cand)
+            api.url_for(CandidateTotalsDetailView, **params_cand)
         )
         assert len(candidate_totals_api) == 1
         assert candidate_totals_api[0]['receipts'] == 311
@@ -172,7 +173,7 @@ class TotalTestCase(common.BaseTestCase):
             'election_full': True,
         }
         candidate_totals_api = self._results(
-            rest.api.url_for(CandidateTotalsDetailView, **params_cand)
+            api.url_for(CandidateTotalsDetailView, **params_cand)
         )
         assert len(candidate_totals_api) == 0
 

@@ -4,8 +4,9 @@ import json
 
 import manage
 from tests.common import BaseTestCase
-from webservices import rest, __API_VERSION__
-from webservices.rest import db
+from webservices import __API_VERSION__
+from webservices.api_setup import api
+from webservices.common.models import db
 from webservices.resources.committees import CommitteeHistoryProfileView
 
 
@@ -15,7 +16,7 @@ class CommitteeTestCase(BaseTestCase):
         super().setUp()
         self.longMessage = True
         self.maxDiff = None
-        self.request_context = rest.app.test_request_context()
+        self.request_context = self.application.test_request_context()
         self.request_context.push()
         self.connection = db.engine.connect()
 
@@ -34,7 +35,7 @@ class CommitteeTestCase(BaseTestCase):
     def tearDown(self):
         self.clear_test_data()
         self.connection.close()
-        rest.db.session.remove()
+        db.session.remove()
 
     committee_data = [
         {
@@ -104,7 +105,7 @@ class CommitteeTestCase(BaseTestCase):
         }
 
         committee_api = self._results(
-            rest.api.url_for(CommitteeHistoryProfileView, **params_cmte)
+            api.url_for(CommitteeHistoryProfileView, **params_cmte)
         )
         self.check_nulls_in_array_column(committee_api, array_column='cycles')
         self.check_nulls_in_array_column(
