@@ -5,10 +5,11 @@ import datetime
 
 from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
-from postgres_copy import query_entities, copy_to
+from postgres_copy import query_entities, format_flags
 from celery_once import QueueOnce
 from smart_open import smart_open
 from celery import shared_task
+from sqlalchemy.dialects import postgresql
 
 from webservices import utils
 from webservices.common import counts
@@ -138,6 +139,20 @@ def make_bundle(resource):
             format="csv",
             header=True
         )
+
+
+# modified for sqlalchemy 2.0 style taken from sqlalchemy-postgres-copy package by Joshua Carp
+# https://github.com/jmcarp/sqlalchemy-postgres-copy
+def copy_to(source, dest, engine, **flags):
+    dialect = postgresql.dialect(paramstyle="named")
+    compiled = source.compile(dialect=dialect, compile_kwargs={"literal_binds": True})
+    conn = engine.raw_connection()
+    cursor = conn.cursor()
+    query = compiled.string
+    formatted_flags = '({})'.format(format_flags(flags)) if flags else ''
+    copy = 'COPY ({}) TO STDOUT {}'.format(query, formatted_flags)
+    cursor.copy_expert(copy, dest)
+    conn.close()
 
 
 @shared_task(base=QueueOnce, once={"graceful": True})
