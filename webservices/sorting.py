@@ -26,7 +26,7 @@ def parse_option(option, model=None, aliases=None, join_columns=None, query=None
             column = getattr(model, column)
         except AttributeError:
             raise ApiError('Field "{0}" not found'.format(column))
-    else:
+    else:  # gets the sort column from all selected columns (column_descriptions)
         if hasattr(query, 'column_descriptions'):
             for descr in query.column_descriptions:
                 if descr.get('name') == column:
