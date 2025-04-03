@@ -221,17 +221,14 @@ def create_and_update_public_api_key_cli(
 @click.argument('space', default=None, required=True)
 @click.argument('service_instance_name', default=None, required=True)
 @click.argument('key_to_remove', required=True)
-@click.argument('token', default=None, required=True)
 def remove_env_var_cli(
         space,
         service_instance_name,
-        key_to_remove,
-        token):
-    manage.remove_env_var(
+        key_to_remove):
+    manage.add_update_remove_env_var(
         space,
         service_instance_name,
-        key_to_remove,
-        token)
+        key_to_remove)
 
 
 @cli.command('add_update_env_var')
@@ -239,19 +236,16 @@ def remove_env_var_cli(
 @click.argument('service_instance_name', default=None, required=True)
 @click.argument('key', required=True)
 @click.argument('value', required=True)
-@click.argument('token', default=None, required=True)
 def add_update_env_var_cli(
         space,
         service_instance_name,
         key,
-        value,
-        token):
-    manage.add_update_env_var(
+        value):
+    manage.add_update_remove_env_var(
         space,
         service_instance_name,
         key,
-        value,
-        token)
+        value)
 
 
 @cli.command('slack_message')
