@@ -124,6 +124,17 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
         # logging.info(response)
         self.assertEqual(response[0]["ao_no"], "2014-19")
 
+        # Test sorting by issue_date in descending order
+        sort = "-issue_date"
+        response = self._results_ao(api.url_for(UniversalSearch, sort=sort))
+        # logging.info(response)
+        self.assertEqual(response[0]["issue_date"], "2024-09-19")
+
+        sort = "issue_date"
+        response = self._results_ao(api.url_for(UniversalSearch, sort=sort))
+        # logging.info(response)
+        self.assertEqual(response[0]["issue_date"], "2015-01-15")
+
     def test_q_filters(self):
         q = "fourth"
         response = self._results_ao(api.url_for(UniversalSearch, q=q))
