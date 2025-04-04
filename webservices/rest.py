@@ -108,9 +108,12 @@ def create_app(test_config=None):
     # app.debug = True
     app.config['APISPEC_FORMAT_RESPONSE'] = None
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SQLALCHEMY_POOL_SIZE'] = 50
-    app.config['SQLALCHEMY_MAX_OVERFLOW'] = 50
-    app.config['SQLALCHEMY_POOL_TIMEOUT'] = 120
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'max_overflow': 50,
+        'pool_size': 50,
+        'pool_timeout': 120,
+
+    }
     app.config['SQLALCHEMY_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS'] = bool(
         env.get_credential('SQLA_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS', ''))
     app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
@@ -125,7 +128,8 @@ def create_app(test_config=None):
 
     if test_config is None:
         app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
-        app.config['SQLALCHEMY_FOLLOWERS'] = [sa.create_engine(follower.strip())
+        app.config['SQLALCHEMY_FOLLOWERS'] = [sa.create_engine(follower.strip(), pool_size=50,
+                                                               max_overflow=50, pool_timeout=120)
                                               for follower in utils.split_env_var(
                                               env.get_credential('SQLA_FOLLOWERS', ''))
                                               if follower.strip()]
@@ -133,10 +137,6 @@ def create_app(test_config=None):
 
     else:
         TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
-        """ app.config['SQLALCHEMY_FOLLOWERS'] = [sa.create_engine(follower.strip())
-                                              for follower in utils.split_env_var(
-                                              env.get_credential('SQLA_FOLLOWERS', ''))
-                                              if follower.strip()] """
         app.config['NPLUSONE_RAISE'] = True
         app.config['SQLALCHEMY_DATABASE_URI'] = TEST_CONN
         app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
