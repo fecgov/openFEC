@@ -316,6 +316,7 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 def get_proximity_query(**kwargs):
     q_proximity = kwargs.get("q_proximity")
     max_gaps = kwargs.get("max_gaps")
+    ordered = kwargs.get("proximity_preserve_order", False)
     intervals_list = []
     contains_filter = False
 
@@ -340,11 +341,14 @@ def get_proximity_query(**kwargs):
 
         if contains_filter:
             intervals_inner_query = Q('intervals', documents__text={
-                    'all_of':  {'max_gaps': max_gaps, "intervals": intervals_list, "filter": filters}
+                    'all_of':  {'max_gaps': max_gaps,
+                                "ordered": ordered,
+                                "intervals": intervals_list,
+                                "filter": filters}
                     })
         else:
             intervals_inner_query = Q('intervals', documents__text={
-                    'all_of':  {'max_gaps': max_gaps, "intervals": intervals_list}
+                    'all_of':  {'max_gaps': max_gaps, "ordered": ordered, "intervals": intervals_list}
                     })
     return intervals_inner_query
 
@@ -646,16 +650,19 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     # Only pass query string to document list below
     query = generic_query_builder(None, type_, from_hit, hits_returned, **kwargs)
 
-    # so far only be able to sort by 'ao_no', default sort is descending order.
-    # descending order: 'sort=-ao_no'; ascending order; sort=ao_no
+    # Sort AO's by 'ao_no' or 'issue_date'. Default sort order is desc.
+    # example desc order: 'sort=-ao_no'; asc order; sort=ao_no
     # https://fec-dev-api.app.cloud.gov/v1/legal/search/?type=advisory_opinions&sort=-ao_no
     # https://fec-dev-api.app.cloud.gov/v1/legal/search/?type=advisory_opinions&sort=ao_no
 
-    if kwargs.get("sort"):
-        if kwargs.get("sort").upper() == "AO_NO":
-            query = query.sort({"ao_no": {"order": "asc"}})
-        else:
-            query = query.sort({"ao_no": {"order": "desc"}})
+    sort_field = kwargs.get("sort")
+    if sort_field:
+        sort_order = "desc" if sort_field in ["ao_no", "issue_date"] else "asc"
+
+        if sort_field.upper() == "AO_NO":
+            query = query.sort({"ao_no": {"order": sort_order}})
+        elif sort_field.upper() == "ISSUE_DATE":
+            query = query.sort({"issue_date": {"order": sort_order}})
 
     should_query = [
         get_ao_document_query(q, **kwargs),

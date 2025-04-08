@@ -267,15 +267,23 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
         self.assertEqual(response["total_admin_fines"], 0)
         self.assertEqual(response["total_adrs"], 0)
 
-        multiple_phrases = ["second adr", "sample text"]
+        multiple_phrases = ["sample text", "second adr"]
         max_gaps = 6
-        response = self._results_case(api.url_for(UniversalSearch, q_proximity=multiple_phrases, max_gaps=max_gaps))
-
+        response = self._results_case(api.url_for(UniversalSearch,
+                                                  q_proximity=multiple_phrases,
+                                                  proximity_preserve_order=True,
+                                                  max_gaps=max_gaps))
         self.assertEqual(response["total_murs"], 0)
         self.assertEqual(response["total_admin_fines"], 0)
         self.assertEqual(response["total_adrs"], 1)
 
         self.check_incorrect_values({"q_proximity": search_phrase, "max_gaps": 1},
+                                    ["total_murs", "total_admin_fines", "total_adrs"],
+                                    False)
+
+        self.check_incorrect_values({"q_proximity": [multiple_phrases[1], multiple_phrases[0]],
+                                     "proximity_preserve_order": True,
+                                     "max_gaps": 6},
                                     ["total_murs", "total_admin_fines", "total_adrs"],
                                     False)
 

@@ -2394,6 +2394,10 @@ MAX_GAPS = '''
 The maximum number of positions allowed between terms specified in `q_proximity`
 '''
 
+PROXIMITY_PRESERVE_ORDER = '''
+When set to true, maintains the original order of phrases in `q_proximity`.
+'''
+
 PROXIMITY_FILTER = '''
 Adds additional filters to the proximity search that provides options to specify positional constraints
 '''
