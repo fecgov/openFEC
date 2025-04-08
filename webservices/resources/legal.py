@@ -316,6 +316,7 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 def get_proximity_query(**kwargs):
     q_proximity = kwargs.get("q_proximity")
     max_gaps = kwargs.get("max_gaps")
+    ordered = kwargs.get("proximity_preserve_order", False)
     intervals_list = []
     contains_filter = False
 
@@ -340,11 +341,14 @@ def get_proximity_query(**kwargs):
 
         if contains_filter:
             intervals_inner_query = Q('intervals', documents__text={
-                    'all_of':  {'max_gaps': max_gaps, "intervals": intervals_list, "filter": filters}
+                    'all_of':  {'max_gaps': max_gaps,
+                                "ordered": ordered,
+                                "intervals": intervals_list,
+                                "filter": filters}
                     })
         else:
             intervals_inner_query = Q('intervals', documents__text={
-                    'all_of':  {'max_gaps': max_gaps, "intervals": intervals_list}
+                    'all_of':  {'max_gaps': max_gaps, "ordered": ordered, "intervals": intervals_list}
                     })
     return intervals_inner_query
 
