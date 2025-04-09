@@ -1,7 +1,6 @@
 import sqlalchemy as sa
 
 from webservices.exceptions import ApiError
-from webservices.common.util import get_class_by_tablename
 
 
 def parse_option(option, model=None, aliases=None, join_columns=None, query=None):
@@ -27,16 +26,12 @@ def parse_option(option, model=None, aliases=None, join_columns=None, query=None
             column = getattr(model, column)
         except AttributeError:
             raise ApiError('Field "{0}" not found'.format(column))
-    else:
-        for entity in query._entities:
-            if entity._label_name == column:
-                single_model = get_class_by_tablename(entity.namespace)
-                if not single_model:
-                    column = entity.column
+    else:  # gets the sort column from all selected columns (column_descriptions)
+        if hasattr(query, 'column_descriptions'):
+            for descr in query.column_descriptions:
+                if descr.get('name') == column:
+                    column = descr.get('expr')
                     break
-                column = getattr(single_model, column)
-                break
-        return column, order, relationship
     return column, order, relationship
 
 
@@ -77,7 +72,9 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
     # In this case, use the string name of the sort key.
     sort_model = (
         model
-        if len(query._entities) == 1 and hasattr(query._entities[0], 'mapper')
+        if hasattr(query, 'column_descriptions') and
+        len(query.column_descriptions) == 1 and
+        hasattr(query.column_descriptions[0].get('entity'), '__mapper__')
         else None
     )
     column, order, relationship = parse_option(
