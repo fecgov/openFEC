@@ -144,15 +144,19 @@ def make_bundle(resource):
 # modified for sqlalchemy 2.0 style taken from sqlalchemy-postgres-copy package by Joshua Carp
 # https://github.com/jmcarp/sqlalchemy-postgres-copy
 def copy_to(source, dest, engine, **flags):
-    dialect = postgresql.dialect(paramstyle="named")
-    compiled = source.compile(dialect=dialect, compile_kwargs={"literal_binds": True})
+    dialect = postgresql.dialect(paramstyle="pyformat")
+    statement = getattr(source, 'statement', source)
+    compiled = statement.compile(dialect=dialect, compile_kwargs={"render_postcompile": True})
+
     conn = engine.raw_connection()
-    cursor = conn.cursor()
-    query = compiled.string
-    formatted_flags = '({})'.format(format_flags(flags)) if flags else ''
-    copy = 'COPY ({}) TO STDOUT {}'.format(query, formatted_flags)
-    cursor.copy_expert(copy, dest)
-    conn.close()
+    try:
+        with conn.cursor() as cursor:
+            query = cursor.mogrify(compiled.string, compiled.params).decode()
+            formatted_flags = f"({format_flags(flags)})" if flags else ""
+            copy_sql = f"COPY ({query}) TO STDOUT {formatted_flags}"
+            cursor.copy_expert(copy_sql, dest)
+    finally:
+        conn.close()
 
 
 @shared_task(base=QueueOnce, once={"graceful": True})
