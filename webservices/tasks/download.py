@@ -2,6 +2,7 @@ import base64
 import hashlib
 import logging
 import datetime
+import re
 
 from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
@@ -144,19 +145,40 @@ def make_bundle(resource):
 # modified for sqlalchemy 2.0 style taken from sqlalchemy-postgres-copy package by Joshua Carp
 # https://github.com/jmcarp/sqlalchemy-postgres-copy
 def copy_to(source, dest, engine, **flags):
-    dialect = postgresql.dialect(paramstyle="pyformat")
+    dialect = postgresql.dialect()
     statement = getattr(source, 'statement', source)
-    compiled = statement.compile(dialect=dialect, compile_kwargs={"render_postcompile": True})
+    compiled = statement.compile(dialect=dialect)
 
+    sql = compiled.string
+    params = compiled.params
     conn = engine.raw_connection()
+
+    if "POSTCOMPILE" in sql:
+        sql = rebind_postcompile(sql)
+        params = convert_lists_to_tuples(params)
+        print(sql)
+        print(params)
+
     try:
         with conn.cursor() as cursor:
-            query = cursor.mogrify(compiled.string, compiled.params).decode()
+            query = cursor.mogrify(sql, params).decode()
             formatted_flags = f"({format_flags(flags)})" if flags else ""
             copy_sql = f"COPY ({query}) TO STDOUT {formatted_flags}"
             cursor.copy_expert(copy_sql, dest)
     finally:
         conn.close()
+
+
+def rebind_postcompile(sql):
+    pattern = r"\(__\[POSTCOMPILE_([a-zA-Z0-9_]+)\]\)"
+    return re.sub(pattern, r"%(\1)s", sql)
+
+
+def convert_lists_to_tuples(params):
+    for key, val in params.items():
+        if isinstance(val, list):
+            params[key] = tuple(val)
+    return params
 
 
 @shared_task(base=QueueOnce, once={"graceful": True})
