@@ -124,6 +124,17 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
         # logging.info(response)
         self.assertEqual(response[0]["ao_no"], "2014-19")
 
+        # Test sorting by issue_date in descending order
+        sort = "-issue_date"
+        response = self._results_ao(api.url_for(UniversalSearch, sort=sort))
+        # logging.info(response)
+        self.assertEqual(response[0]["issue_date"], "2024-09-19")
+
+        sort = "issue_date"
+        response = self._results_ao(api.url_for(UniversalSearch, sort=sort))
+        # logging.info(response)
+        self.assertEqual(response[0]["issue_date"], "2015-01-15")
+
     def test_q_filters(self):
         q = "fourth"
         response = self._results_ao(api.url_for(UniversalSearch, q=q))
@@ -156,18 +167,24 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0]["ao_no"], "2024-12")
 
-        multiple_phrases = ["fourth ao", "proximity document"]
+        multiple_phrases = ["proximity document", "fourth ao"]
         max_gaps = 3
 
         response = self._results_ao(api.url_for(UniversalSearch,
                                                 q_proximity=multiple_phrases,
                                                 proximity_filter=proximity_filter,
+                                                proximity_preserve_order=True,
                                                 proximity_filter_term=proximity_filter_term,
                                                 max_gaps=max_gaps))
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0]["ao_no"], "2014-19")
 
         self.check_incorrect_values({"q_proximity": search_phrase, "max_gaps": 1}, False)
+
+        self.check_incorrect_values(
+            {"q_proximity": [multiple_phrases[1], multiple_phrases[0]],
+             "proximity_preserve_order": True,
+             "max_gaps": 3, }, False)
 
     def test_citation_filters(self):
         statutory_title = 52

@@ -428,6 +428,7 @@ legal_universal_search = {
     'case_max_penalty_amount': fields.Str(required=False, description=docs.CASE_MAX_PENALTY_AMOUNT),
     'q_proximity': fields.List(fields.Str, description=docs.Q_PROXIMITY),
     'max_gaps': fields.Int(required=False, description=docs.MAX_GAPS),
+    'proximity_preserve_order': fields.Bool(required=False, description=docs.PROXIMITY_PRESERVE_ORDER),
     'proximity_filter': fields.Str(validate=validate.OneOf(["after", "before"]), description=docs.PROXIMITY_FILTER),
     'proximity_filter_term': fields.Str(required=False, description=docs.PROXIMITY_FILTER_TERM),
     'filename': fields.Str(required=False, description=docs.FILENAME),
