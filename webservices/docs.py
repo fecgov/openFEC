@@ -49,8 +49,9 @@ Number of pages in the document
 '''
 
 SORT = '''
-Provide a field to sort by. Use `-` for descending order. \
-ex: `-case_no`
+Sort `cases` (MUR, ADR, and AF) by `case_no`. Sort `advisory opinions` by `ao_no` or `issue_date`.
+Use `-` before a parameter name to sort in descending order.
+ex: `-case_no` or `-ao_no`
 '''
 
 # ======== candidate start ===========
