@@ -62,6 +62,12 @@ if env.app.get("space_name", "unknown-space").lower() != "feature":
             "task": "webservices.tasks.legal_docs.delete_es_backup_monthly",
             "schedule": crontab(minute=0, hour=5, day_of_month=1),
         },
+        # Task 8: This task is launched every 30 seconds
+        # Checks that redis, celery-beat, and celery-worker are running
+        "essential-services-status-check": {
+            "task": "webservices.tasks.service_status_checks.heartbeat",
+            "schedule": 30.0,
+        },
     }
 
 

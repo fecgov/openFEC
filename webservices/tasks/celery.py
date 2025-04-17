@@ -24,6 +24,7 @@ def celery_init_app(app: Flask) -> Celery:
             "webservices.tasks.refresh_db",
             "webservices.tasks.download",
             "webservices.tasks.legal_docs",
+            "webservices.tasks.service_status_checks",
         ),
         beat_schedule=schedule,
         broker_connection_timeout=30,  # in seconds

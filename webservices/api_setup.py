@@ -28,6 +28,7 @@ from webservices.resources import audit
 from webservices.resources import operations_log
 from webservices.resources import presidential
 from webservices.resources import spending_by_others
+from webservices.resources import monitoring
 from webservices.env import env
 
 
@@ -196,5 +197,7 @@ api.add_resource(presidential.PresidentialSummaryView, '/presidential/financial_
 api.add_resource(presidential.PresidentialBySizeView, '/presidential/contributions/by_size/')
 api.add_resource(presidential.PresidentialByStateView, '/presidential/contributions/by_state/')
 api.add_resource(presidential.PresidentialCoverageView, '/presidential/coverage_end_date/')
+api.add_resource(monitoring.celery_check, '/monitoring/celery_check/')
+
 if SHOW_TEST_F1:
     api.add_resource(filings.TestF1EFilingsView, '/efile/test-form1/')
