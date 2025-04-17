@@ -62,20 +62,10 @@ if env.app.get("space_name", "unknown-space").lower() != "feature":
             "task": "webservices.tasks.legal_docs.delete_es_backup_monthly",
             "schedule": crontab(minute=0, hour=5, day_of_month=1),
         },
+        # Task 8: This task is launched every 30 seconds
+        # Checks that redis, celery-beat, and celery-worker are running
+        "essential-services-status-check": {
+            "task": "webservices.tasks.service_status_checks.heartbeat",
+            "schedule": 30.0,
+        },
     }
-
-
-def redis_url():
-    """
-    Retrieve the URL needed to connect to a Redis instance, depending on environment.
-    When running in a cloud.gov environment, retrieve the uri credential for the 'aws-elasticache-redis' service.
-    """
-
-    # Is the app running in a cloud.gov environment
-    if env.space is not None:
-        redis_env = env.get_service(label="aws-elasticache-redis")
-        redis_url = redis_env.credentials.get("uri")
-
-        return redis_url
-
-    return env.get_credential("FEC_REDIS_URL", "redis://localhost:6379/0")
