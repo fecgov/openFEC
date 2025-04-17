@@ -149,23 +149,12 @@ def create_app(test_config=None):
     NPlusOne(app)
 
     def redis_url():
-        """
-        Retrieve the URL needed to connect to a Redis instance, depending on environment.
-        When running in a cloud.gov environment, retrieve the uri credential for the 'aws-elasticache-redis' service.
-        """
-        # Is the app running in a cloud.gov environment
-        if env.space is not None:
-            redis_env = env.get_service(label="aws-elasticache-redis")
-            redis_url = redis_env.credentials.get("uri")
-
-            return redis_url
-
         return env.get_credential("FEC_REDIS_URL", "redis://localhost:6379/0")
 
     app.config.from_mapping(
         CELERY=dict(
             broker_url=redis_url(),
-            result_backend=None,  # may need to set
+            result_backend=redis_url(),
             task_ignore_result=True,  # may need to unset
         ),
     )
