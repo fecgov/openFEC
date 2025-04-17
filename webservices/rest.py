@@ -165,7 +165,7 @@ def create_app(test_config=None):
     app.config.from_mapping(
         CELERY=dict(
             broker_url=redis_url(),
-            result_backend=None,  # may need to set
+            result_backend=redis_url(),
             task_ignore_result=True,  # may need to unset
         ),
     )
