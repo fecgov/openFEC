@@ -1,7 +1,6 @@
 import re
 
 from elasticsearch_dsl import Search, Q
-from webargs import fields
 from flask import abort
 from flask_apispec import doc
 from webservices import docs
@@ -78,20 +77,26 @@ REQUESTOR_TYPES = {
 # http://127.0.0.1:5000/v1/legal/docs/admin_fines/4399/
 
 
-# TODO: add this endpoint to swagger
 @doc(
-    tags=["legal"],
     description=docs.LEGAL_DOC_SEARCH,
-)
-class GetLegalDocument(Resource):
-    @property
-    def args(self):
-        return {
-            "no": fields.Str(required=True, description=docs.LEGAL_DOC_NO),
-            "doc_type": fields.Str(required=True, description=docs.LEGAL_DOC_TYPE),
+    tags=["legal"],
+    params={
+        "doc_type": {
+            "in": "path",
+            "required": True,
+            "description": docs.LEGAL_DOC_TYPE,
+            "type": "string",
+            "enum": ["statutes", "admin_fines", "adrs", "advisory_opinions", "murs"]
+        },
+        "no": {
+            "in": "path",
+            "required": True,
+            "description": docs.LEGAL_DOC_NO,
+            "schema": {"type": "string"}
         }
-
-    def get(self, doc_type, no, **kwargs):
+    })
+class GetLegalDocument(Resource):
+    def get(self, doc_type, no):
         es_results = (
             Search()
             .using(es_client)
@@ -103,12 +108,8 @@ class GetLegalDocument(Resource):
         )
 
         results = {"docs": [hit.to_dict() for hit in es_results]}
+        return results if results["docs"] else abort(404)
         # logger.debug("GetLegalDocument() results =" + json.dumps(results, indent=3, cls=DateTimeEncoder))
-
-        if len(results["docs"]) > 0:
-            return results
-        else:
-            return abort(404)
 
 
 # endpoint path: /legal/search/

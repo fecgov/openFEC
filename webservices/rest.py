@@ -271,6 +271,7 @@ def create_app(test_config=None):
     apidoc.register(audit.AuditCommitteeNameSearch, blueprint='v1')
     apidoc.register(operations_log.OperationsLogView, blueprint='v1')
     apidoc.register(legal.UniversalSearch, blueprint='v1')
+    apidoc.register(legal.GetLegalDocument, blueprint='v1')
     apidoc.register(candidate_aggregates.CandidateTotalAggregateView, blueprint='v1')
     apidoc.register(spending_by_others.ECTotalsByCandidateView, blueprint='v1')
     apidoc.register(spending_by_others.IETotalsByCandidateView, blueprint='v1')
