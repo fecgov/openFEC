@@ -2077,7 +2077,7 @@ The maximum value of `hits_returned` is 200.\n\
 '''
 
 LEGAL_DOC_SEARCH = '''
-Search legal documents by type and No
+Search legal documents by type and number
 '''
 
 LEGAL_DOC_NO = '''
@@ -2085,7 +2085,7 @@ Document number to fetch
 '''
 
 LEGAL_DOC_TYPE = '''
-Choose a legal document type
+Choose a legal document type: advisory_opinions, murs, admin_fines, statutes, or adrs
 '''
 
 TEXT_SEARCH = '''
