@@ -83,18 +83,23 @@ REQUESTOR_TYPES = {
     params={
         "doc_type": {
             "in": "path",
-            "required": True,
-            "description": docs.LEGAL_DOC_TYPE,
             "type": "string",
-            "enum": ["statutes", "admin_fines", "adrs", "advisory_opinions", "murs"]
+            "required": True,
+            "enum": ["statutes", "admin_fines", "adrs", "advisory_opinions", "murs"],
+            "description": docs.LEGAL_DOC_TYPE
         },
         "no": {
             "in": "path",
+            "type": "string",
             "required": True,
-            "description": docs.LEGAL_DOC_NO,
-            "schema": {"type": "string"}
+            "description": docs.LEGAL_DOC_NO
         }
-    })
+    },
+    responses={
+        200: {"description": "Legal document found"},
+        404: {"description": "Document not found"}
+    }
+)
 class GetLegalDocument(Resource):
     def get(self, doc_type, no):
         es_results = (
