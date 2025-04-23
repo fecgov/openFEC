@@ -111,7 +111,7 @@ def fetch_page(
             nulls_last=nulls_last,
         )
     paginator = paginators.OffsetPaginator(query, kwargs["per_page"],
-                                           session, is_count_exact=is_count_exact, count=count)
+                                           session, is_count_exact=is_count_exact, count=count, **options)
     return paginator.get_page(kwargs["page"], **options)
 
 
