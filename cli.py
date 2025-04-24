@@ -7,11 +7,49 @@ import manage
 from flask.cli import FlaskGroup
 from webservices.rest import create_app
 import webservices.legal_docs as legal_docs
+import webservices.rulemaking as rulemaking
+import webservices.utils_es as utils_es
 from webservices.legal_docs.es_management import CASE_REPO, CASE_INDEX
 
 
 cli = FlaskGroup(create_app=create_app)
 logger = logging.getLogger("cli")
+
+
+# begin -- es_xxxxxx commands are used for elasticsearch management globally
+@cli.command('es_display_index_alias')
+def es_display_index_alias_cli():
+    utils_es.display_index_alias()
+
+
+@cli.command('es_create_index')
+@click.argument('index_name', default=None, required=False)
+def es_create_index_cli(index_name):
+    utils_es.create_index(index_name)
+
+
+@cli.command('es_delete_index')
+@click.argument('index_name', required=True)
+def es_delete_index_cli(index_name):
+    utils_es.delete_index(index_name)
+
+
+@cli.command('es_display_mapping')
+@click.argument('index_name', default=None, required=False)
+def es_display_mapping_cli(index_name):
+    utils_es.display_mapping(index_name)
+
+# end -- es_xxxxxx commands are used for elasticsearch management globally
+
+
+# begin -- rulemaking commands
+
+
+@cli.command('load_rulemaking')
+@click.argument('rm_no', default=None, required=False)
+def load_rulemaking_cli(rm_no):
+    rulemaking.load_rulemaking(rm_no)
+# end -- rulemaking commands
 
 
 @cli.command('load_statutes')
