@@ -43,6 +43,7 @@ def reset_schema():
         "rohan",
         "staging",
         "test_efile",
+        "fosers",
     ]:
         db.engine.execute('drop schema if exists %s cascade;' % schema)
     db.engine.execute('create schema public;')
