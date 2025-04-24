@@ -110,8 +110,8 @@ class GetLegalDocument(Resource):
         )
 
         results = {"docs": [hit.to_dict() for hit in es_results]}
-        return results if results["docs"] else abort(404)
         # logger.debug("GetLegalDocument() results =" + json.dumps(results, indent=3, cls=DateTimeEncoder))
+        return results if results["docs"] else abort(404)
 
 
 # endpoint path: /legal/search/
