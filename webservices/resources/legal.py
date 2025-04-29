@@ -654,10 +654,13 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     # example desc order: 'sort=-ao_no'; asc order; sort=ao_no
     # https://fec-dev-api.app.cloud.gov/v1/legal/search/?type=advisory_opinions&sort=-ao_no
     # https://fec-dev-api.app.cloud.gov/v1/legal/search/?type=advisory_opinions&sort=ao_no
-
     sort_field = kwargs.get("sort")
     if sort_field:
-        sort_order = "desc" if sort_field in ["ao_no", "issue_date"] else "asc"
+        if sort_field.startswith("-"):
+            sort_order = "desc"
+            sort_field = sort_field[1:]
+        else:
+            sort_order = "asc"
 
         if sort_field.upper() == "AO_NO":
             query = query.sort({"ao_no": {"order": sort_order}})

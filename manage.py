@@ -176,8 +176,9 @@ def create_public_api_key(
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError as error:
-        error_message = "Error occured when creating API key, check logs"
-        slack_message(error_message)
+        error_message = """Error occured when creating API key during
+            the execution of the environment variable modification script."""
+        logger.error(error_message)
         logger.error("Error occured with creating API key: {}".format(error))
         raise
 
@@ -192,7 +193,8 @@ def create_public_api_key(
 def get_space_guid(token, space):
     space_guid = ""
 
-    error_message = "Error occured when retrieving space GUID, check logs"
+    error_message = """Error occured when retrieving space GUID during the execution of the
+        environment variable modification script."""
 
     header = {
         "Authorization": token,
@@ -210,8 +212,8 @@ def get_space_guid(token, space):
         response.raise_for_status()
     except requests.exceptions.HTTPError as error:
         if response.status_code == 401:
-            logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
-        slack_message(error_message)
+            logger.error("Token is invalid, please ensure you are logged in")
+        logger.error(error_message)
         logger.error(error)
         raise
 
@@ -229,7 +231,8 @@ def get_space_guid(token, space):
 def get_service_instance_guid(token, space_guid, service_instance_name):
     GUID = ""
 
-    error_message = "Error occured when retrieving service instance GUID, check logs"
+    error_message = """Error occured when retrieving service instance GUID during the
+        execution of the environment variable modification script."""
 
     header = {
         "Authorization": token,
@@ -248,8 +251,8 @@ def get_service_instance_guid(token, space_guid, service_instance_name):
         response.raise_for_status()
     except requests.exceptions.HTTPError as error:
         if response.status_code == 401:
-            logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
-        slack_message(error_message)
+            logger.error("Token is invalid, please ensure you are logged in")
+        logger.error(error_message)
         logger.error("Error occured with retrieving service instances: {}".format(error))
         raise
 
@@ -259,7 +262,7 @@ def get_service_instance_guid(token, space_guid, service_instance_name):
         GUID = response_json["resources"][0]["guid"]
 
     if GUID == "":
-        slack_message(error_message)
+        logger.error(error_message)
         raise Exception("Service instance GUID not found for service instance: {}".format(service_instance_name))
 
     return GUID
@@ -267,7 +270,8 @@ def get_service_instance_guid(token, space_guid, service_instance_name):
 
 def get_credentials_by_guid(token, GUID):
 
-    error_message = "Error occured when retrieving credentials, check logs"
+    error_message = """Error occured when retrieving credentials during the
+        execution of the environment variable modification script."""
 
     header = {
         "Authorization": token,
@@ -281,8 +285,8 @@ def get_credentials_by_guid(token, GUID):
         response.raise_for_status()
     except requests.exceptions.HTTPError as error:
         if response.status_code == 401:
-            logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
-        slack_message(error_message)
+            logger.error("Token is invalid, please ensure you are logged in")
+        logger.error(error_message)
         logger.error("Error occured with retrieving credentials: {}".format(error))
         raise
 
@@ -305,7 +309,8 @@ def update_credentials(creds, update_data):
 
 
 def update_credentials_by_guid(token, GUID, merged_creds):
-    error_message = "Error occured when updating environment variables, check logs"
+    error_message = """Error occured when updating environment
+        variables during the execution of the environment variable modification script."""
 
     header = {
         "Authorization": token,
@@ -320,14 +325,15 @@ def update_credentials_by_guid(token, GUID, merged_creds):
         response.raise_for_status()
     except requests.exceptions.HTTPError as error:
         if response.status_code == 401:
-            logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
-        slack_message(error_message)
+            logger.error("Token is invalid, please ensure you are logged in")
+        logger.error(error_message)
         logger.error("Error occured with updating credentials: {}".format(error))
         raise
 
 
 def check_token(token):
-    error_message = "Error occured when checking bearer token, check logs"
+    error_message = """An error occurred while checking the bearer token
+        during the execution of the environment variable modification script."""
 
     header = {
         "Authorization": token,
@@ -342,24 +348,61 @@ def check_token(token):
         response.raise_for_status()
     except requests.exceptions.HTTPError as error:
         if response.status_code == 401:
-            logger.error("Token may be expired, try generating new bearer token using `cf oauth-token > token.txt`")
-        slack_message(error_message)
+            logger.error("Token is invalid, please ensure you are logged in")
+        logger.error(error_message)
         logger.error("Error occured with updating credentials: {}".format(error))
         raise
 
 
-def remove_env_var(space, service_instance_name, key_to_remove, token):
+def get_token():
 
+    output = subprocess.check_output('cf oauth-token', shell=True)
+    token = output.decode("utf-8")
+    token = token.replace('\n', '')
+
+    return token
+
+
+def check_slack_hook():
+    slack_hook = env.get_credential("SLACK_HOOK")
+
+    if slack_hook is None:
+        logger.error("Error, please set SLACK_HOOK environment variable")
+        raise
+
+
+def get_validated_token():
+    check_slack_hook()
+    token = get_token()
     check_token(token)
 
-    update_env_vars(space, service_instance_name, token, key_to_remove)
+    return token
 
 
-def add_update_env_var(space, service_instance_name, key_to_add, value_to_add, token):
+def add_log_to_cloud(log_message, space, org="fec-beta-fec"):
+    log_message = log_message.replace("'", "")
 
-    check_token(token)
+    cf_command = f"cf run-task api --command \"echo '{log_message}'\" --name log-env-change"
+    target_command = f"cf target -s {space} -o {org}"
 
-    update_env_vars(space, service_instance_name, token, {key_to_add: value_to_add})
+    try:
+        subprocess.run(target_command, shell=True, check=True, text=True)
+        subprocess.run(cf_command, shell=True, check=True, text=True)
+    except subprocess.CalledProcessError as error:
+        logger.error("Failed to add logs to cloud.gov")
+        logger.error("Error: {}".format(error.stderr))
+        raise
+
+
+def add_update_remove_env_var(space, service_instance_name, key_to_change, value_to_add=None):
+    token = get_validated_token()
+
+    if value_to_add is None:  # remove key if no value is passed in
+        message = update_env_vars(space, service_instance_name, token, key_to_change)
+    else:  # add or update env variable
+        message = update_env_vars(space, service_instance_name, token, {key_to_change: value_to_add})
+
+    add_log_to_cloud(message, space)
 
 
 def create_and_update_public_api_key(
@@ -398,14 +441,18 @@ def update_env_vars(space, service_instance_name, token, credentials):
 
     update_credentials_by_guid(token, service_guid, merged_creds)
 
+    credentials = credentials if isinstance(credentials, str) else list(credentials)[0]
+
     message = "Environment variable '{}' has been modified for service instance '{}' in {} space".format(
-        list(credentials)[0],
+        credentials,
         service_instance_name,
         space)
 
     slack_message(message)
 
     logger.info(message)
+
+    return message
 
 
 def cf_startup():

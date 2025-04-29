@@ -15,7 +15,7 @@ jobs:
           SQLA_TEST_CONN: postgresql://postgres@0.0.0.0/cfdm_unit_test
 
       # PostgreSQL
-      - image: cimg/postgres:13.5
+      - image: cimg/postgres:13.16
         environment:
           POSTGRES_USER: postgres
           POSTGRES_HOST_AUTH_METHOD: trust
@@ -40,7 +40,7 @@ jobs:
           # https://circleci.com/docs/2.0/postgres-config/#postgresql-circleci-configuration-example
           command: |
             sudo apt-get --allow-releaseinfo-change-suite update -qq && sudo apt-get install -y build-essential postgresql-client
-            echo 'export PATH=/usr/lib/postgresql/13.5/bin/:$PATH' >> $BASH_ENV
+            echo 'export PATH=/usr/lib/postgresql/13.16/bin/:$PATH' >> $BASH_ENV
 
       - run:
           name: Install flyway
