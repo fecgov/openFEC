@@ -2,6 +2,7 @@ import json
 import logging
 import boto
 import boto3
+import redis
 
 from boto.s3.key import Key
 from webservices.env import env
@@ -43,3 +44,29 @@ def get_json_data(response):
 
 def get_app_name():
     return env.get_credential("APP_NAME") if env.get_credential("APP_NAME") is not None else "fec | api | local"
+
+
+def redis_url():
+    return env.get_credential("FEC_REDIS_URL", "redis://localhost:6379/0")
+
+
+def set_redis_value(key, value, age):
+    """
+    Serialize the value to json and set it in redis with the given age
+    """
+    redis_instance = get_redis_instance()
+    redis_instance.set(key, json.dumps(value), ex=age)
+
+
+def get_redis_value(key, fallback=None):
+    """
+    Get value from redis and parse the json.
+    If they value is falsy ("", None), return None
+    """
+    redis_instance = get_redis_instance()
+    value = redis_instance.get(key)
+    return json.loads(value) if value else fallback
+
+
+def get_redis_instance():
+    return redis.Redis.from_url(redis_url())
