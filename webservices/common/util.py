@@ -34,15 +34,3 @@ def output_json(data, code, headers=None):
     resp.mimetype = 'application/json'
     resp.headers.extend(headers or {})
     return resp
-
-
-def get_class_by_tablename(tablename):
-    """Return class reference mapped to table.
-
-    :param tablename: String with name of table.
-    :return: Class reference or None.
-    """
-    from webservices.common.models import db
-    for c in db.Model._decl_class_registry.values():
-        if hasattr(c, '_sa_class_manager') and c._sa_class_manager.mapper.persist_selectable == tablename:
-            return c

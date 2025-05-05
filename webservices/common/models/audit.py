@@ -62,7 +62,8 @@ class AuditCaseCategoryRelation(db.Model):
             foreign(AuditCaseCategoryRelation.primary_category_id) == AuditCaseSubCategory.primary_category_id
        )''',
         uselist=True,
-        lazy='joined'
+        lazy='joined',
+        viewonly=True
     )
 
 
@@ -92,7 +93,8 @@ class AuditCase(db.Model):
             foreign(AuditCaseCategoryRelation.audit_case_id) == AuditCase.audit_case_id
         )''',
         uselist=True,
-        lazy='joined'
+        lazy='joined',
+        viewonly=True
     )
 
 
