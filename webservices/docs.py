@@ -2105,6 +2105,10 @@ AO_NUMBER = '''
 Force advisory opinion number
 '''
 
+AO_YEAR = '''
+Force advisory opinion year
+'''
+
 AO_NAME = '''
 Force advisory opinion name
 '''
