@@ -733,6 +733,9 @@ def apply_ao_specific_query_params(query, **kwargs):
     if check_filter_exists(kwargs, "ao_no"):
         must_clauses.append(Q("terms", no=kwargs.get("ao_no")))
 
+    if kwargs.get("ao_year") is not None:
+        must_clauses.append(Q("term", ao_year=kwargs.get("ao_year")))
+
     if check_filter_exists(kwargs, "ao_name"):
         must_clauses.append(Q("match", name=" ".join(kwargs.get("ao_name"))))
 
