@@ -2102,15 +2102,15 @@ Number of results to return (max 10)
 '''
 
 AO_NUMBER = '''
-Force advisory opinion number
+Advisory opinion number
 '''
 
 AO_YEAR = '''
-Force advisory opinion year
+Advisory opinion year
 '''
 
 AO_NAME = '''
-Force advisory opinion name
+Advisory opinion name
 '''
 
 AO_MIN_ISSUE_DATE = '''

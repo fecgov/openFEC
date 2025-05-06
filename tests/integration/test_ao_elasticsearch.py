@@ -14,12 +14,20 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
 
     def check_filters(self, params, field_name, multiple):
         response = self._results_ao(api.url_for(UniversalSearch, **params))
+        filter_value = list(params.values())[0]
         # logging.info(response)
+        # logging.info(params)
+
+        # Normalize the filter value to a list so we can check integers
+        if isinstance(filter_value, (list, tuple)):
+            expected_values = filter_value
+        else:
+            expected_values = [filter_value]
 
         if multiple:
-            assert all(x[field_name] in list(params.values())[0] for x in response)
+            assert all(x[field_name] in expected_values for x in response)
         else:
-            assert all(x[field_name] == list(params.values())[0] for x in response)
+            assert all(x[field_name] == expected_values[0] for x in response)
 
     def check_incorrect_values(self, params, raiseError):
         response = self.app.get(api.url_for(UniversalSearch, **params))
@@ -48,6 +56,7 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
             [{"ao_name": ["Fake Name", "ActBlue"]}, "name", True, False],
             [{"ao_is_pending": True}, "is_pending", False, True],
             [{"ao_status": "Final"}, "status", False, False],
+            [{"ao_year": 2024}, "ao_year", True, True],
         ]
 
         for filter in filters:
