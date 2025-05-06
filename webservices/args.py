@@ -355,6 +355,7 @@ legal_universal_search = {
             description=docs.LEGAL_DOC_TYPE),
 
     'ao_no': fields.List(IStr, required=False, description=docs.AO_NUMBER),
+    'ao_year': fields.Int(required=False, description=docs.AO_YEAR),
     'ao_name': fields.List(IStr, required=False, description=docs.AO_NAME),
     'ao_min_issue_date': Date(description=docs.AO_MIN_ISSUE_DATE),
     'ao_max_issue_date': Date(description=docs.AO_MAX_ISSUE_DATE),

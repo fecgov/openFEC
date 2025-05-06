@@ -157,6 +157,115 @@ MUR_SCHEMA["items"]["properties"]["mur_type"] = {
         "archived"
     ]
 }
+LEGAL_DOC_RESPONSE = {
+  "default": {
+    "description": "Legal single document search results",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "docs": {"type": "array"},
+                "case_serial": {"type": "integer"},
+                "challenge_outcome": {"type": "string"},
+                "challenge_receipt_date": {
+                                            "type": "string",
+                                            "format": "date"
+                                        },
+                "civil_penalty_due_date": {
+                                            "type": "string",
+                                            "format": "date"
+                                        },
+                "civil_penalty_payment_status": {"type": "string"},
+                "commission_votes": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "vote_date": {
+                                                        "type": "string",
+                                                        "format": "date"
+                                                    },
+                                                    "action": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                "committee_id": {"type": "string"},
+                "dispositions": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "disposition_date": {
+                                            "type": "string",
+                                            "format": "date"
+                                        },
+                                    "disposition_description": {"type": "string"},
+                                    "penalty": {"type": "number"},
+                                    },
+                            }
+                        },
+                "doc_id": {"type": "string"},
+                "documents": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                        "properties": {
+                                            "document_id": {
+                                                    "type": "integer"
+                                                    },
+                                            "date": {
+                                                    "type": "string",
+                                                    "format": "date"
+                                                    },
+                                            "description": {
+                                                    "type": "string"
+                                                    },
+                                            "category": {
+                                                    "type": "string"
+                                                    },
+                                            "url": {
+                                                    "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                "final_determination_amount": {"type": "number"},
+                "final_determination_date": {
+                                            "type": "string",
+                                            "format": "date"
+                                        },
+                "name": {"type": "string"},
+                "no": {"type": "integer"},
+                "payment_amount": {"type": "number"},
+                "petition_court_decision_date": {
+                                            "type": "string",
+                                            "format": "date"
+                                        },
+                "petition_court_filing_date": {
+                                            "type": "string",
+                                            "format": "date"
+                                        },
+                "published_flg": {"type": "boolean"},
+                "reason_to_believe_action_date": {
+                                            "type": "string",
+                                            "format": "date"
+                                        },
+                "reason_to_believe_fine_amount": {"type": "number"},
+                "report_type": {"type": "string"},
+                "report_year": {"type": "integer"},
+                "treasury_referral_amount": {"type": "number"},
+                "treasury_referral_date": {
+                                            "type": "string",
+                                            "format": "date"
+                                        },
+                "type": {"type": "string"},
+                "url": {"type": "string"}
+                }
+            }
+        }
+    }
+
 LEGAL_SEARCH_RESPONSE = {
     "default": {
         "description": "Legal search results",

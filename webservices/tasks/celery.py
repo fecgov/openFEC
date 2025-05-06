@@ -1,7 +1,8 @@
 import ssl
 from celery import Celery, Task
 from flask import Flask
-from webservices.tasks import redis_url, schedule
+from webservices.tasks import schedule
+from webservices.tasks.utils import redis_url
 
 
 def celery_init_app(app: Flask) -> Celery:
@@ -24,10 +25,11 @@ def celery_init_app(app: Flask) -> Celery:
             "webservices.tasks.refresh_db",
             "webservices.tasks.download",
             "webservices.tasks.legal_docs",
+            "webservices.tasks.service_status_checks",
         ),
         beat_schedule=schedule,
         broker_connection_timeout=30,  # in seconds
-        broker_connection_max_retries=0,  # for unlimited retries
+        broker_connection_max_retries=None,  # for unlimited retries
         task_acks_late=False
     )
     celery_app.conf.ONCE = {
