@@ -98,7 +98,7 @@ REQUESTOR_TYPES = {
     responses=responses.LEGAL_DOC_RESPONSE,
 )
 class GetLegalDocument(Resource):
-    def get(self, doc_type, no):
+    def get(self, doc_type, no, **kwargs):
         es_results = (
             Search()
             .using(es_client)
