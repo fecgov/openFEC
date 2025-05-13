@@ -62,6 +62,7 @@ from webservices.env import env
 from webservices.tasks.celery import celery_init_app
 from webservices.tasks.response_exception import ResponseException
 from webservices.tasks.error_code import ErrorCode
+from webservices.tasks.utils import redis_url
 from webservices.api_setup import api, v1
 from celery import signals
 
@@ -148,24 +149,10 @@ def create_app(test_config=None):
     api.init_app(app)
     NPlusOne(app)
 
-    def redis_url():
-        """
-        Retrieve the URL needed to connect to a Redis instance, depending on environment.
-        When running in a cloud.gov environment, retrieve the uri credential for the 'aws-elasticache-redis' service.
-        """
-        # Is the app running in a cloud.gov environment
-        if env.space is not None:
-            redis_env = env.get_service(label="aws-elasticache-redis")
-            redis_url = redis_env.credentials.get("uri")
-
-            return redis_url
-
-        return env.get_credential("FEC_REDIS_URL", "redis://localhost:6379/0")
-
     app.config.from_mapping(
         CELERY=dict(
             broker_url=redis_url(),
-            result_backend=None,  # may need to set
+            result_backend=redis_url(),
             task_ignore_result=True,  # may need to unset
         ),
     )
@@ -271,6 +258,7 @@ def create_app(test_config=None):
     apidoc.register(audit.AuditCommitteeNameSearch, blueprint='v1')
     apidoc.register(operations_log.OperationsLogView, blueprint='v1')
     apidoc.register(legal.UniversalSearch, blueprint='v1')
+    apidoc.register(legal.GetLegalDocument, blueprint='v1')
     apidoc.register(candidate_aggregates.CandidateTotalAggregateView, blueprint='v1')
     apidoc.register(spending_by_others.ECTotalsByCandidateView, blueprint='v1')
     apidoc.register(spending_by_others.IETotalsByCandidateView, blueprint='v1')

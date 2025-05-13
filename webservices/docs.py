@@ -2078,7 +2078,7 @@ The maximum value of `hits_returned` is 200.\n\
 '''
 
 LEGAL_DOC_SEARCH = '''
-Search legal documents by type and No
+Search legal documents by type and number
 '''
 
 LEGAL_DOC_NO = '''
@@ -2086,7 +2086,7 @@ Document number to fetch
 '''
 
 LEGAL_DOC_TYPE = '''
-Choose a legal document type
+Choose a legal document type: advisory_opinions, murs, admin_fines, statutes, or adrs
 '''
 
 TEXT_SEARCH = '''
@@ -2102,11 +2102,15 @@ Number of results to return (max 10)
 '''
 
 AO_NUMBER = '''
-Force advisory opinion number
+Advisory opinion number
+'''
+
+AO_YEAR = '''
+Advisory opinion year
 '''
 
 AO_NAME = '''
-Force advisory opinion name
+Advisory opinion name
 '''
 
 AO_MIN_ISSUE_DATE = '''
