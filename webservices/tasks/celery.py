@@ -29,7 +29,7 @@ def celery_init_app(app: Flask) -> Celery:
         ),
         beat_schedule=schedule,
         broker_connection_timeout=30,  # in seconds
-        broker_connection_max_retries=0,  # for unlimited retries
+        broker_connection_max_retries=None,  # for unlimited retries
         task_acks_late=False
     )
     celery_app.conf.ONCE = {
