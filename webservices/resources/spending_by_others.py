@@ -10,6 +10,7 @@ from webservices.common.models import (
     ElectioneeringByCandidate,
     ScheduleEByCandidate,
     CommunicationCostByCandidate,
+    db,
 )
 
 
@@ -19,7 +20,7 @@ def get_candidate_list(kwargs):
 
     """
     candidate = (
-        sa.select(
+        db.session.query(
             CandidateHistory.candidate_id.label('candidate_id'),
             CandidateHistory.two_year_period.label('two_year_period'),
             CandidateHistory.candidate_election_year.label('candidate_election_year'),
@@ -46,7 +47,7 @@ def get_candidate_list(kwargs):
 
 # used for '/electioneering/totals/by_candidate/'
 # under tag: electioneering
-# Ex: http://127.0.0.1:5000/v1/electioneering/totals/by_candidate/?sort=-cycle&election_full=true
+# Ex:http://127.0.0.1:5000/v1/electioneering/totals/by_candidate/?sort=-cycle&election_full=true
 @doc(
     tags=['electioneering'], description=docs.ELECTIONEERING_TOTAL_BY_CANDIDATE,
 )
@@ -54,7 +55,6 @@ class ECTotalsByCandidateView(ApiResource):
 
     schema = schemas.ECTotalsByCandidateSchema
     page_schema = schemas.ECTotalsByCandidatePageSchema
-    contains_individual_columns = True
     sort_option = [
             'cycle',
             'candidate_id',
@@ -76,7 +76,7 @@ class ECTotalsByCandidateView(ApiResource):
         cycle_column, candidate = get_candidate_list(kwargs)
 
         query = (
-            sa.select(
+            db.session.query(
                 ElectioneeringByCandidate.candidate_id,
                 cycle_column,
                 sa.func.sum(ElectioneeringByCandidate.total).label('total'),
@@ -109,7 +109,7 @@ class IETotalsByCandidateView(ApiResource):
 
     schema = schemas.IETotalsByCandidateSchema
     page_schema = schemas.IETotalsByCandidatePageSchema
-    contains_individual_columns = True
+
     sort_option = [
             'cycle',
             'candidate_id',
@@ -131,7 +131,7 @@ class IETotalsByCandidateView(ApiResource):
         cycle_column, candidate = get_candidate_list(kwargs)
 
         query = (
-            sa.select(
+            db.session.query(
                 ScheduleEByCandidate.candidate_id,
                 ScheduleEByCandidate.support_oppose_indicator,
                 cycle_column,
@@ -170,7 +170,7 @@ class CCTotalsByCandidateView(ApiResource):
 
     schema = schemas.CCTotalsByCandidateSchema
     page_schema = schemas.CCTotalsByCandidatePageSchema
-    contains_individual_columns = True
+
     sort_option = [
             'cycle',
             'candidate_id',
@@ -192,7 +192,7 @@ class CCTotalsByCandidateView(ApiResource):
         cycle_column, candidate = get_candidate_list(kwargs)
 
         query = (
-            sa.select(
+            db.session.query(
                 CommunicationCostByCandidate.candidate_id,
                 CommunicationCostByCandidate.support_oppose_indicator,
                 cycle_column,

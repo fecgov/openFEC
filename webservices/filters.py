@@ -89,14 +89,14 @@ def filter_fulltext(query, kwargs, fields):
                     sa.not_(column.match(utils.parse_fulltext(value)))
                     for value in exclude_list
                 ]
-                query = query.filter(sa.and_(*filters)) if len(filters) > 1 else query.filter(*filters)
+                query = query.filter(sa.and_(*filters))
             if include_list:
                 filters = []
                 for value in include_list:
                     filters.append(column.match(utils.parse_fulltext(value)))
                     if value.upper() == 'NULL':
                         filters.append(column.is_(None))
-                query = query.filter(sa.or_(*filters)) if len(filters) > 1 else query.filter(*filters)
+                query = query.filter(sa.or_(*filters))
     return query
 
 
@@ -113,7 +113,7 @@ def filter_fulltext_NA(query, kwargs, fields):
                         query = query.filter(original_column != 'N/A')
                     else:
                         filters.append(sa.not_(column.match(utils.parse_fulltext(value))))
-                query = query.filter(sa.and_(*filters)) if len(filters) > 1 else query.filter(*filters)
+                query = query.filter(sa.and_(*filters))
             if include_list:
                 filters = []
                 for value in include_list:
@@ -123,7 +123,7 @@ def filter_fulltext_NA(query, kwargs, fields):
                         filters.append(column.match(utils.parse_fulltext(value)))
                         if value.upper() == 'NULL':
                             filters.append(column.is_(None))
-                query = query.filter(sa.or_(*filters)) if len(filters) > 1 else query.filter(*filters)
+                query = query.filter(sa.or_(*filters))
     return query
 
 
@@ -137,13 +137,13 @@ def filter_multi_start_with(query, kwargs, fields):
                     sa.not_(column.startswith(value))
                     for value in exclude_list
                 ]
-                query = query.filter(sa.and_(*filters)) if len(filters) > 1 else query.filter(*filters)
+                query = query.filter(sa.and_(*filters))
             if include_list:
                 filters = [
                     column.startswith(value)
                     for value in include_list
                 ]
-                query = query.filter(sa.or_(*filters)) if len(filters) > 1 else query.filter(*filters)
+                query = query.filter(sa.or_(*filters))
     return query
 
 
