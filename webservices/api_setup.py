@@ -23,6 +23,7 @@ from webservices.resources import search
 from webservices.resources import dates
 from webservices.resources import costs
 from webservices.resources import legal
+from webservices.resources import rulemaking
 from webservices.resources import large_aggregates
 from webservices.resources import audit
 from webservices.resources import operations_log
@@ -191,6 +192,7 @@ api.add_resource(download.DownloadView, '/download/<path:path>/')
 api.add_resource(legal.UniversalSearch, '/legal/search/')
 api.add_resource(legal.GetLegalCitation, '/legal/citation/<citation_type>/<citation>')
 api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
+api.add_resource(rulemaking.RulemakingSearch, '/rulemaking/search/')
 api.add_resource(operations_log.OperationsLogView, '/operations-log/')
 api.add_resource(presidential.PresidentialByCandidateView, '/presidential/contributions/by_candidate/')
 api.add_resource(presidential.PresidentialSummaryView, '/presidential/financial_summary/')
