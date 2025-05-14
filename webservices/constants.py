@@ -1,0 +1,606 @@
+
+# ========= For legal document ==========
+CASE_INDEX = "case_index"
+CASE_ALIAS = "case_alias"
+CASE_SWAP_INDEX = "case_swap_index"
+CASE_REPO = "case_repo"
+CASE_SNAPSHOT = "case_snapshot"
+
+AO_INDEX = "ao_index"
+AO_ALIAS = "ao_alias"
+AO_SWAP_INDEX = "ao_swap_index"
+AO_REPO = "ao_repo"
+AO_SNAPSHOT = "ao_snapshot"
+
+ARCH_MUR_INDEX = "arch_mur_index"
+ARCH_MUR_ALIAS = "arch_mur_alias"
+ARCH_MUR_SWAP_INDEX = "arch_mur_swap_index"
+ARCH_MUR_REPO = "arch_mur_repo"
+ARCH_MUR_SNAPSHOT = "arch_mur_snapshot"
+
+SEARCH_ALIAS = "search_alias"
+S3_BACKUP_DIRECTORY = "es-backups"
+S3_PRIVATE_SERVICE_INSTANCE_NAME = "fec-s3-snapshot"
+
+TEST_CASE_INDEX = "test_case_index"
+TEST_CASE_ALIAS = "test_case_alias"
+TEST_AO_INDEX = "test_ao_index"
+TEST_AO_ALIAS = "test_ao_alias"
+TEST_ARCH_MUR_INDEX = "test_arch_mur_index"
+TEST_ARCH_MUR_ALIAS = "test_arch_mur_alias"
+TEST_SEARCH_ALIAS = "test_search_alias"
+# ========= For legal document end ==========
+
+DOCS_PATH = "docs"
+RULEMAKING_PATH = "rulemaking"
+RULEMAKING_TYPE = "rulemaking"
+
+# =========Start rulemaking Constants==========
+RM_INDEX = "rm_index"
+RM_ALIAS = "rm_alias"
+RM_SWAP_INDEX = "rm_swap_index"
+RM_REPO = "rm_repo"
+RM_SNAPSHOT = "rm_snapshot"
+RM_SEARCH_ALIAS = "rm_search_alias"
+
+
+# doc_category_id(int):doc_category_label(string)
+DOC_CATEGORY_MAP = {
+    1: "Open Meeting",
+    2: "Hearing",
+    3: "Agenda Document",
+    4: "Federal Register Document",
+    5: "Comments and Ex Parte Communications",
+    6: "Commencing Document",
+    7: "Votes",
+    8: "Press &amp; Public Guidance",
+}
+
+
+# level_1(int):level_1_label(string)
+LEVEL_1_MAP = {
+    1: "Final Rules",
+    2: "NPRM",
+    3: "Notice of Hearing",
+    4: "Announcement of Effective Date (AED)",
+    5: "Advance NPRM",
+    6: "Notice of Change of Hearing Date",
+    7: "Commencing Document",
+    8: "Correction to Final Rules",
+    9: "Correction to Final Rules and Explanation and Justification",
+    10: "Explanation and Justification",
+    11: "Correction to Explanation and Justification",
+    12: "Final Rules and E&J",
+    13: "Interim Final Rules",
+    14: "Notice of Availabilty",
+    15: "Notice of Disposition",
+    16: "Notice of Inquiry",
+    17: "Supplemental NPRM",
+    18: "Extension of Public Comment Period",
+    19: "Reopening of Comment Period",
+    20: "Request for Additional Comment",
+    21: "Termination of Rulemaking",
+}
+
+
+LEVEL_1_2_MAP = {
+    1: {
+        0: "Final Rules",
+        1: "Open Meeting Documents",
+        2: "Ex parte",
+    },
+    2: {
+        0: "NPRM",
+        1: "Open Meeting Documents",
+        2: "Comments",
+        3: "Ex parte",
+        4: "Hearing Materials",
+    },
+    3: {
+        0: "Notice of Hearing",
+        1: "Open Meeting Documents",
+        2: "Hearing Materials",
+    },
+    4: {
+        0: "Announcement of Effective Date (AED)",
+        1: "Open Meeting Documents",
+    },
+    5: {
+        0: "Advance NPRM",
+        1: "Open Meeting Documents",
+        2: "Comments",
+        3: "Ex parte",
+    },
+    6: {
+        0: "Notice of Change of Hearing Date",
+        1: "Open Meeting Documents",
+        2: "Hearing Materials",
+    },
+    7: {
+        0: "Commencing Document",
+    },
+    8: {
+        0: "Correction to Final Rules",
+        1: "Open Meeting Documents",
+    },
+    9: {
+        0: "Correction to Final Rules and Explanation and Justification",
+        1: "Open Meeting Documents",
+    },
+    10: {
+        0: "Explanation and Justification",
+        1: "Open Meeting Documents",
+    },
+    11: {
+        0: "Correction to Explanation and Justification",
+        1: "Open Meeting Documents",
+    },
+    12: {
+        0: "Final Rules and E&J",
+        1: "Open Meeting Documents",
+        2: "Ex parte",
+    },
+    13: {
+        0: "Interim Final Rules",
+        1: "Open Meeting Documents",
+        2: "Comments",
+        3: "Ex parte",
+    },
+    14: {
+        0: "Notice of Availabilty",
+        1: "Open Meeting Documents",
+        2: "Comments",
+        3: "Ex parte",
+    },
+    15: {
+        0: "Notice of Disposition",
+        1: "Open Meeting Documents",
+        2: "Comments",
+        3: "Ex parte",
+    },
+    16: {
+        0: "Notice of Inquiry",
+        1: "Open Meeting Documents",
+        2: "Comments",
+        3: "Ex parte",
+    },
+    17: {
+        0: "Supplemental NPRM",
+        1: "Open Meeting Documents",
+        2: "Comments",
+        3: "Ex parte",
+    },
+    18: {
+        0: "Extension of Public Comment Period",
+        1: "Open Meeting Documents",
+        2: "Comments",
+        3: "Ex parte",
+    },
+    19: {
+        0: "Reopening of Comment Period",
+        1: "Open Meeting Documents",
+        2: "Comments",
+        3: "Ex parte",
+    },
+    20: {
+        0: "Request for Additional Comment",
+        1: "Open Meeting Documents",
+        2: "Comments",
+        3: "Ex parte",
+    },
+    21: {
+        0: "Termination of Rulemaking",
+    },
+}
+
+
+DOC_LEVEL_MAP = {
+    # label.tier.1=Final Rules
+    # label.tier.1.0=Final Rules
+    # label.tier.1.1=Open Meeting Documents
+    # label.tier.1.2=Ex parte
+    # label.tier.2=NPRM
+    # label.tier.2.0=NPRM
+    # label.tier.2.1=Open Meeting Documents
+    # label.tier.2.2=Comments
+    # label.tier.2.3=Ex parte
+    # label.tier.2.4=Hearing Materials
+    # label.tier.3=Notice of Hearing
+    # label.tier.3.0=Notice of Hearing
+    # label.tier.3.1=Open Meeting Documents
+    # label.tier.3.2=Hearing Materials
+    # label.tier.4=Announcement of Effective Date (AED)
+    # label.tier.4.0=Announcement of Effective Date (AED)
+    # label.tier.4.1=Open Meeting Documents
+    # label.tier.5=Advance NPRM
+    # label.tier.5.0=Advance NPRM
+    # label.tier.5.1=Open Meeting Documents
+    # label.tier.5.2=Comments
+    # label.tier.5.3=Ex parte
+    # label.tier.6=Notice of Change of Hearing Date
+    # label.tier.6.0=Notice of Change of Hearing Date
+    # label.tier.6.1=Open Meeting Documents
+    # label.tier.6.2=Hearing Materials
+    # label.tier.7=Commencing Document
+    # label.tier.7.0=Commencing Document
+    # label.tier.8=Correction to Final Rules
+    # label.tier.8.0=Correction to Final Rules
+    # label.tier.8.1=Open Meeting Documents
+    # label.tier.9=Correction to Final Rules and Explanation and Justification
+    # label.tier.9.0=Correction to Final Rules and Explanation and Justification
+    # label.tier.9.1=Open Meeting Documents
+    # label.tier.10=Explanation and Justification
+    # label.tier.10.0=Explanation and Justification
+    # label.tier.10.1=Open Meeting Documents
+    # label.tier.11=Correction to Explanation and Justification
+    # label.tier.11.0=Correction to Explanation and Justification
+    # label.tier.11.1=Open Meeting Documents
+    # label.tier.12=Final Rules and E&J
+    # label.tier.12.0=Final Rules and E&J
+    # label.tier.12.1=Open Meeting Documents
+    # label.tier.12.2=Ex parte
+    # label.tier.13=Interim Final Rules
+    # label.tier.13.0=Interim Final Rules
+    # label.tier.13.1=Open Meeting Documents
+    # label.tier.13.2=Comments
+    # label.tier.13.3=Ex parte
+    # label.tier.14=Notice of Availabilty
+    # label.tier.14.0=Notice of Availabilty
+    # label.tier.14.1=Open Meeting Documents
+    # label.tier.14.2=Comments
+    # label.tier.14.3=Ex parte
+    # label.tier.15=Notice of Disposition
+    # label.tier.15.0=Notice of Disposition
+    # label.tier.15.1=Open Meeting Documents
+    # label.tier.15.2=Comments
+    # label.tier.15.3=Ex parte
+    # label.tier.16=Notice of Inquiry
+    # label.tier.16.0=Notice of Inquiry
+    # label.tier.16.1=Open Meeting Documents
+    # label.tier.16.2=Comments
+    # label.tier.16.3=Ex parte
+    # label.tier.17=Supplemental NPRM
+    # label.tier.17.0=Supplemental NPRM
+    # label.tier.17.1=Open Meeting Documents
+    # label.tier.17.2=Comments
+    # label.tier.17.3=Ex parte
+    # label.tier.18=Extension of Public Comment Period
+    # label.tier.18.0=Extension of Public Comment Period
+    # label.tier.18.1=Open Meeting Documents
+    # label.tier.18.2=Comments
+    # label.tier.18.3=Ex parte
+    # label.tier.19=Reopening of Comment Period
+    # label.tier.19.0=Reopening of Comment Period
+    # label.tier.19.1=Open Meeting Documents
+    # label.tier.19.2=Comments
+    # label.tier.19.3=Ex parte
+    # label.tier.20=Request for Additional Comment
+    # label.tier.20.0=Request for Additional Comment
+    # label.tier.20.1=Open Meeting Documents
+    # label.tier.20.2=Comments
+    # label.tier.20.3=Ex parte
+    # label.tier.21=Termination of Rulemaking
+    # label.tier.21.0=Termination of Rulemaking
+}
+
+DOC_TYPE_MAP = {
+    0:  "NO TIER ENTRY Sers Code :0",
+    1:  "NO TIER ENTRY Sers Code :1",
+    2:  "NO TIER ENTRY Sers Code :2",
+    3:  "NO TIER ENTRY Sers Code :3",
+    4:  "NO TIER ENTRY Sers Code :4",
+    5:  "NO TIER ENTRY Sers Code :5",
+    6:  "NO TIER ENTRY Sers Code :6",
+    7:  "Open Meeting Podcast",
+    8:  "Open Meeting Agenda",
+    9:  "NO TIER ENTRY Sers Code :9",
+    10: "label.doctype.10=Hearing Transcript",
+    11: "label.doctype.11=Hearing Podcast",
+    12: "Hearing Schedule",
+    13: "Suppl Info from Witness",
+    14: "Statement of Commissioner",
+    15: "NO TIER ENTRY Sers Code :15",
+    16: "Other (Hearing)",
+    17: "Draft Advance NPRM",
+    18: "Draft NPRM",
+    19: "Draft Supplemental NPRM",
+    20: "Draft FR",
+    21: "Draft Interim Final Rules and/or Explanation and Justification",
+    22: "Draft Correction to Final Rules",
+    23: "Draft Notice of Disposition",
+    24: "Other (Open Meeting)",
+    25: "Advance NPRM",
+    26: "Draft Notice of Inquiry",
+    27: "Draft Notice of Availability",
+    28: "NPRM",
+    29: "Supplemental NPRM",
+    30: "Notice of Hearing",
+    31: "Request for Additional Comment",
+    32: "Extension of Public Comment Period",
+    33: "Termination of Rulemaking",
+    34: "Notice of Disposition",
+    35: "Final Rules",
+    36: "Interim Final Rules",
+    37: "NO TIER ENTRY Sers Code :37",
+    38: "NO TIER ENTRY Sers Code :38",
+    39: "NO TIER ENTRY Sers Code :39",
+    40: "NO TIER ENTRY Sers Code :40",
+    41: "NO TIER ENTRY Sers Code :41",
+    42: "Open Meeting Minutes",
+    43: "NO TIER ENTRY Sers Code :43",
+    44: "Vote to approve",
+    45: "Vote to revise and approve",
+    46: "Vote to approve",
+    47: "Vote to revise and approve",
+    48: "Vote to approve",
+    49: "Vote to revise and approve",
+    50: "Vote to approve",
+    51: "Vote to revise and approve",
+    52: "Vote to approve",
+    53: "Vote to revise and approve",
+    54: "Vote to approve",
+    55: "Vote to revise and approve",
+    56: "Draft Explanation and Justification",
+    57: "NO TIER ENTRY Sers Code :57",
+    58: "NO TIER ENTRY Sers Code :58",
+    59: "Vote to approve",
+    60: "Vote to revise and approve",
+    61: "Vote to approve",
+    62: "Vote to revise and approve",
+    63: "NO TIER ENTRY Sers Code :63",
+    64: "Notice of Inquiry",
+    65: "NO TIER ENTRY Sers Code :65",
+    66: "Notice of Availabilty",
+    67: "NO TIER ENTRY Sers Code :67",
+    68: "NO TIER ENTRY Sers Code :68",
+    69: "NO TIER ENTRY Sers Code :69",
+    70: "Request for additional Comment Close Period",
+    71: "NO TIER ENTRY Sers Code :71",
+    72: "NO TIER ENTRY Sers Code :72",
+    73: "Commencing Document",
+    74: "Comments",
+    75: "Comments",
+    76: "Comments",
+    77: "Comments",
+    78: "NO TIER ENTRY Sers Code :78",
+    79: "Comments",
+    80: "Vote to disapprove",
+    81: "Vote to disapprove",
+    82: "Vote to disapprove",
+    83: "Vote to disapprove",
+    84: "Vote to disapprove",
+    85: "Vote to disapprove",
+    86: "NO TIER ENTRY Sers Code :86",
+    87: "Vote to disapprove",
+    88: "Vote to disapprove",
+    89: "Other (Vote Document)",
+    90: "Other (Federal Register Publication)",
+    91: "Other (Agenda)",
+    92: "Other (Comments and Ex Parte Communications)",
+    93: "NO TIER ENTRY Sers Code :93",
+    94: "NO TIER ENTRY Sers Code :94",
+    95: "NO TIER ENTRY Sers Code :95",
+    96: "NO TIER ENTRY Sers Code :96",
+    97: "NO TIER ENTRY Sers Code :97",
+    98: "NO TIER ENTRY Sers Code :98",
+    99: "NO TIER ENTRY Sers Code :99",
+    100: "NO TIER ENTRY Sers Code :100",
+    101: "Draft Announcement of Effective Date",
+    102: "Commissioner Submission",
+    103: "Commissioner submission",
+    104: "Draft Final Rules and Explanation and Justification Correction",
+    105: "Commissioner submission",
+    106: "Submission of Commissioner",
+    107: "Draft Notice Extension of Comment Period",
+    108: "Commissioner Submission",
+    109: "Commissioner submission",
+    110: "Draft Final Rules",
+    111: "Commissioner submission",
+    112: "Draft Notice of Change of Hearing Date",
+    113: "Commissioner submission",
+    114: "Commissioner submission",
+    115: "Commissioner submission",
+    116: "Draft Notice of Hearing",
+    117: "Commissioner Submission",
+    118: "Commissioner Submission",
+    119: "Draft Notice Reopening Comment Period",
+    120: "Commissioner Submission",
+    121: "Draft Notice Request for Additional Comment",
+    122: "Commissioner submission",
+    123: "Ex Parte Communication",
+    124: "Comments",
+    125: "Ex Parte Communication",
+    126: "Ex Parte Communication",
+    127: "Ex Parte Communication",
+    128: "Comments",
+    129: "Ex Parte Communication",
+    130: "NO TIER ENTRY Sers Code :130",
+    131: "Ex Parte Communication",
+    132: "Ex Parte Communication",
+    133: "Comments",
+    134: "Ex Parte Communication",
+    135: "Ex Parte Communication",
+    136: "Ex Parte Communication",
+    137: "Comments",
+    138: "Ex Parte Communication",
+    139: "Comments",
+    140: "Ex Parte Communication",
+    141: "Announcement of Effective Date (AED)",
+    142: "Notice of Change of Hearing Date",
+    143: "Correction to Final Rules",
+    144: "Correction to Final Rules and Explanation and Justification",
+    145: "NO TIER ENTRY Sers Code :145",
+    146: "NO TIER ENTRY Sers Code :146",
+    147: "NO TIER ENTRY Sers Code :147",
+    148: "Reopening of Comment Period",
+    149: "NO TIER ENTRY Sers Code :149",
+    150: "Hearing Exhibits",
+    151: "Hearing Podcast",
+    152: "Hearing Schedule",
+    153: "Hearing Transcript",
+    154: "Other (Hearing)",
+    155: "Statement of Commissioner",
+    156: "Suppl Info from Witness",
+    157: "Hearing Exhibits",
+    158: "Hearing Exhibits",
+    159: "Hearing Podcast",
+    160: "Hearing Schedule",
+    161: "Hearing Transcript",
+    162: "Other (Hearing)",
+    163: "Statement of Commissioner",
+    164: "Suppl Info from Witness",
+    165: "Open Meeting Agenda",
+    166: "Open Meeting Minutes",
+    167: "Open Meeting Podcast",
+    168: "Open Meeting Agenda",
+    169: "Open Meeting Minutes",
+    170: "Open Meeting Podcast",
+    171: "Open Meeting Agenda",
+    172: "Open Meeting Minutes",
+    173: "Open Meeting Podcast",
+    174: "Open Meeting Agenda",
+    175: "Open Meeting Minutes",
+    176: "Open Meeting Podcast",
+    177: "Open Meeting Agenda",
+    178: "Open Meeting Minutes",
+    179: "Open Meeting Podcast",
+    180: "Open Meeting Agenda",
+    181: "Open Meeting Minutes",
+    182: "Open Meeting Podcast",
+    183: "Open Meeting Agenda",
+    184: "Open Meeting Minutes",
+    185: "Open Meeting Podcast",
+    186: "Open Meeting Agenda",
+    187: "Open Meeting Minutes",
+    188: "Open Meeting Podcast",
+    189: "Open Meeting Agenda",
+    190: "Open Meeting MINUTES",
+    191: "Open Meeting Podcast",
+    192: "Considered and continued",
+    193: "Vote to approve",
+    194: "Vote to revise and approve",
+    195: "Returned to the General Counsel's Office for redrafting",
+    196: "Vote to disapprove",
+    197: "Insufficient number of affirmative votes for Commission action",
+    198: "Continued",
+    199: "Considered and continued",
+    200: "Returned to the General Counsel's Office for redrafting",
+    201: "Insufficient number of affirmative votes for Commission action",
+    202: "Continued",
+    203: "Vote to approve",
+    204: "Vote to approve",
+    205: "Considered and continued",
+    206: "Continued",
+    207: "Vote to disapprove",
+    208: "Insufficient number of affirmative votes for Commission action",
+    209: "Returned to the General Counsel's Office for redrafting",
+    210: "Vote to revise and approve",
+    211: "Vote to approve",
+    212: "Considered and continued",
+    213: "Continued",
+    214: "Vote to disapprove",
+    215: "Insufficient number of affirmative votes for Commission action",
+    216: "Returned to the General Counsel's Office for redrafting",
+    217: "Vote to revise and approve",
+    218: "NO TIER ENTRY Sers Code :218",
+    219: "NO TIER ENTRY Sers Code :219",
+    220: "NO TIER ENTRY Sers Code :220",
+    221: "NO TIER ENTRY Sers Code :221",
+    222: "NO TIER ENTRY Sers Code :222",
+    223: "NO TIER ENTRY Sers Code :223",
+    224: "NO TIER ENTRY Sers Code :224",
+    225: "NO TIER ENTRY Sers Code :225",
+    226: "NO TIER ENTRY Sers Code :226",
+    227: "NO TIER ENTRY Sers Code :227",
+    228: "NO TIER ENTRY Sers Code :228",
+    229: "Considered and continued",
+    230: "Vote to approve",
+    231: "Vote to revise and approve",
+    232: "Returned to the General Counsel's Office for redrafting",
+    233: "Vote to disapprove",
+    234: "Insufficient number of affirmative votes for Commission action",
+    235: "Continued",
+    236: "Vote to approve",
+    237: "Considered and continued",
+    238: "Continued",
+    239: "Vote to disapprove",
+    240: "Insufficient number of affirmative votes for Commission action",
+    241: "Returned to the General Counsel's Office for redrafting",
+    242: "Vote to revise and approve",
+    243: "Considered and continued",
+    244: "Returned to the General Counsel's Office for redrafting",
+    245: "Insufficient number of affirmative votes for Commission action",
+    246: "Continued",
+    247: "Considered and continued",
+    248: "Vote to approve",
+    249: "Vote to revise and approve",
+    250: "Returned to the General Counsel's Office for redrafting",
+    251: "Vote to disapprove",
+    252: "Insufficient number of affirmative votes for Commission action",
+    253: "Continued",
+    254: "Considered and continued",
+    255: "Returned to the General Counsel's Office for redrafting",
+    256: "Insufficient number of affirmative votes for Commission action",
+    257: "Continued",
+    258: "Considered and continued",
+    259: "Returned to the General Counsel's Office for redrafting",
+    260: "Insufficient number of affirmative votes for Commission action",
+    261: "Continued",
+    262: "Considered and continued",
+    263: "Returned to the General Counsel's Office for redrafting",
+    264: "Insufficient number of affirmative votes for Commission action",
+    265: "Continued",
+    266: "Considered and continued",
+    267: "Returned to the General Counsel's Office for redrafting",
+    268: "Insufficient number of affirmative votes for Commission action",
+    269: "Continued",
+    270: "Considered and continued",
+    271: "Returned to the General Counsel's Office for redrafting",
+    272: "Insufficient number of affirmative votes for Commission action",
+    273: "Continued",
+    274: "Vote to approve",
+    275: "Considered and continued",
+    276: "Continued",
+    277: "Vote to disapprove",
+    278: "Insufficient number of affirmative votes for Commission action",
+    279: "Returned to the General Counsel's Office for redrafting",
+    280: "Vote to revise and approve",
+    281: "Considered and continued",
+    282: "Vote to approve",
+    283: "Vote to revise and approve",
+    284: "Returned to the General Counsel's Office for redrafting",
+    285: "Vote to disapprove",
+    286: "Insufficient number of affirmative votes for Commission action",
+    287: "Continued",
+    288: "Considered and continued",
+    289: "Continued",
+    290: "Insufficient number of affirmative votes for Commission action",
+    291: "Returned to the General Counsel's Office for redrafting",
+    292: "Commissioner submission",
+    293: "Explanation and Justification",
+    294: "Correction to Explanation and Justification",
+    295: "Final Rules and E&J",
+    296: "Vote to approve",
+    297: "Vote to approve",
+    298: "Considered and continued",
+    299: "Considered and continued",
+    300: "Continued",
+    301: "Continued",
+    302: "Vote to disapprove",
+    303: "Vote to disapprove",
+    304: "Insufficient number of affirmative votes for Commission action",
+    305: "Insufficient number of affirmative votes for Commission action",
+    306: "Returned to the General Counsel's Office for redrafting",
+    307: "Returned to the General Counsel's Office for redrafting",
+    308: "Vote to revise and approve",
+    309: "Vote to revise and approve",
+    310: "Draft Explanation and Justification",
+    311: "Commissioner submission",
+    312: "Open Meeting Agenda",
+    313: "Open Meeting Minutes",
+    314: "Open Meeting Podcast",
+    315: "Open Meeting Agenda",
+    316: "Open Meeting Podcast",
+    317: "Open Meeting Minutes",
+}
+# ========= For rulemaking end ==========
