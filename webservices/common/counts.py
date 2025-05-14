@@ -54,7 +54,8 @@ def get_estimated_count(query):
 
 
 def get_query_plan(query):
-    return models.db.session.execute(explain(select("*").select_from(query.subquery()))).fetchall()
+    return models.db.session.execute(explain(query)).fetchall()
+    # return models.db.session.execute(explain(select("*").select_from(query.subquery()))).fetchall()
 
 
 def extract_analyze_count(rows):

@@ -1,9 +1,10 @@
 import random
 import celery
-from sqlalchemy import orm
 from flask_sqlalchemy import SQLAlchemy as SQLAlchemyBase
 from flask_sqlalchemy import session
 from flask import current_app
+from webservices.common.counts import explain
+import logging
 
 
 class RoutingSession(session.Session):
@@ -42,21 +43,22 @@ class RoutingSession(session.Session):
         return use_follower
 
     def get_bind(self, mapper=None, clause=None):
+        if isinstance(clause, explain):
+            clause = clause.statement
+
         if self.use_follower:
+            logging.warning(
+                f"""Using SQLALCHEMY_FOLLOWERS: flushing={self._flushing},
+                followers={len(self.followers)}, task={celery.current_task.name}""")
             return random.choice(self.followers)
 
+        logging.warning(
+            f"""Using SQLALCHEMY_DATABASE_URI: flushing={self._flushing},
+            followers={len(self.followers)}, clause={clause}""")
         return super().get_bind(mapper=mapper, clause=clause)
 
 
-class RoutingSQLAlchemy(SQLAlchemyBase):
-    """Override the default SQLAlchemyBase.create_session
-    to return a session factory that makes RoutingSession type sessions"""
-
-    def create_session(self, options):
-        return orm.sessionmaker(class_=RoutingSession, db=self, **options)
-
-
-db = RoutingSQLAlchemy()
+db = SQLAlchemyBase(session_options={'class_': RoutingSession})
 
 
 class BaseModel(db.Model):
