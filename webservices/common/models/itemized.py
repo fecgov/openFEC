@@ -222,7 +222,7 @@ class ScheduleAEfile(BaseRawItemized):
                             ScheduleAEfile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
                             )''',
         foreign_keys=committee_id,
-        lazy='joined',
+        lazy='selectin',
     )
 
     filing = db.relationship(
@@ -231,7 +231,7 @@ class ScheduleAEfile(BaseRawItemized):
                     ScheduleAEfile.file_number == EFilings.file_number,
                 )''',
         foreign_keys=file_number,
-        lazy='joined',
+        lazy='selectin',
     )
 
     @hybrid_property
@@ -400,7 +400,7 @@ class ScheduleBEfile(BaseRawItemized):
                         ScheduleBEfile.file_number == EFilings.file_number,
                     )''',
         foreign_keys=file_number,
-        lazy='joined',
+        lazy='selectin',
     )
 
     committee = db.relationship(
@@ -411,7 +411,7 @@ class ScheduleBEfile(BaseRawItemized):
                                 ScheduleBEfile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
                                 )''',
         foreign_keys=committee_id,
-        lazy='joined',
+        lazy='selectin',
     )
 
 
@@ -425,7 +425,7 @@ class ScheduleC(PdfMixin, BaseItemized):
             foreign(ScheduleC.committee_id) == CommitteeHistory.committee_id,
             ScheduleC.cycle == CommitteeHistory.cycle,
         )''',
-        lazy='joined',
+        lazy='selectin',
     )
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
@@ -533,7 +533,7 @@ class ScheduleD(PdfMixin, BaseItemized):
             foreign(ScheduleD.committee_id) == CommitteeHistory.committee_id,
             ScheduleD.election_cycle == CommitteeHistory.cycle,
         )''',
-        lazy='joined',
+        lazy='selectin',
     )
 
     @property
@@ -702,7 +702,7 @@ class ScheduleEEfile(BaseRawItemized):
                             ScheduleEEfile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
                         )''',
         foreign_keys=committee_id,
-        lazy='joined',
+        lazy='selectin',
     )
 
     @hybrid_property
@@ -732,7 +732,7 @@ class ScheduleF(PdfMixin, BaseItemized):
             foreign(ScheduleF.committee_id) == CommitteeHistory.committee_id,
             ScheduleF.election_cycle == CommitteeHistory.cycle,
         )''',
-        lazy='joined',
+        lazy='selectin',
     )
 
     sub_id = db.Column(db.Integer, primary_key=True)
@@ -749,7 +749,7 @@ class ScheduleF(PdfMixin, BaseItemized):
             foreign(ScheduleF.subordinate_committee_id) == CommitteeHistory.committee_id,
             ScheduleF.report_year + ScheduleF.report_year % 2 == CommitteeHistory.cycle,
         )''',
-        lazy='joined',
+        lazy='selectin',
     )
     subordinate_committee_id = db.Column('subord_cmte_id', db.String)
     """
@@ -906,7 +906,7 @@ class ScheduleH4Efile(BaseRawItemized):
                         ScheduleH4Efile.file_number == EFilings.file_number,
                     )''',
         foreign_keys=file_number,
-        lazy='joined',
+        lazy='selectin',
     )
 
     committee = db.relationship(
@@ -917,5 +917,5 @@ class ScheduleH4Efile(BaseRawItemized):
                                 ScheduleH4Efile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
                                 )''',
         foreign_keys=committee_id,
-        lazy='joined',
+        lazy='selectin',
     )

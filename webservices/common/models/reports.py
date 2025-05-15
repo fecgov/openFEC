@@ -586,7 +586,7 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
                                 EfilingsAmendments.file_number == BaseF3PFiling.file_number,
                             )''',
         foreign_keys=file_number,
-        lazy='joined',
+        lazy='selectin',
         viewonly=True
     )
 
@@ -640,7 +640,7 @@ class BaseF3Filing(TreasurerMixin, BaseFiling):
                                     EfilingsAmendments.file_number == BaseF3Filing.file_number,
                                 )''',
         foreign_keys=file_number,
-        lazy='joined',
+        lazy='selectin',
     )
 
     summary_lines = db.relationship(
@@ -692,7 +692,7 @@ class BaseF3XFiling(BaseFiling):
                                     EfilingsAmendments.file_number == BaseF3XFiling.file_number,
                                 )''',
         foreign_keys=file_number,
-        lazy='joined',
+        lazy='selectin',
         viewonly=True
     )
 

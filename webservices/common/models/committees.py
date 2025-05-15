@@ -66,7 +66,7 @@ class Committee(BaseConcreteCommittee):
         primaryjoin='''and_(
                     foreign(PacSponsorCandidate.committee_id) == Committee.committee_id,
                 )''',
-        lazy='joined'
+        lazy='selectin'
     )
 
 
@@ -130,7 +130,7 @@ class CommitteeHistoryProfile(CommitteeHistory):
                         JFCCommittee.most_recent_filing_flag == 'Y',
                         JFCCommittee.joint_committee_id != None,
                     )''',
-            lazy="joined",
+            lazy="selectin",
             uselist=True,
         )
 

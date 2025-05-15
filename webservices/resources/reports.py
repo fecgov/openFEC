@@ -240,7 +240,7 @@ class CommitteeReportsView(views.ApiResource):
         # Eagerly load committees if applicable
         if hasattr(reports_class, 'committee'):
             query = sa.select(reports_class).options(
-                sa.orm.joinedload(reports_class.committee)
+                sa.orm.selectinload(reports_class.committee)
             )
             self.contains_joined_load = True
         if committee_id is not None:

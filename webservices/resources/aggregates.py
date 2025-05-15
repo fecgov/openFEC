@@ -222,8 +222,8 @@ class ScheduleBByRecipientIDView(AggregateResource):
         ('committee_id', models.ScheduleBByRecipientID.committee_id),
     ]
     query_options = [
-        sa.orm.joinedload(models.ScheduleBByRecipientID.committee),
-        sa.orm.joinedload(models.ScheduleBByRecipientID.recipient),
+        sa.orm.selectinload(models.ScheduleBByRecipientID.committee),
+        sa.orm.selectinload(models.ScheduleBByRecipientID.recipient),
     ]
 
 

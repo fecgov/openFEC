@@ -72,8 +72,8 @@ class ScheduleBView(ItemizedResource):
     ]
     use_pk_for_count = True
     query_options = [
-        sa.orm.joinedload(models.ScheduleB.committee),
-        sa.orm.joinedload(models.ScheduleB.recipient_committee),
+        sa.orm.selectinload(models.ScheduleB.committee),
+        sa.orm.selectinload(models.ScheduleB.recipient_committee),
     ]
 
     @property

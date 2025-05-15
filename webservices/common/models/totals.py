@@ -118,7 +118,7 @@ class CommitteeTotals(BaseModel):
                 {0}.cycle  == TransactionCoverage.fec_election_year,
             )'''.format(self.__name__),
             viewonly=True,
-            lazy='joined',
+            lazy='selectin',
         )
 
 
@@ -216,7 +216,7 @@ class CommitteeTotalsPacParty(CommitteeTotals):
                     foreign(PacSponsorCandidatePerCycle.committee_id) == CommitteeTotalsPacParty.committee_id,
                     PacSponsorCandidatePerCycle.cycle == CommitteeTotalsPacParty.cycle,
                 )''',
-        lazy='joined'
+        lazy='selectin'
     )
 
 
@@ -258,7 +258,7 @@ class CommitteeTotalsIEOnly(BaseModel):
             CommitteeTotalsIEOnly.cycle  == TransactionCoverage.fec_election_year,
         )''',
         viewonly=True,
-        lazy='joined',
+        lazy='selectin',
     )
 
 

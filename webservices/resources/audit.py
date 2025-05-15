@@ -67,7 +67,7 @@ class AuditCategoryView(ApiResource):
         ('primary_category_name', model.primary_category_name),
     ]
     query_options = [
-        sa.orm.joinedload(models.AuditCategory.sub_category_list),
+        sa.orm.selectinload(models.AuditCategory.sub_category_list),
     ]
 
     @property

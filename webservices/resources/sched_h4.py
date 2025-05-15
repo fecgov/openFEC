@@ -76,7 +76,7 @@ class ScheduleH4View(ItemizedResource):
     ]
 
     query_options = [
-        sa.orm.joinedload(models.ScheduleH4.committee),
+        sa.orm.selectinload(models.ScheduleH4.committee),
     ]
 
     @property

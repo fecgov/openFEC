@@ -83,8 +83,8 @@ class ScheduleAView(ItemizedResource):
         ('contributor_zip', models.ScheduleA.contributor_zip),
     ]
     query_options = [
-        sa.orm.joinedload(models.ScheduleA.committee),
-        sa.orm.joinedload(models.ScheduleA.contributor),
+        sa.orm.selectinload(models.ScheduleA.committee),
+        sa.orm.selectinload(models.ScheduleA.contributor),
     ]
     sort_options = [
         'contribution_receipt_date',

@@ -46,7 +46,7 @@ class CandidateList(ApiResource):
     contains_joined_load = True
 
     query_options = [
-        sa.orm.joinedload(models.Candidate.flags),
+        sa.orm.selectinload(models.Candidate.flags),
     ]
 
     @property
@@ -154,7 +154,7 @@ class CandidateSearch(CandidateList):
     contains_joined_load = True
 
     query_options = [
-        sa.orm.joinedload(models.Candidate.flags),
+        sa.orm.selectinload(models.Candidate.flags),
         sa.orm.selectinload(models.Candidate.principal_committees),
     ]
 
@@ -181,7 +181,7 @@ class CandidateView(ApiResource):
     contains_joined_load = True
 
     query_options = [
-        sa.orm.joinedload(models.CandidateDetail.flags),
+        sa.orm.selectinload(models.CandidateDetail.flags),
     ]
 
     @property
@@ -260,7 +260,7 @@ class CandidateHistoryView(ApiResource):
     contains_joined_load = True
 
     query_options = [
-        sa.orm.joinedload(models.CandidateHistory.flags),
+        sa.orm.selectinload(models.CandidateHistory.flags),
     ]
 
     @property

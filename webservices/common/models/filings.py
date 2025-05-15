@@ -151,7 +151,7 @@ class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.M
                             EfilingsAmendments.file_number == EFilings.file_number,
                         )''',
         foreign_keys=file_number,
-        lazy='joined',
+        lazy='selectin',
     )
 
     @property

@@ -75,8 +75,8 @@ class ScheduleEView(ItemizedResource):
     ]
     use_pk_for_count = True
     query_options = [
-        sa.orm.joinedload(models.ScheduleE.candidate),
-        sa.orm.joinedload(models.ScheduleE.committee),
+        sa.orm.selectinload(models.ScheduleE.candidate),
+        sa.orm.selectinload(models.ScheduleE.committee),
     ]
 
     @property

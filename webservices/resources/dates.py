@@ -174,4 +174,4 @@ class ReportingDatesView(ApiResource):
         (('min_update_date', 'max_update_date'), models.ReportDate.update_date),
     ]
 
-    query_options = [sa.orm.joinedload(models.ReportDate.report)]
+    query_options = [sa.orm.selectinload(models.ReportDate.report)]
