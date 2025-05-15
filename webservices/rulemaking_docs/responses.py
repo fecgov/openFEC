@@ -10,9 +10,9 @@ RULEMAKING_SEARCH_RESPONSE_1 = {
                     "items": {
                         "type": "object",
                         "properties": {
-                            # "admin_close_date": {"type": "string", "format": "date"},
-                            # "calculated_comment_close_date": {"type": "string", "format": "date"},
-                            # "comment_close_date": {"type": "string", "format": "date"},
+                            "admin_close_date": {"type": "string", "format": "date"},
+                            "calculated_comment_close_date": {"type": "string", "format": "date"},
+                            "comment_close_date": {"type": "string", "format": "date"},
                             # "commenter_names": {
                             #     "type": "array",
                             #     "items": {"type": "string"}
@@ -143,13 +143,13 @@ RULEMAKING_SEARCH_RESPONSE_1 = {
                             # "type": {"type": "string"},
                             # "witness": {"type": "string"},
                             # "vote_dates": {"type": "string", "format": "date"},
-                            "highlights": {
-                                "type": "array",
-                                "items": {"type": "string"}
-                            },
-                            "document_highlights": {
-                                "type": "object"  # Dynamic dictionary
-                            }
+                            # "highlights": {
+                            #     "type": "array",
+                            #     "items": {"type": "string"}
+                            # },
+                            # "document_highlights": {
+                            #     "type": "object"  # Dynamic dictionary
+                            # }
                         }
                     }
                 }
