@@ -117,6 +117,9 @@ def create_app(test_config=None):
     app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
         'webservices.tasks.download.export_query',]
     app.config['PROPAGATE_EXCEPTIONS'] = True
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "compiled_cache_size": 1000,
+    }
     # app.config['SQLALCHEMY_ECHO'] = True
 
     # Modify app configuration and logging level for production
