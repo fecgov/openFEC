@@ -49,7 +49,7 @@ class RoutingSession(session.Session):
         if self.use_follower:
             logging.warning(
                 f"""Using SQLALCHEMY_FOLLOWERS: flushing={self._flushing},
-                followers={len(self.followers)}, task={celery.current_task.name}""")
+                followers={len(self.followers)}""")
             return random.choice(self.followers)
 
         logging.warning(
