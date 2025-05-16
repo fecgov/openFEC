@@ -46,35 +46,35 @@ class TestFilterMatch(ApiBaseTest):
     def test_filter_match(self):
         # Filter for a single integer value
         query_dates = filters.filter_match(
-            sa.select(models.CalendarDate),
+            models.CalendarDate.query,
             {'event_id': 123},
             CalendarDatesView.filter_match_fields,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_dates).scalars().all()),
+            set(query_dates.all()),
             set(each for each in self.dates if each.event_id == 123),
         )
 
         # Filter for a single string value
         query_reports = filters.filter_match(
-            sa.select(models.CommitteeReportsHouseSenate),
+            models.CommitteeReportsHouseSenate.query,
             {'filer_type': 'e-file'},
             self.filter_match_fields,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_reports).scalars().all()),
+            set(query_reports.all()),
             set(each for each in self.reports if each.means_filed == 'e-file'),
         )
 
     def test_filter_match_exclude(self):
         # Exclude a single integer value
         query_dates = filters.filter_match(
-            sa.select(models.CalendarDate),
+            models.CalendarDate.query,
             {'event_id': -321},
             CalendarDatesView.filter_match_fields,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_dates).scalars().all()),
+            set(query_dates.all()),
             set(
                 each
                 for each in self.dates
@@ -84,12 +84,12 @@ class TestFilterMatch(ApiBaseTest):
 
         # Exclude a single string value
         query_reports = filters.filter_match(
-            sa.select(models.CommitteeReportsHouseSenate),
+            models.CommitteeReportsHouseSenate.query,
             {'filer_type': '-paper'},
             self.filter_match_fields,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_reports).scalars().all()),
+            set(query_reports.all()),
             set(each for each in self.reports if each.means_filed != 'paper'),
         )
 
@@ -128,46 +128,46 @@ class TestFilterMulti(ApiBaseTest):
     def test_filter_multi(self):
         # Filter for multiple integer values
         query_dates = filters.filter_multi(
-            sa.select(models.CalendarDate),
+            models.CalendarDate.query,
             {'calendar_category_id': [1, 3]},
             CalendarDatesView.filter_multi_fields,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_dates).scalars().all()),
+            set(query_dates.all()),
             set(each for each in self.dates if each.calendar_category_id in [1, 3]),
         )
 
         # Filter for multiple string values
         query_committees = filters.filter_multi(
-            sa.select(models.Committee),
+            models.Committee.query,
             {'designation': ['P', 'U']},
             CommitteeList.filter_multi_fields,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_committees).unique().scalars().all()),
+            set(query_committees.all()),
             set(each for each in self.committees if each.designation in ['P', 'U']),
         )
 
     def test_filter_multi_exclude(self):
         # Exclude multiple integer values
         query_dates = filters.filter_multi(
-            sa.select(models.CalendarDate),
+            models.CalendarDate.query,
             {'calendar_category_id': [-1, -3]},
             CalendarDatesView.filter_multi_fields,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_dates).scalars().all()),
+            set(query_dates.all()),
             set(each for each in self.dates if each.calendar_category_id not in [1, 3]),
         )
 
         # Exclude multiple string values
         query_committees = filters.filter_multi(
-            sa.select(models.Committee),
+            models.Committee.query,
             {'designation': ['-P', '-U']},
             CommitteeList.filter_multi_fields,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_committees).unique().scalars().all()),
+            set(query_committees.all()),
             set(
                 each
                 for each in self.committees
@@ -178,12 +178,12 @@ class TestFilterMulti(ApiBaseTest):
     def test_filter_multi_combo(self):
         # Exclude/include multiple integer values
         query_dates = filters.filter_multi(
-            sa.select(models.CalendarDate),
+            models.CalendarDate.query,
             {'calendar_category_id': [-1, 3]},
             CalendarDatesView.filter_multi_fields,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_dates).scalars().all()),
+            set(query_dates.all()),
             set(
                 each
                 for each in self.dates
@@ -194,12 +194,12 @@ class TestFilterMulti(ApiBaseTest):
 
         # Exclude/include multiple string values
         query_committees = filters.filter_multi(
-            sa.select(models.Committee),
+            models.Committee.query,
             {'designation': ['-P', 'U']},
             CommitteeList.filter_multi_fields,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_committees).unique().scalars().all()),
+            set(query_committees.all()),
             set(
                 each
                 for each in self.committees
@@ -240,44 +240,44 @@ class TestFilterOther(ApiBaseTest):
 
     def test_filter_contributor_type_individual(self):
         query = filters.filter_contributor_type(
-            sa.select(models.ScheduleA),
+            models.ScheduleA.query,
             models.ScheduleA.entity_type,
             {'contributor_type': ['individual']},
         )
         self.assertEqual(
-            set(models.db.session.execute(query).unique().scalars().all()),
+            set(query.all()),
             set(each for each in self.receipts if each.entity_type == 'IND'),
         )
 
     def test_filter_contributor_type_committee(self):
         query = filters.filter_contributor_type(
-            sa.select(models.ScheduleA),
+            models.ScheduleA.query,
             models.ScheduleA.entity_type,
             {'contributor_type': ['committee']},
         )
         self.assertEqual(
-            set(models.db.session.execute(query).unique().scalars().all()),
+            set(query.all()),
             set(each for each in self.receipts if each.entity_type != 'IND'),
         )
 
     def test_filter_contributor_type_none(self):
         query = filters.filter_contributor_type(
-            sa.select(models.ScheduleA),
+            models.ScheduleA.query,
             models.ScheduleA.entity_type,
             {'contributor_type': ['individual', 'committee']},
         )
-        self.assertEqual(set(models.db.session.execute(query).unique().scalars().all()), set(self.receipts))
+        self.assertEqual(set(query.all()), set(self.receipts))
 
     # Note: filter_fulltext is tested in test_itemized
 
     def test_filter_fulltext_exclude(self):
         query_dates = filters.filter_fulltext(
-            sa.select(models.CalendarDate),
+            models.CalendarDate.query,
             {'summary': ['Report', '-IE']},
             CalendarDatesView.filter_fulltext_fields,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_dates).scalars().all()),
+            set(query_dates.all()),
             set(
                 each
                 for each in self.dates
@@ -297,23 +297,23 @@ class TestFilterOverlap(ApiBaseTest):
     def test_filter_overlap(self):
         """Test the filter that compares whether two arrays have elements in common."""
         query_committees = filters.filter_overlap(
-            sa.select(models.Committee),
+            models.Committee.query,
             {'sponsor_candidate_id': ['H001']},
             CommitteeList.filter_overlap_fields,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_committees).unique().scalars().all()),
+            set(query_committees.all()),
             set(each for each in self.committees if each.sponsor_candidate_ids == ['H001']),
         )
 
     def test_filter_overlap_exclude(self):
         query_committees = filters.filter_overlap(
-            sa.select(models.Committee),
+            models.Committee.query,
             {'sponsor_candidate_id': ['-H001']},
             CommitteeList.filter_overlap_fields,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_committees).unique().scalars().all()),
+            set(query_committees.all()),
             set(each for each in self.committees if each.sponsor_candidate_ids == ['S001']),
         )
 
@@ -345,12 +345,12 @@ class TestFilterFulltext_NA(ApiBaseTest):
 
     def test_filter_fulltext_NA_include(self):
         query_receipts = filters.filter_fulltext_NA(
-            sa.select(models.ScheduleA),
+            models.ScheduleA.query,
             {'contributor_employer': ['amzaon.com',]},
             ScheduleAView.filter_fulltext_fields_NA,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_receipts).unique().scalars().all()),
+            set(query_receipts.all()),
             set(
                 each
                 for each in self.receipts
@@ -360,12 +360,12 @@ class TestFilterFulltext_NA(ApiBaseTest):
 
     def test_filter_fulltext_NA_include_NA(self):
         query_receipts = filters.filter_fulltext_NA(
-            sa.select(models.ScheduleA),
+            models.ScheduleA.query,
             {'contributor_employer': ['N/A',]},
             ScheduleAView.filter_fulltext_fields_NA,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_receipts).unique().scalars().all()),
+            set(query_receipts.all()),
             set(
                 each
                 for each in self.receipts
@@ -385,12 +385,12 @@ class TestFilterFulltext_NA(ApiBaseTest):
 
     def test_filter_fulltext_NA_exclude(self):
         query_receipts = filters.filter_fulltext_NA(
-            sa.select(models.ScheduleA),
+            models.ScheduleA.query,
             {'contributor_employer': ['-amazon',]},
             ScheduleAView.filter_fulltext_fields_NA,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_receipts).unique().scalars().all()),
+            set(query_receipts.all()),
             set(
                 each
                 for each in self.receipts
@@ -400,12 +400,12 @@ class TestFilterFulltext_NA(ApiBaseTest):
 
     def test_filter_fulltext_NA_exclude_NA(self):
         query_receipts = filters.filter_fulltext_NA(
-            sa.select(models.ScheduleA),
+            models.ScheduleA.query,
             {'contributor_employer': ['-N/A',]},
             ScheduleAView.filter_fulltext_fields_NA,
         )
         self.assertEqual(
-            set(models.db.session.execute(query_receipts).unique().scalars().all()),
+            set(query_receipts.all()),
             set(
                 each
                 for each in self.receipts

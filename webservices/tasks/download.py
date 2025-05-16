@@ -2,15 +2,13 @@ import base64
 import hashlib
 import logging
 import datetime
-import re
 
 from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
-from postgres_copy import query_entities, format_flags
+from postgres_copy import query_entities, copy_to
 from celery_once import QueueOnce
 from smart_open import smart_open
 from celery import shared_task
-from sqlalchemy.dialects import postgresql
 
 from webservices import utils
 from webservices.common import counts
@@ -99,9 +97,9 @@ def query_with_labels(query, schema, sort_columns=False):
         entities.sort(key=lambda x: x.name)
 
     if joins:
-        query = query.join(*joins).with_only_columns(*entities)
+        query = query.join(*joins).with_entities(*entities)
     else:
-        query = query.with_only_columns(*entities)
+        query = query.with_entities(*entities)
 
     return query
 
@@ -140,42 +138,6 @@ def make_bundle(resource):
             format="csv",
             header=True
         )
-
-
-# modified for sqlalchemy 2.0 style taken from sqlalchemy-postgres-copy package by Joshua Carp
-# https://github.com/jmcarp/sqlalchemy-postgres-copy
-def copy_to(source, dest, engine, **flags):
-    dialect = postgresql.dialect()
-    compiled = source.compile(dialect=dialect)
-
-    sql = compiled.string
-    params = compiled.params
-    conn = engine.raw_connection()
-
-    if "POSTCOMPILE" in sql:
-        sql = rebind_postcompile(sql)
-        params = convert_lists_to_tuples(params)
-
-    try:
-        with conn.cursor() as cursor:
-            query = cursor.mogrify(sql, params).decode()
-            formatted_flags = f"({format_flags(flags)})" if flags else ""
-            copy_sql = f"COPY ({query}) TO STDOUT {formatted_flags}"
-            cursor.copy_expert(copy_sql, dest)
-    finally:
-        conn.close()
-
-
-def rebind_postcompile(sql):
-    pattern = r"\(__\[POSTCOMPILE_([a-zA-Z0-9_]+)\]\)"
-    return re.sub(pattern, r"%(\1)s", sql)
-
-
-def convert_lists_to_tuples(params):
-    for key, val in params.items():
-        if isinstance(val, list):
-            params[key] = tuple(val)
-    return params
 
 
 @shared_task(base=QueueOnce, once={"graceful": True})

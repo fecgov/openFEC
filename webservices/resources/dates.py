@@ -90,9 +90,7 @@ class CalendarDatesExport(CalendarDatesView):
         schema_type, renderer, mimetype = self.renderers[kwargs['renderer']]
         schema = schema_type(many=True)
         return Response(
-            renderer(
-                schema.dump(
-                    models.db.session.execute(query).scalars().all()), schema),
+            renderer(schema.dump(query), schema),
             mimetype=mimetype,
         )
 
@@ -151,7 +149,6 @@ class ReportingDatesView(ApiResource):
     model = models.ReportDate
     schema = schemas.ReportingDatesSchema
     page_schema = schemas.ReportingDatesPageSchema
-    contains_joined_load = True
 
     @property
     def args(self):

@@ -7,9 +7,9 @@ ANALYZE borrowed from https://bitbucket.org/zzzeek/sqlalchemy/wiki/UsageRecipes/
 import re
 
 from sqlalchemy.ext.compiler import compiles
-from sqlalchemy.sql.expression import Executable, ClauseElement
+from sqlalchemy.sql.expression import Executable, ClauseElement, _literal_as_text
 from webservices.common import models
-from sqlalchemy import select, func
+
 
 count_pattern = re.compile(r'rows=(\d+)')
 
@@ -22,7 +22,7 @@ def is_estimated_count(resource, query):
     """
     if resource.use_pk_for_count and resource.model:
         primary_key = resource.model.__mapper__.primary_key[0]
-        query = query.with_only_columns(primary_key)
+        query = query.with_entities(primary_key)
     if resource.use_estimated_counts:
         estimated_count = get_estimated_count(query)
         if estimated_count > resource.estimated_count_threshold:
@@ -43,7 +43,7 @@ def get_count(resource, query):
         estimated_count = get_estimated_count(query)
         return estimated_count, is_estimate
     # Use exact counts for `use_estimated_counts == False` and small result sets
-    exact_count = models.db.session.scalar(select(func.count()).select_from(query.subquery()))
+    exact_count = query.count()
     return exact_count, is_estimate
 
 
@@ -54,7 +54,7 @@ def get_estimated_count(query):
 
 
 def get_query_plan(query):
-    return models.db.session.execute(explain(select("*").select_from(query.subquery()))).fetchall()
+    return models.db.session.execute(explain(query)).fetchall()
 
 
 def extract_analyze_count(rows):
@@ -65,10 +65,8 @@ def extract_analyze_count(rows):
 
 
 class explain(Executable, ClauseElement):
-    inherit_cache = False
-
     def __init__(self, stmt, analyze=False):
-        self.statement = stmt
+        self.statement = _literal_as_text(stmt)
         self.analyze = analyze
         # helps with INSERT statements
         self.inline = getattr(stmt, 'inline', None)
