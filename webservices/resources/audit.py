@@ -58,7 +58,7 @@ class AuditCategoryView(ApiResource):
     model = models.AuditCategory
     schema = schemas.AuditCategorySchema
     page_schema = schemas.AuditCategoryPageSchema
-    contains_joined_load = True
+
     filter_multi_fields = [
         ('primary_category_id', model.primary_category_id),
         ('tier', model.tier),
@@ -96,7 +96,7 @@ class AuditCaseView(ApiResource):
     model = models.AuditCase
     schema = schemas.AuditCaseSchema
     page_schema = schemas.AuditCasePageSchema
-    contains_joined_load = True
+
     filter_multi_fields = [
         ('audit_case_id', model.audit_case_id),
         ('cycle', model.cycle),
@@ -173,12 +173,11 @@ class AuditCandidateNameSearch(utils.Resource):
     @use_kwargs(args.names)
     @marshal_with(schemas.AuditCandidateSearchListSchema())
     def get(self, **kwargs):
-        query = sa.select(models.AuditCandidateSearch.id, models.AuditCandidateSearch.name)
-        query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
+        query = filters.filter_fulltext(models.AuditCandidateSearch.query, kwargs, self.filter_fulltext_fields)
         query = query.order_by(
             sa.desc(models.AuditCandidateSearch.id)
         ).limit(20)
-        return {'results': models.db.session.execute(query).all()}
+        return {'results': query.all()}
 
 
 # used for endpoint:`/names/audit_committees/`
@@ -198,9 +197,8 @@ class AuditCommitteeNameSearch(utils.Resource):
     @use_kwargs(args.names)
     @marshal_with(schemas.AuditCommitteeSearchListSchema())
     def get(self, **kwargs):
-        query = sa.select(models.AuditCommitteeSearch.id, models.AuditCommitteeSearch.name)
-        query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
+        query = filters.filter_fulltext(models.AuditCommitteeSearch.query, kwargs, self.filter_fulltext_fields)
         query = query.order_by(
             sa.desc(models.AuditCommitteeSearch.id)
         ).limit(20)
-        return {'results': models.db.session.execute(query).all()}
+        return {'results': query.all()}

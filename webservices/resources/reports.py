@@ -150,8 +150,7 @@ class ReportsView(views.ApiResource):
         if kwargs['sort']:
             validator = args.IndicesValidator(reports_class)
             validator(kwargs['sort'])
-        page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=reports_class, multi=True,
-                                contains_joined_load=self.contains_joined_load)
+        page = utils.fetch_page(query, kwargs, is_count_exact=True, model=reports_class, multi=True)
         return reports_schema().dump(page)
 
     def build_query(self, entity_type=None, **kwargs):
@@ -159,7 +158,7 @@ class ReportsView(views.ApiResource):
         reports_class, reports_schema = reports_schema_map.get(
             reports_type_map.get(entity_type), default_schemas,
         )
-        query = sa.select(reports_class)
+        query = reports_class.query
 
         filter_multi_fields = [
             ('amendment_indicator', models.CommitteeReports.amendment_indicator),
@@ -180,10 +179,9 @@ class ReportsView(views.ApiResource):
             filter_fulltext_fields = [("q_filer", reports_class.filer_name_text), ]
 
         if hasattr(reports_class, 'committee'):
-            query = sa.select(reports_class).outerjoin(reports_class.committee).options(
+            query = reports_class.query.outerjoin(reports_class.committee).options(
                 sa.orm.contains_eager(reports_class.committee)
             )
-            self.contains_joined_load = True
 
         if kwargs.get('committee_type'):
             query = query.filter(
@@ -217,8 +215,7 @@ class CommitteeReportsView(views.ApiResource):
         if kwargs['sort']:
             validator = args.IndicesValidator(reports_class)
             validator(kwargs['sort'])
-        page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=reports_class, multi=True,
-                                contains_joined_load=self.contains_joined_load)
+        page = utils.fetch_page(query, kwargs, is_count_exact=True, model=reports_class, multi=True)
         return reports_schema().dump(page)
 
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
@@ -228,7 +225,7 @@ class CommitteeReportsView(views.ApiResource):
             ),
             default_schemas,
         )
-        query = sa.select(reports_class)
+        query = reports_class.query
 
         filter_multi_fields = [
             ('amendment_indicator', models.CommitteeReports.amendment_indicator),
@@ -239,10 +236,9 @@ class CommitteeReportsView(views.ApiResource):
         ]
         # Eagerly load committees if applicable
         if hasattr(reports_class, 'committee'):
-            query = sa.select(reports_class).options(
+            query = reports_class.query.options(
                 sa.orm.joinedload(reports_class.committee)
             )
-            self.contains_joined_load = True
         if committee_id is not None:
             query = query.filter_by(committee_id=committee_id)
 
@@ -254,7 +250,7 @@ class CommitteeReportsView(views.ApiResource):
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
         if committee_id is not None:
             utils.check_committee_id(committee_id)
-            query = sa.select(models.CommitteeHistory).filter_by(committee_id=committee_id)
+            query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
 
             if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
@@ -263,7 +259,7 @@ class CommitteeReportsView(views.ApiResource):
                 query = query.filter(models.CommitteeHistory.cycle.in_(cycle_list))
 
             query = query.order_by(sa.desc(models.CommitteeHistory.cycle))
-            committee = models.db.first_or_404(query)
+            committee = query.first_or_404()
             return committee.committee_type
         elif committee_type is not None:
             return reports_type_map.get(committee_type)
@@ -281,7 +277,6 @@ class EFilingHouseSenateSummaryView(views.ApiResource):
     model = models.BaseF3Filing
     schema = schemas.BaseF3FilingSchema
     page_schema = schemas.BaseF3FilingPageSchema
-    contains_joined_load = True
 
     filter_range_fields = [
         (('min_receipt_date', 'max_receipt_date'), models.BaseFiling.receipt_date),
@@ -329,7 +324,6 @@ class EFilingPresidentialSummaryView(views.ApiResource):
     model = models.BaseF3PFiling
     schema = schemas.BaseF3PFilingSchema
     page_schema = schemas.BaseF3PFilingPageSchema
-    contains_joined_load = True
 
     filter_range_fields = [
         (('min_receipt_date', 'max_receipt_date'), models.BaseFiling.receipt_date),
@@ -377,7 +371,6 @@ class EFilingPacPartySummaryView(views.ApiResource):
     model = models.BaseF3XFiling
     schema = schemas.BaseF3XFilingSchema
     page_schema = schemas.BaseF3XFilingPageSchema
-    contains_joined_load = True
 
     filter_range_fields = [
         (('min_receipt_date', 'max_receipt_date'), models.BaseFiling.receipt_date),

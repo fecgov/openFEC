@@ -3,6 +3,7 @@ import datetime
 import pytest
 
 import sqlalchemy as sa
+
 from tests import common, factories
 from webservices.common import models
 from webservices.common.models import ScheduleA, db
@@ -40,86 +41,83 @@ class IntegrationTestCase(common.BaseTestCase):
             self._check_financial_model(model)
 
     def _check_financial_model(self, model):
-        query = sa.select(model).filter(model.cycle < SQL_CONFIG['START_YEAR'])
-
-        count = db.session.scalar(sa.select(sa.func.count()).select_from(query.subquery()))
-
+        count = model.query.filter(
+            model.cycle < SQL_CONFIG['START_YEAR']
+        ).count()
         self.assertEqual(count, 0)
 
     def _check_entity_model(self, model, key):
-        subquery = sa.select(
+        subquery = model.query.with_entities(
             getattr(model, key), sa.func.unnest(model.cycles).label('cycle'),
         ).subquery()
-
-        query = (
-            sa.select(getattr(subquery.columns, key))
+        count = (
+            db.session.query(getattr(subquery.columns, key))
             .group_by(getattr(subquery.columns, key))
             .having(
                 sa.func.max(subquery.columns.cycle) < SQL_CONFIG['START_YEAR']
             )
+            .count()
         )
-        count = db.session.scalar(sa.select(sa.func.count()).select_from(query.subquery()))
-
         self.assertEqual(count, 0)
 
     def test_committee_counts(self):
-        query = sa.select(models.CommitteeHistory).distinct(models.CommitteeHistory.committee_id)
         counts = [
-            db.session.scalar(sa.select(sa.func.count()).select_from(models.Committee)),
-            db.session.scalar(sa.select(sa.func.count()).select_from(models.CommitteeDetail)),
-            db.session.scalar(sa.select(sa.func.count()).select_from(query.subquery())),
-            db.session.scalar(sa.select(sa.func.count()).select_from(models.CommitteeSearch)),
+            models.Committee.query.count(),
+            models.CommitteeDetail.query.count(),
+            models.CommitteeHistory.query.distinct(
+                models.CommitteeHistory.committee_id
+            ).count(),
+            models.CommitteeSearch.query.count(),
         ]
         assert len(set(counts)) == 1
 
     def test_candidate_counts(self):
-        query = sa.select(models.CandidateHistory).distinct(models.CandidateHistory.candidate_id)
         counts = [
-            db.session.scalar(sa.select(sa.func.count()).select_from(models.Candidate)),
-            db.session.scalar(sa.select(sa.func.count()).select_from(models.CandidateDetail)),
-            db.session.scalar(sa.select(sa.func.count()).select_from(query.subquery())),
-            db.session.scalar(sa.select(sa.func.count()).select_from(models.CandidateSearch)),
+            models.Candidate.query.count(),
+            models.CandidateDetail.query.count(),
+            models.CandidateHistory.query.distinct(
+                models.CandidateHistory.candidate_id
+            ).count(),
+            models.CandidateSearch.query.count(),
         ]
         assert len(set(counts)) == 1
 
     def test_unverified_filers_excluded_in_candidates(self):
-        candidate_history_count = db.session.scalar(sa.select(sa.func.count()).select_from(models.CandidateHistory))
+        candidate_history_count = models.CandidateHistory.query.count()
 
-        query = sa.select(models.UnverifiedFiler).filter(
+        unverified_candidates = models.UnverifiedFiler.query.filter(
             sa.or_(
                 models.UnverifiedFiler.candidate_committee_id.like('H%'),
                 models.UnverifiedFiler.candidate_committee_id.like('S%'),
                 models.UnverifiedFiler.candidate_committee_id.like('P%'),
             )
-        )
-        unverified_candidates = db.session.execute(query).scalars().all()
+        ).all()
+
         unverified_candidate_ids = [
             c.candidate_committee_id for c in unverified_candidates
         ]
 
-        query = sa.select(models.CandidateHistory).filter(
+        candidate_history_verified_count = models.CandidateHistory.query.filter(
             ~models.CandidateHistory.candidate_id.in_(unverified_candidate_ids)
-        )
-        candidate_history_verified_count = db.session.scalar(sa.select(sa.func.count()).select_from(query.subquery()))
+        ).count()
 
         self.assertEqual(candidate_history_count, candidate_history_verified_count)
 
     def test_unverified_filers_excluded_in_committees(self):
-        committee_history_count = db.session.scalar(sa.select(sa.func.count()).select_from(models.CommitteeHistory))
+        committee_history_count = models.CommitteeHistory.query.count()
 
-        query = sa.select(models.UnverifiedFiler).filter(
+        unverified_committees = models.UnverifiedFiler.query.filter(
             models.UnverifiedFiler.candidate_committee_id.like('C%')
-        )
+        ).all()
 
-        unverified_committees = db.session.execute(query).scalars().all()
         unverified_committees_ids = [
             c.candidate_committee_id for c in unverified_committees
         ]
 
-        query = sa.select(models.CommitteeHistory).filter(
+        committee_history_verified_count = models.CommitteeHistory.query.filter(
             ~models.CommitteeHistory.committee_id.in_(unverified_committees_ids)
-        )
-        committee_history_verified_count = db.session.scalar(sa.select(sa.func.count()).select_from(query.subquery()))
+        ).count()
+
         self.assertEqual(committee_history_count, committee_history_verified_count)
 
     def test_last_day_of_month(self):
@@ -173,11 +171,9 @@ class IntegrationTestCase(common.BaseTestCase):
             ScheduleA.contributor_id,
             ScheduleA.committee_id,
         )
-        query = sa.select(ScheduleA)
-        rows = db.session.execute(query).scalars().all()
+
+        rows = ScheduleA.query.all()
         self.assertEqual(rows, individuals + earmarks)
 
-        query = query.filter(is_individual)
-
-        rows = db.session.execute(query).scalars().all()
+        rows = ScheduleA.query.filter(is_individual).all()
         self.assertEqual(rows, individuals)
