@@ -2,11 +2,11 @@ import random
 import celery
 from sqlalchemy import orm
 from flask_sqlalchemy import SQLAlchemy as SQLAlchemyBase
-from flask_sqlalchemy import session
+from flask_sqlalchemy import SignallingSession
 from flask import current_app
 
 
-class RoutingSession(session.Session):
+class RoutingSession(SignallingSession):
     """Route requests to database leader or follower as appropriate.
 
     Based on http://techspot.zzzeek.org/2012/01/11/django-style-database-routers-in-sqlalchemy/
