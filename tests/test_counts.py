@@ -2,8 +2,6 @@ import datetime
 
 from unittest import mock
 
-import sqlalchemy as sa
-
 from tests import factories
 from tests.common import ApiBaseTest
 
@@ -19,7 +17,7 @@ class TestCounts(ApiBaseTest):
         factories.EFilingsFactory(file_number=123)
         db.session.flush()
 
-        query = sa.select(models.ScheduleEEfile)
+        query = db.session.query(models.ScheduleEEfile)
         # Estimated rows = 6000000
         get_query_plan_mock.return_value = [
             (
@@ -48,7 +46,7 @@ class TestCounts(ApiBaseTest):
                 two_year_transaction_period=2016,
             ),
         ]
-        query = sa.select(models.ScheduleA)
+        query = db.session.query(models.ScheduleA)
         # Estimated rows == 200
         get_query_plan_mock.return_value = [
             ('Seq Scan on fec_fitem_sched_a  (cost=0.00..10.60 rows=200 width=1289)',)
@@ -59,7 +57,7 @@ class TestCounts(ApiBaseTest):
         self.assertEqual(estimate, False)
 
     def test_use_estimated_counts_over_threshold(self, get_query_plan_mock):
-        query = sa.select(models.ScheduleA)
+        query = db.session.query(models.ScheduleA)
         # Estimated rows == 2000000
         get_query_plan_mock.return_value = [
             (
@@ -74,7 +72,7 @@ class TestCounts(ApiBaseTest):
 
     # test boundary conditions (n-1)
     def test_threshold_boundary_minus_1(self, get_query_plan_mock):
-        query = sa.select(models.ScheduleA)
+        query = db.session.query(models.ScheduleA)
         resource = sched_a.ScheduleAView()
         get_query_plan_mock.return_value = [
             (
@@ -87,7 +85,7 @@ class TestCounts(ApiBaseTest):
 
     # test boundary conditions (n)
     def test_threshold_boundary(self, get_query_plan_mock):
-        query = sa.select(models.ScheduleA)
+        query = db.session.query(models.ScheduleA)
         resource = sched_a.ScheduleAView()
         get_query_plan_mock.return_value = [
             (
@@ -100,7 +98,7 @@ class TestCounts(ApiBaseTest):
 
     # test boundary conditions (n+1)
     def test_threshold_boundary_plus_1(self, get_query_plan_mock):
-        query = sa.select(models.ScheduleA)
+        query = db.session.query(models.ScheduleA)
         resource = sched_a.ScheduleAView()
         get_query_plan_mock.return_value = [
             (
