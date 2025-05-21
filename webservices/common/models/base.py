@@ -1,12 +1,12 @@
 import random
 import celery
-from sqlalchemy import orm
 from flask_sqlalchemy import SQLAlchemy as SQLAlchemyBase
-from flask_sqlalchemy import SignallingSession
+from flask_sqlalchemy import session
 from flask import current_app
+from webservices.common.counts import explain
 
 
-class RoutingSession(SignallingSession):
+class RoutingSession(session.Session):
     """Route requests to database leader or follower as appropriate.
 
     Based on http://techspot.zzzeek.org/2012/01/11/django-style-database-routers-in-sqlalchemy/
@@ -42,21 +42,16 @@ class RoutingSession(SignallingSession):
         return use_follower
 
     def get_bind(self, mapper=None, clause=None):
+        if isinstance(clause, explain):
+            clause = clause.statement
+
         if self.use_follower:
             return random.choice(self.followers)
 
         return super().get_bind(mapper=mapper, clause=clause)
 
 
-class RoutingSQLAlchemy(SQLAlchemyBase):
-    """Override the default SQLAlchemyBase.create_session
-    to return a session factory that makes RoutingSession type sessions"""
-
-    def create_session(self, options):
-        return orm.sessionmaker(class_=RoutingSession, db=self, **options)
-
-
-db = RoutingSQLAlchemy()
+db = SQLAlchemyBase(session_options={'class_': RoutingSession})
 
 
 class BaseModel(db.Model):
