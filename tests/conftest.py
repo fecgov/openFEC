@@ -23,7 +23,6 @@ def run_migrations():
         [
             'flyway',
             'migrate',
-            '-n',
             '-url={0}'.format(common.get_test_jdbc_url()),
             '-locations=filesystem:data/migrations',
         ],
