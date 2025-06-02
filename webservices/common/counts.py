@@ -65,7 +65,7 @@ def extract_analyze_count(rows):
 
 
 class explain(Executable, ClauseElement):
-    inherit_cache = True
+    inherit_cache = False
 
     def __init__(self, stmt, analyze=False):
         self.statement = stmt
