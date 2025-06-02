@@ -151,10 +151,11 @@ def copy_to(source, dest, engine, **flags):
     sql = compiled.string
     params = compiled.params
     conn = engine.raw_connection()
+    array_keys = getattr(source, '_array_cast_keys', set())
 
     if "POSTCOMPILE" in sql:
         sql = rebind_postcompile(sql)
-        params = convert_lists_to_tuples(params)
+        params = convert_lists_to_tuples(params, array_keys)
 
     try:
         with conn.cursor() as cursor:
@@ -171,10 +172,13 @@ def rebind_postcompile(sql):
     return re.sub(pattern, r"%(\1)s", sql)
 
 
-def convert_lists_to_tuples(params):
+def convert_lists_to_tuples(params, array_keys):
     for key, val in params.items():
         if isinstance(val, list):
-            params[key] = tuple(val)
+            if any(key.startswith(prefix) for prefix in array_keys):
+                params[key] = val
+            else:
+                params[key] = tuple(val)
     return params
 
 

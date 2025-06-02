@@ -92,11 +92,13 @@ class CommitteeList(ApiResource):
                 )
 
         query = super().build_query(**kwargs)
+        query._array_cast_keys = set()
+        query._array_cast_keys.add('sponsor_candidate_ids')
         if kwargs.get("candidate_id"):
             query = query.filter(
                 models.Committee.candidate_ids.overlap(kwargs["candidate_id"])
             )
-
+            query._array_cast_keys.add('candidate_ids_')
         if kwargs.get("q"):
             query = query.join(
                 models.CommitteeSearch,
@@ -111,6 +113,7 @@ class CommitteeList(ApiResource):
 
         if kwargs.get("cycle"):
             query = query.filter(models.Committee.cycles.overlap(kwargs["cycle"]))
+            query._array_cast_keys.add('cycles_')
 
         return query
 
@@ -156,6 +159,7 @@ class CommitteeView(ApiResource):
 
     def build_query(self, committee_id=None, candidate_id=None, **kwargs):
         query = super().build_query(**kwargs)
+        query._array_cast_keys = set()
 
         if committee_id is not None:
             committee_id = committee_id.upper()
@@ -176,6 +180,7 @@ class CommitteeView(ApiResource):
 
         if kwargs.get("cycle"):
             query = query.filter(models.CommitteeDetail.cycles.overlap(kwargs["cycle"]))
+            query._array_cast_keys.add('cycles_')
 
         return query
 
