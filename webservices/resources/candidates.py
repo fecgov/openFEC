@@ -75,6 +75,8 @@ class CandidateList(ApiResource):
             kwargs['q'] = kwargs['name']
 
         query = super().build_query(**kwargs)
+        query._array_cast_keys = set()
+
         candidate_detail = models.Candidate
 
         if 'has_raised_funds' in kwargs:
@@ -102,10 +104,12 @@ class CandidateList(ApiResource):
 
         if kwargs.get('cycle'):
             query = query.filter(candidate_detail.cycles.overlap(kwargs['cycle']))
+            query._array_cast_keys.add('cycles_')
         if kwargs.get('election_year'):
             query = query.filter(
                 candidate_detail.election_years.overlap(kwargs['election_year'])
             )
+            query._array_cast_keys.add('election_years_')
         if 'is_active_candidate' in kwargs and kwargs.get('is_active_candidate'):
             # load active candidates only if True
             if kwargs.get('election_year'):
@@ -119,6 +123,8 @@ class CandidateList(ApiResource):
                         candidate_detail.inactive_election_years.is_(None),
                     )
                 )
+                query._array_cast_keys.add('inactive_election_years_')
+
             else:
                 query = query.filter(
                     candidate_detail.candidate_inactive.is_(False)
@@ -131,6 +137,7 @@ class CandidateList(ApiResource):
                         kwargs['election_year']
                     )
                 )
+                query._array_cast_keys.add('inactive_election_years_')
             else:
                 query = query.filter(
                     candidate_detail.candidate_inactive == True  # noqa
@@ -196,6 +203,7 @@ class CandidateView(ApiResource):
 
     def build_query(self, candidate_id=None, committee_id=None, **kwargs):
         query = super().build_query(**kwargs)
+        query._array_cast_keys = set()
 
         if candidate_id is not None:
             candidate_id = candidate_id.upper()
@@ -214,10 +222,12 @@ class CandidateView(ApiResource):
 
         if kwargs.get('cycle'):
             query = query.filter(models.CandidateDetail.cycles.overlap(kwargs['cycle']))
+            query._array_cast_keys.add('cycles_')
         if kwargs.get('election_year'):
             query = query.filter(
                 models.Candidate.election_years.overlap(kwargs['election_year'])
             )
+            query._array_cast_keys.add('election_years_')
         if 'has_raised_funds' in kwargs:
             query = query.filter(
                 models.Candidate.flags.has(

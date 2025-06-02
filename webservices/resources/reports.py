@@ -160,7 +160,8 @@ class ReportsView(views.ApiResource):
             reports_type_map.get(entity_type), default_schemas,
         )
         query = sa.select(reports_class)
-
+        query._array_cast_keys = set()
+        query._array_cast_keys.add('candidate_ids_')
         filter_multi_fields = [
             ('amendment_indicator', models.CommitteeReports.amendment_indicator),
             ('report_type', reports_class.report_type),
