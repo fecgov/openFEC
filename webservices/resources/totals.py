@@ -87,7 +87,8 @@ class TotalsByEntityTypeView(ApiResource):
             default_schemas,
         )
         query = sa.select(totals_class)
-
+        query._array_cast_keys = set()
+        query._array_cast_keys.add('sponsor_candidate_ids_')
         # Committee ID needs to be handled separately because it's not in kwargs
         if committee_id is not None:
             query = query.filter(totals_class.committee_id.in_(committee_id))
