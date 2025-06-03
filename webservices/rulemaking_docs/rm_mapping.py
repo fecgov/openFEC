@@ -12,7 +12,7 @@ RM_MAPPING = {
         "documents": {
             "type": "nested",
             "properties": {  # Level 1 documents: level_1=x,level_2=0
-                "comment_eligibility": {"type": "boolean"},
+                "doc_comment_eligibility": {"type": "boolean"},
                 "doc_category_id": {"type": "keyword"},
                 "doc_category_label": {"type": "keyword"},
                 "doc_date": {"type": "date", "format": "dateOptionalTime"},
@@ -38,7 +38,7 @@ RM_MAPPING = {
                         "level_2_label": {"type": "keyword"},
                         "level_2_docs": {
                             "properties": {
-                                "comment_eligibility": {"type": "boolean"},
+                                "doc_comment_eligibility": {"type": "boolean"},
                                 "doc_category_id": {"type": "integer"},
                                 "doc_category_label": {"type": "keyword"},
                                 "document_date": {"type": "date", "format": "dateOptionalTime"},
@@ -88,7 +88,7 @@ RM_MAPPING = {
         "last_updated": {"type": "date", "format": "dateOptionalTime"},
         "no_tier_documents": {
             "properties": {
-                "comment_eligibility": {"type": "boolean"},
+                "doc_comment_eligibility": {"type": "boolean"},
                 "doc_category_id": {"type": "keyword"},
                 "doc_category_label": {"type": "keyword"},
                 "doc_date": {"type": "date", "format": "dateOptionalTime"},

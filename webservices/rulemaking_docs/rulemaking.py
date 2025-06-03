@@ -3,14 +3,12 @@ from webservices.common.models import db
 from webservices.utils import (
     create_es_client,
 )
-# from webservices.tasks.utils import get_bucket
 import webservices.constants as constants
 
 logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line
 # logger.setLevel(logging.DEBUG)
-
 
 ALL_RMS = """
 SELECT
@@ -43,6 +41,7 @@ WHERE rm_number = %s
 LEVEL_1_DOCS = """
 SELECT
 doc_category_id,
+doc_comment_eligibility,
 doc_description,
 doc_date,
 doc_id,
@@ -66,6 +65,7 @@ ORDER BY doc_date DESC
 NO_TIER_DOCUMENTS = """
 SELECT
 doc_category_id,
+doc_comment_eligibility,
 doc_description,
 doc_date,
 doc_id,
@@ -92,6 +92,7 @@ AND level_2 > 0
 LEVEL_2_DOCS = """
 SELECT
 doc_category_id,
+doc_comment_eligibility,
 doc_description,
 doc_date,
 doc_id,
@@ -110,7 +111,7 @@ ORDER BY doc_date, doc_id
 """
 
 KEY_DOCUMENTS = """
-SELECT
+SELECT DISTINCT
 doc_description,
 doc_date,
 doc_id,
@@ -261,6 +262,7 @@ def get_documents(rm_id):
         for row in rs:
             document = {
                 "doc_category_id": row["doc_category_id"],
+                "doc_comment_eligibility": row["doc_comment_eligibility"],
                 "doc_category_label": constants.DOC_CATEGORY_MAP.get(row["doc_category_id"]),
                 "doc_description": row["doc_description"],
                 "doc_date": row["doc_date"],
@@ -303,8 +305,8 @@ def get_level_2_docs(rm_id, level_1, level_2):
         rs = conn.execute(LEVEL_2_DOCS, rm_id, level_1, level_2)
         for row in rs:
             document = {
-                # "comment_eligibility": row["comment_eligibility"],
                 "doc_category_id": row["doc_category_id"],
+                "doc_comment_eligibility": row["doc_comment_eligibility"],
                 "doc_category_label": constants.DOC_CATEGORY_MAP.get(row["doc_category_id"]),
                 "doc_description": row["doc_description"],
                 "doc_date": row["doc_date"],
@@ -332,7 +334,6 @@ def get_key_documents(rm_id):
         rs = conn.execute(KEY_DOCUMENTS, rm_id)
         for row in rs:
             document = {
-                # "comment_eligibility": row["comment_eligibility"],
                 "doc_description": row["doc_description"],
                 "doc_date": row["doc_date"],
                 "doc_id": row["doc_id"],
@@ -351,8 +352,8 @@ def get_no_tier_documents(rm_id):
         rs = conn.execute(NO_TIER_DOCUMENTS, rm_id)
         for row in rs:
             document = {
-                # "comment_eligibility": row["comment_eligibility"],
                 "doc_category_id": row["doc_category_id"],
+                "doc_comment_eligibility": row["doc_comment_eligibility"],
                 "doc_category_label": constants.DOC_CATEGORY_MAP.get(row["doc_category_id"]),
                 "doc_date": row["doc_date"],
                 "doc_description": row["doc_description"],

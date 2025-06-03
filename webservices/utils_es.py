@@ -1,18 +1,13 @@
 import logging
-# import datetime
 import json
 import time
 import webservices.constants as constants
 
 from webservices.utils import (
     create_es_client,
-    DateTimeEncoder,
 )
-# from webservices.env import env
-# from webservices.tasks.utils import get_bucket
 from webservices.legal_docs import es_management
 from webservices.rulemaking_docs import rm_mapping
-
 
 logger = logging.getLogger(__name__)
 # To debug, uncomment the line below:
@@ -203,31 +198,3 @@ def display_mapping(index_name=None):
     logger.info(" The mapping for index '{0}': \n{1}".format(
         index_name,
         json.dumps(es_client.indices.get_mapping(index=index_name), indent=3)))
-
-
-def show_index_data():
-    """
-    Display the index data locally. For debug only
-    -How to run from terminal:
-    a) modify the following example id
-    b) python cli.py es_show_index_data
-    """
-    es_client = create_es_client()
-
-    try:
-        logger.info("\n==================Index rm_index info==================")
-        if es_client.indices.exists(index="rm_index"):
-            logger.info("\n*** total count in 'rm_index': ***\n{0}".format(
-                json.dumps(es_client.count(index="rm_index"), indent=2)))
-
-        # ---display index data:
-        try:
-            rm_id = "3691"
-            logger.info("\n*** rulemaking {0} data: ***\n{1}".format(
-                3691,
-                json.dumps(es_client.get(index="rm_index", id=3691), indent=2, cls=DateTimeEncoder)))
-        except Exception:
-            logger.error("current {0} not found.".format(rm_id))
-
-    except Exception as err:
-        logger.error("An error occurred while running the get command.{0}".format(err))
