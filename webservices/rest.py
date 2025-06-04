@@ -126,10 +126,14 @@ def create_app(test_config=None):
 
     if test_config is None:
         app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
-        app.config['SQLALCHEMY_FOLLOWERS'] = [sa.create_engine(follower.strip())
+        query_cache_size = int(env.get_credential('QUERY_CACHE_SIZE', '100'))
+        app.config['SQLALCHEMY_FOLLOWERS'] = [sa.create_engine(follower.strip(), query_cache_size=query_cache_size)
                                               for follower in utils.split_env_var(
                                               env.get_credential('SQLA_FOLLOWERS', ''))
                                               if follower.strip()]
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+            'query_cache_size': query_cache_size
+        }
         app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
 
     else:
