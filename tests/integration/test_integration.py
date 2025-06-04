@@ -141,7 +141,7 @@ class IntegrationTestCase(common.BaseTestCase):
         for fixture in fixtures:
             test_value, expected = fixture
             returned_date = connection.execute(
-                "SELECT last_day_of_month(%s)", test_value
+                sa.text("SELECT last_day_of_month(:test)"), {"test": test_value}
             ).scalar()
 
             assert returned_date == expected

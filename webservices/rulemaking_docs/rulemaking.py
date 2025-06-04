@@ -4,7 +4,7 @@ from webservices.utils import (
     create_es_client,
 )
 import webservices.constants as constants
-
+from sqlalchemy import text
 logger = logging.getLogger(__name__)
 
 # for debug, uncomment this line
@@ -35,7 +35,7 @@ rm_year,
 sync_status,
 title
 FROM fosers.rulemaking_vw
-WHERE rm_number = %s
+WHERE rm_number = :rm
 """
 
 LEVEL_1_DOCS = """
@@ -53,11 +53,11 @@ level_2,
 ocrtext,
 sort_order
 FROM fosers.documents_vw
-WHERE rm_id = %s
+WHERE rm_id = :rm
 AND level_1 in (SELECT
 DISTINCT level_1
 FROM fosers.documents_vw
-WHERE rm_id = %s)
+WHERE rm_id = :rm)
 AND level_2 = 0
 ORDER BY doc_date DESC
 """
@@ -75,7 +75,7 @@ is_key_document,
 ocrtext,
 sort_order
 FROM fosers.documents_vw
-WHERE rm_id = %s
+WHERE rm_id = :rm
 AND level_1 is NULL
 ORDER BY doc_date DESC, doc_id DESC
 
@@ -84,8 +84,8 @@ LEVEL_2_ID_LIST = """
 SELECT
 DISTINCT level_2
 FROM fosers.documents_vw
-WHERE rm_id = %s
-AND level_1 = %s
+WHERE rm_id = :rm
+AND level_1 = :level
 AND level_2 > 0
 """
 
@@ -104,9 +104,9 @@ level_2,
 ocrtext,
 sort_order
 FROM fosers.documents_vw
-WHERE rm_id = %s
-AND level_1 = %s
-AND level_2 = %s
+WHERE rm_id = :rm
+AND level_1 = :level_1
+AND level_2 = :level_2
 ORDER BY doc_date, doc_id
 """
 
@@ -118,7 +118,7 @@ doc_id,
 filename,
 doc_type_id
 FROM fosers.documents_vw
-WHERE rm_id = %s
+WHERE rm_id = :rm
 AND is_key_document = true
 ORDER BY doc_date DESC
 """
@@ -128,7 +128,7 @@ SELECT
 name,
 role
 FROM fosers.participants
-WHERE rm_id = %s
+WHERE rm_id = :rm
 ORDER BY name
 """
 
@@ -138,8 +138,8 @@ p.name as name,
 p.role as role
 FROM fosers.documentplayers dp, fosers.participants p
 WHERE dp.participant_id = p.id
-AND dp.rm_id = %s
-AND dp.document_id = %s
+AND dp.rm_id = :rm
+AND dp.document_id = :doc
 ORDER BY name
 """
 
@@ -156,7 +156,7 @@ WHERE event_key IN (107229,107232,107422,107425,106646,106649,106775,106777,1124
 107420,107428,108711,112380,106772,106778,108751,112388,112426,112425,112431,112429,112430,112428,112427,
 107006,107009,107011,107013,108788,108789,112393,112442,112448,112447,112445,106695,112489,106693,112488,
 112410,112494,108887,112492,108888,112493,106700,112491,106697,112490)
-AND rm_id = %s
+AND rm_id = :rm
 ORDER BY vote_date DESC
 """
 
@@ -167,7 +167,7 @@ FROM FOSERS.CALENDAR
 WHERE event_key IN (107029,107091,112449,107138,107208,108817,110919,108693,112598,107358,108847,107034,
 108713,106993,106874,106881,107093,112451,107212,108818,108908,112419,112481,112509,108851,112588,112432,
 112434,107358,112599,112495,112466)
-AND rm_id = %s
+AND rm_id = :rm
 ORDER BY fr_publication_date DESC
 """
 
@@ -176,7 +176,7 @@ SELECT event_name,
 eventdt as hearing_date
 FROM FOSERS.CALENDAR
 WHERE event_key in (112420,112608,107143)
-AND rm_id = %s
+AND rm_id = :rm
 ORDER BY hearing_date DESC
 """
 
@@ -203,8 +203,8 @@ def get_rulemaking(specific_rm_no):
     # bucket = get_bucket() (don't need upload xxxx.pdf to s3 bucket)
     if specific_rm_no is None:
         # load all rulemakings
-        with db.engine.connect() as conn:
-            rs = conn.execute(ALL_RMS)
+        with db.engine.begin() as conn:
+            rs = conn.execute(text(ALL_RMS)).mappings()
             for row in rs:
                 yield get_single_rulemaking(row["rm_number"])
     else:
@@ -214,8 +214,8 @@ def get_rulemaking(specific_rm_no):
 
 
 def get_single_rulemaking(rm_number):
-    with db.engine.connect() as conn:
-        rs = conn.execute(SINGLE_RM, rm_number)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(SINGLE_RM), {"rm": rm_number}).mappings()
         row = rs.first()
         rm_id = row["rm_id"]
         rm = {
@@ -257,8 +257,8 @@ def get_single_rulemaking(rm_number):
 
 def get_documents(rm_id):
     documents = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(LEVEL_1_DOCS, rm_id, rm_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(LEVEL_1_DOCS), {"rm": rm_id}).mappings()
         for row in rs:
             document = {
                 "doc_category_id": row["doc_category_id"],
@@ -287,8 +287,8 @@ def get_documents(rm_id):
 
 def get_level_2_labels(rm_id, level_1):
     level_2_labels = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(LEVEL_2_ID_LIST, rm_id, level_1)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(LEVEL_2_ID_LIST), {"rm": rm_id, "level": level_1}).mappings()
         for row in rs:
             document = {
                 "level_2": row["level_2"],
@@ -301,8 +301,8 @@ def get_level_2_labels(rm_id, level_1):
 
 def get_level_2_docs(rm_id, level_1, level_2):
     level_2_documents = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(LEVEL_2_DOCS, rm_id, level_1, level_2)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(LEVEL_2_DOCS), {"rm": rm_id, "level_1": level_1, "level_2": level_2}).mappings()
         for row in rs:
             document = {
                 "doc_category_id": row["doc_category_id"],
@@ -330,8 +330,8 @@ def get_level_2_docs(rm_id, level_1, level_2):
 
 def get_key_documents(rm_id):
     key_documents = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(KEY_DOCUMENTS, rm_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(KEY_DOCUMENTS), {"rm": rm_id}).mappings()
         for row in rs:
             document = {
                 "doc_description": row["doc_description"],
@@ -348,8 +348,8 @@ def get_key_documents(rm_id):
 
 def get_no_tier_documents(rm_id):
     no_tier_documents = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(NO_TIER_DOCUMENTS, rm_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(NO_TIER_DOCUMENTS), {"rm": rm_id}).mappings()
         for row in rs:
             document = {
                 "doc_category_id": row["doc_category_id"],
@@ -372,8 +372,8 @@ def get_no_tier_documents(rm_id):
 
 def get_doc_entities(rm_id, document_id):
     doc_entities = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(RM_DOCUMENT_ENTITIES, rm_id, document_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(RM_DOCUMENT_ENTITIES), {"rm": rm_id, "doc": document_id}).mappings()
         for row in rs:
             doc_entities.append(
                 {
@@ -386,8 +386,8 @@ def get_doc_entities(rm_id, document_id):
 
 def get_fr_publication_dates(rm_id):
     fr_publication_dates = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(RM_FR_PUBLICATION_DATE, rm_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(RM_FR_PUBLICATION_DATE), {"rm": rm_id}).mappings()
         for row in rs:
             fr_publication_dates.append(row["fr_publication_date"])
     return fr_publication_dates
@@ -395,8 +395,8 @@ def get_fr_publication_dates(rm_id):
 
 def get_hearing_dates(rm_id):
     hearing_dates = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(RM_HEARING_DATE, rm_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(RM_HEARING_DATE), {"rm": rm_id}).mappings()
         for row in rs:
             hearing_dates.append(row["hearing_date"])
     return hearing_dates
@@ -404,8 +404,8 @@ def get_hearing_dates(rm_id):
 
 def get_vote_dates(rm_id):
     vote_dates = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(RM_VOTE_DATE, rm_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(RM_VOTE_DATE), {"rm": rm_id}).mappings()
         for row in rs:
             vote_dates.append(row["vote_date"])
     return vote_dates
@@ -418,8 +418,8 @@ def get_rm_entities(rm_id):
     witness_names = []
     petitioner_names = []
     rm_entities = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(RM_ENTITIES, rm_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(RM_ENTITIES), {"rm": rm_id}).mappings()
         for row in rs:
             rm_entities.append(
                 {
