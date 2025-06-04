@@ -40,7 +40,7 @@ SINGLE_MUR = """
         close_date
     FROM MUR_ARCH.ARCHIVED_MURS
     JOIN fecmur.arch_current_mur_sorting_vw mur_sort on mur_id = mur_sort.case_serial
-    WHERE mur_number = %s
+    WHERE mur_number = :no
 """
 
 MUR_COMPLAINANT = """
@@ -48,7 +48,7 @@ MUR_COMPLAINANT = """
         complainant_respondent_code as code,
         complainant_respondent_name as name
     FROM MUR_ARCH.ARCHIVED_MURS
-    WHERE mur_id = %s AND complainant_respondent_code = 'C'
+    WHERE mur_id = :id AND complainant_respondent_code = 'C'
     ORDER BY complainant_respondent_name
 """
 
@@ -57,7 +57,7 @@ MUR_RESPONDENT = """
         complainant_respondent_code as code,
         complainant_respondent_name as name
     FROM MUR_ARCH.ARCHIVED_MURS
-    WHERE mur_id = %s AND complainant_respondent_code = 'R'
+    WHERE mur_id = :id AND complainant_respondent_code = 'R'
     ORDER BY complainant_respondent_name
 """
 
@@ -65,7 +65,7 @@ MUR_CITES = """
     SELECT
         citation as cite
     FROM MUR_ARCH.ARCHIVED_MURS
-    WHERE mur_id = %s AND citation is not null
+    WHERE mur_id = :id AND citation is not null
     ORDER BY citation
 """
 
@@ -76,7 +76,7 @@ MUR_SUBJECT_LV1 = """
         subject
     FROM MUR_ARCH.SUBJCT_FROM_FILE
     WHERE level_2::integer = 0 AND level_3::integer = 0
-    AND mur = %s
+    AND mur = :id
 """
 
 MUR_SUBJECT_LV2 = """
@@ -87,8 +87,8 @@ MUR_SUBJECT_LV2 = """
     FROM MUR_ARCH.SUBJCT_FROM_FILE
     WHERE level_2::integer > 0
     AND level_3::integer = 0
-    AND mur = %s
-    AND level_1 = %s
+    AND mur = :id
+    AND level_1 = :level
 """
 
 MUR_SUBJECT_LV3 = """
@@ -98,9 +98,9 @@ MUR_SUBJECT_LV3 = """
         subject
     FROM MUR_ARCH.SUBJCT_FROM_FILE
     WHERE level_3::integer > 0
-    AND mur = %s
-    AND level_1 = %s
-    AND level_2 = %s
+    AND mur = :id
+    AND level_1 = :level1
+    AND level_2 = :level2
 """
 
 MUR_DOCUMENTS = """
@@ -112,7 +112,7 @@ MUR_DOCUMENTS = """
         length,
         url
     FROM MUR_ARCH.DOCUMENTS
-    WHERE mur_id = %s
+    WHERE mur_id = :id
     ORDER BY document_id
 """
 
@@ -162,7 +162,7 @@ def load_archived_murs(mur_no=None):
 def get_murs(mur_no=None):
     if mur_no is None:
         with db.engine.connect() as conn:
-            rs = conn.execute(ALL_ARCHIVED_MURS)
+            rs = conn.execute(text(ALL_ARCHIVED_MURS)).mappings()
             for row in rs:
                 yield get_single_mur(row["mur_no"])
     else:
@@ -171,7 +171,7 @@ def get_murs(mur_no=None):
 
 def get_single_mur(mur_no):
     with db.engine.connect() as conn:
-        rs = conn.execute(SINGLE_MUR, mur_no)
+        rs = conn.execute(text(SINGLE_MUR), {"no": mur_no}).mappings()
         row = rs.first()
         if row is not None:
             mur_id = row["mur_id"]
@@ -203,7 +203,7 @@ def get_es_type():
 def get_complainants(mur_id):
     complainants = []
     with db.engine.connect() as conn:
-        rs = conn.execute(MUR_COMPLAINANT, mur_id)
+        rs = conn.execute(text(MUR_COMPLAINANT), {"id": mur_id}).mappings()
         for row in rs:
             complainants.append(row["name"])
     return complainants
@@ -212,7 +212,7 @@ def get_complainants(mur_id):
 def get_respondents(mur_id):
     respondents = []
     with db.engine.connect() as conn:
-        rs = conn.execute(MUR_RESPONDENT, mur_id)
+        rs = conn.execute(text(MUR_RESPONDENT), {"id": mur_id}).mappings()
         for row in rs:
             respondents.append(row["name"])
     return respondents
@@ -234,7 +234,7 @@ def get_citations_arch_mur(mur_id):
     us_codes = []
     regulations = []
     with db.engine.connect() as conn:
-        rs = conn.execute(MUR_CITES, mur_id)
+        rs = conn.execute(text(MUR_CITES), {"id": mur_id}).mappings()
         for row in rs:
             if row["cite"]:
                 us_code_match = re.match(
@@ -265,14 +265,16 @@ def get_subjects(mur_id):
     subject_lv2 = []
     subject_lv3 = []
     with db.engine.connect() as conn:
-        rs1 = conn.execute(MUR_SUBJECT_LV1, mur_id)
+        rs1 = conn.execute(text(MUR_SUBJECT_LV1), {"id": mur_id}).mappings()
         for row1 in rs1:
             if row1["subject"]:
-                rs2 = conn.execute(MUR_SUBJECT_LV2, mur_id, row1["level_1"])
+                rs2 = conn.execute(text(MUR_SUBJECT_LV2), {"id": mur_id, "level": row1["level_1"]}).mappings()
                 subject_lv2 = []
                 for row2 in rs2:
                     if row2["subject"]:
-                        rs3 = conn.execute(MUR_SUBJECT_LV3, mur_id, row1["level_1"], row2["level_2"])
+                        rs3 = conn.execute(text(MUR_SUBJECT_LV3),
+                                           {"id": mur_id, "level1": row1["level_1"], "level2": row2["level_2"]}
+                                           ).mappings()
                         subject_lv3 = []
                         for row3 in rs3:
                             if row3["subject"]:
@@ -292,7 +294,7 @@ def get_subjects(mur_id):
 def get_documents(mur_id):
     documents = []
     with db.engine.connect() as conn:
-        rs = conn.execute(MUR_DOCUMENTS, mur_id)
+        rs = conn.execute(text(MUR_DOCUMENTS), {"id": mur_id}).mappings()
         for row in rs:
             documents.append({
                 "document_id": int(row["document_id"] or 1),

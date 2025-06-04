@@ -2,6 +2,7 @@ import subprocess
 from unittest.mock import patch
 from datetime import datetime, date
 from decimal import Decimal
+from sqlalchemy import text
 import pytest
 
 
@@ -621,31 +622,36 @@ class TestLoadCurrentCases(BaseTestCase):
         published_flg,
         case_type='MUR',
     ):
-        subject_id = self.connection.execute(
-            "SELECT subject_id FROM fecmur.subject " " WHERE description = %s ",
-            subject_description,
-        ).scalar()
-        self.connection.execute(
-            "INSERT INTO fecmur.case (case_id, case_no, name, published_flg, case_type) "
-            "VALUES (%s, %s, %s, %s, %s)",
-            case_id,
-            case_no,
-            name,
-            published_flg,
-            case_type,
-        )
-        if case_type != 'AF':
+        with self.connection.begin():
+            subject_id = self.connection.execute(
+                text("SELECT subject_id FROM fecmur.subject " " WHERE description = :subj "),
+                {"subj": subject_description},
+            ).scalar()
             self.connection.execute(
-                "INSERT INTO fecmur.case_subject (case_id, subject_id, relatedsubject_id) "
-                "VALUES (%s, %s, -1)",
-                case_id,
-                subject_id,
+                text("""INSERT INTO fecmur.case (case_id, case_no, name, published_flg, case_type)
+                     VALUES (:id, :no, :name, :flg, :type)"""),
+                {
+                    "id": case_id,
+                    "no": case_no,
+                    "name": name,
+                    "flg": published_flg,
+                    "type": case_type
+                }
             )
-            self.connection.execute(
-                "INSERT INTO fecmur.electioncycle (case_id, election_cycle) "
-                "VALUES (%s, 2016)",
-                case_id,
-            )
+            if case_type != 'AF':
+                self.connection.execute(
+                    text("""INSERT INTO fecmur.case_subject (case_id, subject_id, relatedsubject_id)
+                         VALUES (:id, :sID, -1)"""),
+                    {
+                        "id": case_id,
+                        "sID": subject_id
+                    }
+                )
+                self.connection.execute(
+                    text("""INSERT INTO fecmur.electioncycle (case_id, election_cycle)
+                         VALUES (:id, 2016)"""),
+                    {"id": case_id},
+                )
 
     def create_admin_fine(
         self,
@@ -667,32 +673,34 @@ class TestLoadCurrentCases(BaseTestCase):
         civil_penalty_due_date,
         civil_penalty_pymt_status_flg,
     ):
-
-        self.connection.execute(
-            "INSERT INTO fecmur.af_case (case_id, committee_id, report_year, report_type, \
-            rtb_action_date, rtb_fine_amount, chal_receipt_date, chal_outcome_code_desc, \
-            fd_date, fd_final_fine_amount, check_amount, treasury_date, treasury_amount, \
-            petition_court_filing_date, petition_court_decision_date, civil_penalty_due_date, \
-            civil_penalty_pymt_status_flg ) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-            case_id,
-            committee_id,
-            report_year,
-            report_type,
-            reason_to_believe_action_date,
-            reason_to_believe_fine_amount,
-            challenge_receipt_date,
-            challenge_outcome,
-            final_determination_date,
-            final_determination_amount,
-            payment_amount,
-            treasury_referral_date,
-            treasury_referral_amount,
-            petition_court_filing_date,
-            petition_court_decision_date,
-            civil_penalty_due_date,
-            civil_penalty_pymt_status_flg,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""INSERT INTO fecmur.af_case (case_id, committee_id, report_year, report_type,
+                     fd_date, fd_final_fine_amount, check_amount, treasury_date, treasury_amount,
+                     petition_court_filing_date, petition_court_decision_date,
+                     civil_penalty_due_date,civil_penalty_pymt_status_flg )
+                     VALUES (:id, :cID, :year, :type, :rtbDate, :rtbAmt, :cDate,
+                     :outcome, :fdDate, :fdAmt, :amt, :trDate, :trAmt, :pcfDate, :pcdDate, :cpdDate, :status)"""),
+                {
+                    "id": case_id,
+                    "cID": committee_id,
+                    "year": report_year,
+                    "type": report_type,
+                    "rtbDate": reason_to_believe_action_date,
+                    "rtbAmt": reason_to_believe_fine_amount,
+                    "cDate": challenge_receipt_date,
+                    "outcome": challenge_outcome,
+                    "fdDate": final_determination_date,
+                    "fdAmt": final_determination_amount,
+                    "amt": payment_amount,
+                    "trDate": treasury_referral_date,
+                    "trAmt": treasury_referral_amount,
+                    "pcfDate": petition_court_filing_date,
+                    "pcdDate": petition_court_decision_date,
+                    "cpdDate": civil_penalty_due_date,
+                    "status": civil_penalty_pymt_status_flg
+                }
+            )
 
     def create_participant(
         self,
@@ -704,65 +712,79 @@ class TestLoadCurrentCases(BaseTestCase):
         statutory_citation=None,
         regulatory_citation=None,
     ):
-        role_id = self.connection.execute(
-            "SELECT role_id FROM fecmur.role " " WHERE description = %s ", role
-        ).scalar()
-        self.connection.execute(
-            "INSERT INTO fecmur.entity (entity_id, name) " "VALUES (%s, %s)",
-            entity_id,
-            name,
-        )
-        self.connection.execute(
-            "INSERT INTO fecmur.players (player_id, entity_id, case_id, role_id) "
-            "VALUES (%s, %s, %s, %s)",
-            entity_id,
-            entity_id,
-            case_id,
-            role_id,
-        )
-        if stage:
-            self.create_violation(
-                case_id, entity_id, stage, statutory_citation, regulatory_citation
+        with self.connection.begin():
+            role_id = self.connection.execute(
+                text("SELECT role_id FROM fecmur.role " " WHERE description = :role "), {"role": role}
+            ).scalar()
+            self.connection.execute(
+                text("INSERT INTO fecmur.entity (entity_id, name) " "VALUES (:id, :name)"),
+                {
+                    "id": entity_id,
+                    "name": name
+                }
             )
+            self.connection.execute(
+                text("""INSERT INTO fecmur.players (player_id, entity_id, case_id, role_id)
+                     VALUES (:eID, :eID, :cID, :rID)"""),
+                {
+                    "eID": entity_id,
+                    "cID": case_id,
+                    "rID": role_id
+                }
+            )
+            if stage:
+                self.create_violation(
+                    case_id, entity_id, stage, statutory_citation, regulatory_citation
+                )
 
     def create_violation(
         self, case_id, entity_id, stage, statutory_citation, regulatory_citation
     ):
-        self.connection.execute(
-            "INSERT INTO fecmur.violations (case_id, entity_id, stage, statutory_citation, regulatory_citation) "
-            "VALUES (%s, %s, %s, %s, %s)",
-            case_id,
-            entity_id,
-            stage,
-            statutory_citation,
-            regulatory_citation,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""INSERT INTO fecmur.violations (case_id, entity_id, stage, statutory_citation,
+                     regulatory_citation)
+                     VALUES (:id, :eID, :stage, :sCit, :rCit)"""),
+                {
+                    "id": case_id,
+                    "eID": entity_id,
+                    "stage": stage,
+                    "sCit": statutory_citation,
+                    "rCit": regulatory_citation
+                }
+            )
 
     def create_document(self, case_id, document, filename='201801_C.pdf'):
-        self.connection.execute(
-            """
-            INSERT INTO fecmur.document
-            (document_id, case_id, filename, category, document_date, ocrtext, description, doc_order_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
-            document["document_id"],
-            case_id,
-            filename,
-            document["category"],
-            document["date"],
-            document["text"],
-            document["description"],
-            document["doc_order_id"],
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""
+                INSERT INTO fecmur.document
+                (document_id, case_id, filename, category, document_date, ocrtext, description, doc_order_id)
+                VALUES (:id, :cID, :name, :category, :date, :text, :descr, :order)"""),
+                {
+                    "id": document["document_id"],
+                    "cID": case_id,
+                    "name": filename,
+                    "category": document["category"],
+                    "date": document["date"],
+                    "text": document["text"],
+                    "descr": document["description"],
+                    "order": document["doc_order_id"]
+                }
+            )
 
     def create_calendar_event(self, entity_id, event_date, event_id, case_id):
-        self.connection.execute(
-            "INSERT INTO fecmur.calendar (entity_id, event_date, event_id, case_id) "
-            "VALUES (%s, %s, %s, %s)",
-            entity_id,
-            event_date,
-            event_id,
-            case_id,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""INSERT INTO fecmur.calendar (entity_id, event_date, event_id, case_id)
+                     VALUES (:id, :date, :eID, :cID)"""),
+                {
+                    "id": entity_id,
+                    "date": event_date,
+                    "eID": event_id,
+                    "cID": case_id
+                }
+            )
 
     def create_entity(
         self,
@@ -776,20 +798,23 @@ class TestLoadCurrentCases(BaseTestCase):
         name,
         pg_date,
     ):
-        self.connection.execute(
-            "INSERT INTO fecmur.entity (entity_id, first_name, last_name, middle_name, "
-            "prefix, suffix, type, name, pg_date) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-            entity_id,
-            first_name,
-            last_name,
-            middle_name,
-            prefix,
-            suffix,
-            type,
-            name,
-            pg_date,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""INSERT INTO fecmur.entity (entity_id, first_name, last_name, middle_name,
+                     prefix, suffix, type, name, pg_date)
+                     VALUES (:id, :fname, :lname, :mname, :prefix, :suffix, :type, :name, :date)"""),
+                {
+                    "id": entity_id,
+                    "fname": first_name,
+                    "lname": last_name,
+                    "mname": middle_name,
+                    "prefix": prefix,
+                    "suffix": suffix,
+                    "type": type,
+                    "name": name,
+                    "date": pg_date
+                }
+            )
 
     def create_event(
         self,
@@ -801,18 +826,21 @@ class TestLoadCurrentCases(BaseTestCase):
         check_primary_respondent,
         pg_date,
     ):
-        self.connection.execute(
-            "INSERT INTO fecmur.event (event_id, parent_event, event_name, path, is_key_date, "
-            "check_primary_respondent, pg_date) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            event_id,
-            parent_event,
-            event_name,
-            path,
-            is_key_date,
-            check_primary_respondent,
-            pg_date,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""INSERT INTO fecmur.event (event_id, parent_event, event_name, path, is_key_date,
+                     check_primary_respondent, pg_date)
+                     VALUES (:id, :event, :name, :path, :isDate, :primary, :date)"""),
+                {
+                    "id": event_id,
+                    "event": parent_event,
+                    "name": event_name,
+                    "path": path,
+                    "isDate": is_key_date,
+                    "primary": check_primary_respondent,
+                    "date": pg_date
+                }
+            )
 
     def create_disposition_category(
             self,
@@ -822,25 +850,31 @@ class TestLoadCurrentCases(BaseTestCase):
             published_flg,
             doc_type,
      ):
-        self.connection.execute(
-            "INSERT INTO fecmur.ref_case_disposition_category (category_id, category_name, "
-            "display_category_name, published_flg, doc_type) "
-            "VALUES (%s, %s, %s, %s, %s)",
-            category_id,
-            category_name,
-            display_category_name,
-            published_flg,
-            doc_type,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""INSERT INTO fecmur.ref_case_disposition_category (category_id, category_name,
+                     display_category_name, published_flg, doc_type)
+                     VALUES (:id, :name, :catName, :flg, :doc)"""),
+                {
+                    "id": category_id,
+                    "name": category_name,
+                    "catName": display_category_name,
+                    "flg": published_flg,
+                    "doc": doc_type
+                }
+            )
 
     def create_relatedobjects(self, master_key, detail_key, relation_id):
-        self.connection.execute(
-            "INSERT INTO fecmur.relatedobjects (master_key, detail_key, relation_id) "
-            "VALUES (%s, %s, %s)",
-            master_key,
-            detail_key,
-            relation_id,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""INSERT INTO fecmur.relatedobjects (master_key, detail_key, relation_id)
+                     VALUES (:key, :dKey, :id)"""),
+                {
+                    "key": master_key,
+                    "dKey": detail_key,
+                    "id": relation_id
+                }
+            )
 
     def create_settlement(
         self,
@@ -852,68 +886,83 @@ class TestLoadCurrentCases(BaseTestCase):
         settlement_type,
         pg_date,
     ):
-        self.connection.execute(
-            "INSERT INTO fecmur.settlement (settlement_id, case_id, initial_amount, "
-            "final_amount, amount_received, settlement_type, pg_date) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            settlement_id,
-            case_id,
-            initial_amount,
-            final_amount,
-            amount_received,
-            settlement_type,
-            pg_date,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""INSERT INTO fecmur.settlement (settlement_id, case_id, initial_amount, final_amount,
+                     amount_received, settlement_type, pg_date)
+                     VALUES (:id, :cID, :amt, :fAmt, :rAmt, :type, :date)"""),
+                {
+                    "id": settlement_id,
+                    "cID": case_id,
+                    "amt": initial_amount,
+                    "fAmt": final_amount,
+                    "rAmt": amount_received,
+                    "type": settlement_type,
+                    "date": pg_date
+                }
+            )
 
     def create_commission(
         self, commission_id, agenda_date, vote_date, action, case_id, pg_date
     ):
-        self.connection.execute(
-            "INSERT INTO fecmur.commission (commission_id, agenda_date, vote_date, action, case_id, pg_date) "
-            "VALUES (%s, %s, %s, %s, %s, %s)",
-            commission_id,
-            agenda_date,
-            vote_date,
-            action,
-            case_id,
-            pg_date,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""INSERT INTO fecmur.commission (commission_id, agenda_date, vote_date, action, case_id, pg_date)
+                     VALUES (:id, :aDate, :vDate, :action, :cID, :date)"""),
+                {
+                    "id": commission_id,
+                    "aDate": agenda_date,
+                    "vDate": vote_date,
+                    "action": action,
+                    "cID": case_id,
+                    "date": pg_date
+                }
+            )
 
     def create_complainant(
         self, player_id, entity_id, case_id, role_id, pg_date
     ):
-        self.connection.execute(
-            "INSERT INTO fecmur.players (player_id, entity_id, case_id, role_id, pg_date) "
-            "VALUES (%s, %s, %s, %s, %s)",
-            player_id,
-            entity_id,
-            case_id,
-            role_id,
-            pg_date,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""INSERT INTO fecmur.players (player_id, entity_id, case_id, role_id, pg_date)
+                     VALUES (:id, :eID, :cID, :rID, :date)"""),
+                {
+                    "id": player_id,
+                    "eID": entity_id,
+                    "cID": case_id,
+                    "rID": role_id,
+                    "date": pg_date
+                }
+            )
 
     def create_af_case_disposition(
         self, case_id, amount, description, dates
     ):
-        self.connection.execute(
-            "INSERT INTO fecmur.af_case_disposition (case_id, amount, description, dates) "
-            "VALUES ( %s, %s, %s, %s )",
-            case_id,
-            amount,
-            description,
-            dates,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""INSERT INTO fecmur.af_case_disposition (case_id, amount, description, dates)
+                     VALUES ( :id, :amt, :descr, :date )"""),
+                {
+                    "id": case_id,
+                    "amt": amount,
+                    "descr": description,
+                    "date": dates
+                }
+            )
 
     def create_non_monetary_term(
         self, term_id, term_description, pg_date
     ):
-        self.connection.execute(
-            "INSERT INTO fecmur.non_monetary_term (term_id, term_description, pg_date) "
-            "VALUES (%s, %s, %s)",
-            term_id,
-            term_description,
-            pg_date,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""INSERT INTO fecmur.non_monetary_term (term_id, term_description, pg_date)
+                     VALUES (:id, :descr, :date)"""),
+                {
+                    "id": term_id,
+                    "descr": term_description,
+                    "date": pg_date
+                }
+            )
 
     def clear_test_data(self):
         tables = [
@@ -934,5 +983,6 @@ class TestLoadCurrentCases(BaseTestCase):
             "af_case_disposition",
             "non_monetary_term",
         ]
-        for table in tables:
-            self.connection.execute("DELETE FROM fecmur.{}".format(table))
+        with self.connection.begin():
+            for table in tables:
+                self.connection.execute(text("DELETE FROM fecmur.{}".format(table)))

@@ -12,6 +12,7 @@ from webservices.resources.sched_b import ScheduleBView
 from webservices import __API_VERSION__
 from webservices.common.models import db
 from webservices.utils import parse_fulltext
+from sqlalchemy import text
 
 
 @pytest.mark.usefixtures("migrate_db")
@@ -52,34 +53,35 @@ class TriggerTestCase(common.BaseTestCase):
                 "O'Reilly",
             ],
         }
-        i = 0
-        for key in names:
-            for n in names[key]:
-                i += 1
-                data = {
-                    'recipient_nm': n,
-                    'sub_id': 9999999999999999990 + i,
-                    'filing_form': 'F3',
-                }
-                insert = (
-                    "INSERT INTO disclosure.fec_fitem_sched_b "
-                    + "(recipient_nm, sub_id, filing_form) "
-                    + " VALUES (%(recipient_nm)s, %(sub_id)s, %(filing_form)s)"
+        with connection.begin():
+            i = 0
+            for key in names:
+                for n in names[key]:
+                    i += 1
+                    data = {
+                        'recipient_nm': n,
+                        'sub_id': 9999999999999999990 + i,
+                        'filing_form': 'F3',
+                    }
+                    insert = (
+                        "INSERT INTO disclosure.fec_fitem_sched_b "
+                        + "(recipient_nm, sub_id, filing_form) "
+                        + " VALUES (:recipient_nm, :sub_id, :filing_form)"
+                    )
+                    connection.execute(text(insert), data)
+                manage.refresh_materialized(concurrent=False)
+                select = (
+                    "SELECT * from disclosure.fec_fitem_sched_b "
+                    + "WHERE recipient_name_text @@ to_tsquery('"
+                    + parse_fulltext(key)
+                    + "');"
                 )
-                connection.execute(insert, data)
-            manage.refresh_materialized(concurrent=False)
-            select = (
-                "SELECT * from disclosure.fec_fitem_sched_b "
-                + "WHERE recipient_name_text @@ to_tsquery('"
-                + parse_fulltext(key)
-                + "');"
-            )
-            results = connection.execute(select).fetchall()
-            recipient_nm_list = [name[2] for name in results]
-            # the only result not returned is the "bad" last element
-            self.assertEqual(
-                set(names[key]) - set(recipient_nm_list), {names[key][-1]}
-            )
+                results = connection.execute(text(select)).fetchall()
+                recipient_nm_list = [name[2] for name in results]
+                # the only result not returned is the "bad" last element
+                self.assertEqual(
+                    set(names[key]) - set(recipient_nm_list), {names[key][-1]}
+                )
         connection.close()
 
     def test_schedule_a_contributor_name_text(self):
@@ -98,32 +100,33 @@ class TriggerTestCase(common.BaseTestCase):
                 "O'Reilly",
             ],
         }
-        i = 0
-        for key in names:
-            for n in names[key]:
-                i += 1
-                data = {
-                    'contbr_nm': n,
-                    'sub_id': 9999999999999999990 + i,
-                    'filing_form': 'F3',
-                }
-                insert = (
-                    "INSERT INTO disclosure.fec_fitem_sched_a "
-                    + "(contbr_nm, sub_id, filing_form) "
-                    + " VALUES (%(contbr_nm)s, %(sub_id)s, %(filing_form)s)"
+        with connection.begin():
+            i = 0
+            for key in names:
+                for n in names[key]:
+                    i += 1
+                    data = {
+                        'contbr_nm': n,
+                        'sub_id': 9999999999999999990 + i,
+                        'filing_form': 'F3',
+                    }
+                    insert = (
+                        "INSERT INTO disclosure.fec_fitem_sched_a "
+                        + "(contbr_nm, sub_id, filing_form) "
+                        + " VALUES (:contbr_nm, :sub_id, :filing_form)"
+                    )
+                    connection.execute(text(insert), data)
+                manage.refresh_materialized(concurrent=False)
+                select = (
+                    "SELECT * from disclosure.fec_fitem_sched_a "
+                    + "WHERE contributor_name_text @@ to_tsquery('"
+                    + parse_fulltext(key)
+                    + "');"
                 )
-                connection.execute(insert, data)
-            manage.refresh_materialized(concurrent=False)
-            select = (
-                "SELECT * from disclosure.fec_fitem_sched_a "
-                + "WHERE contributor_name_text @@ to_tsquery('"
-                + parse_fulltext(key)
-                + "');"
-            )
-            results = connection.execute(select).fetchall()
-            contbr_nm_list = [name[3] for name in results]
-            # the only result not returned is the "bad" last element
-            self.assertEqual(set(names[key]) - set(contbr_nm_list), {names[key][-1]})
+                results = connection.execute(text(select)).fetchall()
+                contbr_nm_list = [name[3] for name in results]
+                # the only result not returned is the "bad" last element
+                self.assertEqual(set(names[key]) - set(contbr_nm_list), {names[key][-1]})
         connection.close()
 
     def test_schedule_a_contributor_employer_text(self):
@@ -142,34 +145,35 @@ class TriggerTestCase(common.BaseTestCase):
                 "O'Reilly",
             ],
         }
-        i = 0
-        for key in names:
-            for n in names[key]:
-                i += 1
-                data = {
-                    'contbr_employer': n,
-                    'sub_id': 9999999999999999980 + i,
-                    'filing_form': 'F3',
-                }
-                insert = (
-                    "INSERT INTO disclosure.fec_fitem_sched_a "
-                    + "(contbr_employer, sub_id, filing_form) "
-                    + " VALUES (%(contbr_employer)s, %(sub_id)s, %(filing_form)s)"
+        with connection.begin():
+            i = 0
+            for key in names:
+                for n in names[key]:
+                    i += 1
+                    data = {
+                        'contbr_employer': n,
+                        'sub_id': 9999999999999999980 + i,
+                        'filing_form': 'F3',
+                    }
+                    insert = (
+                        "INSERT INTO disclosure.fec_fitem_sched_a "
+                        + "(contbr_employer, sub_id, filing_form) "
+                        + " VALUES (:contbr_employer, :sub_id, :filing_form)"
+                    )
+                    connection.execute(text(insert), data)
+                manage.refresh_materialized(concurrent=False)
+                select = (
+                    "SELECT * from disclosure.fec_fitem_sched_a "
+                    + "WHERE contributor_employer_text @@ to_tsquery('"
+                    + parse_fulltext(key)
+                    + "');"
                 )
-                connection.execute(insert, data)
-            manage.refresh_materialized(concurrent=False)
-            select = (
-                "SELECT * from disclosure.fec_fitem_sched_a "
-                + "WHERE contributor_employer_text @@ to_tsquery('"
-                + parse_fulltext(key)
-                + "');"
-            )
-            results = connection.execute(select).fetchall()
-            contbr_employer_list = [name[16] for name in results]
-            # the only result not returned is the "bad" last element
-            self.assertEqual(
-                set(names[key]) - set(contbr_employer_list), {names[key][-1]}
-            )
+                results = connection.execute(text(select)).fetchall()
+                contbr_employer_list = [name[16] for name in results]
+                # the only result not returned is the "bad" last element
+                self.assertEqual(
+                    set(names[key]) - set(contbr_employer_list), {names[key][-1]}
+                )
         connection.close()
 
     def test_schedule_a_contributor_occupation_text(self):
@@ -188,34 +192,35 @@ class TriggerTestCase(common.BaseTestCase):
                 "O'Reilly",
             ],
         }
-        i = 0
-        for key in names:
-            for n in names[key]:
-                i += 1
-                data = {
-                    'contbr_occupation': n,
-                    'sub_id': 9999999999999999970 + i,
-                    'filing_form': 'F3',
-                }
-                insert = (
-                    "INSERT INTO disclosure.fec_fitem_sched_a "
-                    + "(contbr_occupation, sub_id, filing_form) "
-                    + " VALUES (%(contbr_occupation)s, %(sub_id)s, %(filing_form)s)"
+        with connection.begin():
+            i = 0
+            for key in names:
+                for n in names[key]:
+                    i += 1
+                    data = {
+                        'contbr_occupation': n,
+                        'sub_id': 9999999999999999970 + i,
+                        'filing_form': 'F3',
+                    }
+                    insert = (
+                        "INSERT INTO disclosure.fec_fitem_sched_a "
+                        + "(contbr_occupation, sub_id, filing_form) "
+                        + " VALUES (:contbr_occupation, :sub_id, :filing_form)"
+                    )
+                    connection.execute(text(insert), data)
+                manage.refresh_materialized(concurrent=False)
+                select = (
+                    "SELECT * from disclosure.fec_fitem_sched_a "
+                    + "WHERE contributor_occupation_text @@ to_tsquery('"
+                    + parse_fulltext(key)
+                    + "');"
                 )
-                connection.execute(insert, data)
-            manage.refresh_materialized(concurrent=False)
-            select = (
-                "SELECT * from disclosure.fec_fitem_sched_a "
-                + "WHERE contributor_occupation_text @@ to_tsquery('"
-                + parse_fulltext(key)
-                + "');"
-            )
-            results = connection.execute(select).fetchall()
-            contbr_occupation_list = [name[17] for name in results]
-            # the only result not returned is the "bad" last element
-            self.assertEqual(
-                set(names[key]) - set(contbr_occupation_list), {names[key][-1]}
-            )
+                results = connection.execute(text(select)).fetchall()
+                contbr_occupation_list = [name[17] for name in results]
+                # the only result not returned is the "bad" last element
+                self.assertEqual(
+                    set(names[key]) - set(contbr_occupation_list), {names[key][-1]}
+                )
         connection.close()
 
     def test_schedule_c_loan_source_name_text(self):
@@ -227,33 +232,34 @@ class TriggerTestCase(common.BaseTestCase):
         name = "O'Reilly"
         names_good = {'O Reilly', "O'Reilly", 'O.Reilly', 'O-Reilly'}
         names_bad = {'O', "O'Hare", "Reilly"}
-        i = 0
-        for n in names_good.union(names_bad):
-            i += 1
-            data = {
-                'loan_src_nm': n,
-                'sub_id': 9999999999999999970 + i,
-                'filing_form': 'F3',
-            }
-            insert = (
-                "INSERT INTO disclosure.fec_fitem_sched_c "
-                + "(loan_src_nm, sub_id, filing_form) "
-                + " VALUES (%(loan_src_nm)s, %(sub_id)s, %(filing_form)s)"
+        with connection.begin():
+            i = 0
+            for n in names_good.union(names_bad):
+                i += 1
+                data = {
+                    'loan_src_nm': n,
+                    'sub_id': 9999999999999999970 + i,
+                    'filing_form': 'F3',
+                }
+                insert = (
+                    "INSERT INTO disclosure.fec_fitem_sched_c "
+                    + "(loan_src_nm, sub_id, filing_form) "
+                    + " VALUES (:loan_src_nm, :sub_id, :filing_form)"
+                )
+                connection.execute(text(insert), data)
+            manage.refresh_materialized(concurrent=False)
+            select = (
+                "SELECT * from disclosure.fec_fitem_sched_c "
+                + "WHERE loan_source_name_text @@ to_tsquery('"
+                + parse_fulltext(name)
+                + "');"
             )
-            connection.execute(insert, data)
-        manage.refresh_materialized(concurrent=False)
-        select = (
-            "SELECT * from disclosure.fec_fitem_sched_c "
-            + "WHERE loan_source_name_text @@ to_tsquery('"
-            + parse_fulltext(name)
-            + "');"
-        )
-        results = connection.execute(select).fetchall()
-        loan_src_nm_list = {na[7] for na in results}
-        # assert all good names in result set
-        assert names_good.issubset(loan_src_nm_list)
-        # assert no bad names in result set
-        assert names_bad.isdisjoint(loan_src_nm_list)
+            results = connection.execute(text(select)).fetchall()
+            loan_src_nm_list = {na[7] for na in results}
+            # assert all good names in result set
+            assert names_good.issubset(loan_src_nm_list)
+            # assert no bad names in result set
+            assert names_bad.isdisjoint(loan_src_nm_list)
         connection.close()
 
     def test_schedule_c_candidate_name_text(self):
@@ -265,33 +271,34 @@ class TriggerTestCase(common.BaseTestCase):
         name = "O'Reilly"
         names_good = {'O Reilly', "O'Reilly", 'O.Reilly', 'O-Reilly'}
         names_bad = {'O', "O'Hare", "Reilly"}
-        i = 0
-        for n in names_good.union(names_bad):
-            i += 1
-            data = {
-                'cand_nm': n,
-                'sub_id': 9999999999999999960 + i,
-                'filing_form': 'F3',
-            }
-            insert = (
-                "INSERT INTO disclosure.fec_fitem_sched_c "
-                + "(cand_nm, sub_id, filing_form) "
-                + " VALUES (%(cand_nm)s, %(sub_id)s, %(filing_form)s)"
+        with connection.begin():
+            i = 0
+            for n in names_good.union(names_bad):
+                i += 1
+                data = {
+                    'cand_nm': n,
+                    'sub_id': 9999999999999999960 + i,
+                    'filing_form': 'F3',
+                }
+                insert = (
+                    "INSERT INTO disclosure.fec_fitem_sched_c "
+                    + "(cand_nm, sub_id, filing_form) "
+                    + " VALUES (:cand_nm, :sub_id, :filing_form)"
+                )
+                connection.execute(text(insert), data)
+            manage.refresh_materialized(concurrent=False)
+            select = (
+                "SELECT * from disclosure.fec_fitem_sched_c "
+                + "WHERE candidate_name_text @@ to_tsquery('"
+                + parse_fulltext(name)
+                + "');"
             )
-            connection.execute(insert, data)
-        manage.refresh_materialized(concurrent=False)
-        select = (
-            "SELECT * from disclosure.fec_fitem_sched_c "
-            + "WHERE candidate_name_text @@ to_tsquery('"
-            + parse_fulltext(name)
-            + "');"
-        )
-        results = connection.execute(select).fetchall()
-        cand_nm_list = {na[32] for na in results}
-        # assert all good names in result set
-        assert names_good.issubset(cand_nm_list)
-        # assert no bad names in result set
-        assert names_bad.isdisjoint(cand_nm_list)
+            results = connection.execute(text(select)).fetchall()
+            cand_nm_list = {na[32] for na in results}
+            # assert all good names in result set
+            assert names_good.issubset(cand_nm_list)
+            # assert no bad names in result set
+            assert names_bad.isdisjoint(cand_nm_list)
         connection.close()
 
     def test_schedule_d_creditor_debtor_name_text(self):
@@ -303,33 +310,34 @@ class TriggerTestCase(common.BaseTestCase):
         name = "O'Reilly"
         names_good = {'O Reilly', "O'Reilly", 'O.Reilly', 'O-Reilly'}
         names_bad = {'O', "O'Hare", "Reilly"}
-        i = 0
-        for n in names_good.union(names_bad):
-            i += 1
-            data = {
-                'cred_dbtr_nm': n,
-                'sub_id': 9999999999999999970 + i,
-                'filing_form': 'F3',
-            }
-            insert = (
-                "INSERT INTO disclosure.fec_fitem_sched_d "
-                + "(cred_dbtr_nm, sub_id, filing_form) "
-                + " VALUES (%(cred_dbtr_nm)s, %(sub_id)s, %(filing_form)s)"
+        with connection.begin():
+            i = 0
+            for n in names_good.union(names_bad):
+                i += 1
+                data = {
+                    'cred_dbtr_nm': n,
+                    'sub_id': 9999999999999999970 + i,
+                    'filing_form': 'F3',
+                }
+                insert = (
+                    "INSERT INTO disclosure.fec_fitem_sched_d "
+                    + "(cred_dbtr_nm, sub_id, filing_form) "
+                    + " VALUES (:cred_dbtr_nm, :sub_id, :filing_form)"
+                )
+                connection.execute(text(insert), data)
+            manage.refresh_materialized(concurrent=False)
+            select = (
+                "SELECT * from disclosure.fec_fitem_sched_d "
+                + "WHERE creditor_debtor_name_text @@ to_tsquery('"
+                + parse_fulltext(name)
+                + "');"
             )
-            connection.execute(insert, data)
-        manage.refresh_materialized(concurrent=False)
-        select = (
-            "SELECT * from disclosure.fec_fitem_sched_d "
-            + "WHERE creditor_debtor_name_text @@ to_tsquery('"
-            + parse_fulltext(name)
-            + "');"
-        )
-        results = connection.execute(select).fetchall()
-        cred_dbtr_nm_list = {na[3] for na in results}
-        # assert all good names in result set
-        assert names_good.issubset(cred_dbtr_nm_list)
-        # assert no bad names in result set
-        assert names_bad.isdisjoint(cred_dbtr_nm_list)
+            results = connection.execute(text(select)).fetchall()
+            cred_dbtr_nm_list = {na[3] for na in results}
+            # assert all good names in result set
+            assert names_good.issubset(cred_dbtr_nm_list)
+            # assert no bad names in result set
+            assert names_bad.isdisjoint(cred_dbtr_nm_list)
         connection.close()
 
     def test_schedule_f_payee_name_text(self):
@@ -341,29 +349,30 @@ class TriggerTestCase(common.BaseTestCase):
         name = "O'Reilly"
         names_good = {'O Reilly', "O'Reilly", 'O.Reilly', 'O-Reilly'}
         names_bad = {'O', "O'Hare", "Reilly"}
-        i = 0
-        for n in names_good.union(names_bad):
-            i += 1
-            data = {'pye_nm': n, 'sub_id': 9999999999999999970 + i, 'filing_form': 'F3'}
-            insert = (
-                "INSERT INTO disclosure.fec_fitem_sched_f "
-                + "(pye_nm, sub_id, filing_form) "
-                + " VALUES (%(pye_nm)s, %(sub_id)s, %(filing_form)s)"
+        with connection.begin():
+            i = 0
+            for n in names_good.union(names_bad):
+                i += 1
+                data = {'pye_nm': n, 'sub_id': 9999999999999999970 + i, 'filing_form': 'F3'}
+                insert = (
+                    "INSERT INTO disclosure.fec_fitem_sched_f "
+                    + "(pye_nm, sub_id, filing_form) "
+                    + " VALUES (:pye_nm, :sub_id, :filing_form)"
+                )
+                connection.execute(text(insert), data)
+            manage.refresh_materialized(concurrent=False)
+            select = (
+                "SELECT * from disclosure.fec_fitem_sched_f "
+                + "WHERE payee_name_text @@ to_tsquery('"
+                + parse_fulltext(name)
+                + "');"
             )
-            connection.execute(insert, data)
-        manage.refresh_materialized(concurrent=False)
-        select = (
-            "SELECT * from disclosure.fec_fitem_sched_f "
-            + "WHERE payee_name_text @@ to_tsquery('"
-            + parse_fulltext(name)
-            + "');"
-        )
-        results = connection.execute(select).fetchall()
-        pye_nm_list = {na[14] for na in results}
-        # assert all good names in result set
-        assert names_good.issubset(pye_nm_list)
-        # assert no bad names in result set
-        assert names_bad.isdisjoint(pye_nm_list)
+            results = connection.execute(text(select)).fetchall()
+            pye_nm_list = {na[14] for na in results}
+            # assert all good names in result set
+            assert names_good.issubset(pye_nm_list)
+            # assert no bad names in result set
+            assert names_bad.isdisjoint(pye_nm_list)
         connection.close()
 
     def test_schedule_f_payee_name_text_accent(self):
@@ -373,35 +382,36 @@ class TriggerTestCase(common.BaseTestCase):
         '''
         connection = db.engine.connect()
         names = {'ÁCCENTED NAME', 'ACCENTED NAME'}
-        i = 0
-        for n in names:
-            i += 1
-            data = {'pye_nm': n, 'sub_id': 9999999998999999970 + i, 'filing_form': 'F3'}
-            insert = (
-                "INSERT INTO disclosure.fec_fitem_sched_f "
-                + "(pye_nm, sub_id, filing_form) "
-                + " VALUES (%(pye_nm)s, %(sub_id)s, %(filing_form)s)"
+        with connection.begin():
+            i = 0
+            for n in names:
+                i += 1
+                data = {'pye_nm': n, 'sub_id': 9999999998999999970 + i, 'filing_form': 'F3'}
+                insert = (
+                    "INSERT INTO disclosure.fec_fitem_sched_f "
+                    + "(pye_nm, sub_id, filing_form) "
+                    + " VALUES (:pye_nm, :sub_id, :filing_form)"
+                )
+                connection.execute(text(insert), data)
+            manage.refresh_materialized(concurrent=False)
+            select = (
+                "SELECT * from disclosure.fec_fitem_sched_f "
+                + "WHERE payee_name_text @@ to_tsquery('"
+                + parse_fulltext('ÁCCENTED NAME')
+                + "');"
             )
-            connection.execute(insert, data)
-        manage.refresh_materialized(concurrent=False)
-        select = (
-            "SELECT * from disclosure.fec_fitem_sched_f "
-            + "WHERE payee_name_text @@ to_tsquery('"
-            + parse_fulltext('ÁCCENTED NAME')
-            + "');"
-        )
-        results = connection.execute(select).fetchall()
-        pye_nm_list = {na[14] for na in results}
-        assert names.issubset(pye_nm_list)
-        select = (
-            "SELECT * from disclosure.fec_fitem_sched_f "
-            + "WHERE payee_name_text @@ to_tsquery('"
-            + parse_fulltext('ACCENTED NAME')
-            + "');"
-        )
-        results = connection.execute(select).fetchall()
-        pye_nm_list = {na[14] for na in results}
-        assert names.issubset(pye_nm_list)
+            results = connection.execute(text(select)).fetchall()
+            pye_nm_list = {na[14] for na in results}
+            assert names.issubset(pye_nm_list)
+            select = (
+                "SELECT * from disclosure.fec_fitem_sched_f "
+                + "WHERE payee_name_text @@ to_tsquery('"
+                + parse_fulltext('ACCENTED NAME')
+                + "');"
+            )
+            results = connection.execute(text(select)).fetchall()
+            pye_nm_list = {na[14] for na in results}
+            assert names.issubset(pye_nm_list)
         connection.close()
 
     def test_accent_insensitive_sched_a(self):
@@ -418,21 +428,24 @@ class TriggerTestCase(common.BaseTestCase):
             'TEST.COM',
             'Test.com',
         }
-        i = 0
-        for n in names:
-            i += 1
-            data = {
-                'contbr_employer': n,
-                'sub_id': 9999999959999999980 + i,
-                'filing_form': 'F3',
-                'two_year_transaction_period': 2020,
-            }
-            insert = (
-                "INSERT INTO disclosure.fec_fitem_sched_a "
-                + "(contbr_employer, sub_id, filing_form, two_year_transaction_period) "
-                + " VALUES (%(contbr_employer)s, %(sub_id)s, %(filing_form)s, %(two_year_transaction_period)s)"
-            )
-            connection.execute(insert, data)
+        with connection.begin():
+            i = 0
+            for n in names:
+                i += 1
+                data = {
+                    'contbr_employer': n,
+                    'sub_id': 9999999959999999980 + i,
+                    'filing_form': 'F3',
+                    'two_year_transaction_period': 2020,
+                }
+                insert = (
+                    "INSERT INTO disclosure.fec_fitem_sched_a "
+                    + "(contbr_employer, sub_id, filing_form, two_year_transaction_period) "
+                    + " VALUES (:contbr_employer, :sub_id, :filing_form, :two_year_transaction_period)"
+                )
+                connection.execute(text(insert), data)
+        connection.close()
+
         manage.refresh_materialized(concurrent=False)
         results = self._results(
             api.url_for(ScheduleAView, contributor_employer='Test.com')
@@ -444,7 +457,6 @@ class TriggerTestCase(common.BaseTestCase):
         )
         contbr_employer_list = {r['contributor_employer'] for r in results}
         assert names.issubset(contbr_employer_list)
-        connection.close()
 
     def test_accent_insensitive_sched_b(self):
         '''
@@ -460,21 +472,24 @@ class TriggerTestCase(common.BaseTestCase):
             'est lou',
             '@@@est      lou---@',
         }
-        i = 0
-        for n in names:
-            i += 1
-            data = {
-                'recipient_nm': n,
-                'sub_id': 9999999999995699990 + i,
-                'filing_form': 'F3',
-                'two_year_transaction_period': 2020,
-            }
-            insert = (
-                "INSERT INTO disclosure.fec_fitem_sched_b "
-                + "(recipient_nm, sub_id, filing_form, two_year_transaction_period) "
-                + " VALUES (%(recipient_nm)s, %(sub_id)s, %(filing_form)s, %(two_year_transaction_period)s)"
-            )
-            connection.execute(insert, data)
+        with connection.begin():
+            i = 0
+            for n in names:
+                i += 1
+                data = {
+                    'recipient_nm': n,
+                    'sub_id': 9999999999995699990 + i,
+                    'filing_form': 'F3',
+                    'two_year_transaction_period': 2020,
+                }
+                insert = (
+                    "INSERT INTO disclosure.fec_fitem_sched_b "
+                    + "(recipient_nm, sub_id, filing_form, two_year_transaction_period) "
+                    + " VALUES (:recipient_nm, :sub_id, :filing_form, :two_year_transaction_period)"
+                )
+                connection.execute(text(insert), data)
+        connection.close()
+
         manage.refresh_materialized(concurrent=False)
         results = self._results(
             api.url_for(ScheduleBView, recipient_name='ést-lou')
@@ -486,7 +501,6 @@ class TriggerTestCase(common.BaseTestCase):
         )
         contbr_employer_list = {r['recipient_name'] for r in results}
         assert names.issubset(contbr_employer_list)
-        connection.close()
 
     def real_efile_sa7(self):
         """
@@ -508,17 +522,18 @@ class TriggerTestCase(common.BaseTestCase):
         insert = (
             "INSERT INTO real_efile_sa7 "
             + "(repid, tran_id, fname, mname, name, indemp, indocc) "
-            + "VALUES (%(repid)s, %(tran_id)s, %(fname)s, %(mname)s, %(name)s, %(indemp)s, %(indocc)s)"
+            + "VALUES (:repid, :tran_id, :fname, :mname, :name, :indemp, :indocc)"
         )
-        connection.executemany(insert, data)
-        manage.refresh_materialized(concurrent=False)
-        results = self._results(
-            api.url_for(ScheduleAEfileView, contributor_employer='Neighborhood')
-        )
-        employer_set = {r['contributor_employer'] for r in results}
-        assert {'The Neighborhood'}.issubset(employer_set)
-        name_set = {r['contributor_name'] for r in results}
-        assert {'Mr.'}.issubset(name_set)
-        occupation_set = {r['contributor_occupation'] for r in results}
-        assert {'Educator'}.issubset(occupation_set)
+        with connection.begin():
+            connection.executemany(text(insert), data)
+            manage.refresh_materialized(concurrent=False)
+            results = self._results(
+                api.url_for(ScheduleAEfileView, contributor_employer='Neighborhood')
+            )
+            employer_set = {r['contributor_employer'] for r in results}
+            assert {'The Neighborhood'}.issubset(employer_set)
+            name_set = {r['contributor_name'] for r in results}
+            assert {'Mr.'}.issubset(name_set)
+            occupation_set = {r['contributor_occupation'] for r in results}
+            assert {'Educator'}.issubset(occupation_set)
         connection.close()
