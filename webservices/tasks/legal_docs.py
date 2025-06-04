@@ -18,7 +18,7 @@ from webservices.legal_docs.es_management import (  # noqa
 
 from webservices.common.models import db
 from webservices.tasks.utils import get_app_name
-
+from sqlalchemy import text
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ def refresh_most_recent_legal_doc():
         #   if published_flg = true, reload the case(s) on elasticsearch service.
         #   if published_flg = false, delete the case(s) on elasticsearch service.
     """
-    with db.engine.connect() as conn:
+    with db.engine.begin() as conn:
         refresh_most_recent_aos(conn)
         refresh_most_recent_cases(conn)
 
@@ -81,7 +81,7 @@ def refresh_most_recent_aos(conn):
         # 3) Reload all AO(s) starting from the referenced AO to the latest AO.
     """
     logger.info(" Checking for recently modified AOs...")
-    rs = conn.execute(RECENTLY_MODIFIED_AOS)
+    rs = conn.execute(text(RECENTLY_MODIFIED_AOS)).mappings()
     row_count = 0
     for row in rs:
         if row:
@@ -101,7 +101,7 @@ def refresh_most_recent_cases(conn):
         #   if published_flg = false, delete the case(s) on elasticsearch service.
     """
     logger.info(" Checking for recently modified cases(MUR/AF/ADR)...")
-    rs = conn.execute(RECENTLY_MODIFIED_CASES)
+    rs = conn.execute(text(RECENTLY_MODIFIED_CASES)).mappings()
     row_count = 0
     load_count = 0
     deleted_case_count = 0
@@ -130,8 +130,8 @@ def daily_reload_all_aos_when_change():
     """
     slack_message = ""
     logger.info(" Checking for daily modified AOs...")
-    with db.engine.connect() as conn:
-        rs = conn.execute(DAILY_MODIFIED_AOS)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(DAILY_MODIFIED_AOS)).mappings()
         row_count = 0
         for row in rs:
             if row:
@@ -171,8 +171,8 @@ def weekly_reload_all_aos():
 def send_alert_daily_modified_legal_case():
     # When found modified case(s)(MUR/AF/ADR) during 6am-7pm EST, Send case detail information to Slack.
     slack_message = ""
-    with db.engine.connect() as conn:
-        rs = conn.execute(DAILY_MODIFIED_CASES_SEND_ALERT)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(DAILY_MODIFIED_CASES_SEND_ALERT)).mappings()
         row_count = 0
         for row in rs:
             row_count += 1
