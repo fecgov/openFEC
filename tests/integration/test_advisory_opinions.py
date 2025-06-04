@@ -7,7 +7,7 @@ from tests.common import TEST_CONN, BaseTestCase
 
 from webservices.common.models import db
 from webservices.legal_docs.advisory_opinions import get_advisory_opinions
-
+from sqlalchemy import text
 EMPTY_SET = set()
 
 
@@ -330,18 +330,20 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
 
         if "status" not in ao:
             ao["status"] = "Pending"
-
-        self.connection.execute(
-            "INSERT INTO aouser.ao (ao_id, ao_no, name, summary, req_date, issue_date, stage)"
-            "VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            ao_id,
-            ao["no"],
-            ao["name"],
-            ao["summary"],
-            ao["request_date"],
-            ao["issue_date"],
-            ao_status_to_stage(ao["status"]),
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""INSERT INTO aouser.ao (ao_id, ao_no, name, summary, req_date, issue_date, stage)
+                     VALUES (:id, :no, :name, :summary, :rdate, :idate, :status)"""),
+                {
+                    "id": ao_id,
+                    "no": ao["no"],
+                    "name": ao["name"],
+                    "summary": ao["summary"],
+                    "rdate": ao["request_date"],
+                    "idate": ao["issue_date"],
+                    "status": ao_status_to_stage(ao["status"])
+                }
+            )
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
     @patch("webservices.legal_docs.advisory_opinions.create_es_client")
@@ -439,26 +441,29 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         assert (next(gen)) == expected_ao2
 
     def create_document(self, ao_id, document, filename='201801_C.pdf'):
-        self.connection.execute(
-            """
-            INSERT INTO aouser.document
-            (document_id, ao_id, category, ocrtext, fileimage, description, document_date, filename)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
-            document["document_id"],
-            ao_id,
-            document["category"],
-            document["text"],
-            document["text"],
-            document["description"],
-            document["date"],
-            filename,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""
+                INSERT INTO aouser.document
+                (document_id, ao_id, category, ocrtext, fileimage, description, document_date, filename)
+                VALUES (:docid, :id, :category, :text, :text, :descr, :date, :filename)"""),
+                {
+                    "docid": document["document_id"],
+                    "id": ao_id,
+                    "category": document["category"],
+                    "text": document["text"],
+                    "descr": document["description"],
+                    "date": document["date"],
+                    "filename": filename
+                }
+            )
 
     def create_requestor(self, ao_id, entity_id, requestor_name, requestor_type):
-        entity_type_id = self.connection.execute(
-            "SELECT entity_type_id FROM aouser.entity_type " " WHERE description = %s ",
-            requestor_type,
-        ).scalar()
+        with self.connection.begin():
+            entity_type_id = self.connection.execute(
+                text("SELECT entity_type_id FROM aouser.entity_type " " WHERE description = :type "),
+                {"type": requestor_type}
+            ).scalar()
 
         self.create_entity(ao_id, entity_id, requestor_name, entity_type_id, 1)
 
@@ -469,56 +474,66 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         self.create_entity(ao_id, entity_id, requestor_name, 16, 3)
 
     def create_entity(self, ao_id, entity_id, requestor_name, entity_type_id, role_id):
-        self.connection.execute(
-            """
-            INSERT INTO aouser.entity
-            (entity_id, name, type)
-            VALUES (%s, %s, %s)""",
-            entity_id,
-            requestor_name,
-            entity_type_id,
-        )
-        self.connection.execute(
-            """
-            INSERT INTO aouser.players
-            (player_id, ao_id, entity_id, role_id)
-            VALUES (%s, %s, %s, %s)""",
-            entity_id,
-            ao_id,
-            entity_id,
-            role_id,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""
+                INSERT INTO aouser.entity
+                (entity_id, name, type)
+                VALUES (:id, :name, :type)"""),
+                {
+                    "id": entity_id,
+                    "name": requestor_name,
+                    "type": entity_type_id
+                }
+            )
+            self.connection.execute(
+                text("""
+                INSERT INTO aouser.players
+                (player_id, ao_id, entity_id, role_id)
+                VALUES (:eID, :id, :eID, :rID)"""),
+                {
+                    "eID": entity_id,
+                    "id": ao_id,
+                    "rID": role_id
+                }
+            )
 
     def create_entity_individual(self, ao_id, entity_id, requestor_name, entity_type_id,
                                  role_id, prefix, first_name, last_name, suffix):
-        self.connection.execute(
-            """
-            INSERT INTO aouser.entity
-            (prefix, first_name, last_name, suffix, entity_id, name, type)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-            prefix,
-            first_name,
-            last_name,
-            suffix,
-            entity_id,
-            requestor_name,
-            entity_type_id,
-        )
-        self.connection.execute(
-            """
-            INSERT INTO aouser.players
-            (player_id, ao_id, entity_id, role_id)
-            VALUES (%s, %s, %s, %s)""",
-            entity_id,
-            ao_id,
-            entity_id,
-            role_id,
-        )
+        with self.connection.begin():
+            self.connection.execute(
+                text("""
+                INSERT INTO aouser.entity
+                (prefix, first_name, last_name, suffix, entity_id, name, type)
+                VALUES (:prefix, :fname, :lname, :suffix, :id, :rname, :type)"""),
+                {
+                    "prefix": prefix,
+                    "fname": first_name,
+                    "lname": last_name,
+                    "suffix": suffix,
+                    "id": entity_id,
+                    "rname": requestor_name,
+                    "type": entity_type_id
+                }
+            )
+            self.connection.execute(
+                text("""
+                INSERT INTO aouser.players
+                (player_id, ao_id, entity_id, role_id)
+                VALUES (:id, :aID, :eID, :rID)"""),
+                {
+                    "id": entity_id,
+                    "aID": ao_id,
+                    "eID": entity_id,
+                    "rID": role_id
+                }
+            )
 
     def clear_test_data(self):
         tables = ["ao", "document", "players", "entity", "entity_type", "role"]
-        for table in tables:
-            self.connection.execute("DELETE FROM aouser.{}".format(table))
+        with self.connection.begin():
+            for table in tables:
+                self.connection.execute(text("DELETE FROM aouser.{}".format(table)))
 
 
 def ao_status_to_stage(status):

@@ -1,10 +1,11 @@
 from flask import current_app
 from tests.common import BaseTestCase
+from sqlalchemy import text
 
 
 class TestBaseTestCase(BaseTestCase):
     def test_db_connection(self):
-        result = self.connection.execute("SELECT 1").scalar()
+        result = self.connection.execute(text("SELECT 1")).scalar()
         self.assertEqual(result, 1, "Database is not connected")
 
     def test_app_context_exists(self):

@@ -117,6 +117,7 @@ def create_app(test_config=None):
     app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
         'webservices.tasks.download.export_query',]
     app.config['PROPAGATE_EXCEPTIONS'] = True
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"future": True}
     # app.config['SQLALCHEMY_ECHO'] = True
 
     # Modify app configuration and logging level for production
@@ -126,7 +127,7 @@ def create_app(test_config=None):
 
     if test_config is None:
         app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
-        app.config['SQLALCHEMY_FOLLOWERS'] = [sa.create_engine(follower.strip())
+        app.config['SQLALCHEMY_FOLLOWERS'] = [sa.create_engine(follower.strip(), future=True)
                                               for follower in utils.split_env_var(
                                               env.get_credential('SQLA_FOLLOWERS', ''))
                                               if follower.strip()]
