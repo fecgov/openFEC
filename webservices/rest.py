@@ -109,14 +109,25 @@ def create_app(test_config=None):
     # app.debug = True
     app.config['APISPEC_FORMAT_RESPONSE'] = None
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SQLALCHEMY_POOL_SIZE'] = 50
-    app.config['SQLALCHEMY_MAX_OVERFLOW'] = 50
-    app.config['SQLALCHEMY_POOL_TIMEOUT'] = 120
     app.config['SQLALCHEMY_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS'] = bool(
         env.get_credential('SQLA_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS', ''))
     app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
         'webservices.tasks.download.export_query',]
     app.config['PROPAGATE_EXCEPTIONS'] = True
+    query_cache_size = int(env.get_credential('QUERY_CACHE_SIZE', '100'))
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+            'query_cache_size': query_cache_size,
+            'max_overflow': 50,
+            'pool_size': 50,
+            'pool_timeout': 120,
+        }
+
+    def create_sqlalchemy_followers(env_var_name: str, default_value: str = '') -> list:
+        followers = utils.split_env_var(env.get_credential(env_var_name, default_value))
+        return [sa.create_engine(follower.strip(), query_cache_size=query_cache_size,
+                                 pool_size=50, max_overflow=50,
+                                 pool_timeout=120) for follower in followers if follower.strip()
+                ]
     # app.config['SQLALCHEMY_ECHO'] = True
 
     # Modify app configuration and logging level for production
@@ -126,27 +137,18 @@ def create_app(test_config=None):
 
     if test_config is None:
         app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
-        query_cache_size = int(env.get_credential('QUERY_CACHE_SIZE', '100'))
-        app.config['SQLALCHEMY_FOLLOWERS'] = [sa.create_engine(follower.strip(), query_cache_size=query_cache_size)
-                                              for follower in utils.split_env_var(
-                                              env.get_credential('SQLA_FOLLOWERS', ''))
-                                              if follower.strip()]
-        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-            'query_cache_size': query_cache_size
-        }
+        app.config['SQLALCHEMY_FOLLOWERS'] = create_sqlalchemy_followers('SQLA_FOLLOWERS')
         app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
-
     else:
         TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
-        """ app.config['SQLALCHEMY_FOLLOWERS'] = [sa.create_engine(follower.strip())
-                                              for follower in utils.split_env_var(
-                                              env.get_credential('SQLA_FOLLOWERS', ''))
-                                              if follower.strip()] """
         app.config['NPLUSONE_RAISE'] = True
         app.config['SQLALCHEMY_DATABASE_URI'] = TEST_CONN
         app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
         app.config['TESTING'] = True
-
+        if test_config == 'follower':
+            # Config just for read replica int test
+            app.config['SQLALCHEMY_FOLLOWERS'] = create_sqlalchemy_followers('SQLA_TEST_CONN',
+                                                                             'postgresql:///cfdm_unit_test')
     # Initialize Extensions
     db.init_app(app)
     cors.CORS(app)

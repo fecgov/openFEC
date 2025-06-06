@@ -1,6 +1,7 @@
 import manage
 from tests import common
 from webservices.common.models import db
+from flask import current_app
 
 
 import pytest
@@ -30,22 +31,24 @@ def run_migrations():
 
 
 def reset_schema():
-    for schema in [
-        "aouser",
-        "auditsearch",
-        "disclosure",
-        "fecapp",
-        "fecmur",
-        "public",
-        "rad_pri_user",
-        "real_efile",
-        "real_pfile",
-        "rohan",
-        "staging",
-        "test_efile",
-    ]:
-        db.engine.execute('drop schema if exists %s cascade;' % schema)
-    db.engine.execute('create schema public;')
+    if current_app.config['TESTING']:
+        with db.engine.connect() as conn:
+            for schema in [
+                "aouser",
+                "auditsearch",
+                "disclosure",
+                "fecapp",
+                "fecmur",
+                "public",
+                "rad_pri_user",
+                "real_efile",
+                "real_pfile",
+                "rohan",
+                "staging",
+                "test_efile",
+            ]:
+                conn.execute('drop schema if exists %s cascade;' % schema)
+            conn.execute('create schema public;')
 
 
 def pytest_addoption(parser):
