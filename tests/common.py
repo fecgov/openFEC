@@ -35,15 +35,15 @@ def _reset_schema(db):
             conn.execute('drop schema if exists staging cascade;')
             conn.execute('drop schema if exists fecapp cascade;')
             conn.execute('drop schema if exists real_efile cascade;')
-            conn.execute('drop schema if exists test_efile cascade;')
             conn.execute('drop schema if exists auditsearch cascade;')
+            conn.execute('drop schema if exists test_efile cascade;')
             conn.execute('create schema public;')
             conn.execute('create schema disclosure;')
             conn.execute('create schema staging;')
             conn.execute('create schema fecapp;')
             conn.execute('create schema real_efile;')
-            conn.execute('create schema test_efile;')
             conn.execute('create schema auditsearch;')
+            conn.execute('create schema test_efile;')
 
 
 class BaseTestCase(unittest.TestCase):
@@ -93,7 +93,9 @@ class ApiBaseTest(BaseTestCase):
             )
 
         with db.engine.connect() as connection:
-            db.metadata.create_all(bind=connection,)
+            db.metadata.create_all(
+                bind=connection,
+            )
 
     def setUp(self):
         super(ApiBaseTest, self).setUp()
