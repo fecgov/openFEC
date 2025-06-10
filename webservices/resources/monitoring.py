@@ -7,7 +7,7 @@ from webservices.tasks.utils import get_redis_value
 
 class celery_check(Resource):
 
-    def get(self):
+    def get(self, **kwargs):
         try:
 
             celery_status = get_redis_value("CELERY_STATUS", {})

@@ -54,9 +54,9 @@ We are always trying to improve our documentation. If you have suggestions or ru
      - Read a [Windows tutorial](https://www.postgresqltutorial.com/install-postgresql/)
      - Read a [Linux tutorial](https://www.postgresql.org/docs/13/installation.html) (or follow your OS package manager)
    - Elastic Search 7.x (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/_installation.html))
-   - Flyway 11.6.0 ([homebrew instructions](https://formulae.brew.sh/formula/flyway))
+   - Flyway 11.8.2 ([homebrew instructions](https://formulae.brew.sh/formula/flyway))
 
-     - After downloading, create a .toml file in the following location: `flyway-11.6.0/conf/flyway.toml` and set the flyway environment variables `environment`, `url`, `user`, `password` and`locations` as
+     - After downloading, create a .toml file in the following location: `flyway-11.8.2/conf/flyway.toml` and set the flyway environment variables `environment`, `url`, `user`, `password` and`locations` as
 
        ```
        [environments.local]
