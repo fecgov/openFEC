@@ -1,12 +1,12 @@
 from collections import defaultdict
 import logging
 import re
-import sqlalchemy as sa
 from webservices.common.models import db
 from webservices.utils import (
     create_es_client,
     DateTimeEncoder,
 )
+from sqlalchemy import text
 from webservices.tasks.utils import get_bucket
 from .reclassify_statutory_citation import reclassify_statutory_citation
 from .es_management import (  # noqa
@@ -35,9 +35,9 @@ ALL_AOS = """
     INNER JOIN aouser.ao ao
         ON ao_parsed.ao_id = ao.ao_id
     WHERE (
-        (ao_parsed.ao_year = %s AND ao_parsed.ao_serial >= %s)
+        (ao_parsed.ao_year = :year AND ao_parsed.ao_serial >= :serial)
         OR
-        (ao_parsed.ao_year > %s)
+        (ao_parsed.ao_year > :year)
     )
     ORDER BY ao_parsed.ao_year desc, ao_parsed.ao_serial desc
 """
@@ -55,7 +55,7 @@ AO_ENTITIES = """
     INNER JOIN aouser.entity e USING (entity_id)
     INNER JOIN aouser.entity_type et ON et.entity_type_id = e.type
     INNER JOIN aouser.role r USING (role_id)
-    WHERE p.ao_id = %s
+    WHERE p.ao_id = :id
 """
 
 AO_DOCUMENTS = """
@@ -71,7 +71,7 @@ AO_DOCUMENTS = """
     FROM aouser.document doc
     INNER JOIN aouser.ao ao
         ON ao.ao_id = doc.ao_id
-    WHERE doc.ao_id = %s
+    WHERE doc.ao_id = :id
 """
 
 TO_END_OF_SENTENCE = r"(?P<possible_sections>\d+[a-z]?(-1)?[^.;]*)[.;]"
@@ -173,8 +173,8 @@ def get_advisory_opinions(from_ao_no):
     else:
         start_ao_year, start_ao_serial = tuple(map(int, from_ao_no.split("-")))
 
-    with db.engine.connect() as conn:
-        rs = conn.execute(ALL_AOS, (start_ao_year, start_ao_serial, start_ao_year))
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(ALL_AOS), {"year": start_ao_year, "serial": start_ao_serial}).mappings()
         for row in rs:
             ao_id = row["ao_id"]
             year, serial = ao_no_to_component_map[row["ao_no"]]
@@ -233,8 +233,8 @@ def get_entities(ao_id):
     representative_names = []
     requestor_types = set()
     entities = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(AO_ENTITIES, ao_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(AO_ENTITIES), {"id": ao_id}).mappings()
         for row in rs:
             full_name = get_full_name(row)
             entities.append(
@@ -262,8 +262,8 @@ def get_entities(ao_id):
 
 def get_documents(ao_id, bucket):
     documents = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(AO_DOCUMENTS, ao_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(AO_DOCUMENTS), {"id": ao_id}).mappings()
         for row in rs:
             document = {
                 "document_id": row["document_id"],
@@ -305,8 +305,8 @@ def get_documents(ao_id, bucket):
 
 
 def get_ao_names():
-    with db.engine.connect() as conn:
-        ao_names_results = conn.execute(sa.text("SELECT ao_no, name FROM aouser.ao"))
+    with db.engine.begin() as conn:
+        ao_names_results = conn.execute(text("""SELECT ao_no, name FROM aouser.ao""")).mappings()
         ao_names = {}
         for row in ao_names_results:
             ao_names[row["ao_no"]] = row["name"]
@@ -358,13 +358,13 @@ def get_citations(ao_names):
     ao_component_to_name_map = {tuple(map(int, a.split("-"))): a for a in ao_names}
 
     logger.info(" Getting AO citations...")
-    with db.engine.connect() as conn:
-        rs = conn.execute(sa.text(
-            """SELECT ao_no, ocrtext FROM aouser.document
+    with db.engine.begin() as conn:
+        rs = conn.execute(
+            text("""SELECT ao_no, ocrtext FROM aouser.document
                 INNER JOIN aouser.ao USING (ao_id)
                 WHERE category = 'Final Opinion'
             """
-        ))
+                 )).mappings()
 
     all_regulatory_citations = set()
     all_statutory_citations = set()

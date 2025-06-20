@@ -12,6 +12,7 @@ from webservices.resources.sched_b import ScheduleBView
 from webservices import __API_VERSION__
 from webservices.common.models import db
 from webservices.utils import parse_fulltext
+from sqlalchemy import text
 
 
 @pytest.mark.usefixtures("migrate_db")
@@ -64,9 +65,10 @@ class TriggerTestCase(common.BaseTestCase):
                 insert = (
                     "INSERT INTO disclosure.fec_fitem_sched_b "
                     + "(recipient_nm, sub_id, filing_form) "
-                    + " VALUES (%(recipient_nm)s, %(sub_id)s, %(filing_form)s)"
+                    + " VALUES (:recipient_nm, :sub_id, :filing_form)"
                 )
-                connection.execute(insert, data)
+                connection.execute(text(insert), data)
+                connection.commit()
             manage.refresh_materialized(concurrent=False)
             select = (
                 "SELECT * from disclosure.fec_fitem_sched_b "
@@ -74,7 +76,7 @@ class TriggerTestCase(common.BaseTestCase):
                 + parse_fulltext(key)
                 + "');"
             )
-            results = connection.execute(select).fetchall()
+            results = connection.execute(text(select)).fetchall()
             recipient_nm_list = [name[2] for name in results]
             # the only result not returned is the "bad" last element
             self.assertEqual(
@@ -110,9 +112,10 @@ class TriggerTestCase(common.BaseTestCase):
                 insert = (
                     "INSERT INTO disclosure.fec_fitem_sched_a "
                     + "(contbr_nm, sub_id, filing_form) "
-                    + " VALUES (%(contbr_nm)s, %(sub_id)s, %(filing_form)s)"
+                    + " VALUES (:contbr_nm, :sub_id, :filing_form)"
                 )
-                connection.execute(insert, data)
+                connection.execute(text(insert), data)
+                connection.commit()
             manage.refresh_materialized(concurrent=False)
             select = (
                 "SELECT * from disclosure.fec_fitem_sched_a "
@@ -120,7 +123,7 @@ class TriggerTestCase(common.BaseTestCase):
                 + parse_fulltext(key)
                 + "');"
             )
-            results = connection.execute(select).fetchall()
+            results = connection.execute(text(select)).fetchall()
             contbr_nm_list = [name[3] for name in results]
             # the only result not returned is the "bad" last element
             self.assertEqual(set(names[key]) - set(contbr_nm_list), {names[key][-1]})
@@ -154,9 +157,10 @@ class TriggerTestCase(common.BaseTestCase):
                 insert = (
                     "INSERT INTO disclosure.fec_fitem_sched_a "
                     + "(contbr_employer, sub_id, filing_form) "
-                    + " VALUES (%(contbr_employer)s, %(sub_id)s, %(filing_form)s)"
+                    + " VALUES (:contbr_employer, :sub_id, :filing_form)"
                 )
-                connection.execute(insert, data)
+                connection.execute(text(insert), data)
+                connection.commit()
             manage.refresh_materialized(concurrent=False)
             select = (
                 "SELECT * from disclosure.fec_fitem_sched_a "
@@ -164,7 +168,7 @@ class TriggerTestCase(common.BaseTestCase):
                 + parse_fulltext(key)
                 + "');"
             )
-            results = connection.execute(select).fetchall()
+            results = connection.execute(text(select)).fetchall()
             contbr_employer_list = [name[16] for name in results]
             # the only result not returned is the "bad" last element
             self.assertEqual(
@@ -200,9 +204,10 @@ class TriggerTestCase(common.BaseTestCase):
                 insert = (
                     "INSERT INTO disclosure.fec_fitem_sched_a "
                     + "(contbr_occupation, sub_id, filing_form) "
-                    + " VALUES (%(contbr_occupation)s, %(sub_id)s, %(filing_form)s)"
+                    + " VALUES (:contbr_occupation, :sub_id, :filing_form)"
                 )
-                connection.execute(insert, data)
+                connection.execute(text(insert), data)
+                connection.commit()
             manage.refresh_materialized(concurrent=False)
             select = (
                 "SELECT * from disclosure.fec_fitem_sched_a "
@@ -210,7 +215,7 @@ class TriggerTestCase(common.BaseTestCase):
                 + parse_fulltext(key)
                 + "');"
             )
-            results = connection.execute(select).fetchall()
+            results = connection.execute(text(select)).fetchall()
             contbr_occupation_list = [name[17] for name in results]
             # the only result not returned is the "bad" last element
             self.assertEqual(
@@ -238,9 +243,10 @@ class TriggerTestCase(common.BaseTestCase):
             insert = (
                 "INSERT INTO disclosure.fec_fitem_sched_c "
                 + "(loan_src_nm, sub_id, filing_form) "
-                + " VALUES (%(loan_src_nm)s, %(sub_id)s, %(filing_form)s)"
+                + " VALUES (:loan_src_nm, :sub_id, :filing_form)"
             )
-            connection.execute(insert, data)
+            connection.execute(text(insert), data)
+            connection.commit()
         manage.refresh_materialized(concurrent=False)
         select = (
             "SELECT * from disclosure.fec_fitem_sched_c "
@@ -248,7 +254,7 @@ class TriggerTestCase(common.BaseTestCase):
             + parse_fulltext(name)
             + "');"
         )
-        results = connection.execute(select).fetchall()
+        results = connection.execute(text(select)).fetchall()
         loan_src_nm_list = {na[7] for na in results}
         # assert all good names in result set
         assert names_good.issubset(loan_src_nm_list)
@@ -276,9 +282,10 @@ class TriggerTestCase(common.BaseTestCase):
             insert = (
                 "INSERT INTO disclosure.fec_fitem_sched_c "
                 + "(cand_nm, sub_id, filing_form) "
-                + " VALUES (%(cand_nm)s, %(sub_id)s, %(filing_form)s)"
+                + " VALUES (:cand_nm, :sub_id, :filing_form)"
             )
-            connection.execute(insert, data)
+            connection.execute(text(insert), data)
+            connection.commit()
         manage.refresh_materialized(concurrent=False)
         select = (
             "SELECT * from disclosure.fec_fitem_sched_c "
@@ -286,7 +293,7 @@ class TriggerTestCase(common.BaseTestCase):
             + parse_fulltext(name)
             + "');"
         )
-        results = connection.execute(select).fetchall()
+        results = connection.execute(text(select)).fetchall()
         cand_nm_list = {na[32] for na in results}
         # assert all good names in result set
         assert names_good.issubset(cand_nm_list)
@@ -314,9 +321,10 @@ class TriggerTestCase(common.BaseTestCase):
             insert = (
                 "INSERT INTO disclosure.fec_fitem_sched_d "
                 + "(cred_dbtr_nm, sub_id, filing_form) "
-                + " VALUES (%(cred_dbtr_nm)s, %(sub_id)s, %(filing_form)s)"
+                + " VALUES (:cred_dbtr_nm, :sub_id, :filing_form)"
             )
-            connection.execute(insert, data)
+            connection.execute(text(insert), data)
+            connection.commit()
         manage.refresh_materialized(concurrent=False)
         select = (
             "SELECT * from disclosure.fec_fitem_sched_d "
@@ -324,7 +332,7 @@ class TriggerTestCase(common.BaseTestCase):
             + parse_fulltext(name)
             + "');"
         )
-        results = connection.execute(select).fetchall()
+        results = connection.execute(text(select)).fetchall()
         cred_dbtr_nm_list = {na[3] for na in results}
         # assert all good names in result set
         assert names_good.issubset(cred_dbtr_nm_list)
@@ -348,9 +356,10 @@ class TriggerTestCase(common.BaseTestCase):
             insert = (
                 "INSERT INTO disclosure.fec_fitem_sched_f "
                 + "(pye_nm, sub_id, filing_form) "
-                + " VALUES (%(pye_nm)s, %(sub_id)s, %(filing_form)s)"
+                + " VALUES (:pye_nm, :sub_id, :filing_form)"
             )
-            connection.execute(insert, data)
+            connection.execute(text(insert), data)
+            connection.commit()
         manage.refresh_materialized(concurrent=False)
         select = (
             "SELECT * from disclosure.fec_fitem_sched_f "
@@ -358,7 +367,7 @@ class TriggerTestCase(common.BaseTestCase):
             + parse_fulltext(name)
             + "');"
         )
-        results = connection.execute(select).fetchall()
+        results = connection.execute(text(select)).fetchall()
         pye_nm_list = {na[14] for na in results}
         # assert all good names in result set
         assert names_good.issubset(pye_nm_list)
@@ -380,9 +389,10 @@ class TriggerTestCase(common.BaseTestCase):
             insert = (
                 "INSERT INTO disclosure.fec_fitem_sched_f "
                 + "(pye_nm, sub_id, filing_form) "
-                + " VALUES (%(pye_nm)s, %(sub_id)s, %(filing_form)s)"
+                + " VALUES (:pye_nm, :sub_id, :filing_form)"
             )
-            connection.execute(insert, data)
+            connection.execute(text(insert), data)
+            connection.commit()
         manage.refresh_materialized(concurrent=False)
         select = (
             "SELECT * from disclosure.fec_fitem_sched_f "
@@ -390,7 +400,7 @@ class TriggerTestCase(common.BaseTestCase):
             + parse_fulltext('ÁCCENTED NAME')
             + "');"
         )
-        results = connection.execute(select).fetchall()
+        results = connection.execute(text(select)).fetchall()
         pye_nm_list = {na[14] for na in results}
         assert names.issubset(pye_nm_list)
         select = (
@@ -399,7 +409,7 @@ class TriggerTestCase(common.BaseTestCase):
             + parse_fulltext('ACCENTED NAME')
             + "');"
         )
-        results = connection.execute(select).fetchall()
+        results = connection.execute(text(select)).fetchall()
         pye_nm_list = {na[14] for na in results}
         assert names.issubset(pye_nm_list)
         connection.close()
@@ -430,9 +440,12 @@ class TriggerTestCase(common.BaseTestCase):
             insert = (
                 "INSERT INTO disclosure.fec_fitem_sched_a "
                 + "(contbr_employer, sub_id, filing_form, two_year_transaction_period) "
-                + " VALUES (%(contbr_employer)s, %(sub_id)s, %(filing_form)s, %(two_year_transaction_period)s)"
+                + " VALUES (:contbr_employer, :sub_id, :filing_form, :two_year_transaction_period)"
             )
-            connection.execute(insert, data)
+            connection.execute(text(insert), data)
+            connection.commit()
+        connection.close()
+
         manage.refresh_materialized(concurrent=False)
         results = self._results(
             api.url_for(ScheduleAView, contributor_employer='Test.com')
@@ -444,7 +457,6 @@ class TriggerTestCase(common.BaseTestCase):
         )
         contbr_employer_list = {r['contributor_employer'] for r in results}
         assert names.issubset(contbr_employer_list)
-        connection.close()
 
     def test_accent_insensitive_sched_b(self):
         '''
@@ -472,9 +484,13 @@ class TriggerTestCase(common.BaseTestCase):
             insert = (
                 "INSERT INTO disclosure.fec_fitem_sched_b "
                 + "(recipient_nm, sub_id, filing_form, two_year_transaction_period) "
-                + " VALUES (%(recipient_nm)s, %(sub_id)s, %(filing_form)s, %(two_year_transaction_period)s)"
+                + " VALUES (:recipient_nm, :sub_id, :filing_form, :two_year_transaction_period)"
             )
-            connection.execute(insert, data)
+            connection.execute(text(insert), data)
+            connection.commit()
+
+        connection.close()
+
         manage.refresh_materialized(concurrent=False)
         results = self._results(
             api.url_for(ScheduleBView, recipient_name='ést-lou')
@@ -486,7 +502,6 @@ class TriggerTestCase(common.BaseTestCase):
         )
         contbr_employer_list = {r['recipient_name'] for r in results}
         assert names.issubset(contbr_employer_list)
-        connection.close()
 
     def real_efile_sa7(self):
         """
@@ -508,9 +523,10 @@ class TriggerTestCase(common.BaseTestCase):
         insert = (
             "INSERT INTO real_efile_sa7 "
             + "(repid, tran_id, fname, mname, name, indemp, indocc) "
-            + "VALUES (%(repid)s, %(tran_id)s, %(fname)s, %(mname)s, %(name)s, %(indemp)s, %(indocc)s)"
+            + "VALUES (:repid, :tran_id, :fname, :mname, :name, :indemp, :indocc)"
         )
-        connection.executemany(insert, data)
+        connection.executemany(text(insert), data)
+        connection.commit()
         manage.refresh_materialized(concurrent=False)
         results = self._results(
             api.url_for(ScheduleAEfileView, contributor_employer='Neighborhood')

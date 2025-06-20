@@ -12,6 +12,7 @@ from webservices.tasks.utils import get_bucket
 from .es_management import (  # noqa
     CASE_ALIAS,
 )
+from sqlalchemy import text
 from .reclassify_statutory_citation import reclassify_statutory_citation_without_title
 import json
 
@@ -30,7 +31,7 @@ ALL_ADR_AF_CASES = """
         case_type,
         published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
-    WHERE case_type = %s
+    WHERE case_type = :type
     ORDER BY case_serial desc
 """
 
@@ -44,7 +45,7 @@ ALL_MUR_CASES = """
         published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw current_case
     JOIN fecmur.arch_current_mur_sorting_vw mur_sort on current_case.case_serial = mur_sort.case_serial
-    WHERE case_type = %s
+    WHERE case_type = :type
     AND mur_sort.mur_type ='current'
     AND current_case.case_no = mur_sort.case_no
     ORDER BY case_serial desc
@@ -59,8 +60,8 @@ SINGLE_CASE = """
         case_type,
         published_flg
     FROM fecmur.cases_with_parsed_case_serial_numbers_vw
-    WHERE case_type = %s
-    AND case_no = %s
+    WHERE case_type = :type
+    AND case_no = :no
 """
 
 AF_SPECIFIC_FIELDS = """
@@ -88,7 +89,7 @@ AF_SPECIFIC_FIELDS = """
         civil_penalty_due_date,
         civil_penalty_pymt_status_flg
     FROM fecmur.af_case
-    WHERE case_id = %s
+    WHERE case_id = :id
 """
 
 CASE_SUBJECTS = """
@@ -98,14 +99,14 @@ CASE_SUBJECTS = """
     FROM fecmur.case_subject
     JOIN fecmur.subject USING (subject_id)
     LEFT OUTER JOIN fecmur.relatedsubject USING (subject_id, relatedsubject_id)
-    WHERE case_id = %s
+    WHERE case_id = :id
 """
 
 CASE_ELECTION_CYCLES = """
     SELECT
         election_cycle::INT
     FROM fecmur.electioncycle
-    WHERE case_id = %s
+    WHERE case_id = :id
 """
 
 CASE_PARTICIPANTS = """
@@ -116,7 +117,7 @@ CASE_PARTICIPANTS = """
     FROM fecmur.players
     JOIN fecmur.role USING (role_id)
     JOIN fecmur.entity USING (entity_id)
-    WHERE case_id = %s
+    WHERE case_id = :id
 """
 
 CASE_DOCUMENTS = """
@@ -137,20 +138,20 @@ CASE_DOCUMENTS = """
         ON mur.case_id = doc.case_id
     INNER JOIN fecmur.doc_order doo
         ON doo.doc_order_id= doc.doc_order_id
-    WHERE doc.case_id = %s
+    WHERE doc.case_id = :id
     ORDER BY doc.doc_order_id, doc.document_date desc, doc.document_id DESC;
 """
 
 CASE_VIOLATIONS = """
     SELECT entity_id, stage, statutory_citation, regulatory_citation
     FROM fecmur.violations
-    WHERE case_id = %s;
+    WHERE case_id = :id;
 """
 
 OPEN_AND_CLOSE_DATES = """
     SELECT min(event_date), max(event_date)
     FROM fecmur.calendar
-    WHERE case_id = %s;
+    WHERE case_id = :id;
 """
 
 AF_DISPOSITION_DATA = """
@@ -159,7 +160,7 @@ AF_DISPOSITION_DATA = """
         dates,
         description
     FROM fecmur.af_case_disposition
-    WHERE case_id = %s
+    WHERE case_id = :id
     ORDER BY dates ASC;
 
 """
@@ -202,13 +203,13 @@ MUR_CITATION_DATA = """
 
 MUR_COMMISSION_VOTES = """
     SELECT vote_date, action from fecmur.commission
-    WHERE case_id = %s
+    WHERE case_id = :id
     ORDER BY vote_date desc;
 """
 ADR_COMMISSION_VOTES = """
     SELECT DISTINCT c."action", c.vote_date , e.name as commissioner_name,  v.vote_type
     FROM fecmur.COMMISSION c, fecmur.votes v, fecmur.entity e
-    WHERE c.CASE_ID = %s
+    WHERE c.CASE_ID = :id
     AND c.commission_id = v.commission_id
     AND e.entity_id =  v.entity_id
     ORDER BY c.vote_date desc;
@@ -218,14 +219,14 @@ ADR_COMPLAINANT = """
    FROM fecmur.players
    JOIN fecmur.role USING (role_id)
    JOIN fecmur.entity USING (entity_id)
-   WHERE  players.case_id = %s
+   WHERE  players.case_id = :id
    AND players.role_id IN (100095)
 """
 
 ADR_NON_MONETARY_TERMS = """
     SELECT DISTINCT nt.term_description, nt.term_id
     FROM fecmur.case c, fecmur.SETTLEMENT s, fecmur.RELATEDOBJECTS r, fecmur.NON_MONETARY_TERM NT
-    WHERE c.case_id = %s
+    WHERE c.case_id = :id
     AND c.case_id = s.case_id
     AND UPPER (SETTLEMENT_TYPE) LIKE 'PENALTY'
     AND r.RELATION_ID = 8
@@ -241,13 +242,13 @@ ADR_NON_MONETARY_TERMS_RESPONDENTS = """
     INNER JOIN fecmur.settlement
         ON fecmur.relatedobjects.master_key = fecmur.settlement.settlement_id
     WHERE relation_id = 1
-    AND fecmur.settlement.case_id = %s
+    AND fecmur.settlement.case_id = :id
 """
 
 ADR_CITATIONS = """
     SELECT DISTINCT VIOLATIONS.statutory_citation, VIOLATIONS.regulatory_citation, entity.name, entity.entity_id
     FROM  fecmur.VIOLATIONS, fecmur.ENTITY
-    WHERE VIOLATIONS.case_id = %s
+    WHERE VIOLATIONS.case_id = :id
     AND VIOLATIONS.ENTITY_ID = ENTITY.ENTITY_ID
     AND (case when trim(VIOLATIONS.STAGE) = ''
     or VIOLATIONS.STAGE is null then 'None'
@@ -262,7 +263,7 @@ ADR_CITATIONS = """
 
 AF_COMMISSION_VOTES = """
     SELECT action_date as vote_date, action from fecmur.af_case
-    WHERE case_id = %s
+    WHERE case_id = :id
     ORDER BY action_date desc;
 """
 
@@ -280,7 +281,7 @@ CASE_DISPOSITION_CATEGORY = """
     doc_type
     from fecmur.ref_case_disposition_category
     WHERE published_flg = true
-    AND doc_type = %s
+    AND doc_type = :type
 """
 
 
@@ -392,12 +393,12 @@ def get_cases(case_type, case_no=None):
     bucket = get_bucket()
 
     if case_no is None:
-        with db.engine.connect() as conn:
+        with db.engine.begin() as conn:
 
             if case_type in ("ADR", "AF"):
-                rs = conn.execute(ALL_ADR_AF_CASES, case_type)
+                rs = conn.execute(text(ALL_ADR_AF_CASES), {"type": case_type}).mappings()
             elif case_type in ("MUR"):
-                rs = conn.execute(ALL_MUR_CASES, case_type)
+                rs = conn.execute(text(ALL_MUR_CASES), {"type": case_type}).mappings()
             for row in rs:
                 yield get_single_case(case_type, row["case_no"], bucket)
     else:
@@ -407,8 +408,8 @@ def get_cases(case_type, case_no=None):
 def get_single_case(case_type, case_no, bucket):
     # bucket = get_bucket()
 
-    with db.engine.connect() as conn:
-        rs = conn.execute(SINGLE_CASE, case_type, case_no)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(SINGLE_CASE), {"type": case_type, "no": case_no}).mappings()
         row = rs.first()
         if row is not None:
             case_id = row["case_id"]
@@ -473,8 +474,8 @@ def get_es_type(case_type):
 
 def get_af_specific_fields(case_id):
     case = {}
-    with db.engine.connect() as conn:
-        rs = conn.execute(AF_SPECIFIC_FIELDS, case_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(AF_SPECIFIC_FIELDS), {"id": case_id}).mappings()
         row = rs.first()
         if row is not None:
             case["committee_id"] = row["committee_id"]
@@ -498,8 +499,8 @@ def get_af_specific_fields(case_id):
 
 
 def get_af_dispositions(case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(AF_DISPOSITION_DATA, case_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(AF_DISPOSITION_DATA), {"id": case_id}).mappings()
         disposition_data = []
         for row in rs:
             disposition_data.append({"disposition_description": row["description"],
@@ -508,11 +509,11 @@ def get_af_dispositions(case_id):
 
 
 def get_af_mur_commission_votes(case_type, case_id):
-    with db.engine.connect() as conn:
+    with db.engine.begin() as conn:
         if case_type == "AF":
-            rs = conn.execute(AF_COMMISSION_VOTES, case_id)
+            rs = conn.execute(text(AF_COMMISSION_VOTES), {"id": case_id}).mappings()
         elif case_type == "MUR":
-            rs = conn.execute(MUR_COMMISSION_VOTES, case_id)
+            rs = conn.execute(text(MUR_COMMISSION_VOTES), {"id": case_id}).mappings()
         commission_votes = []
         for row in rs:
             commission_votes.append({"vote_date": row["vote_date"], "action": row["action"]})
@@ -520,8 +521,8 @@ def get_af_mur_commission_votes(case_type, case_id):
 
 
 def get_adr_commission_votes(case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(ADR_COMMISSION_VOTES, case_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(ADR_COMMISSION_VOTES), {"id": case_id}).mappings()
         commission_votes = []
         for row in rs:
             commission_votes.append({"vote_date": row["vote_date"], "action": row["action"],
@@ -530,8 +531,8 @@ def get_adr_commission_votes(case_id):
 
 
 def get_adr_complainant(case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(ADR_COMPLAINANT, case_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(ADR_COMPLAINANT), {"id": case_id}).mappings()
         complainant = []
         for row in rs:
             complainant.append(row["complainant_name"])
@@ -539,8 +540,8 @@ def get_adr_complainant(case_id):
 
 
 def get_adr_non_monetary_terms(case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(ADR_NON_MONETARY_TERMS, case_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(ADR_NON_MONETARY_TERMS), {"id": case_id}).mappings()
         non_monetary_terms = []
         for row in rs:
             non_monetary_terms.append(row["term_description"])
@@ -548,8 +549,8 @@ def get_adr_non_monetary_terms(case_id):
 
 
 def get_adr_non_monetary_terms_respondents(case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(ADR_NON_MONETARY_TERMS_RESPONDENTS, case_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(ADR_NON_MONETARY_TERMS_RESPONDENTS), {"id": case_id}).mappings()
         non_monetary_terms_repondents = []
         for row in rs:
             non_monetary_terms_repondents.append(row["name"])
@@ -558,8 +559,8 @@ def get_adr_non_monetary_terms_respondents(case_id):
 
 def get_adr_citations(case_id):
     citations = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(ADR_CITATIONS, case_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(ADR_CITATIONS), {"id": case_id}).mappings()
         for row in rs:
             citations = parse_statutory_citations(row["statutory_citation"], case_id, row["name"])
             citations.extend(parse_regulatory_citations(row["regulatory_citation"], case_id, row["name"]))
@@ -567,8 +568,8 @@ def get_adr_citations(case_id):
 
 
 def get_all_mur_citations():
-    with db.engine.connect() as conn:
-        rs = conn.execute(MUR_CITATION_DATA)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(MUR_CITATION_DATA)).mappings()
         for row in rs:
             if row["statutory_citation"]:
                 ALL_STATUTORY_CITATIONS[str(row["case_id"]) + row["name"]] = parse_statutory_citations(
@@ -593,8 +594,8 @@ def clean_mur_citation_text(text, cit_type):
 
 
 def get_adr_dispositions(case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(MUR_ADR_DISPOSITION_DATA.format(case_id))
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(MUR_ADR_DISPOSITION_DATA.format(case_id))).mappings()
         dispositions = []
         citations = []
         citations = get_adr_citations(case_id)
@@ -605,8 +606,8 @@ def get_adr_dispositions(case_id):
 
 
 def get_adr_case_status(case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(MUR_ADR_DISPOSITION_DATA.format(case_id))
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(MUR_ADR_DISPOSITION_DATA.format(case_id))).mappings()
         case_status = []
         for row in rs:
             disposition_description = row["event_name"]
@@ -618,11 +619,11 @@ def get_adr_case_status(case_id):
 
 
 def get_mur_dispositions(case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(MUR_ADR_DISPOSITION_DATA.format(case_id))
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(MUR_ADR_DISPOSITION_DATA.format(case_id))).mappings()
 
         # Get the allowed displayed MUR disposition category list from table fecmur.ref_case_disposition_category
-        category_list = [dict(row) for row in conn.execute(CASE_DISPOSITION_CATEGORY, "MUR")]
+        category_list = [dict(row) for row in conn.execute(text(CASE_DISPOSITION_CATEGORY), {"type": "MUR"}).mappings()]
         logger.debug("category_list =" + json.dumps(category_list, indent=3, cls=DateTimeEncoder))
         disposition_data = []
         for row in rs:
@@ -736,8 +737,8 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id, doc_type
 
 def get_election_cycles(case_id):
     election_cycles = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(CASE_ELECTION_CYCLES, case_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(CASE_ELECTION_CYCLES), {"id": case_id}).mappings()
         for row in rs:
             election_cycles.append(row["election_cycle"])
     return election_cycles
@@ -745,8 +746,8 @@ def get_election_cycles(case_id):
 
 def get_participants(case_id):
     participants = {}
-    with db.engine.connect() as conn:
-        rs = conn.execute(CASE_PARTICIPANTS, case_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(CASE_PARTICIPANTS), {"id": case_id}).mappings()
         for row in rs:
             participants[row["entity_id"]] = {
                 "name": row["name"],
@@ -767,8 +768,8 @@ def get_sorted_respondents(participants):
 
 
 def get_open_and_close_dates(case_id):
-    with db.engine.connect() as conn:
-        rs = conn.execute(OPEN_AND_CLOSE_DATES, case_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(OPEN_AND_CLOSE_DATES), {"id": case_id})
         open_date, close_date = rs.fetchone()
     return open_date, close_date
 
@@ -821,8 +822,8 @@ SECONDARY_SUBJECT_MAP = {
 
 def get_subjects(case_id):
     subjects_data = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(CASE_SUBJECTS, case_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(CASE_SUBJECTS), {"id": case_id}).mappings()
         for row in rs:
             if row["rel"]:
                 subject_str = row["subj"] + "-" + row["rel"]
@@ -846,8 +847,8 @@ def get_subjects(case_id):
 
 def get_documents(case_id, bucket):
     documents = []
-    with db.engine.connect() as conn:
-        rs = conn.execute(CASE_DOCUMENTS, case_id)
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(CASE_DOCUMENTS), {"id": case_id}).mappings()
         for row in rs:
             document = {
                 "document_id": row["document_id"],

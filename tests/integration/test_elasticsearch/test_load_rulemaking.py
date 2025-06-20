@@ -6,6 +6,7 @@ import pytest
 from tests.common import TEST_CONN, BaseTestCase
 
 from webservices.common.models import db
+from sqlalchemy import text
 # from webservices.rulemaking_docs.rulemaking import get_rulemaking
 
 EMPTY_SET = set()
@@ -41,14 +42,17 @@ class TestGetRulemaking(BaseTestCase):
 
     def create_rm(self, rm_id, rm):
         self.connection.execute(
-            "INSERT INTO fosers.rulemaster (id, rm_number, title, description, comment_close_date, admin_close_date)"
-            "VALUES (%s, %s, %s, %s, %s, %s)",
-            rm_id,
-            rm["rm_number"],
-            rm["title"],
-            rm["description"],
-            rm["comment_close_date"],
-            rm["admin_close_date"],
+            text(
+                """INSERT INTO fosers.rulemaster (id, rm_number, title, description, comment_close_date,
+                admin_close_date) VALUES (:rm, :rm_num, :title, :descr, :cc_date, :ac_date)"""),
+            {
+                "rm": rm_id,
+                "rm_num": rm["rm_number"],
+                "title": rm["title"],
+                "descr": rm["description"],
+                "cc_date": rm["comment_close_date"],
+                "ac_date": rm["admin_close_date"]
+            }
         )
 
     # @patch("webservices.legal_docs.advisory_opinions.get_bucket")
@@ -403,4 +407,4 @@ class TestGetRulemaking(BaseTestCase):
         #           "participants", "rulemaster", "tiermapping", "votes", ]
         tables = ["rulemaster"]
         for table in tables:
-            self.connection.execute("DELETE FROM fosers.{}".format(table))
+            self.connection.execute(text("DELETE FROM fosers.{}".format(table)))

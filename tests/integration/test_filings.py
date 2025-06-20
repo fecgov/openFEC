@@ -1,6 +1,7 @@
 import pytest
 import codecs
 import json
+from sqlalchemy import text
 
 import manage
 from tests.common import BaseTestCase
@@ -155,27 +156,33 @@ class TestFilings(BaseTestCase):
 
     def insert_committee(self, committee):
         self.connection.execute(
-            "INSERT INTO disclosure.cmte_valid_fec_yr \
-            (valid_fec_yr_id, cmte_id, fec_election_yr, cmte_tp, date_entered) "
-            "VALUES (%s, %s, %s, %s, %s)",
-            committee['valid_fec_yr_id'],
-            committee['committee_id'],
-            committee['fec_election_yr'],
-            committee['committee_type'],
-            committee['date_entered'],
+            text("""INSERT INTO disclosure.cmte_valid_fec_yr
+                    (valid_fec_yr_id, cmte_id, fec_election_yr, cmte_tp, date_entered)
+                    VALUES (:id, :cID, :year, :type, :date)"""),
+            {
+                "id": committee['valid_fec_yr_id'],
+                "cID": committee['committee_id'],
+                "year": committee['fec_election_yr'],
+                "type": committee['committee_type'],
+                "date": committee['date_entered']
+            }
         )
+        self.connection.commit()
 
     def insert_filing(self, sub_id, expected_filing):
         self.connection.execute(
-            "INSERT INTO disclosure.f_rpt_or_form_sub \
-            (sub_id, cand_cmte_id, form_tp, rpt_yr, begin_image_num) "
-            "VALUES (%s, %s, %s, %s, %s)",
-            sub_id,
-            expected_filing['cand_cmte_id'],
-            expected_filing['form_type'],
-            expected_filing['report_year'],
-            expected_filing['begin_image_num'],
+            text("""INSERT INTO disclosure.f_rpt_or_form_sub
+                    (sub_id, cand_cmte_id, form_tp, rpt_yr, begin_image_num)
+                    VALUES (:id, :cID, :type, :year, :num)"""),
+            {
+                "id": sub_id,
+                "cID": expected_filing['cand_cmte_id'],
+                "type": expected_filing['form_type'],
+                "year": expected_filing['report_year'],
+                "num": expected_filing['begin_image_num']
+            }
         )
+        self.connection.commit()
 
     def assert_filings_equal(self, api_result, expected_filing):
         assert api_result['report_year'] == expected_filing['report_year']
@@ -185,4 +192,5 @@ class TestFilings(BaseTestCase):
     def clear_test_data(self):
         tables = ["cmte_valid_fec_yr", "f_rpt_or_form_sub"]
         for table in tables:
-            self.connection.execute("DELETE FROM disclosure.{}".format(table))
+            self.connection.execute(text("DELETE FROM disclosure.{}".format(table)))
+        self.connection.commit()

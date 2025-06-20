@@ -482,11 +482,9 @@ class CandidateTotalAggregateView(ApiResource):
             )
             query = query.add_columns(
                 sa.case(
-                    [
-                        (total.party == "DFL", "DEM"),
-                        (total.party == "DEM", "DEM"),
-                        (total.party == "REP", "REP"),
-                    ],
+                    (total.party == "DFL", "DEM"),
+                    (total.party == "DEM", "DEM"),
+                    (total.party == "REP", "REP"),
                     else_="Other",
                 ).label("party")
             )
@@ -495,11 +493,9 @@ class CandidateTotalAggregateView(ApiResource):
                 total.election_year,
                 total.office,
                 sa.case(
-                    [
-                        (total.party == "DFL", "DEM"),
-                        (total.party == "DEM", "DEM"),
-                        (total.party == "REP", "REP"),
-                    ],
+                    (total.party == "DFL", "DEM"),
+                    (total.party == "DEM", "DEM"),
+                    (total.party == "REP", "REP"),
                     else_="Other",
                 ),
             )

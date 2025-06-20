@@ -481,7 +481,7 @@ def cycle_param(**kwargs):
 
 
 def get_election_duration(column):
-    return sa.case([(column == "S", 6), (column == "P", 4), ], else_=2,)
+    return sa.case((column == "S", 6), (column == "P", 4), else_=2,)
 
 
 def get_current_cycle():

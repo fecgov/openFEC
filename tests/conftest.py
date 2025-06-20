@@ -8,6 +8,7 @@ import pytest
 import subprocess
 import logging
 from webservices.rest import create_app
+from sqlalchemy import text
 
 
 @pytest.fixture(scope="session")
@@ -31,24 +32,25 @@ def run_migrations():
 
 
 def reset_schema():
+    schemas = [
+        "aouser",
+        "auditsearch",
+        "disclosure",
+        "fecapp",
+        "fecmur",
+        "public",
+        "rad_pri_user",
+        "real_efile",
+        "real_pfile",
+        "rohan",
+        "staging",
+        "test_efile",
+    ]
     if current_app.config['TESTING']:
-        with db.engine.connect() as conn:
-            for schema in [
-                "aouser",
-                "auditsearch",
-                "disclosure",
-                "fecapp",
-                "fecmur",
-                "public",
-                "rad_pri_user",
-                "real_efile",
-                "real_pfile",
-                "rohan",
-                "staging",
-                "test_efile",
-            ]:
-                conn.execute('drop schema if exists %s cascade;' % schema)
-            conn.execute('create schema public;')
+        with db.engine.begin() as conn:
+            for schema in schemas:
+                conn.execute(text(f'drop schema if exists {schema} cascade;'))
+            conn.execute(text('create schema public;'))
 
 
 def pytest_addoption(parser):

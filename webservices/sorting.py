@@ -94,7 +94,7 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
 
     sort_column = order(column)
     if nulls_last and not hide_null:
-        query = query.order_by(sa.nullslast(sort_column))
+        query = query.order_by(sort_column.nullslast())
     else:
         query = query.order_by(sort_column)
 

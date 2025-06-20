@@ -11,6 +11,7 @@ from webservices.api_setup import api
 from webservices.resources.candidates import CandidateList
 from webservices.resources.candidate_aggregates import TotalsCandidateView
 from webservices.resources.elections import ElectionView
+from sqlalchemy import text
 
 
 @pytest.mark.usefixtures("migrate_db")
@@ -125,7 +126,9 @@ class CandidatesTestCase(common.BaseTestCase):
                 election_year - 1, election_year
             )
         )
-        results_tab = self.connection.execute(sql_extract).fetchall()
+        results_tab = self.connection.execute(text(sql_extract)).fetchall()
+        self.connection.commit()
+
         candidate_params = {
             'election_year': election_year,
             'cycle': election_year,
@@ -166,19 +169,21 @@ class CandidatesTestCase(common.BaseTestCase):
             "INSERT INTO disclosure.cand_valid_fec_yr \
             (cand_valid_yr_id, cand_id, fec_election_yr, cand_election_yr, \
             cand_status, cand_office, cand_office_st, cand_office_district, date_entered) \
-            VALUES (%(cand_valid_yr_id)s, %(cand_id)s, \
-            %(fec_election_yr)s, %(cand_election_yr)s, %(cand_status)s, %(cand_office)s, \
-            %(cand_office_st)s, %(cand_office_district)s, %(date_entered)s)"
+            VALUES (:cand_valid_yr_id, :cand_id, \
+            :fec_election_yr, :cand_election_yr, :cand_status, :cand_office, \
+            :cand_office_st, :cand_office_district, :date_entered)"
         )
-        self.connection.execute(sql_insert, candidate_data)
+        self.connection.execute(text(sql_insert), candidate_data)
+        self.connection.commit()
 
     def create_cand_cmte_linkage(self, linkage_data):
         sql_insert = (
             "INSERT INTO disclosure.cand_cmte_linkage \
             (linkage_id, cand_id, fec_election_yr, cand_election_yr, \
             cmte_id, cmte_count_cand_yr, cmte_tp, cmte_dsgn, linkage_type, date_entered) \
-            VALUES (%(linkage_id)s, %(cand_id)s, \
-            %(fec_election_yr)s, %(cand_election_yr)s, %(cmte_id)s, %(cmte_count_cand_yr)s, \
-            %(cmte_tp)s, %(cmte_dsgn)s, %(linkage_type)s, %(date_entered)s)"
+            VALUES (:linkage_id, :cand_id, \
+            :fec_election_yr, :cand_election_yr, :cmte_id, :cmte_count_cand_yr, \
+            :cmte_tp, :cmte_dsgn, :linkage_type, :date_entered)"
         )
-        self.connection.execute(sql_insert, linkage_data)
+        self.connection.execute(text(sql_insert), linkage_data)
+        self.connection.commit()
