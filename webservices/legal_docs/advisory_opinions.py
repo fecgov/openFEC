@@ -1,6 +1,7 @@
 from collections import defaultdict
 import logging
 import re
+import sqlalchemy as sa
 from webservices.common.models import db
 from webservices.utils import (
     create_es_client,
@@ -304,12 +305,13 @@ def get_documents(ao_id, bucket):
 
 
 def get_ao_names():
-    ao_names_results = db.engine.execute("""SELECT ao_no, name FROM aouser.ao""")
-    ao_names = {}
-    for row in ao_names_results:
-        ao_names[row["ao_no"]] = row["name"]
+    with db.engine.connect() as conn:
+        ao_names_results = conn.execute(sa.text("SELECT ao_no, name FROM aouser.ao"))
+        ao_names = {}
+        for row in ao_names_results:
+            ao_names[row["ao_no"]] = row["name"]
 
-    return ao_names
+        return ao_names
 
 
 def fix_citations(ao_no, citation_type, citations):
@@ -356,13 +358,13 @@ def get_citations(ao_names):
     ao_component_to_name_map = {tuple(map(int, a.split("-"))): a for a in ao_names}
 
     logger.info(" Getting AO citations...")
-
-    rs = db.engine.execute(
-        """SELECT ao_no, ocrtext FROM aouser.document
-            INNER JOIN aouser.ao USING (ao_id)
-            WHERE category = 'Final Opinion'
-        """
-    )
+    with db.engine.connect() as conn:
+        rs = conn.execute(sa.text(
+            """SELECT ao_no, ocrtext FROM aouser.document
+                INNER JOIN aouser.ao USING (ao_id)
+                WHERE category = 'Final Opinion'
+            """
+        ))
 
     all_regulatory_citations = set()
     all_statutory_citations = set()

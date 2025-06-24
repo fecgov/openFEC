@@ -48,10 +48,13 @@ def _reset_schema(db):
 
 class BaseTestCase(unittest.TestCase):
     _extensions_set_up = False  # prevent multiple clients for ext setup
+    _application = False
 
     @classmethod
     def setUpClass(cls):
-        cls.application = create_app(test_config="testing")
+        if not BaseTestCase._application:
+            BaseTestCase.application = create_app(test_config='testing')
+            BaseTestCase._application = True
         cls.app = cls.application.test_client()
         cls.client = TestApp(cls.application)
         cls.app_context = cls.application.app_context()
