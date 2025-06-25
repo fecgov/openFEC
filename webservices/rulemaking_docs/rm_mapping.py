@@ -112,7 +112,7 @@ RM_MAPPING = {
             },
         },
         "rm_id": {"type": "integer"},
-        "rm_name": {"type": "keyword"},
+        "rm_name": {"type": "text"},
         "rm_no": {"type": "keyword"},
         "rm_number": {"type": "keyword"},
         "rm_serial": {"type": "integer"},

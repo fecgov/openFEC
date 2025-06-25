@@ -29,6 +29,7 @@ from webservices.resources import operations_log
 from webservices.resources import presidential
 from webservices.resources import spending_by_others
 from webservices.resources import monitoring
+from webservices.resources import rulemaking
 from webservices.env import env
 
 
@@ -191,6 +192,7 @@ api.add_resource(download.DownloadView, '/download/<path:path>/')
 api.add_resource(legal.UniversalSearch, '/legal/search/')
 api.add_resource(legal.GetLegalCitation, '/legal/citation/<citation_type>/<citation>')
 api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
+api.add_resource(rulemaking.RulemakingSearch, '/rulemaking/search/')
 api.add_resource(operations_log.OperationsLogView, '/operations-log/')
 api.add_resource(presidential.PresidentialByCandidateView, '/presidential/contributions/by_candidate/')
 api.add_resource(presidential.PresidentialSummaryView, '/presidential/financial_summary/')
