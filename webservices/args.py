@@ -437,6 +437,38 @@ legal_universal_search = {
     'filename': fields.Str(required=False, metadata={'description': docs.FILENAME}),
 }
 
+# rulemaking endpoint: /rulemaking/search (resources/rulemaking.py/Rulemakingsearch)
+rulemaking_search = {
+    'q': fields.Str(required=False, description=docs.TEXT_SEARCH),
+    'from_hit': fields.Int(required=False, description=docs.FROM_HIT),
+    'hits_returned': fields.Int(required=False, description=docs.HITS_RETURNED),
+    'rm_no': fields.List(IStr, required=False, description=docs.RM_NUMBER),
+    'rm_name': fields.List(IStr, required=False, description=docs.RM_NAME),
+    'rm_year': fields.Int(required=False, description=docs.RM_YEAR),
+    'rm_doc_category_id': fields.List(IStr(
+        validate=validate.OneOf(['', '1', '2', '3', '4', '5', '6', '7', '8'])),
+                                description=docs.RM_DOC_CATEGORY_DESC),
+    'min_federal_registry_publish_date': Date(description=docs.RM_MIN_FEDERAL_REGISTRY_DATE),
+    'max_federal_registry_publish_date': Date(description=docs.RM_MAX_FEDERAL_REGISTRY_DATE),
+    'min_hearing_date': Date(description=docs.RM_MIN_HEARING_DATE),
+    'max_hearing_date': Date(description=docs.RM_MAX_HEARING_DATE),
+    'min_vote_date': Date(description=docs.RM_MIN_VOTE_DATE),
+    'max_vote_date': Date(description=docs.RM_MAX_VOTE_DATE),
+    'is_key_document': fields.Bool(description=docs.RM_IS_KEY_DOCUMENT),
+    'is_open_for_comment': fields.Bool(description=docs.RM_OPEN_FOR_COMMENT),
+    'entity_name': fields.Str(description=docs.RM_ENTITY_NAME),
+    'entity_role_type': fields.List(IStr(
+        validate=validate.OneOf(['', '1', '2', '3', '4', '5'])),
+                                description=docs.RM_ENTITY_TYPE),
+    'filename': fields.Str(required=False, description=docs.FILENAME),
+    'sort': IStr(required=False, description=docs.RM_SORT),
+    'q_proximity': fields.List(fields.Str, description=docs.Q_PROXIMITY),
+    'max_gaps': fields.Int(required=False, description=docs.MAX_GAPS),
+    'proximity_preserve_order': fields.Bool(required=False, description=docs.PROXIMITY_PRESERVE_ORDER),
+    'proximity_filter': fields.Str(validate=validate.OneOf(["after", "before"]), description=docs.PROXIMITY_FILTER),
+    'proximity_filter_term': fields.Str(required=False, description=docs.PROXIMITY_FILTER_TERM),
+}
+
 citation = {
     'doc_type': fields.Str(
                 required=False, validate=validate.OneOf(['', 'adrs', 'advisory_opinions', 'murs']),

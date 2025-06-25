@@ -58,6 +58,7 @@ from webservices.resources import audit
 from webservices.resources import operations_log
 from webservices.resources import presidential
 from webservices.resources import spending_by_others
+from webservices.resources import rulemaking
 from webservices.env import env
 from webservices.tasks.celery import celery_init_app
 from webservices.tasks.response_exception import ResponseException
@@ -265,6 +266,7 @@ def create_app(test_config=None):
     apidoc.register(operations_log.OperationsLogView, blueprint='v1')
     apidoc.register(legal.UniversalSearch, blueprint='v1')
     apidoc.register(legal.GetLegalDocument, blueprint='v1')
+    apidoc.register(rulemaking.RulemakingSearch, blueprint='v1')
     apidoc.register(candidate_aggregates.CandidateTotalAggregateView, blueprint='v1')
     apidoc.register(spending_by_others.ECTotalsByCandidateView, blueprint='v1')
     apidoc.register(spending_by_others.IETotalsByCandidateView, blueprint='v1')

@@ -25,7 +25,7 @@ import json
 logger = logging.getLogger(__name__)
 
 # To debug, uncomment the line below:
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
 
