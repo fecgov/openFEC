@@ -10,6 +10,7 @@ from webservices import __API_VERSION__
 from webservices.common.models import db
 from webservices.api_setup import api
 from webservices.resources.filings import FilingsView, FilingsList
+from sqlalchemy import text
 
 
 @pytest.mark.usefixtures("migrate_db")
@@ -354,32 +355,38 @@ class TestAmendmentChain(BaseTestCase):
 
     def insert_vsum(self, sub_id, expected_filing):
         self.connection.execute(
-            "INSERT INTO disclosure.v_sum_and_det_sum_report \
-            (orig_sub_id, form_tp_cd,cmte_id, file_num) "
-            "VALUES (%s, %s, %s, %s)",
-            sub_id,
-            expected_filing['form_type'],
-            expected_filing['committee_id'],
-            expected_filing['file_number'],
-        )
+                text("""INSERT INTO disclosure.v_sum_and_det_sum_report
+                     (orig_sub_id, form_tp_cd,cmte_id, file_num)
+                     VALUES (:id, :type, :cID, :num)"""),
+                {
+                    "id": sub_id,
+                    "type": expected_filing['form_type'],
+                    "cID": expected_filing['committee_id'],
+                    "num": expected_filing['file_number']
+                }
+            )
+        self.connection.commit()
 
     def create_filing(self, sub_id, expected_filing):
         self.connection.execute(
-            "INSERT INTO disclosure.f_rpt_or_form_sub \
-            (sub_id, cand_cmte_id, form_tp, rpt_yr, rpt_tp, amndt_ind, \
-            receipt_dt, file_num, prev_file_num, begin_image_num) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-            sub_id,
-            expected_filing['committee_id'],
-            expected_filing['form_type'],
-            expected_filing['report_year'],
-            expected_filing['report_type'],
-            expected_filing['amendment_indicator'],
-            int(expected_filing['receipt_date'].strftime("%Y%m%d")),
-            expected_filing['file_number'],
-            expected_filing['previous_file_number'],
-            expected_filing['begin_image_num'],
-        )
+                text("""INSERT INTO disclosure.f_rpt_or_form_sub
+                     (sub_id, cand_cmte_id, form_tp, rpt_yr, rpt_tp, amndt_ind,
+                     receipt_dt, file_num, prev_file_num, begin_image_num)
+                     VALUES (:id, :cID, :fType, :year, :rType, :indicator, :date, :num, :prevNum, :image)"""),
+                {
+                    "id": sub_id,
+                    "cID": expected_filing['committee_id'],
+                    "fType": expected_filing['form_type'],
+                    "year": expected_filing['report_year'],
+                    "rType": expected_filing['report_type'],
+                    "indicator": expected_filing['amendment_indicator'],
+                    "date": int(expected_filing['receipt_date'].strftime("%Y%m%d")),
+                    "num": expected_filing['file_number'],
+                    "prevNum": expected_filing['previous_file_number'],
+                    "image": expected_filing['begin_image_num']
+                }
+            )
+        self.connection.commit()
 
     def assert_filings_equal(self, api_result, expected_filing):
         assert api_result['committee_id'] == expected_filing['committee_id']
@@ -404,4 +411,5 @@ class TestAmendmentChain(BaseTestCase):
     def clear_test_data(self):
         tables = [('disclosure', 'f_rpt_or_form_sub')]
         for table in tables:
-            self.connection.execute("DELETE FROM {0}.{1}".format(table[0], table[1]))
+            self.connection.execute(text("DELETE FROM {0}.{1}".format(table[0], table[1])))
+        self.connection.commit()

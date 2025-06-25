@@ -9,6 +9,7 @@ from webservices import __API_VERSION__
 from webservices.common.models import db
 from webservices.api_setup import api
 from webservices.resources.totals import CandidateTotalsDetailView, TotalsCommitteeView
+from sqlalchemy import text
 
 
 @pytest.mark.usefixtures("migrate_db")
@@ -181,33 +182,38 @@ class TotalTestCase(common.BaseTestCase):
         sql_insert = (
             "INSERT INTO disclosure.cmte_valid_fec_yr"
             "(valid_fec_yr_id, cmte_id, fec_election_yr, cmte_tp, cmte_dsgn, date_entered)"
-            "VALUES (%(valid_fec_yr_id)s, %(cmte_id)s, %(fec_election_yr)s, %(cmte_tp)s, "
-            "%(cmte_dsgn)s, %(date_entered)s)"
+            "VALUES (:valid_fec_yr_id, :cmte_id, :fec_election_yr, :cmte_tp, "
+            ":cmte_dsgn, :date_entered)"
         )
-        self.connection.execute(sql_insert, committee_data)
+        self.connection.execute(text(sql_insert), committee_data)
+        self.connection.commit()
 
     def insert_vsum(self, filing):
         self.connection.execute(
-            """
-            INSERT INTO disclosure.v_sum_and_det_sum_report
-            (orig_sub_id, form_tp_cd, cmte_id, file_num, ttl_receipts, ttl_disb, rpt_yr)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-            filing['sub_id'],
-            filing['form_type'],
-            filing['committee_id'],
-            filing['file_number'],
-            filing['ttl_receipts'],
-            filing['ttl_disb'],
-            filing['rpt_year'],
-        )
+                text("""
+                INSERT INTO disclosure.v_sum_and_det_sum_report
+                (orig_sub_id, form_tp_cd, cmte_id, file_num, ttl_receipts, ttl_disb, rpt_yr)
+                VALUES (:id, :type, :cID, :num, :receipts, :disb, :year)"""),
+                {
+                    "id": filing['sub_id'],
+                    "type": filing['form_type'],
+                    "cID": filing['committee_id'],
+                    "num": filing['file_number'],
+                    "receipts": filing['ttl_receipts'],
+                    "disb": filing['ttl_disb'],
+                    "year": filing['rpt_year']
+                }
+            )
+        self.connection.commit()
 
     def create_cand_cmte_linkage(self, linkage_data):
         sql_insert = (
             "INSERT INTO disclosure.cand_cmte_linkage "
             "(linkage_id, cand_id, fec_election_yr, cand_election_yr, "
             "cmte_id, cmte_count_cand_yr, cmte_tp, cmte_dsgn, linkage_type, date_entered) "
-            "VALUES (%(linkage_id)s, %(cand_id)s, "
-            "%(fec_election_yr)s, %(cand_election_yr)s, %(cmte_id)s, %(cmte_count_cand_yr)s, "
-            "%(cmte_tp)s, %(cmte_dsgn)s, %(linkage_type)s, %(date_entered)s)"
+            "VALUES (:linkage_id, :cand_id, "
+            ":fec_election_yr, :cand_election_yr, :cmte_id, :cmte_count_cand_yr, "
+            ":cmte_tp, :cmte_dsgn, :linkage_type, :date_entered)"
         )
-        self.connection.execute(sql_insert, linkage_data)
+        self.connection.execute(text(sql_insert), linkage_data)
+        self.connection.commit()

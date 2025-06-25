@@ -2,6 +2,7 @@ import unittest
 from webservices.rest import create_app
 from webservices.common.models import db
 from unittest.mock import patch
+from sqlalchemy import text
 
 
 class FollowerRoutingTest(unittest.TestCase):
@@ -20,7 +21,7 @@ class FollowerRoutingTest(unittest.TestCase):
 
         with patch.object(follower_engine, 'connect', wraps=follower_engine.connect) as mock_connect:
             # Run a read query
-            db.session.execute("SELECT 1")
+            db.session.execute(text("SELECT 1"))
             db.session.commit()
 
             # Check that the follower engine was used

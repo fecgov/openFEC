@@ -8,6 +8,7 @@ from webservices import __API_VERSION__
 from webservices.api_setup import api
 from webservices.common.models import db
 from webservices.resources.committees import CommitteeHistoryProfileView
+from sqlalchemy import text
 
 
 @pytest.mark.usefixtures("migrate_db")
@@ -128,31 +129,35 @@ class CommitteeTestCase(BaseTestCase):
         sql_insert = (
             "INSERT INTO disclosure.cmte_valid_fec_yr"
             "(valid_fec_yr_id, cmte_id, fec_election_yr, cmte_tp, cmte_dsgn, date_entered)"
-            "VALUES (%(valid_fec_yr_id)s, %(cmte_id)s, %(fec_election_yr)s, %(cmte_tp)s, "
-            "%(cmte_dsgn)s, %(date_entered)s)"
+            "VALUES (:valid_fec_yr_id, :cmte_id, :fec_election_yr, :cmte_tp, "
+            ":cmte_dsgn, :date_entered)"
         )
-        self.connection.execute(sql_insert, committee_data)
+        self.connection.execute(text(sql_insert), committee_data)
+        self.connection.commit()
 
     def insert_cand_cmte_linkage(self, linkage_data):
         sql_insert = (
             "INSERT INTO disclosure.cand_cmte_linkage "
             "(linkage_id, cand_id, fec_election_yr, cand_election_yr, "
             "cmte_id, cmte_count_cand_yr, cmte_tp, cmte_dsgn, linkage_type, date_entered) "
-            "VALUES (%(linkage_id)s, %(cand_id)s, "
-            "%(fec_election_yr)s, %(cand_election_yr)s, %(cmte_id)s, %(cmte_count_cand_yr)s, "
-            "%(cmte_tp)s, %(cmte_dsgn)s, %(linkage_type)s, %(date_entered)s)"
+            "VALUES (:linkage_id, :cand_id, "
+            ":fec_election_yr, :cand_election_yr, :cmte_id, :cmte_count_cand_yr, "
+            ":cmte_tp, :cmte_dsgn, :linkage_type, :date_entered)"
         )
-        self.connection.execute(sql_insert, linkage_data)
+        self.connection.execute(text(sql_insert), linkage_data)
+        self.connection.commit()
 
     def insert_f_rpt_or_form_sub(self, f_rpt_or_form_sub_data):
         sql_insert = (
             "INSERT INTO disclosure.f_rpt_or_form_sub "
             "(cand_cmte_id,receipt_dt,form_tp,rpt_yr,sub_id) "
-            "VALUES (%(cand_cmte_id)s, %(receipt_dt)s, %(form_tp)s, %(rpt_yr)s, %(sub_id)s)"
+            "VALUES (:cand_cmte_id, :receipt_dt, :form_tp, :rpt_yr, :sub_id)"
         )
-        self.connection.execute(sql_insert, f_rpt_or_form_sub_data)
+        self.connection.execute(text(sql_insert), f_rpt_or_form_sub_data)
+        self.connection.commit()
 
     def clear_test_data(self):
         tables = ["cmte_valid_fec_yr", "cand_cmte_linkage", "f_rpt_or_form_sub"]
         for table in tables:
-            self.connection.execute("DELETE FROM disclosure.{}".format(table))
+            self.connection.execute(text("DELETE FROM disclosure.{}".format(table)))
+        self.connection.commit()
