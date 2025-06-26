@@ -51,7 +51,7 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
     def test_ao_filters(self):
         filters = [
             [{"ao_no": "2014-19"}, "no", False, False],
-            [{"ao_no": ["2014-22", "2024-12"]}, "no", True, False],
+            [{"ao_no": ["2014-22", "2024-12",]}, "no", True, False],
             [{"ao_name": "McCutcheon"}, "name", False, False],
             [{"ao_name": ["Fake Name", "ActBlue"]}, "name", True, False],
             [{"ao_is_pending": True}, "is_pending", False, True],
@@ -126,12 +126,24 @@ class TestAODocsElasticsearch(ElasticSearchBaseTest):
         sort = "-ao_no"
         response = self._results_ao(api.url_for(UniversalSearch, sort=sort))
         # logging.info(response)
+        # sort by ao_year and ao_serial for correct numerical desc ordering.
+        # Ex: 1980-100, 1980-11, 1980-10
         self.assertEqual(response[0]["ao_no"], "2024-12")
+        self.assertEqual(response[1]["ao_no"], "2014-19")
+        self.assertEqual(response[2]["ao_no"], "1980-100")
+        self.assertEqual(response[3]["ao_no"], "1980-11")
+        self.assertEqual(response[4]["ao_no"], "1980-10")
 
         sort = "ao_no"
         response = self._results_ao(api.url_for(UniversalSearch, sort=sort))
         # logging.info(response)
-        self.assertEqual(response[0]["ao_no"], "2014-19")
+        # sort by ao_year and ao_serial for correct numerical asc ordering.
+        # Ex: 1980-10, 1980-11, 1980-100
+        self.assertEqual(response[0]["ao_no"], "1980-10")
+        self.assertEqual(response[1]["ao_no"], "1980-11")
+        self.assertEqual(response[2]["ao_no"], "1980-100")
+        self.assertEqual(response[3]["ao_no"], "2014-19")
+        self.assertEqual(response[4]["ao_no"], "2024-12")
 
         # Test sorting by issue_date in descending order
         sort = "-issue_date"

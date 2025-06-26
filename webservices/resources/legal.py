@@ -654,7 +654,9 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     query = generic_query_builder(None, type_, from_hit, hits_returned, **kwargs)
 
     # Sort AO's by 'ao_no' or 'issue_date'. Default sort order is desc.
-    # example desc order: 'sort=-ao_no'; asc order; sort=ao_no
+    # Example desc order: 'sort=-ao_no'; asc order; sort=ao_no
+    # Sorting by 'ao_no' will be replaced to sort by 'ao_year' and 'ao_serial'
+    # for correct numerical ordering.
     # https://fec-dev-api.app.cloud.gov/v1/legal/search/?type=advisory_opinions&sort=-ao_no
     # https://fec-dev-api.app.cloud.gov/v1/legal/search/?type=advisory_opinions&sort=ao_no
     sort_field = kwargs.get("sort")
@@ -666,7 +668,7 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
             sort_order = "asc"
 
         if sort_field.upper() == "AO_NO":
-            query = query.sort({"ao_no": {"order": sort_order}})
+            query = query.sort({"ao_year": {"order": sort_order}}, {"ao_serial": {"order": sort_order}})
         elif sort_field.upper() == "ISSUE_DATE":
             query = query.sort({"issue_date": {"order": sort_order}})
 
