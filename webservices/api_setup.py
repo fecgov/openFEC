@@ -29,6 +29,7 @@ from webservices.resources import operations_log
 from webservices.resources import presidential
 from webservices.resources import spending_by_others
 from webservices.resources import monitoring
+from webservices.resources import async_endpoint
 from webservices.env import env
 
 
@@ -188,6 +189,8 @@ api.add_resource(
 
 api.add_resource(filings.FilingsList, '/filings/')
 api.add_resource(download.DownloadView, '/download/<path:path>/')
+api.add_resource(async_endpoint.async_schedule_a, '/async/<path:path>/')
+api.add_resource(async_endpoint.async_status, '/async/status/<task_id>/')
 api.add_resource(legal.UniversalSearch, '/legal/search/')
 api.add_resource(legal.GetLegalCitation, '/legal/citation/<citation_type>/<citation>')
 api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
