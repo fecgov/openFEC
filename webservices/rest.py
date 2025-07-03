@@ -155,6 +155,8 @@ def create_app(test_config=None):
     api.init_app(app)
     NPlusOne(app)
 
+    import webservices.profiling  # noqa
+
     app.config.from_mapping(
         CELERY=dict(
             broker_url=redis_url(),
