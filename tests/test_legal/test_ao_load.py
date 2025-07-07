@@ -27,7 +27,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
     @patch("webservices.legal_docs.advisory_opinions.create_es_client")
     @patch("webservices.legal_docs.es_management.create_index")
-    def test_pending_ao(self, get_bucket, create_es_client, create_index):
+    def test_pending_unpublished_ao(self, get_bucket, create_es_client, create_index):
         expected_ao = {
             "type": "advisory_opinions",
             "no": "2017-01",
@@ -40,6 +40,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "is_pending": True,
+            "published_flg": False,
             "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
@@ -81,6 +82,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "An AO summary",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
+            "published_flg": True,
             "documents": [],
             "requestor_names": expected_requestor_names,
             "requestor_types": expected_requestor_types,
@@ -126,6 +128,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "An AO summary",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
+            "published_flg": True,
             "documents": [],
             "requestor_names": [],
             "requestor_types": [],
@@ -157,6 +160,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "An AO summary",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
+            "published_flg": True,
             "documents": [],
             "requestor_names": [],
             "requestor_types": [],
@@ -194,6 +198,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "is_pending": True,
+            "published_flg": True,
             "status": "Final",
             "documents": [expected_document],
         }
@@ -228,6 +233,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "status": "Final",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
+            "published_flg": True,
             "documents": [ao1_document],
         }
 
@@ -246,6 +252,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "status": "Final",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
+            "published_flg": True,
             "documents": [ao2_document],
         }
 
@@ -285,6 +292,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "status": "Final",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
+            "published_flg": True,
             "documents": [ao_document],
         }
 
@@ -314,6 +322,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "status": "Final",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
+            "published_flg": True,
             "documents": [ao_document],
         }
 
@@ -331,8 +340,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         if "status" not in ao:
             ao["status"] = "Pending"
         self.connection.execute(
-            text("""INSERT INTO aouser.ao (ao_id, ao_no, name, summary, req_date, issue_date, stage)
-                    VALUES (:id, :no, :name, :summary, :rdate, :idate, :status)"""),
+            text("""INSERT INTO aouser.ao (ao_id, ao_no, name, summary, req_date, issue_date, stage,published_flg)
+                    VALUES (:id, :no, :name, :summary, :rdate, :idate, :status, :published_flg)"""),
             {
                 "id": ao_id,
                 "no": ao["no"],
@@ -340,7 +349,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
                 "summary": ao["summary"],
                 "rdate": ao["request_date"],
                 "idate": ao["issue_date"],
-                "status": ao_status_to_stage(ao["status"])
+                "status": ao_status_to_stage(ao["status"]),
+                "published_flg": ao["published_flg"]
             }
         )
         self.connection.commit()
@@ -361,6 +371,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "is_pending": True,
+            "published_flg": True,
             "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
@@ -387,6 +398,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "is_pending": True,
+            "published_flg": True,
             "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
@@ -413,6 +425,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "is_pending": True,
+            "published_flg": True,
             "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
