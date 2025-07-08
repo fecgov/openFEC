@@ -140,7 +140,7 @@ def create_app(test_config=None):
         app.config['SQLALCHEMY_FOLLOWERS'] = create_sqlalchemy_followers('SQLA_FOLLOWERS')
         app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
     else:
-        TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
+        TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql+psycopg:///cfdm_unit_test')
         app.config['NPLUSONE_RAISE'] = True
         app.config['SQLALCHEMY_DATABASE_URI'] = TEST_CONN
         app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
@@ -148,7 +148,7 @@ def create_app(test_config=None):
         if test_config == 'follower':
             # Config just for read replica int test
             app.config['SQLALCHEMY_FOLLOWERS'] = create_sqlalchemy_followers('SQLA_TEST_CONN',
-                                                                             'postgresql:///cfdm_unit_test')
+                                                                             'postgresql+psycopg:///cfdm_unit_test')
     # Initialize Extensions
     db.init_app(app)
     cors.CORS(app)
