@@ -10,6 +10,7 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 from webservices import filters
 from webservices.utils import use_kwargs
+from webservices.profiling import profiled
 
 
 # used for endpoint:`/audit-primary-category/`
@@ -178,7 +179,8 @@ class AuditCandidateNameSearch(utils.Resource):
         query = query.order_by(
             sa.desc(models.AuditCandidateSearch.id)
         ).limit(20)
-        return {'results': models.db.session.execute(query).mappings().all()}
+        with profiled():
+            return {'results': models.db.session.execute(query).mappings().all()}
 
 
 # used for endpoint:`/names/audit_committees/`
@@ -203,4 +205,5 @@ class AuditCommitteeNameSearch(utils.Resource):
         query = query.order_by(
             sa.desc(models.AuditCommitteeSearch.id)
         ).limit(20)
-        return {'results': models.db.session.execute(query).mappings().all()}
+        with profiled():
+            return {'results': models.db.session.execute(query).mappings().all()}

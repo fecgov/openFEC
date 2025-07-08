@@ -48,13 +48,14 @@ class ApiResource(utils.Resource):
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
-        return utils.fetch_page(
-            query, kwargs, models.db.session, is_count_exact=self.is_count_exact,
-            count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
-            index_column=self.index_column, cap=self.cap, multi=multi,
-            contains_individual_columns=self.contains_individual_columns,
-            contains_joined_load=self.contains_joined_load, union_query=self.union_query
-        )
+        with profiled():
+            return utils.fetch_page(
+                query, kwargs, models.db.session, is_count_exact=self.is_count_exact,
+                count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
+                index_column=self.index_column, cap=self.cap, multi=multi,
+                contains_individual_columns=self.contains_individual_columns,
+                contains_joined_load=self.contains_joined_load, union_query=self.union_query
+            )
 
     def build_query(self, *args, _apply_options=True, **kwargs):
         query = sa.select(self.model)

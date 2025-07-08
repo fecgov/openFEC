@@ -15,6 +15,7 @@ from webservices.common import models
 from webservices.utils import use_kwargs
 from webservices.common.views import ApiResource
 from webservices import calendar
+from webservices.profiling import profiled
 
 
 # used for endpoint:'/calendar-dates/'
@@ -89,12 +90,13 @@ class CalendarDatesExport(CalendarDatesView):
         )
         schema_type, renderer, mimetype = self.renderers[kwargs['renderer']]
         schema = schema_type(many=True)
-        return Response(
-            renderer(
-                schema.dump(
-                    models.db.session.execute(query).scalars().all()), schema),
-            mimetype=mimetype,
-        )
+        with profiled():
+            return Response(
+                renderer(
+                    schema.dump(
+                        models.db.session.execute(query).scalars().all()), schema),
+                mimetype=mimetype,
+            )
 
 
 # used for endpoint:'/election-dates/'

@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 from sqlalchemy import cast, Integer
 from flask_apispec import doc, marshal_with
+from webservices.profiling import profiled
 
 from webservices import args
 from webservices import docs
@@ -339,8 +340,8 @@ class ElectionSummary(utils.Resource):
             aggregates.c.disbursements,
             expenditures.c.independent_expenditures,
         )
-
-        return (db.session.execute(query).first()._asdict())
+        with profiled():
+            return (db.session.execute(query).first()._asdict())
 
     def _get_aggregates(self, kwargs):
         totals_model = office_totals_map[kwargs['office']]

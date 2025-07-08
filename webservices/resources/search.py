@@ -9,6 +9,7 @@ from webservices import filters
 from webservices import schemas
 from webservices.common import models
 from webservices.utils import use_kwargs
+from webservices.profiling import profiled
 
 
 # used for endpoint:'/names/candidates/'
@@ -34,7 +35,8 @@ class CandidateNameSearch(utils.Resource):
         query = query.order_by(
             sa.desc(models.CandidateSearch.total_activity)
         ).limit(20)
-        return {'results': models.db.session.execute(query).mappings().all()}
+        with profiled():
+            return {'results': models.db.session.execute(query).mappings().all()}
 
 
 # search committee full text name
@@ -62,4 +64,5 @@ class CommitteeNameSearch(utils.Resource):
         query = query.order_by(
             sa.desc(models.CommitteeSearch.total_activity)
         ).limit(20)
-        return {'results': models.db.session.execute(query).mappings().all()}
+        with profiled():
+            return {'results': models.db.session.execute(query).mappings().all()}
