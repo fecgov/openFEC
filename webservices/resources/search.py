@@ -28,14 +28,14 @@ class CandidateNameSearch(utils.Resource):
     @use_kwargs(args.names)
     @marshal_with(schemas.CandidateSearchListSchema())
     def get(self, **kwargs):
-        query = sa.select(models.CandidateSearch.id,
-                          models.CandidateSearch.name,
-                          models.CandidateSearch.office_sought)
-        query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
-        query = query.order_by(
-            sa.desc(models.CandidateSearch.total_activity)
-        ).limit(20)
         with profiled():
+            query = sa.select(models.CandidateSearch.id,
+                              models.CandidateSearch.name,
+                              models.CandidateSearch.office_sought)
+            query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
+            query = query.order_by(
+                sa.desc(models.CandidateSearch.total_activity)
+            ).limit(20)
             return {'results': models.db.session.execute(query).mappings().all()}
 
 
@@ -57,12 +57,12 @@ class CommitteeNameSearch(utils.Resource):
     @use_kwargs(args.names)
     @marshal_with(schemas.CommitteeSearchListSchema())
     def get(self, **kwargs):
-        query = sa.select(models.CommitteeSearch.id,
-                          models.CommitteeSearch.name,
-                          models.CommitteeSearch.is_active)
-        query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
-        query = query.order_by(
-            sa.desc(models.CommitteeSearch.total_activity)
-        ).limit(20)
         with profiled():
+            query = sa.select(models.CommitteeSearch.id,
+                              models.CommitteeSearch.name,
+                              models.CommitteeSearch.is_active)
+            query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
+            query = query.order_by(
+                sa.desc(models.CommitteeSearch.total_activity)
+            ).limit(20)
             return {'results': models.db.session.execute(query).mappings().all()}

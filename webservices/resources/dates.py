@@ -82,15 +82,15 @@ class CalendarDatesExport(CalendarDatesView):
         'renderer': fields.Str(missing='ics', validate=validate.OneOf(['ics', 'csv'])),
     })
     def get(self, **kwargs):
-        query = self.build_query(**kwargs)
-        today = datetime.date.today()
-        query = query.filter(
-            self.model.start_date >= today - relativedelta(years=1),
-            self.model.start_date < today + relativedelta(years=1),
-        )
-        schema_type, renderer, mimetype = self.renderers[kwargs['renderer']]
-        schema = schema_type(many=True)
         with profiled():
+            query = self.build_query(**kwargs)
+            today = datetime.date.today()
+            query = query.filter(
+                self.model.start_date >= today - relativedelta(years=1),
+                self.model.start_date < today + relativedelta(years=1),
+            )
+            schema_type, renderer, mimetype = self.renderers[kwargs['renderer']]
+            schema = schema_type(many=True)
             return Response(
                 renderer(
                     schema.dump(

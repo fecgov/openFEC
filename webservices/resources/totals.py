@@ -9,7 +9,7 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common.views import ApiResource
 from webservices.utils import use_kwargs
-
+from webservices.profiling import profiled
 committee_type_map = {
     'house-senate': 'H',
     'presidential': 'P',
@@ -74,12 +74,13 @@ class TotalsByEntityTypeView(ApiResource):
     @use_kwargs(args.make_sort_args(default='-cycle'))
     @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
     def get(self, committee_id=None, entity_type=None, **kwargs):
-        query, totals_class, totals_schema = self.build_query(
-            committee_id=committee_id, entity_type=entity_type, **kwargs
-        )
-        page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=totals_class,
-                                contains_joined_load=True)
-        return totals_schema().dump(page)
+        with profiled():
+            query, totals_class, totals_schema = self.build_query(
+                committee_id=committee_id, entity_type=entity_type, **kwargs
+            )
+            page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=totals_class,
+                                    contains_joined_load=True)
+            return totals_schema().dump(page)
 
     def build_query(self, committee_id=None, entity_type=None, **kwargs):
         totals_class, totals_schema = totals_schema_map.get(
@@ -230,12 +231,13 @@ class TotalsCommitteeView(ApiResource):
     @use_kwargs(args.make_sort_args(default='-cycle'))
     @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
-        query, totals_class, totals_schema = self.build_query(
-            committee_id=committee_id.upper(), committee_type=committee_type, **kwargs
-        )
-        page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=totals_class,
-                                contains_joined_load=True)
-        return totals_schema().dump(page)
+        with profiled():
+            query, totals_class, totals_schema = self.build_query(
+                committee_id=committee_id.upper(), committee_type=committee_type, **kwargs
+            )
+            page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=totals_class,
+                                    contains_joined_load=True)
+            return totals_schema().dump(page)
 
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
         totals_class, totals_schema = totals_schema_map.get(
@@ -279,15 +281,16 @@ class CandidateTotalsDetailView(utils.Resource):
     @use_kwargs(args.make_sort_args(default='-cycle'))
     @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
     def get(self, candidate_id, **kwargs):
-        query, totals_class, totals_schema = self.build_query(
-            candidate_id=candidate_id.upper(), **kwargs
-        )
-        if kwargs['sort']:
-            validator = args.IndexValidator(totals_class)
-            validator(kwargs['sort'])
+        with profiled():
+            query, totals_class, totals_schema = self.build_query(
+                candidate_id=candidate_id.upper(), **kwargs
+            )
+            if kwargs['sort']:
+                validator = args.IndexValidator(totals_class)
+                validator(kwargs['sort'])
 
-        page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=totals_class)
-        return totals_schema().dump(page)
+            page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=totals_class)
+            return totals_schema().dump(page)
 
     def build_query(self, candidate_id=None, **kwargs):
         committee_type = self._resolve_committee_type(candidate_id=candidate_id.upper(), **kwargs)

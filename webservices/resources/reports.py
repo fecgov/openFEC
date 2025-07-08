@@ -9,7 +9,7 @@ from webservices import filters
 from webservices.common import models
 from webservices.common import views
 from webservices.utils import use_kwargs
-
+from webservices.profiling import profiled
 
 reports_schema_map = {
     'P': (
@@ -144,15 +144,17 @@ class ReportsView(views.ApiResource):
     @use_kwargs(args.make_multi_sort_args(default=['-coverage_end_date']))
     @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
     def get(self, entity_type=None, **kwargs):
-        query, reports_class, reports_schema = self.build_query(
-            entity_type=entity_type, **kwargs
-        )
-        if kwargs['sort']:
-            validator = args.IndicesValidator(reports_class)
-            validator(kwargs['sort'])
-        page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=reports_class, multi=True,
-                                contains_joined_load=self.contains_joined_load)
-        return reports_schema().dump(page)
+        with profiled():
+            query, reports_class, reports_schema = self.build_query(
+                entity_type=entity_type, **kwargs
+            )
+            if kwargs['sort']:
+                validator = args.IndicesValidator(reports_class)
+                validator(kwargs['sort'])
+            page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=reports_class,
+                                    multi=True,
+                                    contains_joined_load=self.contains_joined_load)
+            return reports_schema().dump(page)
 
     def build_query(self, entity_type=None, **kwargs):
         # For this endpoint we now enforce the enpoint specified to map the right model.
@@ -212,15 +214,17 @@ class CommitteeReportsView(views.ApiResource):
     @use_kwargs(args.make_multi_sort_args(default=['-coverage_end_date']))
     @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
-        query, reports_class, reports_schema = self.build_query(
-            committee_id=committee_id.upper(), committee_type=committee_type, **kwargs
-        )
-        if kwargs['sort']:
-            validator = args.IndicesValidator(reports_class)
-            validator(kwargs['sort'])
-        page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=reports_class, multi=True,
-                                contains_joined_load=self.contains_joined_load)
-        return reports_schema().dump(page)
+        with profiled():
+            query, reports_class, reports_schema = self.build_query(
+                committee_id=committee_id.upper(), committee_type=committee_type, **kwargs
+            )
+            if kwargs['sort']:
+                validator = args.IndicesValidator(reports_class)
+                validator(kwargs['sort'])
+            page = utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=reports_class,
+                                    multi=True,
+                                    contains_joined_load=self.contains_joined_load)
+            return reports_schema().dump(page)
 
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
         reports_class, reports_schema = reports_schema_map.get(

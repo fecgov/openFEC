@@ -69,8 +69,10 @@ class ElectionsListView(utils.Resource):
     @use_kwargs(args.make_multi_sort_args(default=['sort_order', 'district', ]))
     @marshal_with(schemas.ElectionsListPageSchema())
     def get(self, **kwargs):
-        query = self._get_elections(kwargs)
-        return utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=ElectionsList, multi=True)
+        with profiled():
+            query = self._get_elections(kwargs)
+            return utils.fetch_page(query, kwargs, models.db.session, is_count_exact=True, model=ElectionsList,
+                                    multi=True)
 
     def _get_elections(self, kwargs):
         """Get elections from ElectionsList model."""
@@ -141,26 +143,27 @@ class ElectionView(ApiResource):
         )
 
     def get(self, *args, **kwargs):
-        query = self.build_query(*args, **kwargs)
-        count, _ = counts.get_count(self, query)
-        multi = False
-        if isinstance(kwargs['sort'], (list, tuple)):
-            multi = True
+        with profiled():
+            query = self.build_query(*args, **kwargs)
+            count, _ = counts.get_count(self, query)
+            multi = False
+            if isinstance(kwargs['sort'], (list, tuple)):
+                multi = True
 
-        return utils.fetch_page(
-            query,
-            kwargs,
-            models.db.session,
-            is_count_exact=self.is_count_exact,
-            count=count,
-            model=self.model,
-            join_columns=self.join_columns,
-            aliases=self.aliases,
-            index_column=self.index_column,
-            cap=0,
-            multi=multi,
-            contains_individual_columns=True
-        )
+            return utils.fetch_page(
+                query,
+                kwargs,
+                models.db.session,
+                is_count_exact=self.is_count_exact,
+                count=count,
+                model=self.model,
+                join_columns=self.join_columns,
+                aliases=self.aliases,
+                index_column=self.index_column,
+                cap=0,
+                multi=multi,
+                contains_individual_columns=True
+            )
 
     def build_query(self, **kwargs):
         utils.check_election_arguments(kwargs)
@@ -330,17 +333,17 @@ class ElectionSummary(utils.Resource):
     @use_kwargs(args.elections)
     @marshal_with(schemas.ElectionSummarySchema())
     def get(self, **kwargs):
-        utils.check_election_arguments(kwargs)
-        aggregates = self._get_aggregates(kwargs).subquery()
-        expenditures = self._get_expenditures(kwargs).subquery()
-
-        query = sa.select(
-            aggregates.c.count,
-            aggregates.c.receipts,
-            aggregates.c.disbursements,
-            expenditures.c.independent_expenditures,
-        )
         with profiled():
+            utils.check_election_arguments(kwargs)
+            aggregates = self._get_aggregates(kwargs).subquery()
+            expenditures = self._get_expenditures(kwargs).subquery()
+
+            query = sa.select(
+                aggregates.c.count,
+                aggregates.c.receipts,
+                aggregates.c.disbursements,
+                expenditures.c.independent_expenditures,
+            )
             return (db.session.execute(query).first()._asdict())
 
     def _get_aggregates(self, kwargs):

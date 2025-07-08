@@ -39,23 +39,23 @@ class ApiResource(utils.Resource):
     @use_kwargs(Ref('args'))
     @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
-        query = self.build_query(*args, **kwargs)
-        is_estimate = counts.is_estimated_count(self, query)
-        if not is_estimate:
-            count = None
-        else:
-            count, _ = counts.get_count(self, query)
-        multi = False
-        if isinstance(kwargs['sort'], (list, tuple)):
-            multi = True
         with profiled():
+            query = self.build_query(*args, **kwargs)
+            is_estimate = counts.is_estimated_count(self, query)
+            if not is_estimate:
+                count = None
+            else:
+                count, _ = counts.get_count(self, query)
+            multi = False
+            if isinstance(kwargs['sort'], (list, tuple)):
+                multi = True
             return utils.fetch_page(
-                query, kwargs, models.db.session, is_count_exact=self.is_count_exact,
-                count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
-                index_column=self.index_column, cap=self.cap, multi=multi,
-                contains_individual_columns=self.contains_individual_columns,
-                contains_joined_load=self.contains_joined_load, union_query=self.union_query
-            )
+                    query, kwargs, models.db.session, is_count_exact=self.is_count_exact,
+                    count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
+                    index_column=self.index_column, cap=self.cap, multi=multi,
+                    contains_individual_columns=self.contains_individual_columns,
+                    contains_joined_load=self.contains_joined_load, union_query=self.union_query
+                )
 
     def build_query(self, *args, _apply_options=True, **kwargs):
         query = sa.select(self.model)
@@ -81,15 +81,15 @@ class ItemizedResource(ApiResource):
     def get(self, **kwargs):
         """Get itemized resources.
         """
-        self.validate_kwargs(kwargs)
-
-        query = self.build_query(**kwargs)
-        is_estimate = counts.is_estimated_count(self, query)
-        if not is_estimate:
-            count = None
-        else:
-            count, _ = counts.get_count(self, query)
         with profiled():
+            self.validate_kwargs(kwargs)
+
+            query = self.build_query(**kwargs)
+            is_estimate = counts.is_estimated_count(self, query)
+            if not is_estimate:
+                count = None
+            else:
+                count, _ = counts.get_count(self, query)
             return utils.fetch_seek_page(query,
                                          kwargs,
                                          self.index_column,
@@ -176,14 +176,15 @@ class NoCapResource(utils.Resource):
     @use_kwargs(Ref('args'))
     @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
-        self.validate_kwargs(kwargs)
-        query = self.build_query(*args, **kwargs)
-        multi = False
-        if isinstance(kwargs['sort'], (list, tuple)):
-            multi = True
-        return utils.fetch_page(query, kwargs, models.db.session, multi=multi, cap=0, is_count_exact=True,
-                                contains_individual_columns=self.contains_individual_columns,
-                                contains_joined_load=self.contains_joined_load)
+        with profiled():
+            self.validate_kwargs(kwargs)
+            query = self.build_query(*args, **kwargs)
+            multi = False
+            if isinstance(kwargs['sort'], (list, tuple)):
+                multi = True
+            return utils.fetch_page(query, kwargs, models.db.session, multi=multi, cap=0, is_count_exact=True,
+                                    contains_individual_columns=self.contains_individual_columns,
+                                    contains_joined_load=self.contains_joined_load)
 
     def validate_kwargs(self, kwargs):
         """

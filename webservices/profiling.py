@@ -2,10 +2,9 @@ from sqlalchemy import event
 from sqlalchemy.engine import Engine
 import time
 import logging
-import cProfile
 import io
-import pstats
 import contextlib
+import yappi
 
 logging.basicConfig()
 logger = logging.getLogger("sql_profiling")
@@ -26,14 +25,20 @@ def after_cursor_execute(conn, cursor, statement, parameters, context, executema
 
 
 @contextlib.contextmanager
-def profiled():
-    pr = cProfile.Profile()
-    pr.enable()
-    yield
-    pr.disable()
-    s = io.StringIO()
-    ps = pstats.Stats(pr, stream=s).sort_stats("cumulative")
-    ps.print_stats()
-    # uncomment this to see who's calling what
-    # ps.print_callers()
-    logger.debug(s.getvalue())
+def profiled(sort_by="ttot"):  # total time
+    yappi.set_clock_type("wall")  # includes time spent waiting
+    yappi.set_context_backend("greenlet")
+    yappi.clear_stats()
+    yappi.start()
+    try:
+        yield
+    finally:
+        yappi.stop()
+        s = io.StringIO()
+
+        yappi.get_func_stats().sort(sort_by).print_all(out=s)
+
+        s.write("\n--- Greenlet Stats ---\n")
+        yappi.get_greenlet_stats().print_all(out=s)
+
+        logger.debug(s.getvalue())
