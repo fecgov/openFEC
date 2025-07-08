@@ -14,36 +14,36 @@ from webservices import __API_VERSION__
 from webservices.legal_docs import (create_test_indices, TEST_CASE_INDEX, TEST_ARCH_MUR_INDEX, TEST_AO_INDEX,
                                     TEST_CASE_ALIAS, TEST_ARCH_MUR_ALIAS, TEST_AO_ALIAS)
 from webservices.utils import create_es_client
-from tests.test_legal_data import document_dictionary
+from tests.test_legal.test_legal_data import document_dictionary
 from jdbc_utils import to_jdbc_url
-
+from sqlalchemy import text
 
 TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
 ALL_INDICES = [TEST_CASE_INDEX, TEST_AO_INDEX, TEST_ARCH_MUR_INDEX]
 
 
 def _setup_extensions(db):
-    with db.engine.connect() as conn:
-        conn.execute('create extension if not exists btree_gin;')
+    with db.engine.begin() as conn:
+        conn.execute(text('create extension if not exists btree_gin;'))
 
 
 def _reset_schema(db):
     if current_app.config['TESTING']:
-        with db.engine.connect() as conn:
-            conn.execute('drop schema if exists public cascade;')
-            conn.execute('drop schema if exists disclosure cascade;')
-            conn.execute('drop schema if exists staging cascade;')
-            conn.execute('drop schema if exists fecapp cascade;')
-            conn.execute('drop schema if exists real_efile cascade;')
-            conn.execute('drop schema if exists auditsearch cascade;')
-            conn.execute('drop schema if exists test_efile cascade;')
-            conn.execute('create schema public;')
-            conn.execute('create schema disclosure;')
-            conn.execute('create schema staging;')
-            conn.execute('create schema fecapp;')
-            conn.execute('create schema real_efile;')
-            conn.execute('create schema auditsearch;')
-            conn.execute('create schema test_efile;')
+        with db.engine.begin() as conn:
+            conn.execute(text('drop schema if exists public cascade;'))
+            conn.execute(text('drop schema if exists disclosure cascade;'))
+            conn.execute(text('drop schema if exists staging cascade;'))
+            conn.execute(text('drop schema if exists fecapp cascade;'))
+            conn.execute(text('drop schema if exists real_efile cascade;'))
+            conn.execute(text('drop schema if exists test_efile cascade;'))
+            conn.execute(text('drop schema if exists auditsearch cascade;'))
+            conn.execute(text('create schema public;'))
+            conn.execute(text('create schema disclosure;'))
+            conn.execute(text('create schema staging;'))
+            conn.execute(text('create schema fecapp;'))
+            conn.execute(text('create schema real_efile;'))
+            conn.execute(text('create schema test_efile;'))
+            conn.execute(text('create schema auditsearch;'))
 
 
 class BaseTestCase(unittest.TestCase):
@@ -95,10 +95,8 @@ class ApiBaseTest(BaseTestCase):
                 stdout=null,
             )
 
-        with db.engine.connect() as connection:
-            db.metadata.create_all(
-                bind=connection,
-            )
+        with db.engine.begin() as connection:
+            db.metadata.create_all(bind=connection,)
 
     def setUp(self):
         super(ApiBaseTest, self).setUp()

@@ -86,14 +86,14 @@ def filter_fulltext(query, kwargs, fields):
             include_list = build_include_list(kwargs.get(key))
             if exclude_list:
                 filters = [
-                    sa.not_(column.match(utils.parse_fulltext(value)))
+                    sa.not_(column.op('@@')(sa.func.to_tsquery(utils.parse_fulltext(value))))
                     for value in exclude_list
                 ]
                 query = query.filter(sa.and_(*filters)) if len(filters) > 1 else query.filter(*filters)
             if include_list:
                 filters = []
                 for value in include_list:
-                    filters.append(column.match(utils.parse_fulltext(value)))
+                    filters.append(column.op('@@')(sa.func.to_tsquery(utils.parse_fulltext(value))))
                     if value.upper() == 'NULL':
                         filters.append(column.is_(None))
                 query = query.filter(sa.or_(*filters)) if len(filters) > 1 else query.filter(*filters)
@@ -112,7 +112,7 @@ def filter_fulltext_NA(query, kwargs, fields):
                     if value.strip().upper() == "N/A":
                         query = query.filter(original_column != 'N/A')
                     else:
-                        filters.append(sa.not_(column.match(utils.parse_fulltext(value))))
+                        filters.append(sa.not_(column.op('@@')(sa.func.to_tsquery(utils.parse_fulltext(value)))))
                 query = query.filter(sa.and_(*filters)) if len(filters) > 1 else query.filter(*filters)
             if include_list:
                 filters = []
@@ -120,7 +120,7 @@ def filter_fulltext_NA(query, kwargs, fields):
                     if value.strip().upper() == "N/A":
                         query = query.filter(original_column == 'N/A')
                     else:
-                        filters.append(column.match(utils.parse_fulltext(value)))
+                        filters.append(column.op('@@')(sa.func.to_tsquery(utils.parse_fulltext(value))))
                         if value.upper() == 'NULL':
                             filters.append(column.is_(None))
                 query = query.filter(sa.or_(*filters)) if len(filters) > 1 else query.filter(*filters)

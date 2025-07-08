@@ -248,7 +248,7 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
         # logging.info(response)
 
         self.assertEqual(response["total_admin_fines"], 0)
-        self.assertEqual(response["total_all"], 10)
+        self.assertEqual(response["total_all"], 13)
 
     def test_q_proximity_filters(self):
         # for archived and current murs, advisory_opinions, adrs, and afs

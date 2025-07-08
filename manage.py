@@ -110,7 +110,7 @@ def refresh_materialized(concurrent=True):
                         refresh_command = "REFRESH MATERIALIZED VIEW {}".format(mv)
 
                     connection.execute(
-                        sa.text(refresh_command).execution_options(autocommit=True)
+                        sa.text(refresh_command)
                     )
             else:
                 logger.error("Error refreshing node {}: not found.".format(node))

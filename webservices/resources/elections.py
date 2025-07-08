@@ -203,12 +203,10 @@ class ElectionView(ApiResource):
             ),
             totals_model.coverage_end_date,
             sa.case(
-                [
                     (
                         CandidateCommitteeLink.committee_designation == 'P',
                         CandidateCommitteeLink.committee_id,
                     )
-                ]  # noqa
             ).label('candidate_pcc_id'),
         ).filter(CandidateCommitteeLink.committee_designation.in_(['P', 'A']))
         basicPairs = join_candidate_totals(basicPairs, kwargs, totals_model)
@@ -237,12 +235,10 @@ class ElectionView(ApiResource):
             ],
             'order_by': [
                 sa.case(
-                    [
                         (
                             basicPairs.c.coverage_end_date.isnot(None),
                             basicPairs.c.two_year_period,
                         )
-                    ]
                 )
                 .desc()
                 .nullslast()
