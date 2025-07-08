@@ -6,12 +6,12 @@ import re
 
 from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
-from postgres_copy import query_entities, format_flags
 from celery_once import QueueOnce
 from smart_open import smart_open
 from celery import shared_task
 from sqlalchemy.dialects import postgresql
 
+from webservices.tasks.copy import query_entities, format_flags
 from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
@@ -19,6 +19,8 @@ from webservices.legal_docs.es_management import S3_BACKUP_DIRECTORY
 
 from webservices.tasks import utils as task_utils
 from flask import Flask, current_app
+from psycopg import ClientCursor
+
 
 logger = logging.getLogger(__name__)
 
@@ -147,10 +149,8 @@ def make_bundle(resource):
 def copy_to(source, dest, engine, **flags):
     dialect = postgresql.dialect()
     compiled = source.compile(dialect=dialect)
-
     sql = compiled.string
     params = compiled.params
-    conn = engine.raw_connection()
     array_keys = getattr(source, '_array_cast_keys', set())
 
     if "POSTCOMPILE" in sql:
@@ -158,13 +158,21 @@ def copy_to(source, dest, engine, **flags):
         params = convert_lists_to_tuples(params, array_keys)
 
     try:
-        with conn.cursor() as cursor:
-            query = cursor.mogrify(sql, params).decode()
-            formatted_flags = f"({format_flags(flags)})" if flags else ""
-            copy_sql = f"COPY ({query}) TO STDOUT {formatted_flags}"
-            cursor.copy_expert(copy_sql, dest)
-    finally:
-        conn.close()
+        with engine.connect() as conn:
+            raw_conn = conn.connection.driver_connection
+
+            with ClientCursor(raw_conn) as cursor:
+                query = cursor.mogrify(sql, params)
+
+                formatted_flags = f"({format_flags(flags)})" if flags else ""
+                copy_sql = f"COPY ({query}) TO STDOUT {formatted_flags}"
+
+                with cursor.copy(copy_sql) as copy:
+                    for data in copy:
+                        dest.write(bytes(data))
+    except Exception:
+        logger.exception("Error during COPY TO operation")
+        raise
 
 
 def rebind_postcompile(sql):
