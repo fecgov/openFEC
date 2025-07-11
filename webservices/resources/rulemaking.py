@@ -1,5 +1,4 @@
 from elasticsearch_dsl import Search, Q
-# from flask import abort
 from flask_apispec import doc
 from webservices import docs
 from webservices import args
@@ -19,7 +18,7 @@ from webservices.utils import use_kwargs
 from elasticsearch import RequestError
 from webservices.exceptions import ApiError
 from webservices.rulemaking_docs.responses import (
-    RULEMAKING_SEARCH_RESPONSE_1
+    RULEMAKING_SEARCH_RESPONSE
 )
 import logging
 import json
@@ -36,10 +35,19 @@ INNER_HITS = {
     "_source": False,
     "highlight": {
         "require_field_match": False,
-        "fields": {"documents.text": {}, "documents.description": {}},
+        "fields": {"documents.text": {}},
     },
     "size": 100,
 }
+
+# INNER_HITS_2 = {
+#     "_source": False,
+#     "highlight": {
+#         "require_field_match": False,
+#         "fields": {"documents.level_2_labels.level_2_docs.text": {}},
+#      },
+#     "size": 100,
+# }
 
 ACCEPTED_DATE_FORMATS = "strict_date_optional_time_nanos||MM/dd/yyyy||M/d/yyyy||MM/d/yyyy||M/dd/yyyy"
 
@@ -51,24 +59,22 @@ ACCEPTED_DATE_FORMATS = "strict_date_optional_time_nanos||MM/dd/yyyy||M/d/yyyy||
 @doc(
     tags=["legal"],
     description=docs.RM_SEARCH,
-    responses=RULEMAKING_SEARCH_RESPONSE_1,
+    responses=RULEMAKING_SEARCH_RESPONSE,
 )
 class RulemakingSearch(Resource):
     @use_kwargs(args.rulemaking_search)
     def get(self, q="", from_hit=0, hits_returned=20, **kwargs):
-        query_builder = rm_query_builder
         type_ = RULEMAKING_TYPE
-        print("@@@@@@@@@@@@@@@@@@@@@@@ TYPE:::::", type_)
         hits_returned = min([200, hits_returned])
         results = {}
         total_count = 0
         try:
-            query = query_builder(q, type_, from_hit, hits_returned, **kwargs)
+            query = build_search_query(q, type_, from_hit, hits_returned, **kwargs)
             logger.debug(
                 "Rulemaking search final query = " +
                 json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder)
             )
-            formatted_hits, rm_count = execute_query(query)
+            formatted_hits, rm_count = execute_search_query(query)
         except TypeError as te:
             logger.error(te.args)
             raise ApiError("Not a valid search type", 400)
@@ -88,34 +94,32 @@ class RulemakingSearch(Resource):
         return results
 
 
-def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
+def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
+    # Only pass query string to document list below
+    proximity_query = False
     must_query = [Q("term", type=type_)]
-    # proximity_query = False
-
-    if q:
-        must_query.append(Q("simple_query_string", query=q))
-
-    # if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
-    #     proximity_query = True
-
     query = (
         Search()
         .using(es_client)
         .query(Q("bool", must=must_query))
         .highlight_options(require_field_match=False)
         .source(exclude=["sort1", "sort2"])
+        # .source(exclude=["no_tier_documents.text", "documents.level_2_labels.level_2_docs.text",
+        #                  "documents.text", "sort1", "sort2"])
         .extra(size=hits_returned, from_=from_hit)
         .index(RM_SEARCH_ALIAS)
         .sort("sort1", "sort2")
     )
 
-    # if not proximity_query:
-    #     if type_ == "advisory_opinions":
-    #         query = query.highlight("summary", "documents.text", "documents.description")
-    #     elif type_ == "statutes":
-    #         query = query.highlight("name", "no")
-    #     else:
-    #         query = query.highlight("documents.text", "documents.description")
+    if q:
+        must_query.append(Q("simple_query_string", query=q))
+
+    if filters.check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
+        proximity_query = True
+
+    if not proximity_query:
+        query = query.highlight("documents.text", "documents.level_2_labels.level_2_docs.text")
+        # query = query.highlight("documents.text", "documents.description")
 
     # if kwargs.get("q_exclude"):
     #     must_not = []
@@ -130,8 +134,75 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     #             )
     #         )
     #     )
-    # logging.warning("generic_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
-    return query
+
+    # Sort regulations by 'rm_no'. Default sort order is desc.
+    sort_field = kwargs.get("sort")
+    if sort_field:
+        if sort_field.startswith("-"):
+            sort_order = "desc"
+            sort_field = sort_field[1:]
+        else:
+            sort_order = "asc"
+
+        if sort_field.upper() == "RM_NO":
+            query = query.sort({"rm_year": {"order": sort_order}}, {"rm_serial": {"order": sort_order}})
+
+    should_query = [
+        get_document_query_params(q, **kwargs),
+        Q("simple_query_string", query=q, fields=["description"]),
+    ]
+    query = query.query("bool", should=should_query, minimum_should_match=1)
+
+    # logger.debug("build_search_query:: =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    return get_all_query_params(query, **kwargs)
+
+
+def execute_search_query(query):
+    es_results = query.execute()
+    logger.debug("Rulemaking execute_search_query() es_results =" + json.dumps(
+        es_results.to_dict(), indent=3, cls=DateTimeEncoder))
+
+    formatted_hits = []
+    for hit in es_results:
+        formatted_hit = hit.to_dict()
+        formatted_hit["document_highlights"] = {}
+        formatted_hit["source"] = []
+        formatted_hits.append(formatted_hit)
+
+        # The 'inner_hits' section is in hit.meta and 'highlight' & 'nested' are in inner_hit.meta
+        # hit.meta={'index': 'docs', 'id': 'mur_7212', 'score': None, 'sort': [...}
+        # logger.debug("hit.meta:::::: =" + json.dumps(hit.meta, indent=3, cls=DateTimeEncoder))
+        if "inner_hits" in hit.meta:
+            for inner_hit in hit.meta.inner_hits["documents"].hits:
+                # offset = inner_hit.meta["nested"]["offset"]
+                # for inner_hit_2 in hit.meta.inner_hits["documents.level_2_labels.level_2_docs"].hits:
+                if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
+                    # set "document_highlights" in return hit
+                    offset = inner_hit.meta["nested"]["offset"]
+                    # offset_2 = inner_hit_2.meta["nested"]["offset"]
+                    highlights = inner_hit.meta.highlight.to_dict().values()
+                    formatted_hit["document_highlights"][offset] = [
+                        hl for hl_list in highlights for hl in hl_list
+                    ]
+                    # formatted_hit["document_highlights"][offset][offset_2] = [
+                    #     hl for hl_list in highlights for hl in hl_list
+                    # ]
+
+                    # put "highlights" in return hit
+                    # for key in inner_hit.meta.highlight:
+                    #     formatted_hit["highlights"].extend(inner_hit.meta.highlight[key])
+
+                    if len(inner_hit.to_dict()) > 0:
+                        source = inner_hit.to_dict()
+                        formatted_hit["source"].append(source)
+
+    # logger.debug("formatted_hits =" + json.dumps(formatted_hits, indent=3, cls=DateTimeEncoder))
+
+    # Since ES7 the `total` becomes an object : "total": {"value": 1,"relation": "eq"}
+    # We can set rest_total_hits_as_int=true, default is false.
+    # but elasticsearch-dsl==7.3.0 has not supported this setting yet.
+    count_dict = es_results.hits.total
+    return formatted_hits, count_dict["value"]
 
 
 def get_proximity_query(**kwargs):
@@ -171,39 +242,11 @@ def get_proximity_query(**kwargs):
             intervals_inner_query = Q('intervals', documents__text={
                     'all_of':  {'max_gaps': max_gaps, "ordered": ordered, "intervals": intervals_list}
                     })
+        # logger.debug("get_proximity_query =" + json.dumps(intervals_inner_query, indent=3, cls=DateTimeEncoder))
     return intervals_inner_query
 
 
-def rm_query_builder(q, type_, from_hit, hits_returned, **kwargs):
-    # Only pass query string to document list below
-    query = generic_query_builder(None, type_, from_hit, hits_returned, **kwargs)
-
-    # Sort regulations by 'rm_no'. Default sort order is desc.
-    # example desc order: 'sort=-rm_no'; asc order; sort=rm_no
-    # https://fec-dev-api.app.cloud.gov/v1/rulemaking/search/?type=rulemaking&sort=-rm_no
-    # https://fec-dev-api.app.cloud.gov/v1/rulemaking/search/?type=rulemaking&sort=rm_no
-    sort_field = kwargs.get("sort")
-    if sort_field:
-        if sort_field.startswith("-"):
-            sort_order = "desc"
-            sort_field = sort_field[1:]
-        else:
-            sort_order = "asc"
-
-        if sort_field.upper() == "RM_NO":
-            query = query.sort({"rm_year": {"order": sort_order}}, {"rm_serial": {"order": sort_order}})
-
-    # should_query = [
-    #     get_rm_document_query(q, **kwargs),
-    #     Q("simple_query_string", query=q, fields=["description"]),
-    # ]
-    # query = query.query("bool", should=should_query, minimum_should_match=1)
-
-    logger.debug("rm_query_builder =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
-    return apply_rm_specific_query_params(query, **kwargs)
-
-
-def get_rm_document_query(q, **kwargs):
+def get_document_query_params(q, **kwargs):
     category_query = []
     combined_query = []
     if kwargs.get("rm_doc_category_id") and (len(kwargs.get("rm_doc_category_id")) > 0):
@@ -213,26 +256,28 @@ def get_rm_document_query(q, **kwargs):
         combined_query.append(Q("bool", should=category_query, minimum_should_match=1))
 
     if q:
-        q_query = Q("simple_query_string", query=q, fields=["documents.level_2_labels.level_2_docs.text"])
+        # q_query = Q("simple_query_string", query=q, fields=["documents.level_2_labels.level_2_docs.text"])
+        q_query = Q("simple_query_string", query=q, fields=["documents.text"])
         combined_query.append(q_query)
 
-    # if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
-    #     combined_query.append(get_proximity_query(**kwargs))
-    #     proximity_inner_hits = {"_source": {"excludes": ["documents.text"]}, "size": 100}
+    if filters.check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
+        combined_query.append(get_proximity_query(**kwargs))
+        proximity_inner_hits = {"_source": {"excludes": ["documents.text"]}, "size": 100}
 
-    #     if q:
-    #         proximity_inner_hits["highlight"] = {
-    #             "require_field_match": False,
-    #             "fields": {"documents.text": {}, "documents.description": {}, },
-    #             "highlight_query": q_query.to_dict()
-    #             }
+        if q:
+            proximity_inner_hits["highlight"] = {
+                "require_field_match": False,
+                # "fields": {"documents.text": {}},
+                "fields": {"documents.text": {}, "documents.description": {}},
+                "highlight_query": q_query.to_dict()
+                }
 
-    #     return Q(
-    #         "nested",
-    #         path="documents",
-    #         inner_hits=proximity_inner_hits,
-    #         query=Q("bool", must=combined_query),
-    #     )
+        return Q(
+            "nested",
+            path="documents",
+            inner_hits=proximity_inner_hits,
+            query=Q("bool", must=combined_query),
+        )
 
     return Q(
         "nested",
@@ -242,13 +287,13 @@ def get_rm_document_query(q, **kwargs):
     )
 
 
-def apply_rm_specific_query_params(query, **kwargs):
+def get_all_query_params(query, **kwargs):
     must_clauses = []
 
-    if check_filter_exists(kwargs, "rm_no"):
+    if filters.check_filter_exists(kwargs, "rm_no"):
         must_clauses.append(Q("terms", rm_no=kwargs.get("rm_no")))
 
-    if check_filter_exists(kwargs, "rm_name"):
+    if filters.check_filter_exists(kwargs, "rm_name"):
         must_clauses.append(Q("match", rm_name=" ".join(kwargs.get("rm_name"))))
 
     if kwargs.get("rm_year") is not None:
@@ -308,68 +353,8 @@ def apply_rm_specific_query_params(query, **kwargs):
         must_clauses = []
         must_clauses.append(Q("nested", path="documents",
                             query=Q("match", documents__filename=kwargs.get("filename"))))
-        query = query.query("bool", must=must_clauses)
 
     query = query.query("bool", must=must_clauses)
-    logger.debug("apply_rm_specific_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    logger.debug("get_all_query_params:: =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
 
     return query
-
-
-def execute_query(query):
-    es_results = query.execute()
-    # logger.debug("Rulemaking search() execute_query() es_results =" + json.dumps(
-    #     es_results.to_dict(), indent=3, cls=DateTimeEncoder))
-
-    formatted_hits = []
-    for hit in es_results:
-        formatted_hit = hit.to_dict()
-        # formatted_hit["highlights"] = []
-        # formatted_hit["document_highlights"] = {}
-        formatted_hit["source"] = []
-        formatted_hits.append(formatted_hit)
-
-        # 1)When doc_type=[statutes], The 'highlight' section is in hit.meta
-        # hit.meta={'index': 'docs', 'id': '100_29', 'score': None, 'highlight'...}
-        # if "highlight" in hit.meta:
-        #     for key in hit.meta.highlight:
-        #         formatted_hit["highlights"].extend(hit.meta.highlight[key])
-
-        # 2)When doc_type= [advisory_opinions, murs, adrs, admin_fines],
-        # The 'inner_hits' section is in hit.meta and 'highlight' & 'nested' are in inner_hit.meta
-        # hit.meta={'index': 'docs', 'id': 'mur_7212', 'score': None, 'sort': [...}
-        # if "inner_hits" in hit.meta:
-        #     for inner_hit in hit.meta.inner_hits["documents"].hits:
-        #         if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
-        #             # set "document_highlights" in return hit
-        #             offset = inner_hit.meta["nested"]["offset"]
-        #             highlights = inner_hit.meta.highlight.to_dict().values()
-        #             formatted_hit["document_highlights"][offset] = [
-        #                 hl for hl_list in highlights for hl in hl_list
-        #             ]
-
-        #             # put "highlights" in return hit
-        #             for key in inner_hit.meta.highlight:
-        #                 formatted_hit["highlights"].extend(inner_hit.meta.highlight[key])
-
-        #         if len(inner_hit.to_dict()) > 0:
-        #             source = inner_hit.to_dict()
-        #             formatted_hit["source"].append(source)
-
-    # logger.debug("formatted_hits =" + json.dumps(formatted_hits, indent=3, cls=DateTimeEncoder))
-
-# Since ES7 the `total` becomes an object : "total": {"value": 1,"relation": "eq"}
-# We can set rest_total_hits_as_int=true, default is false.
-# but elasticsearch-dsl==7.3.0 has not supported this setting yet.
-    count_dict = es_results.hits.total
-    return formatted_hits, count_dict["value"]
-
-
-def check_filter_exists(kwargs, filter):
-    if kwargs.get(filter):
-        for val in kwargs.get(filter):
-            if len(val) > 0:
-                return True
-        return False
-    else:
-        return False

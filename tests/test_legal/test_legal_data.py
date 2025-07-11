@@ -2164,24 +2164,13 @@ fourth_citation = {
       "type": "citations"
     }
 
-document_dictionary = {
-    "murs": [first_test_mur, second_test_mur],
-    "archived_murs": [first_archived_mur, second_archived_mur],
-    "adrs": [first_adr, second_adr],
-    "admin_fines": [first_admin_fine, second_admin_fine],
-    "statutes": [first_statute, second_statute],
-    "advisory_opinions": [first_ao, second_ao, third_ao, fourth_ao, fifth_ao],
-    "ao_citations": [second_citation, fourth_citation],
-    "mur_citations": [first_citation, third_citation]
-}
-
 first_rm = {
     "admin_close_date": "2024-07-23",
     "calculated_comment_close_date": "2024-09-19",
     "comment_close_date": "2024-09-19",
     "commenter_names": [],
     "counsel_names": [],
-    "description": "REG 2024-10 Civil Monetary Penalties Annual Inflation Adjustments 2025",
+    "description": "REG 2024-14 Civil Monetary Penalties Annual Inflation Adjustments 2025",
     "documents": [
       {
         "doc_category_id": 4,
@@ -2227,12 +2216,12 @@ first_rm = {
                 "doc_category_id": 7,
                 "doc_category_label": "Votes",
                 "doc_date": "2024-12-23",
-                "doc_description": "REG 2024-10 (Civil Monetary Penalties Inflation Adjustment 2025) 12.23.24.pdf",
+                "doc_description": "REG 2024-14 (Civil Monetary Penalties Inflation Adjustment 2025) 12.23.24.pdf",
                 "doc_entities": [],
                 "doc_id": 425658,
                 "doc_type_id": 236,
                 "doc_type_label": "Vote to approve",
-                "filename": "REG 2024-10 (Civil Monetary Penalties Inflation Adjustment 2025) 12.23.24.pdf",
+                "filename": "REG 2024-14 (Civil Monetary Penalties Inflation Adjustment 2025) 12.23.24.pdf",
                 "is_comment_eligible": False,
                 "is_key_document": False,
                 "level_1": 12,
@@ -2249,7 +2238,7 @@ first_rm = {
         ],
         "sort_order": 0,
         "text": "",
-        "url": "https://www.fec.gov/rulemaking/425670/REG 2024-10 FEC 2024-31 Final Rules and EandJ 1.3.25.pdf"
+        "url": "https://www.fec.gov/rulemaking/425670/REG 2024-14 4EC 2024-31 Final Rules and EandJ 1.3.25.pdf"
         }
       ],
     "fr_publication_dates": [
@@ -2264,8 +2253,8 @@ first_rm = {
           "doc_id": 425670,
           "doc_type_id": 295,
           "doc_type_label": "Final Rules and E&J",
-          "filename": "REG 2024-10 Final Rules and EandJ 1.3.25.pdf",
-          "url": "https://www.fec.gov/rulemaking/425670/REG 2024-10 FEC 2024-31 Final Rules and EandJ 1.3.25.pdf"
+          "filename": "REG 2024-14 Final Rules and EandJ 1.3.25.pdf",
+          "url": "https://www.fec.gov/rulemaking/425670/REG 2024-14 FEC 2024-31 Final Rules and EandJ 1.3.25.pdf"
         }
       ],
     "last_updated": "2025-01-06T13:06:17",
@@ -2275,13 +2264,13 @@ first_rm = {
     "rm_entities": [],
     "rm_id": 3479145,
     "rm_name": "Civil Monetary Penalties Annual Inflation Adjustments 2025",
-    "rm_no": "2024-10",
-    "rm_number": "REG 2024-10",
-    "rm_serial": 10,
+    "rm_no": "2024-14",
+    "rm_number": "REG 2024-14",
+    "rm_serial": 14,
     "rm_year": 2024,
     "source": [],
     "sync_status": "UPTODATE",
-    "title": "REG 2024-10 Civil Monetary Penalties Annual Inflation Adjustments 2025",
+    "title": "REG 2024-14 Civil Monetary Penalties Annual Inflation Adjustments 2025",
     "type": "rulemakings",
     "vote_dates": [
         "2024-12-23"
@@ -2295,7 +2284,7 @@ second_rm = {
     "comment_close_date": "2024-09-19",
     "commenter_names": [],
     "counsel_names": [],
-    "description": "REG 2024-10 Civil Monetary Penalties Annual Inflation Adjustments 2025",
+    "description": "REG 2023-11 Civil Monetary Penalties Annual Inflation Adjustments 2025",
     "documents": [
       {
         "doc_category_id": 4,
@@ -2306,7 +2295,7 @@ second_rm = {
         "doc_id": 425670,
         "doc_type_id": 295,
         "doc_type_label": "Final Rules and E&J",
-        "filename": "REG 2024-10 FEC 2024-31 Final Rules and EandJ 1.3.25.pdf",
+        "filename": "REG 2023-11 FEC 2024-31 Final Rules and EandJ 1.3.25.pdf",
         "is_comment_eligible": False,
         "is_key_document": True,
         "level_1": 12,
@@ -2326,7 +2315,7 @@ second_rm = {
                 "doc_id": 425669,
                 "doc_type_id": 110,
                 "doc_type_label": "Draft Final Rules",
-                "filename": "REG 2024-10 Tally Vote Cover Memo and  Draft Final Rule 12.19.24.pdf",
+                "filename": "REG 2023-11 Tally Vote Cover Memo and  Draft Final Rule 12.19.24.pdf",
                 "is_comment_eligible": False,
                 "is_key_document": False,
                 "level_1": 12,
@@ -2335,18 +2324,18 @@ second_rm = {
                 "level_2_label": "Open Meeting Documents",
                 "sort_order": 0,
                 "text": "",
-                "url": "https://www.fec.gov/rulemaking/425669/REG 2024-10 Draft Final Rule 12.19.24.pdf"
+                "url": "https://www.fec.gov/rulemaking/425669/REG 2023-11 Draft Final Rule 12.19.24.pdf"
               },
               {
                 "doc_category_id": 7,
                 "doc_category_label": "Votes",
                 "doc_date": "2024-12-23",
-                "doc_description": "REG 2024-10 (Civil Monetary Penalties Inflation Adjustment 2025) 12.23.24.pdf",
+                "doc_description": "REG 2023-11 (Civil Monetary Penalties Inflation Adjustment 2025) 12.23.24.pdf",
                 "doc_entities": [],
                 "doc_id": 425658,
                 "doc_type_id": 236,
                 "doc_type_label": "Vote to approve",
-                "filename": "REG 2024-10 (Civil Monetary Penalties Inflation Adjustment 2025) 12.23.24.pdf",
+                "filename": "REG 2023-11 (Civil Monetary Penalties Inflation Adjustment 2025) 12.23.24.pdf",
                 "is_comment_eligible": False,
                 "is_key_document": False,
                 "level_1": 12,
@@ -2363,7 +2352,7 @@ second_rm = {
         ],
         "sort_order": 0,
         "text": "",
-        "url": "https://www.fec.gov/rulemaking/425670/REG 2024-10 FEC 2024-31 Final Rules and EandJ 1.3.25.pdf"
+        "url": "https://www.fec.gov/rulemaking/425670/REG 2023-11 FEC 2024-31 Final Rules and EandJ 1.3.25.pdf"
         }
       ],
     "fr_publication_dates": [
@@ -2378,8 +2367,8 @@ second_rm = {
           "doc_id": 425670,
           "doc_type_id": 295,
           "doc_type_label": "Final Rules and E&J",
-          "filename": "REG 2024-10 Final Rules and EandJ 1.3.25.pdf",
-          "url": "https://www.fec.gov/rulemaking/425670/REG 2024-10 Final Rules and EandJ 1.3.25.pdf"
+          "filename": "REG 2023-11 Final Rules and EandJ 1.3.25.pdf",
+          "url": "https://www.fec.gov/rulemaking/425670/REG 2023-11 Final Rules and EandJ 1.3.25.pdf"
         }
       ],
     "last_updated": "2023-01-06T13:06:17",
@@ -2389,9 +2378,9 @@ second_rm = {
     "rm_entities": [],
     "rm_id": 3479145,
     "rm_name": "Civil Monetary Penalties Annual Inflation Adjustments 2025",
-    "rm_no": "2023-10",
-    "rm_number": "REG 2023-10",
-    "rm_serial": 10,
+    "rm_no": "2023-11",
+    "rm_number": "REG 2023-11",
+    "rm_serial": 11,
     "rm_year": 2023,
     "source": [],
     "sync_status": "UPTODATE",
@@ -2403,116 +2392,128 @@ second_rm = {
     "witness_names": []
     }
 
-# third_rm = {
-#     "admin_close_date": "2024-07-23",
-#     "calculated_comment_close_date": "2024-09-19",
-#     "comment_close_date": "2024-09-19",
-#     "commenter_names": [],
-#     "counsel_names": [],
-#     "description": "REG 2024-10 Civil Monetary Penalties Annual Inflation Adjustments 2025",
-#     "documents": [
-#       {
-#         "doc_category_id": 4,
-#         "doc_category_label": "Federal Register Document",
-#         "doc_date": "2025-01-03",
-#         "doc_description": "",
-#         "doc_entities": [],
-#         "doc_id": 425670,
-#         "doc_type_id": 295,
-#         "doc_type_label": "Final Rules and E&J",
-#         "filename": "REG 2024-10 FEC 2024-31 Final Rules and EandJ 1.3.25.pdf",
-#         "is_comment_eligible": False,
-#         "is_key_document": True,
-#         "level_1": 12,
-#         "level_1_label": "Final Rules and E&J",
-#         "level_2": 0,
-#         "level_2_label": "Final Rules and E&J",
-#         "level_2_labels": [
-#           {
-#             "level_2": 1,
-#             "level_2_docs": [
-#               {
-#                 "doc_category_id": 3,
-#                 "doc_category_label": "Agenda Document",
-#                 "doc_date": "2024-12-19",
-#                 "doc_description": "",
-#                 "doc_entities": [],
-#                 "doc_id": 425669,
-#                 "doc_type_id": 110,
-#                 "doc_type_label": "Draft Final Rules",
-#                 "filename": "REG 2024-10 Final Rule 12.19.24.pdf",
-#                 "is_comment_eligible": False,
-#                 "is_key_document": False,
-#                 "level_1": 12,
-#                 "level_1_label": "Final Rules and E&J",
-#                 "level_2": 1,
-#                 "level_2_label": "Open Meeting Documents",
-#                 "sort_order": 0,
-#                 "text": "",
-#                 "url": "https://www.fec.gov/rulemaking/425669/REG 2024-10 Final Rule 12.19.24.pdf"
-#               },
-#               {
-#                 "doc_category_id": 7,
-#                 "doc_category_label": "Votes",
-#                 "doc_date": "2024-12-23",
-#                 "doc_description": "REG 2024-10 (Civil Monetary Penalties Inflation Adjustment 2025) 12.23.24.pdf",
-#                 "doc_entities": [],
-#                 "doc_id": 425658,
-#                 "doc_type_id": 236,
-#                 "doc_type_label": "Vote to approve",
-#                 "filename": "REG 2024-10 (Civil Monetary Penalties Inflation Adjustment 2025) 12.23.24.pdf",
-#                 "is_comment_eligible": False,
-#                 "is_key_document": False,
-#                 "level_1": 12,
-#                 "level_1_label": "Final Rules and E&J",
-#                 "level_2": 1,
-#                 "level_2_label": "Open Meeting Documents",
-#                 "sort_order": 0,
-#                 "text": "",
-#                 "url": "https://www.fec.gov/rulemaking/425658/REG 2024-10 12.23.24.pdf"
-#               }
-#             ],
-#             "level_2_label": "Open Meeting Documents"
-#           }
-#         ],
-#         "sort_order": 0,
-#         "text": "",
-#         "url": "https://www.fec.gov/rulemaking/425670/REG 2024-10 FEC 2024-31 Final Rules and EandJ 1.3.25.pdf"
-#         }
-#       ],
-#       "fr_publication_dates": [
-#         "2025-01-03"
-#       ],
-#       "hearing_dates": [],
-#       "is_open_for_comment": False,
-#       "key_documents": [
-#         {
-#           "doc_date": "2021-01-03",
-#           "doc_description": "",
-#           "doc_id": 425670,
-#           "doc_type_id": 295,
-#           "doc_type_label": "Final Rules and E&J",
-#           "filename": "REG 2021-01  FEC 2024-31 Final Rules and EandJ 1.3.25.pdf",
-#           "url": "https://www.fec.gov/rulemaking/425670/REG 2021-01 FEC 2024-31 Final Rules and EandJ 1.3.25.pdf"
-#         }
-#       ],
-#       "last_updated": "2021-01-06T13:06:17",
-#       "no_tier_documents": [],
-#       "petitioner_names": [],
-#       "representative_names": [],
-#       "rm_entities": [],
-#       "rm_id": 3479145,
-#       "rm_name": "Civil Monetary Penalties Annual Inflation Adjustments 2025",
-#       "rm_no": "2021-01",
-#       "rm_number": "REG 2021-01",
-#       "rm_serial": 1,
-#       "rm_year": 2021,
-#       "source": [],
-#       "sync_status": "UPTODATE",
-#       "title": "REG 2021-01 Civil Monetary Penalties Annual Inflation Adjustments 2025",
-#       "type": "rulemakings",
-#       "vote_dates": [
-#         "2021-01-16"
-#       ],
-#       "witness_names": []
-#     }
+third_rm = {
+    "admin_close_date": "2024-07-23",
+    "calculated_comment_close_date": "2024-09-19",
+    "comment_close_date": "2024-09-19",
+    "commenter_names": [],
+    "counsel_names": [],
+    "description": "REG 2021-19 Civil Monetary Penalties Annual Inflation Adjustments 2025",
+    "documents": [
+      {
+        "doc_category_id": 4,
+        "doc_category_label": "Federal Register Document",
+        "doc_date": "2025-01-03",
+        "doc_description": "",
+        "doc_entities": [],
+        "doc_id": 425670,
+        "doc_type_id": 295,
+        "doc_type_label": "Final Rules and E&J",
+        "filename": "REG 2021-19 FEC 2024-31 Final Rules and EandJ 1.3.25.pdf",
+        "is_comment_eligible": False,
+        "is_key_document": True,
+        "level_1": 12,
+        "level_1_label": "Final Rules and E&J",
+        "level_2": 0,
+        "level_2_label": "Final Rules and E&J",
+        "level_2_labels": [
+          {
+            "level_2": 1,
+            "level_2_docs": [
+              {
+                "doc_category_id": 3,
+                "doc_category_label": "Agenda Document",
+                "doc_date": "2024-12-19",
+                "doc_description": "",
+                "doc_entities": [],
+                "doc_id": 425669,
+                "doc_type_id": 110,
+                "doc_type_label": "Draft Final Rules",
+                "filename": "REG 2021-19 Final Rule 12.19.24.pdf",
+                "is_comment_eligible": False,
+                "is_key_document": False,
+                "level_1": 12,
+                "level_1_label": "Final Rules and E&J",
+                "level_2": 1,
+                "level_2_label": "Open Meeting Documents",
+                "sort_order": 0,
+                "text": "",
+                "url": "https://www.fec.gov/rulemaking/425669/REG 2021-19 Final Rule 12.19.24.pdf"
+              },
+              {
+                "doc_category_id": 7,
+                "doc_category_label": "Votes",
+                "doc_date": "2024-12-23",
+                "doc_description": "REG 2021-19 (Civil Monetary Penalties Inflation Adjustment 2025) 12.23.24.pdf",
+                "doc_entities": [],
+                "doc_id": 425658,
+                "doc_type_id": 236,
+                "doc_type_label": "Vote to approve",
+                "filename": "REG 2021-19 (Civil Monetary Penalties Inflation Adjustment 2025) 12.23.24.pdf",
+                "is_comment_eligible": False,
+                "is_key_document": False,
+                "level_1": 12,
+                "level_1_label": "Final Rules and E&J",
+                "level_2": 1,
+                "level_2_label": "Open Meeting Documents",
+                "sort_order": 0,
+                "text": "",
+                "url": "https://www.fec.gov/rulemaking/425658/REG 2021-19 12.23.24.pdf"
+              }
+            ],
+            "level_2_label": "Open Meeting Documents"
+          }
+        ],
+        "sort_order": 0,
+        "text": "",
+        "url": "https://www.fec.gov/rulemaking/425670/REG 2021-19 FEC 2024-31 Final Rules and EandJ 1.3.25.pdf"
+        }
+      ],
+    "fr_publication_dates": [
+        "2025-01-03"
+      ],
+    "hearing_dates": [],
+    "is_open_for_comment": False,
+    "key_documents": [
+        {
+          "doc_date": "2021-01-03",
+          "doc_description": "",
+          "doc_id": 425670,
+          "doc_type_id": 295,
+          "doc_type_label": "Final Rules and E&J",
+          "filename": "REG 2021-01  FEC 2024-31 Final Rules and EandJ 1.3.25.pdf",
+          "url": "https://www.fec.gov/rulemaking/425670/REG 2021-01 FEC 2024-31 Final Rules and EandJ 1.3.25.pdf"
+        }
+      ],
+    "last_updated": "2021-01-06T13:06:17",
+    "no_tier_documents": [],
+    "petitioner_names": [],
+    "representative_names": [],
+    "rm_entities": [],
+    "rm_id": 3479145,
+    "rm_name": "Civil Monetary Penalties Annual Inflation Adjustments 2025",
+    "rm_no": "2021-19",
+    "rm_number": "REG 2021-19",
+    "rm_serial": 19,
+    "rm_year": 2021,
+    "source": [],
+    "sync_status": "UPTODATE",
+    "title": "REG 2021-19 Civil Monetary Penalties Annual Inflation Adjustments 2025",
+    "type": "rulemakings",
+    "vote_dates": [
+        "2021-01-16"
+      ],
+    "witness_names": []
+    }
+
+document_dictionary = {
+    "murs": [first_test_mur, second_test_mur],
+    "archived_murs": [first_archived_mur, second_archived_mur],
+    "adrs": [first_adr, second_adr],
+    "admin_fines": [first_admin_fine, second_admin_fine],
+    "statutes": [first_statute, second_statute],
+    "advisory_opinions": [first_ao, second_ao, third_ao, fourth_ao, fifth_ao],
+    "ao_citations": [second_citation, fourth_citation],
+    "mur_citations": [first_citation, third_citation],
+    "rulemakings": [first_rm, second_rm, third_rm],
+}
