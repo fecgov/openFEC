@@ -33,10 +33,12 @@ RM_MAPPING = {
                 "level_2": {"type": "integer"},
                 "level_2_label": {"type": "keyword"},
                 "level_2_labels": {
+                    "type": "nested",
                     "properties": {
                         "level_2": {"type": "integer"},
                         "level_2_label": {"type": "keyword"},
                         "level_2_docs": {
+                            "type": "nested",
                             "properties": {
                                 "is_comment_eligible": {"type": "boolean"},
                                 "doc_category_id": {"type": "integer"},
