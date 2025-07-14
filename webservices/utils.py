@@ -44,7 +44,7 @@ class Resource(six.with_metaclass(MethodResourceMeta, restful.Resource)):
 
 
 API_KEY_ARG = fields.Str(
-     missing="DEMO_KEY", description=docs.API_KEY_DESCRIPTION,
+     load_default="DEMO_KEY", metadata={'description': docs.API_KEY_DESCRIPTION},
 )
 if env.get_credential("PRODUCTION") or env.get_credential("STAGE"):
     Resource = use_kwargs({"api_key": API_KEY_ARG})(Resource)
