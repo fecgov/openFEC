@@ -18,40 +18,45 @@ class TestGetRulemaking(BaseTestCase):
     def setUp(self):
         self.connection = db.engine.connect()
         subprocess.check_call(
-            ["psql", TEST_CONN, "-f", "data/load_base_advisory_opinion_data.sql"]
+            ["psql", TEST_CONN, "-f", "data/load_base_rm_participants_data.sql"]
         )
 
     def tearDown(self):
-        self.clear_test_data()
+        # self.clear_test_data()
         self.connection.close()
         db.session.remove()
 
-    # def test_rulemaking_doc(self):
-    #     expected_rm = {
-    #         "id": 3177009,
-    #         "rm_number": "REG 2021-01",
-    #         "title": "REG 2021-01 Candidate Salaries",
-    #         "description": "REG 2021-01 Candidate Salaries",
-    #         "comment_close_date": "2023-03-29",
-    #         "admin_close_date": None,
-    #     }
-    #     self.create_rm(3177009, expected_rm)
-    #     actual_rm = next(get_rulemaking(None))
+    def test_rulemaking_doc(self):
+        expected_rm = {
+            "id": 3177009,
+            "rm_number": "REG 2021-01",
+            "title": "REG 2021-01 Candidate Salaries",
+            "description": "REG 2021-01 Candidate Salaries",
+            "comment_close_date": "2023-03-29",
+            "admin_close_date": None,
+            "sync_status": "UPTODATE",
+            "last_updated": "2023-03-29 23:59:59.000",
+        }
+        self.create_rm(3177009, expected_rm)
+        # actual_rm = next(get_rulemaking(None))
 
-    #     assert actual_rm == expected_rm
+        # assert actual_rm == expected_rm
 
     def create_rm(self, rm_id, rm):
         self.connection.execute(
             text(
                 """INSERT INTO fosers.rulemaster (id, rm_number, title, description, comment_close_date,
-                admin_close_date) VALUES (:rm, :rm_num, :title, :descr, :cc_date, :ac_date)"""),
+                admin_close_date, sync_status, last_updated) VALUES
+                (:rm, :rm_num, :title, :descr, :cc_date, :ac_date, :sync_status, :last_updated)"""),
             {
                 "rm": rm_id,
                 "rm_num": rm["rm_number"],
                 "title": rm["title"],
                 "descr": rm["description"],
                 "cc_date": rm["comment_close_date"],
-                "ac_date": rm["admin_close_date"]
+                "ac_date": rm["admin_close_date"],
+                "sync_status": rm["sync_status"],
+                "last_updated": rm["last_updated"],
             }
         )
 
