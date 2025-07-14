@@ -23,7 +23,7 @@ URL_EXPIRY = 7 * 24 * 60 * 60
 
 class DownloadView(utils.Resource):
 
-    @use_kwargs_original({'filename': fields.Str(missing=None)})
+    @use_kwargs_original({'filename': fields.Str(load_default=None)})
     def post(self, path, filename=None, **kwargs):
         parts = request.path.split('/')
         parts.remove('download')
