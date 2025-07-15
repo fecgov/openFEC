@@ -59,6 +59,7 @@ AO_ENTITIES = """
 """
 
 AO_DOCUMENTS = """
+    SELECT * FROM (
     SELECT
         ao.ao_no,
         doc.document_id,
@@ -67,11 +68,27 @@ AO_DOCUMENTS = """
         doc.fileimage,
         doc.description,
         doc.category,
-        doc.document_date
+        doc.document_date,
+        CASE doc.category
+            WHEN 'Final Opinion' THEN 'F'
+            WHEN 'Votes' THEN 'V'
+            WHEN 'Draft Documents' THEN 'D'
+            WHEN 'AO Request, Supplemental Material, and Extensions of Time' THEN 'R'
+            WHEN 'Withdrawal of Request' THEN 'W'
+            WHEN 'Comments and Ex parte Communications' THEN 'C'
+            WHEN 'Commissioner Statements' THEN 'S'
+        ELSE NULL
+        END AS ao_doc_category_id
     FROM aouser.document doc
     INNER JOIN aouser.ao ao
         ON ao.ao_id = doc.ao_id
-    WHERE doc.ao_id = :id
+    WHERE doc.ao_id = :id ) AS t
+    ORDER BY
+        CASE ao_doc_category_id
+        WHEN 'F' THEN 0
+        ELSE 1
+        END,
+    ao_doc_category_id ASC
 """
 
 TO_END_OF_SENTENCE = r"(?P<possible_sections>\d+[a-z]?(-1)?[^.;]*)[.;]"
@@ -210,17 +227,6 @@ def get_advisory_opinions(from_ao_no):
             yield ao
 
 
-CATEGORY_MAP = {
-    "Final Opinion": "F",
-    "Votes": "V",
-    "Draft Documents": "D",
-    "AO Request, Supplemental Material, and Extensions of Time": "R",
-    "Withdrawal of Request": "W",
-    "Comments and Ex parte Communications": "C",
-    "Commissioner Statements": "S",
-    }
-
-
 def get_full_name(row):
     if row["entity_type_description"] == "Individual":
         return f"{row['prefix']} {row['firstname']} {row['lastname']} {row['suffix']}".strip()
@@ -268,7 +274,7 @@ def get_documents(ao_id, bucket):
             document = {
                 "document_id": row["document_id"],
                 "category": row["category"],
-                "ao_doc_category_id": CATEGORY_MAP.get(row["category"]),
+                "ao_doc_category_id": row["ao_doc_category_id"],
                 "description": row["description"],
                 "text": row["ocrtext"],
                 "date": row["document_date"],
