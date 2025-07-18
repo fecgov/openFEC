@@ -402,7 +402,11 @@ def get_case_document_query(q, **kwargs):
 
     if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
         combined_query.append(get_proximity_query(**kwargs))
-        proximity_inner_hits = {"_source": {"excludes": ["documents.text"]}, "size": 100}
+        proximity_inner_hits = {"_source": {
+            "excludes": ["documents.text"]},
+            "size": 100,
+            "sort": [{"documents.doc_order_id": "asc"}, {"_score": "desc"}]
+            }
 
         if q:
             proximity_inner_hits["highlight"] = {
@@ -705,7 +709,10 @@ def get_ao_document_query(q, **kwargs):
 
     if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
         combined_query.append(get_proximity_query(**kwargs))
-        proximity_inner_hits = {"_source": {"excludes": ["documents.text"]}, "size": 100}
+        proximity_inner_hits = {"_source": {
+            "excludes": ["documents.text"]},
+            "size": 100,
+            "sort": [{"documents.ao_doc_category_id": "asc"}, {"_score": "desc"}]}
 
         if q:
             proximity_inner_hits["highlight"] = {
