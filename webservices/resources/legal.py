@@ -402,11 +402,7 @@ def get_case_document_query(q, **kwargs):
 
     if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
         combined_query.append(get_proximity_query(**kwargs))
-        proximity_inner_hits = {"_source": {
-            "excludes": ["documents.text"]},
-            "size": 100,
-            "sort": [{"documents.doc_order_id": "asc"}, {"_score": "desc"}]
-            }
+        proximity_inner_hits = {"_source": {"excludes": ["documents.text"]}, "size": 100}
 
         if q:
             proximity_inner_hits["highlight"] = {
