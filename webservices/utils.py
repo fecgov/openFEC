@@ -658,3 +658,13 @@ def check_form_line_number(kwargs):
                 raise exceptions.ApiError(
                     exceptions.FORM_LINE_NUMBER_ERROR, status_code=400
                 )
+
+
+def check_filter_exists(kwargs, filter):
+    if kwargs.get(filter):
+        for val in kwargs.get(filter):
+            if len(val) > 0:
+                return True
+        return False
+    else:
+        return False

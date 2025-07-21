@@ -13,6 +13,7 @@ from webservices.utils import (
     create_es_client,
     Resource,
     DateTimeEncoder,
+    check_filter_exists,
 )
 from webservices.utils import use_kwargs
 from elasticsearch import RequestError
@@ -27,7 +28,7 @@ import json
 logger = logging.getLogger(__name__)
 
 # To debug, uncomment the line below:
-logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
 
@@ -39,15 +40,6 @@ INNER_HITS = {
     },
     "size": 100,
 }
-
-# INNER_HITS_2 = {
-#     "_source": False,
-#     "highlight": {
-#         "require_field_match": False,
-#         "fields": {"documents.level_2_labels.level_2_docs.text": {}},
-#      },
-#     "size": 100,
-# }
 
 ACCEPTED_DATE_FORMATS = "strict_date_optional_time_nanos||MM/dd/yyyy||M/d/yyyy||MM/d/yyyy||M/dd/yyyy"
 
@@ -67,7 +59,6 @@ class RulemakingSearch(Resource):
         type_ = RULEMAKING_TYPE
         hits_returned = min([200, hits_returned])
         results = {}
-        total_count = 0
         try:
             query = build_search_query(q, type_, from_hit, hits_returned, **kwargs)
             logger.debug(
@@ -87,10 +78,8 @@ class RulemakingSearch(Resource):
 
         results[type_] = formatted_hits
         results["total_%s" % type_] = rm_count
-        total_count += rm_count
-        results["total"] = total_count
 
-        logger.debug("total count={0}".format(str(total_count)))
+        logger.debug("total count={0}".format(str(rm_count)))
         return results
 
 
@@ -104,6 +93,7 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
         .query(Q("bool", must=must_query))
         .highlight_options(require_field_match=False)
         .source(exclude=["sort1", "sort2"])
+        # text/ocrtext will not show in the resultset/output when text/ocrtext fields are added to the exclud list
         # .source(exclude=["no_tier_documents.text", "documents.level_2_labels.level_2_docs.text",
         #                  "documents.text", "sort1", "sort2"])
         .extra(size=hits_returned, from_=from_hit)
@@ -111,29 +101,25 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
         .sort("sort1", "sort2")
     )
 
-    if q:
-        must_query.append(Q("simple_query_string", query=q))
-
-    if filters.check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
+    if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
         proximity_query = True
 
     if not proximity_query:
-        query = query.highlight("documents.text", "documents.level_2_labels.level_2_docs.text")
-        # query = query.highlight("documents.text", "documents.description")
+        query = query.highlight("documents.text", "documents.description")
 
-    # if kwargs.get("q_exclude"):
-    #     must_not = []
-    #     must_not.append(
-    #         Q(
-    #             "nested",
-    #             path="documents",
-    #             query=Q(
-    #                 "simple_query_string",
-    #                 query=kwargs.get("q_exclude"),
-    #                 fields=["documents.text"]
-    #             )
-    #         )
-    #     )
+    if kwargs.get("q_exclude"):
+        must_not = []
+        must_not.append(
+            Q(
+                "nested",
+                path="documents",
+                query=Q(
+                    "simple_query_string",
+                    query=kwargs.get("q_exclude"),
+                    fields=["documents.text"]
+                )
+            )
+        )
 
     # Sort regulations by 'rm_no'. Default sort order is desc.
     sort_field = kwargs.get("sort")
@@ -153,56 +139,188 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
 
-    # logger.debug("build_search_query:: =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.debug("build_search_query =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return get_all_query_params(query, **kwargs)
 
 
-def execute_search_query(query):
-    es_results = query.execute()
-    logger.debug("Rulemaking execute_search_query() es_results =" + json.dumps(
-        es_results.to_dict(), indent=3, cls=DateTimeEncoder))
+def get_document_query_params(q, **kwargs):
+    should_clauses = []
+    doc_category_ids = kwargs.get("doc_category_id", [])
+    doc_category_ids = [int(i) for i in doc_category_ids if i]
 
-    formatted_hits = []
-    for hit in es_results:
-        formatted_hit = hit.to_dict()
-        formatted_hit["document_highlights"] = {}
-        formatted_hit["source"] = []
-        formatted_hits.append(formatted_hit)
+    if doc_category_ids:
+        # Search in documents.doc_category_id
+        should_clauses.append(
+            Q("nested",
+              path="documents",
+              query=Q("terms", **{"documents.doc_category_id": doc_category_ids}),
+              inner_hits=INNER_HITS)
+        )
+        # Search in documents.level_2_labels.level_2_docs.doc_category_id
+        should_clauses.append(
+            Q("nested",
+              path="documents.level_2_labels.level_2_docs",
+              query=Q("terms", **{"documents.level_2_labels.level_2_docs.doc_category_id": doc_category_ids}),
+              inner_hits=INNER_HITS)
+        )
 
-        # The 'inner_hits' section is in hit.meta and 'highlight' & 'nested' are in inner_hit.meta
-        # hit.meta={'index': 'docs', 'id': 'mur_7212', 'score': None, 'sort': [...}
-        # logger.debug("hit.meta:::::: =" + json.dumps(hit.meta, indent=3, cls=DateTimeEncoder))
-        if "inner_hits" in hit.meta:
-            for inner_hit in hit.meta.inner_hits["documents"].hits:
-                # offset = inner_hit.meta["nested"]["offset"]
-                # for inner_hit_2 in hit.meta.inner_hits["documents.level_2_labels.level_2_docs"].hits:
-                if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
-                    # set "document_highlights" in return hit
-                    offset = inner_hit.meta["nested"]["offset"]
-                    # offset_2 = inner_hit_2.meta["nested"]["offset"]
-                    highlights = inner_hit.meta.highlight.to_dict().values()
-                    formatted_hit["document_highlights"][offset] = [
-                        hl for hl_list in highlights for hl in hl_list
-                    ]
-                    # formatted_hit["document_highlights"][offset][offset_2] = [
-                    #     hl for hl_list in highlights for hl in hl_list
-                    # ]
+    # Add full-text query to documents
+    if q:
+        # Search in documents.text
+        should_clauses.append(
+            Q("nested",
+                path="documents",
+                query=Q("simple_query_string", query=q, fields=["documents.text"]),
+                inner_hits=INNER_HITS)
+        )
 
-                    # put "highlights" in return hit
-                    # for key in inner_hit.meta.highlight:
-                    #     formatted_hit["highlights"].extend(inner_hit.meta.highlight[key])
+        # Search in documents.level_2_labels.level_2_docs.text
+        should_clauses.append(
+            Q("nested",
+                path="documents.level_2_labels.level_2_docs",
+                query=Q("simple_query_string", query=q, fields=["documents.level_2_labels.level_2_docs.text"]),
+                inner_hits=INNER_HITS)
+        )
 
-                    if len(inner_hit.to_dict()) > 0:
-                        source = inner_hit.to_dict()
-                        formatted_hit["source"].append(source)
+    # Handle proximity query
+    if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
+        proximity_query = get_proximity_query(**kwargs)
 
-    # logger.debug("formatted_hits =" + json.dumps(formatted_hits, indent=3, cls=DateTimeEncoder))
+        # Highlight config for documents.text
+        proximity_inner_hits_documents = {
+            "size": 100,
+            "highlight": {
+                "require_field_match": False,
+                "fields": {
+                    "documents.text": {},
+                    "documents.description": {}
+                },
+                "highlight_query": Q("simple_query_string", query=q, fields=["documents.text"]).to_dict()
+            }
+        }
 
-    # Since ES7 the `total` becomes an object : "total": {"value": 1,"relation": "eq"}
-    # We can set rest_total_hits_as_int=true, default is false.
-    # but elasticsearch-dsl==7.3.0 has not supported this setting yet.
-    count_dict = es_results.hits.total
-    return formatted_hits, count_dict["value"]
+        should_clauses.append(
+            Q("nested",
+                path="documents",
+                query=proximity_query,
+                inner_hits=proximity_inner_hits_documents)
+        )
+
+        # Highlight config for level_2_docs.text
+        proximity_inner_hits_level2 = {
+            "size": 100,
+            "highlight": {
+                "require_field_match": False,
+                "fields": {
+                    "documents.level_2_labels.level_2_docs.text": {},
+                },
+                "highlight_query": Q(
+                    "simple_query_string",
+                    query=q,
+                    fields=["documents.level_2_labels.level_2_docs.text"]
+                ).to_dict()
+            }
+        }
+
+        should_clauses.append(
+            Q("nested",
+                path="documents.level_2_labels.level_2_docs",
+                query=proximity_query,
+                inner_hits=proximity_inner_hits_level2)
+        )
+
+    return Q("bool", should=should_clauses, minimum_should_match=1)
+
+
+def get_all_query_params(query, **kwargs):
+    must_clauses = []
+
+    if check_filter_exists(kwargs, "rm_no"):
+        must_clauses.append(Q("terms", rm_no=kwargs.get("rm_no")))
+
+    if check_filter_exists(kwargs, "rm_name"):
+        must_clauses.append(Q({
+            "simple_query_string": {
+                "query": " ".join(kwargs.get("rm_name")),
+                "fields": ["rm_name"]
+            }
+        }))
+
+    if kwargs.get("rm_year") is not None:
+        must_clauses.append(Q("term", rm_year=kwargs.get("rm_year")))
+
+    if kwargs.get("is_key_document") is not None:
+        must_clauses.append(
+            Q("nested", path="documents",
+                query=Q("term", documents__is_key_document=kwargs.get("is_key_document"))))
+
+    if kwargs.get("is_open_for_comment") is not None:
+        must_clauses.append(Q("term", is_open_for_comment=kwargs.get("is_open_for_comment")))
+
+    # entity_name and entity_role filter
+    nested_entity_query = build_entity_nested_query(kwargs)
+    if nested_entity_query:
+        must_clauses.append(nested_entity_query)
+
+    fr_publish_dates_range = {}
+    if kwargs.get("min_federal_registry_publish_date"):
+        fr_publish_dates_range["gte"] = kwargs.get("min_federal_registry_publish_date")
+    if kwargs.get("max_federal_registry_publish_date"):
+        fr_publish_dates_range["lte"] = kwargs.get("max_federal_registry_publish_date")
+    if fr_publish_dates_range:
+        fr_publish_dates_range["format"] = ACCEPTED_DATE_FORMATS
+        must_clauses.append(Q("range", fr_publication_dates=fr_publish_dates_range))
+
+    hearing_dates_range = {}
+    if kwargs.get("min_hearing_date"):
+        hearing_dates_range["gte"] = kwargs.get("min_hearing_date")
+    if kwargs.get("max_hearing_date"):
+        hearing_dates_range["lte"] = kwargs.get("max_hearing_date")
+    if hearing_dates_range:
+        hearing_dates_range["format"] = ACCEPTED_DATE_FORMATS
+        must_clauses.append(Q("range", hearing_dates=hearing_dates_range))
+
+    vote_dates_range = {}
+    if kwargs.get("min_vote_date"):
+        vote_dates_range["gte"] = kwargs.get("min_vote_date")
+    if kwargs.get("max_vote_date"):
+        vote_dates_range["lte"] = kwargs.get("max_vote_date")
+    if vote_dates_range:
+        vote_dates_range["format"] = ACCEPTED_DATE_FORMATS
+        must_clauses.append(Q("range", vote_dates=vote_dates_range))
+
+    # Use the .keyword subfield for wildcard matching exact full filename strings.
+    # Use wildcard query with *{filename}* so partial matches are possible.
+    filename = kwargs.get("filename")
+    if filename:
+        # Query for documents.filename.keyword
+        doc_filename_query = Q(
+            "nested",
+            path="documents",
+            query=Q("wildcard", **{"documents.filename.keyword": f"*{filename}*"}),
+            inner_hits={}
+        )
+
+        # Query for documents.level_2_labels.level_2_docs.filename.keyword
+        level_2_docs_filename_query = Q(
+            "nested",
+            path="documents.level_2_labels.level_2_docs",
+            query=Q("wildcard", **{"documents.level_2_labels.level_2_docs.filename.keyword": f"*{filename}*"}),
+            inner_hits={}
+        )
+
+        must_clauses.append(
+            Q(
+                "bool",
+                should=[doc_filename_query, level_2_docs_filename_query],
+                minimum_should_match=1
+            )
+        )
+
+    query = query.query("bool", must=must_clauses)
+    # logger.debug("get_all_query_params =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+
+    return query
 
 
 def get_proximity_query(**kwargs):
@@ -242,119 +360,67 @@ def get_proximity_query(**kwargs):
             intervals_inner_query = Q('intervals', documents__text={
                     'all_of':  {'max_gaps': max_gaps, "ordered": ordered, "intervals": intervals_list}
                     })
-        # logger.debug("get_proximity_query =" + json.dumps(intervals_inner_query, indent=3, cls=DateTimeEncoder))
+    # logger.debug("get_proximity_query =" + json.dumps(intervals_inner_query, indent=3, cls=DateTimeEncoder))
     return intervals_inner_query
 
 
-def get_document_query_params(q, **kwargs):
-    category_query = []
-    combined_query = []
-    if kwargs.get("rm_doc_category_id") and (len(kwargs.get("rm_doc_category_id")) > 0):
-        for rm_doc_category_id in kwargs.get("rm_doc_category_id"):
-            if len(rm_doc_category_id) > 0:
-                category_query.append(Q("term", documents__doc_category_id=rm_doc_category_id))
-        combined_query.append(Q("bool", should=category_query, minimum_should_match=1))
+# This function returns highlights at document nested level by default. Refactor this function to return
+# highlights at documents, documents.level_2_labels, documents.level_2_labels.level_2_docs nested levels
+def execute_search_query(query):
+    es_results = query.execute()
+    # logger.debug("Rulemaking execute_search_query() es_results =" + json.dumps(
+    #     es_results.to_dict(), indent=3, cls=DateTimeEncoder))
 
-    if q:
-        # q_query = Q("simple_query_string", query=q, fields=["documents.level_2_labels.level_2_docs.text"])
-        q_query = Q("simple_query_string", query=q, fields=["documents.text"])
-        combined_query.append(q_query)
+    formatted_hits = []
+    for hit in es_results:
+        formatted_hit = hit.to_dict()
+        formatted_hit["document_highlights"] = {}
+        formatted_hits.append(formatted_hit)
 
-    if filters.check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
-        combined_query.append(get_proximity_query(**kwargs))
-        proximity_inner_hits = {"_source": {"excludes": ["documents.text"]}, "size": 100}
+        # The 'inner_hits' section is in hit.meta and 'highlight' & 'nested' are in inner_hit.meta
+        if "inner_hits" in hit.meta:
+            for inner_hit in hit.meta.inner_hits["documents"].hits:
+                if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
+                    # set "document_highlights" in return hit
+                    offset = inner_hit.meta["nested"]["offset"]
+                    highlights = inner_hit.meta.highlight.to_dict().values()
+                    formatted_hit["document_highlights"][offset] = [
+                        hl for hl_list in highlights for hl in hl_list
+                    ]
 
-        if q:
-            proximity_inner_hits["highlight"] = {
-                "require_field_match": False,
-                # "fields": {"documents.text": {}},
-                "fields": {"documents.text": {}, "documents.description": {}},
-                "highlight_query": q_query.to_dict()
-                }
+    # logger.debug("formatted_hits =" + json.dumps(formatted_hits, indent=3, cls=DateTimeEncoder))
 
-        return Q(
-            "nested",
-            path="documents",
-            inner_hits=proximity_inner_hits,
-            query=Q("bool", must=combined_query),
-        )
+    count_dict = es_results.hits.total
+    return formatted_hits, count_dict["value"]
 
-    return Q(
-        "nested",
-        path="documents",
-        inner_hits=INNER_HITS,
-        query=Q("bool", must=combined_query),
+
+def build_entity_nested_query(kwargs):
+    nested_must = []
+
+    # Get and validate 'entity_role_type' filter
+    entity_role_type = kwargs.get("entity_role_type", [])
+    valid_entity_role_types = filters.validate_multiselect_filter(
+        entity_role_type, ENTITY_ROLE_TYPE_VALID_VALUES
     )
 
+    # Add simple_query_string for entity_name
+    entity_name = kwargs.get("entity_name")
+    if entity_name:
+        nested_must.append(Q({
+            "simple_query_string": {
+                "query": entity_name,
+                "fields": ["rm_entities.name"]
+            }
+        }))
 
-def get_all_query_params(query, **kwargs):
-    must_clauses = []
-
-    if filters.check_filter_exists(kwargs, "rm_no"):
-        must_clauses.append(Q("terms", rm_no=kwargs.get("rm_no")))
-
-    if filters.check_filter_exists(kwargs, "rm_name"):
-        must_clauses.append(Q("match", rm_name=" ".join(kwargs.get("rm_name"))))
-
-    if kwargs.get("rm_year") is not None:
-        must_clauses.append(Q("term", rm_year=kwargs.get("rm_year")))
-
-    if kwargs.get("is_key_document") is not None:
-        must_clauses.append(
-            Q("nested", path="documents",
-                query=Q("term", documents__is_key_document=kwargs.get("is_key_document"))))
-
-    if kwargs.get("is_open_for_comment") is not None:
-        must_clauses.append(Q("term", is_open_for_comment=kwargs.get("is_open_for_comment")))
-
-    if kwargs.get("entity_name"):
-        must_clauses.append(Q("nested", path="rm_entities",
-                            query=Q("match", rm_entities__name=kwargs.get("entity_name"))))
-
-    # Get 'entity_role_type' from kwargs
-    entity_role_type = kwargs.get("entity_role_type", [])
-
-    # Validate 'entity_role_type filter'
-    valid_entity_role_types = filters.validate_multiselect_filter(
-        entity_role_type, ENTITY_ROLE_TYPE_VALID_VALUES)
-
-    # Always include valid values in the query construction
+    # Add terms query for entity_role_type
     if valid_entity_role_types:
-        must_clauses.append(Q("nested", path="rm_entities",
-                            query=Q("terms",
-                                    rm_entities__role=[ENTITY_ROLE_TYPES[r] for r in valid_entity_role_types])))
+        nested_must.append(Q("terms", rm_entities__role=[
+            ENTITY_ROLE_TYPES[r] for r in valid_entity_role_types
+        ]))
 
-    date_range = {}
-    if kwargs.get("min_federal_registry_publish_date"):
-        date_range["gte"] = kwargs.get("min_federal_registry_publish_date")
-    if kwargs.get("max_federal_registry_publish_date"):
-        date_range["lte"] = kwargs.get("max_federal_registry_publish_date")
-    if date_range:
-        date_range["format"] = ACCEPTED_DATE_FORMATS
-        must_clauses.append(Q("range", fr_publication_dates=date_range))
+    # If any nested filters are present, return a nested query
+    if nested_must:
+        return Q("nested", path="rm_entities", query=Q("bool", must=nested_must))
 
-    if kwargs.get("min_hearing_date"):
-        date_range["gte"] = kwargs.get("min_hearing_date")
-    if kwargs.get("max_hearing_date"):
-        date_range["lte"] = kwargs.get("max_hearing_date")
-    if date_range:
-        date_range["format"] = ACCEPTED_DATE_FORMATS
-        must_clauses.append(Q("range", hearing_dates=date_range))
-
-    if kwargs.get("min_vote_date"):
-        date_range["gte"] = kwargs.get("min_vote_date")
-    if kwargs.get("max_vote_date"):
-        date_range["lte"] = kwargs.get("max_vote_date")
-    if date_range:
-        date_range["format"] = ACCEPTED_DATE_FORMATS
-        must_clauses.append(Q("range", vote_dates=date_range))
-
-    if kwargs.get("filename"):
-        must_clauses = []
-        must_clauses.append(Q("nested", path="documents",
-                            query=Q("match", documents__filename=kwargs.get("filename"))))
-
-    query = query.query("bool", must=must_clauses)
-    logger.debug("get_all_query_params:: =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
-
-    return query
+    return None

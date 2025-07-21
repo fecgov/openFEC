@@ -13,7 +13,7 @@ RM_MAPPING = {
             "type": "nested",
             "properties": {  # Level 1 documents: level_1=x,level_2=0
                 "is_comment_eligible": {"type": "boolean"},
-                "doc_category_id": {"type": "keyword"},
+                "doc_category_id": {"type": "integer"},
                 "doc_category_label": {"type": "keyword"},
                 "doc_date": {"type": "date", "format": "dateOptionalTime"},
                 "doc_description": {"type": "text"},
@@ -26,7 +26,15 @@ RM_MAPPING = {
                 "doc_id": {"type": "long"},
                 "doc_type_id": {"type": "integer"},
                 "doc_type_label": {"type": "keyword"},
-                "filename": {"type": "text"},
+                "filename": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
                 "is_key_document": {"type": "boolean"},
                 "level_1": {"type": "integer"},
                 "level_1_label": {"type": "keyword"},
@@ -54,7 +62,15 @@ RM_MAPPING = {
                                 },
                                 "doc_type_id": {"type": "integer"},
                                 "doc_type_label": {"type": "keyword"},
-                                "filename": {"type": "text"},
+                                "filename": {
+                                    "type": "text",
+                                    "fields": {
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "ignore_above": 256
+                                        }
+                                    }
+                                },
                                 "is_key_document": {"type": "boolean"},
                                 "level_1": {"type": "integer"},
                                 "level_1_label": {"type": "keyword"},
