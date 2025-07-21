@@ -194,13 +194,3 @@ def validate_multiselect_filter(filter, valid_values):
             if value in valid_values:
                 valid_results.append(value)
     return valid_results
-
-
-def check_filter_exists(kwargs, filter):
-    if kwargs.get(filter):
-        for val in kwargs.get(filter):
-            if len(val) > 0:
-                return True
-        return False
-    else:
-        return False

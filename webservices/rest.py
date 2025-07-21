@@ -82,6 +82,7 @@ RESTRICT_TRAFFIC = env.get_credential('FEC_API_RESTRICT_TRAFFIC', False)
 RESTRICT_MESSAGE = "We apologize for the inconvenience, but we are temporarily " \
     "blocking API traffic. Please contact apiinfo@fec.gov if this is an urgent issue."
 SHOW_TEST_F1 = env.get_credential('FEC_SHOW_TEST_F1', False)
+RULEMAKINGS_FEATURE = env.get_credential('FEC_FEATURE_RULEMAKINGS', False)
 
 
 def sqla_conn_string():
@@ -266,7 +267,8 @@ def create_app(test_config=None):
     apidoc.register(operations_log.OperationsLogView, blueprint='v1')
     apidoc.register(legal.UniversalSearch, blueprint='v1')
     apidoc.register(legal.GetLegalDocument, blueprint='v1')
-    apidoc.register(rulemaking.RulemakingSearch, blueprint='v1')
+    if RULEMAKINGS_FEATURE:
+        apidoc.register(rulemaking.RulemakingSearch, blueprint='v1')
     apidoc.register(candidate_aggregates.CandidateTotalAggregateView, blueprint='v1')
     apidoc.register(spending_by_others.ECTotalsByCandidateView, blueprint='v1')
     apidoc.register(spending_by_others.IETotalsByCandidateView, blueprint='v1')

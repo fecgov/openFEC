@@ -2090,7 +2090,7 @@ Choose a legal document type: advisory_opinions, murs, admin_fines, statutes, or
 '''
 
 TEXT_SEARCH = '''
-Text to search legal documents for
+Search field to find documents containing a word or phrase in their text.
 '''
 
 FROM_HIT = '''
@@ -2436,7 +2436,7 @@ RM_YEAR = '''
 Search by REG documents by the year in which a rulemaking began
 '''
 
-RM_DOC_CATEGORY_DESC = '''
+DOC_CATEGORY_DESC = '''
 Category of the rulemaking document
 - 1 - Open Meeting
 - 2 - Hearing
