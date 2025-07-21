@@ -27,6 +27,7 @@ SQLAlchemy==2.0.41
 ujson==5.4.0 # decoding CSP violation reported
 webargs==7.0.0
 werkzeug==3.0.6
+yappi==1.6.10
 
 # Marshalling
 flask-apispec==0.11.4
