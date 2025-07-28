@@ -5,8 +5,8 @@ from webservices import docs
 class OperationsLog(db.Model):
     __tablename__ = 'fec_operations_log_vw'
 
-    sub_id = db.Column(db.Integer, primary_key=True, doc=docs.SUB_ID)
-    status_num = db.Column(db.Integer, doc=docs.STATUS_NUM)
+    sub_id = db.Column(db.BigInteger, primary_key=True, doc=docs.SUB_ID)
+    status_num = db.Column(db.String, doc=docs.STATUS_NUM)
     form_type = db.Column('form_tp', db.String, doc=docs.FORM_TYPE)
     report_year = db.Column('rpt_yr', db.Integer, doc=docs.REPORT_YEAR)
     candidate_committee_id = db.Column('cand_cmte_id', db.String, doc=docs.CAND_CMTE_ID)

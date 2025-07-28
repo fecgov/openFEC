@@ -111,7 +111,7 @@ class CommitteeReports(FecFileNumberMixin, PdfMixin, CsvMixin, BaseModel):
     file_number = db.Column(db.Integer)
     amendment_indicator = db.Column('amendment_indicator', db.String)
     amendment_indicator_full = db.Column(db.String)
-    beginning_image_number = db.Column(db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER)
+    beginning_image_number = db.Column(db.String, doc=docs.BEGINNING_IMAGE_NUMBER)
     cash_on_hand_beginning_period = db.Column(
         db.Numeric(30, 2), doc=docs.CASH_ON_HAND_BEGIN_PERIOD
     )  # P
@@ -130,7 +130,7 @@ class CommitteeReports(FecFileNumberMixin, PdfMixin, CsvMixin, BaseModel):
     debts_owed_to_committee = db.Column(
         db.Numeric(30, 2), doc=docs.DEBTS_OWED_TO_COMMITTEE
     )  # P
-    end_image_number = db.Column(db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
+    end_image_number = db.Column(db.String, doc=docs.ENDING_IMAGE_NUMBER)
     other_disbursements_period = db.Column(
         db.Numeric(30, 2), doc=docs.add_period(docs.OTHER_DISBURSEMENTS)
     )  # PX
@@ -466,7 +466,7 @@ class CommitteeReportsPresidential(CommitteeReports):
 class CommitteeReportsIEOnly(PdfMixin, BaseModel):
     __tablename__ = 'ofec_reports_ie_only_mv'
 
-    beginning_image_number = db.Column(db.BigInteger)
+    beginning_image_number = db.Column(db.String)
     committee_id = db.Column(db.String)
     committee_name = db.Column(db.String)
     cycle = db.Column(db.Integer)
@@ -504,7 +504,7 @@ class BaseFiling(FecFileNumberMixin, AmendmentChainMixin, PdfMixin, FecMixin, db
     coverage_end_date = db.Column('through_date', db.Date)
     rpt_pgi = db.Column('rptpgi', db.String, doc=docs.ELECTION_TYPE)
     report_type = db.Column('rptcode', db.String)
-    beginning_image_number = db.Column('imageno', db.BigInteger)
+    beginning_image_number = db.Column('imageno', db.String)
     street_1 = db.Column('str1', db.String)
     street_2 = db.Column('str2', db.String)
     city = db.Column(db.String)

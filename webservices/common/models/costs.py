@@ -7,8 +7,8 @@ from webservices import docs
 class CommunicationCost(db.Model):
     __tablename__ = 'ofec_communication_cost_mv'
 
-    sub_id = db.Column(db.Integer, primary_key=True)
-    original_sub_id = db.Column('orig_sub_id', db.Integer, index=True)
+    sub_id = db.Column(db.BigInteger, primary_key=True)
+    original_sub_id = db.Column('orig_sub_id', db.BigInteger, index=True)
     candidate_id = db.Column('cand_id', db.String, index=True)
     committee_id = db.Column('cmte_id', db.String, index=True)
     committee_name = db.Column(db.String)
@@ -61,7 +61,7 @@ class Electioneering(db.Model):
     candidate_state = db.Column('cand_office_st', db.String, index=True)
     beginning_image_number = db.Column('f9_begin_image_num', db.String, index=True)
     sb_image_num = db.Column(db.String, index=True)
-    sub_id = db.Column(db.Integer, doc=docs.EC_SUB_ID)
+    sub_id = db.Column(db.BigInteger, doc=docs.EC_SUB_ID)
     link_id = db.Column(db.Integer)
     sb_link_id = db.Column(db.String)
     number_of_candidates = db.Column(db.Numeric)

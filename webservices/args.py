@@ -83,42 +83,58 @@ class District(fields.Str):
         return '{0:0>2}'.format(value)
 
 
-class Date(fields.Str):
+class Date(fields.Date):
+    """Accepts both 'YYYY-MM-DD' and 'MM/DD/YYYY' formats."""
 
-    def _validate(self, value):
-        value = value.strip()
-        super()._validate(value)
-        try:
-            datetime.datetime.strptime(value, '%Y-%m-%d')
-        except (TypeError, ValueError):
-            try:
-                datetime.datetime.strptime(value, '%m/%d/%Y')
-            except (TypeError, ValueError):
-                raise exceptions.ApiError(
+    def _deserialize(self, value, attr, data, **kwargs):
+        if isinstance(value, datetime.date):
+            return value
+
+        if not isinstance(value, str):
+            raise exceptions.ApiError(
                     exceptions.DATE_ERROR,
                     status_code=422)
 
-
-class FullDate(fields.Str):
-
-    def _validate(self, value):
         value = value.strip()
-        super()._validate(value)
-        try:
-            if value.endswith("Z"):
-                value = value[:-1] + "+00:00"
-            # Try parsing ISO 8601 format
-            datetime.datetime.fromisoformat(value)
-        except (TypeError, ValueError):
+
+        for fmt in ("%Y-%m-%d", "%m/%d/%Y"):
             try:
-                # Try parsing YYYY-MM-DD
-                datetime.datetime.strptime(value, '%Y-%m-%d')
-            except (TypeError, ValueError):
-                try:
-                    # Try parsing MM/DD/YYYY
-                    datetime.datetime.strptime(value, '%m/%d/%Y')
-                except (TypeError, ValueError):
-                    raise exceptions.ApiError(
+                return datetime.datetime.strptime(value, fmt).date()
+            except ValueError:
+                raise exceptions.ApiError(
+                            exceptions.DATE_ERROR,
+                            status_code=422)
+
+
+class FullDate(fields.DateTime):
+    """Accepts ISO 8601, 'YYYY-MM-DD', or 'MM/DD/YYYY' and returns datetime."""
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        if isinstance(value, datetime.datetime):
+            return value
+
+        if not isinstance(value, str):
+            raise exceptions.ApiError(
+                        exceptions.FULLDATE_ERROR,
+                        status_code=422)
+
+        value = value.strip()
+
+        if value.endswith("Z"):
+            value = value[:-1] + "+00:00"
+
+        try:
+            return datetime.datetime.fromisoformat(value)
+        except ValueError:
+            pass
+
+        for fmt in ("%Y-%m-%d", "%m/%d/%Y"):
+            try:
+                return datetime.datetime.strptime(value, fmt)
+            except ValueError:
+                continue
+
+        raise exceptions.ApiError(
                         exceptions.FULLDATE_ERROR,
                         status_code=422)
 
@@ -139,7 +155,23 @@ class ImageNumber(fields.Str):
                 status_code=422)
 
 
-class FileNumber(fields.Str):
+class ImageNumberInt(fields.Int):
+
+    def _validate(self, value):
+        super()._validate(value)
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            raise exceptions.ApiError(
+                exceptions.IMAGE_NUMBER_ERROR,
+                status_code=422)
+        if value < 0:
+            raise exceptions.ApiError(
+                exceptions.IMAGE_NUMBER_ERROR,
+                status_code=422)
+
+
+class FileNumber(fields.Int):
 
     def _validate(self, value):
         super()._validate(value)
@@ -535,7 +567,7 @@ filings = {
     'report_type': fields.List(IStr, description=docs.REPORT_TYPE),
     'request_type': fields.List(IStr, description=docs.REQUEST_TYPE),
     'document_type': fields.List(IStr, description=docs.DOC_TYPE),
-    'beginning_image_number': fields.List(ImageNumber, description=docs.BEGINNING_IMAGE_NUMBER),
+    'beginning_image_number': fields.List(ImageNumberInt, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'min_receipt_date': Date(description=docs.MIN_RECEIPT_DATE),
     'max_receipt_date': Date(description=docs.MAX_RECEIPT_DATE),
@@ -591,7 +623,7 @@ form1efilings = {
         description=docs.OFFICE),
     'candidate_district': fields.List(IStr, description=docs.ELECTION_DISTRICT),
     'candidate_party': fields.List(IStr, description=docs.PARTY),
-    'image_number': fields.List(ImageNumber, description=docs.IMAGE_NUMBER),
+    'image_number': fields.List(ImageNumberInt, description=docs.IMAGE_NUMBER),
     'min_load_timestamp': Date(description=docs.LOAD_DATE),
     'max_load_timestamp': Date(description=docs.LOAD_DATE),
     'committee_type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
@@ -1506,5 +1538,5 @@ national_party_totals = {
  'two_year_transaction_period': fields.List(
         TwoYearTransactionPeriod,
         description=docs.TWO_YEAR_TRANSACTION_PERIOD,
-    ),
+        ),
 }

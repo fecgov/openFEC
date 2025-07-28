@@ -12,7 +12,7 @@ jobs:
       - image: cimg/python:3.11
         environment:
           TZ: America/New_York
-          SQLA_TEST_CONN: postgresql://postgres@0.0.0.0/cfdm_unit_test
+          SQLA_TEST_CONN: postgresql+psycopg://postgres@0.0.0.0/cfdm_unit_test
 
       # PostgreSQL
       - image: cimg/postgres:13.16
