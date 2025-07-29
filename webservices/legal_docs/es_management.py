@@ -307,6 +307,7 @@ AO_MAPPING = {
         "issue_date": {"type": "date", "format": "dateOptionalTime"},
         "is_pending": {"type": "boolean"},
         "status": {"type": "text"},
+        "published_flg": {"type": "boolean"},
         "ao_citations": {
             "properties": {
                 "name": {"type": "text"},

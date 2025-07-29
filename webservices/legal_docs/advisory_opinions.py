@@ -30,7 +30,8 @@ ALL_AOS = """
         ao_parsed.summary as summary,
         ao_parsed.req_date as req_date,
         ao_parsed.issue_date as issue_date,
-        ao.stage as stage
+        ao.stage as stage,
+        ao_parsed.published_flg
     FROM aouser.aos_with_parsed_numbers ao_parsed
     INNER JOIN aouser.ao ao
         ON ao_parsed.ao_id = ao.ao_id
@@ -59,6 +60,7 @@ AO_ENTITIES = """
 """
 
 AO_DOCUMENTS = """
+    SELECT * FROM (
     SELECT
         ao.ao_no,
         doc.document_id,
@@ -67,11 +69,27 @@ AO_DOCUMENTS = """
         doc.fileimage,
         doc.description,
         doc.category,
-        doc.document_date
+        doc.document_date,
+        CASE doc.category
+            WHEN 'Final Opinion' THEN 'F'
+            WHEN 'Votes' THEN 'V'
+            WHEN 'Draft Documents' THEN 'D'
+            WHEN 'AO Request, Supplemental Material, and Extensions of Time' THEN 'R'
+            WHEN 'Withdrawal of Request' THEN 'W'
+            WHEN 'Comments and Ex parte Communications' THEN 'C'
+            WHEN 'Commissioner Statements' THEN 'S'
+        ELSE NULL
+        END AS ao_doc_category_id
     FROM aouser.document doc
     INNER JOIN aouser.ao ao
         ON ao.ao_id = doc.ao_id
-    WHERE doc.ao_id = :id
+    WHERE doc.ao_id = :id ) AS t
+    ORDER BY
+        CASE ao_doc_category_id
+        WHEN 'F' THEN 0
+        ELSE 1
+        END,
+    ao_doc_category_id ASC
 """
 
 TO_END_OF_SENTENCE = r"(?P<possible_sections>\d+[a-z]?(-1)?[^.;]*)[.;]"
@@ -126,15 +144,26 @@ def load_advisory_opinions(from_ao_no=None):
         logger.info("Index alias '{}' exists, start loading advisory opinions...".format(AO_ALIAS))
         try:
             for ao in get_advisory_opinions(from_ao_no):
-                logger.info(" Loading AO number: %s", ao["no"])
-                es_client.index(AO_ALIAS, ao, id=ao["no"])
-                ao_count += 1
-
+                if ao is not None:
+                    if ao.get("published_flg"):
+                        logger.info(" Loading AO number: %s", ao["no"])
+                        es_client.index(AO_ALIAS, ao, id=ao["no"])
+                        ao_count += 1
                 # ==for local dubug use: remove the big "documents" section to display the object "ao" data.
-                debug_ao_data = ao
-                del debug_ao_data["documents"]
-                logger.debug("ao_data count=" + str(ao_count))
-                logger.debug("debug_ao_data =" + json.dumps(debug_ao_data, indent=3, cls=DateTimeEncoder))
+                        debug_ao_data = ao
+                        del debug_ao_data["documents"]
+                        logger.debug("ao_data count=" + str(ao_count))
+                        logger.debug("debug_ao_data =" + json.dumps(debug_ao_data, indent=3, cls=DateTimeEncoder))
+
+                    else:
+                        try:
+                            logger.info("Found an unpublished ao - deleting AO number : {0} from ES".format(
+                                ao["no"]))
+                            es_client.delete(index=AO_ALIAS, id=ao["no"])
+                            logger.info("Successfully deleted AO number: {} from ES".format(ao["no"]))
+                        except Exception as err:
+                            logger.error("An error occurred while deteting an unpublished ao: {0} {1} ".format(
+                                ao["no"], err))
 
             logger.info(" Total %d advisory opinions loaded.", ao_count)
         except Exception:
@@ -189,6 +218,7 @@ def get_advisory_opinions(from_ao_no):
                 "summary": row["summary"],
                 "request_date": row["req_date"],
                 "issue_date": row["issue_date"],
+                "published_flg": row["published_flg"],
                 "is_pending": ao_stage_to_pending(row["stage"]),
                 "status": ao_stage_to_status(row["ao_no"], row["stage"]),
                 "ao_citations": citations[row["ao_no"]]["ao"],
@@ -208,17 +238,6 @@ def get_advisory_opinions(from_ao_no):
             ) = get_entities(ao_id)
 
             yield ao
-
-
-CATEGORY_MAP = {
-    "Final Opinion": "F",
-    "Votes": "V",
-    "Draft Documents": "D",
-    "AO Request, Supplemental Material, and Extensions of Time": "R",
-    "Withdrawal of Request": "W",
-    "Comments and Ex parte Communications": "C",
-    "Commissioner Statements": "S",
-    }
 
 
 def get_full_name(row):
@@ -268,7 +287,7 @@ def get_documents(ao_id, bucket):
             document = {
                 "document_id": row["document_id"],
                 "category": row["category"],
-                "ao_doc_category_id": CATEGORY_MAP.get(row["category"]),
+                "ao_doc_category_id": row["ao_doc_category_id"],
                 "description": row["description"],
                 "text": row["ocrtext"],
                 "date": row["document_date"],

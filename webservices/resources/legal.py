@@ -402,7 +402,8 @@ def get_case_document_query(q, **kwargs):
 
     if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
         combined_query.append(get_proximity_query(**kwargs))
-        proximity_inner_hits = {"_source": {"excludes": ["documents.text"]}, "size": 100}
+        proximity_inner_hits = {"_source": {
+            "excludes": ["documents.text"]}, "size": 100}
 
         if q:
             proximity_inner_hits["highlight"] = {
@@ -705,7 +706,20 @@ def get_ao_document_query(q, **kwargs):
 
     if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
         combined_query.append(get_proximity_query(**kwargs))
-        proximity_inner_hits = {"_source": {"excludes": ["documents.text"]}, "size": 100}
+        proximity_inner_hits = {"_source": {
+            "excludes": ["documents.text"]},
+            "size": 100,
+            "sort": [{
+                "_script": {
+                    "type": "number",
+                    "script": {
+                        "lang": "painless",
+                        "source": """if (doc['documents.ao_doc_category_id'].size() == 0) return 1;
+                        return doc['documents.ao_doc_category_id'].value == 'F' ? 0 : 1;"""
+                        }, "order": "asc"
+                        }
+                        }, {"documents.ao_doc_category_id": "asc"}, {"_score": "desc"}]
+            }
 
         if q:
             proximity_inner_hits["highlight"] = {
