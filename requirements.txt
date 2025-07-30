@@ -1,4 +1,4 @@
-apispec==4.0.0
+apispec==6.8.2
 certifi==2024.7.4
 cfenv==0.5.2
 defusedxml==0.6.0
@@ -31,8 +31,8 @@ werkzeug==3.0.6
 # Marshalling
 flask-apispec==0.11.4
 git+https://github.com/fecgov/marshmallow-pagination@upgrade-sqlalchemy-v2
-marshmallow==3.0.0
-marshmallow-sqlalchemy==0.29.0
+marshmallow==3.26.0
+marshmallow-sqlalchemy==1.4.2
 
 # Data export
 smart_open==1.8.0

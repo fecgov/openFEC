@@ -345,7 +345,7 @@ class CommitteeSearchSchema(BaseSearchSchema):
 class CandidateSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
         CandidateSearchBaseSchema,
-        ref='#/definitions/CandidateSearch',
+        metadata={'ref': '#/definitions/CandidateSearch'},
         many=True,
     )
 
@@ -353,7 +353,7 @@ class CandidateSearchListSchema(ApiSchema):
 class CommitteeSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
         CommitteeSearchSchema,
-        ref='#/definitions/CommitteeSearch',
+        metadata={'ref': '#/definitions/CommitteeSearch'},
         many=True,
     )
 
@@ -375,7 +375,7 @@ class AuditCommitteeSearchSchema(BaseSearchSchema):
 class AuditCandidateSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
         AuditCandidateSearchSchema,
-        ref='#/definitions/AuditCandidateSearch',
+        metadata={'ref': '#/definitions/AuditCandidateSearch'},
         many=True,
     )
 
@@ -383,7 +383,7 @@ class AuditCandidateSearchListSchema(ApiSchema):
 class AuditCommitteeSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
         AuditCommitteeSearchSchema,
-        ref='#/definitions/AuditCommitteeSearch',
+        metadata={'ref': '#/definitions/AuditCommitteeSearch'},
         many=True,
     )
 
@@ -771,7 +771,7 @@ entity_fields = {
     'last_beginning_image_number': ma.fields.Str(),
     'transaction_coverage_date': ma.fields.Date(
         attribute='transaction_coverage.transaction_coverage_date',
-        default=None),
+        dump_default=None),
     'individual_contributions_percent': ma.fields.Float(),
     'party_and_other_committee_contributions_percent': ma.fields.Float(),
     'contributions_ie_and_party_expenditures_made_percent': ma.fields.Float(),
@@ -1002,7 +1002,7 @@ ScheduleASchema = make_schema(
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'contributor': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'contribution_receipt_amount': ma.fields.Float(),
-        'contributor_aggregate_ytd': ma.fields.Float(description=docs.CONTRIBUTOR_AGGREGATE_YTD),
+        'contributor_aggregate_ytd': ma.fields.Float(metadata={'description': docs.CONTRIBUTOR_AGGREGATE_YTD}),
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
@@ -1615,8 +1615,8 @@ class ElectionSchema(ma.Schema):
     incumbent_challenge_full = ma.fields.Str()
     party_full = ma.fields.Str()
     committee_ids = ma.fields.List(ma.fields.Str)
-    candidate_pcc_id = ma.fields.Str(description=docs.CANDIDATE_PCC_ID)
-    candidate_pcc_name = ma.fields.Str(description=docs.CANDIDATE_PCC_NAME)
+    candidate_pcc_id = ma.fields.Str(metadata={'description': docs.CANDIDATE_PCC_ID})
+    candidate_pcc_name = ma.fields.Str(metadata={'description': docs.CANDIDATE_PCC_NAME})
     total_receipts = ma.fields.Float()
     total_disbursements = ma.fields.Float()
     cash_on_hand_end_period = ma.fields.Float()
@@ -1680,7 +1680,7 @@ register_schema(RadAnalystPageSchema)
 EntityReceiptDisbursementTotalsSchema = make_schema(
     models.EntityReceiptDisbursementTotals,
     options={'exclude': ('idx', 'month', 'year')},
-    fields={'end_date': ma.fields.Date(description=docs.END_DATE_ENTITY_CHART)}
+    fields={'end_date': ma.fields.Date(metadata={'description': docs.END_DATE_ENTITY_CHART})}
 )
 EntityReceiptDisbursementTotalsPageSchema = make_page_schema(EntityReceiptDisbursementTotalsSchema)
 register_schema(EntityReceiptDisbursementTotalsSchema)

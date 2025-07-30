@@ -78,7 +78,7 @@ class CalendarDatesExport(CalendarDatesView):
     }
 
     @use_kwargs({
-        'renderer': fields.Str(missing='ics', validate=validate.OneOf(['ics', 'csv'])),
+        'renderer': fields.Str(load_default='ics', validate=validate.OneOf(['ics', 'csv'])),
     })
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
