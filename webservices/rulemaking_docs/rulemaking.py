@@ -1,5 +1,6 @@
 import logging
 from webservices.common.models import db
+from webservices.tasks.utils import get_bucket
 from webservices.utils import (
     create_es_client,
 )
@@ -40,6 +41,7 @@ WHERE rm_number = :rm
 
 LEVEL_1_DOCS = """
 SELECT
+contents,
 doc_category_id,
 is_comment_eligible,
 doc_description,
@@ -91,6 +93,7 @@ AND level_2 > 0
 
 LEVEL_2_DOCS = """
 SELECT
+contents,
 doc_category_id,
 is_comment_eligible,
 doc_description,
@@ -200,20 +203,20 @@ def load_rulemaking(specific_rm_no=None):
 
 
 def get_rulemaking(specific_rm_no):
-    # bucket = get_bucket() (don't need upload xxxx.pdf to s3 bucket)
+    bucket = get_bucket()
     if specific_rm_no is None:
         # load all rulemakings
         with db.engine.begin() as conn:
             rs = conn.execute(text(ALL_RMS)).mappings()
             for row in rs:
-                yield get_single_rulemaking(row["rm_number"])
+                yield get_single_rulemaking(row["rm_number"], bucket)
     else:
         # load specific one rulemaking
         rm_number = "REG " + specific_rm_no
-        yield get_single_rulemaking(rm_number)
+        yield get_single_rulemaking(rm_number, bucket)
 
 
-def get_single_rulemaking(rm_number):
+def get_single_rulemaking(rm_number, bucket):
     with db.engine.begin() as conn:
         rs = conn.execute(text(SINGLE_RM), {"rm": rm_number}).mappings()
         row = rs.first()
@@ -239,7 +242,7 @@ def get_single_rulemaking(rm_number):
             "title": row["title"],
             "type": constants.RULEMAKING_TYPE,
         }
-        rm["documents"] = get_documents(rm_id)
+        rm["documents"] = get_documents(rm_id, bucket)
         rm["fr_publication_dates"] = get_fr_publication_dates(rm_id)
         rm["hearing_dates"] = get_hearing_dates(rm_id)
         rm["vote_dates"] = get_vote_dates(rm_id)
@@ -255,7 +258,7 @@ def get_single_rulemaking(rm_number):
     return rm
 
 
-def get_documents(rm_id):
+def get_documents(rm_id, bucket):
     documents = []
     with db.engine.begin() as conn:
         rs = conn.execute(text(LEVEL_1_DOCS), {"rm": rm_id}).mappings()
@@ -279,13 +282,40 @@ def get_documents(rm_id):
                 "sort_order": row["sort_order"],
                 "text": row["ocrtext"],
                 "url": constants.RM_PDF_PATH + "{}/{}".format(row["doc_id"], row["filename"]),
-                "level_2_labels": get_level_2_labels(rm_id, row["level_1"]),
+                "level_2_labels": get_level_2_labels(rm_id, row["level_1"], bucket),
             }
-            documents.append(document)
+            if not row["contents"]:
+                logger.error(
+                    "PDF contents not found for document ID {0} and rulemaking id {1}: cannot upload to S3".format(
+                        row["doc_id"], row["rm"]
+                    )
+                )
+            else:
+                pdf_key = "legal/rulemakings/{0}/{1}".format(
+                    row["rm"], row["filename"].replace(" ", "-")
+                )
+                document["url"] = "/files/" + pdf_key
+                filename = row["filename"][:-4]
+                document["filename"] = filename
+                logger.info("Successfully uploaded rulemaking PDF contents to S3 {}".format(pdf_key))
+                documents.append(document)
+
+                try:
+                    # bucket is None on local, don't need upload pdf to s3
+                    if bucket:
+                        logger.debug("S3: Uploading {}".format(pdf_key))
+                        bucket.put_object(
+                            Key=pdf_key,
+                            Body=bytes(row["contents"]),
+                            ContentType="application/pdf",
+                            ACL="public-read",
+                        )
+                except Exception:
+                    pass
         return documents
 
 
-def get_level_2_labels(rm_id, level_1):
+def get_level_2_labels(rm_id, level_1, bucket):
     level_2_labels = []
     with db.engine.begin() as conn:
         rs = conn.execute(text(LEVEL_2_ID_LIST), {"rm": rm_id, "level": level_1}).mappings()
@@ -293,13 +323,13 @@ def get_level_2_labels(rm_id, level_1):
             document = {
                 "level_2": row["level_2"],
                 "level_2_label": (constants.LEVEL_1_2_MAP.get(level_1).get(row["level_2"])),
-                "level_2_docs": get_level_2_docs(rm_id, level_1, row["level_2"]),
+                "level_2_docs": get_level_2_docs(rm_id, level_1, row["level_2"], bucket),
             }
             level_2_labels.append(document)
         return level_2_labels
 
 
-def get_level_2_docs(rm_id, level_1, level_2):
+def get_level_2_docs(rm_id, level_1, level_2, bucket):
     level_2_documents = []
     with db.engine.begin() as conn:
         rs = conn.execute(text(LEVEL_2_DOCS), {"rm": rm_id, "level_1": level_1, "level_2": level_2}).mappings()
@@ -324,7 +354,34 @@ def get_level_2_docs(rm_id, level_1, level_2):
                 "text": row["ocrtext"],
                 "url": constants.RM_PDF_PATH + "{}/{}".format(row["doc_id"], row["filename"]),
             }
-            level_2_documents.append(document)
+            if not row["contents"]:
+                logger.error(
+                    "PDF contents not found for document ID {0} and rulemaking id {1}: cannot upload to S3".format(
+                        row["doc_id"], row["rm"]
+                    )
+                )
+            else:
+                pdf_key = "legal/rulemakings/{0}/{1}".format(
+                    row["rm"], row["filename"].replace(" ", "-")
+                )
+                document["url"] = "/files/" + pdf_key
+                filename = row["filename"][:-4]
+                document["filename"] = filename
+                logger.info("Successfully uploaded rulemaking PDF contents to S3: {}".format(pdf_key))
+                level_2_documents.append(document)
+
+                try:
+                    # bucket is None on local, don't need upload pdf to s3
+                    if bucket:
+                        logger.debug("S3: Uploading {}".format(pdf_key))
+                        bucket.put_object(
+                            Key=pdf_key,
+                            Body=bytes(row["contents"]),
+                            ContentType="application/pdf",
+                            ACL="public-read",
+                        )
+                except Exception:
+                    pass
         return level_2_documents
 
 
