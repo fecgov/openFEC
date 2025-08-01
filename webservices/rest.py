@@ -125,7 +125,7 @@ def create_app(test_config=None):
     def create_sqlalchemy_followers(env_var_name: str, default_value: str = '') -> list:
         followers = utils.split_env_var(env.get_credential(env_var_name, default_value))
         return [sa.create_engine(follower.strip(), query_cache_size=query_cache_size,
-                                 pool_size=50, max_overflow=50,
+                                 pool_size=1, max_overflow=0,
                                  pool_timeout=120) for follower in followers if follower.strip()
                 ]
     # app.config['SQLALCHEMY_ECHO'] = True
