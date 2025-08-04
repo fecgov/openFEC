@@ -31,11 +31,38 @@ logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
 
+# INNER_HITS = {
+#     "_source": False,
+#     "highlight": {
+#         "require_field_match": False,
+#         "fields": {"documents.text": {}},
+#     },
+#     "size": 100,
+# }
+
 INNER_HITS = {
     "_source": False,
     "highlight": {
         "require_field_match": False,
         "fields": {"documents.text": {}},
+    },
+    "size": 100,
+}
+
+INNER_HITS_LEVEL_2_LABELS = {
+    "_source": False,
+    "highlight": {
+        "require_field_match": False,
+        "fields": {"documents.level_2_labels.level_2_label": {}},
+    },
+    "size": 100,
+}
+
+INNER_HITS_LEVEL_2_DOCS = {
+    "_source": False,
+    "highlight": {
+        "require_field_match": False,
+        "fields": {"documents.level_2_labels.level_2_docs.text": {}},
     },
     "size": 100,
 }
@@ -84,8 +111,12 @@ class RulemakingSearch(Resource):
 
 def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
     # Only pass query string to document list below
-    proximity_query = False
+    # proximity_query = False
     must_query = [Q("term", type=type_)]
+
+    # if q:
+    #     must_query.append(Q("simple_query_string", query=q))
+
     query = (
         Search()
         .using(es_client)
@@ -93,21 +124,15 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
         .highlight_options(require_field_match=False)
         .source(exclude=["sort1", "sort2"])
         # text/ocrtext will not show in the resultset/output when text/ocrtext fields are added to the exclud list
-        # .source(exclude=["no_tier_documents.text", "documents.level_2_labels.level_2_docs.text",
-        #                  "documents.text", "sort1", "sort2"])
+        .source(exclude=["no_tier_documents.text", "documents.level_2_labels.level_2_docs.text",
+                         "documents.text", "sort1", "sort2"])
         .extra(size=hits_returned, from_=from_hit)
         .index(RM_SEARCH_ALIAS)
         .sort("sort1", "sort2")
     )
 
-    if q:
-        must_query.append(Q("simple_query_string", query=q))
-
-    if filters.check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
-        proximity_query = True
-
-    if not proximity_query:
-        query = query.highlight("documents.text", "documents.description")
+    # if filters.check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
+    #     proximity_query = True
 
     if kwargs.get("q_exclude"):
         must_not = []
@@ -136,13 +161,87 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
             query = query.sort({"rm_year": {"order": sort_order}}, {"rm_serial": {"order": sort_order}})
 
     should_query = [
-        get_document_query_params(q, **kwargs),
-        Q("simple_query_string", query=q, fields=["description"]),
+        # get_document_query_params(q, **kwargs),
+        # get_level_1_document_query(q, **kwargs),
+        get_level_2_document_query(q, **kwargs),
+        # Q("simple_query_string", query=q, fields=["description"]),
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
 
     # logger.debug("build_search_query =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return get_all_query_params(query, **kwargs)
+
+
+def get_level_1_document_query(q, **kwargs):
+    return Q(
+        "nested",
+        path="documents",
+        inner_hits={
+            "name": "inner_hits_documents",
+            "highlight": {
+                "fields": {
+                    "documents.text": {
+                        "number_of_fragments": 0,  # Return full match
+                        "fragment_size": 100,
+                        "type": "unified"  # Required for offsets
+                    }
+                }
+            }
+        },
+        query=Q("simple_query_string", query=q, fields=["documents.text"]),
+    )
+
+
+def get_level_2_document_query(q, **kwargs):
+    return Q(
+        "nested",
+        path="documents",
+        inner_hits={
+            "name": "inner_hits_documents",
+            "highlight": {
+                "fields": {
+                    "documents.text": {
+                        "number_of_fragments": 0,  # Return full match
+                        "fragment_size": 100,
+                        "type": "unified"  # Required for offsets
+                    }
+                }
+            }
+        },
+        query=Q(
+            "nested",
+            path="documents.level_2_labels",
+            inner_hits={
+                "name": "inner_hits_level_2_labels",
+                "highlight": {
+                    "fields": {
+                        "documents.level_2_labels.level_2_label": {
+                            "number_of_fragments": 0,  # Return full match
+                            "fragment_size": 100,
+                            "type": "unified"  # Required for offsets
+                        }
+                    }
+                }
+            },
+            query=Q(
+                "nested",
+                path="documents.level_2_labels.level_2_docs",
+                inner_hits={
+                    "name": "inner_hits_level_2_docs",
+                    "highlight": {
+                        "fields": {
+                            "documents.level_2_labels.level_2_docs.text": {
+                                "number_of_fragments": 0,  # Return full match
+                                "fragment_size": 100,
+                                "type": "unified"  # Required for offsets
+                            }
+                        }
+                    }
+                },
+                query=Q("simple_query_string", query=q, fields=["documents.level_2_labels.level_2_docs.text"]),
+            )
+        )
+    )
 
 
 def get_document_query_params(q, **kwargs):
@@ -155,7 +254,7 @@ def get_document_query_params(q, **kwargs):
         combined_query.append(Q("bool", should=category_query, minimum_should_match=1))
 
     if q:
-        q_query = Q("simple_query_string", query=q, fields=["documents.text"])
+        q_query = Q("simple_query_string", query=q, fields=["documents.level_2_labels.level_2_docs.text"])
         combined_query.append(q_query)
 
     if filters.check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
@@ -175,12 +274,31 @@ def get_document_query_params(q, **kwargs):
             query=Q("bool", must=combined_query),
         )
 
-    return Q(
-        "nested",
-        path="documents",
-        inner_hits=INNER_HITS,
-        query=Q("bool", must=combined_query),
-    )
+    # combined_query.append(Q("bool", should=document_query, minimum_should_match=1))
+    return combined_query
+
+    # return Q(
+    #     "nested",
+    #     path="documents.level_2_labels.level_2_docs",
+    #     # path="documents",
+    #     inner_hits=INNER_HITS,
+    #     query=Q("bool", must=combined_query),
+    # )
+    # .query(
+    #     "nested",
+    #     path="comments",
+    #     query=Q("match", comments__author="Alice"),
+    #     inner_hits={
+    #         "name": "comments_hits", # Name for the inner hits
+    #         "nested": {
+    #             "path": "comments.replies",
+    #             "query": Q("match", comments__replies__user="Bob"),
+    #             "inner_hits": {
+    #                 "name": "replies_hits" # Name for the nested inner hits
+    #             }
+    #         }
+    #     }
+    # )
 
 
 def get_all_query_params(query, **kwargs):
@@ -303,7 +421,14 @@ def execute_search_query(query):
     es_results = query.execute()
     # logger.debug("Rulemaking execute_search_query() es_results =" + json.dumps(
     #     es_results.to_dict(), indent=3, cls=DateTimeEncoder))
-
+    # for hit in response:
+    #     activities_hits = hit.meta.inner_hits.activities_hits
+    #     for act_hit in activities_hits:
+    #         details_hits = act_hit.meta.inner_hits.details_hits
+    #         for detail_hit in details_hits:
+    #             highlights = detail_hit.meta.highlight.get("user.activities.details.text", [])
+    #             for fragment in highlights:
+    #                 print("Highlight:", fragment)
     formatted_hits = []
     for hit in es_results:
         formatted_hit = hit.to_dict()
@@ -311,23 +436,79 @@ def execute_search_query(query):
         formatted_hit["source"] = []
         formatted_hits.append(formatted_hit)
 
-        # The 'inner_hits' section is in hit.meta and 'highlight' & 'nested' are in inner_hit.meta
-        if "inner_hits" in hit.meta:
-            for inner_hit in hit.meta.inner_hits["documents"].hits:
-                if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
-                    # set "document_highlights" in return hit
-                    offset = inner_hit.meta["nested"]["offset"]
-                    highlights = inner_hit.meta.highlight.to_dict().values()
-                    formatted_hit["document_highlights"][offset] = [
-                        hl for hl_list in highlights for hl in hl_list
-                    ]
+    for hit in es_results:
+        inner_hits_documents = hit.meta.inner_hits.inner_hits_documents
+        # print ("$$$$$$$$$$$$$$$$ top 1")
+        # print (inner_hits_documents.to_dict())
+        # if "highlight" in inner_hits_documents.meta and "nested" in inner_hits_documents.meta:
+        #     inner_hits_offset = inner_hits_documents.meta["nested"]["offset"]
+        #     print("Jun inner_hits_offset//////")
+        #     print("inner_hits_offset:", inner_hits_offset)
+        for top_hit in inner_hits_documents:
+            # print ("$$$$$$$$$$$$$$$$ top 1")
+            inner_hits_level_2_labels = top_hit.meta.inner_hits.inner_hits_level_2_labels
+            for label2_hit in inner_hits_level_2_labels:
+                # label2_highlights = label2_hit.meta.highlight["documents.level_2_labels.level_2_label"]
+                # if "label2_highlights" in label2_hit.meta and "nested" in label2_hit.meta:
+                #     print ("$$$$$$$$$$$$$$$$ top 3")
+                inner_hits_level_2_docs = label2_hit.meta.inner_hits.inner_hits_level_2_docs
+                # print ("$$$$$$$$$$$$$$$$ top 4")
+                for label2_doc_hit in inner_hits_level_2_docs:
+                    # print ("$$$$$$$$$$$$$$$$ top 5")
+                    # highlights = label2_doc_hit.meta.highlight["documents.level_2_labels.level_2_docs.text"]
+                    # print ("$$$$$$$$$$$$$$$$ highlights")
+                    if "highlight" in label2_doc_hit.meta and "nested" in label2_doc_hit.meta:
+                        highlights = label2_doc_hit.meta.highlight["documents.level_2_labels.level_2_docs.text"]
+                        offset_label2_doc = label2_doc_hit.meta["nested"]["offset"]
+                        print("Jun li########")
+                        print("offset_label2_doc:", offset_label2_doc)
 
-                if len(inner_hit.to_dict()) > 0:
-                    source = inner_hit.to_dict()
-                    formatted_hit["source"].append(source)
+                        formatted_hit["document_highlights"][offset_label2_doc] = [
+                            hl for hl_list in highlights for hl in hl_list
+                        ]
+                        #   for fragment in highlights:
+                        #   print("$$$$$$")
+                        #   print("Highlight:", fragment)
+    # formatted_hits = []
+    # for hit in es_results:
+    #     formatted_hit = hit.to_dict()
+    #     formatted_hit["document_highlights"] = {}
+    #     formatted_hit["source"] = []
+    #     formatted_hits.append(formatted_hit)
+    # logger.debug("Rulemaking hit meta =" + json.dumps(
+    # hit.meta.to_dict(), indent=3, cls=DateTimeEncoder))
+
+        # The 'inner_hits' section is in hit.meta and 'highlight' & 'nested' are in inner_hit.meta
+        # if "inner_hits" in hit.meta:
+        #     for inner_hit in hit.meta.inner_hits["documents"].hits:
+        #         if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
+        #             # set "document_highlights" in return hit
+        #             offset = inner_hit.meta["nested"]["offset"]
+        #             highlights = inner_hit.meta.highlight.to_dict().values()
+        #             formatted_hit["document_highlights"][offset] = [
+        #                 hl for hl_list in highlights for hl in hl_list
+        #             ]
+
+        #         if len(inner_hit.to_dict()) > 0:
+        #             source = inner_hit.to_dict()
+        #             formatted_hit["source"].append(source)
+
+# INNER_HITS_LEVEL_2_LABELS
+        # # if "inner_hits" in hit.meta:
+        # #     for inner_hit in hit.meta.inner_hits["documents.level_2_labels.level_2_docs"].hits:
+        # #         if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
+        # #             # set "document_highlights" in return hit
+        # #             offset = inner_hit.meta["nested"]["offset"]
+        # #             highlights = inner_hit.meta.highlight.to_dict().values()
+        # #             formatted_hit["document_highlights"][offset] = [
+        # #                 hl for hl_list in highlights for hl in hl_list
+        # #             ]
+
+        #         if len(inner_hit.to_dict()) > 0:
+        #             source = inner_hit.to_dict()
+        #             formatted_hit["source"].append(source)
 
     # logger.debug("formatted_hits =" + json.dumps(formatted_hits, indent=3, cls=DateTimeEncoder))
-
     # Since ES7 the `total` becomes an object : "total": {"value": 1,"relation": "eq"}
     # We can set rest_total_hits_as_int=true, default is false.
     # but elasticsearch-dsl==7.3.0 has not supported this setting yet.
