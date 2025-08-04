@@ -2416,7 +2416,101 @@ FILENAME = '''
 Search documents by file name
 '''
 
+RM_SEARCH = '''
+The Searchable Electronic Rulemaking System (SERS) lets you search all public documents associated
+with Federal Election Commission rulemakings (REGs), including draft Federal Register publications,
+ open meeting agendas, comments submitted by the public, and hearing transcripts.
+'''
 
+RM_NUMBER = '''
+Search a REG number to go directly to  the REG and all associated documents.
+REG numbers are listed in a YYYY-PP format
+'''
+
+RM_NAME = '''
+Search REG Name field to retrieve REG documents
+with specific words in their names.
+'''
+
+RM_YEAR = '''
+Search by REG documents by the year in which a rulemaking began
+'''
+
+RM_DOC_CATEGORY_DESC = '''
+Category of the rulemaking document
+- 1 - Open Meeting
+- 2 - Hearing
+- 3 - Agenda Document
+- 4 - Federal Register Document
+- 5 - Comments and Ex Parte Communications
+- 6 - Commencing Document"
+- 7 - Votes
+- 8 - Press &amp; Public Guidance
+'''
+
+RM_ENTITY_TYPE = '''
+An "entity" is any individual or group that plays one of the following roles
+with respect to a REG.  The different entity roles are:
+- 1 - Petitioner
+- 2 - Witness
+- 3 - Counsel
+- 4 - Officer/Representative
+- 5 - Commenter
+'''
+
+RM_ENTITY_NAME = '''
+Name of the entity related a specific rulemaking
+'''
+
+RM_MIN_FEDERAL_REGISTRY_DATE = '''
+Search for documents associated with a REG where the Federal Register
+published a REG document approved by the Commission on or after this date. Date must be
+formatted as MM/DD/YYYY or YYYY-MM-DD."
+'''
+
+RM_MAX_FEDERAL_REGISTRY_DATE = '''
+Search for documents associated with a REG where the Federal Register
+published a REG document approved by the Commission on or before this date. Date must be
+formatted as MM/DD/YYYY or YYYY-MM-DD."
+'''
+
+RM_MIN_HEARING_DATE = '''
+Search for documents associated with a REG where the Commission
+held a hearing on or after this date. Date must be
+formatted as MM/DD/YYYY or YYYY-MM-DD."
+'''
+
+RM_MAX_HEARING_DATE = '''
+Search for documents associated with a REG where the Commission
+held a hearing on or before this date. Date must be
+formatted as MM/DD/YYYY or YYYY-MM-DD."
+'''
+
+RM_MIN_VOTE_DATE = '''
+Search for documents associated with a REG where the Commission
+voted on an agenda document on or after this date. Date must be
+formatted as MM/DD/YYYY or YYYY-MM-DD."
+'''
+
+RM_MAX_VOTE_DATE = '''
+Search for documents associated with a REG where the Commission
+voted on an agenda document on or after this date. Date must be
+formatted as MM/DD/YYYY or YYYY-MM-DD."
+'''
+
+RM_SORT = '''
+Sort `rulemaking`  by `rm_no`.
+Use `-` before a parameter name to sort in descending order.
+ex: `-rm_no`
+'''
+
+RM_IS_KEY_DOCUMENT = '''
+When set to true, only rulemakings with at least one key document are returned
+'''
+
+RM_OPEN_FOR_COMMENT = '''
+When set to true, this flag returns rulemakings that are currently open for comment.
+'''
 # ======== legal end =========
 
 

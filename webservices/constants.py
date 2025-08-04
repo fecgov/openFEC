@@ -33,7 +33,7 @@ TEST_SEARCH_ALIAS = "test_search_alias"
 
 DOCS_PATH = "docs"
 RULEMAKING_PATH = "rulemaking"
-RULEMAKING_TYPE = "rulemaking"
+RULEMAKING_TYPE = "rulemakings"
 
 # =========Start rulemaking Constants==========
 RM_INDEX = "rm_index"
@@ -514,4 +514,14 @@ DOC_TYPE_MAP = {
     316: "Open Meeting Podcast",
     317: "Open Meeting Minutes",
 }
+
+ENTITY_ROLE_TYPES = {
+            "1": "Petitioner",
+            "2": "Witness",
+            "3": "Counsel",
+            "4": "Officer/Representative",
+            "5": "Commenter"
+}
+
+ENTITY_ROLE_TYPE_VALID_VALUES = ['1', '2', '3', '4', '5']
 # ========= For rulemaking end ==========
