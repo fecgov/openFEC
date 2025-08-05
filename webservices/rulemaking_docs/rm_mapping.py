@@ -13,7 +13,7 @@ RM_MAPPING = {
             "type": "nested",
             "properties": {  # Level 1 documents: level_1=x,level_2=0
                 "is_comment_eligible": {"type": "boolean"},
-                "doc_category_id": {"type": "keyword"},
+                "doc_category_id": {"type": "integer"},
                 "doc_category_label": {"type": "keyword"},
                 "doc_date": {"type": "date", "format": "dateOptionalTime"},
                 "doc_description": {"type": "text"},
@@ -26,17 +26,27 @@ RM_MAPPING = {
                 "doc_id": {"type": "long"},
                 "doc_type_id": {"type": "integer"},
                 "doc_type_label": {"type": "keyword"},
-                "filename": {"type": "text"},
+                "filename": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
                 "is_key_document": {"type": "boolean"},
                 "level_1": {"type": "integer"},
                 "level_1_label": {"type": "keyword"},
                 "level_2": {"type": "integer"},
                 "level_2_label": {"type": "keyword"},
                 "level_2_labels": {
+                    "type": "nested",
                     "properties": {
                         "level_2": {"type": "integer"},
                         "level_2_label": {"type": "keyword"},
                         "level_2_docs": {
+                            "type": "nested",
                             "properties": {
                                 "is_comment_eligible": {"type": "boolean"},
                                 "doc_category_id": {"type": "integer"},
@@ -52,7 +62,15 @@ RM_MAPPING = {
                                 },
                                 "doc_type_id": {"type": "integer"},
                                 "doc_type_label": {"type": "keyword"},
-                                "filename": {"type": "text"},
+                                "filename": {
+                                    "type": "text",
+                                    "fields": {
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "ignore_above": 256
+                                        }
+                                    }
+                                },
                                 "is_key_document": {"type": "boolean"},
                                 "level_1": {"type": "integer"},
                                 "level_1_label": {"type": "keyword"},
@@ -112,7 +130,7 @@ RM_MAPPING = {
             },
         },
         "rm_id": {"type": "integer"},
-        "rm_name": {"type": "keyword"},
+        "rm_name": {"type": "text"},
         "rm_no": {"type": "keyword"},
         "rm_number": {"type": "keyword"},
         "rm_serial": {"type": "integer"},

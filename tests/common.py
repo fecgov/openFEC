@@ -117,6 +117,14 @@ class ApiBaseTest(BaseTestCase):
         self.assertEqual(result['api_version'], __API_VERSION__)
         return result
 
+    def _response_rm(self, qry):
+        response_rm = self.app.get(qry)
+        self.assertEqual(response_rm.status_code, 200)
+        result = json.loads(codecs.decode(response_rm.data))
+        self.assertNotEqual(result, [], "Empty response!")
+        self.assertEqual(result['api_version'], __API_VERSION__)
+        return result
+
     def _results(self, qry):
         response = self._response(qry)
         return response['results']
@@ -154,6 +162,11 @@ class ElasticSearchBaseTest(BaseTestCase):
         response = self._results(qry)
         self.assertNotEqual(response["total_all"], 0)
         return response
+
+    def _response_rm(self, qry):
+        response_rm = self._results(qry)
+        self.assertNotEqual(response_rm["total_rulemakings"], 0)
+        return response_rm
 
     def _results_case(self, qry):
         response = self._response(qry)
@@ -194,6 +207,11 @@ class ElasticSearchBaseTest(BaseTestCase):
         response = self._results(qry)
         self.assertNotEqual(len(response["citations"]), 0)
         return response["citations"]
+
+    def _results_rm(self, qry):
+        response_rm = self._response_rm(qry)
+        self.assertNotEqual(response_rm["total_rulemakings"], 0)
+        return response_rm["total_rulemakings"]
 
 
 def _create_all_indices():
