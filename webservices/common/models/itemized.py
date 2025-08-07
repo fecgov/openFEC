@@ -1,7 +1,7 @@
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.postgresql import TSVECTOR
-
 from webservices import docs, utils
+from sqlalchemy.orm import mapped_column
 
 from .base import db
 from .reports import PdfMixin, name_generator
@@ -11,15 +11,15 @@ class BaseItemized(db.Model):
     __abstract__ = True
 
     committee = utils.related_committee_history('committee_id', cycle_label='report_year')
-    committee_id = db.Column('cmte_id', db.String, doc=docs.COMMITTEE_ID)
-    report_year = db.Column('rpt_yr', db.Numeric(4, 0))
-    report_type = db.Column('rpt_tp', db.String, doc=docs.REPORT_TYPE)
-    image_number = db.Column('image_num', db.String, doc=docs.IMAGE_NUMBER)
-    filing_form = db.Column(db.String)
-    link_id = db.Column(db.Integer)
-    line_number = db.Column('line_num', db.String)
-    transaction_id = db.Column('tran_id', db.String)
-    file_number = db.Column('file_num', db.Integer)
+    committee_id = mapped_column('cmte_id', db.String, doc=docs.COMMITTEE_ID, sort_order=-90)
+    report_year = mapped_column('rpt_yr', db.Numeric(4, 0), sort_order=-80)
+    report_type = mapped_column('rpt_tp', db.String, doc=docs.REPORT_TYPE, sort_order=-70)
+    image_number = mapped_column('image_num', db.String, doc=docs.IMAGE_NUMBER, sort_order=-60)
+    filing_form = mapped_column(db.String, sort_order=-50)
+    link_id = mapped_column(db.Integer, sort_order=-40)
+    line_number = mapped_column('line_num', db.String, sort_order=-30)
+    transaction_id = mapped_column('tran_id', db.String, sort_order=-20)
+    file_number = mapped_column('file_num', db.Integer, sort_order=-10)
 
     @hybrid_property
     def memoed_subtotal(self):
@@ -833,7 +833,8 @@ class ScheduleH4(BaseItemized):
     )
 
     # Recipient info
-    committee_id = db.Column('cmte_id', db.String)  # override from BaseItemized
+    committee_id = mapped_column('cmte_id', db.String, sort_order=-90)  # override from BaseItemized
+
     spender_committee_type = db.Column('cmte_tp', db.String(1), index=True)
     spender_committee_designation = db.Column('cmte_dsgn', db.String(1), index=True)
     spender_committee_name = db.Column('cmte_nm', db.String, index=True)
