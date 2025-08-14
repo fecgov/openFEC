@@ -3,14 +3,14 @@ from elasticsearch_dsl import Search
 import logging
 import re
 from webservices.common.models import db
-from webservices.utils import (
+from webservices.legal.utils_es import (
     create_es_client,
     create_eregs_link,
     DateTimeEncoder,
 )
 from .reclassify_statutory_citation import reclassify_statutory_citation
 import json
-from .es_management import (  # noqa
+from webservices.legal.constants import (  # noqa
     ARCH_MUR_ALIAS,
 )
 

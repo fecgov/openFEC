@@ -1,70 +1,30 @@
+import webservices.legal.constants as constants
 import logging
-import sys
 
-from .advisory_opinions import load_advisory_opinions
+from webservices.legal.utils_es import create_index, switch_alias, restore_from_swapping_index, INDEX_DICT
 
-from .current_cases import (
+from webservices.legal.legal_docs.current_cases import (
     load_current_murs,
     load_adrs,
     load_admin_fines,
 )
 
-from .archived_murs import ( # noqa
+from webservices.legal.legal_docs.archived_murs import ( # noqa
     load_archived_murs,
-    extract_pdf_text,
 )
 
-from .statutes import (  # noqa
+from webservices.legal.legal_docs.advisory_opinions import ( # noqa
+    load_advisory_opinions,
+)
+
+from webservices.legal.legal_docs.statutes import (  # noqa
     load_statutes,
 )
 
+from webservices.legal.rulemaking_docs.rulemaking import load_rulemaking
 
-from .es_management import (  # noqa
-    INDEX_DICT,
-    CASE_INDEX,
-    ARCH_MUR_INDEX,
-    AO_INDEX,
-    create_index,
-    delete_index,
-    display_index_alias,
-    switch_alias,
-    display_mapping,
-    restore_from_swapping_index,
-    configure_snapshot_repository,
-    delete_repository,
-    display_repositories,
-    create_es_snapshot,
-    restore_es_snapshot,
-    restore_es_snapshot_downtime,
-    delete_snapshot,
-    display_snapshots,
-    display_snapshot_detail,
-    delete_murs_from_s3,
-    delete_doctype_from_es,
-    delete_single_doctype_from_es,
-    CASE_ALIAS,
-    AO_ALIAS,
-    ARCH_MUR_ALIAS,
-    SEARCH_ALIAS,
-    TEST_CASE_INDEX,
-    TEST_CASE_ALIAS,
-    TEST_AO_INDEX,
-    TEST_AO_ALIAS,
-    TEST_SEARCH_ALIAS,
-    TEST_ARCH_MUR_INDEX,
-    TEST_ARCH_MUR_ALIAS,
-    create_test_indices
-)
 
-from .show_legal_data import ( # noqa
-    show_legal_data,
-)
-
-logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-logger = logging.getLogger("elasticsearch")
-logger.setLevel("WARN")
-logger = logging.getLogger("botocore")
-logger.setLevel("WARN")
+logger = logging.getLogger(__name__)
 
 
 def reload_all_data_by_index(index_name=None):
@@ -81,18 +41,22 @@ def reload_all_data_by_index(index_name=None):
     b) cf run-task api --command "python cli.py reload_all_data_by_index ao_index" -m 4G --name reload_all_data_ao
     c) cf run-task api --command "python cli.py reload_all_data_by_index arch_mur_index" -m 4G
     --name reload_all_data_arch_mur
+    d) cf run-task api --command "python cli.py reload_all_data_by_index rm_index" -m 4G
+    --name reload_all_data_rm
     """
-    index_name = index_name or CASE_INDEX
+    index_name = index_name or constants.CASE_INDEX
     if index_name in INDEX_DICT.keys():
-        if index_name == CASE_INDEX:
+        if index_name == constants.CASE_INDEX:
             load_current_murs()
             load_adrs()
             load_admin_fines()
-        elif index_name == AO_INDEX:
+        elif index_name == constants.AO_INDEX:
             load_advisory_opinions()
             load_statutes()
-        elif index_name == ARCH_MUR_INDEX:
+        elif index_name == constants.ARCH_MUR_INDEX:
             load_archived_murs()
+        elif index_name == constants.RM_INDEX:
+            load_rulemaking()
     else:
         logger.error(" Invalid index '{0}', unable to reload this index.".format(index_name))
 
@@ -111,8 +75,9 @@ def initialize_legal_data(index_name=None):
     a) cf run-task api --command "python cli.py initialize_legal_data case_index" -m 4G --name init_case_data
     b) cf run-task api --command "python cli.py initialize_legal_data ao_index" -m 4G --name init_ao_data
     c) cf run-task api --command "python cli.py initialize_legal_data arch_mur_index" -m 4G --name init_arch_mur_data
+    d) cf run-task api --command "python cli.py initialize_legal_data rm_index" -m 4G --name init_rm_data
     """
-    index_name = index_name or CASE_INDEX
+    index_name = index_name or constants.CASE_INDEX
     if index_name in INDEX_DICT.keys():
         create_index(index_name)
         reload_all_data_by_index(index_name)
@@ -143,7 +108,7 @@ def update_mapping_and_reload_legal_data(index_name=None):
     c) cf run-task api --command "python cli.py update_mapping_and_reload_legal_data arch_mur_index" -m 4G
     --name update_mapping_reload_data_arch_mur
     """
-    index_name = index_name or CASE_INDEX
+    index_name = index_name or constants.CASE_INDEX
     if index_name in INDEX_DICT.keys():
         # 1) Create 'XXXX_SWAP_INDEX'
         create_index(INDEX_DICT.get(index_name)[3])

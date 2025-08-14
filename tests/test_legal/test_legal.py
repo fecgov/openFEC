@@ -3,7 +3,7 @@ import codecs
 from tests.common import BaseTestCase
 from unittest.mock import patch
 from elasticsearch import RequestError
-from webservices.legal_docs.es_management import (  # noqa
+from webservices.legal.constants import (  # noqa
     DOCS_PATH, CASE_INDEX
 )
 from webservices.resources.legal import (  # noqa
