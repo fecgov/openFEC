@@ -1,6 +1,6 @@
 import unittest
 
-from webservices.legal_docs import reclassify_statutory_citation
+from webservices.legal.legal_docs import reclassify_statutory_citation
 
 
 class TestGetCitations(unittest.TestCase):

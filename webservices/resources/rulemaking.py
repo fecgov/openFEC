@@ -3,22 +3,21 @@ from flask_apispec import doc
 from webservices import docs
 from webservices import args
 from webservices import filters
-from webservices.constants import (
+from webservices.legal.constants import (
     RM_SEARCH_ALIAS,
     ENTITY_ROLE_TYPES,
     ENTITY_ROLE_TYPE_VALID_VALUES,
     RULEMAKING_TYPE
 )
-from webservices.utils import (
+from webservices.legal.utils_es import (
     create_es_client,
-    Resource,
     DateTimeEncoder,
     check_filter_exists,
 )
-from webservices.utils import use_kwargs
+from webservices.utils import use_kwargs, Resource
 from elasticsearch import RequestError
 from webservices.exceptions import ApiError
-from webservices.rulemaking_docs.responses import (
+from webservices.legal.rulemaking_docs.responses import (
     RULEMAKING_SEARCH_RESPONSE
 )
 import logging

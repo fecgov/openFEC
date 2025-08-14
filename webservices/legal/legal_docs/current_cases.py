@@ -1,15 +1,15 @@
 import logging
 import re
 from webservices.common.models import db
-from webservices.utils import (
-    extend,
+from webservices.legal.utils_es import (
     create_es_client,
     create_eregs_link,
     DateTimeEncoder,
     upload_citations,
 )
+from webservices.utils import extend
 from webservices.tasks.utils import get_bucket
-from .es_management import (  # noqa
+from webservices.legal.constants import (  # noqa
     CASE_ALIAS,
 )
 from sqlalchemy import text

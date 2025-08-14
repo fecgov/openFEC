@@ -5,8 +5,8 @@ from tempfile import NamedTemporaryFile
 from defusedxml import ElementTree as Et
 import logging
 import requests
-from webservices.utils import create_es_client
-from .es_management import (  # noqa
+from webservices.legal.utils_es import create_es_client
+from webservices.legal.constants import (  # noqa
     AO_ALIAS,
 )
 
