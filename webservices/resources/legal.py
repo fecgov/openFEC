@@ -200,7 +200,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     if kwargs.get("filename"):
         must_clauses = []
         must_clauses.append(Q("nested", path="documents",
-                            query=Q("match", documents__filename=kwargs.get("filename"))))
+                            query=Q("term", documents__filename=kwargs.get("filename"))))
         query = query.query("bool", must=must_clauses)
 
     if kwargs.get("q_exclude"):
