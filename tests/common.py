@@ -11,9 +11,10 @@ from webservices.rest import create_app, db
 from webservices import __API_VERSION__
 
 
-from webservices.legal_docs import (create_test_indices, TEST_CASE_INDEX, TEST_ARCH_MUR_INDEX, TEST_AO_INDEX,
-                                    TEST_CASE_ALIAS, TEST_ARCH_MUR_ALIAS, TEST_AO_ALIAS)
-from webservices.utils import create_es_client
+from webservices.legal.constants import (TEST_CASE_INDEX, TEST_ARCH_MUR_INDEX, TEST_AO_INDEX,
+                                         TEST_CASE_ALIAS, TEST_ARCH_MUR_ALIAS, TEST_AO_ALIAS)
+
+from webservices.legal.utils_es import create_test_indices, create_es_client
 from tests.test_legal.test_legal_data import document_dictionary
 from jdbc_utils import to_jdbc_url
 from sqlalchemy import text

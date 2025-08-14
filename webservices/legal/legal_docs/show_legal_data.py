@@ -1,5 +1,5 @@
 import logging
-from webservices import utils
+from webservices.legal.utils_es import create_es_client
 import json
 import datetime
 from json import JSONEncoder
@@ -16,7 +16,7 @@ class DateTimeEncoder(JSONEncoder):
 def show_legal_data():
 
     try:
-        es_client = utils.create_es_client()
+        es_client = create_es_client()
 
         logger.info("\n==================Legal doc info==================")
         if es_client.indices.exists(index="docs"):

@@ -2,17 +2,15 @@ from collections import defaultdict
 import logging
 import re
 from webservices.common.models import db
-from webservices.utils import (
-    create_es_client,
-    DateTimeEncoder,
-)
+
 from sqlalchemy import text
 from webservices.tasks.utils import get_bucket
 from .reclassify_statutory_citation import reclassify_statutory_citation
-from .es_management import (  # noqa
+from webservices.legal.constants import (  # noqa
    AO_ALIAS,
 )
 import json
+from webservices.legal.utils_es import create_es_client, DateTimeEncoder
 
 logger = logging.getLogger(__name__)
 

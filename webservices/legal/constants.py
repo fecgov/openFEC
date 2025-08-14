@@ -29,6 +29,22 @@ TEST_AO_ALIAS = "test_ao_alias"
 TEST_ARCH_MUR_INDEX = "test_arch_mur_index"
 TEST_ARCH_MUR_ALIAS = "test_arch_mur_alias"
 TEST_SEARCH_ALIAS = "test_search_alias"
+
+ANALYZER_SETTING = {
+    "analysis": {
+        "analyzer": {
+            "default": {
+                "type": "standard"
+            }
+        }
+    },
+    "highlight.max_analyzed_offset": 60000000,
+}
+
+ES_SERVICE_INSTANCE_NAME = "fec-api-elasticsearch"
+AWS_ES_SERVICE = "es"
+REGION = "us-gov-west-1"
+PORT = 443
 # ========= For legal document end ==========
 
 DOCS_PATH = "docs"
