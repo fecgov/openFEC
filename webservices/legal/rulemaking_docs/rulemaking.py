@@ -1,9 +1,8 @@
 import logging
 from webservices.common.models import db
-from webservices.utils import (
-    create_es_client,
-)
-import webservices.constants as constants
+from webservices.legal.utils_es import create_es_client
+
+import webservices.legal.constants as constants
 from sqlalchemy import text
 logger = logging.getLogger(__name__)
 
