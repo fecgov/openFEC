@@ -45,6 +45,7 @@ def reset_schema():
         "rohan",
         "staging",
         "test_efile",
+        "fosers",
     ]
     if current_app.config['TESTING']:
         with db.engine.begin() as conn:
