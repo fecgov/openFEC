@@ -1029,6 +1029,31 @@ ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging_schemas
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)
 
+
+# excluding street address to comply with FEC policy
+Form5Schema = make_schema(
+    models.Form56,
+    fields={
+        'contribution_amount': ma.fields.Float(),
+        'image_number': ma.fields.Str(),
+        'original_sub_id': ma.fields.Str(),
+        'sub_id': ma.fields.Str(),
+        'report_year': ma.fields.Int(),
+    },
+    options={
+         'exclude': (
+            'contributor_name_text',
+            'contributor_employer_text',
+            'contributor_occupation_text',
+            ),
+    }
+)
+
+Form5PageSchema = make_page_schema(Form5Schema, page_type=paging_schemas.SeekPageSchema)
+register_schema(Form5Schema)
+register_schema(Form5PageSchema)
+
+
 ScheduleCSchema = make_schema(
     models.ScheduleC,
     fields={

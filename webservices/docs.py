@@ -1204,6 +1204,12 @@ The forms filed are categorized based on the nature of the filing:\n\
     - OTHER F1M, F8, F99, F12, FRQ\n\
 '''
 
+FORM_56 = '''
+FEC FORM 5 Receipts
+REPORT OF INDEPENDENT EXPENDITURES MADE AND CONTRIBUTIONS RECEIVED
+To Be Used By Persons (Other than Political Committees)
+'''
+
 PRIMARY_GENERAL_INDICTOR = '''
 Primary, general or special election indicator.
 '''
