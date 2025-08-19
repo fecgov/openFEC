@@ -834,6 +834,7 @@ class ScheduleH4(BaseItemized):
 
     # Recipient info
     committee_id = mapped_column('cmte_id', db.String, sort_order=-90)  # override from BaseItemized
+
     spender_committee_type = db.Column('cmte_tp', db.String(1), index=True)
     spender_committee_designation = db.Column('cmte_dsgn', db.String(1), index=True)
     spender_committee_name = db.Column('cmte_nm', db.String, index=True)
