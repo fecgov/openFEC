@@ -86,7 +86,7 @@ def query_with_labels(query, schema, sort_columns=False):
     for relationship in relationships:
         if relationship.position == -1:
             entities.append(relationship.column.label(relationship.label))
-        else:
+        elif relationship.label != "committee_history_name":
             entities.insert(
                 relationship.position,
                 relationship.column.label(relationship.label)
