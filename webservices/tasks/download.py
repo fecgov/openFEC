@@ -15,6 +15,7 @@ from sqlalchemy.dialects import postgresql
 from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
+from webservices.common.models.itemized import ScheduleA
 from webservices.legal_docs.es_management import S3_BACKUP_DIRECTORY
 
 from webservices.tasks import utils as task_utils
@@ -75,7 +76,12 @@ def query_with_labels(query, schema, sort_columns=False):
     :param sort_columns: Optional flag to sort the column labels by name
     :returns: Query with labeled entities
     """
-    exclude = getattr(schema.Meta, "exclude", ())
+    exclude = list(getattr(schema.Meta, "exclude", ()))
+
+    # remove empty committee_name from schedule A downloads
+    if query.column_descriptions[0]["entity"] == ScheduleA:
+        exclude.append("committee_name")
+
     relationships = getattr(schema.Meta, "relationships", [])
     joins = []
     entities = [
@@ -86,7 +92,7 @@ def query_with_labels(query, schema, sort_columns=False):
     for relationship in relationships:
         if relationship.position == -1:
             entities.append(relationship.column.label(relationship.label))
-        elif relationship.label != "committee_history_name":
+        else:
             entities.insert(
                 relationship.position,
                 relationship.column.label(relationship.label)

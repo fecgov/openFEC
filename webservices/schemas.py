@@ -1018,7 +1018,7 @@ ScheduleASchema = make_schema(
             Relationship(
                 models.ScheduleA.committee,
                 models.CommitteeHistory.name,
-                'committee_history_name',
+                'committee_name',
                 1
                 ),
             ],
