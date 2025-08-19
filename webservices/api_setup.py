@@ -11,6 +11,7 @@ from webservices.resources import sched_d
 from webservices.resources import sched_e
 from webservices.resources import sched_f
 from webservices.resources import sched_h4
+from webservices.resources import form_56
 from webservices.resources import download
 from webservices.resources import aggregates
 from webservices.resources import candidate_aggregates
@@ -80,6 +81,7 @@ api.add_resource(search.CandidateNameSearch, '/names/candidates/')
 api.add_resource(search.CommitteeNameSearch, '/names/committees/')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/', '/schedules/schedule_a/<string:sub_id>/')
 api.add_resource(sched_a.ScheduleAEfileView, '/schedules/schedule_a/efile/')
+api.add_resource(form_56.Form5View, '/schedules/form5a/')
 api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/', '/schedules/schedule_b/<string:sub_id>/')
 api.add_resource(sched_b.ScheduleBEfileView, '/schedules/schedule_b/efile/')
 api.add_resource(sched_c.ScheduleCView, '/schedules/schedule_c/')
