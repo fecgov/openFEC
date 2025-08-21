@@ -1,7 +1,7 @@
 from datetime import datetime
 from webservices.resources.legal import ALL_DOCUMENT_TYPES
 from tests.common import ElasticSearchBaseTest, ALL_INDICES, document_dictionary
-from webservices.legal_docs import TEST_SEARCH_ALIAS
+from webservices.legal.legal_docs import TEST_SEARCH_ALIAS
 from webservices.api_setup import api
 from webservices.resources.legal import UniversalSearch
 

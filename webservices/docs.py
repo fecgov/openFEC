@@ -382,6 +382,8 @@ ORGANIZATION_TYPE = 'The one-letter code for the kind for organization:\n\
         - T trade association\n\
         - V cooperative\n\
         - W corporation without capital stock\n\
+        - H host committee\n\
+        - I inaugural committee\n\
 '
 COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
         - C communication cost\n\

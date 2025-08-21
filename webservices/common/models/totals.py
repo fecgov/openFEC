@@ -2,6 +2,7 @@ from sqlalchemy.dialects.postgresql import TSVECTOR, ARRAY
 from webservices import docs, utils
 from .base import db, BaseModel
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import mapped_column
 
 
 # resource class that uses this model: CandidateTotalsDetailView
@@ -62,52 +63,54 @@ class CandidateTotalsDetail(db.Model):
 class CommitteeTotals(BaseModel):
     __abstract__ = True
 
-    committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
-    cycle = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CYCLE)
-    offsets_to_operating_expenditures = db.Column(db.Numeric(30, 2))
-    political_party_committee_contributions = db.Column(db.Numeric(30, 2))
-    other_disbursements = db.Column(db.Numeric(30, 2))
-    other_political_committee_contributions = db.Column(db.Numeric(30, 2))
-    individual_itemized_contributions = db.Column(db.Numeric(30, 2), doc=docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS)
-    individual_unitemized_contributions = db.Column(db.Numeric(30, 2), doc=docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS)
-    operating_expenditures = db.Column(db.Numeric(30, 2))
-    disbursements = db.Column(db.Numeric(30, 2), doc=docs.DISBURSEMENTS)
-    contributions = db.Column(db.Numeric(30, 2), doc=docs.CONTRIBUTIONS)
-    contribution_refunds = db.Column(db.Numeric(30, 2))
-    individual_contributions = db.Column(db.Numeric(30, 2))
-    refunded_individual_contributions = db.Column(db.Numeric(30, 2))
-    refunded_other_political_committee_contributions = db.Column(db.Numeric(30, 2))
-    refunded_political_party_committee_contributions = db.Column(db.Numeric(30, 2))
-    receipts = db.Column(db.Numeric(30, 2))
-    coverage_start_date = db.Column(db.DateTime(), index=True)
-    coverage_end_date = db.Column(db.DateTime(), index=True)
-    net_contributions = db.Column(db.Numeric(30, 2))
-    net_operating_expenditures = db.Column(db.Numeric(30, 2))
+    committee_id = mapped_column(db.String, index=True, doc=docs.COMMITTEE_ID, sort_order=-420)
+    cycle = mapped_column(db.Integer, primary_key=True, index=True, doc=docs.CYCLE, sort_order=-410)
+    offsets_to_operating_expenditures = mapped_column(db.Numeric(30, 2), sort_order=-400)
+    political_party_committee_contributions = mapped_column(db.Numeric(30, 2), sort_order=-390)
+    other_disbursements = mapped_column(db.Numeric(30, 2), sort_order=-380)
+    other_political_committee_contributions = mapped_column(db.Numeric(30, 2), sort_order=-370)
+    individual_itemized_contributions = mapped_column(db.Numeric(30, 2),
+                                                      doc=docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS, sort_order=-360)
+    individual_unitemized_contributions = mapped_column(db.Numeric(30, 2),
+                                                        doc=docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS, sort_order=-350)
+    operating_expenditures = mapped_column(db.Numeric(30, 2), sort_order=-340)
+    disbursements = mapped_column(db.Numeric(30, 2), doc=docs.DISBURSEMENTS, sort_order=-330)
+    contributions = mapped_column(db.Numeric(30, 2), doc=docs.CONTRIBUTIONS, sort_order=-320)
+    contribution_refunds = mapped_column(db.Numeric(30, 2), sort_order=-310)
+    individual_contributions = mapped_column(db.Numeric(30, 2), sort_order=-300)
+    refunded_individual_contributions = mapped_column(db.Numeric(30, 2), sort_order=-290)
+    refunded_other_political_committee_contributions = mapped_column(db.Numeric(30, 2), sort_order=-280)
+    refunded_political_party_committee_contributions = mapped_column(db.Numeric(30, 2), sort_order=-270)
+    receipts = mapped_column(db.Numeric(30, 2), sort_order=-260)
+    coverage_start_date = mapped_column(db.DateTime(), index=True, sort_order=-250)
+    coverage_end_date = mapped_column(db.DateTime(), index=True, sort_order=-240)
+    net_contributions = mapped_column(db.Numeric(30, 2), sort_order=-230)
+    net_operating_expenditures = mapped_column(db.Numeric(30, 2), sort_order=-220)
 
-    last_report_year = db.Column(db.Integer)
-    last_report_type_full = db.Column(db.String)
-    last_beginning_image_number = db.Column(db.BigInteger)
-    last_cash_on_hand_end_period = db.Column(db.Numeric(30, 2))
-    last_debts_owed_by_committee = db.Column(db.Numeric(30, 2))
-    last_debts_owed_to_committee = db.Column(db.Numeric(30, 2))
+    last_report_year = mapped_column(db.Integer, sort_order=-210)
+    last_report_type_full = mapped_column(db.String, sort_order=-200)
+    last_beginning_image_number = mapped_column(db.BigInteger, sort_order=-190)
+    last_cash_on_hand_end_period = mapped_column(db.Numeric(30, 2), sort_order=-180)
+    last_debts_owed_by_committee = mapped_column(db.Numeric(30, 2), sort_order=-170)
+    last_debts_owed_to_committee = mapped_column(db.Numeric(30, 2), sort_order=-160)
 
     # Add additional fields and filters to /totals/{committee-type} endpoint#2631
-    committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
-    committee_type = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
-    committee_designation = db.Column(db.String, doc=docs.DESIGNATION)
-    committee_type_full = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
-    committee_designation_full = db.Column(db.String, doc=docs.DESIGNATION)
-    party_full = db.Column(db.String, doc=docs.PARTY_FULL)
+    committee_name = mapped_column(db.String, doc=docs.COMMITTEE_NAME, sort_order=-150)
+    committee_type = mapped_column(db.String, doc=docs.COMMITTEE_TYPE, sort_order=-140)
+    committee_designation = mapped_column(db.String, doc=docs.DESIGNATION, sort_order=-130)
+    committee_type_full = mapped_column(db.String, doc=docs.COMMITTEE_TYPE, sort_order=-120)
+    committee_designation_full = mapped_column(db.String, doc=docs.DESIGNATION, sort_order=-110)
+    party_full = mapped_column(db.String, doc=docs.PARTY_FULL, sort_order=-100)
 
-    treasurer_name = db.Column(db.String(100), index=True, doc=docs.TREASURER_NAME)
-    treasurer_text = db.Column(TSVECTOR)
-    committee_state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
-    filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
-    filing_frequency_full = db.Column(db.String, doc=docs.FILING_FREQUENCY)
-    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_FILE_DATE)
-    organization_type = db.Column(db.String(1), index=True, doc=docs.ORGANIZATION_TYPE)
-    organization_type_full = db.Column(db.String(100), index=True, doc=docs.ORGANIZATION_TYPE)
-    first_f1_date = db.Column(db.Date, index=True, doc=docs.FIRST_F1_DATE)
+    treasurer_name = mapped_column(db.String(100), index=True, doc=docs.TREASURER_NAME, sort_order=-90)
+    treasurer_text = mapped_column(TSVECTOR, sort_order=-80)
+    committee_state = mapped_column(db.String(2), index=True, doc=docs.COMMITTEE_STATE, sort_order=-70)
+    filing_frequency = mapped_column(db.String(1), doc=docs.FILING_FREQUENCY, sort_order=-60)
+    filing_frequency_full = mapped_column(db.String, doc=docs.FILING_FREQUENCY, sort_order=-50)
+    first_file_date = mapped_column(db.Date, index=True, doc=docs.FIRST_FILE_DATE, sort_order=-40)
+    organization_type = mapped_column(db.String(1), index=True, doc=docs.ORGANIZATION_TYPE, sort_order=-30)
+    organization_type_full = mapped_column(db.String(100), index=True, doc=docs.ORGANIZATION_TYPE, sort_order=-20)
+    first_f1_date = mapped_column(db.Date, index=True, doc=docs.FIRST_F1_DATE, sort_order=-10)
 
     @declared_attr
     def transaction_coverage(self):

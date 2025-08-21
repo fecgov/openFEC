@@ -524,7 +524,7 @@ committee = {
         metadata={'description': docs.DESIGNATION},
     ),
     'organization_type': fields.List(
-        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
+        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W', 'H', 'I'])),
         metadata={'description': docs.ORGANIZATION_TYPE},
     ),
     'committee_type': fields.List(
@@ -634,7 +634,7 @@ form1efilings = {
     'max_load_timestamp': Date(metadata={'description': docs.LOAD_DATE}),
     'committee_type': fields.List(fields.Str, metadata={'description': docs.COMMITTEE_TYPE}),
     'organization_type': fields.List(
-        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
+        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W', 'H', 'I'])),
         metadata={'description': docs.ORGANIZATION_TYPE},
     ),
 }
@@ -727,7 +727,7 @@ totals_by_entity_type = {
     # sponsor_candidate_id Only for 'pac' and 'pac-party'
     'sponsor_candidate_id': fields.List(Candidate_ID, metadata={'description': docs.SPONSOR_CANDIDATE_ID}),
     'organization_type': fields.List(
-        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
+        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W', 'H', 'I'])),
         metadata={'description': docs.ORGANIZATION_TYPE},
     ),
     'min_first_f1_date': Date(metadata={'description': docs.MIN_FIRST_F1_DATE}),
@@ -830,7 +830,7 @@ schedule_a = {
         metadata={'description': docs.COMMITTEE_TYPE},
     ),
     'recipient_committee_org_type': fields.List(
-        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
+        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W', 'H', 'I'])),
         metadata={'description': docs.ORGANIZATION_TYPE},
     ),
     'recipient_committee_designation': fields.List(
@@ -926,7 +926,7 @@ schedule_b = {
         metadata={'description': docs.DESIGNATION},
     ),
     'spender_committee_org_type': fields.List(
-        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
+        IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W', 'H', 'I'])),
         metadata={'description': docs.ORGANIZATION_TYPE},
     ),
     'spender_committee_type': fields.List(
