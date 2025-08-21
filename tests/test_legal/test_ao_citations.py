@@ -1,7 +1,7 @@
 import pytest
 import unittest
 
-from webservices.legal_docs.advisory_opinions import (
+from webservices.legal.legal_docs.advisory_opinions import (
     parse_ao_citations,
     parse_regulatory_citations,
     parse_statutory_citations,

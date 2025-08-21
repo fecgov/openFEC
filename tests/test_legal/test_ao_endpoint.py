@@ -2,7 +2,7 @@ from tests.common import ElasticSearchBaseTest
 from webservices.resources.legal import UniversalSearch, REQUESTOR_TYPES
 from webservices.api_setup import api
 from datetime import datetime
-from webservices.legal_docs import TEST_SEARCH_ALIAS
+from webservices.legal.legal_docs import TEST_SEARCH_ALIAS
 
 import unittest.mock as mock
 # import logging

@@ -1,7 +1,7 @@
 from tests.common import ElasticSearchBaseTest
 from webservices.api_setup import api
 from webservices.resources.legal import GetLegalDocument
-from webservices.legal_docs import TEST_SEARCH_ALIAS
+from webservices.legal.legal_docs import TEST_SEARCH_ALIAS
 
 import unittest.mock as mock
 # import logging
