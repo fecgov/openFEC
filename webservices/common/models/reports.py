@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 
 from webservices.common.models.dates import ReportType
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import mapped_column
 
 from webservices.common.models.dates import clean_report_type
 
@@ -96,147 +97,163 @@ class FecFileNumberMixin(object):
 class CommitteeReports(FecFileNumberMixin, PdfMixin, CsvMixin, BaseModel):
     __abstract__ = True
 
-    committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
-    committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)  # mapped
+    committee_id = mapped_column(db.String, index=True, doc=docs.COMMITTEE_ID, sort_order=-550)
+    committee_name = mapped_column(db.String, doc=docs.COMMITTEE_NAME, sort_order=-540)  # mapped
     committee = utils.related(
         'CommitteeHistory', 'committee_id', 'committee_id', 'report_year', 'cycle'
     )
 
     # These columns derived from amendments materializeds view
-    amendment_chain = db.Column(ARRAY(db.Numeric), doc=docs.AMENDMENT_CHAIN)
-    previous_file_number = db.Column(db.Numeric)
-    most_recent_file_number = db.Column(db.Numeric)
+    amendment_chain = mapped_column(ARRAY(db.Numeric), doc=docs.AMENDMENT_CHAIN, sort_order=-530)
+    previous_file_number = mapped_column(db.Numeric, sort_order=-520)
+    most_recent_file_number = mapped_column(db.Numeric, sort_order=-510)
 
-    cycle = db.Column(db.Integer, index=True, doc=docs.CYCLE)
-    file_number = db.Column(db.Integer)
-    amendment_indicator = db.Column('amendment_indicator', db.String)
-    amendment_indicator_full = db.Column(db.String)
-    beginning_image_number = db.Column(db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER)
-    cash_on_hand_beginning_period = db.Column(
-        db.Numeric(30, 2), doc=docs.CASH_ON_HAND_BEGIN_PERIOD
+    cycle = mapped_column(db.Integer, index=True, doc=docs.CYCLE, sort_order=-500)
+    file_number = mapped_column(db.Integer, sort_order=-490)
+    amendment_indicator = mapped_column('amendment_indicator', db.String, sort_order=-480)
+    amendment_indicator_full = mapped_column(db.String, sort_order=-470)
+    beginning_image_number = mapped_column(db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER, sort_order=-460)
+    cash_on_hand_beginning_period = mapped_column(
+        db.Numeric(30, 2), doc=docs.CASH_ON_HAND_BEGIN_PERIOD,
+        sort_order=-450
     )  # P
-    cash_on_hand_end_period = db.Column(
-        'cash_on_hand_end_period', db.Numeric(30, 2), doc=docs.CASH_ON_HAND_END_PERIOD
+    cash_on_hand_end_period = mapped_column(
+        'cash_on_hand_end_period', db.Numeric(30, 2), doc=docs.CASH_ON_HAND_END_PERIOD, sort_order=-440
     )  # P
-    coverage_end_date = db.Column(
-        db.DateTime, index=True, doc=docs.COVERAGE_END_DATE
+    coverage_end_date = mapped_column(
+        db.DateTime, index=True, doc=docs.COVERAGE_END_DATE, sort_order=-430
     )  # P
-    coverage_start_date = db.Column(
-        db.DateTime, index=True, doc=docs.COVERAGE_START_DATE
+    coverage_start_date = mapped_column(
+        db.DateTime, index=True, doc=docs.COVERAGE_START_DATE, sort_order=-420
     )  # P
-    debts_owed_by_committee = db.Column(
-        'debts_owed_by_committee', db.Numeric(30, 2), doc=docs.DEBTS_OWED_BY_COMMITTEE
+    debts_owed_by_committee = mapped_column(
+        'debts_owed_by_committee', db.Numeric(30, 2), doc=docs.DEBTS_OWED_BY_COMMITTEE, sort_order=-410
     )  # P
-    debts_owed_to_committee = db.Column(
-        db.Numeric(30, 2), doc=docs.DEBTS_OWED_TO_COMMITTEE
+    debts_owed_to_committee = mapped_column(
+        db.Numeric(30, 2), doc=docs.DEBTS_OWED_TO_COMMITTEE, sort_order=-400
     )  # P
-    end_image_number = db.Column(db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
-    other_disbursements_period = db.Column(
-        db.Numeric(30, 2), doc=docs.add_period(docs.OTHER_DISBURSEMENTS)
+    end_image_number = mapped_column(db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
+    other_disbursements_period = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_period(docs.OTHER_DISBURSEMENTS), sort_order=-390
     )  # PX
-    other_disbursements_ytd = db.Column(
-        db.Numeric(30, 2), doc=docs.add_ytd(docs.OTHER_DISBURSEMENTS)
+    other_disbursements_ytd = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_ytd(docs.OTHER_DISBURSEMENTS),
+        sort_order=-380
     )  # PX
-    other_political_committee_contributions_period = db.Column(
+    other_political_committee_contributions_period = mapped_column(
         db.Numeric(30, 2),
         doc=docs.add_period(docs.OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS),
+        sort_order=-370
     )  # P
-    other_political_committee_contributions_ytd = db.Column(
+    other_political_committee_contributions_ytd = mapped_column(
         db.Numeric(30, 2),
         doc=docs.add_ytd(docs.OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS),
+        sort_order=-360
     )  # P
-    political_party_committee_contributions_period = db.Column(
+    political_party_committee_contributions_period = mapped_column(
         db.Numeric(30, 2),
         doc=docs.add_period(docs.POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS),
+        sort_order=-350
     )  # P
-    political_party_committee_contributions_ytd = db.Column(
+    political_party_committee_contributions_ytd = mapped_column(
         db.Numeric(30, 2),
         doc=docs.add_ytd(docs.POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS),
+        sort_order=-340
     )  # P
-    report_type = db.Column(db.String, doc=docs.REPORT_TYPE)
-    report_type_full = db.Column(db.String, doc=docs.REPORT_TYPE)
-    report_year = db.Column(db.Integer, doc=docs.REPORT_YEAR)
-    total_contribution_refunds_period = db.Column(
-        db.Numeric(30, 2), doc=docs.add_period(docs.CONTRIBUTION_REFUNDS)
+    report_type = mapped_column(db.String, doc=docs.REPORT_TYPE, sort_order=-330)
+    report_type_full = mapped_column(db.String, doc=docs.REPORT_TYPE, sort_order=-320)
+    report_year = mapped_column(db.Integer, doc=docs.REPORT_YEAR, sort_order=-310)
+    total_contribution_refunds_period = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_period(docs.CONTRIBUTION_REFUNDS),
+        sort_order=-300
     )  # P
-    total_contribution_refunds_ytd = db.Column(
-        db.Numeric(30, 2), doc=docs.add_ytd(docs.CONTRIBUTION_REFUNDS)
+    total_contribution_refunds_ytd = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_ytd(docs.CONTRIBUTION_REFUNDS),
+        sort_order=-290
     )  # P
-    refunded_individual_contributions_period = db.Column(
-        db.Numeric(30, 2), doc=docs.add_period(docs.REFUNDED_INDIVIDUAL_CONTRIBUTIONS)
+    refunded_individual_contributions_period = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_period(docs.REFUNDED_INDIVIDUAL_CONTRIBUTIONS),
+        sort_order=-280
     )  # P
-    refunded_individual_contributions_ytd = db.Column(
-        db.Numeric(30, 2), doc=docs.add_ytd(docs.REFUNDED_INDIVIDUAL_CONTRIBUTIONS)
+    refunded_individual_contributions_ytd = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_ytd(docs.REFUNDED_INDIVIDUAL_CONTRIBUTIONS),
+        sort_order=-270
     )  # P
-    refunded_other_political_committee_contributions_period = db.Column(
+    refunded_other_political_committee_contributions_period = mapped_column(
         db.Numeric(30, 2),
         doc=docs.add_period(docs.REFUNDED_OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS),
+        sort_order=-260
     )  # P
-    refunded_other_political_committee_contributions_ytd = db.Column(
+    refunded_other_political_committee_contributions_ytd = mapped_column(
         db.Numeric(30, 2),
         doc=docs.add_ytd(docs.REFUNDED_OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS),
+        sort_order=-250
     )  # P
-    refunded_political_party_committee_contributions_period = db.Column(
+    refunded_political_party_committee_contributions_period = mapped_column(
         db.Numeric(30, 2),
         doc=docs.add_period(docs.REFUNDED_POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS),
+        sort_order=-240
     )  # P
-    refunded_political_party_committee_contributions_ytd = db.Column(
+    refunded_political_party_committee_contributions_ytd = mapped_column(
         db.Numeric(30, 2),
         doc=docs.add_ytd(docs.REFUNDED_POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS),
+        sort_order=-230
     )  # P
-    total_contributions_period = db.Column(
+    total_contributions_period = mapped_column(
         'total_contributions_period',
         db.Numeric(30, 2),
         doc=docs.add_period(docs.CONTRIBUTIONS),
+        sort_order=-220
     )  # P
-    total_contributions_ytd = db.Column(
-        db.Numeric(30, 2), doc=docs.add_ytd(docs.CONTRIBUTIONS)
+    total_contributions_ytd = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_ytd(docs.CONTRIBUTIONS), sort_order=-210
     )  # P
-    total_disbursements_period = db.Column(
+    total_disbursements_period = mapped_column(
         'total_disbursements_period',
         db.Numeric(30, 2),
         doc=docs.add_period(docs.DISBURSEMENTS),
+        sort_order=-200
     )  # P
-    total_disbursements_ytd = db.Column(
-        db.Numeric(30, 2), doc=docs.add_ytd(docs.DISBURSEMENTS)
+    total_disbursements_ytd = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_ytd(docs.DISBURSEMENTS), sort_order=-190
     )  # P
-    total_receipts_period = db.Column(
-        'total_receipts_period', db.Numeric(30, 2), doc=docs.add_period(docs.RECEIPTS)
+    total_receipts_period = mapped_column(
+        'total_receipts_period', db.Numeric(30, 2), doc=docs.add_period(docs.RECEIPTS), sort_order=-180
     )  # P
-    total_receipts_ytd = db.Column(
-        db.Numeric(30, 2), doc=docs.add_ytd(docs.RECEIPTS)
+    total_receipts_ytd = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_ytd(docs.RECEIPTS), sort_order=-170
     )  # P
-    offsets_to_operating_expenditures_ytd = db.Column(
-        db.Numeric(30, 2), doc=docs.add_ytd(docs.OFFSETS_TO_OPERATING_EXPENDITURES)
+    offsets_to_operating_expenditures_ytd = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_ytd(docs.OFFSETS_TO_OPERATING_EXPENDITURES), sort_order=-160
     )  # P
-    offsets_to_operating_expenditures_period = db.Column(
-        db.Numeric(30, 2), doc=docs.add_period(docs.OFFSETS_TO_OPERATING_EXPENDITURES)
+    offsets_to_operating_expenditures_period = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_period(docs.OFFSETS_TO_OPERATING_EXPENDITURES), sort_order=-150
     )  # P
-    total_individual_contributions_ytd = db.Column(
-        db.Numeric(30, 2), doc=docs.add_ytd(docs.INDIVIDUAL_CONTRIBUTIONS)
+    total_individual_contributions_ytd = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_ytd(docs.INDIVIDUAL_CONTRIBUTIONS), sort_order=-140
     )  # P
-    total_individual_contributions_period = db.Column(
-        db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_CONTRIBUTIONS)
+    total_individual_contributions_period = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_CONTRIBUTIONS), sort_order=-130
     )  # P
-    individual_unitemized_contributions_ytd = db.Column(
-        db.Numeric(30, 2), doc=docs.add_ytd(docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS)
+    individual_unitemized_contributions_ytd = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_ytd(docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS), sort_order=-120
     )  # P \
-    individual_unitemized_contributions_period = db.Column(
-        db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS)
+    individual_unitemized_contributions_period = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS), sort_order=-100
     )  # P
-    individual_itemized_contributions_ytd = db.Column(
-        db.Numeric(30, 2), doc=docs.add_ytd(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS)
+    individual_itemized_contributions_ytd = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_ytd(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS), sort_order=-90
     )  # P
-    individual_itemized_contributions_period = db.Column(
-        db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS)
+    individual_itemized_contributions_period = mapped_column(
+        db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS), sort_order=-80
     )  # P
-    is_amended = db.Column('is_amended', db.Boolean, doc=docs.IS_AMENDED)
-    receipt_date = db.Column('receipt_date', db.Date, doc=docs.RECEIPT_DATE)
-    means_filed = db.Column('means_filed', db.String, doc=docs.MEANS_FILED)
-    fec_url = db.Column(db.String, doc=docs.FEC_URL)
-    html_url = db.Column(db.String, doc=docs.HTML_URL)
-    most_recent = db.Column('most_recent', db.Boolean, doc=docs.MOST_RECENT)
-    filer_name_text = db.Column(TSVECTOR, doc=docs.FILER_NAME_TEXT)
+    is_amended = mapped_column('is_amended', db.Boolean, doc=docs.IS_AMENDED, sort_order=-70)
+    receipt_date = mapped_column('receipt_date', db.Date, doc=docs.RECEIPT_DATE, sort_order=-60)
+    means_filed = mapped_column('means_filed', db.String, doc=docs.MEANS_FILED, sort_order=-50)
+    fec_url = mapped_column(db.String, doc=docs.FEC_URL, sort_order=-40)
+    html_url = mapped_column(db.String, doc=docs.HTML_URL, sort_order=-30)
+    most_recent = mapped_column('most_recent', db.Boolean, doc=docs.MOST_RECENT, sort_order=-20)
+    filer_name_text = mapped_column(TSVECTOR, doc=docs.FILER_NAME_TEXT, sort_order=-10)
 
     @property
     def document_description(self):
