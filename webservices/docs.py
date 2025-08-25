@@ -2100,7 +2100,7 @@ Get results starting from this index
 '''
 
 HITS_RETURNED = '''
-Number of results to return (max 10)
+Number of results to return. The default value is 20, with a maximum limit of 200 results per page
 '''
 
 AO_NUMBER = '''
