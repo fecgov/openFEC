@@ -6,10 +6,10 @@ from celery_once import QueueOnce
 from celery import shared_task
 
 from webservices import utils
-from webservices.legal_docs.advisory_opinions import load_advisory_opinions
-from webservices.legal_docs.current_cases import load_cases
-from webservices.legal_docs.es_management import create_es_snapshot, display_snapshot_detail, delete_snapshot
-from webservices.legal_docs.es_management import (  # noqa
+from webservices.legal.legal_docs.advisory_opinions import load_advisory_opinions
+from webservices.legal.legal_docs.current_cases import load_cases
+from webservices.legal.utils_es import create_es_snapshot, display_snapshot_detail, delete_snapshot
+from webservices.legal.constants import (  # noqa
     CASE_INDEX,
     AO_INDEX,
     AO_REPO,

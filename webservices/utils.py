@@ -13,9 +13,6 @@ from datetime import date
 from sqlalchemy.orm import foreign
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.dialects import postgresql
-from elasticsearch import Elasticsearch, RequestsHttpConnection
-import certifi
-from requests_aws4auth import AWS4Auth
 from marshmallow_pagination import paginators
 from webargs import fields
 from flask_apispec import use_kwargs as use_kwargs_original
@@ -26,10 +23,6 @@ from webservices import docs
 from webservices import sorting
 from webservices import decoders
 from webservices import exceptions
-
-# import these 2 libraries to display the JSON formate with "datetime" data type
-import datetime
-from json import JSONEncoder
 
 
 logger = logging.getLogger(__name__)
@@ -489,57 +482,6 @@ def get_current_cycle():
     return year + year % 2
 
 
-ES_SERVICE_INSTANCE_NAME = "fec-api-elasticsearch"
-AWS_ES_SERVICE = "es"
-REGION = "us-gov-west-1"
-PORT = 443
-
-
-def get_service_instance(service_instance_name):
-    return env.get_service(name=service_instance_name)
-
-
-def get_service_instance_credentials(service_instance):
-    return service_instance.credentials
-
-
-def create_es_client():
-    try:
-        es_service = get_service_instance(ES_SERVICE_INSTANCE_NAME)
-        if es_service:
-            credentials = es_service.credentials
-            #  create "http_auth".
-            host = credentials["host"]
-            access_key = credentials["access_key"]
-            secret_key = credentials["secret_key"]
-            aws_auth = AWS4Auth(access_key, secret_key, REGION, AWS_ES_SERVICE)
-
-            #  create elasticsearch client through "http_auth"
-            es_client = Elasticsearch(
-                hosts=[{"host": host, "port": PORT}],
-                http_auth=aws_auth,
-                use_ssl=True,
-                verify_certs=True,
-                ca_certs=certifi.where(),
-                connection_class=RequestsHttpConnection,
-                timeout=40,
-                max_retries=10,
-                retry_on_timeout=True,
-            )
-        else:
-            # create local elasticsearch client
-            url = "http://localhost:9200"
-            es_client = Elasticsearch(
-                url,
-                timeout=30,
-                max_retries=10,
-                retry_on_timeout=True,
-            )
-        return es_client
-    except Exception as err:
-        logger.error("An error occurred trying to create Elasticsearch client.{0}".format(err))
-
-
 def print_literal_query_string(query):
     print(
         str(
@@ -548,36 +490,6 @@ def print_literal_query_string(query):
             )
         )
     )
-
-
-def upload_citations(statutory_citations, regulatory_citations, index, doc_type, es_client):
-    try:
-        for citation in statutory_citations:
-            entry = {
-                "type": "citations",
-                "citation_text": citation,
-                "citation_type": "statute",
-                "doc_type": doc_type,
-            }
-            es_client.index(index, entry, id=doc_type + "_" + citation)
-
-        for citation in regulatory_citations:
-            entry = {
-                "type": "citations",
-                "citation_text": citation,
-                "citation_type": "regulation",
-                "doc_type": doc_type,
-            }
-            es_client.index(index, entry, id=doc_type + "_" + citation)
-    except Exception:
-        logger.error("An error occurred while uploading {} citations".format(doc_type))
-
-
-def create_eregs_link(part, section):
-    url_part_section = part
-    if section:
-        url_part_section += "-" + section
-    return "/regulations/{}/CURRENT".format(url_part_section)
 
 
 def post_to_slack(message, channel):
@@ -601,13 +513,6 @@ def post_to_slack(message, channel):
 def split_env_var(env_var):
     """ Remove whitespace and split to a list based of comma delimiter"""
     return env_var.replace(" ", "").split(",")
-
-
-# To display the open_date and close_date of JSON format inside object "mur"
-class DateTimeEncoder(JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, (datetime.date, datetime.datetime)):
-            return obj.isoformat()
 
 
 def get_percentage(numerators, denominators):
@@ -658,13 +563,3 @@ def check_form_line_number(kwargs):
                 raise exceptions.ApiError(
                     exceptions.FORM_LINE_NUMBER_ERROR, status_code=400
                 )
-
-
-def check_filter_exists(kwargs, filter):
-    if kwargs.get(filter):
-        for val in kwargs.get(filter):
-            if len(val) > 0:
-                return True
-        return False
-    else:
-        return False

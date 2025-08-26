@@ -2,7 +2,7 @@ from tests.common import ElasticSearchBaseTest
 from webservices.resources.rulemaking import RulemakingSearch
 from webservices.api_setup import api
 # from datetime import datetime
-from webservices.constants import TEST_SEARCH_ALIAS
+from webservices.legal.constants import TEST_SEARCH_ALIAS
 
 import unittest.mock as mock
 # import logging
