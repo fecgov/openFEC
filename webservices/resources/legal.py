@@ -6,18 +6,16 @@ from flask_apispec import doc
 from webservices import docs
 from webservices import args
 from webservices import filters
-from webservices.utils import (
-    create_es_client,
-    Resource,
-    DateTimeEncoder,
-)
-from webservices.legal_docs.es_management import (  # noqa
+from webservices.utils import Resource
+from webservices.legal.utils_es import create_es_client, DateTimeEncoder, check_filter_exists
+
+from webservices.legal.constants import (  # noqa
     SEARCH_ALIAS,
 )
 from webservices.utils import use_kwargs
 from elasticsearch import RequestError
 from webservices.exceptions import ApiError
-import webservices.legal_docs.responses as responses
+import webservices.legal.legal_docs.responses as responses
 import logging
 import json
 
@@ -200,7 +198,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     if kwargs.get("filename"):
         must_clauses = []
         must_clauses.append(Q("nested", path="documents",
-                            query=Q("match", documents__filename=kwargs.get("filename"))))
+                            query=Q("term", documents__filename=kwargs.get("filename"))))
         query = query.query("bool", must=must_clauses)
 
     if kwargs.get("q_exclude"):
@@ -937,16 +935,6 @@ def execute_query(query):
 # but elasticsearch-dsl==7.3.0 has not supported this setting yet.
     count_dict = es_results.hits.total
     return formatted_hits, count_dict["value"]
-
-
-def check_filter_exists(kwargs, filter):
-    if kwargs.get(filter):
-        for val in kwargs.get(filter):
-            if len(val) > 0:
-                return True
-        return False
-    else:
-        return False
 
 
 # endpoint path: /legal/citation/<citation_type>/<citation>

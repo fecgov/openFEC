@@ -6,40 +6,15 @@ import manage
 
 from flask.cli import FlaskGroup
 from webservices.rest import create_app
-import webservices.legal_docs as legal_docs
-import webservices.rulemaking_docs as rulemaking_docs
-import webservices.utils_es as utils_es
-from webservices.legal_docs.es_management import CASE_REPO, CASE_INDEX
+import webservices.legal.legal_docs as legal_docs
+import webservices.legal.rulemaking_docs as rulemaking_docs
+import webservices.legal.utils_es as utils_es
+import webservices.legal.utils_load as load_utils
+from webservices.legal.constants import CASE_REPO, CASE_INDEX
 
 
 cli = FlaskGroup(create_app=create_app)
 logger = logging.getLogger("cli")
-
-
-# begin -- es_xxxxxx commands are used for elasticsearch management globally
-@cli.command('es_display_index_alias')
-def es_display_index_alias_cli():
-    utils_es.display_index_alias()
-
-
-@cli.command('es_create_index')
-@click.argument('index_name', default=None, required=False)
-def es_create_index_cli(index_name):
-    utils_es.create_index(index_name)
-
-
-@cli.command('es_delete_index')
-@click.argument('index_name', required=True)
-def es_delete_index_cli(index_name):
-    utils_es.delete_index(index_name)
-
-
-@cli.command('es_display_mapping')
-@click.argument('index_name', default=None, required=False)
-def es_display_mapping_cli(index_name):
-    utils_es.display_mapping(index_name)
-
-# end -- es_xxxxxx commands are used for elasticsearch management globally
 
 
 # begin -- rulemaking commands
@@ -97,7 +72,7 @@ def extract_pdf_text_cli(mur_no):
 @click.argument('index_name', default=None, required=False)
 @click.argument('doc_type', default=None, required=False)
 def delete_doctype_from_es_cli(index_name, doc_type):
-    legal_docs.delete_doctype_from_es(index_name, doc_type)
+    utils_es.delete_doctype_from_es(index_name, doc_type)
 
 
 @cli.command('delete_single_doctype_from_es')
@@ -105,12 +80,12 @@ def delete_doctype_from_es_cli(index_name, doc_type):
 @click.argument('doc_type', default=None, required=False)
 @click.argument('num_doc_id', default=None, required=False)
 def delete_single_doctype_from_es_cli(index_name, doc_type, num_doc_id):
-    legal_docs.delete_single_doctype_from_es(index_name, doc_type, num_doc_id)
+    utils_es.delete_single_doctype_from_es(index_name, doc_type, num_doc_id)
 
 
 @cli.command('delete_murs_from_s3')
 def delete_murs_from_s3_cli():
-    legal_docs.delete_murs_from_s3()
+    utils_es.delete_murs_from_s3()
 
 
 @cli.command('show_legal_data')
@@ -121,65 +96,65 @@ def show_legal_data_cli():
 @cli.command('create_index')
 @click.argument('index_name', default=None, required=False)
 def create_index_cli(index_name):
-    legal_docs.create_index(index_name)
+    utils_es.create_index(index_name)
 
 
 @cli.command('delete_index')
 @click.argument('index_name', required=True)
 def delete_index_cli(index_name):
-    legal_docs.delete_index(index_name)
+    utils_es.delete_index(index_name)
 
 
 @cli.command('display_index_alias')
 def display_index_alias_cli():
-    legal_docs.display_index_alias()
+    utils_es.display_index_alias()
 
 
 @cli.command('display_mapping')
 @click.argument('index_name', default=None, required=False)
 def display_mapping_cli(index_name):
-    legal_docs.display_mapping(index_name)
+    utils_es.display_mapping(index_name)
 
 
 @cli.command('reload_all_data_by_index')
 @click.argument('index_name', default=None, required=False)
 def reload_all_data_by_index_cli(index_name):
-    legal_docs.reload_all_data_by_index(index_name)
+    load_utils.reload_all_data_by_index(index_name)
 
 
 @cli.command('initialize_legal_data')
 @click.argument('index_name', default=None, required=False)
 def initialize_legal_data_cli(index_name):
-    legal_docs.initialize_legal_data(index_name)
+    load_utils.initialize_legal_data(index_name)
 
 
 @cli.command('update_mapping_and_reload_legal_data')
 @click.argument('index_name', default=None, required=False)
 def update_mapping_and_reload_legal_data_cli(index_name):
-    legal_docs.update_mapping_and_reload_legal_data(index_name)
+    load_utils.update_mapping_and_reload_legal_data(index_name)
 
 
 @cli.command('configure_snapshot_repository')
 @click.argument('repo_name', default=CASE_REPO, required=False)
 def configure_snapshot_repository_cli(repo_name):
-    legal_docs.configure_snapshot_repository(repo_name)
+    utils_es.configure_snapshot_repository(repo_name)
 
 
 @cli.command('delete_repository')
 @click.argument('repo_name', required=True)
 def delete_repository_cli(repo_name):
-    legal_docs.delete_repository(repo_name)
+    utils_es.delete_repository(repo_name)
 
 
 @cli.command('display_repositories')
 def display_repositories_cli():
-    legal_docs.display_repositories()
+    utils_es.display_repositories()
 
 
 @cli.command('create_es_snapshot')
 @click.argument('index_name', default=CASE_INDEX, required=False)
 def create_es_snapshot_cli(index_name):
-    legal_docs.create_es_snapshot(index_name)
+    utils_es.create_es_snapshot(index_name)
 
 
 @cli.command('restore_es_snapshot')
@@ -187,7 +162,7 @@ def create_es_snapshot_cli(index_name):
 @click.argument('snapshot_name', default=None, required=False)
 @click.argument('index_name', default=None, required=False)
 def restore_es_snapshot_cli(repo_name, snapshot_name, index_name):
-    legal_docs.restore_es_snapshot(repo_name, snapshot_name, index_name)
+    utils_es.restore_es_snapshot(repo_name, snapshot_name, index_name)
 
 
 @cli.command('restore_es_snapshot_downtime')
@@ -195,27 +170,27 @@ def restore_es_snapshot_cli(repo_name, snapshot_name, index_name):
 @click.argument('snapshot_name', default=None, required=False)
 @click.argument('index_name', default=None, required=False)
 def restore_es_snapshot_downtime_cli(repo_name, snapshot_name, index_name):
-    legal_docs.restore_es_snapshot_downtime(repo_name, snapshot_name, index_name)
+    utils_es.restore_es_snapshot_downtime(repo_name, snapshot_name, index_name)
 
 
 @cli.command('delete_snapshot')
 @click.argument('repo_name', default=None, required=False)
 @click.argument('snapshot_name', default=None, required=False)
 def delete_snapshot_cli(repo_name, snapshot_name):
-    legal_docs.delete_snapshot(repo_name, snapshot_name)
+    utils_es.delete_snapshot(repo_name, snapshot_name)
 
 
 @cli.command('display_snapshots')
 @click.argument('repo_name', default=None, required=False)
 def display_snapshots_cli(repo_name):
-    legal_docs.display_snapshots(repo_name)
+    utils_es.display_snapshots(repo_name)
 
 
 @cli.command('display_snapshot_detail')
 @click.argument('repo_name', default=None, required=False)
 @click.argument('snapshot_name', default=None, required=False)
 def display_snapshot_detail_cli(repo_name, snapshot_name):
-    legal_docs.display_snapshot_detail(repo_name, snapshot_name)
+    utils_es.display_snapshot_detail(repo_name, snapshot_name)
 
 
 @cli.command('refresh_materialized')
