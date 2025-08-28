@@ -441,7 +441,7 @@ legal_universal_search = {
 rulemaking_search = {
     'q': fields.Str(required=False, metadata={'description': docs.TEXT_SEARCH}),
     'from_hit': fields.Int(required=False, metadata={'description': docs.FROM_HIT}),
-    'hits_returned': fields.Int(required=False, metadata={'description': docs.HITS_RETURNED}),
+    'hits_returned': fields.Int(required=False, metadata={'description': docs.HITS_RETURNED_RM}),
     'rm_no': fields.List(IStr, required=False, metadata={'description': docs.RM_NUMBER}),
     'rm_name': fields.List(IStr, required=False, metadata={'description': docs.RM_NAME}),
     'rm_year': fields.Int(required=False, metadata={'description': docs.RM_YEAR}),
