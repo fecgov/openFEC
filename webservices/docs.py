@@ -2276,8 +2276,8 @@ Select one or more case document category id to filter by corresponding case doc
 
 MUR_DISPOSITION_CATEGORY_DESCRIPTION = '''
 Select one or more MUR disposition category id to filter by corresponding MUR disposition category:\n\
-        - 1 - Conciliation-PPC\n\
-        - 2 - Conciliation-PC\n\
+        - 1 - Conciliation: Pre Probable Cause\n\
+        - 2 - Conciliation: Probable Cause\n\
         - 3 - Dismiss and Remind\n\
         - 4 - Dismissed\n\
         - 5 - Dismissed-Low Rated\n\
@@ -2285,14 +2285,14 @@ Select one or more MUR disposition category id to filter by corresponding MUR di
         - 7 - Dismissed-Stale\n\
         - 8 - Dismiss pursuant to prosecutorial discretion\n\
         - 9 - Dismiss pursuant to prosecutorial discretion, and caution\n\
-        - 10 - Enforcement - Disposition - Dismissed Dismiss - Dismiss and Caution\n\
-        - 11 - No PCTB\n\
-        - 12 - No RTB\n\
-        - 13 - PCTB Finding\n\
-        - 14 - PC/NFA\n\
-        - 15 - RTB Finding\n\
-        - 16 - RTB/NFA\n\
-        - 17 - Take no action\n\
+        - 10 - Dismiss with Caution\n\
+        - 11 - No Probable Cause to Believe\n\
+        - 12 - No Reason to Believe\n\
+        - 13 - Probable Cause to Believe Finding\n\
+        - 14 - Probable Cause to Believe Finding/No Further Action\n\
+        - 15 - Reason to Believe Finding\n\
+        - 16 - Reason to Believe Finding/No Further Action\n\
+        - 17 - Take No Action\n\
         - 18 - Take No Further Action\n\
 '''
 
@@ -2342,8 +2342,8 @@ Primary Subject Description:\n\
     - 2 - Committees\n\
     - 3 - Contributions\n\
     - 4 - Disclaimer\n\
-    - 5 - Disbursements
-    - 6 - Electioneering\n\
+    - 5 - Disbursements\n\
+    - 6 - Electioneering Communications\n\
     - 7 - Expenditures\n\
     - 8 - Express Advocacy\n\
     - 9 - Foreign Nationals\n\
