@@ -42,6 +42,7 @@ from webservices.resources import sched_d
 from webservices.resources import sched_e
 from webservices.resources import sched_f
 from webservices.resources import sched_h4
+from webservices.resources import form_56
 from webservices.resources import aggregates
 from webservices.resources import candidate_aggregates
 from webservices.resources import candidates
@@ -212,6 +213,7 @@ def create_app(test_config=None):
     apidoc.register(totals.InauguralDonationsView, blueprint='v1')
     apidoc.register(sched_a.ScheduleAView, blueprint='v1')
     apidoc.register(sched_a.ScheduleAEfileView, blueprint='v1')
+    apidoc.register(form_56.Form56View, blueprint='v1')
     apidoc.register(sched_b.ScheduleBView, blueprint='v1')
     apidoc.register(sched_b.ScheduleBEfileView, blueprint='v1')
     apidoc.register(sched_c.ScheduleCView, blueprint='v1')

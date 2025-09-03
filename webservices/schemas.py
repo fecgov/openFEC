@@ -1029,6 +1029,30 @@ ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging_schemas
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)
 
+
+Form56Schema = make_schema(
+    models.Form56,
+    fields={
+        'contribution_amount': ma.fields.Float(),
+        'image_number': ma.fields.Str(),
+        'original_sub_id': ma.fields.Str(),
+        'sub_id': ma.fields.Str(),
+        'report_year': ma.fields.Int(),
+    },
+    options={
+         'exclude': (
+            'contributor_name_text',
+            'contributor_employer_text',
+            'contributor_occupation_text',
+            ),
+    }
+)
+
+Form56PageSchema = make_page_schema(Form56Schema, page_type=paging_schemas.SeekPageSchema)
+register_schema(Form56Schema)
+register_schema(Form56PageSchema)
+
+
 ScheduleCSchema = make_schema(
     models.ScheduleC,
     fields={

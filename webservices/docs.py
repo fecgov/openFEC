@@ -628,6 +628,10 @@ FILER_NAME_TEXT = '''
 Keyword search for filer name or ID
 '''
 
+FILER_NAME = '''
+Name of Form 5 filer
+'''
+
 SPENDER_NAME_TEXT = '''
 Keyword search for spender name or ID
 '''
@@ -1204,6 +1208,12 @@ The forms filed are categorized based on the nature of the filing:\n\
     - NOTICE F6, F9, F10, F11\n\
     - STATEMENT F1, F2\n\
     - OTHER F1M, F8, F99, F12, FRQ\n\
+'''
+
+FORM_56 = '''
+FEC FORM 5 Receipts
+REPORT OF INDEPENDENT EXPENDITURES MADE AND CONTRIBUTIONS RECEIVED
+To Be Used By Persons (Other than Political Committees)
 '''
 
 PRIMARY_GENERAL_INDICTOR = '''

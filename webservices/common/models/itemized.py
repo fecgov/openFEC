@@ -251,6 +251,43 @@ class ScheduleAEfile(BaseRawItemized):
         return name
 
 
+class Form56(db.Model):
+    __tablename__ = 'ofec_form_56_mv'
+
+    filer_name = db.Column('filer_name', db.String, doc=docs.FILER_NAME)
+    contributor_type = db.Column('entity_type', db.String, index=True)
+    contributor_type_full = db.Column('entity', db.String)
+    contributor_name = db.Column('contributor_name', db.String, doc=docs.CONTRIBUTOR_NAME)
+    contributor_name_text = db.Column(TSVECTOR)
+    contributor_street_1 = db.Column('contributor_street_1', db.String)
+    contributor_street_2 = db.Column('contributor_street_2', db.String)
+    contributor_city = db.Column('contributor_city', db.String, index=True, doc=docs.CONTRIBUTOR_CITY)
+    contributor_state = db.Column('contributor_state', db.String, index=True, doc=docs.CONTRIBUTOR_STATE)
+    contributor_zip = db.Column('contributor_zip', db.String, index=True, doc=docs.CONTRIBUTOR_ZIP)
+    contributor_employer = db.Column('contributor_employer', db.String, doc=docs.CONTRIBUTOR_EMPLOYER)
+    contributor_employer_text = db.Column(TSVECTOR)
+    contributor_occupation = db.Column('contributor_occupation', db.String, doc=docs.CONTRIBUTOR_OCCUPATION)
+    contributor_occupation_text = db.Column(TSVECTOR)
+    contribution_receipt_date = db.Column('contribution_receipt_date',  db.Date, index=True)
+    contribution_amount = db.Column('contribution_amount', db.Numeric(30, 2), index=True)
+    filing_form = db.Column('filing_form', db.String, doc=docs.FORM_TYPE)
+    schedule_type = db.Column('schedule_type', db.String)
+    schedule_type_full = db.Column('schedule_type_full', db.String)
+    report_year = db.Column('report_year', db.Integer, index=True, doc=docs.REPORT_YEAR)
+    report_type = db.Column('report_type',  db.String, index=True, doc=docs.REPORT_TYPE)
+    two_year_transaction_period = db.Column('election_cycle', db.Integer, index=True)
+    amendment_indicator = db.Column('amendment_indicator', db.String)
+
+    # Base
+    image_number = db.Column('image_number', db.String, index=True, doc=docs.IMAGE_NUMBER)
+    transaction_id = db.Column('transaction_id', db.String)
+    file_number = db.Column('file_number', db.Integer)
+    sub_id = db.Column(db.Integer, primary_key=True)
+    link_id = db.Column('link_id', db.Integer)
+    original_sub_id = db.Column('original_sub_id', db.Integer)
+    load_date = db.Column('load_date', db.DateTime)
+
+
 class ScheduleB(BaseItemized):
     __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'fec_fitem_sched_b'
