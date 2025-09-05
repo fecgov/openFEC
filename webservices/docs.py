@@ -1569,6 +1569,17 @@ breakdowns of the amount of money coming from individuals.'
 MISSING_STATE = 'Exclude values with missing state'
 MIN_LOAD_DATE = 'Minimum load date'
 MAX_LOAD_DATE = 'Maximum load date'
+LAST_CONTRIBUTION_RECEIPT_AMOUNT = 'When sorting by `contribution_receipt_amount`, this is populated with the \
+contribution_receipt_amount` of the last result. However, you will need to pass the index \
+of that last result to `last_index` to get the next page.'
+LAST_CONTRIBUTION_RECEIPT_DATE = 'When sorting by `contribution_receipt_date`, this is populated with the \
+contribution_receipt_date` of the last result. However, you will need to pass the index \
+of that last result to `last_index` to get the next page.'
+
+# form 5
+LAST_CONTRIBUTION_AMOUNT = 'When sorting by `contribution_amount`, this is populated with the \
+contribution_amount` of the last result. However, you will need to pass the index \
+of that last result to `last_index` to get the next page.'
 
 # schedule B
 DISBURSEMENT_DESCRIPTION = 'Description of disbursement'

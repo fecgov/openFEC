@@ -802,17 +802,9 @@ schedule_a = {
     'contributor_employer': fields.List(Keyword, metadata={'description': docs.CONTRIBUTOR_EMPLOYER}),
     'contributor_occupation': fields.List(Keyword, metadata={'description': docs.CONTRIBUTOR_OCCUPATION}),
     'last_contribution_receipt_date': Date(
-        load_default=None,
-        metadata={'description': 'When sorting by `contribution_receipt_date`, this is populated with the \
-        `contribution_receipt_date` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'}
-    ),
+        load_default=None, metadata={'description': docs.LAST_CONTRIBUTION_RECEIPT_DATE}),
     'last_contribution_receipt_amount': fields.Float(
-        load_default=None,
-        metadata={'description': 'When sorting by `contribution_receipt_amount`, this is populated with the \
-        `contribution_receipt_amount` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'}
-    ),
+        load_default=None, metadata={'description': docs.LAST_CONTRIBUTION_RECEIPT_AMOUNT}),
     'line_number': fields.Str(metadata={'description': docs.LINE_NUMBER}),
     'is_individual': fields.Bool(load_default=None, metadata={'description': docs.IS_INDIVIDUAL}),
     'contributor_type': fields.List(
@@ -899,17 +891,9 @@ form_56 = {
     'contributor_employer': fields.List(Keyword, metadata={'description': docs.CONTRIBUTOR_EMPLOYER}),
     'contributor_occupation': fields.List(Keyword, metadata={'description': docs.CONTRIBUTOR_OCCUPATION}),
     'last_contribution_receipt_date': Date(
-        load_default=None,
-        metadata={'description': 'When sorting by `contribution_receipt_date`, this is populated with the \
-        `contribution_receipt_date` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'}
-    ),
+        load_default=None, metadata={'description': docs.LAST_CONTRIBUTION_RECEIPT_DATE}),
     'last_contribution_amount': fields.Float(
-        load_default=None,
-        metadata={'description': 'When sorting by `contribution_receipt_amount`, this is populated with the \
-        `contribution_receipt_amount` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'}
-    ),
+        load_default=None, metadata={'description': docs.LAST_CONTRIBUTION_AMOUNT}),
     'report_year': fields.List(fields.Int, metadata={'description': docs.REPORT_YEAR}),
     'report_type': fields.List(fields.Str, metadata={'description': docs.REPORT_TYPE}),
     'contributor_type': fields.List(
