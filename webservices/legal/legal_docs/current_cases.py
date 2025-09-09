@@ -278,7 +278,8 @@ ADR_CASE_STATUS_MAP = {
 CASE_DISPOSITION_CATEGORY = """
     SELECT category_name,
     category_id,
-    doc_type
+    doc_type,
+    display_category_name,
     from fecmur.ref_case_disposition_category
     WHERE published_flg = true
     AND doc_type = :type
@@ -627,17 +628,22 @@ def get_mur_dispositions(case_id):
         logger.debug("category_list =" + json.dumps(category_list, indent=3, cls=DateTimeEncoder))
         disposition_data = []
         for row in rs:
-            category_id = get_display_case_disposition_category_id(category_list, row["event_name"], "MUR")
+            category_id, display_nm = get_display_case_disposition_category_id(category_list, row["event_name"], "MUR")
             if category_id:
+                disposition = None
                 citations = []
                 if ALL_STATUTORY_CITATIONS.get(str(case_id) + row["name"]):
                     citations += ALL_STATUTORY_CITATIONS.get(str(case_id) + row["name"])
                 if ALL_REGULATORY_CITATIONS.get(str(case_id) + row["name"]):
                     citations += ALL_REGULATORY_CITATIONS.get(str(case_id) + row["name"])
 
+                if category_id < 0:
+                    category_id = 3
+                    disposition = "Dismiss with Caution"
+
                 disposition_data.append({
                     "citations": citations,
-                    "disposition": row["event_name"],
+                    "disposition": disposition if disposition else display_nm,
                     "mur_disposition_category_id": category_id,
                     "penalty": row["final_amount"],
                     "respondent": row["name"], },
@@ -648,7 +654,7 @@ def get_mur_dispositions(case_id):
 def get_display_case_disposition_category_id(category_list, category_name, doc_type):
     for one_row in category_list:
         if one_row["category_name"] == category_name and one_row["doc_type"] == doc_type:
-            return one_row["category_id"]
+            return one_row["category_id"], one_row["display_category_name"]
 
 
 def parse_statutory_citations(statutory_citation, case_id, entity_id, doc_type=None):
