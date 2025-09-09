@@ -529,6 +529,13 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
             )
             for mur in response["murs"]
         )
+
+        category = 4
+        response = self._results_mur(api.url_for(UniversalSearch, mur_disposition_category_id=category))
+        # logging.info(response)
+
+        assert len(response["murs"]) == 1
+
         self.check_incorrect_values({"mur_disposition_category_id": "49"}, "total_murs", True)
 
 # ---------------------- End MUR  filters ------------------------------------------------

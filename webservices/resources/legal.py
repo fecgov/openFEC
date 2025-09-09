@@ -10,7 +10,7 @@ from webservices.utils import Resource
 from webservices.legal.utils_es import create_es_client, DateTimeEncoder, check_filter_exists
 
 from webservices.legal.constants import (  # noqa
-    SEARCH_ALIAS,
+    SEARCH_ALIAS, DISMISSED_ALL, DISMISSED_CATEGORIES
 )
 from webservices.utils import use_kwargs
 from elasticsearch import RequestError
@@ -429,8 +429,12 @@ def get_mur_disposition_query(q, **kwargs):
     combined_query = []
     category_queries = []
     if kwargs.get("mur_disposition_category_id") and (len(kwargs.get("mur_disposition_category_id")) > 0):
+        mur_disposition_list = set(kwargs.get("mur_disposition_category_id"))
 
-        for mur_disposition_category_id in kwargs.get("mur_disposition_category_id"):
+        if DISMISSED_ALL in mur_disposition_list:  # add all dismiss categories
+            mur_disposition_list.update(set(DISMISSED_CATEGORIES))
+
+        for mur_disposition_category_id in mur_disposition_list:
             if len(mur_disposition_category_id) > 0:
                 category_queries.append(
                     Q(
