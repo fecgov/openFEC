@@ -54,7 +54,8 @@ ACCEPTED_DATE_FORMATS = "strict_date_optional_time_nanos||MM/dd/yyyy||M/d/yyyy||
 )
 class RulemakingSearch(Resource):
     @use_kwargs(args.rulemaking_search)
-    def get(self, q="", from_hit=0, hits_returned=20, **kwargs):
+    #  Set 'hit_returned' to 30 by default to implement pagination for rulemaking on datatables.
+    def get(self, q="", from_hit=0, hits_returned=30, **kwargs):
         type_ = RULEMAKING_TYPE
         hits_returned = min([200, hits_returned])
         results = {}
@@ -92,9 +93,9 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
         .query(Q("bool", must=must_query))
         .highlight_options(require_field_match=False)
         .source(exclude=["sort1", "sort2"])
-        # text/ocrtext will not show in the resultset/output when text/ocrtext fields are added to the exclud list
-        # .source(exclude=["no_tier_documents.text", "documents.level_2_labels.level_2_docs.text",
-        #                  "documents.text", "sort1", "sort2"])
+        # Add text/ocrtext fields to exclude list to prevent showing in the results
+        .source(exclude=["no_tier_documents.text", "documents.level_2_labels.level_2_docs.text",
+                         "documents.text", "sort1", "sort2"])
         .extra(size=hits_returned, from_=from_hit)
         .index(RM_SEARCH_ALIAS)
         .sort("sort1", "sort2")

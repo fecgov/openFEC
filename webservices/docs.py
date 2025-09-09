@@ -2100,7 +2100,7 @@ Get results starting from this index
 '''
 
 HITS_RETURNED = '''
-Number of results to return (max 10)
+Number of results to return. The default value is 20, with a maximum limit of 200 results per page
 '''
 
 AO_NUMBER = '''
@@ -2436,6 +2436,10 @@ with specific words in their names.
 
 RM_YEAR = '''
 Search by REG documents by the year in which a rulemaking began
+'''
+
+HITS_RETURNED_RM = '''
+Number of results to return. The default value is 30, with a maximum limit of 200 results per page
 '''
 
 DOC_CATEGORY_DESC = '''

@@ -58,7 +58,8 @@ RM_SWAP_INDEX = "rm_swap_index"
 RM_REPO = "rm_repo"
 RM_SNAPSHOT = "rm_snapshot"
 RM_SEARCH_ALIAS = "rm_search_alias"
-RM_PDF_PATH = "https://www.fec.gov/rulemaking/"
+RM_PDF_S3_PATH = "legal/rulemakings/"
+RM_URL_PATH = "/files/"
 
 # doc_category_id(int):doc_category_label(string)
 DOC_CATEGORY_MAP = {
