@@ -47,33 +47,32 @@ GRANT ALL ON TABLE public.ofec_form_56_mv TO fec;
 GRANT SELECT ON TABLE public.ofec_form_56_mv TO fec_read;
 
 -- create index on the ofec_form_56_mv (should support sort by contribution_receipt_date, & contribution_amount)
-CREATE UNIQUE INDEX idx_ofec_form_56_mv_date_amount_sub ON public.ofec_form_56_mv USING btree (contribution_receipt_date, contribution_amount, sub_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_ofec_form_56_mv_date_amount_sub ON public.ofec_form_56_mv USING btree (contribution_receipt_date, contribution_amount, sub_id);
 
-CREATE INDEX idx_ofec_form_56_mv_entity_type ON public.ofec_form_56_mv USING btree (entity_type);
+CREATE INDEX IF NOT EXISTS idx_ofec_form_56_mv_entity_type ON public.ofec_form_56_mv USING btree (entity_type);
 
-CREATE INDEX idx_ofec_form_56_mv_contributor_city ON public.ofec_form_56_mv USING btree (contributor_city);
+CREATE INDEX IF NOT EXISTS idx_ofec_form_56_mv_contributor_city ON public.ofec_form_56_mv USING btree (contributor_city);
 
-CREATE INDEX idx_ofec_form_56_mv_contributor_state ON public.ofec_form_56_mv USING btree (contributor_state);
+CREATE INDEX IF NOT EXISTS idx_ofec_form_56_mv_contributor_state ON public.ofec_form_56_mv USING btree (contributor_state);
 
-CREATE INDEX idx_ofec_form_56_mv_contributor_zip ON public.ofec_form_56_mv USING btree (contributor_zip);
+CREATE INDEX IF NOT EXISTS idx_ofec_form_56_mv_contributor_zip ON public.ofec_form_56_mv USING btree (contributor_zip);
 
-CREATE INDEX idx_ofec_form_56_mv_contribution_receipt_date ON public.ofec_form_56_mv USING btree (contribution_receipt_date);
+CREATE INDEX IF NOT EXISTS idx_ofec_form_56_mv_contribution_receipt_date ON public.ofec_form_56_mv USING btree (contribution_receipt_date);
 
-CREATE INDEX idx_ofec_form_56_mv_contribution_amount ON public.ofec_form_56_mv USING btree (contribution_amount);
+CREATE INDEX IF NOT EXISTS idx_ofec_form_56_mv_contribution_amount ON public.ofec_form_56_mv USING btree (contribution_amount);
 
-CREATE INDEX idx_ofec_form_56_mv_image_number ON public.ofec_form_56_mv USING btree (image_number);
+CREATE INDEX IF NOT EXISTS idx_ofec_form_56_mv_image_number ON public.ofec_form_56_mv USING btree (image_number);
 
-CREATE INDEX idx_ofec_form_56_mv_sub_id ON public.ofec_form_56_mv USING btree (sub_id);
+CREATE INDEX IF NOT EXISTS idx_ofec_form_56_mv_sub_id ON public.ofec_form_56_mv USING btree (sub_id);
 
-CREATE INDEX idx_ofec_form_56_mv_report_year ON public.ofec_form_56_mv USING btree (report_year);
+CREATE INDEX IF NOT EXISTS idx_ofec_form_56_mv_report_year ON public.ofec_form_56_mv USING btree (report_year);
 
-CREATE INDEX idx_ofec_form_56_mv_election_cycle ON public.ofec_form_56_mv USING btree (election_cycle);
+CREATE INDEX IF NOT EXISTS idx_ofec_form_56_mv_election_cycle ON public.ofec_form_56_mv USING btree (election_cycle);
 
-CREATE INDEX idx_ofec_form_56_mv_report_type ON public.ofec_form_56_mv USING btree (report_type);
+CREATE INDEX IF NOT EXISTS idx_ofec_form_56_mv_report_type ON public.ofec_form_56_mv USING btree (report_type);
 
-CREATE INDEX idx_ofec_form_56_mv_contributor_name_text ON public.ofec_form_56_mv USING btree (contributor_name_text);
+CREATE INDEX IF NOT EXISTS idx_ofec_form_56_mv_contributor_name_text ON public.ofec_form_56_mv USING gin (contributor_name_text);
 
-CREATE INDEX idx_ofec_form_56_mv_contributor_employer_text ON public.ofec_form_56_mv USING gin (contributor_employer_text);
+CREATE INDEX IF NOT EXISTS idx_ofec_form_56_mv_contributor_employer_text ON public.ofec_form_56_mv USING gin (contributor_employer_text);
 
-CREATE INDEX idx_ofec_form_56_mv_contributor_occupation_text ON public.ofec_form_56_mv USING gin (contributor_occupation_text);
-
+CREATE INDEX IF NOT EXISTS idx_ofec_form_56_mv_contributor_occupation_text ON public.ofec_form_56_mv USING gin (contributor_occupation_text);
