@@ -563,3 +563,21 @@ def check_form_line_number(kwargs):
                 raise exceptions.ApiError(
                     exceptions.FORM_LINE_NUMBER_ERROR, status_code=400
                 )
+
+
+def validate_and_filter_zip_codes(query, kwargs, zip_field, filters, filter_fields):
+    if kwargs.get(zip_field):
+        zip_list = []
+        for value in kwargs[zip_field]:
+            if re.search('[^a-zA-Z0-9-\s]', value): # noqa
+                raise exceptions.ApiError(
+                    exceptions.INVALID_ZIP,
+                    status_code=422,
+                )
+            else:
+                zip_list.append(value[:5])
+        contributor_zip_list = {zip_field: zip_list}
+        query = filters.filter_multi_start_with(
+            query, contributor_zip_list, filter_fields
+        )
+    return query
