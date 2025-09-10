@@ -2,8 +2,8 @@ apispec==6.8.2
 certifi==2024.7.4
 cfenv==0.5.2
 defusedxml==0.6.0
-elasticsearch==7.6.0
-elasticsearch-dsl==7.3.0
+elasticsearch==7.10.1
+elasticsearch-dsl==7.4.1
 Flask==2.2.5
 Flask-Cors==6.0.0
 Flask-RESTful==0.3.9

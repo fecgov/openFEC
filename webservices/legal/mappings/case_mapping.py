@@ -15,7 +15,7 @@ CASE_DOCUMENT_MAPPING = {
             "type": "text",
             "term_vector": "with_positions_offsets",
         },
-        "document_date": {"type": "date", "format": "dateOptionalTime"},
+        "document_date": {"type": "date", "format": "date_optional_time"},
         "url": {"type": "text"},
         "filename": {"type": "keyword"},
         "doc_order_id": {"type": "integer"},
@@ -31,7 +31,7 @@ ADMIN_FINE_MAPPING = {
     "published_flg": {"type": "boolean"},
     "commission_votes": {
         "properties": {
-            "vote_date": {"type": "date", "format": "dateOptionalTime"},
+            "vote_date": {"type": "date", "format": "date_optional_time"},
             "action": {"type": "text"},
         }
     },
@@ -42,32 +42,32 @@ ADMIN_FINE_MAPPING = {
     "report_type": {"type": "text", "index": False},
     "reason_to_believe_action_date": {
         "type": "date",
-        "format": "dateOptionalTime",
+        "format": "date_optional_time",
     },
     "reason_to_believe_fine_amount": {"type": "long"},
     "challenge_receipt_date": {
         "type": "date",
-        "format": "dateOptionalTime",
+        "format": "date_optional_time",
     },
     "challenge_outcome": {"type": "text", "index": False},
     "final_determination_date": {
         "type": "date",
-        "format": "dateOptionalTime",
+        "format": "date_optional_time",
     },
     "final_determination_amount": {"type": "long"},
     "payment_amount": {"type": "long", "index": False},
     "treasury_referral_date": {
         "type": "date",
-        "format": "dateOptionalTime",
+        "format": "date_optional_time",
     },
     "treasury_referral_amount": {"type": "long", "index": False},
     "petition_court_filing_date": {
         "type": "date",
-        "format": "dateOptionalTime",
+        "format": "date_optional_time",
     },
     "petition_court_decision_date": {
         "type": "date",
-        "format": "dateOptionalTime",
+        "format": "date_optional_time",
     },
     "civil_penalty_payment_status": {
         "type": "text",
@@ -75,7 +75,7 @@ ADMIN_FINE_MAPPING = {
     },
     "civil_penalty_due_date": {
         "type": "date",
-        "format": "dateOptionalTime",
+        "format": "date_optional_time",
     },
     "dispositions": {
         "properties": {
@@ -85,7 +85,7 @@ ADMIN_FINE_MAPPING = {
             },
             "disposition_date": {
                 "type": "date",
-                "format": "dateOptionalTime",
+                "format": "date_optional_time",
             },
             "penalty": {
                 "type": "scaled_float",
@@ -113,7 +113,7 @@ MUR_MAPPING = {
     "published_flg": {"type": "boolean"},
     "commission_votes": {
         "properties": {
-            "vote_date": {"type": "date", "format": "dateOptionalTime"},
+            "vote_date": {"type": "date", "format": "date_optional_time"},
             "action": {"type": "text"},
         }
     },
@@ -155,8 +155,8 @@ MUR_MAPPING = {
             "mur_disposition_catagory_id": {"type": "keyword"},
         }
     },
-    "open_date": {"type": "date", "format": "dateOptionalTime"},
-    "close_date": {"type": "date", "format": "dateOptionalTime"},
+    "open_date": {"type": "date", "format": "date_optional_time"},
+    "close_date": {"type": "date", "format": "date_optional_time"},
 }
 
 ADR_MAPPING = {
@@ -169,7 +169,7 @@ ADR_MAPPING = {
     "complainant": {"type": "text"},
     "commission_votes": {
         "properties": {
-            "vote_date": {"type": "date", "format": "dateOptionalTime"},
+            "vote_date": {"type": "date", "format": "date_optional_time"},
             "action": {"type": "text"},
             "commissioner_name": {"type": "text"},
             "vote_type": {"type": "text"},
@@ -214,8 +214,8 @@ ADR_MAPPING = {
             "respondent": {"type": "text"},
         }
     },
-    "open_date": {"type": "date", "format": "dateOptionalTime"},
-    "close_date": {"type": "date", "format": "dateOptionalTime"},
+    "open_date": {"type": "date", "format": "date_optional_time"},
+    "close_date": {"type": "date", "format": "date_optional_time"},
 }
 
 STATUTE_MAPPING = {
