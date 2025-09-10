@@ -279,7 +279,7 @@ CASE_DISPOSITION_CATEGORY = """
     SELECT category_name,
     category_id,
     doc_type,
-    display_category_name,
+    display_category_name
     from fecmur.ref_case_disposition_category
     WHERE published_flg = true
     AND doc_type = :type
