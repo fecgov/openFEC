@@ -656,6 +656,8 @@ def get_display_case_disposition_category_id(category_list, category_name, doc_t
         if one_row["category_name"] == category_name and one_row["doc_type"] == doc_type:
             return one_row["category_id"], one_row["display_category_name"]
 
+    return None, None
+
 
 def parse_statutory_citations(statutory_citation, case_id, entity_id, doc_type=None):
     citations = []
