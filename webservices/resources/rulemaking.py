@@ -92,10 +92,10 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
         .using(es_client)
         .query(Q("bool", must=must_query))
         .highlight_options(require_field_match=False)
-        .source(exclude=["sort1", "sort2"])
+        .source(excludes=["sort1", "sort2"])
         # Add text/ocrtext fields to exclude list to prevent showing in the results
-        .source(exclude=["no_tier_documents.text", "documents.level_2_labels.level_2_docs.text",
-                         "documents.text", "sort1", "sort2"])
+        .source(excludes=["no_tier_documents.text", "documents.level_2_labels.level_2_docs.text",
+                          "documents.text", "sort1", "sort2"])
         .extra(size=hits_returned, from_=from_hit)
         .index(RM_SEARCH_ALIAS)
         .sort("sort1", "sort2")

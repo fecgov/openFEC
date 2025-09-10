@@ -3,9 +3,9 @@
 RM_MAPPING = {
     "dynamic": "false",
     "properties": {
-        "admin_close_date": {"type": "date", "format": "dateOptionalTime"},
-        "calculated_comment_close_date": {"type": "date", "format": "dateOptionalTime"},
-        "comment_close_date": {"type": "date", "format": "dateOptionalTime"},
+        "admin_close_date": {"type": "date", "format": "date_optional_time"},
+        "calculated_comment_close_date": {"type": "date", "format": "date_optional_time"},
+        "comment_close_date": {"type": "date", "format": "date_optional_time"},
         "commenter_names": {"type": "text"},
         "counsel_names": {"type": "text"},
         "description": {"type": "text"},
@@ -15,7 +15,7 @@ RM_MAPPING = {
                 "is_comment_eligible": {"type": "boolean"},
                 "doc_category_id": {"type": "integer"},
                 "doc_category_label": {"type": "keyword"},
-                "doc_date": {"type": "date", "format": "dateOptionalTime"},
+                "doc_date": {"type": "date", "format": "date_optional_time"},
                 "doc_description": {"type": "text"},
                 "doc_entities": {
                     "properties": {
@@ -51,7 +51,7 @@ RM_MAPPING = {
                                 "is_comment_eligible": {"type": "boolean"},
                                 "doc_category_id": {"type": "integer"},
                                 "doc_category_label": {"type": "keyword"},
-                                "document_date": {"type": "date", "format": "dateOptionalTime"},
+                                "document_date": {"type": "date", "format": "date_optional_time"},
                                 "doc_description": {"type": "text"},
                                 "document_id": {"type": "long"},
                                 "doc_entities": {
@@ -88,12 +88,12 @@ RM_MAPPING = {
                 "url": {"type": "text", "index": False},
             }  # End: level_2_labels
         },  # End: documents
-        "fr_publication_dates": {"type": "date", "format": "dateOptionalTime"},
-        "hearing_dates": {"type": "date", "format": "dateOptionalTime"},
+        "fr_publication_dates": {"type": "date", "format": "date_optional_time"},
+        "hearing_dates": {"type": "date", "format": "date_optional_time"},
         "is_open_for_comment": {"type": "boolean"},
         "key_documents": {
             "properties": {
-                "doc_date": {"type": "date", "format": "dateOptionalTime"},
+                "doc_date": {"type": "date", "format": "date_optional_time"},
                 "doc_description": {"type": "text"},
                 "doc_id": {"type": "long"},
                 "filename": {"type": "text"},
@@ -103,13 +103,13 @@ RM_MAPPING = {
                 "url": {"type": "text", "index": False},
             }
         },
-        "last_updated": {"type": "date", "format": "dateOptionalTime"},
+        "last_updated": {"type": "date", "format": "date_optional_time"},
         "no_tier_documents": {
             "properties": {
                 "is_comment_eligible": {"type": "boolean"},
                 "doc_category_id": {"type": "keyword"},
                 "doc_category_label": {"type": "keyword"},
-                "doc_date": {"type": "date", "format": "dateOptionalTime"},
+                "doc_date": {"type": "date", "format": "date_optional_time"},
                 "doc_description": {"type": "text"},
                 "doc_id": {"type": "long"},
                 "doc_type_id": {"type": "integer"},
@@ -140,7 +140,7 @@ RM_MAPPING = {
         "sync_status": {"type": "text"},
         "title": {"type": "text"},
         "type": {"type": "keyword"},
-        "vote_dates": {"type": "date", "format": "dateOptionalTime"},
+        "vote_dates": {"type": "date", "format": "date_optional_time"},
         "witness_names": {"type": "text"},
     }
 }
