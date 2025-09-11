@@ -802,17 +802,9 @@ schedule_a = {
     'contributor_employer': fields.List(Keyword, metadata={'description': docs.CONTRIBUTOR_EMPLOYER}),
     'contributor_occupation': fields.List(Keyword, metadata={'description': docs.CONTRIBUTOR_OCCUPATION}),
     'last_contribution_receipt_date': Date(
-        load_default=None,
-        metadata={'description': 'When sorting by `contribution_receipt_date`, this is populated with the \
-        `contribution_receipt_date` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'}
-    ),
+        load_default=None, metadata={'description': docs.LAST_CONTRIBUTION_RECEIPT_DATE}),
     'last_contribution_receipt_amount': fields.Float(
-        load_default=None,
-        metadata={'description': 'When sorting by `contribution_receipt_amount`, this is populated with the \
-        `contribution_receipt_amount` of the last result. However, you will need to pass the index \
-        of that last result to `last_index` to get the next page.'}
-    ),
+        load_default=None, metadata={'description': docs.LAST_CONTRIBUTION_RECEIPT_AMOUNT}),
     'line_number': fields.Str(metadata={'description': docs.LINE_NUMBER}),
     'is_individual': fields.Bool(load_default=None, metadata={'description': docs.IS_INDIVIDUAL}),
     'contributor_type': fields.List(
@@ -887,6 +879,31 @@ schedule_a_by_occupation = {
 schedule_a_by_contributor = {
     'cycle': fields.List(fields.Int, metadata={'description': docs.RECORD_CYCLE}),
     'contributor_id': fields.List(IStr, metadata={'description': docs.CONTRIBUTOR_ID}),
+}
+
+form_56 = {
+    'image_number': fields.List(ImageNumber, metadata={'description': docs.IMAGE_NUMBER}),
+
+    'contributor_name': fields.List(Keyword, metadata={'description': docs.CONTRIBUTOR_NAME}),
+    'contributor_city': fields.List(IStr, metadata={'description': docs.CONTRIBUTOR_CITY}),
+    'contributor_state': fields.List(IStr, metadata={'description': docs.CONTRIBUTOR_STATE}),
+    'contributor_zip': fields.List(IStr, metadata={'description': docs.CONTRIBUTOR_ZIP}),
+    'contributor_employer': fields.List(Keyword, metadata={'description': docs.CONTRIBUTOR_EMPLOYER}),
+    'contributor_occupation': fields.List(Keyword, metadata={'description': docs.CONTRIBUTOR_OCCUPATION}),
+    'last_contribution_receipt_date': Date(
+        load_default=None, metadata={'description': docs.LAST_CONTRIBUTION_RECEIPT_DATE}),
+    'last_contribution_amount': fields.Float(
+        load_default=None, metadata={'description': docs.LAST_CONTRIBUTION_AMOUNT}),
+    'report_year': fields.List(fields.Int, metadata={'description': docs.REPORT_YEAR}),
+    'report_type': fields.List(fields.Str, metadata={'description': docs.REPORT_TYPE}),
+    'contributor_type': fields.List(
+        fields.Str(validate=validate.OneOf(['individual', 'committee'])),
+        metadata={'description': docs.CONTRIBUTOR_TYPE}
+    ),
+    'two_year_transaction_period': fields.List(
+        TwoYearTransactionPeriod,
+        metadata={'description': docs.TWO_YEAR_TRANSACTION_PERIOD},
+    ),
 }
 
 schedule_b_by_purpose = {

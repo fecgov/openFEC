@@ -1,4 +1,3 @@
-import re
 from flask_apispec import doc
 
 from webservices import args
@@ -82,19 +81,8 @@ class NationalParty_ScheduleAView(ApiResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
-        zip_list = []
-        if kwargs.get('contributor_zip'):
-            for value in kwargs['contributor_zip']:
-                if re.search('[^a-zA-Z0-9-\s]', value):  # noqa
-                    raise exceptions.ApiError(
-                        'Invalid zip code. It can not have special character',
-                        status_code=422,
-                    )
-                else:
-                    zip_list.append(value[:5])
-            contributor_zip_list = {'contributor_zip': zip_list}
-            query = filters.filter_multi_start_with(
-                query, contributor_zip_list, self.filter_multi_start_with_fields
+        query = utils.validate_and_filter_zip_codes(
+                query, kwargs, 'contributor_zip', filters, self.filter_multi_start_with_fields
             )
         return query
 
@@ -163,19 +151,8 @@ class NationalParty_ScheduleBView(ApiResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
-        zip_list = []
-        if kwargs.get('recipient_zip'):
-            for value in kwargs['recipient_zip']:
-                if re.search('[^a-zA-Z0-9-\s]', value):  # noqa
-                    raise exceptions.ApiError(
-                        'Invalid zip code. It can not have special character',
-                        status_code=422,
-                    )
-                else:
-                    zip_list.append(value[:5])
-            recipient_zip_list = {'recipient_zip': zip_list}
-            query = filters.filter_multi_start_with(
-                query, recipient_zip_list, self.filter_multi_start_with_fields
+        query = utils.validate_and_filter_zip_codes(
+                query, kwargs, 'recipient_zip', filters, self.filter_multi_start_with_fields
             )
         if kwargs.get('line_number'):
             # line number is a composite value of 'filing_form-line_number'

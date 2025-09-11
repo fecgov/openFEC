@@ -1,6 +1,5 @@
 import sqlalchemy as sa
 from flask_apispec import doc
-import re
 
 from webservices import args
 from webservices import docs
@@ -126,19 +125,8 @@ class ScheduleAView(ItemizedResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
-        zip_list = []
-        if kwargs.get('contributor_zip'):
-            for value in kwargs['contributor_zip']:
-                if re.search('[^a-zA-Z0-9-\s]', value):  # noqa
-                    raise exceptions.ApiError(
-                        'Invalid zip code. It can not have special character',
-                        status_code=422,
-                    )
-                else:
-                    zip_list.append(value[:5])
-            contributor_zip_list = {'contributor_zip': zip_list}
-            query = filters.filter_multi_start_with(
-                query, contributor_zip_list, self.filter_multi_start_with_fields
+        query = utils.validate_and_filter_zip_codes(
+                query, kwargs, 'contributor_zip', filters, self.filter_multi_start_with_fields
             )
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))

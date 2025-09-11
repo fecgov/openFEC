@@ -11,6 +11,7 @@ from webservices.resources import sched_d
 from webservices.resources import sched_e
 from webservices.resources import sched_f
 from webservices.resources import sched_h4
+from webservices.resources import form_56
 from webservices.resources import download
 from webservices.resources import aggregates
 from webservices.resources import candidate_aggregates
@@ -127,6 +128,7 @@ api.add_resource(candidate_aggregates.ScheduleAByStateCandidateTotalsView,
                  '/schedules/schedule_a/by_state/by_candidate/totals/')
 api.add_resource(candidate_aggregates.TotalsCandidateView, '/candidates/totals/')
 api.add_resource(totals.ScheduleAByStateRecipientTotalsView, '/schedules/schedule_a/by_state/totals/')
+api.add_resource(form_56.Form56View, '/schedules/schedule_a_form5/')
 api.add_resource(candidate_aggregates.CandidateTotalAggregateView, '/candidates/totals/aggregates/')
 api.add_resource(totals.InauguralDonationsView, '/totals/inaugural_committees/by_contributor/')
 
