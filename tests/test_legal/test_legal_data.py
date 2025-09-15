@@ -362,7 +362,7 @@ second_test_mur = {
             }
           ],
           "disposition": "No RTB",
-          "mur_disposition_category_id": 12,
+          "mur_disposition_category_id": 10,
           "penalty": None,
           "respondent": "Shearer, Alaina"
         },
@@ -376,7 +376,7 @@ second_test_mur = {
             }
           ],
           "disposition": "No RTB",
-          "mur_disposition_category_id": 12,
+          "mur_disposition_category_id": 10,
           "penalty": None,
           "respondent": "Hubay, Scott M."
         },
@@ -396,7 +396,7 @@ second_test_mur = {
             }
           ],
           "disposition": "No RTB",
-          "mur_disposition_category_id": 12,
+          "mur_disposition_category_id": 10,
           "penalty": None,
           "respondent": "Frost-Brooks, Patricia"
         },
@@ -410,7 +410,7 @@ second_test_mur = {
             }
           ],
           "disposition": "No RTB",
-          "mur_disposition_category_id": 12,
+          "mur_disposition_category_id": 10,
           "penalty": None,
           "respondent": "Alaina Shearer for Congress"
         },
@@ -424,7 +424,7 @@ second_test_mur = {
             }
           ],
           "disposition": "No RTB",
-          "mur_disposition_category_id": 12,
+          "mur_disposition_category_id": 10,
           "penalty": None,
           "respondent": "Gem City Rise PAC (f/k/a Friends of Desiree Tims)"
         },
@@ -450,7 +450,7 @@ second_test_mur = {
             }
           ],
           "disposition": "No RTB",
-          "mur_disposition_category_id": 12,
+          "mur_disposition_category_id": 10,
           "penalty": None,
           "respondent": "Tims, Desiree"
         },
@@ -470,7 +470,7 @@ second_test_mur = {
             }
           ],
           "disposition": "No RTB",
-          "mur_disposition_category_id": 12,
+          "mur_disposition_category_id": 10,
           "penalty": None,
           "respondent": "Ohio Democratic Party"
         }

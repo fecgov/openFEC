@@ -50,6 +50,8 @@ PORT = 443
 DOCS_PATH = "docs"
 RULEMAKING_PATH = "rulemaking"
 RULEMAKING_TYPE = "rulemakings"
+DISMISSED_ALL = "4"
+DISMISSED_CATEGORIES = {"3", "5", "6", "7", "8"}
 
 # =========Start rulemaking Constants==========
 RM_INDEX = "rm_index"
