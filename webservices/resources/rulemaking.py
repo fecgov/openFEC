@@ -27,7 +27,7 @@ import json
 logger = logging.getLogger(__name__)
 
 # To debug, uncomment the line below:
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 es_client = create_es_client()
 
@@ -101,26 +101,6 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
         .sort("sort1", "sort2")
     )
 
-    if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
-        proximity_query = True
-
-    if not proximity_query:
-        query = query.highlight("documents.text", "documents.description")
-
-    if kwargs.get("q_exclude"):
-        must_not = []
-        must_not.append(
-            Q(
-                "nested",
-                path="documents",
-                query=Q(
-                    "simple_query_string",
-                    query=kwargs.get("q_exclude"),
-                    fields=["documents.text"]
-                )
-            )
-        )
-
     # Sort regulations by 'rm_no'. Default sort order is desc.
     sort_field = kwargs.get("sort")
     if sort_field:
@@ -135,11 +115,61 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
 
     should_query = [
         get_document_query_params(q, **kwargs),
-        Q("simple_query_string", query=q, fields=["description"]),
+        # Q("simple_query_string", query=q, fields=["rm_name"]),
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
 
-    # logger.debug("build_search_query =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+    if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
+        proximity_query = True
+
+    if not proximity_query:
+        query = query.highlight("documents.text", "documents.description")
+
+    if kwargs.get("q_exclude") is not None:
+        q_exclude = kwargs["q_exclude"]
+
+        exclude_list = []
+
+        if q_exclude:
+            # Match documents where nested documents.text contains q_exclude
+            exclude_list.append(
+                Q(
+                    "nested",
+                    path="documents",
+                    query=Q(
+                        "simple_query_string",
+                        query=q_exclude,
+                        fields=["documents.text"]
+                    )
+                )
+            )
+
+            # Match documents where nested level_2_docs.text contains q_exclude
+            exclude_list.append(
+                Q(
+                    "nested",
+                    path="documents.level_2_labels.level_2_docs",
+                    query=Q(
+                        "simple_query_string",
+                        query=q_exclude,
+                        fields=["documents.level_2_labels.level_2_docs.text"]
+                    )
+                )
+            )
+
+            # Match documents where key_documents.text contains q_exclude
+            exclude_list.append(
+                Q(
+                    "simple_query_string",
+                    query=q_exclude,
+                    fields=["key_documents.text"]
+                )
+            )
+
+        # Exclude all documents that contains q_exclude
+        query = query.query("bool", should=exclude_list)
+
+    logger.debug("build_search_query =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return get_all_query_params(query, **kwargs)
 
 

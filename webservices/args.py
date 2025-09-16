@@ -462,6 +462,7 @@ rulemaking_search = {
                                 metadata={'description': docs.RM_ENTITY_TYPE}),
     'filename': fields.Str(required=False, metadata={'description': docs.FILENAME}),
     'sort': IStr(required=False, metadata={'description': docs.RM_SORT}),
+    'q_exclude': IStr(required=False, metadata={'description': docs.Q_EXCLUDE}),
     'q_proximity': fields.List(fields.Str, metadata={'description': docs.Q_PROXIMITY}),
     'max_gaps': fields.Int(required=False, metadata={'description': docs.MAX_GAPS}),
     'proximity_preserve_order': fields.Bool(required=False, metadata={'description': docs.PROXIMITY_PRESERVE_ORDER}),
