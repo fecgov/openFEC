@@ -66,6 +66,7 @@ from webservices.tasks.error_code import ErrorCode
 from webservices.tasks.utils import redis_url
 from webservices.api_setup import api, v1
 from celery import signals
+import requests
 
 
 # Variables NTC
@@ -306,12 +307,75 @@ def create_app(test_config=None):
 
     @docs.route('/developers/')
     def api_ui():
+        show_banner_env = os.getenv("SHOW_BANNER", "").lower() == "true"
+        banner_text = env.get_credential('BANNER_TEXT', '')
+        status_text = get_statuspage_text() if show_banner_env else None
+        if banner_text:
+            status_text = banner_text
+        status_link = None
+        if status_text:
+            status_link = (
+                '<a href="https://fecgov.statuspage.io" target="_blank" '
+                'rel="noopener noreferrer">See more at fecgov.statuspage.io</a>'
+            )
+        show_banner = show_banner_env and (status_text or banner_text)
+
         return render_template(
             'swagger-ui.html',
             specs_url=url_for('docs.api_spec'),
             PRODUCTION=env.get_credential('PRODUCTION'),
             api_key_signup_key=env.get_credential('API_UMBRELLA_SIGNUP_KEY'),
+            show_banner=show_banner,
+            status_text=status_text,
+            status_link=status_link,
         )
+
+    def get_statuspage_text():
+        try:
+            base_url = "https://fecgov.statuspage.io/api/v2"
+            messages = []
+
+            # Fetch active scheduled maintenances
+            maint_resp = requests.get(f"{base_url}/scheduled-maintenances/active.json")
+            maint_resp.raise_for_status()
+            maint_data = maint_resp.json()
+
+            maints = maint_data.get("scheduled_maintenances", [])
+            for maintenance in maints:
+                name = maintenance.get('name', 'Active Maintenance')
+                updates = maintenance.get("incident_updates", [])
+                latest_body = None
+                if updates:
+                    latest_body = updates[-1].get("body")
+                if latest_body:
+                    messages.append(f"{name}: {latest_body}")
+                else:
+                    messages.append(f"Ongoing Maintenance: {maintenance.get('name')}")
+
+            # Fetch unresolved incidents
+            incident_resp = requests.get(f"{base_url}/incidents/unresolved.json")
+            incident_resp.raise_for_status()
+            incident_data = incident_resp.json()
+
+            incidents = incident_data.get("incidents", [])
+            for incident in incidents:
+                name = incident.get('name', 'Ongoing Incident')
+                updates = incident.get("incident_updates", [])
+                latest_body = None
+                if updates:
+                    latest_body = updates[-1].get("body")
+                if latest_body:
+                    messages.append(f"{name}: {latest_body}")
+                else:
+                    messages.append(f"Ongoing Incident: {maintenance.get('name')}")
+            if messages:
+                formatted = " ".join(messages)
+                return formatted
+
+        except Exception as e:
+            print(f"Statuspage fetch error: {e}")
+
+        return ""
 
     @docs.route('/swagger/')
     def api_spec():
