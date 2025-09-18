@@ -135,7 +135,6 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
 
     should_query = [
         get_document_query_params(q, **kwargs),
-        Q("simple_query_string", query=q, fields=["description"]),
     ]
     query = query.query("bool", should=should_query, minimum_should_match=1)
 
@@ -144,30 +143,43 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
 
 
 def get_document_query_params(q, **kwargs):
-    should_clauses = []
+    must_clauses = []
     doc_category_ids = kwargs.get("doc_category_id", [])
     doc_category_ids = [int(i) for i in doc_category_ids if i]
 
     if doc_category_ids:
+        combined_queries = []
+        doc_category_id_inner_hits = INNER_HITS.copy()
+        doc_category_id_lvl2_inner_hits = INNER_HITS.copy()
+
+        doc_category_id_inner_hits["name"] = "documents_by_category"
+        doc_category_id_lvl2_inner_hits["name"] = "documents_by_category_lvl2"
+
         # Search in documents.doc_category_id
-        should_clauses.append(
+        combined_queries.append(
             Q("nested",
               path="documents",
               query=Q("terms", **{"documents.doc_category_id": doc_category_ids}),
-              inner_hits=INNER_HITS)
+              inner_hits=doc_category_id_inner_hits
+              )
         )
+
         # Search in documents.level_2_labels.level_2_docs.doc_category_id
-        should_clauses.append(
+        combined_queries.append(
             Q("nested",
               path="documents.level_2_labels.level_2_docs",
               query=Q("terms", **{"documents.level_2_labels.level_2_docs.doc_category_id": doc_category_ids}),
-              inner_hits=INNER_HITS)
+              inner_hits=doc_category_id_lvl2_inner_hits,
+              )
         )
+        doc_id_should_clauses = Q("bool", should=combined_queries, minimum_should_match=1)
+        must_clauses.append(doc_id_should_clauses)
 
     # Add full-text query to documents
     if q:
         # Search in documents.text
-        should_clauses.append(
+        combined_queries = []
+        combined_queries.append(
             Q("nested",
                 path="documents",
                 query=Q("simple_query_string", query=q, fields=["documents.text"]),
@@ -175,20 +187,26 @@ def get_document_query_params(q, **kwargs):
         )
 
         # Search in documents.level_2_labels.level_2_docs.text
-        should_clauses.append(
+        combined_queries.append(
             Q("nested",
                 path="documents.level_2_labels.level_2_docs",
                 query=Q("simple_query_string", query=q, fields=["documents.level_2_labels.level_2_docs.text"]),
                 inner_hits=INNER_HITS)
         )
+        combined_queries.append(Q("simple_query_string", query=q, fields=["description"]))
+
+        q_should_clauses = Q("bool", should=combined_queries, minimum_should_match=1)
+        must_clauses.append(q_should_clauses)
 
     # Handle proximity query
     if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
-        proximity_query = get_proximity_query(**kwargs)
+        proximity_query = get_proximity_query("documents__text", **kwargs)
+        combined_queries = []
 
         # Highlight config for documents.text
         proximity_inner_hits_documents = {
             "size": 100,
+            "name": "documents_proximity",
             "highlight": {
                 "require_field_match": False,
                 "fields": {
@@ -199,7 +217,7 @@ def get_document_query_params(q, **kwargs):
             }
         }
 
-        should_clauses.append(
+        combined_queries.append(
             Q("nested",
                 path="documents",
                 query=proximity_query,
@@ -209,6 +227,7 @@ def get_document_query_params(q, **kwargs):
         # Highlight config for level_2_docs.text
         proximity_inner_hits_level2 = {
             "size": 100,
+            "name": "documents_proximity_lvl2",
             "highlight": {
                 "require_field_match": False,
                 "fields": {
@@ -221,15 +240,19 @@ def get_document_query_params(q, **kwargs):
                 ).to_dict()
             }
         }
+        proximity_lvl2_query = get_proximity_query("documents.level_2_labels.level_2_docs.text", **kwargs)
 
-        should_clauses.append(
+        combined_queries.append(
             Q("nested",
                 path="documents.level_2_labels.level_2_docs",
-                query=proximity_query,
+                query=proximity_lvl2_query,
                 inner_hits=proximity_inner_hits_level2)
         )
 
-    return Q("bool", should=should_clauses, minimum_should_match=1)
+        proximity_should_clauses = Q("bool", should=combined_queries, minimum_should_match=1)
+        must_clauses.append(proximity_should_clauses)
+
+    return Q("bool", must=must_clauses)
 
 
 def get_all_query_params(query, **kwargs):
@@ -323,7 +346,7 @@ def get_all_query_params(query, **kwargs):
     return query
 
 
-def get_proximity_query(**kwargs):
+def get_proximity_query(location, **kwargs):
     q_proximity = kwargs.get("q_proximity")
     max_gaps = kwargs.get("max_gaps")
     ordered = kwargs.get("proximity_preserve_order", False)
@@ -337,29 +360,29 @@ def get_proximity_query(**kwargs):
 
     if len(q_proximity) == 1:
         if contains_filter:
-            intervals_inner_query = Q('intervals', documents__text={
+            intervals_inner_query = Q('intervals', **{location: {
                 'match':  {'query': q_proximity[0], 'max_gaps': max_gaps, "filter": filters, "ordered": True}
-                })
+                }})
         else:
-            intervals_inner_query = Q('intervals', documents__text={
+            intervals_inner_query = Q('intervals', **{location: {
                 'match':  {'query': q_proximity[0], 'max_gaps': max_gaps, "ordered": True}
-                })
+                }})
     else:
         for q in q_proximity:
             dict_item = {"match": {"query": q, "max_gaps": 0, "ordered": True}}
             intervals_list.append(dict_item)
 
         if contains_filter:
-            intervals_inner_query = Q('intervals', documents__text={
+            intervals_inner_query = Q('intervals', **{location: {
                     'all_of':  {'max_gaps': max_gaps,
                                 "ordered": ordered,
                                 "intervals": intervals_list,
                                 "filter": filters}
-                    })
+                    }})
         else:
-            intervals_inner_query = Q('intervals', documents__text={
+            intervals_inner_query = Q('intervals', **{location: {
                     'all_of':  {'max_gaps': max_gaps, "ordered": ordered, "intervals": intervals_list}
-                    })
+                    }})
     # logger.debug("get_proximity_query =" + json.dumps(intervals_inner_query, indent=3, cls=DateTimeEncoder))
     return intervals_inner_query
 
@@ -379,14 +402,15 @@ def execute_search_query(query):
 
         # The 'inner_hits' section is in hit.meta and 'highlight' & 'nested' are in inner_hit.meta
         if "inner_hits" in hit.meta:
-            for inner_hit in hit.meta.inner_hits["documents"].hits:
-                if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
-                    # set "document_highlights" in return hit
-                    offset = inner_hit.meta["nested"]["offset"]
-                    highlights = inner_hit.meta.highlight.to_dict().values()
-                    formatted_hit["document_highlights"][offset] = [
-                        hl for hl_list in highlights for hl in hl_list
-                    ]
+            if "documents" in hit.meta.inner_hits:
+                for inner_hit in hit.meta.inner_hits["documents"].hits:
+                    if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
+                        # set "document_highlights" in return hit
+                        offset = inner_hit.meta["nested"]["offset"]
+                        highlights = inner_hit.meta.highlight.to_dict().values()
+                        formatted_hit["document_highlights"][offset] = [
+                            hl for hl_list in highlights for hl in hl_list
+                        ]
 
     # logger.debug("formatted_hits =" + json.dumps(formatted_hits, indent=3, cls=DateTimeEncoder))
 
