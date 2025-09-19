@@ -112,7 +112,7 @@ class CommitteeReports(FecFileNumberMixin, PdfMixin, CsvMixin, BaseModel):
     file_number = mapped_column(db.Integer, sort_order=-490)
     amendment_indicator = mapped_column('amendment_indicator', db.String, sort_order=-480)
     amendment_indicator_full = mapped_column(db.String, sort_order=-470)
-    beginning_image_number = mapped_column(db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER, sort_order=-460)
+    beginning_image_number = mapped_column(db.String, doc=docs.BEGINNING_IMAGE_NUMBER, sort_order=-460)
     cash_on_hand_beginning_period = mapped_column(
         db.Numeric(30, 2), doc=docs.CASH_ON_HAND_BEGIN_PERIOD,
         sort_order=-450
@@ -132,9 +132,9 @@ class CommitteeReports(FecFileNumberMixin, PdfMixin, CsvMixin, BaseModel):
     debts_owed_to_committee = mapped_column(
         db.Numeric(30, 2), doc=docs.DEBTS_OWED_TO_COMMITTEE, sort_order=-400
     )  # P
-    end_image_number = mapped_column(db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
-    other_disbursements_period = mapped_column(
-        db.Numeric(30, 2), doc=docs.add_period(docs.OTHER_DISBURSEMENTS), sort_order=-390
+    end_image_number = db.Column(db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
+    other_disbursements_period = db.Column(
+        db.Numeric(30, 2), doc=docs.add_period(docs.OTHER_DISBURSEMENTS)
     )  # PX
     other_disbursements_ytd = mapped_column(
         db.Numeric(30, 2), doc=docs.add_ytd(docs.OTHER_DISBURSEMENTS),
@@ -483,7 +483,7 @@ class CommitteeReportsPresidential(CommitteeReports):
 class CommitteeReportsIEOnly(PdfMixin, BaseModel):
     __tablename__ = 'ofec_reports_ie_only_mv'
 
-    beginning_image_number = db.Column(db.BigInteger)
+    beginning_image_number = db.Column(db.String)
     committee_id = db.Column(db.String)
     committee_name = db.Column(db.String)
     cycle = db.Column(db.Integer)
@@ -521,7 +521,7 @@ class BaseFiling(FecFileNumberMixin, AmendmentChainMixin, PdfMixin, FecMixin, db
     coverage_end_date = db.Column('through_date', db.Date)
     rpt_pgi = db.Column('rptpgi', db.String, doc=docs.ELECTION_TYPE)
     report_type = db.Column('rptcode', db.String)
-    beginning_image_number = db.Column('imageno', db.BigInteger)
+    beginning_image_number = db.Column('imageno', db.String)
     street_1 = db.Column('str1', db.String)
     street_2 = db.Column('str2', db.String)
     city = db.Column(db.String)

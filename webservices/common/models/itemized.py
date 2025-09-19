@@ -168,8 +168,8 @@ class ScheduleA(BaseItemized):
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     increased_limit = db.Column(db.String)
     load_date = db.Column('pg_date', db.DateTime)
-    sub_id = db.Column(db.Integer, primary_key=True)
-    original_sub_id = db.Column('orig_sub_id', db.Integer)
+    sub_id = db.Column(db.BigInteger, primary_key=True)
+    original_sub_id = db.Column('orig_sub_id', db.BigInteger)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
     pdf_url = db.Column(db.String)
@@ -365,8 +365,8 @@ class ScheduleB(BaseItemized):
     schedule_type = db.Column('schedule_type', db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     load_date = db.Column('pg_date', db.DateTime)
-    sub_id = db.Column(db.Integer, primary_key=True)
-    original_sub_id = db.Column('orig_sub_id', db.Integer)
+    sub_id = db.Column(db.BigInteger, primary_key=True)
+    original_sub_id = db.Column('orig_sub_id', db.BigInteger)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_id = db.Column('back_ref_sched_id', db.String)
     semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
@@ -464,8 +464,8 @@ class ScheduleC(PdfMixin, BaseItemized):
         )''',
         lazy='joined',
     )
-    sub_id = db.Column(db.Integer, primary_key=True)
-    original_sub_id = db.Column('orig_sub_id', db.Integer)
+    sub_id = db.Column(db.BigInteger, primary_key=True)
+    original_sub_id = db.Column('orig_sub_id', db.BigInteger)
     incurred_date = db.Column('incurred_dt', db.Date)
     loan_source_prefix = db.Column('loan_src_prefix', db.String)
     loan_source_first_name = db.Column('loan_src_f_nm', db.String)
@@ -532,8 +532,8 @@ class ScheduleC(PdfMixin, BaseItemized):
 class ScheduleD(PdfMixin, BaseItemized):
     __tablename__ = 'ofec_sched_d_mv'
 
-    sub_id = db.Column(db.Integer, primary_key=True)
-    original_sub_id = db.Column('orig_sub_id', db.Integer)
+    sub_id = db.Column(db.BigInteger, primary_key=True)
+    original_sub_id = db.Column('orig_sub_id', db.BigInteger)
     committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_NAME)
     creditor_debtor_name = db.Column('cred_dbtr_nm', db.String)
     creditor_debtor_last_name = db.Column('cred_dbtr_l_nm', db.String)
@@ -588,7 +588,7 @@ class ScheduleD(PdfMixin, BaseItemized):
 class ScheduleE(PdfMixin, BaseItemized):
     __tablename__ = 'ofec_sched_e_mv'
 
-    sub_id = db.Column(db.String, primary_key=True)
+    sub_id = db.Column(db.BigInteger, primary_key=True)
     # Payee info
     payee_prefix = db.Column(db.String)
     payee_name = db.Column('pye_nm', db.String)
@@ -657,7 +657,7 @@ class ScheduleE(PdfMixin, BaseItemized):
     filer_last_name = db.Column('filer_l_nm', db.String)
     filer_suffix = db.Column(db.String)
     transaction_id = db.Column('tran_id', db.String)
-    original_sub_id = db.Column('orig_sub_id', db.Integer)
+    original_sub_id = db.Column('orig_sub_id', db.BigInteger)
     action_code = db.Column('action_cd', db.String)
     action_code_full = db.Column('action_cd_desc', db.String)
     # Auxiliary fields
@@ -772,8 +772,8 @@ class ScheduleF(PdfMixin, BaseItemized):
         lazy='joined',
     )
 
-    sub_id = db.Column(db.Integer, primary_key=True)
-    original_sub_id = db.Column('orig_sub_id', db.Integer)
+    sub_id = db.Column(db.BigInteger, primary_key=True)
+    original_sub_id = db.Column('orig_sub_id', db.BigInteger)
     committee_designated_coordinated_expenditure_indicator = db.Column('cmte_desg_coord_exp_ind', db.String)
     committee_name = db.Column('cmte_nm', db.String)
     entity_type = db.Column('entity_tp', db.String)
@@ -888,8 +888,8 @@ class ScheduleH4(BaseItemized):
     disbursement_amount = db.Column('disbursement_amount', db.Numeric(30, 2), index=True)
     schedule_type = db.Column('schedule_type', db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
-    sub_id = db.Column(db.Integer, primary_key=True)
-    original_sub_id = db.Column('orig_sub_id', db.Integer)
+    sub_id = db.Column(db.BigInteger, primary_key=True)
+    original_sub_id = db.Column('orig_sub_id', db.BigInteger)
     federal_share = db.Column('fed_share', db.Numeric(14, 2))
     nonfederal_share = db.Column('nonfed_share', db.Numeric(14, 2))
     administrative_voter_drive_activity_indicator = db.Column('admin_voter_drive_acty_ind', db.String)

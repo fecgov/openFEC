@@ -480,24 +480,19 @@ class CandidateTotalAggregateView(ApiResource):
             query = query.add_columns(
                 total.office.label("office")
             )
-            query = query.add_columns(
-                sa.case(
+            party_case = sa.case(
                     (total.party == "DFL", "DEM"),
                     (total.party == "DEM", "DEM"),
                     (total.party == "REP", "REP"),
                     else_="Other",
-                ).label("party")
-            )
-
+            ).label("party")
+            query = query.add_columns(
+                party_case
+                )
             query = query.group_by(
                 total.election_year,
                 total.office,
-                sa.case(
-                    (total.party == "DFL", "DEM"),
-                    (total.party == "DEM", "DEM"),
-                    (total.party == "REP", "REP"),
-                    else_="Other",
-                ),
+                party_case,
             )
 
         # without `aggregate_by`, aggregate by election_year only

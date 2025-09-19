@@ -458,12 +458,13 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             text("""
             INSERT INTO aouser.document
             (document_id, ao_id, category, ocrtext, fileimage, description, document_date, filename)
-            VALUES (:docid, :id, :category, :text, :text, :descr, :date, :filename)"""),
+            VALUES (:docid, :id, :category, :text, :fileimage, :descr, :date, :filename)"""),
             {
                 "docid": document["document_id"],
                 "id": ao_id,
                 "category": document["category"],
                 "text": document["text"],
+                "fileimage": document.get("fileimage", document["text"].encode("utf-8")),
                 "descr": document["description"],
                 "date": document["date"],
                 "filename": filename

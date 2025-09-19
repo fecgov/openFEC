@@ -262,9 +262,10 @@ def create_sample_db(ctx):
     """
 
     print("Loading schema...")
-    db_conn = os.getenv('SQLA_SAMPLE_DB_CONN')
+    db_conn = os.getenv('SQLA_SAMPLE_DB_CONN1')
+    db_conn2 = os.getenv('SQLA_SAMPLE_DB_CONN2')
     if not db_conn:
-        print("Error: SQLA_SAMPLE_DB_CONN env var must be set")
+        print("Error: SQLA_SAMPLE_DB_CONN1 env var must be set")
         return
     jdbc_url = to_jdbc_url(db_conn)
     result = run_migrations(ctx, jdbc_url)
@@ -281,7 +282,7 @@ def create_sample_db(ctx):
     print("Sample data loaded")
 
     print("Refreshing materialized views...")
-    os.environ["SQLA_CONN"] = db_conn  # SQLA_CONN is used by manage.py tasks
+    os.environ["SQLA_CONN"] = db_conn2  # SQLA_CONN is used by manage.py tasks
     subprocess.check_call(['python', 'cli.py', 'refresh_materialized'])
     print("Materialized views refreshed")
 

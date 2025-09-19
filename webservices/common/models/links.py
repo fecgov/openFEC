@@ -30,7 +30,7 @@ class CandidateCommitteeAlternateLink(db.Model):
     __table_args__ = {"schema": "disclosure"}
     __tablename__ = "cand_cmte_linkage_alternate"
 
-    sub_id = db.Column(db.Integer, primary_key=True, doc=docs.SUB_ID)
+    sub_id = db.Column(db.BigInteger, primary_key=True, doc=docs.SUB_ID)
     candidate_id = db.Column(
         "cand_id",
         db.String,

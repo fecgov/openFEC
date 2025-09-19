@@ -17,7 +17,7 @@ kombu==5.5.3 # Starting from celery 5.x release, the minimum required version is
 networkx==2.6.2
 prance[osv]==0.22.11.4.0
 pre-commit==2.21.0 #client-side hook triggered by operations like git commit
-psycopg2-binary==2.9.1
+psycopg==3.2.10
 python-dateutil==2.8.1
 python-dotenv>=0.20.0 # Sets variable defaults in .flaskenv file
 requests==2.32.4
