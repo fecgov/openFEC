@@ -67,20 +67,18 @@
       }
     </style>
   </head>
-  <body {% if show_banner %}style="padding-top: 50px;" {% endif %}>
-    <div id="swagger-ui"></div>
+  <body>
     {% if show_banner %}
     <div
       id="maintenance-banner"
       style="
-        background-color: #ffcc00;
-        color: #333;
+        background-color: #112e51;
+        color: #ffffff;
         padding: 12px;
         font-weight: 600;
         text-align: center;
-        position: fixed;
+        position: relative;
         top: 0;
-        left: 0;
         width: 100%;
         z-index: 9999;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -88,8 +86,10 @@
     >
       {{ status_text }} {{ status_link | safe }}
     </div>
-    <div style="height: 50px"></div>
     {% endif %}
+    <div {% if show_banner %} style="margin-top: 5px" {% endif %}>
+      <div id="swagger-ui"></div>
+    </div>
     <script type="text/javascript">
       /* {#
       CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE #} */
