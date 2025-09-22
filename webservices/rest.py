@@ -331,51 +331,28 @@ def create_app(test_config=None):
         )
 
     def get_statuspage_text():
-        try:
-            base_url = "https://fecgov.statuspage.io/api/v2"
+        def fetch_items(endpoint, item_key, prefix):
+            resp = requests.get(f"https://fecgov.statuspage.io/api/v2/{endpoint}")
+            resp.raise_for_status()
+            items = resp.json().get(item_key, [])
             messages = []
-
-            # Fetch active scheduled maintenances
-            maint_resp = requests.get(f"{base_url}/scheduled-maintenances/active.json")
-            maint_resp.raise_for_status()
-            maint_data = maint_resp.json()
-
-            maints = maint_data.get("scheduled_maintenances", [])
-            for maintenance in maints:
-                name = maintenance.get('name', 'Active Maintenance')
-                updates = maintenance.get("incident_updates", [])
-                latest_body = None
-                if updates:
-                    latest_body = updates[-1].get("body")
-                if latest_body:
-                    messages.append(f"{name}: {latest_body}")
+            for item in items:
+                name = item.get('name', f'{prefix} Item')
+                updates = item.get('incident_updates', [])
+                if updates and updates[-1].get('body'):
+                    messages.append(f"{name}: {updates[-1]['body']}")
                 else:
-                    messages.append(f"Ongoing Maintenance: {maintenance.get('name')}")
+                    messages.append(f"{prefix}: {name}")
+            return messages
 
-            # Fetch unresolved incidents
-            incident_resp = requests.get(f"{base_url}/incidents/unresolved.json")
-            incident_resp.raise_for_status()
-            incident_data = incident_resp.json()
-
-            incidents = incident_data.get("incidents", [])
-            for incident in incidents:
-                name = incident.get('name', 'Ongoing Incident')
-                updates = incident.get("incident_updates", [])
-                latest_body = None
-                if updates:
-                    latest_body = updates[-1].get("body")
-                if latest_body:
-                    messages.append(f"{name}: {latest_body}")
-                else:
-                    messages.append(f"Ongoing Incident: {maintenance.get('name')}")
-            if messages:
-                formatted = " ".join(messages)
-                return formatted
-
+        try:
+            messages = []
+            messages.extend(fetch_items('scheduled-maintenances/active.json', 'scheduled_maintenances', 'Maintenance'))
+            messages.extend(fetch_items('incidents/unresolved.json', 'incidents', 'Incident'))
+            return ' '.join(messages) if messages else ""
         except Exception as e:
             print(f"Statuspage fetch error: {e}")
-
-        return ""
+            return ""
 
     @docs.route('/swagger/')
     def api_spec():
