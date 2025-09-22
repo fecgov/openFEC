@@ -47,8 +47,8 @@ jobs:
           command: |
             sudo apt-get --allow-releaseinfo-change-suite update && sudo apt-get install -y default-jdk
             mkdir flyway
-            curl -sL https://github.com/flyway/flyway/releases/download/flyway-11.11.2/flyway-commandline-11.11.2-linux-x64.tar.gz | tar zxv -C flyway
-            echo 'export PATH=./flyway/flyway-11.11.2:$PATH' >> $BASH_ENV
+            curl -sL https://github.com/flyway/flyway/releases/download/flyway-11.13.1/flyway-commandline-11.13.1-linux-x64.tar.gz | tar zxv -C flyway
+            echo 'export PATH=./flyway/flyway-11.13.1:$PATH' >> $BASH_ENV
 
       - restore_cache:
           keys:
