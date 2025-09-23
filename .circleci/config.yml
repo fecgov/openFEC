@@ -22,7 +22,7 @@ jobs:
           POSTGRES_DB: cfdm_unit_test
 
       # elasticsearch
-      - image: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
+      - image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
         environment:
           cluster.name: elasticsearch
           xpack.security.enabled: false
@@ -47,8 +47,8 @@ jobs:
           command: |
             sudo apt-get --allow-releaseinfo-change-suite update && sudo apt-get install -y default-jdk
             mkdir flyway
-            curl -s https://repo.maven.apache.org/maven2/org/flywaydb/flyway-commandline/11.8.2/flyway-commandline-11.8.2-linux-x64.tar.gz | tar zxv -C flyway
-            echo 'export PATH=./flyway/flyway-11.8.2:$PATH' >> $BASH_ENV
+            curl -sL https://github.com/flyway/flyway/releases/download/flyway-11.11.2/flyway-commandline-11.11.2-linux-x64.tar.gz | tar zxv -C flyway
+            echo 'export PATH=./flyway/flyway-11.11.2:$PATH' >> $BASH_ENV
 
       - restore_cache:
           keys:

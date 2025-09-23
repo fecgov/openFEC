@@ -50,6 +50,8 @@ PORT = 443
 DOCS_PATH = "docs"
 RULEMAKING_PATH = "rulemaking"
 RULEMAKING_TYPE = "rulemakings"
+DISMISSED_ALL = "4"
+DISMISSED_CATEGORIES = {"3", "5", "6", "7", "8"}
 
 # =========Start rulemaking Constants==========
 RM_INDEX = "rm_index"
@@ -89,7 +91,7 @@ LEVEL_1_MAP = {
     11: "Correction to Explanation and Justification",
     12: "Final Rules and E&J",
     13: "Interim Final Rules",
-    14: "Notice of Availabilty",
+    14: "Notice of Availability",
     15: "Notice of Disposition",
     16: "Notice of Inquiry",
     17: "Supplemental NPRM",
@@ -164,7 +166,7 @@ LEVEL_1_2_MAP = {
         3: "Ex parte",
     },
     14: {
-        0: "Notice of Availabilty",
+        0: "Notice of Availability",
         1: "Open Meeting Documents",
         2: "Comments",
         3: "Ex parte",
@@ -278,7 +280,7 @@ DOC_TYPE_MAP = {
     63: "NO TIER ENTRY Sers Code :63",
     64: "Notice of Inquiry",
     65: "NO TIER ENTRY Sers Code :65",
-    66: "Notice of Availabilty",
+    66: "Notice of Availability",
     67: "NO TIER ENTRY Sers Code :67",
     68: "NO TIER ENTRY Sers Code :68",
     69: "NO TIER ENTRY Sers Code :69",

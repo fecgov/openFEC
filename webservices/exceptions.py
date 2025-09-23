@@ -47,6 +47,8 @@ TWO_YEAR_TRANSACTION_PERIOD_404 = """two_year_transaction_period not found.\
  Data exists for two_year_transaction_periods between 1976 and \
 """
 
+INVALID_ZIP = """Invalid zip code. It can not have special character"""
+
 
 class ApiError(Exception):
     status_code = 400

@@ -7,6 +7,7 @@ from webservices.common.models import db
 from webservices.api_setup import api
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
+from webservices.schemas import Form56Schema
 from webservices.common.models import (
     ScheduleE,
     ScheduleAEfile,
@@ -18,6 +19,7 @@ from webservices.resources.sched_a import ScheduleAView, ScheduleAEfileView
 from webservices.resources.sched_b import ScheduleBView, ScheduleBEfileView
 from webservices.resources.sched_e import ScheduleEView, ScheduleEEfileView
 from webservices.resources.sched_h4 import ScheduleH4View, ScheduleH4EfileView
+from webservices.resources.form_56 import Form56View
 
 
 class TestItemized(ApiBaseTest):
@@ -28,6 +30,7 @@ class TestItemized(ApiBaseTest):
         params = [
             (factories.ScheduleAFactory, ScheduleAView, ScheduleASchema),
             (factories.ScheduleBFactory, ScheduleBView, ScheduleBSchema),
+            (factories.Form56Factory, Form56View, Form56Schema),
         ]
         for factory, resource, schema in params:
             factory()
@@ -1589,3 +1592,313 @@ class TestScheduleH4(ApiBaseTest):
             )
             assert len(results) == 1
             assert results[0][column.key] == values[0]
+
+
+class TestForm56(ApiBaseTest):
+    kwargs = {'two_year_transaction_period': 2016}
+
+    def test_form56_sorting(self):
+        receipts = [
+            factories.Form56Factory(
+                report_year=2016,
+                contribution_receipt_date=datetime.date(2016, 1, 1),
+                two_year_transaction_period=2016,
+            ),
+            factories.Form56Factory(
+                report_year=2015,
+                contribution_receipt_date=datetime.date(2015, 1, 1),
+                two_year_transaction_period=2016,
+            ),
+        ]
+        response = self._response(
+            api.url_for(Form56View, sort='contribution_receipt_date', **self.kwargs)
+        )
+        self.assertEqual(
+            [each['report_year'] for each in response['results']], [2015, 2016]
+        )
+        self.assertEqual(
+            response['pagination']['last_indexes'],
+            {
+                'last_index': str(receipts[0].sub_id),
+                'last_contribution_receipt_date': receipts[
+                    0
+                ].contribution_receipt_date.isoformat(),
+            },
+        )
+
+    def test_form56_sorting_bad_column(self):
+        response = self.app.get(api.url_for(Form56View, sort='bad_column'))
+        self.assertEqual(response.status_code, 422)
+        self.assertIn(b'Cannot sort on value', response.data)
+
+    def test_form56_filter(self):
+        [
+            factories.Form56Factory(contributor_state='NY'),
+            factories.Form56Factory(contributor_state='CA'),
+        ]
+        results = self._results(
+            api.url_for(Form56View, contributor_state='CA', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['contributor_state'], 'CA')
+
+    def test_form56_filter_zip(self):
+        [
+            factories.Form56Factory(contributor_zip=96789),
+            factories.Form56Factory(contributor_zip=9678912),
+            factories.Form56Factory(contributor_zip=967891234),
+            factories.Form56Factory(contributor_zip='M4C 1M7'),
+        ]
+        results = self._results(
+            api.url_for(Form56View, contributor_zip=967893405, **self.kwargs)
+        )
+        self.assertEqual(len(results), 3)
+
+        results = self._results(
+            api.url_for(Form56View, contributor_zip='M4C 1M55', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+
+        contributor_zips = ['M4C 1M5555', 96789]
+        results = self._results(
+            api.url_for(Form56View, contributor_zip=contributor_zips, **self.kwargs)
+        )
+        self.assertEqual(len(results), 4)
+
+    def test_form56_invalid_zip(self):
+        response = self.app.get(
+            api.url_for(Form56View, contributor_zip='96%', cycle=2018)
+        )
+        self.assertEqual(response.status_code, 422)
+
+    def test_form56_filter_multi_start_with(self):
+        [factories.Form56Factory(contributor_zip=1296789)]
+        results = self._results(
+            api.url_for(Form56View, contributor_zip=96789, **self.kwargs)
+        )
+        self.assertEqual(len(results), 0)
+
+    def test_form56_filter_case_insensitive(self):
+        [
+            factories.Form56Factory(contributor_city='NEW YORK'),
+            factories.Form56Factory(contributor_city='DES MOINES'),
+        ]
+        results = self._results(
+            api.url_for(Form56View, contributor_city='new york', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['contributor_city'], 'NEW YORK')
+
+    def test_form56_filter_fulltext(self):
+        """
+        Note: this is the only test for filter_fulltext.
+        If this is removed, please add a test to test_filters.py
+        """
+        names = ['David Koch', 'George Soros']
+        filings = [  # noqa
+            factories.Form56Factory(contributor_name=name) for name in names
+        ]
+        results = self._results(
+            api.url_for(Form56View, contributor_name='soros', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['contributor_name'], 'George Soros')
+
+    def test_form56_filter_fulltext_employer(self):
+        employers = ['Acme Corporation', 'Vandelay Industries']
+        filings = [  # noqa
+            factories.Form56Factory(contributor_employer=employer)
+            for employer in employers
+        ]
+        results = self._results(
+            api.url_for(Form56View, contributor_employer='vandelay', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['contributor_employer'], 'Vandelay Industries')
+
+    def test_form56_filter_fulltext_employer_with_null(self):
+        receipts = [  # noqa
+            factories.Form56Factory(
+                contribution_receipt_date=datetime.date(2016, 6, 1),
+                two_year_transaction_period=2016,
+                contributor_employer='Vandelay Industries',
+            ),
+            factories.Form56Factory(
+                contribution_receipt_date=datetime.date(2016, 4, 1),
+                two_year_transaction_period=2016,
+                contributor_employer='Thomas Null LLC',
+            ),
+            factories.Form56Factory(
+                contribution_receipt_date=datetime.date(2016, 1, 1),
+                two_year_transaction_period=2016,
+                contributor_employer=None,
+            )
+        ]
+        results = self._results(
+            api.url_for(Form56View, contributor_employer='vandelay', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['contributor_employer'], 'Vandelay Industries')
+
+        results = self._results(
+            api.url_for(Form56View, contributor_employer='null', sort='contribution_receipt_date', **self.kwargs)
+        )
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results[0]['contributor_employer'], None)
+        self.assertEqual(results[1]['contributor_employer'], 'Thomas Null LLC')
+
+    def test_schedule_form56_fulltext_employer_and(self):
+        employers = ['Test&Test', 'Test & Test', 'Test& Test', 'Test &Test']
+        [
+            factories.Form56Factory(contributor_employer=employer)
+            for employer in employers
+        ]
+        results = self._results(
+            api.url_for(Form56View, contributor_employer='Test&Test', **self.kwargs)
+        )
+        self.assertIn(results[0]['contributor_employer'], employers)
+        results = self._results(
+            api.url_for(
+                Form56View, contributor_employer='Test & Test', **self.kwargs
+            )
+        )
+        self.assertIn(results[0]['contributor_employer'], employers)
+        results = self._results(
+            api.url_for(Form56View, contributor_employer='Test& Test', **self.kwargs)
+        )
+        self.assertIn(results[0]['contributor_employer'], employers)
+        results = self._results(
+            api.url_for(Form56View, contributor_employer='Test &Test', **self.kwargs)
+        )
+        self.assertIn(results[0]['contributor_employer'], employers)
+
+    def test_form56_filter_fulltext_occupation(self):
+        occupations = ['Attorney at Law', 'Doctor of Philosophy']
+        filings = [  # noqa
+            factories.Form56Factory(contributor_occupation=occupation)
+            for occupation in occupations
+        ]
+        results = self._results(
+            api.url_for(Form56View, contributor_occupation='doctor', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['contributor_occupation'], 'Doctor of Philosophy')
+
+    def test_form56_pagination(self):
+        filings = [
+            factories.Form56Factory(contribution_receipt_date=datetime.date(2016, 1, 1))
+            for _ in range(30)
+        ]
+        page1 = self._results(api.url_for(Form56View, **self.kwargs))
+        self.assertEqual(len(page1), 20)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page1],
+            [each.sub_id for each in filings[29:9:-1]],
+        )
+        page2 = self._results(
+            api.url_for(
+                Form56View,
+                last_index=page1[-1]['sub_id'],
+                last_contribution_receipt_date=page1[-1]['contribution_receipt_date'],
+                **self.kwargs
+            )
+        )
+        self.assertEqual(len(page2), 10)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page2],
+            [each.sub_id for each in filings[9::-1]],
+        )
+
+    def test_form56_pagination_bad_per_page(self):
+        response = self.app.get(
+            api.url_for(Form56View, two_year_transaction_period=2018, per_page=999)
+        )
+        self.assertEqual(response.status_code, 422)
+
+    def test_form56_image_number(self):
+        image_number = '12345'
+        [
+            factories.Form56Factory(),
+            factories.Form56Factory(image_number=image_number),
+        ]
+        results = self._results(
+            api.url_for(Form56View, image_number=image_number, **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['image_number'], image_number)
+
+    def test_form56_image_number_range(self):
+        [
+            factories.Form56Factory(image_number='1'),
+            factories.Form56Factory(image_number='2'),
+            factories.Form56Factory(image_number='3'),
+            factories.Form56Factory(image_number='4'),
+        ]
+        results = self._results(
+            api.url_for(
+                Form56View, min_image_number='2', two_year_transaction_period=2016
+            )
+        )
+        self.assertTrue(all(each['image_number'] >= '2' for each in results))
+        results = self._results(
+            api.url_for(
+                Form56View, max_image_number='3', two_year_transaction_period=2016
+            )
+        )
+        self.assertTrue(all(each['image_number'] <= '3' for each in results))
+        results = self._results(
+            api.url_for(
+                Form56View,
+                min_image_number='2',
+                max_image_number='3',
+                two_year_transaction_period=2016,
+            )
+        )
+        self.assertTrue(all('2' <= each['image_number'] <= '3' for each in results))
+
+    def test_form56_amount(self):
+        [
+            factories.Form56Factory(contribution_amount=50),
+            factories.Form56Factory(contribution_amount=100),
+            factories.Form56Factory(contribution_amount=150),
+            factories.Form56Factory(contribution_amount=200),
+        ]
+        results = self._results(
+            api.url_for(Form56View, min_amount=100, two_year_transaction_period=2016)
+        )
+        self.assertTrue(
+            all(each['contribution_amount'] >= 100 for each in results)
+        )
+        results = self._results(
+            api.url_for(Form56View, max_amount=150, two_year_transaction_period=2016)
+        )
+        self.assertTrue(
+            all(each['contribution_amount'] <= 150 for each in results)
+        )
+        results = self._results(
+            api.url_for(
+                Form56View,
+                min_amount=100,
+                max_amount=150,
+                two_year_transaction_period=2016,
+            )
+        )
+        self.assertTrue(
+            all(100 <= each['contribution_amount'] <= 150 for each in results)
+        )
+
+    def test_form56_invalid_two_year_transaction_period(self):
+
+        response = self.app.get(
+            api.url_for(Form56View, two_year_transaction_period=2013)
+        )
+
+        self.assertEqual(response.status_code, 422)
+        self.assertIn(b'Invalid two_year_transaction period', response.data)
+
+        response = self.app.get(
+            api.url_for(Form56View, two_year_transaction_period=1920)
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn(b'two_year_transaction_period not found', response.data)

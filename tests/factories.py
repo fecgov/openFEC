@@ -228,6 +228,23 @@ class ScheduleAFactory(BaseFactory):
         )
 
 
+class Form56Factory(BaseFactory):
+    class Meta:
+        model = models.Form56
+
+    sub_id = factory.Sequence(lambda n: n)
+    report_year = 2016
+    two_year_transaction_period = 2016
+
+    @factory.post_generation
+    def update_fulltext(obj, create, extracted, **kwargs):
+        obj.contributor_name_text = sa.func.to_tsvector(obj.contributor_name)
+        obj.contributor_employer_text = sa.func.to_tsvector(obj.contributor_employer)
+        obj.contributor_occupation_text = sa.func.to_tsvector(
+            obj.contributor_occupation
+        )
+
+
 class ScheduleBFactory(BaseFactory):
     class Meta:
         model = models.ScheduleB
