@@ -307,7 +307,7 @@ def create_app(test_config=None):
 
     @docs.route('/developers/')
     def api_ui():
-        show_banner_env = os.getenv("SHOW_BANNER", "").lower() == "true"
+        show_banner_env = env.get_credential('SHOW_BANNER', '').lower() == "true"
         banner_text = env.get_credential('BANNER_TEXT', '')
         status_text = get_statuspage_text() if show_banner_env else None
         if banner_text:
