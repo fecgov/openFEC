@@ -84,6 +84,18 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       "
     >
+      <style>
+        #maintenance-banner a {
+          color: #ffffff;
+          font-weight: bold;
+          text-decoration: none;
+          border-bottom: 1px dotted #ffffff;
+        }
+        #maintenance-banner a:hover {
+          color: #ffffff;
+          border-bottom: 1px dotted #0aacfa;
+        }
+      </style>
       {{ status_text }} {{ status_link | safe }}
     </div>
     {% endif %}

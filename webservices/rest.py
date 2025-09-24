@@ -315,8 +315,9 @@ def create_app(test_config=None):
         status_link = None
         if status_text:
             status_link = (
+                'Learn more on the '
                 '<a href="https://fecgov.statuspage.io" target="_blank" '
-                'rel="noopener noreferrer">See more at fecgov.statuspage.io</a>'
+                'rel="noopener noreferrer">FEC.gov status page</a>'
             )
         show_banner = show_banner_env and (status_text or banner_text)
 
