@@ -29,6 +29,9 @@ TEST_AO_ALIAS = "test_ao_alias"
 TEST_ARCH_MUR_INDEX = "test_arch_mur_index"
 TEST_ARCH_MUR_ALIAS = "test_arch_mur_alias"
 TEST_SEARCH_ALIAS = "test_search_alias"
+TEST_RM_INDEX = "test_rm_index"
+TEST_RM_ALIAS = "test_rm_alias"
+TEST_RM_SEARCH_ALIAS = "test_rm_search_alias"
 
 ANALYZER_SETTING = {
     "analysis": {

@@ -390,6 +390,8 @@ def get_proximity_query(location, **kwargs):
 # This function returns highlights at document nested level by default. Refactor this function to return
 # highlights at documents, documents.level_2_labels, documents.level_2_labels.level_2_docs nested levels
 def execute_search_query(query):
+    logger.warning(json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
+
     es_results = query.execute()
     # logger.debug("Rulemaking execute_search_query() es_results =" + json.dumps(
     #     es_results.to_dict(), indent=3, cls=DateTimeEncoder))

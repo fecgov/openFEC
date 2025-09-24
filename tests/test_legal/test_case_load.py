@@ -8,7 +8,7 @@ import pytest
 
 from webservices.common.models import db
 from webservices.legal.legal_docs.current_cases import get_cases, load_mur_citations
-
+from webservices.legal.constants import TEST_CASE_INDEX
 from tests.common import TEST_CONN, BaseTestCase
 
 
@@ -346,6 +346,7 @@ class TestLoadCurrentCases(BaseTestCase):
 
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
     @patch('webservices.legal.legal_docs.current_cases.get_bucket')
+    @patch('webservices.legal.legal_docs.current_cases.CASE_ALIAS', TEST_CASE_INDEX)
     def test_mur_with_disposition(self, get_bucket, get_credential):
         case_id = 1
         case_no = '1'
