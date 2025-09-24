@@ -55,7 +55,6 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
         all_legal_docs = document_dictionary.copy()
         all_legal_docs.pop("ao_citations")
         all_legal_docs.pop("mur_citations")
-        all_legal_docs.pop("rulemakings")
 
         total_all = 0
         total_all += sum(len(all_legal_docs[doc_type]) for doc_type in all_legal_docs)
