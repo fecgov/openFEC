@@ -149,10 +149,15 @@ def get_document_query_params(q, **kwargs):
 
     if doc_category_ids:
         combined_queries = []
-        doc_category_id_inner_hits = INNER_HITS.copy()
-        doc_category_id_lvl2_inner_hits = INNER_HITS.copy()
 
-        doc_category_id_inner_hits["name"] = "documents_by_category"
+        doc_category_inner_hits = {
+            "_source": False,
+            "size": 100,
+            }
+
+        doc_category_id_lvl2_inner_hits = doc_category_inner_hits.copy()
+
+        doc_category_inner_hits["name"] = "documents_by_category"
         doc_category_id_lvl2_inner_hits["name"] = "documents_by_category_lvl2"
 
         # Search in documents.doc_category_id
@@ -160,7 +165,7 @@ def get_document_query_params(q, **kwargs):
             Q("nested",
               path="documents",
               query=Q("terms", **{"documents.doc_category_id": doc_category_ids}),
-              inner_hits=doc_category_id_inner_hits
+              inner_hits=doc_category_inner_hits
               )
         )
 
@@ -186,12 +191,20 @@ def get_document_query_params(q, **kwargs):
                 inner_hits=INNER_HITS)
         )
 
+        inner_hits_lvl_2 = {
+            "_source": False,
+            "highlight": {
+                "require_field_match": False,
+                "fields": {"documents.level_2_labels.level_2_docs.text": {}},
+            },
+            "size": 100,
+        }
         # Search in documents.level_2_labels.level_2_docs.text
         combined_queries.append(
             Q("nested",
                 path="documents.level_2_labels.level_2_docs",
                 query=Q("simple_query_string", query=q, fields=["documents.level_2_labels.level_2_docs.text"]),
-                inner_hits=INNER_HITS)
+                inner_hits=inner_hits_lvl_2)
         )
         combined_queries.append(Q("simple_query_string", query=q, fields=["description"]))
 
