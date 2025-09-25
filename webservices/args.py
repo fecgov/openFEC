@@ -468,6 +468,7 @@ rulemaking_search = {
     'proximity_filter': fields.Str(validate=validate.OneOf(["after", "before"]),
                                    metadata={'description': docs.PROXIMITY_FILTER}),
     'proximity_filter_term': fields.Str(required=False, metadata={'description': docs.PROXIMITY_FILTER_TERM}),
+    'q_exclude': IStr(required=False, metadata={'description': docs.Q_EXCLUDE}),
 }
 
 citation = {

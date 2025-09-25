@@ -120,6 +120,18 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
                 )
             )
         )
+        must_not.append(
+            Q(
+                "nested",
+                path="documents.level_2_labels.level_2_docs",
+                query=Q(
+                    "simple_query_string",
+                    query=kwargs.get("q_exclude"),
+                    fields=["documents.level_2_labels.level_2_docs.text"]
+                )
+            )
+        )
+        query = query.query("bool", must_not=must_not)
 
     # Sort regulations by 'rm_no'. Default sort order is desc.
     sort_field = kwargs.get("sort")
@@ -403,6 +415,7 @@ def get_proximity_query(location, **kwargs):
 # This function returns highlights at document nested level by default. Refactor this function to return
 # highlights at documents, documents.level_2_labels, documents.level_2_labels.level_2_docs nested levels
 def execute_search_query(query):
+    logger.warning(json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     es_results = query.execute()
     # logger.debug("Rulemaking execute_search_query() es_results =" + json.dumps(
     #     es_results.to_dict(), indent=3, cls=DateTimeEncoder))
