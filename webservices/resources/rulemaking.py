@@ -222,6 +222,8 @@ def get_document_query_params(q, **kwargs):
                 query=Q("simple_query_string", query=q, fields=["documents.level_2_labels.level_2_docs.text"]),
                 inner_hits=inner_hits_lvl_2)
         )
+
+        # Search in description
         combined_queries.append(Q("simple_query_string", query=q, fields=["description"]))
 
         q_should_clauses = Q("bool", should=combined_queries, minimum_should_match=1)
@@ -420,13 +422,13 @@ def get_proximity_query(location, **kwargs):
 # highlights at documents, documents.level_2_labels, documents.level_2_labels.level_2_docs nested levels
 def execute_search_query(query):
     es_results = query.execute()
-    # logger.debug("Rulemaking execute_search_query() es_results =" + json.dumps(
-    #     es_results.to_dict(), indent=3, cls=DateTimeEncoder))
+
+    # logger.warning("Rulemaking execute_search_query() es_results =" + json.dumps(
+    #    es_results.to_dict(), indent=3, cls=DateTimeEncoder))
 
     formatted_hits = []
     for hit in es_results:
         formatted_hit = hit.to_dict()
-        formatted_hit["document_highlights"] = {}
         formatted_hits.append(formatted_hit)
 
         # The 'inner_hits' section is in hit.meta and 'highlight' & 'nested' are in inner_hit.meta
@@ -434,14 +436,42 @@ def execute_search_query(query):
             if "documents" in hit.meta.inner_hits:
                 for inner_hit in hit.meta.inner_hits["documents"].hits:
                     if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
-                        # set "document_highlights" in return hit
-                        offset = inner_hit.meta["nested"]["offset"]
-                        highlights = inner_hit.meta.highlight.to_dict().values()
-                        formatted_hit["document_highlights"][offset] = [
-                            hl for hl_list in highlights for hl in hl_list
+                        doc_offset = inner_hit.meta.nested.offset
+
+                        highlights = [
+                            hl
+                            for hl_list in inner_hit.meta.highlight.to_dict().values()
+                            for hl in hl_list
                         ]
 
-    # logger.debug("formatted_hits =" + json.dumps(formatted_hits, indent=3, cls=DateTimeEncoder))
+                        # Attach highlight directly in the document object
+                        doc = formatted_hit["documents"][doc_offset]
+                        doc.setdefault("highlights", []).extend(highlights)
+
+            key = "documents.level_2_labels.level_2_docs"
+            if key in hit.meta.inner_hits:
+                for inner_hit in hit.meta.inner_hits[key].hits:
+                    if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
+
+                        nested = inner_hit.meta.nested
+                        offsets = []
+                        while nested:
+                            offsets.append(nested["offset"])
+                            nested = getattr(nested, "_nested", None)
+
+                        doc_offset, label_offset, doc2_offset = offsets
+
+                        highlights = [
+                            hl
+                            for hl_list in inner_hit.meta.highlight.to_dict().values()
+                            for hl in hl_list
+                        ]
+
+                        doc = formatted_hit["documents"][doc_offset]
+                        label = doc["level_2_labels"][label_offset]
+                        doc2 = label["level_2_docs"][doc2_offset]
+
+                        doc2.setdefault("highlights", []).extend(highlights)
 
     count_dict = es_results.hits.total
     return formatted_hits, count_dict["value"]
