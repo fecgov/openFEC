@@ -251,12 +251,15 @@ class TestRuleMakingDocsElasticsearch(ElasticSearchBaseTest):
         response = self._results_rm(api.url_for(RulemakingSearch, q=q_lvl_one))
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0]["rm_no"], "2024-10")
+        self.assertIn(q_lvl_one, response[0]["documents"][0]["highlights"][0])
 
-        q_lvl_two = "\"sixth lvl 2\""
+        q_lvl_two = "sixthlvl2"
         response = self._results_rm(api.url_for(RulemakingSearch, q=q_lvl_two))
         self.assertEqual(len(response), 2)
         self.assertEqual(response[0]["rm_no"], "2024-08")
         self.assertEqual(response[1]["rm_no"], "2022-06")
+        self.assertIn(q_lvl_two, response[0]["documents"][0]["level_2_labels"][1]["level_2_docs"][3]["highlights"][0])
+        self.assertIn(q_lvl_two, response[1]["documents"][0]["level_2_labels"][1]["level_2_docs"][3]["highlights"][0])
 
         q_description = "\"Form 3Z\""
         response = self._results_rm(api.url_for(RulemakingSearch, q=q_description))
