@@ -3,10 +3,13 @@ import hashlib
 import logging
 import datetime
 import re
+import subprocess
+import sys
+import json
 
 from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
-from postgres_copy import query_entities, format_flags
+from postgres_copy import query_entities
 from celery_once import QueueOnce
 from smart_open import smart_open
 from celery import shared_task
@@ -157,21 +160,34 @@ def copy_to(source, dest, engine, **flags):
 
     sql = compiled.string
     params = compiled.params
-    conn = engine.raw_connection()
     array_keys = getattr(source, '_array_cast_keys', set())
 
     if "POSTCOMPILE" in sql:
         sql = rebind_postcompile(sql)
         params = convert_lists_to_tuples(params, array_keys)
 
-    try:
-        with conn.cursor() as cursor:
-            query = cursor.mogrify(sql, params).decode()
-            formatted_flags = f"({format_flags(flags)})" if flags else ""
-            copy_sql = f"COPY ({query}) TO STDOUT {formatted_flags}"
-            cursor.copy_expert(copy_sql, dest)
-    finally:
-        conn.close()
+    with engine.connect() as conn:
+        raw_conn = conn.connection.dbapi_connection
+        with raw_conn.cursor() as cursor:
+            bound_query = cursor.mogrify(sql, params).decode()
+
+    # copy_expert separate process wo psycogreen
+    url = engine.url
+    config = {
+        'host': url.host,
+        'port': url.port,
+        'database': url.database,
+        'user': url.username,
+        'password': url.password,
+        'query': bound_query,
+        'flags': flags
+    }
+
+    result = subprocess.run([
+        sys.executable, 'webservices/tasks/copy_worker.py'
+    ], input=json.dumps(config), text=True, stdout=subprocess.PIPE, check=True)
+
+    dest.write(result.stdout.encode('utf-8'))
 
 
 def rebind_postcompile(sql):

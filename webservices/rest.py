@@ -68,6 +68,7 @@ from webservices.tasks.utils import redis_url
 from webservices.api_setup import api, v1
 from celery import signals
 import requests
+import psycogreen.gevent
 
 
 # Variables NTC
@@ -108,6 +109,7 @@ parser = FlaskRestParser()
 
 
 def create_app(test_config=None):
+    psycogreen.gevent.patch_psycopg()
     app = Flask(__name__)
     app.url_map.strict_slashes = False
     # app.debug = True
