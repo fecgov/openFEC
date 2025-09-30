@@ -10,17 +10,18 @@ from webtest import TestApp
 from webservices.rest import create_app, db
 from webservices import __API_VERSION__
 
-
 from webservices.legal.constants import (TEST_CASE_INDEX, TEST_ARCH_MUR_INDEX, TEST_AO_INDEX,
-                                         TEST_CASE_ALIAS, TEST_ARCH_MUR_ALIAS, TEST_AO_ALIAS)
+                                         TEST_CASE_ALIAS, TEST_ARCH_MUR_ALIAS, TEST_AO_ALIAS,
+                                         TEST_RM_INDEX, TEST_RM_ALIAS)
 
 from webservices.legal.utils_es import create_test_indices, create_es_client
 from tests.test_legal.test_legal_data import document_dictionary
+from tests.test_legal.test_rm_data import rm_document_dictionary
 from jdbc_utils import to_jdbc_url
 from sqlalchemy import text
 
 TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
-ALL_INDICES = [TEST_CASE_INDEX, TEST_AO_INDEX, TEST_ARCH_MUR_INDEX]
+ALL_INDICES = [TEST_CASE_INDEX, TEST_AO_INDEX, TEST_ARCH_MUR_INDEX, TEST_RM_INDEX]
 
 
 def _setup_extensions(db):
@@ -212,7 +213,7 @@ class ElasticSearchBaseTest(BaseTestCase):
     def _results_rm(self, qry):
         response_rm = self._response_rm(qry)
         self.assertNotEqual(response_rm["total_rulemakings"], 0)
-        return response_rm["total_rulemakings"]
+        return response_rm["rulemakings"]
 
 
 def _create_all_indices():
@@ -236,10 +237,11 @@ def _insert_all_documents(es_client):
     insert_documents("advisory_opinions", TEST_AO_ALIAS, es_client)
     insert_documents("ao_citations", TEST_AO_ALIAS, es_client)
     insert_documents("mur_citations", TEST_CASE_ALIAS, es_client)
+    insert_documents("rulemakings", TEST_RM_ALIAS, es_client, rm_document_dictionary)
 
 
-def insert_documents(doc_type, index, es_client):
-    for doc in document_dictionary[doc_type]:
+def insert_documents(doc_type, index, es_client, doc_dict=document_dictionary):
+    for doc in doc_dict[doc_type]:
         es_client.index(index=index, body=doc)
 
     wait_for_refresh(es_client, index)

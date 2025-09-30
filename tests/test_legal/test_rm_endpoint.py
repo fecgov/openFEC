@@ -1,14 +1,14 @@
-from tests.common import ElasticSearchBaseTest
+from tests.common import ElasticSearchBaseTest, rm_document_dictionary
 from webservices.resources.rulemaking import RulemakingSearch
 from webservices.api_setup import api
-# from datetime import datetime
-from webservices.legal.constants import TEST_SEARCH_ALIAS
+from datetime import datetime
+from webservices.legal.constants import TEST_RM_SEARCH_ALIAS
 
 import unittest.mock as mock
 # import logging
 
 
-@mock.patch("webservices.resources.legal.SEARCH_ALIAS", TEST_SEARCH_ALIAS)
+@mock.patch("webservices.resources.rulemaking.RM_SEARCH_ALIAS", TEST_RM_SEARCH_ALIAS)
 class TestRuleMakingDocsElasticsearch(ElasticSearchBaseTest):
     wrong_date_format = "01/20/24"
 
@@ -39,233 +39,285 @@ class TestRuleMakingDocsElasticsearch(ElasticSearchBaseTest):
             assert response.status_code == 200
             assert response.json["total_rulemakings"] == 0
 
-    # def check_doc_filters(self, params, field_name, compare_values):
-    #     response = self._results_ao(api.url_for(UniversalSearch, **params))
-    #     # logging.info(response)
+    def test_docs(self):
+        response = self._results_rm(api.url_for(RulemakingSearch))
+        # logging.info(response)
 
-    #     assert all(any(
-    #         doc[field_name] in compare_values
-    #         for doc in ao["documents"])
-    #         for ao in response)
+        self.assertEqual(len(response), len(rm_document_dictionary["rulemakings"]))
 
-    # def test_ao_filters(self):
-    #     filters = [
-    #         [{"ao_no": "2014-19"}, "no", False, False],
-    #         [{"ao_no": ["2014-22", "2024-12",]}, "no", True, False],
-    #         [{"ao_name": "McCutcheon"}, "name", False, False],
-    #         [{"ao_name": ["Fake Name", "ActBlue"]}, "name", True, False],
-    #         [{"ao_is_pending": True}, "is_pending", False, True],
-    #         [{"ao_status": "Final"}, "status", False, False],
-    #         [{"ao_year": 2024}, "ao_year", True, True],
-    #     ]
+    def test_rulemaking_filters(self):
+        filters = [
+            [{"rm_no": "2024-10"}, "rm_no", False, False],
+            [{"rm_no": ["2024-10", "2024-08",]}, "rm_no", True, False],
+            [{"rm_name": "Form 3Z"}, "rm_name", False, False],
+            # [{"rm_name":
+            #  ["\"Amendments of Rules Regarding Contributions from Untraceable Electronic Payment Methods\"",
+            #   "Form 3Z"]}, "rm_name", True, False],
+            [{"is_open_for_comment": True}, "is_open_for_comment", False, True],
+            [{"rm_year": 2022}, "rm_year", True, True],
+        ]
 
-    #     for filter in filters:
-    #         self.check_filters(filter[0], filter[1], filter[2])
-    #         self.check_incorrect_values({list(filter[0].keys())[0]: "Incorrect"}, filter[3])
+        for filter in filters:
+            self.check_filters(filter[0], filter[1], filter[2])
+            self.check_incorrect_values({list(filter[0].keys())[0]: "Incorrect"}, filter[3])
 
-    # def test_ao_requestor_filter(self):
-    #     requestor = "Jane Doe"
-    #     response = self._results_ao(api.url_for(UniversalSearch, ao_requestor=requestor))
-    #     # logging.info(response)
+    def test_sort(self):
+        sort = "rm_no"
+        response = self._results_rm(api.url_for(RulemakingSearch, sort=sort))
 
-    #     assert all(requestor in doc["requestor_names"] for doc in response)
-    #     self.check_incorrect_values({"ao_requestor": "Incorrect"}, False)
+        self.assertEqual(response[0]["rm_no"], "2022-06")
+        self.assertEqual(response[1]["rm_no"], "2024-04")
+        self.assertEqual(response[2]["rm_no"], "2024-08")
+        self.assertEqual(response[3]["rm_no"], "2024-10")
 
-    #     types = ["5", "15"]
-    #     requstor_type_full = [REQUESTOR_TYPES["5"], REQUESTOR_TYPES["15"]]
-    #     response = self._results_ao(api.url_for(UniversalSearch, ao_requestor_type=types))
-    #     # logging.info(response)
+        sort = "-rm_no"
+        response = self._results_rm(api.url_for(RulemakingSearch, sort=sort))
 
-    #     assert all(any(requestor in requstor_type_full
-    #                    for requestor in doc["requestor_types"])
-    #                for doc in response)
+        self.assertEqual(response[0]["rm_no"], "2024-10")
+        self.assertEqual(response[1]["rm_no"], "2024-08")
+        self.assertEqual(response[2]["rm_no"], "2024-04")
+        self.assertEqual(response[3]["rm_no"], "2022-06")
 
-    #     type = "15"
-    #     response = self._results_ao(api.url_for(UniversalSearch, ao_requestor_type=type))
-    #     # logging.info(response)
+    def test_is_key_document_filter(self):
+        is_key_document = True
+        response = self._results_rm(api.url_for(RulemakingSearch, is_key_document=is_key_document))
+        assert all(rulemaking["key_documents"] for rulemaking in response)
 
-    #     assert all(REQUESTOR_TYPES[type] in doc["requestor_types"] for doc in response)
+        self.check_incorrect_values({"is_key_document": "IncorrectValue"}, True)
 
-    #     self.check_incorrect_values({"ao_requestor_type": "22"}, True)
+    def test_filename_filter(self):
+        level_one_filename = "NOA"
+        response = self._results_rm(api.url_for(RulemakingSearch, filename=level_one_filename))
 
-    # def test_ao_commenter_filter(self):
-    #     commenter = "Francis Beaver"
-    #     response = self._results_ao(api.url_for(UniversalSearch, ao_commenter=commenter))
-    #     # logging.info(response)
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0]["rm_no"], "2024-08")
 
-    #     assert all(commenter in doc["commenter_names"] for doc in response)
-    #     self.check_incorrect_values({"ao_commenter": "Incorrect"}, False)
+        level_two_filename = "REG 2024-04"
+        response = self._results_rm(api.url_for(RulemakingSearch, filename=level_two_filename))
 
-    # def test_ao_representative_filter(self):
-    #     representative = "Chalmers, Adams, Backer & Kaufman, LLC"
-    #     response = self._results_ao(api.url_for(UniversalSearch, ao_representative=representative))
-    #     # logging.info(response)
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0]["rm_no"], "2024-04")
 
-    #     assert all(representative in doc["representative_names"] for doc in response)
-    #     self.check_incorrect_values({"ao_representative": "Incorrect"}, False)
+        self.check_incorrect_values({"filename": "IncorrectValue"}, False)
 
-    # def test_doc_cat_id_filter(self):
-    #     ao_doc_cat_id = "C"
-    #     self.check_doc_filters({"ao_doc_category_id": ao_doc_cat_id}, "ao_doc_category_id", ao_doc_cat_id)
+    def test_entity_filters(self):
+        entity_role_type = 4
+        entity_role_type_list = [4, 5]
+        response = self._results_rm(api.url_for(RulemakingSearch, entity_role_type=entity_role_type))
 
-    #     ao_doc_cat_ids = ["C", "V"]
-    #     self.check_doc_filters({"ao_doc_category_id": ao_doc_cat_ids}, "ao_doc_category_id", ao_doc_cat_ids)
+        self.assertEqual(len(response), 2)
+        assert all(
+            any(entity.get("role") == "Officer/Representative" for entity in rulemaking.get("rm_entities", []))
+            for rulemaking in response
+        )
 
-    #     self.check_incorrect_values({"ao_doc_category_id": "P"}, True)
+        response = self._results_rm(api.url_for(RulemakingSearch, entity_role_type=entity_role_type_list))
 
-    # def test_filename_filter(self):
-    #     filename = "AO_2014-19_(ActBlue)_Final_(1.15.15)"
-    #     self.check_doc_filters({"filename": filename}, "filename", filename)
+        self.assertEqual(len(response), 3)
+        assert all(
+            any(
+                entity.get("role") in
+                ("Commenter", "Officer/Representative") for entity in rulemaking.get("rm_entities", []))
+            for rulemaking in response
+        )
 
-    #     filename = "202412R_1"
-    #     self.check_doc_filters({"filename": filename}, "filename", filename)
+        self.check_incorrect_values({"entity_role_type": "IncorrectValue"}, True)
 
-    #     self.check_incorrect_values({"filename": "somefilename.pdf"}, False)
+        entity_name = "Junkin"
 
-    # def test_sort_by_rm_no(self):
-    #     sort = "-rm_no"
-    #     response_rm = self._results_rm(api.url_for(RulemakingSearch, sort=sort))
-    #     logging.info(response_rm)
-    #     # sort by rm_no and rm_serial for correct numerical desc ordering.
-    #     # Ex: 1980-100, 1980-11, 1980-10
-    #     self.assertEqual(response_rm[0]["rm_no"], "2024-10")
-    #     self.assertEqual(response_rm[1]["rm_no"], "2014-19")
-    #     self.assertEqual(response_rm[2]["rm_no"], "1980-100")
-    #     self.assertEqual(response_rm[3]["rm_no"], "1980-11")
-    #     self.assertEqual(response_rm[4]["rm_no"], "1980-10")
+        response = self._results_rm(api.url_for(RulemakingSearch, entity_name=entity_name))
 
-    #     sort = "rm_no"
-    #     response = self._results_ao(api.url_for(RulemakingSearch, sort=sort))
-    #     # logging.info(response)
-    #     # sort by ao_year and ao_serial for correct numerical asc ordering.
-    #     # Ex: 1980-10, 1980-11, 1980-100
-    #     self.assertEqual(response[0]["rm_no"], "1980-10")
-    #     self.assertEqual(response[1]["rm_no"], "1980-11")
-    #     self.assertEqual(response[2]["rm_no"], "1980-100")
-    #     self.assertEqual(response[3]["rm_no"], "2014-19")
-    #     self.assertEqual(response[4]["rm_no"], "2024-12")
+        self.assertEqual(len(response), 1)
+        assert all(
+            any(entity_name.lower() in entity.get("name", "").lower() for entity in rulemaking.get("rm_entities", []))
+            for rulemaking in response
+        )
 
-    # def test_q_filters(self):
-    #     q = "fourth"
-    #     response = self._results_ao(api.url_for(UniversalSearch, q=q))
-    #     # logging.info(response)
+        self.check_incorrect_values({"entity_name": "IncorrectValue"}, False)
 
-    #     assert all(
-    #         all(q in highlight
-    #             for highlight in ao["highlights"])
-    #         for ao in response
-    #     )
-    #     q_exclude = "Random"
-    #     response = self._results_ao(api.url_for(UniversalSearch, q_exclude=q_exclude))
-    #     # logging.info(response)
+    def check_date(self, rulemaking_column, query_date, response, is_min):
+        if is_min:
+            assert all(
+                any(
+                    datetime.strptime(date_str, "%Y-%m-%d") >= query_date
+                    for date_str in rulemaking.get(rulemaking_column, [])
+                )
+                for rulemaking in response
+            )
+        else:
+            assert all(
+                any(
+                    datetime.strptime(date_str, "%Y-%m-%d") <= query_date
+                    for date_str in rulemaking.get(rulemaking_column, [])
+                )
+                for rulemaking in response
+            )
 
-    #     self.assertEqual(len(response), 1)
-    #     self.assertEqual(response[0]["ao_no"], "2014-19")
+    def test_fed_registry_date_filter(self):
+        federal_registry_publish_date = "2023-02-22"
+        query_date = datetime.strptime(federal_registry_publish_date, "%Y-%m-%d")
 
-    # def test_q_proximity_filters(self):
-    #     search_phrase = "Random document third ao"
-    #     proximity_filter = "after"
-    #     proximity_filter_term = "document"
-    #     max_gaps = 3
+        response = self._results_rm(
+            api.url_for(RulemakingSearch, min_federal_registry_publish_date=federal_registry_publish_date))
+        # logging.info(response)
 
-    #     response = self._results_ao(api.url_for(UniversalSearch,
-    #                                             q_proximity=search_phrase,
-    #                                             proximity_filter=proximity_filter,
-    #                                             proximity_filter_term=proximity_filter_term,
-    #                                             max_gaps=max_gaps))
+        self.assertEqual(len(response), 3)
+        self.check_date("fr_publication_dates", query_date, response, True)
 
-    #     self.assertEqual(len(response), 1)
-    #     self.assertEqual(response[0]["ao_no"], "2024-12")
+        response = self._results_rm(
+            api.url_for(RulemakingSearch, max_federal_registry_publish_date=federal_registry_publish_date))
+        # logging.info(response)
 
-    #     multiple_phrases = ["proximity document", "fourth ao"]
-    #     max_gaps = 3
+        self.assertEqual(len(response), 1)
+        self.check_date("fr_publication_dates", query_date, response, False)
 
-    #     response = self._results_ao(api.url_for(UniversalSearch,
-    #                                             q_proximity=multiple_phrases,
-    #                                             proximity_filter=proximity_filter,
-    #                                             proximity_preserve_order=True,
-    #                                             proximity_filter_term=proximity_filter_term,
-    #                                             max_gaps=max_gaps))
-    #     self.assertEqual(len(response), 1)
-    #     self.assertEqual(response[0]["ao_no"], "2014-19")
+        filters = ["min_federal_registry_publish_date", "max_federal_registry_publish_date"]
 
-    #     self.check_incorrect_values({"q_proximity": search_phrase, "max_gaps": 1}, False)
+        for filter in filters:
+            self.check_incorrect_values({filter: self.wrong_date_format}, True)
 
-    #     self.check_incorrect_values(
-    #         {"q_proximity": [multiple_phrases[1], multiple_phrases[0]],
-    #          "proximity_preserve_order": True,
-    #          "max_gaps": 3, }, False)
+    def test_hearing_date_filter(self):
+        hearing_date = "2024-11-15"
+        query_date = datetime.strptime(hearing_date, "%Y-%m-%d")
 
-    # def check_date(self, ao_column, query_date, response, is_min):
+        response = self._results_rm(
+            api.url_for(RulemakingSearch, min_hearing_date=hearing_date))
+        # logging.info(response)
 
-    #     if is_min:
-    #         assert all(
-    #             datetime.strptime(ao[ao_column], "%Y-%m-%d") >= query_date
-    #             for ao in response
-    #         )
-    #     else:
-    #         assert all(
-    #             datetime.strptime(ao[ao_column], "%Y-%m-%d") <= query_date
-    #             for ao in response
-    #         )
+        self.assertEqual(len(response), 1)
+        self.check_date("hearing_dates", query_date, response, True)
 
-    # def test_issue_date_filter(self):
-    #     issue_date = "2020-01-01"
-    #     query_date = datetime.strptime(issue_date, "%Y-%m-%d")
+        response = self._results_rm(
+            api.url_for(RulemakingSearch, max_hearing_date=hearing_date))
+        # logging.info(response)
 
-    #     response = self._results_ao(api.url_for(UniversalSearch, ao_min_issue_date=issue_date))
-    #     # logging.info(response)
-    #     self.check_date("issue_date", query_date, response, True)
+        self.assertEqual(len(response), 2)
+        self.check_date("hearing_dates", query_date, response, False)
 
-    #     response = self._results_ao(api.url_for(UniversalSearch, ao_max_issue_date=issue_date))
-    #     # logging.info(response)
-    #     self.check_date("issue_date", query_date, response, False)
+        filters = ["min_hearing_date", "max_hearing_date"]
 
-    #     filters = ["ao_min_issue_date", "ao_max_issue_date"]
+        for filter in filters:
+            self.check_incorrect_values({filter: self.wrong_date_format}, True)
 
-    #     for filter in filters:
-    #         self.check_incorrect_values({filter: self.wrong_date_format}, True)
+    def test_vote_date_filter(self):
+        vote_date = "2022-12-20"
+        query_date = datetime.strptime(vote_date, "%Y-%m-%d")
 
-    # def test_request_date_filter(self):
-    #     request_date = "2020-01-01"
-    #     query_date = datetime.strptime(request_date, "%Y-%m-%d")
+        response = self._results_rm(
+            api.url_for(RulemakingSearch, min_vote_date=vote_date))
+        # logging.info(response)
 
-    #     response = self._results_ao(api.url_for(UniversalSearch, ao_min_request_date=request_date))
-    #     # logging.info(response)
-    #     self.check_date("request_date", query_date, response, True)
+        self.assertEqual(len(response), 3)
+        self.check_date("vote_dates", query_date, response, True)
 
-    #     response = self._results_ao(api.url_for(UniversalSearch, ao_max_request_date=request_date))
-    #     # logging.info(response)
-    #     self.check_date("request_date", query_date, response, False)
+        response = self._results_rm(
+            api.url_for(RulemakingSearch, max_vote_date=vote_date))
+        # logging.info(response)
 
-    #     filters = ["ao_min_request_date", "ao_max_request_date"]
+        self.assertEqual(len(response), 1)
+        self.check_date("vote_dates", query_date, response, False)
 
-    #     for filter in filters:
-    #         self.check_incorrect_values({filter: self.wrong_date_format}, True)
+        filters = ["min_vote_date", "max_vote_date"]
 
-    # def test_doc_date_filter(self):
-    #     document_date = "2022-12-01"
-    #     query_date = datetime.strptime(document_date, "%Y-%m-%d")
+        for filter in filters:
+            self.check_incorrect_values({filter: self.wrong_date_format}, True)
 
-    #     response = self._results_ao(api.url_for(UniversalSearch, ao_min_document_date=document_date))
-    #     # logging.info(response)
+    def test_doc_category_id_filter(self):
+        category_lvl_one = 6
+        response = self._results_rm(api.url_for(RulemakingSearch, doc_category_id=category_lvl_one))
+        self.assertEqual(len(response), 2)
+        self.assertEqual(response[0]["rm_no"], "2024-08")
+        self.assertEqual(response[1]["rm_no"], "2022-06")
 
-    #     assert all(any(
-    #             datetime.strptime(doc["date"], "%Y-%m-%dT%H:%M:%S") >= query_date
-    #             for doc in ao["documents"])
-    #         for ao in response
-    #     )
+        category_lvl_one_list = [4, 6]
+        response = self._results_rm(api.url_for(RulemakingSearch, doc_category_id=category_lvl_one_list))
+        self.assertEqual(len(response), 4)
 
-    #     response = self._results_ao(api.url_for(UniversalSearch, ao_max_document_date=document_date))
-    #     # logging.info(response)
+        category_lvl_two = 5
+        response = self._results_rm(api.url_for(RulemakingSearch, doc_category_id=category_lvl_two))
+        self.assertEqual(len(response), 3)
+        self.assertEqual(response[0]["rm_no"], "2024-08")
+        self.assertEqual(response[1]["rm_no"], "2024-04")
+        self.assertEqual(response[2]["rm_no"], "2022-06")
 
-    #     assert all(any(
-    #             datetime.strptime(doc["date"], "%Y-%m-%dT%H:%M:%S") <= query_date
-    #             for doc in ao["documents"])
-    #         for ao in response
-    #     )
+        category_lvl_two_list = [5, 7]
+        response = self._results_rm(api.url_for(RulemakingSearch, doc_category_id=category_lvl_two_list))
+        self.assertEqual(len(response), 4)
 
-    #     filters = ["ao_min_document_date", "ao_max_document_date",]
+        self.check_incorrect_values({"doc_category_id": "IncorrectValue"}, True)
 
-    #     for filter in filters:
-    #         self.check_incorrect_values({filter: self.wrong_date_format}, True)
+    def test_q_filter(self):
+        q_lvl_one = "level1test"
+        response = self._results_rm(api.url_for(RulemakingSearch, q=q_lvl_one))
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0]["rm_no"], "2024-10")
+
+        q_lvl_two = "\"sixth lvl 2\""
+        response = self._results_rm(api.url_for(RulemakingSearch, q=q_lvl_two))
+        self.assertEqual(len(response), 2)
+        self.assertEqual(response[0]["rm_no"], "2024-08")
+        self.assertEqual(response[1]["rm_no"], "2022-06")
+
+        q_description = "\"Form 3Z\""
+        response = self._results_rm(api.url_for(RulemakingSearch, q=q_description))
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0]["rm_no"], "2024-04")
+
+        self.check_incorrect_values({"q": "IncorrectValue"}, False)
+
+    def test_q_prox_filter(self):
+        q_prox_lvl_one = ["Fourth RM", "lvl1"]
+        max_gaps = 2
+
+        response = self._results_rm(api.url_for(RulemakingSearch,
+                                                q_proximity=q_prox_lvl_one,
+                                                proximity_preserve_order=True,
+                                                max_gaps=max_gaps))
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0]["rm_no"], "2022-06")
+
+        q_prox_lvl_two = ["fourth lvl 2", "Second RM"]
+        max_gaps = 3
+
+        response = self._results_rm(api.url_for(RulemakingSearch,
+                                                q_proximity=q_prox_lvl_two,
+                                                proximity_preserve_order=False,
+                                                max_gaps=max_gaps))
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0]["rm_no"], "2024-08")
+
+        q_prox_description = "RM lvl 2"
+        proximity_filter = "before"
+        proximity_filter_term = "First"
+        max_gaps = 3
+
+        response = self._results_rm(api.url_for(RulemakingSearch,
+                                                q_proximity=q_prox_description,
+                                                proximity_filter=proximity_filter,
+                                                proximity_filter_term=proximity_filter_term,
+                                                max_gaps=max_gaps))
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0]["rm_no"], "2024-10")
+
+        self.check_incorrect_values({"q_proximity": "Incorrect value", "max_gaps": 1}, False)
+
+    def test_all_nested_filters_together(self):
+        q = "\"REG 2024-10 Civil Monetary\""
+        q_proximity = ["First RM", "first lvl 2"]
+        max_gaps = 3
+        doc_category_id = 7
+        is_key_document = False
+        entity_name = "Fake"
+        entity_role = 2
+
+        response = self._results_rm(api.url_for(RulemakingSearch,
+                                                q=q,
+                                                q_proximity=q_proximity,
+                                                max_gaps=max_gaps,
+                                                doc_category_id=doc_category_id,
+                                                is_key_document=is_key_document,
+                                                entity_name=entity_name,
+                                                entity_role_type=entity_role))
+
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0]["rm_no"], "2024-10")

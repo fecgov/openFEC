@@ -45,7 +45,8 @@ TEST_INDEX_DICT = {
         constants.TEST_AO_INDEX: (ao_mapping.AO_MAPPING, constants.TEST_AO_ALIAS,
                                   constants.TEST_SEARCH_ALIAS),
         constants.TEST_ARCH_MUR_INDEX: (arch_mur_mapping.ARCH_MUR_MAPPING,
-                                        constants.TEST_ARCH_MUR_ALIAS, constants.TEST_SEARCH_ALIAS)
+                                        constants.TEST_ARCH_MUR_ALIAS, constants.TEST_SEARCH_ALIAS),
+        constants.TEST_RM_INDEX: (rm_mapping.RM_MAPPING, constants.TEST_RM_ALIAS, constants.TEST_RM_SEARCH_ALIAS)
 }
 
 
