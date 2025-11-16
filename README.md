@@ -815,3 +815,27 @@ You may need to run `flyway` manually in order to test migrations locally, or to
 
 - `-url` specifies the database URL. This is a JDBC URL of the form `jdbc:postgresql://<hostname>:<port>/<database>?user=<username>&password=<password>`.
 - `-locations` specifies the directory where the migrations are stored. This is a value of the form `filesystem:<directory-path>`. In our case, if run from the project root, it would be `-locations=filesystem:data/migration`.
+\n\n## Community Contributions
+## Austin's PRC Donation Signal
+[View Analysis](austin-prc-signal/analysis.ipynb)
+
+- 65K PRC-linked donations timed to 10 flashpoints
+- Pearson r = 0.82 correlation
+- Reproducible Jupyter notebook
+
+Forked & extended by [@Leerrooy95](https://github.com/Leerrooy95) — 82 clones in 4 days.
+
+## Community Contributions
+
+### Austin's PRC Donation Signal
+[![Austin's PRC Donation Signal](https://img.shields.io/badge/Austin-PRC%20Signal%20%24565K-red?style=for-the-badge)](austin-prc-signal/donations.csv)
+
+- **$565K** in PRC-linked donations  
+- Timed to **10 major U.S. political flashpoints**  
+- **Pearson r = 0.82** correlation with polarization  
+- Reproducible CSV data  
+- **82 clones in 4 days** on original repo  
+
+Forked & extended by [@Leerrooy95](https://github.com/Leerrooy95)  
+[Original Analysis](https://github.com/Leerrooy95/US-Election-Donations-China)
+
