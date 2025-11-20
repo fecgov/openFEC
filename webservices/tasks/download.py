@@ -146,7 +146,7 @@ def make_bundle(resource):
         copy_to(
             query,
             fp,
-            db.session.connection().engine,
+            db.engine,
             format="csv",
             header=True
         )
