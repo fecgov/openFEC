@@ -68,6 +68,7 @@ from webservices.tasks.utils import redis_url
 from webservices.api_setup import api, v1
 from celery import signals
 import requests
+import psycogreen.gevent
 
 
 # Variables NTC
@@ -108,6 +109,7 @@ parser = FlaskRestParser()
 
 
 def create_app(test_config=None):
+    psycogreen.gevent.patch_psycopg()
     app = Flask(__name__)
     app.url_map.strict_slashes = False
     # app.debug = True
@@ -119,18 +121,20 @@ def create_app(test_config=None):
         'webservices.tasks.download.export_query',]
     app.config['PROPAGATE_EXCEPTIONS'] = True
     query_cache_size = int(env.get_credential('QUERY_CACHE_SIZE', '100'))
+    pre_ping_bool = bool(env.get_credential('PRE_PING_BOOL', True))
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
             'query_cache_size': query_cache_size,
             'max_overflow': 50,
             'pool_size': 50,
             'pool_timeout': 120,
+            'pool_pre_ping': pre_ping_bool,
         }
 
     def create_sqlalchemy_followers(env_var_name: str, default_value: str = '') -> list:
         followers = utils.split_env_var(env.get_credential(env_var_name, default_value))
         return [sa.create_engine(follower.strip(), query_cache_size=query_cache_size,
-                                 pool_size=50, max_overflow=50,
-                                 pool_timeout=120) for follower in followers if follower.strip()
+                                 pool_size=50, max_overflow=50, pool_timeout=120,
+                                 pool_pre_ping=pre_ping_bool) for follower in followers if follower.strip()
                 ]
     # app.config['SQLALCHEMY_ECHO'] = True
 
