@@ -3,7 +3,7 @@ TEST_RM_1 = {
   "calculated_comment_close_date": None,
   "comment_close_date": None,
   "description": "REG 2024-10 Civil Monetary Penalties Annual Inflation Adjustments 2025",
-  "is_open_for_comment": False,
+  "is_open_for_comment": True,
   "last_updated": "2025-01-06T13:06:17",
   "key_documents": [],
   "no_tier_documents": [],
