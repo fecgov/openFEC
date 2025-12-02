@@ -262,6 +262,7 @@ class CommitteeReports(FecFileNumberMixin, PdfMixin, CsvMixin, BaseModel):
             clean_report_type(str(self.report_type_full)),
             None,
             None,
+            None,
         )
 
 
@@ -539,6 +540,7 @@ class BaseFiling(FecFileNumberMixin, AmendmentChainMixin, PdfMixin, FecMixin, db
             self.coverage_end_date.year,
             clean_report_type(self.report.report_type_full),
             None,
+            self.document_type,
             None,
         )
 
