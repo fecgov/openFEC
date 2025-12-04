@@ -82,10 +82,10 @@ class TestRuleMakingDocsElasticsearch(ElasticSearchBaseTest):
         sort_value = "is_open_for_comment"
         response = self._results_rm(api.url_for(RulemakingSearch, sort=sort_value))
 
-        self.assertEqual(response[0]["rm_no"], "2024-04")
-        self.assertEqual(response[1]["rm_no"], "2024-08")
-        self.assertEqual(response[2]["rm_no"], "2022-06")
-        self.assertEqual(response[3]["rm_no"], "2024-10")
+        self.assertEqual(response[0]["rm_no"], "2024-08")  # is_open_for_comment=false
+        self.assertEqual(response[1]["rm_no"], "2024-04")  # is_open_for_comment=false
+        self.assertEqual(response[2]["rm_no"], "2024-10")  # is_open_for_comment=true
+        self.assertEqual(response[3]["rm_no"], "2022-06")  # is_open_for_comment=true
 
         sort_value = "-is_open_for_comment"
         response = self._results_rm(api.url_for(RulemakingSearch, sort=sort_value))

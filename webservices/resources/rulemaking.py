@@ -130,17 +130,17 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
         sort_field_clean = sort_field.lstrip("-")
         sort_field = sort_field_clean.lower()
 
-        # Special case: when sorting "-is_open_for_comment", secondary = ASC
-        if sort_field == "is_open_for_comment" and sort_order == "asc":
+        # Special case: when sorting "is_open_for_comment", secondary = desc
+        if sort_field == "is_open_for_comment":
             secondary_order = "desc"
         else:
             secondary_order = sort_order
 
         # Apply primary sort field + fallback
         query = query.sort(
-            {sort_field: {"order": sort_order}},           # primary
-            {"rm_year": {"order": secondary_order}},     # secondary
-            {"rm_serial": {"order": secondary_order}},   # tertiary
+            {sort_field: {"order": sort_order}},
+            {"rm_year": {"order": secondary_order}},
+            {"rm_serial": {"order": secondary_order}},
         )
     else:
         # Default sort order: desc by rm_year → rm_serial
