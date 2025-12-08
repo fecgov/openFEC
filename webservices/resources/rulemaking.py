@@ -121,17 +121,33 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
             )
         )
 
-    # Sort regulations by 'rm_no'. Default sort order is desc.
+    # Sort regulations with deterministic fallback ordering
     sort_field = kwargs.get("sort")
-    if sort_field:
-        if sort_field.startswith("-"):
-            sort_order = "desc"
-            sort_field = sort_field[1:]
-        else:
-            sort_order = "asc"
 
-        if sort_field.upper() == "RM_NO":
-            query = query.sort({"rm_year": {"order": sort_order}}, {"rm_serial": {"order": sort_order}})
+    if sort_field:
+        # Determine sort order and clean field name
+        sort_order = "desc" if sort_field.startswith("-") else "asc"
+        sort_field_clean = sort_field.lstrip("-")
+        sort_field = sort_field_clean.lower()
+
+        # Special case: when sorting "is_open_for_comment", secondary = desc
+        if sort_field == "is_open_for_comment":
+            secondary_order = "desc"
+        else:
+            secondary_order = sort_order
+
+        # Apply primary sort field + fallback
+        query = query.sort(
+            {sort_field: {"order": sort_order}},
+            {"rm_year": {"order": secondary_order}},
+            {"rm_serial": {"order": secondary_order}},
+        )
+    else:
+        # Default sort order: desc by rm_year → rm_serial
+        query = query.sort(
+            {"rm_year": {"order": "desc"}},
+            {"rm_serial": {"order": "desc"}},
+        )
 
     should_query = [
         get_document_query_params(q, **kwargs),

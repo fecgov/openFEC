@@ -2525,9 +2525,9 @@ formatted as MM/DD/YYYY or YYYY-MM-DD."
 '''
 
 RM_SORT = '''
-Sort `rulemaking`  by `rm_no`.
+Sort `rulemaking`  by `rm_no` or `is_open_for_comment`.
 Use `-` before a parameter name to sort in descending order.
-ex: `-rm_no`
+ex: `-rm_no` or `-is_open_for_comment`
 '''
 
 RM_IS_KEY_DOCUMENT = '''
