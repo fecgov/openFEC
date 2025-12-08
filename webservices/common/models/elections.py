@@ -1,6 +1,5 @@
-from .base import db
-
 from webservices import docs
+from .base import db
 
 
 class ElectionsList(db.Model):
@@ -17,14 +16,13 @@ class ElectionsList(db.Model):
 
 
 class ZipsDistricts(db.Model):
-    __table_args__ = {'schema': 'staging'}
-    __tablename__ = 'ref_zip_to_district'
+    __tablename__ = 'ofec_zip_to_district'
 
-    zip_district_id = db.Column(db.Integer, primary_key=True)
-    district = db.Column(db.String, doc=docs.DISTRICT)
-    zip_code = db.Column(db.String)
-    state_abbrevation = db.Column(db.String)
-    active = db.Column(db.String)
+    election_year = db.Column(db.Integer, primary_key=True, doc=docs.ELECTION_YEAR)
+    zip_code = db.Column(db.String, primary_key=True)
+    state = db.Column(db.String, primary_key=True)
+    district = db.Column(db.String, primary_key=True, doc=docs.DISTRICT)
+    state_full = db.Column(db.String)
 
 
 class StateElectionOfficeInfo(db.Model):
