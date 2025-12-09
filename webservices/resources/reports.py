@@ -160,8 +160,6 @@ class ReportsView(views.ApiResource):
             reports_type_map.get(entity_type), default_schemas,
         )
         query = sa.select(reports_class)
-        query._array_cast_keys = set()
-        query._array_cast_keys.add('candidate_ids_')
         filter_multi_fields = [
             ('amendment_indicator', models.CommitteeReports.amendment_indicator),
             ('report_type', reports_class.report_type),
@@ -195,6 +193,8 @@ class ReportsView(views.ApiResource):
         query = filters.filter_multi(query, kwargs, filter_multi_fields)
         query = filters.filter_fulltext(query, kwargs, filter_fulltext_fields)
         query = filters.filter_overlap(query, kwargs, filter_overlap_fields)
+
+        query = query.execution_options(overlap_columns=set(['candidate_ids_']))
         return query, reports_class, reports_schema
 
 

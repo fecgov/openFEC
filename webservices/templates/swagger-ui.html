@@ -67,10 +67,41 @@
       }
     </style>
   </head>
-
   <body>
-    <div id="swagger-ui"></div>
-
+    {% if show_banner %}
+    <div
+      id="maintenance-banner"
+      style="
+        background-color: #112e51;
+        color: #ffffff;
+        padding: 12px;
+        font-weight: 600;
+        text-align: center;
+        position: relative;
+        top: 0;
+        width: 100%;
+        z-index: 9999;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      "
+    >
+      <style>
+        #maintenance-banner a {
+          color: #ffffff;
+          font-weight: bold;
+          text-decoration: none;
+          border-bottom: 1px dotted #ffffff;
+        }
+        #maintenance-banner a:hover {
+          color: #ffffff;
+          border-bottom: 1px dotted #0aacfa;
+        }
+      </style>
+      {{ status_text }} {{ status_link | safe }}
+    </div>
+    {% endif %}
+    <div {% if show_banner %} style="margin-top: 5px" {% endif %}>
+      <div id="swagger-ui"></div>
+    </div>
     <script type="text/javascript">
       /* {#
       CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE #} */

@@ -67,6 +67,7 @@ from webservices.tasks.error_code import ErrorCode
 from webservices.tasks.utils import redis_url
 from webservices.api_setup import api, v1
 from celery import signals
+import requests
 
 
 # Variables NTC
@@ -308,12 +309,53 @@ def create_app(test_config=None):
 
     @docs.route('/developers/')
     def api_ui():
+        show_banner_env = env.get_credential('SHOW_BANNER', '').lower() == "true"
+        banner_text = env.get_credential('BANNER_TEXT', '')
+        status_text = get_statuspage_text() if show_banner_env else None
+        if banner_text:
+            status_text = banner_text
+        status_link = None
+        if status_text:
+            status_link = (
+                'Learn more on the '
+                '<a href="https://fecgov.statuspage.io" target="_blank" '
+                'rel="noopener noreferrer">FEC.gov status page</a>'
+            )
+        show_banner = show_banner_env and (status_text or banner_text)
+
         return render_template(
             'swagger-ui.html',
             specs_url=url_for('docs.api_spec'),
             PRODUCTION=env.get_credential('PRODUCTION'),
             api_key_signup_key=env.get_credential('API_UMBRELLA_SIGNUP_KEY'),
+            show_banner=show_banner,
+            status_text=status_text,
+            status_link=status_link,
         )
+
+    def get_statuspage_text():
+        def fetch_items(endpoint, item_key, prefix):
+            resp = requests.get(f"https://fecgov.statuspage.io/api/v2/{endpoint}")
+            resp.raise_for_status()
+            items = resp.json().get(item_key, [])
+            messages = []
+            for item in items:
+                name = item.get('name', f'{prefix} Item')
+                updates = item.get('incident_updates', [])
+                if updates and updates[-1].get('body'):
+                    messages.append(f"{name}: {updates[-1]['body']}")
+                else:
+                    messages.append(f"{prefix}: {name}")
+            return messages
+
+        try:
+            messages = []
+            messages.extend(fetch_items('scheduled-maintenances/active.json', 'scheduled_maintenances', 'Maintenance'))
+            messages.extend(fetch_items('incidents/unresolved.json', 'incidents', 'Incident'))
+            return ' '.join(messages) if messages else ""
+        except Exception as e:
+            print(f"Statuspage fetch error: {e}")
+            return ""
 
     @docs.route('/swagger/')
     def api_spec():

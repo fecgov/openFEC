@@ -158,11 +158,12 @@ def copy_to(source, dest, engine, **flags):
     sql = compiled.string
     params = compiled.params
     conn = engine.raw_connection()
-    array_keys = getattr(source, '_array_cast_keys', set())
+
+    overlap_prefixes = source.get_execution_options().get("overlap_columns", set())
 
     if "POSTCOMPILE" in sql:
         sql = rebind_postcompile(sql)
-        params = convert_lists_to_tuples(params, array_keys)
+        params = convert_lists_to_tuples(params, overlap_prefixes)
 
     try:
         with conn.cursor() as cursor:
@@ -179,10 +180,10 @@ def rebind_postcompile(sql):
     return re.sub(pattern, r"%(\1)s", sql)
 
 
-def convert_lists_to_tuples(params, array_keys):
+def convert_lists_to_tuples(params, overlap_prefixes):
     for key, val in params.items():
         if isinstance(val, list):
-            if any(key.startswith(prefix) for prefix in array_keys):
+            if any(key.startswith(prefix) for prefix in overlap_prefixes):
                 params[key] = val
             else:
                 params[key] = tuple(val)

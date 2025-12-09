@@ -1246,6 +1246,7 @@ The type of document for documents other than reports:\n\
     - R F3L Filing Frequency Change Notice\n\
     - Q Acknowledgment of F3L Filing Frequency Change\n\
     - U Unregistered Committee Notice\n\
+    - W Loan Agreement/Loan Forgiveness\n\
 '''
 DATES_TAG = '''
 Reporting deadlines, election dates FEC meetings, events etc.
