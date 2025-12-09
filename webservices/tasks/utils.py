@@ -1,10 +1,8 @@
 import json
 import logging
-import boto
 import boto3
 import redis
 
-from boto.s3.key import Key
 from webservices.env import env
 
 
@@ -25,15 +23,6 @@ def get_bucket():
 
 def get_object(key):
     return get_bucket().Object(key=key)
-
-
-def get_s3_key(name):
-    connection = boto.s3.connect_to_region(
-        env.get_credential("AWS_DEFAULT_REGION"),
-    )
-    bucket = connection.get_bucket(env.get_credential("AWS_PUBLIC_BUCKET"))
-    key = Key(bucket=bucket, name=name)
-    return key
 
 
 def get_json_data(response):

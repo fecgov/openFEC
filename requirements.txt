@@ -35,7 +35,7 @@ marshmallow==3.26.0
 marshmallow-sqlalchemy==1.4.2
 
 # Data export
-smart_open==1.8.0
+smart_open[s3]==7.5.0
 
 # Task queue
 celery==5.2.2 # if celery version is updated, need to verify compatibility with kombu and ensure correct version of kombu is pinned above
