@@ -413,6 +413,7 @@ def execute_search_query(query):
     formatted_hits = []
     for hit in es_results:
         formatted_hit = hit.to_dict()
+        formatted_hit["document_highlights"] = {}
         formatted_hits.append(formatted_hit)
 
         # The 'inner_hits' section is in hit.meta and 'highlight' & 'nested' are in inner_hit.meta
@@ -429,6 +430,10 @@ def execute_search_query(query):
                         ]
 
                         # Attach highlight directly in the document object
+                        formatted_hit["document_highlights"].setdefault(
+                            doc_offset, {}
+                        ).setdefault(-1, []).extend(highlights)
+
                         doc = formatted_hit["documents"][doc_offset]
                         doc.setdefault("highlights", []).extend(highlights)
 
@@ -451,10 +456,17 @@ def execute_search_query(query):
                             for hl in hl_list
                         ]
 
+                        formatted_hit["document_highlights"].setdefault(
+                            doc_offset, {}
+                        ).setdefault(
+                            label_offset, {}
+                        ).setdefault(
+                            doc2_offset, []
+                        ).extend(highlights)
+
                         doc = formatted_hit["documents"][doc_offset]
                         label = doc["level_2_labels"][label_offset]
                         doc2 = label["level_2_docs"][doc2_offset]
-
                         doc2.setdefault("highlights", []).extend(highlights)
 
     count_dict = es_results.hits.total
