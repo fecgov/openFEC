@@ -108,18 +108,32 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
         query = query.highlight("documents.text", "documents.description")
 
     if kwargs.get("q_exclude"):
-        must_not = []
-        must_not.append(
-            Q(
-                "nested",
-                path="documents",
-                query=Q(
-                    "simple_query_string",
-                    query=kwargs.get("q_exclude"),
-                    fields=["documents.text"]
+        must_exclude_list = []
+        must_exclude_list.append(
+                Q(
+                    "nested",
+                    path="documents",
+                    query=Q(
+                        "simple_query_string",
+                        query=kwargs.get("q_exclude"),
+                        fields=["documents.text"]
+                    )
                 )
             )
-        )
+
+        must_exclude_list.append(
+                Q(
+                    "nested",
+                    path="documents.level_2_labels.level_2_docs",
+                    query=Q(
+                        "simple_query_string",
+                        query=kwargs.get("q_exclude"),
+                        fields=["documents.level_2_labels.level_2_docs.text"]
+                    )
+                )
+            )
+        # Return rulemakings without the q_exclude value in their documents
+        query = query.query("bool", must_not=must_exclude_list, minimum_should_match=1)
 
     # Sort regulations with deterministic fallback ordering
     sort_field = kwargs.get("sort")
