@@ -481,8 +481,6 @@ class ZipsDistrictsFactory(BaseFactory):
     class Meta:
         model = models.ZipsDistricts
 
-    active = "Y"
-
 
 class CommunicationCostFactory(BaseFactory):
     class Meta:

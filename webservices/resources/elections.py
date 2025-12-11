@@ -51,7 +51,8 @@ def get_cycle_duration(kwargs):
 
 # used for endpoint:'/elections/search/'
 # under tag: financial
-# Ex: http://127.0.0.1:5000/v1/elections/search/
+# Ex1: http://127.0.0.1:5000/v1/elections/search/
+# Ex2: http://127.0.0.1:8000/data/elections/?cycle=2024&zip=21211
 @doc(description=docs.ELECTION_SEARCH, tags=['financial'])
 class ElectionsListView(utils.Resource):
 
@@ -92,7 +93,7 @@ class ElectionsListView(utils.Resource):
                 ),
             )
         if kwargs.get('zip'):
-            query = self._filter_zip(query, kwargs)
+            query = self._filter_zip(query, kwargs).distinct()
 
         return filters.filter_multi(query, kwargs, self.filter_multi_fields)
 
@@ -102,22 +103,25 @@ class ElectionsListView(utils.Resource):
             sa.select(ZipsDistricts)
             .filter(
                 cast(ZipsDistricts.zip_code, Integer).in_(kwargs['zip']),
-                ZipsDistricts.active == 'Y',
+                ZipsDistricts.election_year.in_(kwargs['cycle'])
             )
             .subquery()
         )
+
         return query.join(
             districts,
             sa.or_(
                 # House races from matching states and districts
                 sa.and_(
                     ElectionsList.district == districts.c['district'],
-                    ElectionsList.state == districts.c['state_abbrevation'],
+                    ElectionsList.state == districts.c['state'],
+                    ElectionsList.cycle == districts.c['election_year'],
                 ),
                 # Senate and presidential races from matching states
                 sa.and_(
                     sa.or_(ElectionsList.district == '00'),
-                    ElectionsList.state.in_([districts.c['state_abbrevation'], 'US']),
+                    ElectionsList.state.in_([districts.c['state'], 'US']),
+                    ElectionsList.cycle == districts.c['election_year'],
                 ),
             ),
         )

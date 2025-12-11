@@ -68,10 +68,10 @@ class TestElectionSearch(ApiBaseTest):
 
     def test_search_zip(self):
         factories.ZipsDistrictsFactory(
-            district='05', zip_code='22902', state_abbrevation='VA'
+            district='05', zip_code='22902', state='VA', election_year=2012
         )
 
-        results = self._results(api.url_for(ElectionsListView, zip='22902'))
+        results = self._results(api.url_for(ElectionsListView, zip='22902', cycle=2012))
         assert len(results) == 3
         assert_dicts_subset(
             results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'}
