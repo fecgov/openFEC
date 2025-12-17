@@ -135,10 +135,11 @@ def get_s3_name(path, qs):
 
 
 def make_bundle(resource):
+    client = task_utils.get_s3_client()
     bucket_name = env.get_credential("AWS_PUBLIC_BUCKET")
     s3_uri = f"s3://{bucket_name}/{resource['name']}"
 
-    with open(s3_uri, "wb") as fp:
+    with open(s3_uri, "wb", transport_params={"client": client}) as fp:
         query = query_with_labels(
             resource["query"],
             resource["schema"]
