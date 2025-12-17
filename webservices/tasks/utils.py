@@ -25,6 +25,16 @@ def get_object(key):
     return get_bucket().Object(key=key)
 
 
+def get_s3_client():
+    try:
+        session = boto3.Session(region_name=env.get_credential("AWS_DEFAULT_REGION"))
+        client = session.client("s3")
+    except Exception as err:
+        logging.error("An error occurred trying to connect to s3. Please disregard if running locally.{0}".format(err))
+        return
+    return client
+
+
 def get_json_data(response):
     # convert the response bytes data to a string
     python_str = json.dumps(response.data.decode("utf-8"))
