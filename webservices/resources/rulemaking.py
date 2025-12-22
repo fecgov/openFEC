@@ -252,6 +252,9 @@ def get_document_query_params(q, **kwargs):
         proximity_inner_hits_documents = {
             "size": 100,
             "name": "documents_proximity",
+            "_source": {
+                "excludes": ["documents.text", "documents.level_2_labels.level_2_docs.text"]
+            },
             "highlight": {
                 "require_field_match": False,
                 "fields": {
@@ -273,6 +276,9 @@ def get_document_query_params(q, **kwargs):
         proximity_inner_hits_level2 = {
             "size": 100,
             "name": "documents_proximity_lvl2",
+            "_source": {
+                "excludes": ["documents.level_2_labels.level_2_docs.text"]
+            },
             "highlight": {
                 "require_field_match": False,
                 "fields": {
@@ -438,13 +444,14 @@ def execute_search_query(query):
     es_results = query.execute()
 
     # logger.warning("Rulemaking execute_search_query() es_results =" + json.dumps(
-    #    es_results.to_dict(), indent=3, cls=DateTimeEncoder))
+    #   es_results.to_dict(), indent=3, cls=DateTimeEncoder))
 
     formatted_hits = []
     for hit in es_results:
         formatted_hit = hit.to_dict()
         formatted_hit["document_highlights"] = {}
         formatted_hits.append(formatted_hit)
+        formatted_hit["source"] = []
 
         # The 'inner_hits' section is in hit.meta and 'highlight' & 'nested' are in inner_hit.meta
         if "inner_hits" in hit.meta:
@@ -498,6 +505,13 @@ def execute_search_query(query):
                         label = doc["level_2_labels"][label_offset]
                         doc2 = label["level_2_docs"][doc2_offset]
                         doc2.setdefault("highlights", []).extend(highlights)
+
+            for key in ("documents_proximity", "documents_proximity_lvl2"):
+                if key not in hit.meta.inner_hits:
+                    continue
+
+                for inner_hit in hit.meta.inner_hits[key].hits:
+                    formatted_hit["source"].append(inner_hit.to_dict())
 
     count_dict = es_results.hits.total
     return formatted_hits, count_dict["value"]

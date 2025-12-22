@@ -309,6 +309,7 @@ class TestRuleMakingDocsElasticsearch(ElasticSearchBaseTest):
                                                 q_proximity=q_prox_lvl_one,
                                                 proximity_preserve_order=True,
                                                 max_gaps=max_gaps))
+        self.assertNotEqual(len(response[0]["source"]), 0)
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0]["rm_no"], "2022-06")
 
@@ -320,6 +321,7 @@ class TestRuleMakingDocsElasticsearch(ElasticSearchBaseTest):
                                                 proximity_preserve_order=False,
                                                 max_gaps=max_gaps))
         self.assertEqual(len(response), 1)
+        self.assertNotEqual(len(response[0]["source"]), 0)
         self.assertEqual(response[0]["rm_no"], "2024-08")
 
         q_prox_description = "RM lvl 2"
@@ -333,6 +335,7 @@ class TestRuleMakingDocsElasticsearch(ElasticSearchBaseTest):
                                                 proximity_filter_term=proximity_filter_term,
                                                 max_gaps=max_gaps))
         self.assertEqual(len(response), 1)
+        self.assertNotEqual(len(response[0]["source"]), 0)
         self.assertEqual(response[0]["rm_no"], "2024-10")
 
         self.check_incorrect_values({"q_proximity": "Incorrect value", "max_gaps": 1}, False)
