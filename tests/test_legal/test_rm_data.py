@@ -3,7 +3,7 @@ TEST_RM_1 = {
   "calculated_comment_close_date": None,
   "comment_close_date": None,
   "description": "REG 2024-10 Civil Monetary Penalties Annual Inflation Adjustments 2025",
-  "is_open_for_comment": False,
+  "is_open_for_comment": True,
   "last_updated": "2025-01-06T13:06:17",
   "key_documents": [],
   "no_tier_documents": [],
@@ -321,7 +321,7 @@ TEST_RM_2 = {
               "level_1_label": "Notice of Availabilty",
               "level_2_label": "Comments",
               "sort_order": 0,
-              "text": "Second RM, first doc, sixth lvl 2",
+              "text": "Second RM, first doc, sixthlvl2",
               "url": """/files/legal/rulemakings/2024-08/
               425723/REG_2024_08_Coyne__Kevin__11_29_2024_18_34_27_CommentText.pdf"""
             },
@@ -3077,7 +3077,7 @@ TEST_RM_4 = {
               "level_1_label": "Notice of Availabilty",
               "level_2_label": "Comments",
               "sort_order": 0,
-              "text": "Fifth RM, first doc, sixth lvl 2",
+              "text": "Fifth RM, first doc, sixthlvl2",
               "url": """/files/legal/rulemakings/2022-06/421520/REG_2022_06_Cortez_Masto_Catherine_02
               _16_2023_17_35_17_2.21.23_Cortez-Masto-Comment-to-FEC-re-Disgorgement.pdf"""
             },

@@ -121,17 +121,33 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
             )
         )
 
-    # Sort regulations by 'rm_no'. Default sort order is desc.
+    # Sort regulations with deterministic fallback ordering
     sort_field = kwargs.get("sort")
-    if sort_field:
-        if sort_field.startswith("-"):
-            sort_order = "desc"
-            sort_field = sort_field[1:]
-        else:
-            sort_order = "asc"
 
-        if sort_field.upper() == "RM_NO":
-            query = query.sort({"rm_year": {"order": sort_order}}, {"rm_serial": {"order": sort_order}})
+    if sort_field:
+        # Determine sort order and clean field name
+        sort_order = "desc" if sort_field.startswith("-") else "asc"
+        sort_field_clean = sort_field.lstrip("-")
+        sort_field = sort_field_clean.lower()
+
+        # Special case: when sorting "is_open_for_comment", secondary = desc
+        if sort_field == "is_open_for_comment":
+            secondary_order = "desc"
+        else:
+            secondary_order = sort_order
+
+        # Apply primary sort field + fallback
+        query = query.sort(
+            {sort_field: {"order": sort_order}},
+            {"rm_year": {"order": secondary_order}},
+            {"rm_serial": {"order": secondary_order}},
+        )
+    else:
+        # Default sort order: desc by rm_year → rm_serial
+        query = query.sort(
+            {"rm_year": {"order": "desc"}},
+            {"rm_serial": {"order": "desc"}},
+        )
 
     should_query = [
         get_document_query_params(q, **kwargs),
@@ -206,6 +222,8 @@ def get_document_query_params(q, **kwargs):
                 query=Q("simple_query_string", query=q, fields=["documents.level_2_labels.level_2_docs.text"]),
                 inner_hits=inner_hits_lvl_2)
         )
+
+        # Search in description
         combined_queries.append(Q("simple_query_string", query=q, fields=["description"]))
 
         q_should_clauses = Q("bool", should=combined_queries, minimum_should_match=1)
@@ -404,8 +422,9 @@ def get_proximity_query(location, **kwargs):
 # highlights at documents, documents.level_2_labels, documents.level_2_labels.level_2_docs nested levels
 def execute_search_query(query):
     es_results = query.execute()
-    # logger.debug("Rulemaking execute_search_query() es_results =" + json.dumps(
-    #     es_results.to_dict(), indent=3, cls=DateTimeEncoder))
+
+    # logger.warning("Rulemaking execute_search_query() es_results =" + json.dumps(
+    #    es_results.to_dict(), indent=3, cls=DateTimeEncoder))
 
     formatted_hits = []
     for hit in es_results:
@@ -418,14 +437,53 @@ def execute_search_query(query):
             if "documents" in hit.meta.inner_hits:
                 for inner_hit in hit.meta.inner_hits["documents"].hits:
                     if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
-                        # set "document_highlights" in return hit
-                        offset = inner_hit.meta["nested"]["offset"]
-                        highlights = inner_hit.meta.highlight.to_dict().values()
-                        formatted_hit["document_highlights"][offset] = [
-                            hl for hl_list in highlights for hl in hl_list
+                        doc_offset = inner_hit.meta.nested.offset
+
+                        highlights = [
+                            hl
+                            for hl_list in inner_hit.meta.highlight.to_dict().values()
+                            for hl in hl_list
                         ]
 
-    # logger.debug("formatted_hits =" + json.dumps(formatted_hits, indent=3, cls=DateTimeEncoder))
+                        # Attach highlight directly in the document object
+                        formatted_hit["document_highlights"].setdefault(
+                            doc_offset, {}
+                        ).setdefault(-1, []).extend(highlights)
+
+                        doc = formatted_hit["documents"][doc_offset]
+                        doc.setdefault("highlights", []).extend(highlights)
+
+            key = "documents.level_2_labels.level_2_docs"
+            if key in hit.meta.inner_hits:
+                for inner_hit in hit.meta.inner_hits[key].hits:
+                    if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
+
+                        nested = inner_hit.meta.nested
+                        offsets = []
+                        while nested:
+                            offsets.append(nested["offset"])
+                            nested = getattr(nested, "_nested", None)
+
+                        doc_offset, label_offset, doc2_offset = offsets
+
+                        highlights = [
+                            hl
+                            for hl_list in inner_hit.meta.highlight.to_dict().values()
+                            for hl in hl_list
+                        ]
+
+                        formatted_hit["document_highlights"].setdefault(
+                            doc_offset, {}
+                        ).setdefault(
+                            label_offset, {}
+                        ).setdefault(
+                            doc2_offset, []
+                        ).extend(highlights)
+
+                        doc = formatted_hit["documents"][doc_offset]
+                        label = doc["level_2_labels"][label_offset]
+                        doc2 = label["level_2_docs"][doc2_offset]
+                        doc2.setdefault("highlights", []).extend(highlights)
 
     count_dict = es_results.hits.total
     return formatted_hits, count_dict["value"]
