@@ -8,9 +8,10 @@ from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
 from postgres_copy import query_entities, format_flags
 from celery_once import QueueOnce
-from smart_open import smart_open
+from smart_open import open
 from celery import shared_task
 from sqlalchemy.dialects import postgresql
+from webservices.env import env
 
 from webservices import utils
 from webservices.common import counts
@@ -134,8 +135,11 @@ def get_s3_name(path, qs):
 
 
 def make_bundle(resource):
-    s3_key = task_utils.get_s3_key(resource["name"])
-    with smart_open(s3_key, "wb") as fp:
+    client = task_utils.get_s3_client()
+    bucket_name = env.get_credential("AWS_PUBLIC_BUCKET")
+    s3_uri = f"s3://{bucket_name}/{resource['name']}"
+
+    with open(s3_uri, "wb", transport_params={"client": client}) as fp:
         query = query_with_labels(
             resource["query"],
             resource["schema"]

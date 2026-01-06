@@ -285,6 +285,22 @@ class TestRuleMakingDocsElasticsearch(ElasticSearchBaseTest):
 
         self.check_incorrect_values({"q": "IncorrectValue"}, False)
 
+    def test_q_exclude_filter(self):
+        q_exclude_one = "level1test"
+        response = self._results_rm(api.url_for(RulemakingSearch, q_exclude=q_exclude_one))
+        self.assertEqual(len(response), 3)
+        self.assertEqual(response[0]["rm_no"], "2024-08")
+        self.assertEqual(response[1]["rm_no"], "2024-04")
+        self.assertEqual(response[2]["rm_no"], "2022-06")
+
+        # q_exclude_two = "Second RM, first doc, sixthteenth lvl 2"
+        q_exclude_two = "sixthteenth"
+        response = self._results_rm(api.url_for(RulemakingSearch, q_exclude=q_exclude_two))
+        self.assertEqual(len(response), 3)
+        self.assertEqual(response[0]["rm_no"], "2024-10")
+        self.assertEqual(response[1]["rm_no"], "2024-04")
+        self.assertEqual(response[2]["rm_no"], "2022-06")
+
     def test_q_prox_filter(self):
         q_prox_lvl_one = ["Fourth RM", "lvl1"]
         max_gaps = 2
