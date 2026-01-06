@@ -1,10 +1,10 @@
 from sqlalchemy.sql import text
-from elasticsearch_dsl import Search
+from opensearch_dsl import Search
 import logging
 import re
 from webservices.common.models import db
-from webservices.legal.utils_es import (
-    create_es_client,
+from webservices.legal.utils_opensearch import (
+    create_opensearch_client,
     create_eregs_link,
     DateTimeEncoder,
 )
@@ -132,17 +132,17 @@ def load_archived_murs(mur_no=None):
     """
     Reads data for Archived MURs from a Postgres database (under schema:mur_arch),
     assembles a JSON document corresponding to the mur, and indexes this document
-    in Elasticsearch in the alias ARCH_MUR_ALIAS of ARCH_MUR_INDEX with a type=`murs` and mur_type=`archived`.
+    in Opensearch in the alias ARCH_MUR_ALIAS of ARCH_MUR_INDEX with a type=`murs` and mur_type=`archived`.
     """
     # TO DO: check if ARCH_MUR_ALIAS exist before uploading.
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
     mur_count = 0
-    if es_client.indices.exists(index=ARCH_MUR_ALIAS):
+    if opensearch_client.indices.exists(index=ARCH_MUR_ALIAS):
         for mur in get_murs(mur_no):
             if mur is not None:
                 try:
                     logger.info("Loading archived MUR No: {0}".format(mur["no"]))
-                    es_client.index(ARCH_MUR_ALIAS, mur, id=mur["doc_id"])
+                    opensearch_client.index(ARCH_MUR_ALIAS, mur, id=mur["doc_id"])
                     mur_count += 1
                     logger.info("{0} Archived Mur(s) loaded".format(mur_count))
                 except Exception as err:
@@ -176,7 +176,7 @@ def get_single_mur(mur_no):
         if row is not None:
             mur_id = row["mur_id"]
             mur = {
-                "type": get_es_type(),
+                "type": get_opensearch_type(),
                 "doc_id": "mur_{0}".format(row["mur_no"]),
                 "no": row["mur_no"],
                 "case_serial": row["mur_id"],
@@ -196,7 +196,7 @@ def get_single_mur(mur_no):
             return None
 
 
-def get_es_type():
+def get_opensearch_type():
     return "murs"
 
 
@@ -308,23 +308,23 @@ def get_documents(mur_id):
 
 def extract_pdf_text(mur_no=None):
     """
-    1)Reads "text" and "documents" object data for Archived MURs from Elasticsearch,
+    1)Reads "text" and "documents" object data for Archived MURs from Opensearch,
     under index: ARCH_MUR_INDEX and type of `murs`
     2)Assembles a JSON document corresponding to the archived murs,
     3)Insert the JSON document into Postgres database table: mur_arch.documents
     4)Run this command carefully, backup mur_arch.documents table first
     and empty it. the data will be inserted into table: mur_arch.documents
     """
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
     each_fetch_size = 1000
     max_size = 5000
     all_results = []
 
-    # get "text" and "documents" object data from Elasticsearch
+    # get "text" and "documents" object data from Opensearch
     for from_no in range(0, max_size, each_fetch_size):
         es_results = (
             Search()
-            .using(es_client)
+            .using(opensearch_client)
             .source(includes=[
                 "no",
                 "text",

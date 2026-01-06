@@ -1,5 +1,5 @@
 import logging
-from webservices.legal.utils_es import create_es_client
+from webservices.legal.utils_opensearch import create_opensearch_client
 import json
 import datetime
 from json import JSONEncoder
@@ -16,27 +16,27 @@ class DateTimeEncoder(JSONEncoder):
 def show_legal_data():
 
     try:
-        es_client = create_es_client()
+        opensearch_client = create_opensearch_client()
 
         logger.info("\n==================Legal doc info==================")
-        if es_client.indices.exists(index="docs"):
+        if opensearch_client.indices.exists(index="docs"):
             logger.info("\n*** total count in 'docs': ***\n{0}".format(
-                json.dumps(es_client.count(index="docs"), indent=2)))
+                json.dumps(opensearch_client.count(index="docs"), indent=2)))
 
-        if es_client.indices.exists(index="archived_murs"):
+        if opensearch_client.indices.exists(index="archived_murs"):
             logger.info("\n*** total count in 'archived_murs': ***\n{0}".format(
-                json.dumps(es_client.count(index="archived_murs"), indent=2)))
+                json.dumps(opensearch_client.count(index="archived_murs"), indent=2)))
 
-        if es_client.indices.exists(index="docs_search"):
+        if opensearch_client.indices.exists(index="docs_search"):
             logger.info("\n*** total count in 'docs_search': ***\n{0}".format(
-                json.dumps(es_client.count(index="docs_search"), indent=2)))
+                json.dumps(opensearch_client.count(index="docs_search"), indent=2)))
 
         # ---display current mur data:
         try:
             mur_id = "mur_7212"
             logger.info("\n*** current {0} data: ***\n{1}".format(
                 mur_id,
-                json.dumps(es_client.get(index="docs", id=mur_id), indent=2, cls=DateTimeEncoder)))
+                json.dumps(opensearch_client.get(index="docs", id=mur_id), indent=2, cls=DateTimeEncoder)))
         except Exception:
             logger.error("current {0} not found.".format(mur_id))
 
@@ -45,7 +45,7 @@ def show_legal_data():
             af_id = "af_3726"
             logger.info("\n*** admin fine {0} data: ***\n{1}".format(
                 af_id,
-                json.dumps(es_client.get(index="docs", id=af_id), indent=2, cls=DateTimeEncoder)))
+                json.dumps(opensearch_client.get(index="docs", id=af_id), indent=2, cls=DateTimeEncoder)))
         except Exception:
             logger.error("admin fine {0} not found.".format(af_id))
 
@@ -53,7 +53,7 @@ def show_legal_data():
             af_id = "af_3571"
             logger.info("\n*** admin fine {0} data: ***\n{1}".format(
                 af_id,
-                json.dumps(es_client.get(index="docs", id=af_id), indent=2, cls=DateTimeEncoder)))
+                json.dumps(opensearch_client.get(index="docs", id=af_id), indent=2, cls=DateTimeEncoder)))
         except Exception:
             logger.error("admin fine {0} not found.".format(af_id))
 
@@ -62,7 +62,7 @@ def show_legal_data():
             adr_id = "adr_001"
             logger.info("\n*** adr {0} data: ***\n{1}".format(
                 adr_id,
-                json.dumps(es_client.get(index="docs", id=adr_id), indent=2, cls=DateTimeEncoder)))
+                json.dumps(opensearch_client.get(index="docs", id=adr_id), indent=2, cls=DateTimeEncoder)))
         except Exception:
             logger.error("adr {0} not found.".format(adr_id))
 
@@ -71,7 +71,7 @@ def show_legal_data():
             ao_id = "2020-04"
             logger.info("\n*** ao id {0} data: ***\n{1}".format(
                 ao_id,
-                json.dumps(es_client.get(index="docs", id=ao_id), indent=2, cls=DateTimeEncoder)))
+                json.dumps(opensearch_client.get(index="docs", id=ao_id), indent=2, cls=DateTimeEncoder)))
         except Exception:
             logger.error("ao_id {0} not found.".format(ao_id))
 
@@ -80,7 +80,8 @@ def show_legal_data():
             arch_mur_id = "mur_400"
             logger.info("\n*** archived {0} data: ***\n{1}".format(
                 arch_mur_id,
-                json.dumps(es_client.get(index="archived_murs", id=arch_mur_id), indent=2, cls=DateTimeEncoder)))
+                json.dumps(opensearch_client.get(index="archived_murs", id=arch_mur_id),
+                        indent=2, cls=DateTimeEncoder)))
         except Exception:
             logger.error("ao_id {0} not found.".format(arch_mur_id))
 

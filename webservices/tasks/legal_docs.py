@@ -8,7 +8,7 @@ from celery import shared_task
 from webservices import utils
 from webservices.legal.legal_docs.advisory_opinions import load_advisory_opinions
 from webservices.legal.legal_docs.current_cases import load_cases
-from webservices.legal.utils_es import create_es_snapshot, display_snapshot_detail, delete_snapshot
+from webservices.legal.utils_opensearch import create_opensearch_snapshot, display_snapshot_detail, delete_snapshot
 from webservices.legal.constants import (  # noqa
     CASE_INDEX,
     AO_INDEX,
@@ -66,8 +66,8 @@ def refresh_most_recent_legal_doc():
 
         # Task 1B: refresh_most_recent_cases(conn):
         # When found modified case(s)(MUR/AF/ADR) within 8 hours,
-        #   if published_flg = true, reload the case(s) on elasticsearch service.
-        #   if published_flg = false, delete the case(s) on elasticsearch service.
+        #   if published_flg = true, reload the case(s) on opensearch service.
+        #   if published_flg = false, delete the case(s) on opensearch service.
     """
     with db.engine.begin() as conn:
         refresh_most_recent_aos(conn)
@@ -91,14 +91,14 @@ def refresh_most_recent_aos(conn):
     if row_count <= 0:
         logger.info(" No recently modified AO(s) found.")
     else:
-        logger.info(" Total of %d ao(s) loaded to elasticsearch successfully.", row_count)
+        logger.info(" Total of %d ao(s) loaded to opensearch successfully.", row_count)
 
 
 def refresh_most_recent_cases(conn):
     """
         # When found modified case(s)(MUR/AF/ADR) within 8 hours,
-        #   if published_flg = true, reload the case(s) on elasticsearch service.
-        #   if published_flg = false, delete the case(s) on elasticsearch service.
+        #   if published_flg = true, reload the case(s) on opensearch service.
+        #   if published_flg = false, delete the case(s) on opensearch service.
     """
     logger.info(" Checking for recently modified cases(MUR/AF/ADR)...")
     rs = conn.execute(text(RECENTLY_MODIFIED_CASES)).mappings()
@@ -111,7 +111,7 @@ def refresh_most_recent_cases(conn):
         load_cases(row["case_type"], row["case_no"])
         if row["published_flg"]:
             load_count += 1
-            logger.info(" Total of %d case(s) loaded to elasticsearch successfully.", load_count)
+            logger.info(" Total of %d case(s) loaded to opensearch successfully.", load_count)
         else:
             deleted_case_count += 1
             logger.info(" Total of %d case(s) unpublished.", deleted_case_count)
@@ -146,7 +146,7 @@ def daily_reload_all_aos_when_change():
             slack_message = "No daily modified AO found."
         else:
             logger.info(
-                " Daily (%s) total of %d ao(s) reload to elasticsearch successfully.",
+                " Daily (%s) total of %d ao(s) reload to opensearch successfully.",
                 datetime.date.today().strftime("%A"), row_count
             )
 
@@ -193,33 +193,33 @@ def send_alert_daily_modified_legal_case():
 
 
 @shared_task(once={"graceful": True}, base=QueueOnce)
-def create_es_backup():
+def create_opensearch_backup():
     """
-        Take Elasticsearch `CASE_INDEX` and `AO_INDEX` snapshot weekly.
+        Take Opensearch `CASE_INDEX` and `AO_INDEX` snapshot weekly.
     """
     slack_message = ""
     index_name_message = ""
     index_name_list = [CASE_INDEX, AO_INDEX]
-    logger.info(" Weekly (%s) elasticsearch snapshot backup starting", datetime.date.today().strftime("%A"))
+    logger.info(" Weekly (%s) opensearch snapshot backup starting", datetime.date.today().strftime("%A"))
     try:
         for i, index_name in enumerate(index_name_list):
             index_name = index_name_list[i]
-            create_es_snapshot(index_name)
-            logger.info("elasticsearch snapshot on index: '{0}' created".format(index_name))
+            create_opensearch_snapshot(index_name)
+            logger.info("opensearch snapshot on index: '{0}' created".format(index_name))
             index_name_message += index_name + ","
             time.sleep(60)
-        logger.info(" Weekly (%s) elasticsearch snapshot backup completed", datetime.date.today().strftime("%A"))
-        slack_message = "Weekly elasticsearch backup completed in {0} space on indices({1})".format(
+        logger.info(" Weekly (%s) opensearch snapshot backup completed", datetime.date.today().strftime("%A"))
+        slack_message = "Weekly opensearch backup completed in {0} space on indices({1})".format(
             get_app_name(), index_name_message)
         utils.post_to_slack(slack_message, SLACK_BOTS)
     except Exception as error:
         logger.exception(error)
-        slack_message = "*ERROR* elasticsearch backup failed for {0}. Check logs.".format(get_app_name())
+        slack_message = "*ERROR* opensearch backup failed for {0}. Check logs.".format(get_app_name())
         utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
 @shared_task(once={"graceful": True}, base=QueueOnce)
-def delete_es_backup_monthly():
+def delete_opensearch_backup_monthly():
     # Delete snapshots on the first of every month at 1am EST,
     # Send information to Slack.
     today = datetime.datetime.today()
@@ -237,11 +237,11 @@ def delete_es_backup_monthly():
                     delete_snapshot(repo_name, id)
                     logger.info("deleting snapshot: '{0}'".format(id))
                     time.sleep(30)
-            logger.info(" Monthly (%s) elasticsearch snapshot deletion completed", datetime.date.today().strftime("%A"))
-            slack_message = "Monthly elasticsearch deletion completed in {0} space in repository: ({1})".format(
+            logger.info(" Monthly (%s) opensearch snapshot deletion completed", datetime.date.today().strftime("%A"))
+            slack_message = "Monthly opensearch deletion completed in {0} space in repository: ({1})".format(
                 get_app_name(), repo_name)
             utils.post_to_slack(slack_message, SLACK_BOTS)
     except Exception as error:
         logger.exception(error)
-        slack_message = "*ERROR* elasticsearch snapshot deletion failed for {0}. Check logs.".format(get_app_name())
+        slack_message = "*ERROR* opensearch snapshot deletion failed for {0}. Check logs.".format(get_app_name())
         utils.post_to_slack(slack_message, SLACK_BOTS)

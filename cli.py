@@ -8,7 +8,7 @@ from flask.cli import FlaskGroup
 from webservices.rest import create_app
 import webservices.legal.legal_docs as legal_docs
 import webservices.legal.rulemaking_docs as rulemaking_docs
-import webservices.legal.utils_es as utils_es
+import webservices.legal.utils_opensearch as utils_opensearch
 import webservices.legal.utils_load as load_utils
 from webservices.legal.constants import CASE_REPO, CASE_INDEX
 
@@ -68,24 +68,24 @@ def extract_pdf_text_cli(mur_no):
     legal_docs.extract_pdf_text(mur_no)
 
 
-@cli.command('delete_doctype_from_es')
+@cli.command('delete_doctype_from_opensearch')
 @click.argument('index_name', default=None, required=False)
 @click.argument('doc_type', default=None, required=False)
-def delete_doctype_from_es_cli(index_name, doc_type):
-    utils_es.delete_doctype_from_es(index_name, doc_type)
+def delete_doctype_from_opensearch_cli(index_name, doc_type):
+    utils_opensearch.delete_doctype_from_opensearch(index_name, doc_type)
 
 
-@cli.command('delete_single_doctype_from_es')
+@cli.command('delete_single_doctype_from_opensearch')
 @click.argument('index_name', default=None, required=False)
 @click.argument('doc_type', default=None, required=False)
 @click.argument('num_doc_id', default=None, required=False)
-def delete_single_doctype_from_es_cli(index_name, doc_type, num_doc_id):
-    utils_es.delete_single_doctype_from_es(index_name, doc_type, num_doc_id)
+def delete_single_doctype_from_opensearch_cli(index_name, doc_type, num_doc_id):
+    utils_opensearch.delete_single_doctype_from_opensearch(index_name, doc_type, num_doc_id)
 
 
 @cli.command('delete_murs_from_s3')
 def delete_murs_from_s3_cli():
-    utils_es.delete_murs_from_s3()
+    utils_opensearch.delete_murs_from_s3()
 
 
 @cli.command('show_legal_data')
@@ -96,24 +96,24 @@ def show_legal_data_cli():
 @cli.command('create_index')
 @click.argument('index_name', default=None, required=False)
 def create_index_cli(index_name):
-    utils_es.create_index(index_name)
+    utils_opensearch.create_index(index_name)
 
 
 @cli.command('delete_index')
 @click.argument('index_name', required=True)
 def delete_index_cli(index_name):
-    utils_es.delete_index(index_name)
+    utils_opensearch.delete_index(index_name)
 
 
 @cli.command('display_index_alias')
 def display_index_alias_cli():
-    utils_es.display_index_alias()
+    utils_opensearch.display_index_alias()
 
 
 @cli.command('display_mapping')
 @click.argument('index_name', default=None, required=False)
 def display_mapping_cli(index_name):
-    utils_es.display_mapping(index_name)
+    utils_opensearch.display_mapping(index_name)
 
 
 @cli.command('reload_all_data_by_index')
@@ -137,60 +137,60 @@ def update_mapping_and_reload_legal_data_cli(index_name):
 @cli.command('configure_snapshot_repository')
 @click.argument('repo_name', default=CASE_REPO, required=False)
 def configure_snapshot_repository_cli(repo_name):
-    utils_es.configure_snapshot_repository(repo_name)
+    utils_opensearch.configure_snapshot_repository(repo_name)
 
 
 @cli.command('delete_repository')
 @click.argument('repo_name', required=True)
 def delete_repository_cli(repo_name):
-    utils_es.delete_repository(repo_name)
+    utils_opensearch.delete_repository(repo_name)
 
 
 @cli.command('display_repositories')
 def display_repositories_cli():
-    utils_es.display_repositories()
+    utils_opensearch.display_repositories()
 
 
-@cli.command('create_es_snapshot')
+@cli.command('create_opensearch_snapshot')
 @click.argument('index_name', default=CASE_INDEX, required=False)
-def create_es_snapshot_cli(index_name):
-    utils_es.create_es_snapshot(index_name)
+def create_opensearch_snapshot_cli(index_name):
+    utils_opensearch.create_opensearch_snapshot(index_name)
 
 
-@cli.command('restore_es_snapshot')
+@cli.command('restore_opensearch_snapshot')
 @click.argument('repo_name', default=None, required=False)
 @click.argument('snapshot_name', default=None, required=False)
 @click.argument('index_name', default=None, required=False)
-def restore_es_snapshot_cli(repo_name, snapshot_name, index_name):
-    utils_es.restore_es_snapshot(repo_name, snapshot_name, index_name)
+def restore_opensearch_snapshot_cli(repo_name, snapshot_name, index_name):
+    utils_opensearch.restore_opensearch_snapshot(repo_name, snapshot_name, index_name)
 
 
-@cli.command('restore_es_snapshot_downtime')
+@cli.command('restore_opensearch_snapshot_downtime')
 @click.argument('repo_name', default=None, required=False)
 @click.argument('snapshot_name', default=None, required=False)
 @click.argument('index_name', default=None, required=False)
-def restore_es_snapshot_downtime_cli(repo_name, snapshot_name, index_name):
-    utils_es.restore_es_snapshot_downtime(repo_name, snapshot_name, index_name)
+def restore_opensearch_snapshot_downtime_cli(repo_name, snapshot_name, index_name):
+    utils_opensearch.restore_opensearch_snapshot_downtime(repo_name, snapshot_name, index_name)
 
 
 @cli.command('delete_snapshot')
 @click.argument('repo_name', default=None, required=False)
 @click.argument('snapshot_name', default=None, required=False)
 def delete_snapshot_cli(repo_name, snapshot_name):
-    utils_es.delete_snapshot(repo_name, snapshot_name)
+    utils_opensearch.delete_snapshot(repo_name, snapshot_name)
 
 
 @cli.command('display_snapshots')
 @click.argument('repo_name', default=None, required=False)
 def display_snapshots_cli(repo_name):
-    utils_es.display_snapshots(repo_name)
+    utils_opensearch.display_snapshots(repo_name)
 
 
 @cli.command('display_snapshot_detail')
 @click.argument('repo_name', default=None, required=False)
 @click.argument('snapshot_name', default=None, required=False)
 def display_snapshot_detail_cli(repo_name, snapshot_name):
-    utils_es.display_snapshot_detail(repo_name, snapshot_name)
+    utils_opensearch.display_snapshot_detail(repo_name, snapshot_name)
 
 
 @cli.command('refresh_materialized')

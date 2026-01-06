@@ -36,7 +36,7 @@ from webservices.legal.constants import (  # noqa
     TEST_ARCH_MUR_ALIAS,
 )
 
-from webservices.legal.utils_es import( # noqa
+from webservices.legal.utils_opensearch import( # noqa
     INDEX_DICT,
     create_index,
     delete_index,
@@ -47,9 +47,9 @@ from webservices.legal.utils_es import( # noqa
     configure_snapshot_repository,
     delete_repository,
     display_repositories,
-    create_es_snapshot,
-    restore_es_snapshot,
-    restore_es_snapshot_downtime,
+    create_opensearch_snapshot,
+    restore_opensearch_snapshot,
+    restore_opensearch_snapshot_downtime,
     delete_snapshot,
     display_snapshots,
     display_snapshot_detail,
@@ -64,7 +64,7 @@ from .show_legal_data import ( # noqa
 )
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-logger = logging.getLogger("elasticsearch")
+logger = logging.getLogger("opensearch")
 logger.setLevel("WARN")
 logger = logging.getLogger("botocore")
 logger.setLevel("WARN")

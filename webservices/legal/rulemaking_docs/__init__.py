@@ -4,7 +4,8 @@ import sys
 from .rulemaking import load_rulemaking
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-logger = logging.getLogger("elasticsearch")
+# amazonq-ignore-next-line
+logger = logging.getLogger("opensearch")
 logger.setLevel("WARN")
 logger = logging.getLogger("botocore")
 
