@@ -937,7 +937,7 @@ def execute_query(query):
 # Since ES7 the `total` becomes an object : "total": {"value": 1,"relation": "eq"}
 # We can set rest_total_hits_as_int=true, default is false.
 # but elasticsearch-dsl==7.3.0 has not supported this setting yet.
-# TODO
+# TODO (clucas) now that we are on OpenSearch, check if this is still the case
     count_dict = es_results.hits.total
     return formatted_hits, count_dict["value"]
 

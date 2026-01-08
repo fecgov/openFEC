@@ -223,11 +223,12 @@ Follow these steps every time you want to work on this project locally.
    ```
 
 2. If you are using the legal search portion of the site, you will need OpenSearch running.
-   Navigate to the installation folder (eg., `opensearch-1.3.x`) and run: # TODO
+   Navigate to the installation folder (eg., `opensearch-1.3.x`) and run:
 
    ```
    cd bin
-   ./opensearch
+   ./opensearch \
+     -E plugins.security.disabled=true
    ```
 
 3. Start the web server:
@@ -293,12 +294,6 @@ Start the opensearch server locally:
 ```
 ./opensearch
 ```
-
-<!-- TODO
-./opensearch \
-  -E bootstrap.memory_lock=false \
-  -E plugins.security.disabled=true \
-  -E network.host=127.0.0.1 -->
 
 Running the tests:
 

@@ -45,7 +45,7 @@ ANALYZER_SETTING = {
 }
 
 ES_SERVICE_INSTANCE_NAME = "fec-api-opensearch"
-# TODO update constants when migrating to OpenSearch
+# TODO (clucas) update constants for v2
 AWS_ES_SERVICE = "es"
 REGION = "us-gov-west-1"
 PORT = 443
