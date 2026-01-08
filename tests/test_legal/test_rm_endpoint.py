@@ -310,6 +310,7 @@ class TestRuleMakingDocsOpensearch(OpenSearchBaseTest):
                                                 proximity_preserve_order=True,
                                                 max_gaps=max_gaps))
         self.assertEqual(len(response), 1)
+        self.assertNotEqual(len(response[0]["source"]), 0)
         self.assertEqual(response[0]["rm_no"], "2022-06")
 
         q_prox_lvl_two = ["fourth lvl 2", "Second RM"]
@@ -321,6 +322,7 @@ class TestRuleMakingDocsOpensearch(OpenSearchBaseTest):
                                                 max_gaps=max_gaps))
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0]["rm_no"], "2024-08")
+        self.assertNotEqual(len(response[0]["source"]), 0)
 
         q_prox_description = "RM lvl 2"
         proximity_filter = "before"
@@ -341,7 +343,7 @@ class TestRuleMakingDocsOpensearch(OpenSearchBaseTest):
         q = "\"REG 2024-10 Civil Monetary\""
         q_proximity = ["First RM", "first lvl 2"]
         max_gaps = 3
-        doc_category_id = 7
+        doc_category_id = 3
         is_key_document = False
         entity_name = "Fake"
         entity_role = 2
