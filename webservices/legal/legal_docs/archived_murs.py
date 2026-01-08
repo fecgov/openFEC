@@ -347,7 +347,7 @@ def extract_pdf_text(mur_no=None):
     results = {"all_mur_docs": all_results}
     logger.debug("all_mur_docs = " + json.dumps(results, indent=3, cls=DateTimeEncoder))
 
-    logger.info("Get {0} archived mur(s) from elasticserch index: \"ARCH_MUR_INDEX\"".format(
+    logger.info("Get {0} archived mur(s) from opensearch index: \"ARCH_MUR_INDEX\"".format(
         str(len(results["all_mur_docs"]))))
 
     if results and results.get("all_mur_docs"):
