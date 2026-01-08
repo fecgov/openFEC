@@ -174,128 +174,147 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
 
 def get_document_query_params(q, **kwargs):
     must_clauses = []
+    proximity_source = {"excludes": ["documents.text", "documents.level_2_labels.level_2_docs.text"]}
+
     doc_category_ids = kwargs.get("doc_category_id", [])
     doc_category_ids = [int(i) for i in doc_category_ids if i]
 
-    if doc_category_ids:
-        combined_queries = []
+    has_proximity = check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None
 
-        doc_category_inner_hits = {
-            "_source": False,
-            "size": 100,
-            }
+    combined_nested_should = []
 
-        doc_category_id_lvl2_inner_hits = doc_category_inner_hits.copy()
-
-        doc_category_inner_hits["name"] = "documents_by_category"
-        doc_category_id_lvl2_inner_hits["name"] = "documents_by_category_lvl2"
-
-        # Search in documents.doc_category_id
-        combined_queries.append(
-            Q("nested",
-              path="documents",
-              query=Q("terms", **{"documents.doc_category_id": doc_category_ids}),
-              inner_hits=doc_category_inner_hits
-              )
-        )
-
-        # Search in documents.level_2_labels.level_2_docs.doc_category_id
-        combined_queries.append(
-            Q("nested",
-              path="documents.level_2_labels.level_2_docs",
-              query=Q("terms", **{"documents.level_2_labels.level_2_docs.doc_category_id": doc_category_ids}),
-              inner_hits=doc_category_id_lvl2_inner_hits,
-              )
-        )
-        doc_id_should_clauses = Q("bool", should=combined_queries, minimum_should_match=1)
-        must_clauses.append(doc_id_should_clauses)
-
-    # Add full-text query to documents
     if q:
-        # Search in documents.text
-        combined_queries = []
-        combined_queries.append(
-            Q("nested",
+        q_documents = Q("simple_query_string", query=q, fields=["documents.text"])
+        q_lvl_2 = Q("simple_query_string", query=q, fields=["documents.level_2_labels.level_2_docs.text"])
+        q_descr = Q("simple_query_string", query=q, fields=["description"])
+
+        doc_highlight = {
+            "require_field_match": False,
+            "fields": {"documents.text": {}, "documents.description": {}},
+            "highlight_query": Q("simple_query_string", query=q, fields=["documents.text"]).to_dict()
+        }
+
+        lvl_two_highlight = {
+            "require_field_match": False,
+            "fields": {"documents.level_2_labels.level_2_docs.text": {}},
+            "highlight_query": Q(
+                "simple_query_string",
+                query=q,
+                fields=["documents.level_2_labels.level_2_docs.text"]
+            ).to_dict()
+        }
+
+    if has_proximity:
+        doc_proximity = get_proximity_query("documents__text", **kwargs)
+        level_two_proximity = get_proximity_query("documents.level_2_labels.level_2_docs.text", **kwargs)
+
+    if doc_category_ids:
+        document_doc_cat_id = Q("terms", **{"documents.doc_category_id": doc_category_ids})
+        level_two_doc_cat_id = Q("terms", **{"documents.level_2_labels.level_2_docs.doc_category_id": doc_category_ids})
+
+    document_inner_hits = {
+            "_source": proximity_source if has_proximity else False,
+            "size": 100,
+        }
+    level_two_inner_hits = {
+            "_source": proximity_source if has_proximity else False,
+            "size": 100,
+        }
+    # -------document level---------
+    documents_must = []
+    if doc_category_ids:
+        documents_must.append(document_doc_cat_id)
+    if has_proximity:
+        documents_must.append(doc_proximity)
+    if q:
+        documents_must.append(q_documents)
+
+    if documents_must:
+        inner_hits_doc = dict(document_inner_hits, name="document_level")
+        if q:
+            inner_hits_doc["highlight"] = doc_highlight
+
+        combined_nested_should.append(
+            Q(
+                "nested",
                 path="documents",
-                query=Q("simple_query_string", query=q, fields=["documents.text"]),
-                inner_hits=INNER_HITS)
+                query=Q("bool", must=documents_must),
+                inner_hits=inner_hits_doc
+            )
         )
 
-        inner_hits_lvl_2 = {
-            "_source": False,
-            "highlight": {
-                "require_field_match": False,
-                "fields": {"documents.level_2_labels.level_2_docs.text": {}},
-            },
-            "size": 100,
-        }
-        # Search in documents.level_2_labels.level_2_docs.text
-        combined_queries.append(
-            Q("nested",
+    # ----------- level two ------------
+    level2_must = []
+    if doc_category_ids:
+        level2_must.append(level_two_doc_cat_id)
+    if has_proximity:
+        level2_must.append(level_two_proximity)
+    if q:
+        level2_must.append(q_lvl_2)
+
+    if level2_must:
+        inner_hits_lvl2 = dict(level_two_inner_hits, name="level_two")
+        if q:
+            inner_hits_lvl2["highlight"] = lvl_two_highlight
+
+        combined_nested_should.append(
+            Q(
+                "nested",
                 path="documents.level_2_labels.level_2_docs",
-                query=Q("simple_query_string", query=q, fields=["documents.level_2_labels.level_2_docs.text"]),
-                inner_hits=inner_hits_lvl_2)
+                query=Q("bool", must=level2_must),
+                inner_hits=inner_hits_lvl2
+            )
         )
 
-        # Search in description
-        combined_queries.append(Q("simple_query_string", query=q, fields=["description"]))
+    # ---------- q in description + document level ----------
+    if q and (has_proximity or doc_category_ids):
+        desc_doc_must = [q_descr]
 
-        q_should_clauses = Q("bool", should=combined_queries, minimum_should_match=1)
-        must_clauses.append(q_should_clauses)
+        nested_constraints = []
+        if doc_category_ids:
+            nested_constraints.append(document_doc_cat_id)
+        if has_proximity:
+            nested_constraints.append(doc_proximity)
 
-    # Handle proximity query
-    if check_filter_exists(kwargs, "q_proximity") and kwargs.get("max_gaps") is not None:
-        proximity_query = get_proximity_query("documents__text", **kwargs)
-        combined_queries = []
+        if nested_constraints:
+            desc_doc_must.append(
+                Q(
+                    "nested",
+                    path="documents",
+                    query=Q("bool", must=nested_constraints),
+                    inner_hits=dict(document_inner_hits, name="description_document_level")
+                )
+            )
+            combined_nested_should.append(Q("bool", must=desc_doc_must))
 
-        # Highlight config for documents.text
-        proximity_inner_hits_documents = {
-            "size": 100,
-            "name": "documents_proximity",
-            "highlight": {
-                "require_field_match": False,
-                "fields": {
-                    "documents.text": {},
-                    "documents.description": {}
-                },
-                "highlight_query": Q("simple_query_string", query=q, fields=["documents.text"]).to_dict()
-            }
-        }
+    # ---------- q in description + level two ----------
+    if q and (has_proximity or doc_category_ids):
+        desc_lvl2_must = [q_descr]
 
-        combined_queries.append(
-            Q("nested",
-                path="documents",
-                query=proximity_query,
-                inner_hits=proximity_inner_hits_documents)
+        nested_constraints_lvl2 = []
+        if doc_category_ids:
+            nested_constraints_lvl2.append(level_two_doc_cat_id)
+        if has_proximity:
+            nested_constraints_lvl2.append(level_two_proximity)
+
+        if nested_constraints_lvl2:
+            desc_lvl2_must.append(
+                Q(
+                    "nested",
+                    path="documents.level_2_labels.level_2_docs",
+                    query=Q("bool", must=nested_constraints_lvl2),
+                    inner_hits=dict(level_two_inner_hits, name="description_level_two")
+                )
+            )
+            combined_nested_should.append(Q("bool", must=desc_lvl2_must))
+
+    if q and not has_proximity and not doc_category_ids:
+        combined_nested_should.append(q_descr)
+
+    if combined_nested_should:
+        must_clauses.append(
+            Q("bool", should=combined_nested_should, minimum_should_match=1)
         )
-
-        # Highlight config for level_2_docs.text
-        proximity_inner_hits_level2 = {
-            "size": 100,
-            "name": "documents_proximity_lvl2",
-            "highlight": {
-                "require_field_match": False,
-                "fields": {
-                    "documents.level_2_labels.level_2_docs.text": {},
-                },
-                "highlight_query": Q(
-                    "simple_query_string",
-                    query=q,
-                    fields=["documents.level_2_labels.level_2_docs.text"]
-                ).to_dict()
-            }
-        }
-        proximity_lvl2_query = get_proximity_query("documents.level_2_labels.level_2_docs.text", **kwargs)
-
-        combined_queries.append(
-            Q("nested",
-                path="documents.level_2_labels.level_2_docs",
-                query=proximity_lvl2_query,
-                inner_hits=proximity_inner_hits_level2)
-        )
-
-        proximity_should_clauses = Q("bool", should=combined_queries, minimum_should_match=1)
-        must_clauses.append(proximity_should_clauses)
 
     return Q("bool", must=must_clauses)
 
@@ -437,63 +456,64 @@ def get_proximity_query(location, **kwargs):
 def execute_search_query(query):
     es_results = query.execute()
 
-    # logger.warning("Rulemaking execute_search_query() es_results =" + json.dumps(
-    #    es_results.to_dict(), indent=3, cls=DateTimeEncoder))
+    # logger.warning(
+    #    "Rulemaking execute_search_query() es_results =" +
+    #    json.dumps(es_results.to_dict(), indent=3, cls=DateTimeEncoder))
 
     formatted_hits = []
+
     for hit in es_results:
         formatted_hit = hit.to_dict()
         formatted_hit["document_highlights"] = {}
+        formatted_hit["source"] = []
         formatted_hits.append(formatted_hit)
 
-        # The 'inner_hits' section is in hit.meta and 'highlight' & 'nested' are in inner_hit.meta
-        if "inner_hits" in hit.meta:
-            if "documents" in hit.meta.inner_hits:
-                for inner_hit in hit.meta.inner_hits["documents"].hits:
-                    if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
-                        doc_offset = inner_hit.meta.nested.offset
+        inner_hits = getattr(hit.meta, "inner_hits", None)
+        if not inner_hits:
+            continue
 
-                        highlights = [
-                            hl
-                            for hl_list in inner_hit.meta.highlight.to_dict().values()
-                            for hl in hl_list
-                        ]
+        seen_doc_ids = set()
 
-                        # Attach highlight directly in the document object
+        for key in inner_hits:
+            inner = inner_hits[key]
+
+            for inner_hit in inner.hits.hits:
+
+                # proximity source
+                if hasattr(inner_hit, "_source") and inner_hit._source:
+                    doc_dict = inner_hit._source.to_dict()
+                    doc_id = doc_dict.get("doc_id")
+                    if doc_id not in seen_doc_ids:
+                        formatted_hit["source"].append(doc_dict)
+                        seen_doc_ids.add(doc_id)
+
+                if hasattr(inner_hit, "highlight") and hasattr(inner_hit, "_nested"):
+                    nested = inner_hit._nested
+                    offsets = []
+
+                    while nested:
+                        offsets.append(nested["offset"])
+                        nested = getattr(nested, "_nested", None)
+
+                    highlights = [
+                        hl
+                        for hl_list in inner_hit.highlight.to_dict().values()
+                        for hl in hl_list
+                    ]
+
+                    # ocument highlight
+                    if len(offsets) == 1:
+                        doc_offset = offsets[0]
                         formatted_hit["document_highlights"].setdefault(
-                            doc_offset, {}
-                        ).setdefault(-1, []).extend(highlights)
-
+                            doc_offset, {}).setdefault(-1, []).extend(highlights)
                         doc = formatted_hit["documents"][doc_offset]
                         doc.setdefault("highlights", []).extend(highlights)
 
-            key = "documents.level_2_labels.level_2_docs"
-            if key in hit.meta.inner_hits:
-                for inner_hit in hit.meta.inner_hits[key].hits:
-                    if "highlight" in inner_hit.meta and "nested" in inner_hit.meta:
-
-                        nested = inner_hit.meta.nested
-                        offsets = []
-                        while nested:
-                            offsets.append(nested["offset"])
-                            nested = getattr(nested, "_nested", None)
-
+                    # Level 2 document highlight
+                    elif len(offsets) == 3:
                         doc_offset, label_offset, doc2_offset = offsets
-
-                        highlights = [
-                            hl
-                            for hl_list in inner_hit.meta.highlight.to_dict().values()
-                            for hl in hl_list
-                        ]
-
                         formatted_hit["document_highlights"].setdefault(
-                            doc_offset, {}
-                        ).setdefault(
-                            label_offset, {}
-                        ).setdefault(
-                            doc2_offset, []
-                        ).extend(highlights)
-
+                            doc_offset, {}).setdefault(label_offset, {}).setdefault(doc2_offset, []).extend(highlights)
                         doc = formatted_hit["documents"][doc_offset]
                         label = doc["level_2_labels"][label_offset]
                         doc2 = label["level_2_docs"][doc2_offset]
