@@ -107,7 +107,7 @@ class DateTimeEncoder(JSONEncoder):
 
 def create_opensearch_client():
     try:
-        opensearch_service = get_service_instance(constants.ES_SERVICE_INSTANCE_NAME)
+        opensearch_service = get_service_instance(constants.OS_SERVICE_INSTANCE_NAME)
         if opensearch_service:
             credentials = opensearch_service.credentials
             #  create "http_auth".

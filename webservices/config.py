@@ -33,7 +33,7 @@ REQUIRED_CREDS = (
     "FEC_SLACK_TOKEN",
 )
 
-REQUIRED_SERVICES = ("aws-elasticache-redis", "s3", "aws-opensearch")  # TODO may need to add back elasticsearch
+REQUIRED_SERVICES = ("aws-elasticache-redis", "s3", "aws-elasticsearch")
 
 REQUIRED_TABLES = tuple(db.Model.metadata.tables.keys()) + (
     "ofec_pacronyms",
