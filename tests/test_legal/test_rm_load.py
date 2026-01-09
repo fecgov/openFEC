@@ -57,7 +57,7 @@ class TestGetRulemaking(BaseTestCase):
 
     # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
     # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
-    # @patch("webservices.legal.legal_docs.es_management.create_index")
+    # @patch("webservices.legal.legal_docs.opensearch_management.create_index")
     # def test_ao_with_entities(self, get_bucket, create_opensearch_client, create_index):
     #     expected_requestor_names = [
     #         "The Manchurian Candidate",
@@ -107,7 +107,7 @@ class TestGetRulemaking(BaseTestCase):
 
     # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
     # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
-    # @patch("webservices.legal.legal_docs.es_management.create_index")
+    # @patch("webservices.legal.legal_docs.opensearch_management.create_index")
     # def test_ao_with_entity_individual(self, get_bucket, create_opensearch_client, create_index):
     #     expected_entity = {
     #         "role": "Commenter",
@@ -138,7 +138,7 @@ class TestGetRulemaking(BaseTestCase):
 
     # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
     # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
-    # @patch("webservices.legal.legal_docs.es_management.create_index")
+    # @patch("webservices.legal.legal_docs.opensearch_management.create_index")
     # def test_completed_ao_with_docs(self, get_bucket, create_opensearch_client, create_index):
     #     ao_no = "2017-01"
     #     filename = "Some File.pdf"
@@ -175,7 +175,7 @@ class TestGetRulemaking(BaseTestCase):
 
     # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
     # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
-    # @patch("webservices.legal.legal_docs.es_management.create_index")
+    # @patch("webservices.legal.legal_docs.opensearch_management.create_index")
     # def test_ao_citations(self, get_bucket, create_opensearch_client, create_index):
     #     ao1_document = {
     #         "document_id": 1,
@@ -232,7 +232,7 @@ class TestGetRulemaking(BaseTestCase):
 
     # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
     # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
-    # @patch("webservices.legal.legal_docs.es_management.create_index")
+    # @patch("webservices.legal.legal_docs.opensearch_management.create_index")
     # def test_ao_offsets(self, get_bucket, create_opensearch_client, create_index):
     #     expected_ao1 = {
     #         "type": "advisory_opinions",

@@ -292,7 +292,8 @@ The connection URL has to strictly adhere to the structure `postgresql://<userna
 Start the opensearch server locally:
 
 ```
-./opensearch
+./opensearch \
+     -E plugins.security.disabled=true
 ```
 
 Running the tests:
@@ -649,7 +650,7 @@ The materialized views are manually refreshed when something needs to be removed
 
 ### Managing Opensearch
 
-Reference Wiki [Opensearch 7.x.0 management instruction](https://github.com/fecgov/openFEC/wiki/Opensearch-7.x.0-management-instruction)
+Reference Wiki [Opensearch 1.3.x management instruction](https://github.com/fecgov/openFEC/wiki/Opensearch-1.3.x-management-instruction)
 
 There are some management commands to manage (display, create, delete, restore...) repository, index and snapshot on Opensearch.
 More information is available by invoking each of these commands with a `--help` option. These commands can be run as [cf tasks](https://docs.cloudfoundry.org/devguide/using-tasks.html) on `cloud.gov`, e.g.,
