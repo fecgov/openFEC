@@ -143,10 +143,10 @@ class TestDownloadResource(ApiBaseTest):
     @mock.patch('webservices.resources.download.download.export_query')
     def test_download(self, export, get_cached):
         get_cached.return_value = None
-        res = self.client.post_json(
+        res = self.client.post(
             api.url_for(resource.DownloadView, path='candidates', office='S', q='joh', sort='receipts')
         )
-        assert res.json == {'status': 'queued'}
+        assert res.get_json() == {'status': 'queued'}
         get_cached.assert_called_once_with(
             '/v1/candidates/', b'office=S&q=joh&sort=receipts', filename=None
         )
@@ -158,15 +158,15 @@ class TestDownloadResource(ApiBaseTest):
     @mock.patch('webservices.resources.download.download.export_query')
     def test_download_cached(self, export, get_cached):
         get_cached.return_value = '/download'
-        res = self.client.post_json(
+        res = self.client.post(
             api.url_for(resource.DownloadView, path='candidates', office='S')
         )
-        assert res.json == {'status': 'complete', 'url': '/download'}
+        assert res.get_json() == {'status': 'complete', 'url': '/download'}
         assert not export.delay.called
 
     def test_download_forbidden(self):
         with pytest.raises(ApiError):
-            self.client.post_json(
+            self.client.post(
                 api.url_for(
                     resource.DownloadView,
                     path='elections/search',
@@ -183,7 +183,7 @@ class TestDownloadResource(ApiBaseTest):
         get_cached.return_value = None
         [factories.CandidateFactory() for _ in range(5)]
         db.session.commit()
-        res = self.client.post_json(
+        res = self.client.post(
             api.url_for(resource.DownloadView, path='/candidates', expect_errors=True)
         )
         assert res.status_code == 308

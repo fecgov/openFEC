@@ -5,7 +5,6 @@ import subprocess
 import unittest
 
 from flask import current_app
-from webtest import TestApp
 
 from webservices.rest import create_app, db
 from webservices import __API_VERSION__
@@ -58,7 +57,7 @@ class BaseTestCase(unittest.TestCase):
             BaseTestCase.application = create_app(test_config='testing')
             BaseTestCase._application = True
         cls.app = cls.application.test_client()
-        cls.client = TestApp(cls.application)
+        cls.client = cls.application.test_client()
         cls.app_context = cls.application.app_context()
         cls.app_context.push()
 
