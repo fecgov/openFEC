@@ -774,15 +774,20 @@ def display_snapshot_detail(repo_name=None, snapshot_name=None):
 
 # =========== start es document management =============
 
-def delete_doctype_from_es(index_name=None, doc_type=None):
+def delete_doctype_from_opensearch(index_name=None, doc_type=None):
     """
     Deletes all records with the given `doc_type` and `XXXX_INDEX` from OpenSearch
-    Ex1-1: cf run-task api --command "python cli.py delete_doctype_from_es case_inde murs" -m 2G --name delete_murs
-    Ex1-2: cf run-task api --command "python cli.py delete_doctype_from_es case_inde adrs" -m 2G --name delete_adrs
-    Ex1-3: cf run-task api --command "python cli.py delete_doctype_from_es case_inde afs" -m 2G --name delete_afs
-    Ex2: cf run-task api --command "python cli.py delete_doctype_from_es ao_index advisory_opinions" -m 2G
+    Ex1-1: cf run-task api --command "python cli.py delete_doctype_from_opensearch case_inde murs"
+        -m 2G --name delete_murs
+    Ex1-2: cf run-task api --command "python cli.py delete_doctype_from_opensearch case_inde adrs"
+        -m 2G --name delete_adrs
+    Ex1-3: cf run-task api --command "python cli.py delete_doctype_from_opensearch case_inde afs"
+        -m 2G --name delete_afs
+    Ex2: cf run-task api --command "python cli.py delete_doctype_from_opensearch ao_index advisory_opinions"
+        -m 2G
     --name delete_aos
-    Ex3: cf run-task api --command "python cli.py delete_doctype_from_es arch_mur_index murs" -m 2G
+    Ex3: cf run-task api --command "python cli.py delete_doctype_from_opensearch arch_mur_index murs"
+        -m 2G
     --name delete_arch_murs
     """
     body = {"query": {"match": {"type": doc_type}}}
@@ -796,19 +801,19 @@ def delete_doctype_from_es(index_name=None, doc_type=None):
         doc_type, index_name))
 
 
-def delete_single_doctype_from_es(index_name=None, doc_type=None, num_doc_id=None):
+def delete_single_doctype_from_opensearch(index_name=None, doc_type=None, num_doc_id=None):
     """
     Deletes single record with the given `doc_type` , `doc_id` and `XXXX_INDEX` from OpenSearch
 
-    Ex1: cf run-task api --command "python cli.py delete_single_doctype_from_es case_index
+    Ex1: cf run-task api --command "python cli.py delete_single_doctype_from_opensearch case_index
     murs mur_8003" -m 2G --name delete_one_mur
-    Ex1-2: cf run-task api --command "python cli.py delete_single_doctype_from_es case_index
+    Ex1-2: cf run-task api --command "python cli.py delete_single_doctype_from_opensearch case_index
     adrs adr_1091" -m 2G --name delete_one_adr
-    Ex1-3: cf run-task api --command "python cli.py delete_single_doctype_from_es case_index
+    Ex1-3: cf run-task api --command "python cli.py delete_single_doctype_from_opensearch case_index
     admin_fines af_4201" -m 2G --name delete_one_af
-    Ex2:cf run-task api --command "python cli.py delete_single_doctype_from_es ao_index
+    Ex2:cf run-task api --command "python cli.py delete_single_doctype_from_opensearch ao_index
     advisory_opinions advisory_opinions_2021-08" -m 2G --name delete_one_ao
-    Ex3:cf run-task api --command "python cli.py delete_single_doctype_from_es arch_mur_index
+    Ex3:cf run-task api --command "python cli.py delete_single_doctype_from_opensearch arch_mur_index
     murs mur_99" -m 2G --name delete_one_arch_mur
     """
     body = {"query": {

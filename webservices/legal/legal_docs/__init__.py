@@ -54,8 +54,8 @@ from webservices.legal.utils_opensearch import( # noqa
     display_snapshots,
     display_snapshot_detail,
     delete_murs_from_s3,
-    delete_doctype_from_es,
-    delete_single_doctype_from_es,
+    delete_doctype_from_opensearch,
+    delete_single_doctype_from_opensearch,
     create_test_indices
 )
 
