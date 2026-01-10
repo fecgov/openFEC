@@ -10,7 +10,7 @@ from webservices.legal.mappings import rm_mapping, ao_mapping, arch_mur_mapping,
 from webservices.env import env
 from webservices.tasks.utils import get_bucket
 
-from elasticsearch import Elasticsearch, RequestsHttpConnection
+from opensearchpy import OpenSearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 from json import JSONEncoder
 
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # SEARCH_ALIAS is used for legal/search endpoint
 # RM_SEARCH_ALIAS is used for rulemaking/search endpoint
-# XXXX_ALIAS is used for load data to XXXX_INDEX on Elasticsearch
+# XXXX_ALIAS is used for load data to XXXX_INDEX on OpenSearch
 INDEX_DICT = {
     constants.CASE_INDEX: (case_mapping.CASE_MAPPING, constants.CASE_ALIAS,
                            constants.SEARCH_ALIAS, constants.CASE_SWAP_INDEX,
@@ -65,7 +65,7 @@ def create_eregs_link(part, section):
     return "/regulations/{}/CURRENT".format(url_part_section)
 
 
-def upload_citations(statutory_citations, regulatory_citations, index, doc_type, es_client):
+def upload_citations(statutory_citations, regulatory_citations, index, doc_type, opensearch_client):
     try:
         for citation in statutory_citations:
             entry = {
@@ -74,7 +74,7 @@ def upload_citations(statutory_citations, regulatory_citations, index, doc_type,
                 "citation_type": "statute",
                 "doc_type": doc_type,
             }
-            es_client.index(index, entry, id=doc_type + "_" + citation)
+            opensearch_client.index(index, entry, id=doc_type + "_" + citation)
 
         for citation in regulatory_citations:
             entry = {
@@ -83,7 +83,7 @@ def upload_citations(statutory_citations, regulatory_citations, index, doc_type,
                 "citation_type": "regulation",
                 "doc_type": doc_type,
             }
-            es_client.index(index, entry, id=doc_type + "_" + citation)
+            opensearch_client.index(index, entry, id=doc_type + "_" + citation)
     except Exception:
         logger.error("An error occurred while uploading {} citations".format(doc_type))
 
@@ -105,19 +105,19 @@ class DateTimeEncoder(JSONEncoder):
             return obj.isoformat()
 
 
-def create_es_client():
+def create_opensearch_client():
     try:
-        es_service = get_service_instance(constants.ES_SERVICE_INSTANCE_NAME)
-        if es_service:
-            credentials = es_service.credentials
+        opensearch_service = get_service_instance(constants.OS_SERVICE_INSTANCE_NAME)
+        if opensearch_service:
+            credentials = opensearch_service.credentials
             #  create "http_auth".
             host = credentials["host"]
             access_key = credentials["access_key"]
             secret_key = credentials["secret_key"]
             aws_auth = AWS4Auth(access_key, secret_key, constants.REGION, constants.AWS_ES_SERVICE)
 
-            #  create elasticsearch client through "http_auth"
-            es_client = Elasticsearch(
+            #  create opensearch client through "http_auth"
+            opensearch_client = OpenSearch(
                 hosts=[{"host": host, "port": constants.PORT}],
                 http_auth=aws_auth,
                 use_ssl=True,
@@ -129,22 +129,22 @@ def create_es_client():
                 retry_on_timeout=True,
             )
         else:
-            # create local elasticsearch client
+            # create local opensearch client
             url = "http://localhost:9200"
-            es_client = Elasticsearch(
+            opensearch_client = OpenSearch(
                 url,
                 timeout=30,
                 max_retries=10,
                 retry_on_timeout=True,
             )
-        return es_client
+        return opensearch_client
     except Exception as err:
-        logger.error("An error occurred trying to create Elasticsearch client.{0}".format(err))
+        logger.error("An error occurred trying to create OpenSearch client.{0}".format(err))
 
 
 def create_index(index_name=None):
     """
-    Creating an index for storing legal or rulemaking data on Elasticsearch based on 'INDEX_DICT'.
+    Creating an index for storing legal or rulemaking data on OpenSearch based on 'INDEX_DICT'.
     - 'INDEX_DICT' description:
     1) CASE_INDEX includes DOCUMENT_TYPE=('statutes','murs','adrs','admin_fines')
     'murs' means current mur only.
@@ -153,7 +153,7 @@ def create_index(index_name=None):
     4) RM_INDEX includes DOCUMENT_TYPE=('rulemaking')?
 
     -Two aliases will be created under each index: XXXX_ALIAS and SEARCH_ALIAS or RM_SEARCH_ALIAS
-    a) XXXX_ALIAS is used for load data to XXXX_INDEX on Elasticsearch
+    a) XXXX_ALIAS is used for load data to XXXX_INDEX on OpenSearch
     b) SEARCH_ALIAS is used for '/legal/search/' endpoint
     c) RM_SEARCH_ALIAS is used for '/rulemaking/search/' endpoint
 
@@ -193,9 +193,9 @@ def create_index(index_name=None):
             aliases.update({alias2: {}})
             body.update({"aliases": aliases})
 
-        es_client = create_es_client()
+        opensearch_client = create_opensearch_client()
         logger.info(" Creating index '{0}'...".format(index_name))
-        es_client.indices.create(
+        opensearch_client.indices.create(
             index=index_name,
             body=body,
         )
@@ -213,16 +213,16 @@ def delete_index(index_name):
     """
     Delete an index, the argument 'index_name' is required
     -How to call this function in python code:
-    a) es_delete_index(CASE_INDEX)
-    b) es_delete_index(AO_INDEX)
-    c) es_delete_index(ARCH_MUR_INDEX)
-    d) es_delete_index(RM_INDEX)
+    a) opensearch_delete_index(CASE_INDEX)
+    b) opensearch_delete_index(AO_INDEX)
+    c) opensearch_delete_index(ARCH_MUR_INDEX)
+    d) opensearch_delete_index(RM_INDEX)
 
     -How to run from terminal:
-    a) python cli.py es_delete_index case_index
-    b) python cli.py es_delete_index ao_index
-    c) python cli.py es_delete_index arch_mur_index
-    d) python cli.py es_delete_index rm_index
+    a) python cli.py opensearch_delete_index case_index
+    b) python cli.py opensearch_delete_index ao_index
+    c) python cli.py opensearch_delete_index arch_mur_index
+    d) python cli.py opensearch_delete_index rm_index
 
     -How to call task command in cf:
     a) cf run-task api --command "python cli.py delete_index case_index" -m 2G --name delete_case_index
@@ -230,12 +230,12 @@ def delete_index(index_name):
     c) cf run-task api --command "python cli.py delete_index arch_mur_index" -m 2G --name delete_arch_mur_index
     d) cf run-task api --command "python cli.py delete_index rm_index" -m 2G --name delete_rm_index
     """
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
     logger.info(" Checking if index '{0}' already exist...".format(index_name))
-    if es_client.indices.exists(index=index_name):
+    if opensearch_client.indices.exists(index=index_name):
         try:
             logger.info(" Deleting index '{0}'...".format(index_name))
-            es_client.indices.delete(index_name)
+            opensearch_client.indices.delete(index_name)
             # sleep 60 seconds (1 min)
             time.sleep(60)
             logger.info(" The index '{0}' is deleted successfully.".format(index_name))
@@ -247,31 +247,31 @@ def delete_index(index_name):
 
 def display_index_alias():
     """
-    Display all indices and aliases on Elasticsearch.
+    Display all indices and aliases on OpenSearch.
     -How to run from terminal:
-    'python cli.py es_display_index_alias'
+    'python cli.py opensearch_display_index_alias'
 
     -How to call task command:
     cf run-task api --command "python cli.py display_index_alias" -m 2G --name display_index_alias
     """
-    es_client = create_es_client()
-    indices = es_client.cat.indices(format="JSON")
+    opensearch_client = create_opensearch_client()
+    indices = opensearch_client.cat.indices(format="JSON")
     logger.info(" All indices = " + json.dumps(indices, indent=3))
 
     for row in indices:
         logger.info(" The aliases under index '{0}': \n{1}".format(
             row["index"],
-            json.dumps(es_client.indices.get_alias(index=row["index"]), indent=3)))
+            json.dumps(opensearch_client.indices.get_alias(index=row["index"]), indent=3)))
 
 
 def display_mapping(index_name=None):
     """
     Display the index mapping.
     -How to run from terminal:
-    a) python cli.py es_display_mapping case_index
-    b) python cli.py es_display_mapping ao_index
-    c) python cli.py es_display_mapping arch_mur_index
-    d) python cli.py es_display_mapping rm_index
+    a) python cli.py opensearch_display_mapping case_index
+    b) python cli.py opensearch_display_mapping ao_index
+    c) python cli.py opensearch_display_mapping arch_mur_index
+    d) python cli.py opensearch_display_mapping rm_index
 
     -How to call task command:
     a) cf run-task api --command "python cli.py display_mapping case_index" -m 2G --name display_case_index_mapping
@@ -280,10 +280,10 @@ def display_mapping(index_name=None):
     --name display_arch_mur_index_mapping
     d) cf run-task api --command "python cli.py display_mapping rm_index" -m 2G --name display_rm_index_mapping
     """
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
     logger.info(" The mapping for index '{0}': \n{1}".format(
         index_name,
-        json.dumps(es_client.indices.get_mapping(index=index_name), indent=3)))
+        json.dumps(opensearch_client.indices.get_mapping(index=index_name), indent=3)))
 
 
 def create_test_indices():
@@ -307,13 +307,13 @@ def switch_alias(original_index=None, original_alias=None, swapping_index=None):
     original_alias = original_alias or INDEX_DICT.get(original_index)[1]
     swapping_index = swapping_index or INDEX_DICT.get(original_index)[3]
 
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
     # 1) Remove original_alias from original_index
     logger.info(" Removing original alias '{0}' from original index '{1}'...".format(
         original_alias, original_index)
     )
     try:
-        es_client.indices.update_aliases(
+        opensearch_client.indices.update_aliases(
             body={
                 "actions": [
                     {"remove": {"index": original_index, "alias": original_alias}},
@@ -330,7 +330,7 @@ def switch_alias(original_index=None, original_alias=None, swapping_index=None):
     logger.info(" Switching original alias '{0}' to swapping index '{1}'...".format(
         original_alias, swapping_index)
     )
-    es_client.indices.update_aliases(
+    opensearch_client.indices.update_aliases(
         body={
             "actions": [
                 {"add": {"index": swapping_index, "alias": original_alias}},
@@ -356,7 +356,7 @@ def restore_from_swapping_index(index_name=None):
     """
     index_name = index_name or constants.CASE_INDEX
     swapping_index = INDEX_DICT.get(index_name)[3]
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
 
     # 1) Swith the SEARCH_ALIAS to point to XXXX_SWAP_INDEX instead of index_name(original_index).
     switch_alias(index_name, constants.SEARCH_ALIAS, swapping_index)
@@ -365,7 +365,7 @@ def restore_from_swapping_index(index_name=None):
     create_index(index_name)
 
     # 3) Remove XXXX_ALIAS and SEARCH_ALIAS that point new empty XXXX_INDEX now
-    es_client.indices.update_aliases(
+    opensearch_client.indices.update_aliases(
         body={
             "actions": [
                 {"remove": {"index": index_name, "alias": INDEX_DICT.get(index_name)[1]}},
@@ -386,7 +386,7 @@ def restore_from_swapping_index(index_name=None):
             "source": {"index": swapping_index},
             "dest": {"index": index_name}
         }
-        es_client.reindex(
+        opensearch_client.reindex(
             body=body,
             wait_for_completion=True,
             request_timeout=1500
@@ -412,12 +412,12 @@ def switch_aliases_to_original_index(index_name=None):
     """
     index_name = index_name or constants.CASE_INDEX
     swapping_index = INDEX_DICT.get(index_name)[3]
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
 
     logger.info(" Moving aliases '{0}' and '{1}' to point to {2}...".format(
         INDEX_DICT.get(index_name)[1], constants.SEARCH_ALIAS, index_name)
     )
-    es_client.indices.update_aliases(
+    opensearch_client.indices.update_aliases(
         body={
             "actions": [
                 {"remove": {"index": swapping_index, "alias": INDEX_DICT.get(index_name)[1]}},
@@ -435,7 +435,7 @@ def switch_aliases_to_original_index(index_name=None):
     time.sleep(60)
 
     logger.info(" Deleting index '{0}'...".format(swapping_index))
-    es_client.indices.delete(swapping_index)
+    opensearch_client.indices.delete(swapping_index)
     logger.info(" Deleted swapping index '{0}' successfully.".format(swapping_index))
     logger.info(" Task update_mapping_and_reload_legal_data on '{0}' has been completed successfully !!!".format(
         index_name)
@@ -458,7 +458,7 @@ def configure_snapshot_repository(repo_name=None):
     --name configure_snapshot_repository_arch_mur
     """
     repo_name = repo_name or constants.CASE_REPO
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
 
     logger.info(" Configuring snapshot repository: {0}".format(repo_name))
     credentials = get_service_instance_credentials(get_service_instance(
@@ -473,10 +473,10 @@ def configure_snapshot_repository(repo_name=None):
                 "access_key": credentials["access_key_id"],
                 "secret_key": credentials["secret_access_key"],
                 "base_path": constants.S3_BACKUP_DIRECTORY,
-                "role_arn": env.get_credential("ES_SNAPSHOT_ROLE_ARN"),
+                "role_arn": env.get_credential("OS_SNAPSHOT_ROLE_ARN"),
             },
         }
-        es_client.snapshot.create_repository(
+        opensearch_client.snapshot.create_repository(
             repository=repo_name,
             body=body,
         )
@@ -495,8 +495,8 @@ def delete_repository(repo_name):
     """
     if repo_name:
         try:
-            es_client = create_es_client()
-            es_client.snapshot.delete_repository(repository=repo_name)
+            opensearch_client = create_opensearch_client()
+            opensearch_client.snapshot.delete_repository(repository=repo_name)
             logger.info(" Deleted snapshot repository: {0} successfully.".format(repo_name))
         except Exception as err:
             logger.error(" Error occured in delete_repository.{0}".format(err))
@@ -514,8 +514,8 @@ def display_repositories():
     cf run-task api --command "python cli.py display_repositories" -m 2G --name display_repositories
     """
 
-    es_client = create_es_client()
-    result = es_client.cat.repositories(
+    opensearch_client = create_opensearch_client()
+    result = opensearch_client.cat.repositories(
         format="JSON",
         v=True,
         s="id",
@@ -527,17 +527,17 @@ def display_repositories():
 
 # =========== start snapshot management =============
 
-def create_es_snapshot(index_name):
+def create_opensearch_snapshot(index_name):
     """
-    Create elasticsearch snapshot of specific XXXX_INDEX in XXXX_REPO.
+    Create opensearch snapshot of specific XXXX_INDEX in XXXX_REPO.
     snapshot name likes: case_snapshot_202303091720, ao_snapshot_202303091728
 
     How to call task command:
-    ex1: cf run-task api --command "python cli.py create_es_snapshot case_index" -m 2G
+    ex1: cf run-task api --command "python cli.py create_opensearch_snapshot case_index" -m 2G
     --name create_snapshot_case
-    ex2: cf run-task api --command "python cli.py create_es_snapshot ao_index" -m 2G
+    ex2: cf run-task api --command "python cli.py create_opensearch_snapshot ao_index" -m 2G
     --name create_snapshot_ao
-    ex3: cf run-task api --command "python cli.py create_es_snapshot arch_mur_index" -m 2G
+    ex3: cf run-task api --command "python cli.py create_opensearch_snapshot arch_mur_index" -m 2G
     --name create_snapshot_arch_mur
     """
     index_name = index_name or constants.CASE_INDEX
@@ -545,7 +545,7 @@ def create_es_snapshot(index_name):
         repo_name = INDEX_DICT.get(index_name)[4]
         prefix_snapshot = INDEX_DICT.get(index_name)[5]
         index_name_list = [index_name]
-        es_client = create_es_client()
+        opensearch_client = create_opensearch_client()
         body = {
             "indices": index_name_list,
         }
@@ -554,7 +554,7 @@ def create_es_snapshot(index_name):
             prefix_snapshot, datetime.datetime.today().strftime("%Y%m%d%H%M")
         )
         logger.info(" Creating snapshot {0} ...".format(snapshot_name))
-        result = es_client.snapshot.create(
+        result = opensearch_client.snapshot.create(
             repository=repo_name,
             snapshot=snapshot_name,
             body=body,
@@ -585,8 +585,8 @@ def delete_snapshot(repo_name, snapshot_name):
         configure_snapshot_repository(repo_name)
         try:
             logger.info(" Deleting snapshot {0} from {1} ...".format(snapshot_name, repo_name))
-            es_client = create_es_client()
-            es_client.snapshot.delete(repository=repo_name, snapshot=snapshot_name)
+            opensearch_client = create_opensearch_client()
+            opensearch_client.snapshot.delete(repository=repo_name, snapshot=snapshot_name)
             logger.info(" The snapshot {0} from {1} is deleted successfully.".format(snapshot_name, repo_name))
         except Exception as err:
             logger.error(" Error occured in delete_snapshot.{0}".format(err))
@@ -594,9 +594,9 @@ def delete_snapshot(repo_name, snapshot_name):
         logger.error(" Please provide both snapshot and repository names.")
 
 
-def restore_es_snapshot(repo_name=None, snapshot_name=None, index_name=None):
+def restore_opensearch_snapshot(repo_name=None, snapshot_name=None, index_name=None):
     """
-    Restore legal data on elasticsearch from a snapshot in the event of catastrophic failure
+    Restore legal data on opensearch from a snapshot in the event of catastrophic failure
     at the infrastructure layer or user error.
     This command restores 'index_name' snapshot only.
 
@@ -604,14 +604,14 @@ def restore_es_snapshot(repo_name=None, snapshot_name=None, index_name=None):
     -Default to most recent snapshot, optionally specify `snapshot_name`
 
     How to call task command:
-    ex1: cf run-task api --command "python cli.py restore_es_snapshot case_repo case_snapshot_202010272132 case_index"
-    -m 2G --name restore_es_snapshot_case
-    ex2: cf run-task api --command "python cli.py restore_es_snapshot ao_repo ao_snapshot_202010272132 ao_index"
-    -m 2G --name restore_es_snapshot_ao
-    ex3: cf run-task api --command "python cli.py restore_es_snapshot arch_mur_repo
-    arch_mur_snapshot_202010272132 arch_mur_index" -m 2G --name restore_es_snapshot_arch_mur
+    ex1: cf run-task api --command "python cli.py restore_opensearch_snapshot case_repo
+        case_snapshot_202010272132 case_index" -m 2G --name restore_opensearch_snapshot_case
+    ex2: cf run-task api --command "python cli.py restore_opensearch_snapshot ao_repo ao_snapshot_202010272132 ao_index"
+    -m 2G --name restore_opensearch_snapshot_ao
+    ex3: cf run-task api --command "python cli.py restore_opensearch_snapshot arch_mur_repo
+    arch_mur_snapshot_202010272132 arch_mur_index" -m 2G --name restore_opensearch_snapshot_arch_mur
     """
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
 
     repo_name = repo_name or constants.CASE_REPO
     configure_snapshot_repository(repo_name)
@@ -621,7 +621,7 @@ def restore_es_snapshot(repo_name=None, snapshot_name=None, index_name=None):
     most_recent_snapshot_name = get_most_recent_snapshot(repo_name)
     snapshot_name = snapshot_name or most_recent_snapshot_name
 
-    if es_client.indices.exists(index_name):
+    if opensearch_client.indices.exists(index_name):
         logger.info(
             " Found '{0}' index. Creating swapping index for zero-downtime restore".format(index_name)
         )
@@ -635,7 +635,7 @@ def restore_es_snapshot(repo_name=None, snapshot_name=None, index_name=None):
 
     logger.info(" Retrieving snapshot: {0}".format(snapshot_name))
     body = {"indices": index_name}
-    result = es_client.snapshot.restore(
+    result = opensearch_client.snapshot.restore(
         repository=repo_name,
         snapshot=snapshot_name,
         body=body,
@@ -643,7 +643,7 @@ def restore_es_snapshot(repo_name=None, snapshot_name=None, index_name=None):
     time.sleep(20)
     if result.get("accepted"):
         logger.info(" The snapshot: {0} is restored successfully.".format(snapshot_name))
-        if es_client.indices.exists(swapping_index):
+        if opensearch_client.indices.exists(swapping_index):
             # 1. Switch aliases (XXXX_ALIAS,SEARCH_ALIAS) point back to XXXX_INDEX
             # 2. Delete XXXX_SWAP_INDEX
             switch_aliases_to_original_index(index_name)
@@ -656,23 +656,24 @@ def restore_es_snapshot(repo_name=None, snapshot_name=None, index_name=None):
         )
 
 
-def restore_es_snapshot_downtime(repo_name=None, snapshot_name=None, index_name=None):
+def restore_opensearch_snapshot_downtime(repo_name=None, snapshot_name=None, index_name=None):
     """
-    Restore elasticsearch from snapshot with downtime
+    Restore opensearch from snapshot with downtime
 
     -Delete index
-    -Restore from elasticsearch snapshot
+    -Restore from opensearch snapshot
     -Default to most recent snapshot, optionally specify `snapshot_name`
 
     How to call task command:
-    ex1: cf run-task api --command "python cli.py restore_es_snapshot_downtime
-    case_repo case_snapshot_202010272130 case_index" -m 2G --name restore_es_snapshot_downtime_case
-    ex2: cf run-task api --command "python cli.py restore_es_snapshot_downtime
-    ao_repo ao_snapshot_202010272130 ao_index" -m 2G --name restore_es_snapshot_downtime_ao
-    ex3: cf run-task api --command "python cli.py restore_es_snapshot_downtime
-    arch_mur_repo arch_mur_snapshot_202010272130 arch_mur_index" -m 2G --name restore_es_snapshot_downtime_arch_mur
+    ex1: cf run-task api --command "python cli.py restore_opensearch_snapshot_downtime
+    case_repo case_snapshot_202010272130 case_index" -m 2G --name restore_opensearch_snapshot_downtime_case
+    ex2: cf run-task api --command "python cli.py restore_opensearch_snapshot_downtime
+    ao_repo ao_snapshot_202010272130 ao_index" -m 2G --name restore_opensearch_snapshot_downtime_ao
+    ex3: cf run-task api --command "python cli.py restore_opensearch_snapshot_downtime
+    arch_mur_repo arch_mur_snapshot_202010272130 arch_mur_index" -m 2G
+    --name restore_opensearch_snapshot_downtime_arch_mur
     """
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
 
     repo_name = repo_name or constants.CASE_REPO
     configure_snapshot_repository(repo_name)
@@ -687,7 +688,7 @@ def restore_es_snapshot_downtime(repo_name=None, snapshot_name=None, index_name=
 
     logger.info(" Restoring snapshot: '{0}'...".format(snapshot_name))
     body = {"indices": index_name}
-    result = es_client.snapshot.restore(
+    result = opensearch_client.snapshot.restore(
         repository=repo_name,
         snapshot=snapshot_name,
         body=body,
@@ -704,11 +705,11 @@ def get_most_recent_snapshot(repo_name=None):
     Get the list of snapshots (sorted by date, ascending) and
     return most recent snapshot name
     """
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
 
     repo_name = repo_name or constants.CASE_REPO
     logger.info(" Retreiving the most recent snapshot...")
-    snapshot_list = es_client.snapshot.get(repository=repo_name, snapshot="*").get(
+    snapshot_list = opensearch_client.snapshot.get(repository=repo_name, snapshot="*").get(
         "snapshots"
     )
     return snapshot_list.pop().get("snapshot")
@@ -727,12 +728,12 @@ def display_snapshots(repo_name=None):
     ex3: cf run-task api --command "python cli.py display_snapshots arch_mur_repo" -m 2G
     --name display_snapshots_arch_mur
     """
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
 
     repo_name = repo_name or constants.CASE_REPO
     repo_list = [repo_name]
     configure_snapshot_repository(repo_name)
-    result = es_client.cat.snapshots(
+    result = opensearch_client.cat.snapshots(
         repository=repo_list,
         format="JSON",
         v=True,
@@ -756,11 +757,11 @@ def display_snapshot_detail(repo_name=None, snapshot_name=None):
     ex3: cf run-task api --command "python cli.py display_snapshot_detail arch_mur_repo arch_mur*"
     -m 2G --name display_snapshot_detail_arch_mur
     """
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
     repo_name = repo_name or constants.CASE_REPO
     snapshot_name = snapshot_name or "*"
     configure_snapshot_repository(repo_name)
-    result = es_client.snapshot.get(
+    result = opensearch_client.snapshot.get(
         repository=repo_name,
         snapshot=snapshot_name
     )
@@ -773,41 +774,46 @@ def display_snapshot_detail(repo_name=None, snapshot_name=None):
 
 # =========== start es document management =============
 
-def delete_doctype_from_es(index_name=None, doc_type=None):
+def delete_doctype_from_opensearch(index_name=None, doc_type=None):
     """
-    Deletes all records with the given `doc_type` and `XXXX_INDEX` from Elasticsearch
-    Ex1-1: cf run-task api --command "python cli.py delete_doctype_from_es case_inde murs" -m 2G --name delete_murs
-    Ex1-2: cf run-task api --command "python cli.py delete_doctype_from_es case_inde adrs" -m 2G --name delete_adrs
-    Ex1-3: cf run-task api --command "python cli.py delete_doctype_from_es case_inde afs" -m 2G --name delete_afs
-    Ex2: cf run-task api --command "python cli.py delete_doctype_from_es ao_index advisory_opinions" -m 2G
+    Deletes all records with the given `doc_type` and `XXXX_INDEX` from OpenSearch
+    Ex1-1: cf run-task api --command "python cli.py delete_doctype_from_opensearch case_inde murs"
+        -m 2G --name delete_murs
+    Ex1-2: cf run-task api --command "python cli.py delete_doctype_from_opensearch case_inde adrs"
+        -m 2G --name delete_adrs
+    Ex1-3: cf run-task api --command "python cli.py delete_doctype_from_opensearch case_inde afs"
+        -m 2G --name delete_afs
+    Ex2: cf run-task api --command "python cli.py delete_doctype_from_opensearch ao_index advisory_opinions"
+        -m 2G
     --name delete_aos
-    Ex3: cf run-task api --command "python cli.py delete_doctype_from_es arch_mur_index murs" -m 2G
+    Ex3: cf run-task api --command "python cli.py delete_doctype_from_opensearch arch_mur_index murs"
+        -m 2G
     --name delete_arch_murs
     """
     body = {"query": {"match": {"type": doc_type}}}
 
-    es_client = create_es_client()
-    es_client.delete_by_query(
+    opensearch_client = create_opensearch_client()
+    opensearch_client.delete_by_query(
         index=index_name,
         body=body,
     )
-    logger.info(" Successfully deleted doc_type={} from index={} on Elasticsearch.".format(
+    logger.info(" Successfully deleted doc_type={} from index={} on OpenSearch.".format(
         doc_type, index_name))
 
 
-def delete_single_doctype_from_es(index_name=None, doc_type=None, num_doc_id=None):
+def delete_single_doctype_from_opensearch(index_name=None, doc_type=None, num_doc_id=None):
     """
-    Deletes single record with the given `doc_type` , `doc_id` and `XXXX_INDEX` from Elasticsearch
+    Deletes single record with the given `doc_type` , `doc_id` and `XXXX_INDEX` from OpenSearch
 
-    Ex1: cf run-task api --command "python cli.py delete_single_doctype_from_es case_index
+    Ex1: cf run-task api --command "python cli.py delete_single_doctype_from_opensearch case_index
     murs mur_8003" -m 2G --name delete_one_mur
-    Ex1-2: cf run-task api --command "python cli.py delete_single_doctype_from_es case_index
+    Ex1-2: cf run-task api --command "python cli.py delete_single_doctype_from_opensearch case_index
     adrs adr_1091" -m 2G --name delete_one_adr
-    Ex1-3: cf run-task api --command "python cli.py delete_single_doctype_from_es case_index
+    Ex1-3: cf run-task api --command "python cli.py delete_single_doctype_from_opensearch case_index
     admin_fines af_4201" -m 2G --name delete_one_af
-    Ex2:cf run-task api --command "python cli.py delete_single_doctype_from_es ao_index
+    Ex2:cf run-task api --command "python cli.py delete_single_doctype_from_opensearch ao_index
     advisory_opinions advisory_opinions_2021-08" -m 2G --name delete_one_ao
-    Ex3:cf run-task api --command "python cli.py delete_single_doctype_from_es arch_mur_index
+    Ex3:cf run-task api --command "python cli.py delete_single_doctype_from_opensearch arch_mur_index
     murs mur_99" -m 2G --name delete_one_arch_mur
     """
     body = {"query": {
@@ -817,12 +823,12 @@ def delete_single_doctype_from_es(index_name=None, doc_type=None, num_doc_id=Non
                 {"match": {"doc_id": num_doc_id}}
             ]}}}
 
-    es_client = create_es_client()
-    es_client.delete_by_query(
+    opensearch_client = create_opensearch_client()
+    opensearch_client.delete_by_query(
         index=index_name,
         body=body,
     )
-    logger.info(" Successfully deleted doc_type={} and doc_id={} from index={} on Elasticsearch.".format(
+    logger.info(" Successfully deleted doc_type={} and doc_id={} from index={} on OpenSearch.".format(
         doc_type, num_doc_id, index_name))
 
 

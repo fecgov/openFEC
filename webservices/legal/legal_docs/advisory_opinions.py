@@ -10,7 +10,7 @@ from webservices.legal.constants import (  # noqa
    AO_ALIAS,
 )
 import json
-from webservices.legal.utils_es import create_es_client, DateTimeEncoder
+from webservices.legal.utils_opensearch import create_opensearch_client, DateTimeEncoder
 
 logger = logging.getLogger(__name__)
 
@@ -130,22 +130,22 @@ def load_advisory_opinions(from_ao_no=None):
     """
     Reads data for advisory opinions from a Postgres database,
     assembles a JSON document corresponding to the advisory opinion
-    and indexes this document in Elasticsearch in the AO_ALIAS of AO_INDEX
+    and indexes this document in Opensearch in the AO_ALIAS of AO_INDEX
     with a type=`advisory_opinions`.
     In addition, all documents attached to the advisory opinion
     are uploaded to an S3 bucket under the _directory_`legal/aos/`.
     """
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
     ao_count = 0
 
-    if es_client.indices.exists(index=AO_ALIAS):
+    if opensearch_client.indices.exists(index=AO_ALIAS):
         logger.info("Index alias '{}' exists, start loading advisory opinions...".format(AO_ALIAS))
         try:
             for ao in get_advisory_opinions(from_ao_no):
                 if ao is not None:
                     if ao.get("published_flg"):
                         logger.info(" Loading AO number: %s", ao["no"])
-                        es_client.index(AO_ALIAS, ao, id=ao["no"])
+                        opensearch_client.index(AO_ALIAS, ao, id=ao["no"])
                         ao_count += 1
                 # ==for local dubug use: remove the big "documents" section to display the object "ao" data.
                         debug_ao_data = ao
@@ -157,7 +157,7 @@ def load_advisory_opinions(from_ao_no=None):
                         try:
                             logger.info("Found an unpublished ao - deleting AO number : {0} from ES".format(
                                 ao["no"]))
-                            es_client.delete(index=AO_ALIAS, id=ao["no"])
+                            opensearch_client.delete(index=AO_ALIAS, id=ao["no"])
                             logger.info("Successfully deleted AO number: {} from ES".format(ao["no"]))
                         except Exception as err:
                             logger.error("An error occurred while deteting an unpublished ao: {0} {1} ".format(
@@ -446,7 +446,7 @@ def get_citations(ao_names):
             key=lambda d: (d["title"], d["part"], d["section"]),
         )
 
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
 
     for citation in all_regulatory_citations:
         entry = {
@@ -455,7 +455,7 @@ def get_citations(ao_names):
             "citation_type": "regulation",
             "doc_type": "advisory_opinions",
         }
-        es_client.index(AO_ALIAS, entry, id=entry["citation_text"])
+        opensearch_client.index(AO_ALIAS, entry, id=entry["citation_text"])
 
     for citation in all_statutory_citations:
         entry = {
@@ -464,7 +464,7 @@ def get_citations(ao_names):
             "citation_type": "statute",
             "doc_type": "advisory_opinions",
         }
-        es_client.index(AO_ALIAS, entry, id=entry["citation_text"])
+        opensearch_client.index(AO_ALIAS, entry, id=entry["citation_text"])
     logger.info(" AO Citations loaded.")
     return citations
 

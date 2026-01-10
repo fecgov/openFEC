@@ -44,7 +44,8 @@ ANALYZER_SETTING = {
     "highlight.max_analyzed_offset": 60000000,
 }
 
-ES_SERVICE_INSTANCE_NAME = "fec-api-elasticsearch"
+OS_SERVICE_INSTANCE_NAME = "fec-api-opensearch"
+# TODO (clucas) update constants for v2
 AWS_ES_SERVICE = "es"
 REGION = "us-gov-west-1"
 PORT = 443
