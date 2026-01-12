@@ -11,6 +11,7 @@ import webservices.legal.rulemaking_docs as rulemaking_docs
 import webservices.legal.utils_opensearch as utils_opensearch
 import webservices.legal.utils_load as load_utils
 from webservices.legal.constants import CASE_REPO, CASE_INDEX
+from webservices.tasks.legal_docs import create_opensearch_backup
 
 
 cli = FlaskGroup(create_app=create_app)
@@ -265,6 +266,12 @@ def add_update_env_var_cli(
 @click.argument('message')
 def slack_message_cli(message):
     manage.slack_message(message)
+
+
+@cli.command('weekly_backup')
+@click.argument('message')
+def weekly_backup_cli():
+    create_opensearch_backup()
 
 
 if __name__ == "__main__":
