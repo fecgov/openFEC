@@ -19,7 +19,7 @@ ARCH_MUR_REPO = "arch_mur_repo"
 ARCH_MUR_SNAPSHOT = "arch_mur_snapshot"
 
 SEARCH_ALIAS = "search_alias"
-S3_BACKUP_DIRECTORY = "es-backups"
+S3_BACKUP_DIRECTORY = "opensearch-backups"
 S3_PRIVATE_SERVICE_INSTANCE_NAME = "fec-s3-snapshot"
 
 TEST_CASE_INDEX = "test_case_index"
