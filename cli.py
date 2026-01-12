@@ -269,7 +269,6 @@ def slack_message_cli(message):
 
 
 @cli.command('weekly_backup')
-@click.argument('message')
 def weekly_backup_cli():
     create_opensearch_backup()
 
