@@ -1,8 +1,8 @@
 import logging
 import re
 from webservices.common.models import db
-from webservices.legal.utils_es import (
-    create_es_client,
+from webservices.legal.utils_opensearch import (
+    create_opensearch_client,
     create_eregs_link,
     DateTimeEncoder,
     upload_citations,
@@ -300,7 +300,7 @@ def load_current_murs(specific_mur_no=None):
     """
     Reads data for current MURs from a Postgres database,
     assembles a JSON document corresponding to the case, and indexes this document
-    in Elasticsearch in the CASE_ALIAS of CASE_INDEX with a type=`murs`.
+    in Opensearch in the CASE_ALIAS of CASE_INDEX with a type=`murs`.
     In addition, all documents attached to the case are uploaded to an
     S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
     """
@@ -311,7 +311,7 @@ def load_adrs(specific_adr_no=None):
     """
     Reads data for ADRs from a Postgres database,
     assembles a JSON document corresponding to the case, and indexes this document
-    in Elasticsearch the CASE_ALIAS of CASE_INDEX with a type=`adrs`.
+    in Opensearch the CASE_ALIAS of CASE_INDEX with a type=`adrs`.
     In addition, all documents attached to the case are uploaded to an
     S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
     """
@@ -322,7 +322,7 @@ def load_admin_fines(specific_af_no=None):
     """
     Reads data for AFs from a Postgres database,
     assembles a JSON document corresponding to the case, and indexes this document
-    in Elasticsearch the CASE_ALIAS of CASE_INDEX with a type=`admin_fines`.
+    in Opensearch the CASE_ALIAS of CASE_INDEX with a type=`admin_fines`.
     In addition, all documents attached to the case are uploaded to an
     S3 bucket under the _directory_ `legal/<doc_type>/<id>/`.
     """
@@ -341,8 +341,8 @@ def get_full_name(case_type):
 
 def load_cases(case_type, case_no=None):
     if case_type in ("MUR", "ADR", "AF"):
-        es_client = create_es_client()
-        if es_client.indices.exists(index=CASE_ALIAS):
+        opensearch_client = create_opensearch_client()
+        if opensearch_client.indices.exists(index=CASE_ALIAS):
 
             if case_type == "MUR":
                 load_mur_citations()
@@ -353,14 +353,14 @@ def load_cases(case_type, case_no=None):
                 if case is not None:
                     if case.get("published_flg"):
                         logger.info("Loading {0}: {1}".format(case_type, case["no"]))
-                        es_client.index(CASE_ALIAS, case, id=case["doc_id"])
+                        opensearch_client.index(CASE_ALIAS, case, id=case["doc_id"])
                         case_count += 1
                         logger.info("{0} {1}(s) loaded".format(case_count, case_type))
                     else:
                         try:
                             logger.info("Found an unpublished case - deleting {0}: {1} from ES".format(
                                 case_type, case["no"]))
-                            es_client.delete(index=CASE_ALIAS, id=case["doc_id"])
+                            opensearch_client.delete(index=CASE_ALIAS, id=case["doc_id"])
                             logger.info("Successfully deleted {} {} from ES".format(case_type, case["no"]))
                         except Exception as err:
                             logger.error("An error occurred while deteting an unpublished case.{0} {1} {2}".format(
@@ -378,10 +378,10 @@ def load_cases(case_type, case_no=None):
 
 
 def load_mur_citations():
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
     logger.info(" Getting MUR citations...")
     get_all_mur_citations()
-    upload_citations(MUR_STATUTORY_CITATIONS, MUR_REGULATORY_CITATIONS, CASE_ALIAS, "murs", es_client)
+    upload_citations(MUR_STATUTORY_CITATIONS, MUR_REGULATORY_CITATIONS, CASE_ALIAS, "murs", opensearch_client)
     logger.info(" MUR Citations loaded.")
 
 
@@ -416,7 +416,7 @@ def get_single_case(case_type, case_no, bucket):
             case_id = row["case_id"]
             sort1, sort2 = get_sort_fields(row["case_no"])
             case = {
-                "type": get_es_type(case_type),
+                "type": get_opensearch_type(case_type),
                 "doc_id": "{0}_{1}".format(case_type.lower(), row["case_no"]),
                 "no": row["case_no"],
                 "case_serial": row["case_serial"],
@@ -463,7 +463,7 @@ def get_sort_fields(case_no):
     return -int(match.group("serial")), None
 
 
-def get_es_type(case_type):
+def get_opensearch_type(case_type):
     case_type = case_type.upper()
     if case_type == "AF":
         return "admin_fines"
@@ -873,7 +873,7 @@ def get_documents(case_id, bucket):
                     format(row["document_id"], row["case_type"], row["case_no"]))
             else:
                 pdf_key = "legal/{0}/{1}/{2}".format(
-                    get_es_type(row["case_type"]), row["case_no"], row["filename"].replace(" ", "-")
+                    get_opensearch_type(row["case_type"]), row["case_no"], row["filename"].replace(" ", "-")
                 )
                 document["url"] = "/files/" + pdf_key
                 filename = row["filename"][:-4]

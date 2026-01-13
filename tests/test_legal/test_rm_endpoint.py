@@ -1,4 +1,4 @@
-from tests.common import ElasticSearchBaseTest, rm_document_dictionary
+from tests.common import OpenSearchBaseTest, rm_document_dictionary
 from webservices.resources.rulemaking import RulemakingSearch
 from webservices.api_setup import api
 from datetime import datetime
@@ -9,7 +9,7 @@ import unittest.mock as mock
 
 
 @mock.patch("webservices.resources.rulemaking.RM_SEARCH_ALIAS", TEST_RM_SEARCH_ALIAS)
-class TestRuleMakingDocsElasticsearch(ElasticSearchBaseTest):
+class TestRuleMakingDocsOpensearch(OpenSearchBaseTest):
     wrong_date_format = "01/20/24"
 
     def check_filters(self, params, field_name, multiple):

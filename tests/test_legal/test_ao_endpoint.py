@@ -1,4 +1,4 @@
-from tests.common import ElasticSearchBaseTest
+from tests.common import OpenSearchBaseTest
 from webservices.resources.legal import UniversalSearch, REQUESTOR_TYPES
 from webservices.api_setup import api
 from datetime import datetime
@@ -9,7 +9,7 @@ import unittest.mock as mock
 
 
 @mock.patch("webservices.resources.legal.SEARCH_ALIAS", TEST_SEARCH_ALIAS)
-class TestAODocsElasticsearch(ElasticSearchBaseTest):
+class TestAODocsOpensearch(OpenSearchBaseTest):
     wrong_date_format = "01/20/24"
 
     def check_filters(self, params, field_name, multiple):

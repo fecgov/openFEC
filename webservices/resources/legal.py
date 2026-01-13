@@ -1,19 +1,19 @@
 import re
 
-from elasticsearch_dsl import Search, Q
+from opensearch_dsl import Search, Q
 from flask import abort
 from flask_apispec import doc
 from webservices import docs
 from webservices import args
 from webservices import filters
 from webservices.utils import Resource
-from webservices.legal.utils_es import create_es_client, DateTimeEncoder, check_filter_exists
+from webservices.legal.utils_opensearch import create_opensearch_client, DateTimeEncoder, check_filter_exists
 
 from webservices.legal.constants import (  # noqa
     SEARCH_ALIAS, DISMISSED_ALL, DISMISSED_CATEGORIES
 )
 from webservices.utils import use_kwargs
-from elasticsearch import RequestError
+from opensearchpy import RequestError
 from webservices.exceptions import ApiError
 import webservices.legal.legal_docs.responses as responses
 import logging
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # To debug, uncomment the line below:
 # logger.setLevel(logging.DEBUG)
 
-es_client = create_es_client()
+opensearch_client = create_opensearch_client()
 
 INNER_HITS = {
     "_source": False,
@@ -99,7 +99,7 @@ class GetLegalDocument(Resource):
     def get(self, doc_type, no, **kwargs):
         es_results = (
             Search()
-            .using(es_client)
+            .using(opensearch_client)
             .query("bool", must=[Q("term", no=no), Q("term", type=doc_type)])
             .source(excludes="documents.text")
             .extra(size=200)
@@ -154,7 +154,7 @@ class UniversalSearch(Resource):
                 raise ApiError("Not a valid search type", 400)
             except RequestError as e:
                 logger.error(e.args)
-                raise ApiError("Elasticsearch failed to execute query", 400)
+                raise ApiError("Opensearch failed to execute query", 400)
             except Exception as e:
                 logger.error(e.args)
                 raise ApiError("Unexpected Server Error", 500)
@@ -178,7 +178,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
     query = (
         Search()
-        .using(es_client)
+        .using(opensearch_client)
         .query(Q("bool", must=must_query))
         .highlight_options(require_field_match=False)
         .source(excludes=["text", "documents.text", "sort1", "sort2"])
@@ -937,6 +937,7 @@ def execute_query(query):
 # Since ES7 the `total` becomes an object : "total": {"value": 1,"relation": "eq"}
 # We can set rest_total_hits_as_int=true, default is false.
 # but elasticsearch-dsl==7.3.0 has not supported this setting yet.
+# TODO (clucas) now that we are on OpenSearch, check if this is still the case
     count_dict = es_results.hits.total
     return formatted_hits, count_dict["value"]
 
@@ -959,7 +960,7 @@ class GetLegalCitation(Resource):
 
         query = (
             Search()
-            .using(es_client)
+            .using(opensearch_client)
             .query(
                 "bool",
                 must=must_clauses,

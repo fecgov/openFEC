@@ -1,7 +1,7 @@
 import logging
 import webservices.legal.constants as constants
 from webservices.common.models import db
-from webservices.legal.utils_es import create_es_client
+from webservices.legal.utils_opensearch import create_opensearch_client
 from webservices.tasks.utils import get_bucket
 from sqlalchemy import text
 logger = logging.getLogger(__name__)
@@ -187,14 +187,14 @@ ORDER BY hearing_date DESC
 # Load specific one rm_no command: `python cli.py load_rulemaking 2021-01`
 # Load all rulemakings command: `python cli.py load_rulemaking`
 def load_rulemaking(specific_rm_no=None):
-    es_client = create_es_client()
+    opensearch_client = create_opensearch_client()
     rm_count = 0
-    if es_client.indices.exists(index=constants.RM_ALIAS):
+    if opensearch_client.indices.exists(index=constants.RM_ALIAS):
         logger.info(" Index alias '{0}' exists, start loading rulemaking...".format(constants.RM_ALIAS))
         for rm in get_rulemaking(specific_rm_no):
             if rm is not None:
                 logger.info(" Loading rm_no: {0}, rm_id: {1} ".format(rm["rm_no"], rm["rm_id"]))
-                es_client.index(constants.RM_ALIAS, rm, id=rm["rm_id"])
+                opensearch_client.index(constants.RM_ALIAS, rm, id=rm["rm_id"])
                 rm_count += 1
 
         logger.info(" Total %d rulemaking loaded.", rm_count)

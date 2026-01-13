@@ -15,8 +15,8 @@ if env.app.get("space_name", "unknown-space").lower() != "feature":
 
         # Task 1B: refresh_most_recent_cases(conn):
         # When found modified case(s)(MUR/AF/ADR) within 10 hours and 5 minutes,
-        #   if published_flg = true, reload the case(s) on elasticsearch service.
-        #   if published_flg = false, delete the case(s) on elasticsearch service.
+        #   if published_flg = true, reload the case(s) on opensearch service.
+        #   if published_flg = false, delete the case(s) on opensearch service.
         "refresh_legal_docs": {
             "task": "webservices.tasks.legal_docs.refresh_most_recent_legal_doc",
             "schedule": crontab(minute="*/5", hour="10-23"),
@@ -44,9 +44,9 @@ if env.app.get("space_name", "unknown-space").lower() != "feature":
             "schedule": crontab(minute=55, hour=23),
         },
         # Task 5: This task is launched at 12am(EST) only on Sunday.
-        # Take Elasticsearch CASE_INDEX and AO_INDEX snapshot.
-        "backup_elasticsearch_every_sunday": {
-            "task": "webservices.tasks.legal_docs.create_es_backup",
+        # Take Opensearch CASE_INDEX and AO_INDEX snapshot.
+        "backup_opensearch_every_sunday": {
+            "task": "webservices.tasks.legal_docs.create_opensearch_backup",
             "schedule": crontab(minute=0, hour=4, day_of_week="sun"),
         },
         # Task 6: This task is launched at 5am(EST) everyday.
@@ -58,8 +58,8 @@ if env.app.get("space_name", "unknown-space").lower() != "feature":
         # Task 7: This task is launched at 1am(EST) on the first day of the
         # month
         # Deletes snapshots older than 30 days
-        "delete_elasticsearch_backups_monthly": {
-            "task": "webservices.tasks.legal_docs.delete_es_backup_monthly",
+        "delete_opensearch_backups_monthly": {
+            "task": "webservices.tasks.legal_docs.delete_opensearch_backup_monthly",
             "schedule": crontab(minute=0, hour=5, day_of_month=1),
         },
         # Task 8: This task is launched every 30 seconds

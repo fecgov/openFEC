@@ -1,4 +1,4 @@
-from tests.common import ElasticSearchBaseTest
+from tests.common import OpenSearchBaseTest
 from webservices.api_setup import api
 from webservices.resources.legal import UniversalSearch
 from webservices.legal.legal_docs import TEST_SEARCH_ALIAS
@@ -8,7 +8,7 @@ import unittest.mock as mock
 
 
 @mock.patch("webservices.resources.legal.SEARCH_ALIAS", TEST_SEARCH_ALIAS)
-class TestStatuteDocsElasticsearch(ElasticSearchBaseTest):
+class TestStatuteDocsOpensearch(OpenSearchBaseTest):
 
     def test_q_search(self):
         q = "Payments"

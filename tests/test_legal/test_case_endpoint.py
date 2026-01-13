@@ -1,6 +1,6 @@
 from datetime import datetime
 from webservices.resources.legal import ALL_DOCUMENT_TYPES
-from tests.common import ElasticSearchBaseTest, ALL_INDICES, document_dictionary
+from tests.common import OpenSearchBaseTest, ALL_INDICES, document_dictionary
 from webservices.legal.legal_docs import TEST_SEARCH_ALIAS
 from webservices.api_setup import api
 from webservices.resources.legal import UniversalSearch
@@ -10,7 +10,7 @@ import unittest.mock as mock
 
 
 @mock.patch("webservices.resources.legal.SEARCH_ALIAS", TEST_SEARCH_ALIAS)
-class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
+class TestCaseDocsOpensearch(OpenSearchBaseTest):
     wrong_date_format = "01/20/24"
 
     def check_filters(self, params, field_name, doc_type):
@@ -45,7 +45,7 @@ class TestCaseDocsElasticsearch(ElasticSearchBaseTest):
 
     def test_index_creation(self):
         for index in ALL_INDICES:
-            exists = self.es_client.indices.get(index)
+            exists = self.opensearch_client.indices.get(index)
             assert exists, f"Error creating {index}"
 
 # ---------------------- Start all case filters  ------------------------------------------------
