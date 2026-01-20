@@ -53,10 +53,10 @@ We are always trying to improve our documentation. If you have suggestions or ru
      - Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
      - Read a [Windows tutorial](https://www.postgresqltutorial.com/install-postgresql/)
      - Read a [Linux tutorial](https://www.postgresql.org/docs/13/installation.html) (or follow your OS package manager)
-   - Elastic Search 7.x (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/7.X/install-elasticsearch.html))
-   - Flyway 11.19.0 ([homebrew instructions](https://formulae.brew.sh/formula/flyway))
+   - Opensearch 1.3 (instructions [here](https://docs.opensearch.org/1.3/install-and-configure/install-opensearch/index/))
+   - Flyway 11.20.0 ([homebrew instructions](https://formulae.brew.sh/formula/flyway))
 
-     - After downloading, create a .toml file in the following location: `flyway-11.19.0/conf/flyway.toml` and set the flyway environment variables `environment`, `url`, `user`, `password` and`locations` as
+     - After downloading, create a .toml file in the following location: `flyway-11.20.0/conf/flyway.toml` and set the flyway environment variables `environment`, `url`, `user`, `password` and`locations` as
 
        ```
        [environments.local]
@@ -222,12 +222,13 @@ Follow these steps every time you want to work on this project locally.
    export FLASK_DEBUG=1
    ```
 
-2. If you are using the legal search portion of the site, you will need Elastic Search running.
-   Navigate to the installation folder (eg., `elasticsearch-7.10`) and run:
+2. If you are using the legal search portion of the site, you will need OpenSearch running.
+   Navigate to the installation folder (eg., `opensearch-1.3.x`) and run:
 
    ```
    cd bin
-   ./elasticsearch
+   ./opensearch \
+     -E plugins.security.disabled=true
    ```
 
 3. Start the web server:
@@ -288,10 +289,11 @@ export SQLA_TEST_CONN=<psql:address-to-box>
 
 The connection URL has to strictly adhere to the structure `postgresql://<username>:<password>@<hostname>:<port>/<database_name>`. Note that the database_name should be specified explicitly, unlike URLs for SQLAlchemy connections.
 
-Start the elasticsearch server locally:
+Start the opensearch server locally:
 
 ```
-./elasticsearch
+./opensearch \
+     -E plugins.security.disabled=true
 ```
 
 Running the tests:
@@ -646,11 +648,11 @@ The materialized views are manually refreshed when something needs to be removed
 
 - View logs using kibana
 
-### Managing Elasticsearch
+### Managing Opensearch
 
-Reference Wiki [Elasticsearch 7.x.0 management instruction](https://github.com/fecgov/openFEC/wiki/Elasticsearch-7.x.0-management-instruction)
+Reference Wiki [Opensearch 1.3.x management instruction](https://github.com/fecgov/openFEC/wiki/Opensearch-1.3.x-management-instruction)
 
-There are some management commands to manage (display, create, delete, restore...) repository, index and snapshot on Elasticsearch.
+There are some management commands to manage (display, create, delete, restore...) repository, index and snapshot on Opensearch.
 More information is available by invoking each of these commands with a `--help` option. These commands can be run as [cf tasks](https://docs.cloudfoundry.org/devguide/using-tasks.html) on `cloud.gov`, e.g.,
 
 #### Display, Configure and Delete a repository

@@ -2,7 +2,7 @@ import json
 import codecs
 from tests.common import BaseTestCase
 from unittest.mock import patch
-from elasticsearch import RequestError
+from opensearchpy import RequestError
 from webservices.legal.constants import (  # noqa
     DOCS_PATH, CASE_INDEX
 )
@@ -115,7 +115,7 @@ class TestLegalSearch(BaseTestCase):
     def setUp(self):
         super().setUp()
 
-    @patch("webservices.rest.legal.es_client.search", legal_search_data)
+    @patch("webservices.rest.legal.opensearch_client.search", legal_search_data)
     def test_default_search(self):
         response = self.app.get(
             "/v1/legal/search/?&api_key=1234"
@@ -164,7 +164,7 @@ class TestLegalSearch(BaseTestCase):
         result_data.update({"total_all": 10})
         assert result == result_data
 
-    @patch("webservices.rest.legal.es_client.search", legal_search_data)
+    @patch("webservices.rest.legal.opensearch_client.search", legal_search_data)
     def test_search_by_type(self):
         for one_doc_type in ALL_DOCUMENT_TYPES:
             response = self.app.get(
@@ -209,7 +209,7 @@ class TestLegalSearch(BaseTestCase):
                     "total_all": 2,
                 }
 
-    @patch("webservices.rest.legal.es_client.search", legal_search_data)
+    @patch("webservices.rest.legal.opensearch_client.search", legal_search_data)
     def test_case_sort(self):
         for one_doc_type in ALL_CASE_DOCUMENT_TYPES:
             response = self.app.get(
@@ -255,7 +255,7 @@ class TestLegalSearch(BaseTestCase):
                     "total_all": 2,
                 }
 
-    @patch("webservices.rest.legal.es_client.search", legal_invalid_search)
+    @patch("webservices.rest.legal.opensearch_client.search", legal_invalid_search)
     def test_invalid_search(self):
         response = self.app.get(
             "/v1/legal/search/?%20AND%20OR&type=advisory_opinions"
@@ -302,7 +302,7 @@ def legal_doc_data(*args, **kwargs):
 
 
 class TestLegalDoc(BaseTestCase):
-    @patch("webservices.rest.legal.es_client.search", legal_doc_data)
+    @patch("webservices.rest.legal.opensearch_client.search", legal_doc_data)
     def test_legal_doc(self):
         response = self.app.get("/v1/legal/" + DOCS_PATH + "/doc_type/1?api_key=1234")
         assert response.status_code == 200

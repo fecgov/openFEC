@@ -1,7 +1,7 @@
 import webservices.legal.constants as constants
 import logging
 
-from webservices.legal.utils_es import create_index, switch_alias, restore_from_swapping_index, INDEX_DICT
+from webservices.legal.utils_opensearch import create_index, switch_alias, restore_from_swapping_index, INDEX_DICT
 
 from webservices.legal.legal_docs.current_cases import (
     load_current_murs,
@@ -64,7 +64,7 @@ def reload_all_data_by_index(index_name=None):
 def initialize_legal_data(index_name=None):
     """
     When first time load legal data, run this command with downtime (15mins ~ 2+ hours)
-    - Create a XXXX_INDEX on Elasticsearch based on 'INDEX_DICT'.
+    - Create a XXXX_INDEX on Opensearch based on 'INDEX_DICT'.
     'INDEX_DICT' description:
     1) CASE_INDEX includes DOCUMENT_TYPE=('murs','adrs','admin_fines')
     'murs' means current mur only.

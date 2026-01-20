@@ -25,9 +25,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         db.session.remove()
 
     @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    @patch("webservices.legal.legal_docs.advisory_opinions.create_es_client")
-    @patch("webservices.legal.utils_es.create_index")
-    def test_pending_unpublished_ao(self, get_bucket, create_es_client, create_index):
+    @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
+    @patch("webservices.legal.utils_opensearch.create_index")
+    def test_pending_unpublished_ao(self, get_bucket, create_opensearch_client, create_index):
         expected_ao = {
             "type": "advisory_opinions",
             "no": "2017-01",
@@ -61,9 +61,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         assert actual_ao == expected_ao
 
     @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    @patch("webservices.legal.legal_docs.advisory_opinions.create_es_client")
-    @patch("webservices.legal.utils_es.create_index")
-    def test_ao_with_entities(self, get_bucket, create_es_client, create_index):
+    @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
+    @patch("webservices.legal.utils_opensearch.create_index")
+    def test_ao_with_entities(self, get_bucket, create_opensearch_client, create_index):
         expected_requestor_names = [
             "The Manchurian Candidate",
             "Federation of Interstate Truckers",
@@ -112,9 +112,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         )
 
     @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    @patch("webservices.legal.legal_docs.advisory_opinions.create_es_client")
-    @patch("webservices.legal.utils_es.create_index")
-    def test_ao_with_entity_individual(self, get_bucket, create_es_client, create_index):
+    @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
+    @patch("webservices.legal.utils_opensearch.create_index")
+    def test_ao_with_entity_individual(self, get_bucket, create_opensearch_client, create_index):
         expected_entity = {
             "role": "Commenter",
             "name": "Mr Dan Becker MD",
@@ -144,9 +144,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
                 "type": "Individual"}]
 
     @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    @patch("webservices.legal.legal_docs.advisory_opinions.create_es_client")
-    @patch("webservices.legal.utils_es.create_index")
-    def test_ao_with_null_values_entity_individual(self, get_bucket, create_es_client, create_index):
+    @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
+    @patch("webservices.legal.utils_opensearch.create_index")
+    def test_ao_with_null_values_entity_individual(self, get_bucket, create_opensearch_client, create_index):
         expected_entity = {
             "role": "Commenter",
             "name": "Tom Dolan",
@@ -177,9 +177,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
                 "type": "Individual"}]
 
     @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    @patch("webservices.legal.legal_docs.advisory_opinions.create_es_client")
-    @patch("webservices.legal.utils_es.create_index")
-    def test_completed_ao_with_docs(self, get_bucket, create_es_client, create_index):
+    @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
+    @patch("webservices.legal.utils_opensearch.create_index")
+    def test_completed_ao_with_docs(self, get_bucket, create_opensearch_client, create_index):
         ao_no = "2017-01"
         filename = "Some File.pdf"
         expected_document = {
@@ -215,9 +215,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             assert actual_document[key] == expected_document[key]
 
     @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    @patch("webservices.legal.legal_docs.advisory_opinions.create_es_client")
-    @patch("webservices.legal.utils_es.create_index")
-    def test_ao_citations(self, get_bucket, create_es_client, create_index):
+    @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
+    @patch("webservices.legal.utils_opensearch.create_index")
+    def test_ao_citations(self, get_bucket, create_opensearch_client, create_index):
         ao1_document = {
             "document_id": 1,
             "category": "Final Opinion",
@@ -274,9 +274,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         assert actual_ao2["aos_cited_by"] == []
 
     @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    @patch("webservices.legal.legal_docs.advisory_opinions.create_es_client")
-    @patch("webservices.legal.utils_es.create_index")
-    def test_statutory_citations(self, get_bucket, create_es_client, create_index):
+    @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
+    @patch("webservices.legal.utils_opensearch.create_index")
+    def test_statutory_citations(self, get_bucket, create_opensearch_client, create_index):
         ao_document = {
             "document_id": 1,
             "category": "Final Opinion",
@@ -304,9 +304,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         assert actual_ao["statutory_citations"] == [{'title': 52, 'section': '30101'}]
 
     @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    @patch("webservices.legal.legal_docs.advisory_opinions.create_es_client")
-    @patch("webservices.legal.utils_es.create_index")
-    def test_regulatory_citations(self, get_bucket, create_es_client, create_index):
+    @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
+    @patch("webservices.legal.utils_opensearch.create_index")
+    def test_regulatory_citations(self, get_bucket, create_opensearch_client, create_index):
         ao_document = {
             "document_id": 1,
             "category": "Final Opinion",
@@ -356,9 +356,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         self.connection.commit()
 
     @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    @patch("webservices.legal.legal_docs.advisory_opinions.create_es_client")
-    @patch("webservices.legal.utils_es.create_index")
-    def test_ao_offsets(self, get_bucket, create_es_client, create_index):
+    @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
+    @patch("webservices.legal.utils_opensearch.create_index")
+    def test_ao_offsets(self, get_bucket, create_opensearch_client, create_index):
         expected_ao1 = {
             "type": "advisory_opinions",
             "no": "2015-01",

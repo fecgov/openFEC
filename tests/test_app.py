@@ -13,7 +13,7 @@ class TestBaseTestCase(BaseTestCase):
 
     def test_client_is_available(self):
         response = self.client.get("/")
-        self.assertEqual(response.status_int, 301, "Test client request failed")
+        self.assertEqual(response.status_code, 301)
 
     def test_home_page(self):
         response = self.client.get('/developers/')

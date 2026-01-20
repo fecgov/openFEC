@@ -21,14 +21,12 @@ jobs:
           POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_DB: cfdm_unit_test
 
-      # elasticsearch
-      - image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+      # Opensearch
+      - image: opensearchproject/opensearch:1.3.19
         environment:
-          cluster.name: elasticsearch
-          xpack.security.enabled: false
-          transport.host: localhost
-          network.host: 127.0.0.1
-          http.port: 9200
+          cluster.name: opensearch
+          plugins.security.disabled: true
+          OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
           discovery.type: single-node
 
     steps:
@@ -47,8 +45,8 @@ jobs:
           command: |
             sudo apt-get --allow-releaseinfo-change-suite update && sudo apt-get install -y default-jdk
             mkdir flyway
-            curl -sL https://github.com/flyway/flyway/releases/download/flyway-11.19.0/flyway-commandline-11.19.0-linux-x64.tar.gz | tar zxv -C flyway
-            echo 'export PATH=./flyway/flyway-11.19.0:$PATH' >> $BASH_ENV
+            curl -sL https://github.com/flyway/flyway/releases/download/flyway-11.20.0/flyway-commandline-11.20.0-linux-x64.tar.gz | tar zxv -C flyway
+            echo 'export PATH=./flyway/flyway-11.20.0:$PATH' >> $BASH_ENV
 
       - restore_cache:
           keys:
@@ -89,7 +87,7 @@ jobs:
           command: dockerize -wait tcp://localhost:5432 -timeout 1m
 
       - run:
-          name: Wait for Elasticsearch
+          name: Wait for Opensearch
           command: dockerize -wait http://localhost:9200 -timeout 1m
 
       - run:

@@ -2092,7 +2092,7 @@ Explore relevant statutes, regulations and Commission actions.
 
 LEGAL_SEARCH = '''
 Search legal documents by document type, or across all document types using keywords, parameter values and ranges.\n\
-This endpoint uses elasticsearch-dsl pagination.\
+This endpoint uses opensearch-dsl pagination.\
 For pagination, use both `from_hit` and `hits_returned` parameters. `from_hit` defines the offset from the first \
 result you want to fetch. `hits_returned` allows you to configure the maximum results to be returned.\n\
 By default `from_hit` = 0 and `hits_returned` = 20, endpoint will return the first 20 documents (i.e. 0 to 19).\n\

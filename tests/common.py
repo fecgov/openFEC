@@ -5,7 +5,6 @@ import subprocess
 import unittest
 
 from flask import current_app
-from webtest import TestApp
 
 from webservices.rest import create_app, db
 from webservices import __API_VERSION__
@@ -14,7 +13,7 @@ from webservices.legal.constants import (TEST_CASE_INDEX, TEST_ARCH_MUR_INDEX, T
                                          TEST_CASE_ALIAS, TEST_ARCH_MUR_ALIAS, TEST_AO_ALIAS,
                                          TEST_RM_INDEX, TEST_RM_ALIAS)
 
-from webservices.legal.utils_es import create_test_indices, create_es_client
+from webservices.legal.utils_opensearch import create_test_indices, create_opensearch_client
 from tests.test_legal.test_legal_data import document_dictionary
 from tests.test_legal.test_rm_data import rm_document_dictionary
 from jdbc_utils import to_jdbc_url
@@ -58,7 +57,7 @@ class BaseTestCase(unittest.TestCase):
             BaseTestCase.application = create_app(test_config='testing')
             BaseTestCase._application = True
         cls.app = cls.application.test_client()
-        cls.client = TestApp(cls.application)
+        cls.client = cls.application.test_client()
         cls.app_context = cls.application.app_context()
         cls.app_context.push()
 
@@ -132,20 +131,20 @@ class ApiBaseTest(BaseTestCase):
         return response['results']
 
 
-class ElasticSearchBaseTest(BaseTestCase):
+class OpenSearchBaseTest(BaseTestCase):
     @classmethod
     def setUpClass(cls):
-        super(ElasticSearchBaseTest, cls).setUpClass()
-        cls.es_client = create_es_client()
+        super(OpenSearchBaseTest, cls).setUpClass()
+        cls.opensearch_client = create_opensearch_client()
         # ensure environment is completely clean before starting
-        _delete_all_indices(cls.es_client)
+        _delete_all_indices(cls.opensearch_client)
         _create_all_indices()
-        _insert_all_documents(cls.es_client)
+        _insert_all_documents(cls.opensearch_client)
 
     @classmethod
     def tearDownClass(cls):
-        super(ElasticSearchBaseTest, cls).tearDownClass()
-        _delete_all_indices(cls.es_client)
+        super(OpenSearchBaseTest, cls).tearDownClass()
+        _delete_all_indices(cls.opensearch_client)
 
     def setUp(self):
         self.request_context = self.application.test_request_context()
@@ -220,31 +219,31 @@ def _create_all_indices():
     create_test_indices()
 
 
-def _delete_all_indices(es_client):
-    es_client.indices.delete(index=ALL_INDICES, ignore_unavailable=True)
+def _delete_all_indices(opensearch_client):
+    opensearch_client.indices.delete(index=ALL_INDICES, ignore_unavailable=True)
 
 
-def wait_for_refresh(es_client, index_name):
-    es_client.indices.refresh(index=index_name)
+def wait_for_refresh(opensearch_client, index_name):
+    opensearch_client.indices.refresh(index=index_name)
 
 
-def _insert_all_documents(es_client):
-    insert_documents("murs", TEST_CASE_ALIAS, es_client)
-    insert_documents("archived_murs", TEST_ARCH_MUR_ALIAS, es_client)
-    insert_documents("adrs", TEST_CASE_ALIAS, es_client)
-    insert_documents("admin_fines", TEST_CASE_ALIAS, es_client)
-    insert_documents("statutes", TEST_AO_ALIAS, es_client)
-    insert_documents("advisory_opinions", TEST_AO_ALIAS, es_client)
-    insert_documents("ao_citations", TEST_AO_ALIAS, es_client)
-    insert_documents("mur_citations", TEST_CASE_ALIAS, es_client)
-    insert_documents("rulemakings", TEST_RM_ALIAS, es_client, rm_document_dictionary)
+def _insert_all_documents(opensearch_client):
+    insert_documents("murs", TEST_CASE_ALIAS, opensearch_client)
+    insert_documents("archived_murs", TEST_ARCH_MUR_ALIAS, opensearch_client)
+    insert_documents("adrs", TEST_CASE_ALIAS, opensearch_client)
+    insert_documents("admin_fines", TEST_CASE_ALIAS, opensearch_client)
+    insert_documents("statutes", TEST_AO_ALIAS, opensearch_client)
+    insert_documents("advisory_opinions", TEST_AO_ALIAS, opensearch_client)
+    insert_documents("ao_citations", TEST_AO_ALIAS, opensearch_client)
+    insert_documents("mur_citations", TEST_CASE_ALIAS, opensearch_client)
+    insert_documents("rulemakings", TEST_RM_ALIAS, opensearch_client, rm_document_dictionary)
 
 
-def insert_documents(doc_type, index, es_client, doc_dict=document_dictionary):
+def insert_documents(doc_type, index, opensearch_client, doc_dict=document_dictionary):
     for doc in doc_dict[doc_type]:
-        es_client.index(index=index, body=doc)
+        opensearch_client.index(index=index, body=doc)
 
-    wait_for_refresh(es_client, index)
+    wait_for_refresh(opensearch_client, index)
 
 
 def assert_dicts_subset(first, second):

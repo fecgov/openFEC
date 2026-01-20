@@ -1,4 +1,4 @@
-from tests.common import ElasticSearchBaseTest, rm_document_dictionary
+from tests.common import OpenSearchBaseTest, rm_document_dictionary
 from webservices.resources.rulemaking import RulemakingSearch
 from webservices.api_setup import api
 from datetime import datetime
@@ -9,7 +9,7 @@ import unittest.mock as mock
 
 
 @mock.patch("webservices.resources.rulemaking.RM_SEARCH_ALIAS", TEST_RM_SEARCH_ALIAS)
-class TestRuleMakingDocsElasticsearch(ElasticSearchBaseTest):
+class TestRuleMakingDocsOpensearch(OpenSearchBaseTest):
     wrong_date_format = "01/20/24"
 
     def check_filters(self, params, field_name, multiple):
@@ -310,6 +310,7 @@ class TestRuleMakingDocsElasticsearch(ElasticSearchBaseTest):
                                                 proximity_preserve_order=True,
                                                 max_gaps=max_gaps))
         self.assertEqual(len(response), 1)
+        self.assertNotEqual(len(response[0]["source"]), 0)
         self.assertEqual(response[0]["rm_no"], "2022-06")
 
         q_prox_lvl_two = ["fourth lvl 2", "Second RM"]
@@ -321,6 +322,7 @@ class TestRuleMakingDocsElasticsearch(ElasticSearchBaseTest):
                                                 max_gaps=max_gaps))
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0]["rm_no"], "2024-08")
+        self.assertNotEqual(len(response[0]["source"]), 0)
 
         q_prox_description = "RM lvl 2"
         proximity_filter = "before"
@@ -341,7 +343,7 @@ class TestRuleMakingDocsElasticsearch(ElasticSearchBaseTest):
         q = "\"REG 2024-10 Civil Monetary\""
         q_proximity = ["First RM", "first lvl 2"]
         max_gaps = 3
-        doc_category_id = 7
+        doc_category_id = 3
         is_key_document = False
         entity_name = "Fake"
         entity_role = 2
