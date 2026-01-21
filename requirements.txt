@@ -26,7 +26,7 @@ sqlalchemy-postgres-copy==0.3.0
 SQLAlchemy==2.0.41
 ujson==5.4.0 # decoding CSP violation reported
 webargs==8.7.1
-werkzeug==3.1.4
+werkzeug==3.1.5
 
 # Marshalling
 flask-apispec==0.11.4
