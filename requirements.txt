@@ -2,8 +2,7 @@ apispec==6.8.2
 certifi==2024.7.4
 cfenv==0.5.2
 defusedxml==0.6.0
-opensearch-py==1.1.0
-opensearch-dsl==1.0.0
+opensearch-py==2.8.0
 Flask==3.1.0
 Flask-Cors==6.0.0
 Flask-RESTful==0.3.9
@@ -25,6 +24,7 @@ requests-aws4auth==1.0
 sqlalchemy-postgres-copy==0.3.0
 SQLAlchemy==2.0.41
 ujson==5.4.0 # decoding CSP violation reported
+urllib3==2.6.3
 webargs==8.7.1
 werkzeug==3.1.5
 
