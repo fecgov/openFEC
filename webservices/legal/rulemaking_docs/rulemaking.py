@@ -1,7 +1,12 @@
 import logging
+import json
 import webservices.legal.constants as constants
 from webservices.common.models import db
-from webservices.legal.utils_opensearch import create_opensearch_client
+from webservices.legal.utils_opensearch import (
+    create_opensearch_client,
+    DateTimeEncoder
+)
+
 from webservices.tasks.utils import get_bucket
 from sqlalchemy import text
 logger = logging.getLogger(__name__)
@@ -12,7 +17,9 @@ logger = logging.getLogger(__name__)
 ALL_RMS = """
 SELECT
 rm_number,
-rm_id
+rm_id,
+pg_date,
+published_flg
 FROM fosers.rulemaking_vw
 ORDER BY rm_year DESC, rm_serial DESC
 """
@@ -32,7 +39,9 @@ rm_number,
 rm_serial,
 rm_year,
 sync_status,
-title
+title,
+pg_date,
+published_flg
 FROM fosers.rulemaking_vw
 WHERE rm_number = :rm
 """
@@ -184,20 +193,36 @@ ORDER BY hearing_date DESC
 """
 
 
-# Load specific one rm_no command: `python cli.py load_rulemaking 2021-01`
+# Load a single rulemaking with rm_no, command: `python cli.py load_rulemaking 2021-01`
 # Load all rulemakings command: `python cli.py load_rulemaking`
 def load_rulemaking(specific_rm_no=None):
     opensearch_client = create_opensearch_client()
     rm_count = 0
+    # slack_message = ""
     if opensearch_client.indices.exists(index=constants.RM_ALIAS):
-        logger.info(" Index alias '{0}' exists, start loading rulemaking...".format(constants.RM_ALIAS))
+        logger.debug(" Index alias '{0}' exists, start loading rulemaking...".format(constants.RM_ALIAS))
         for rm in get_rulemaking(specific_rm_no):
             if rm is not None:
-                logger.info(" Loading rm_no: {0}, rm_id: {1} ".format(rm["rm_no"], rm["rm_id"]))
-                opensearch_client.index(constants.RM_ALIAS, rm, id=rm["rm_id"])
-                rm_count += 1
-
-        logger.info(" Total %d rulemaking loaded.", rm_count)
+                if rm.get("published_flg"):
+                    logger.info(" Loading rm_no: {0}, rm_id: {1} ".format(rm["rm_no"], rm["rm_id"]))
+                    opensearch_client.index(constants.RM_ALIAS, rm, id=rm["rm_id"])
+                    rm_count += 1
+                    logger.info("Sucessfully loaded rulemaking rm_no: {0}, rm_id: {1} ".format(
+                        rm["rm_no"], rm["rm_id"]))
+                else:
+                    try:
+                        logger.info("Found an unpublished rulemaking - deleting {0}: {1} from ES".format(
+                            rm["rm_no"], rm["rm_id"]))
+                        opensearch_client.delete(index=constants.RM_ALIAS, id=rm["rm_id"])
+                        logger.info("Successfully deleted {} {} from ES".format(rm["rm_no"], rm["rm_id"]))
+                    except Exception as err:
+                        logger.error("An error occurred while deleting an unpublished rulemaking.{0} {1} {2}".format(
+                            rm["rm_no"], rm["rm_id"], err))
+            # ==for local debug use: remove the big "documents" section to display the object "rulemakings" data
+            debug_rm_data = rm
+            del debug_rm_data["documents"]
+            logger.debug("rm_data count=" + str(rm_count))
+            logger.debug("debug_rm_data =" + json.dumps(debug_rm_data, indent=3, cls=DateTimeEncoder))
     else:
         logger.error(" The index alias '{0}' is not found, cannot load rulemaking".format(constants.RM_ALIAS))
 
@@ -231,6 +256,7 @@ def get_single_rulemaking(rm_number, bucket):
             "last_updated": row["last_updated"],
             "key_documents": get_key_documents(rm_no, rm_id, bucket),
             "no_tier_documents": get_no_tier_documents(rm_no, rm_id, bucket),
+            "published_flg": row["published_flg"],
             "rm_id": rm_id,
             "rm_name": row["rm_name"],
             "rm_no": row["rm_no"],
@@ -302,7 +328,7 @@ def get_documents(rm_no, rm_id, bucket):
                 documents.append(document)
 
                 try:
-                    # The bucket is None locally, so there is no need to upload the PDF to S3
+                    # The bucket is None when running locally, so there’s no need to upload the PDF to S3
                     if bucket:
                         logger.debug("S3: Uploading {}".format(pdf_key))
                         bucket.put_object(
