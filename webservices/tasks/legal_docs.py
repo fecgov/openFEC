@@ -8,12 +8,14 @@ from celery import shared_task
 from webservices import utils
 from webservices.legal.legal_docs.advisory_opinions import load_advisory_opinions
 from webservices.legal.legal_docs.current_cases import load_cases
+from webservices.legal.rulemaking_docs.rulemaking import load_rulemaking
 from webservices.legal.utils_opensearch import create_opensearch_snapshot, display_snapshot_detail, delete_snapshot
 from webservices.legal.constants import (  # noqa
     CASE_INDEX,
     AO_INDEX,
     AO_REPO,
     CASE_REPO,
+    SLACK_BOTS
 )
 
 from webservices.common.models import db
@@ -36,6 +38,13 @@ RECENTLY_MODIFIED_CASES = """
     ORDER BY case_serial;
 """
 
+RECENTLY_MODIFIED_RULEMAKINGS = """
+    SELECT /* celery_rulemakings_5 */ rm_no, pg_date, published_flg
+    FROM fosers.rulemaking_vw
+    WHERE pg_date >= NOW() - '10 hours + 5 minutes'::INTERVAL
+    ORDER BY rm_year desc, rm_serial desc;
+"""
+
 # For daily_reload_all_aos_when_change(): in past 24 hours(9pm-9pm EST)
 DAILY_MODIFIED_AOS = """
     SELECT ao_no, pg_date
@@ -52,7 +61,13 @@ DAILY_MODIFIED_CASES_SEND_ALERT = """
     ORDER BY case_serial;
 """
 
-SLACK_BOTS = "#bots"
+# for send_alert_daily_modified_rulemakings():  during 19:55pm-19:55pm(EST) (24 hours)
+DAILY_MODIFIED_RULEMAKINGS_SEND_ALERT = """
+    SELECT rm_no, pg_date, published_flg
+    FROM fosers.rulemaking_vw
+    WHERE pg_date >= NOW() - '24 hour'::INTERVAL
+    ORDER BY rm_serial;
+"""
 
 
 @shared_task(once={"graceful": True}, base=QueueOnce)
@@ -121,6 +136,46 @@ def refresh_most_recent_cases(conn):
 
 
 @shared_task(once={"graceful": True}, base=QueueOnce)
+def refresh_most_recent_rulemakings():
+    """
+        # When found modified rulemakings within 8 hours,
+        #   if published_flg = true, reload rulemaking(s) to opensearch service.
+        #   if published_flg = false, delete the rulemaking(s) to opensearch service.
+    """
+    with db.engine.begin() as conn:
+        logger.info(" Checking for recently modified rulemakings...")
+        rs = conn.execute(text(RECENTLY_MODIFIED_RULEMAKINGS)).mappings()
+        row_count = 0
+        load_count = 0
+        slack_message = ""
+        deleted_rulemakings_count = 0
+        for row in rs:
+            row_count += 1
+            logger.info(" Rulemaking %s was recently modified on %s", row["rm_no"], row["pg_date"])
+            load_rulemaking(row["rm_no"])
+            if row["published_flg"]:
+                load_count += 1
+                logger.info(" A total of %d rulemaking(s) have been successfully loaded to opensearch service.",
+                            load_count)
+                slack_message += 'Rulemaking %s found published at %s' % (row["rm_no"], row["pg_date"])
+                slack_message = slack_message + "\n"
+            else:
+                deleted_rulemakings_count += 1
+                logger.info(" A total of %d rulemaking(s) successfully unpublished from opensearch service.",
+                            deleted_rulemakings_count)
+                slack_message += 'Rulemaking %s found unpublished at %s' % (row["rm_no"], row["pg_date"])
+                slack_message = slack_message + "\n"
+
+        if row_count <= 0:
+            logger.info(" No rulemakings have been modified recently.")
+            slack_message = "No rulemakings have been modified recently."
+
+    if slack_message:
+        slack_message = slack_message + " in " + get_app_name()
+        utils.post_to_slack(slack_message, SLACK_BOTS)
+
+
+@shared_task(once={"graceful": True}, base=QueueOnce)
 def daily_reload_all_aos_when_change():
     """
         # 1) Identify the daily modified AO(s) in past 24 hours(9pm-9pm EST)
@@ -186,6 +241,29 @@ def send_alert_daily_modified_legal_case():
                 slack_message = slack_message + "\n"
     if row_count <= 0:
         slack_message = "No daily modified case (MUR/AF/ADR) found"
+
+    if slack_message:
+        slack_message = slack_message + " in " + get_app_name()
+        utils.post_to_slack(slack_message, SLACK_BOTS)
+
+
+@shared_task(once={"graceful": True}, base=QueueOnce)
+def send_alert_daily_modified_rulemakings():
+    # When rulemakings modified during 6am-7pm EST, post rulemaking details to slack.
+    slack_message = ""
+    with db.engine.begin() as conn:
+        rs = conn.execute(text(DAILY_MODIFIED_RULEMAKINGS_SEND_ALERT)).mappings()
+        row_count = 0
+        for row in rs:
+            row_count += 1
+            if row["published_flg"]:
+                slack_message += 'Rulemaking %s found published at %s' % (row["rm_no"], row["pg_date"])
+                slack_message = slack_message + "\n"
+            else:
+                slack_message += 'Rulemaking %s found unpublished at %s' % (row["rm_no"], row["pg_date"])
+                slack_message = slack_message + "\n"
+    if row_count <= 0:
+        slack_message = "No daily modified rulemakings found"
 
     if slack_message:
         slack_message = slack_message + " in " + get_app_name()
