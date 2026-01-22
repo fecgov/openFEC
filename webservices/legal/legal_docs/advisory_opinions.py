@@ -145,7 +145,7 @@ def load_advisory_opinions(from_ao_no=None):
                 if ao is not None:
                     if ao.get("published_flg"):
                         logger.info(" Loading AO number: %s", ao["no"])
-                        opensearch_client.index(AO_ALIAS, ao, id=ao["no"])
+                        opensearch_client.index(index=AO_ALIAS, body=ao, id=ao["no"])
                         ao_count += 1
                 # ==for local dubug use: remove the big "documents" section to display the object "ao" data.
                         debug_ao_data = ao
@@ -455,7 +455,7 @@ def get_citations(ao_names):
             "citation_type": "regulation",
             "doc_type": "advisory_opinions",
         }
-        opensearch_client.index(AO_ALIAS, entry, id=entry["citation_text"])
+        opensearch_client.index(index=AO_ALIAS, body=entry, id=entry["citation_text"])
 
     for citation in all_statutory_citations:
         entry = {
@@ -464,7 +464,7 @@ def get_citations(ao_names):
             "citation_type": "statute",
             "doc_type": "advisory_opinions",
         }
-        opensearch_client.index(AO_ALIAS, entry, id=entry["citation_text"])
+        opensearch_client.index(index=AO_ALIAS, body=entry, id=entry["citation_text"])
     logger.info(" AO Citations loaded.")
     return citations
 

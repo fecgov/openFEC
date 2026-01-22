@@ -1,5 +1,5 @@
 from sqlalchemy.sql import text
-from opensearch_dsl import Search
+from opensearchpy import Search
 import logging
 import re
 from webservices.common.models import db
@@ -141,10 +141,10 @@ def load_archived_murs(mur_no=None):
         for mur in get_murs(mur_no):
             if mur is not None:
                 try:
-                    logger.info("Loading archived MUR No: {0}".format(mur["no"]))
-                    opensearch_client.index(ARCH_MUR_ALIAS, mur, id=mur["doc_id"])
+                    logger.info("Loading archived MUR No: %s", mur["no"])
+                    opensearch_client.index(index=ARCH_MUR_ALIAS, body=mur, id=mur["doc_id"])
                     mur_count += 1
-                    logger.info("{0} Archived Mur(s) loaded".format(mur_count))
+                    logger.info("%s Archived Mur(s) loaded", mur_count)
                 except Exception as err:
                     logger.error(
                         "An error occurred while uploading archived mur:\nmur no={0} \nerr={1}".format(
@@ -309,7 +309,7 @@ def get_documents(mur_id):
 def extract_pdf_text(mur_no=None):
     """
     1)Reads "text" and "documents" object data for Archived MURs from Opensearch,
-    under index: ARCH_MUR_INDEX and type of `murs`
+    under index: ARCH_MUR_INDEX
     2)Assembles a JSON document corresponding to the archived murs,
     3)Insert the JSON document into Postgres database table: mur_arch.documents
     4)Run this command carefully, backup mur_arch.documents table first
@@ -335,7 +335,6 @@ def extract_pdf_text(mur_no=None):
             ])
             .extra(size=each_fetch_size, from_=from_no)
             .index(ARCH_MUR_ALIAS)
-            .doc_type("murs")
             .sort("no")
             .execute()
         )

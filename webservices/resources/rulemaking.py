@@ -1,4 +1,4 @@
-from opensearch_dsl import Search, Q
+from opensearchpy import Search, Q
 from flask_apispec import doc
 from webservices import docs
 from webservices import args
