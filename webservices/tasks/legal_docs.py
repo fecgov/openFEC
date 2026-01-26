@@ -157,17 +157,22 @@ def refresh_most_recent_rulemakings():
                 load_count += 1
                 logger.info(" A total of %d rulemaking(s) have been successfully loaded to opensearch service.",
                             load_count)
-                slack_message = slack_message + "Rulemaking, " + str(row["rm_no"]) + " found published at "
-                + str(row["pg_date"])
-                slack_message = slack_message + "\n"
+                # slack_message = slack_message + "Rulemaking, " + str(row["rm_no"]) + " found published at "
+                # + str(row["pg_date"])
+                # slack_message = slack_message + "\n"
+                slack_message = slack_message + "Rulemaking " + str(row["rm_no"])
+                slack_message = slack_message + " found published at " + str(row["pg_date"])
+                slack_message = slack_message + "\n" 
             else:
                 deleted_rulemakings_count += 1
                 logger.info(" A total of %d rulemaking(s) successfully unpublished from opensearch service.",
                             deleted_rulemakings_count)
-                slack_message = slack_message + "Rulemaking, " + str(row["rm_no"]) + " found unpublished at "
-                + str(row["pg_date"])
+                # slack_message = slack_message + "Rulemaking, " + str(row["rm_no"]) + " found unpublished at "
+                # + str(row["pg_date"])
+                # slack_message = slack_message + "\n"
+                slack_message = slack_message + "Rulemaking " + str(row["rm_no"])
+                slack_message = slack_message + + " found unpublished at " + str(row["pg_date"])
                 slack_message = slack_message + "\n"
-
         if row_count <= 0:
             logger.info(" No rulemakings have been modified recently.")
             slack_message = "No rulemakings have been modified recently."
