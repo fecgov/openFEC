@@ -162,7 +162,7 @@ def refresh_most_recent_rulemakings():
                 # slack_message = slack_message + "\n"
                 slack_message = slack_message + "Rulemaking " + str(row["rm_no"])
                 slack_message = slack_message + " found published at " + str(row["pg_date"])
-                slack_message = slack_message + "\n" 
+                slack_message = slack_message + "\n"
             else:
                 deleted_rulemakings_count += 1
                 logger.info(" A total of %d rulemaking(s) successfully unpublished from opensearch service.",
@@ -171,7 +171,7 @@ def refresh_most_recent_rulemakings():
                 # + str(row["pg_date"])
                 # slack_message = slack_message + "\n"
                 slack_message = slack_message + "Rulemaking " + str(row["rm_no"])
-                slack_message = slack_message + + " found unpublished at " + str(row["pg_date"])
+                slack_message = slack_message + " found unpublished at " + str(row["pg_date"])
                 slack_message = slack_message + "\n"
         if row_count <= 0:
             logger.info(" No rulemakings have been modified recently.")
