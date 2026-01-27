@@ -1,6 +1,6 @@
 import re
 
-from opensearch_dsl import Search, Q
+from opensearchpy import Search, Q
 from flask import abort
 from flask_apispec import doc
 from webservices import docs

@@ -74,7 +74,7 @@ def upload_citations(statutory_citations, regulatory_citations, index, doc_type,
                 "citation_type": "statute",
                 "doc_type": doc_type,
             }
-            opensearch_client.index(index, entry, id=doc_type + "_" + citation)
+            opensearch_client.index(index=index, body=entry, id=f"{doc_type}_{citation}")
 
         for citation in regulatory_citations:
             entry = {
@@ -83,9 +83,9 @@ def upload_citations(statutory_citations, regulatory_citations, index, doc_type,
                 "citation_type": "regulation",
                 "doc_type": doc_type,
             }
-            opensearch_client.index(index, entry, id=doc_type + "_" + citation)
+            opensearch_client.index(index=index, body=entry, id=f"{doc_type}_{citation}")
     except Exception:
-        logger.error("An error occurred while uploading {} citations".format(doc_type))
+        logger.error(f"An error occurred while uploading {doc_type} citations")
 
 
 def check_filter_exists(kwargs, filter):
@@ -473,7 +473,7 @@ def configure_snapshot_repository(repo_name=None):
                 "access_key": credentials["access_key_id"],
                 "secret_key": credentials["secret_access_key"],
                 "base_path": constants.S3_BACKUP_DIRECTORY,
-                "role_arn": env.get_credential("OS_SNAPSHOT_ROLE_ARN"),
+                "role_arn": env.get_credential("OS2_SNAPSHOT_ROLE_ARN"),
             },
         }
         opensearch_client.snapshot.create_repository(

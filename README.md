@@ -53,7 +53,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
      - Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
      - Read a [Windows tutorial](https://www.postgresqltutorial.com/install-postgresql/)
      - Read a [Linux tutorial](https://www.postgresql.org/docs/13/installation.html) (or follow your OS package manager)
-   - Opensearch 1.3 (instructions [here](https://docs.opensearch.org/1.3/install-and-configure/install-opensearch/index/))
+   - Opensearch 2.11 (instructions [here](https://docs.opensearch.org/2.11/install-and-configure/install-opensearch/index/))
    - Flyway 11.20.0 ([homebrew instructions](https://formulae.brew.sh/formula/flyway))
 
      - After downloading, create a .toml file in the following location: `flyway-11.20.0/conf/flyway.toml` and set the flyway environment variables `environment`, `url`, `user`, `password` and`locations` as
@@ -223,13 +223,15 @@ Follow these steps every time you want to work on this project locally.
    ```
 
 2. If you are using the legal search portion of the site, you will need OpenSearch running.
-   Navigate to the installation folder (eg., `opensearch-1.3.x`) and run:
+   Navigate to the installation folder (eg., `opensearch-2.11.x`) and run:
 
    ```
    cd bin
    ./opensearch \
      -E plugins.security.disabled=true
    ```
+
+   NOTE: You can also disable security in your opensearch.yml file in your local opensearch
 
 3. Start the web server:
 
@@ -650,7 +652,7 @@ The materialized views are manually refreshed when something needs to be removed
 
 ### Managing Opensearch
 
-Reference Wiki [Opensearch 1.3.x management instruction](https://github.com/fecgov/openFEC/wiki/Opensearch-1.3.x-management-instruction)
+Reference Wiki [Opensearch 2.11.x management instruction](https://github.com/fecgov/openFEC/wiki/Opensearch-2.11.x-management-instruction)
 
 There are some management commands to manage (display, create, delete, restore...) repository, index and snapshot on Opensearch.
 More information is available by invoking each of these commands with a `--help` option. These commands can be run as [cf tasks](https://docs.cloudfoundry.org/devguide/using-tasks.html) on `cloud.gov`, e.g.,
