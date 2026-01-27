@@ -147,7 +147,6 @@ def refresh_most_recent_rulemakings():
         rs = conn.execute(text(RECENTLY_MODIFIED_RULEMAKINGS)).mappings()
         row_count = 0
         load_count = 0
-        slack_message = ""
         deleted_rulemakings_count = 0
         for row in rs:
             row_count += 1
@@ -157,22 +156,13 @@ def refresh_most_recent_rulemakings():
                 load_count += 1
                 logger.info(" A total of %d rulemaking(s) have been successfully loaded to opensearch service.",
                             load_count)
-                slack_message += 'Rulemaking %s found published at %s' % (row["rm_no"], row["pg_date"])
-                slack_message = slack_message + "\n"
             else:
                 deleted_rulemakings_count += 1
                 logger.info(" A total of %d rulemaking(s) successfully unpublished from opensearch service.",
                             deleted_rulemakings_count)
-                slack_message += 'Rulemaking %s found unpublished at %s' % (row["rm_no"], row["pg_date"])
-                slack_message = slack_message + "\n"
 
         if row_count <= 0:
             logger.info(" No rulemakings have been modified recently.")
-            slack_message = "No rulemakings have been modified recently."
-
-    if slack_message:
-        slack_message = slack_message + " in " + get_app_name()
-        utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
 @shared_task(once={"graceful": True}, base=QueueOnce)
