@@ -44,6 +44,9 @@ ANALYZER_SETTING = {
     "highlight.max_analyzed_offset": 60000000,
 }
 
+SLACK_BOTS = "#bots"
+SLACK_ALERTS = "#alerts"
+
 OS_SERVICE_INSTANCE_NAME = "fec-api-opensearch"
 # TODO (clucas) update constants for v2
 AWS_ES_SERVICE = "es"
