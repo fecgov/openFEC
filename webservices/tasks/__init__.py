@@ -76,11 +76,11 @@ if env.app.get("space_name", "unknown-space").lower() != "feature":
             "task": "webservices.tasks.service_status_checks.heartbeat",
             "schedule": 30.0,
         },
-        # Task 9: This task is launched at 19:55pm(EST) everyday.
-        # Check for rulemakings modified in the previous 24-hour window (7:55 PM–7:55 PM EST)
+        # Task 9: This task is launched at 19:25pm(EST) everyday.
+        # Check for rulemakings modified in the previous 24-hour window (19:25 PM–19:25 PM EST)
         # and send their detailed information to Slack.
         "send_alert_rulemakings": {
             "task": "webservices.tasks.legal_docs.send_alert_daily_modified_rulemakings",
-            "schedule": crontab(minute=55, hour=23),
+            "schedule": crontab(minute=25, hour=23),
         },
     }
