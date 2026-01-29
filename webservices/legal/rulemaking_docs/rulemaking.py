@@ -205,7 +205,7 @@ def load_rulemaking(specific_rm_no=None):
             if rm is not None:
                 if rm.get("published_flg"):
                     logger.info("Loading rm_no: %s, rm_id: %s", rm["rm_no"], rm["rm_id"])
-                    opensearch_client.index(constants.RM_ALIAS, rm, id=rm["rm_id"])
+                    opensearch_client.index(index=constants.RM_ALIAS, body=rm, id=rm["rm_id"])
                     rm_count += 1
                     logger.info("Successfully loaded rulemaking rm_no: %s, rm_id: %s", rm["rm_no"], rm["rm_id"])
                 else:

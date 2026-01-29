@@ -353,7 +353,7 @@ def load_cases(case_type, case_no=None):
                 if case is not None:
                     if case.get("published_flg"):
                         logger.info("Loading {0}: {1}".format(case_type, case["no"]))
-                        opensearch_client.index(CASE_ALIAS, case, id=case["doc_id"])
+                        opensearch_client.index(index=CASE_ALIAS, body=case, id=case["doc_id"])
                         case_count += 1
                         logger.info("{0} {1}(s) loaded".format(case_count, case_type))
                     else:
