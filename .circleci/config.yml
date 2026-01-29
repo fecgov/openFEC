@@ -22,10 +22,10 @@ jobs:
           POSTGRES_DB: cfdm_unit_test
 
       # Opensearch
-      - image: opensearchproject/opensearch:1.3.19
+      - image: opensearchproject/opensearch:2.11.1
         environment:
           cluster.name: opensearch
-          plugins.security.disabled: true
+          DISABLE_SECURITY_PLUGIN: "true"
           OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
           discovery.type: single-node
 

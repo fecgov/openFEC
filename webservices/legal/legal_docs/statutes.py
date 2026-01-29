@@ -70,7 +70,7 @@ def get_title_52_statutes():
                         "sort1": 52,
                         "sort2": int(section_no),
                     }
-                    opensearch_client.index(AO_ALIAS, doc, id=doc["doc_id"])
+                    opensearch_client.index(index=AO_ALIAS, body=doc, id=doc["doc_id"])
                     section_count += 1
     return section_count
 
@@ -113,7 +113,7 @@ def get_title_26_statutes():
                         "sort2": int(section_no),
                     }
                     try:
-                        opensearch_client.index(AO_ALIAS, doc, id=doc["doc_id"])
+                        opensearch_client.index(index=AO_ALIAS, body=doc, id=doc["doc_id"])
                         section_count += 1
                     except Exception as e:
                         logger.error("Failed to index statute %s: %s", doc["doc_id"], str(e))
