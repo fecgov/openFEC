@@ -6,6 +6,56 @@ import io
 import contextlib
 import yappi
 
+
+"""
+===========================
+SQL + CODE PROFILING
+===========================
+
+This module provides two types of profiling:
+
+1) SQLAlchemy
+2) Full Python function profiling using Yappi 
+
+--------------------------------------------------
+1) HOW TO ENABLE SQL QUERY PROFILING
+--------------------------------------------------
+
+To activate sqlalchemy query timing, you need to import this module
+during application startup in create_app()
+
+
+    def create_app():
+        app = Flask(__name__)
+        db.init_app(app)
+
+        # Enable SQL profiling
+        import webservices.profiling # noqa
+
+        .
+        .
+        .
+        return app
+
+--------------------------------------------------
+2) HOW TO USE THE YAPPI CONTEXT MANAGER
+--------------------------------------------------
+
+The `profiled()` context manager enables python code
+profiling for wrapped blocks of code. 
+
+To use wrap any slow code with profiled().
+
+Usage example:
+
+    from webservices.profiling import profiled
+
+    def get():
+        with profiled():
+            run_expensive_code()
+
+"""
+
 logging.basicConfig()
 logger = logging.getLogger("sql_profiling")
 logger.setLevel(logging.DEBUG)
