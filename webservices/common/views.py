@@ -7,6 +7,7 @@ from webservices.common import counts
 from webservices.utils import use_kwargs
 from webservices.common import models
 import sqlalchemy as sa
+from webservices.profiling import profiled
 
 
 class ApiResource(utils.Resource):
@@ -79,21 +80,22 @@ class ItemizedResource(ApiResource):
     def get(self, **kwargs):
         """Get itemized resources.
         """
-        self.validate_kwargs(kwargs)
+        with profiled():
+            self.validate_kwargs(kwargs)
 
-        query = self.build_query(**kwargs)
-        is_estimate = counts.is_estimated_count(self, query)
-        if not is_estimate:
-            count = None
-        else:
-            count, _ = counts.get_count(self, query)
-        return utils.fetch_seek_page(query,
-                                     kwargs,
-                                     self.index_column,
-                                     models.db.session,
-                                     is_count_exact=self.is_count_exact,
-                                     count=count,
-                                     cap=self.cap)
+            query = self.build_query(**kwargs)
+            is_estimate = counts.is_estimated_count(self, query)
+            if not is_estimate:
+                count = None
+            else:
+                count, _ = counts.get_count(self, query)
+            return utils.fetch_seek_page(query,
+                                         kwargs,
+                                         self.index_column,
+                                         models.db.session,
+                                         is_count_exact=self.is_count_exact,
+                                         count=count,
+                                         cap=self.cap)
 
     def validate_kwargs(self, kwargs):
         """Custom keyword argument validation
