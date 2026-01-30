@@ -789,8 +789,8 @@ itemized = {
     'max_image_number': ImageNumber(metadata={'description': docs.MAX_IMAGE_NUMBER}),
     'min_amount': Currency(metadata={'description': 'Filter for all amounts greater than a value.'}),
     'max_amount': Currency(metadata={'description': 'Filter for all amounts less than a value.'}),
-    'min_date': Date(metadata={'description': 'Minimum date'}),
-    'max_date': Date(metadata={'description': 'Maximum date'}),
+    'min_date': Date(metadata={'description': docs.ITEMIZED_MIN_DATE}),
+    'max_date': Date(metadata={'description': docs.ITEMIZED_MAX_DATE}),
 }
 
 schedule_a = {

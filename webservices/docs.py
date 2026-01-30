@@ -2841,3 +2841,13 @@ Maximum disbursement amount
 RECIPIENT_ZIP = '''
 Zipcode of recipient
 '''
+
+ITEMIZED_MIN_DATE = '''
+The earliest date used to filter reported activity. Only records with an applicable
+reporting date after this date are returned.
+'''
+
+ITEMIZED_MAX_DATE = '''
+The latest date used to filter reported activity. Only records with an applicable reporting date
+before this date are returned.
+'''
