@@ -44,6 +44,9 @@ ANALYZER_SETTING = {
     "highlight.max_analyzed_offset": 60000000,
 }
 
+SLACK_BOTS = "#bots"
+SLACK_ALERTS = "#alerts"
+
 OS_SERVICE_INSTANCE_NAME = "fec-api-opensearch"
 # AWS service name remains 'es' even for OpenSearch 2.x
 AWS_ES_SERVICE = "es"

@@ -21,6 +21,14 @@ if env.app.get("space_name", "unknown-space").lower() != "feature":
             "task": "webservices.tasks.legal_docs.refresh_most_recent_legal_doc",
             "schedule": crontab(minute="*/5", hour="10-23"),
         },
+        # Task 1C: refresh_most_recent_rulemakings(conn):
+        # When found modified rulemaking(s) within 10 hours and 5 minutes
+        #   if published_flg = true, upload the rulemaking(s) to elasticsearch service.
+        #   if published_flg = false, delete the rulemaking(s) from elasticsearch service.
+        "refresh_most_recent_rulemakings": {
+            "task": "webservices.tasks.legal_docs.refresh_most_recent_rulemakings",
+            "schedule": crontab(minute="*/1", hour="10-23"),
+        },
         # Task 2: This task is launched at 9pm(EST) everyday except Sunday.
         # 1) Identify the daily modified AO(s) in past 24 hours(9pm-9pm EST)
         # 2) For each modified AO, find the earliest AO referenced by the modified AO
@@ -67,5 +75,12 @@ if env.app.get("space_name", "unknown-space").lower() != "feature":
         "essential-services-status-check": {
             "task": "webservices.tasks.service_status_checks.heartbeat",
             "schedule": 30.0,
+        },
+        # Task 9: This task is launched at 19:25pm(EST) everyday.
+        # Check for rulemakings modified in the previous 24-hour window (19:25 PM–19:25 PM EST)
+        # and send their detailed information to Slack.
+        "send_alert_rulemakings": {
+            "task": "webservices.tasks.legal_docs.send_alert_daily_modified_rulemakings",
+            "schedule": crontab(minute=25, hour=23),
         },
     }
