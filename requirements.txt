@@ -27,6 +27,7 @@ ujson==5.11.0
 urllib3==2.6.3
 webargs==8.7.1
 werkzeug==3.1.5
+yappi==1.7.3
 
 # Marshalling
 flask-apispec==0.11.4
