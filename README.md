@@ -1,3 +1,5 @@
+[![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fecgov/openFEC)
+
 **Develop**
 [![CircleCI](https://circleci.com/gh/fecgov/openFEC.svg?style=svg)](https://circleci.com/gh/fecgov/openFEC)
 [![Test Coverage](https://img.shields.io/codecov/c/github/fecgov/openFEC/develop.svg)](https://codecov.io/github/fecgov/openFEC)
