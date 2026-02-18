@@ -550,4 +550,8 @@ ENTITY_ROLE_TYPES = {
 }
 
 ENTITY_ROLE_TYPE_VALID_VALUES = ['1', '2', '3', '4', '5']
+
+# CL TEST VALS
+REINDEX_SLICES = 5
+REINDEX_BATCH_SIZE = 100
 # ========= For rulemaking end ==========
