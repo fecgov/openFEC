@@ -391,7 +391,7 @@ def restore_from_swapping_index(index_name=None):
             wait_for_completion=True,
             request_timeout=1500,
             slices=constants.REINDEX_SLICES,
-            max_docs=constants.REINDEX_BATCH_SIZE
+            chunk_size=constants.REINDEX_BATCH_SIZE
         )
     except Exception as e:
         logger.error(" Reindex exception error = {0}".format(e.args))
