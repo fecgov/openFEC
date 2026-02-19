@@ -205,7 +205,20 @@ def load_rulemaking(specific_rm_no=None):
             if rm is not None:
                 if rm.get("published_flg"):
                     logger.info("Loading rm_no: %s, rm_id: %s", rm["rm_no"], rm["rm_id"])
-                    opensearch_client.index(index=constants.RM_ALIAS, body=rm, id=rm["rm_id"])
+                    # Trying sizes
+                    rm_json = json.dumps(rm, cls=DateTimeEncoder)
+                    rm_size = len(rm_json.encode('utf-8'))
+                    rm_size_mb = rm_size / (1024 * 1024)
+
+                    docs_json = json.dumps(rm.get('documents', []), cls=DateTimeEncoder)
+                    docs_size_mb = len(docs_json.encode('utf-8')) / (1024 * 1024)
+
+                    no_tier_json = json.dumps(rm.get('no_tier_documents', []), cls=DateTimeEncoder)
+                    no_tier_size_mb = len(no_tier_json.encode('utf-8')) / (1024 * 1024)
+                    logger.info("Rulemaking %s size: %.2f MB (documents: %.2f MB, no_tier: %.2f MB)",
+                                rm["rm_no"], rm_size_mb, docs_size_mb, no_tier_size_mb)
+
+                    # opensearch_client.index(index=constants.RM_ALIAS, body=rm, id=rm["rm_id"])
                     rm_count += 1
                     logger.info("Successfully loaded rulemaking rm_no: %s, rm_id: %s", rm["rm_no"], rm["rm_id"])
                 else:
@@ -219,10 +232,6 @@ def load_rulemaking(specific_rm_no=None):
                         logger.error("An error occurred while deleting an unpublished rulemaking: %s %s %s",
                                      rm["rm_no"], rm["rm_id"], err)
             # ==for local debug use: remove the big "documents" section to display the object "rulemakings" data
-            debug_rm_data = rm
-            del debug_rm_data["documents"]
-            logger.debug("rm_data count=" + str(rm_count))
-            logger.debug("debug_rm_data =" + json.dumps(debug_rm_data, indent=3, cls=DateTimeEncoder))
     else:
         logger.error("The index alias '%s' was not found; cannot load rulemaking", constants.RM_ALIAS)
 
