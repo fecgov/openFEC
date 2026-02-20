@@ -162,13 +162,43 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
             {"rm_serial": {"order": "desc"}},
         )
 
-    should_query = [
-        get_document_query_params(q, **kwargs),
-    ]
+    should_query = [get_document_query_params(q, **kwargs)]
+
+    child_query = get_child_document_query(q, **kwargs)
+    if child_query:
+        should_query.append(child_query)
+
     query = query.query("bool", should=should_query, minimum_should_match=1)
 
     # logger.debug("build_search_query =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
     return get_all_query_params(query, **kwargs)
+
+
+def get_child_document_query(q, **kwargs):
+    """Query for child level-2 documents"""
+    if not q:
+        return None
+
+    must_clauses = [Q("simple_query_string", query=q, fields=["text"])]
+
+    doc_category_ids = kwargs.get("doc_category_id", [])
+    doc_category_ids = [int(i) for i in doc_category_ids if i]
+    if doc_category_ids:
+        must_clauses.append(Q("terms", doc_category_id=doc_category_ids))
+
+    return Q(
+        "has_child",
+        type="level_2_doc",
+        query=Q("bool", must=must_clauses),
+        inner_hits={
+            "size": 100,
+            "_source": ["doc_id", "parent_doc_id"],
+            "highlight": {
+                "require_field_match": False,
+                "fields": {"text": {}}
+            }
+        }
+    )
 
 
 def get_document_query_params(q, **kwargs):
@@ -450,14 +480,8 @@ def get_proximity_query(location, **kwargs):
     return intervals_inner_query
 
 
-# This function returns highlights at document nested level by default. Refactor this function to return
-# highlights at documents, documents.level_2_labels, documents.level_2_labels.level_2_docs nested levels
 def execute_search_query(query):
     es_results = query.execute()
-
-    # logger.warning(
-    #    "Rulemaking execute_search_query() es_results =" +
-    #    json.dumps(es_results.to_dict(), indent=3, cls=DateTimeEncoder))
 
     formatted_hits = []
 
@@ -476,8 +500,43 @@ def execute_search_query(query):
         for key in inner_hits:
             inner = inner_hits[key]
 
-            for inner_hit in inner.hits.hits:
+            logger.debug(f"Processing inner_hits key: {key}, hits count: {len(inner.hits.hits)}")
 
+            # Handle has_child inner_hits
+            if key == "level_2_doc":
+                for child_hit in inner.hits.hits:
+                    # Access _source directly from hit object
+                    doc_id = child_hit._source.doc_id if hasattr(child_hit, '_source') else None
+                    parent_doc_id = child_hit._source.parent_doc_id if hasattr(child_hit, '_source') else None
+
+                    logger.debug(f"Child doc_id: {doc_id}, parent_doc_id: {parent_doc_id}")
+
+                    # Extract highlights from child
+                    if hasattr(child_hit, "highlight"):
+                        highlights = [
+                            hl
+                            for hl_list in child_hit.highlight.to_dict().values()
+                            for hl in hl_list
+                        ]
+                        logger.debug(f"Found {len(highlights)} highlights in child doc {doc_id}")
+
+                        if doc_id and parent_doc_id:
+                            # Find the parent document and level_2_label to add highlights
+                            for doc_idx, document in enumerate(formatted_hit.get("documents", [])):
+                                if document.get("doc_id") == parent_doc_id:
+                                    for label_idx, label in enumerate(document.get("level_2_labels", [])):
+                                        for doc2_idx, doc2 in enumerate(label.get("level_2_docs", [])):
+                                            if doc2.get("doc_id") == doc_id:
+                                                doc2.setdefault("highlights", []).extend(highlights)
+                                                formatted_hit["document_highlights"].setdefault(
+                                                    doc_idx, {}).setdefault(label_idx,
+                                                                            {}).setdefault(doc2_idx, []).extend(highlights)  # noqa: E501
+                                                logger.debug(f"Added highlights to doc[{doc_idx}].label[{label_idx}].doc2[{doc2_idx}]")  # noqa: E501
+                                                break
+                continue
+
+            # Handle nested inner_hits (documents and level_2_labels)
+            for inner_hit in inner.hits.hits:
                 # proximity source
                 if hasattr(inner_hit, "_source") and inner_hit._source:
                     doc_dict = inner_hit._source.to_dict()
@@ -500,21 +559,23 @@ def execute_search_query(query):
                         for hl in hl_list
                     ]
 
-                    # ocument highlight
+                    logger.debug(f"Nested highlights with {len(offsets)} offsets: {offsets}")
+
+                    # Document highlight
                     if len(offsets) == 1:
                         doc_offset = offsets[0]
                         formatted_hit["document_highlights"].setdefault(
                             doc_offset, {}).setdefault(-1, []).extend(highlights)
-                        doc = formatted_hit["documents"][doc_offset]
-                        doc.setdefault("highlights", []).extend(highlights)
+                        document = formatted_hit["documents"][doc_offset]
+                        document.setdefault("highlights", []).extend(highlights)
 
                     # Level 2 document highlight
                     elif len(offsets) == 3:
                         doc_offset, label_offset, doc2_offset = offsets
                         formatted_hit["document_highlights"].setdefault(
                             doc_offset, {}).setdefault(label_offset, {}).setdefault(doc2_offset, []).extend(highlights)
-                        doc = formatted_hit["documents"][doc_offset]
-                        label = doc["level_2_labels"][label_offset]
+                        document = formatted_hit["documents"][doc_offset]
+                        label = document["level_2_labels"][label_offset]
                         doc2 = label["level_2_docs"][doc2_offset]
                         doc2.setdefault("highlights", []).extend(highlights)
 
