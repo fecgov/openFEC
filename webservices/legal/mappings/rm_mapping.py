@@ -9,6 +9,30 @@ RM_MAPPING = {
         "commenter_names": {"type": "text"},
         "counsel_names": {"type": "text"},
         "description": {"type": "text"},
+        "doc_category_id": {"type": "integer"},
+        "doc_category_label": {"type": "keyword"},
+        "doc_date": {"type": "date", "format": "date_optional_time"},
+        "doc_description": {"type": "text"},
+        "doc_id": {"type": "long"},
+        "doc_type_id": {"type": "integer"},
+        "doc_type_label": {"type": "keyword"},
+        "filename": {"type": "text"},
+        "is_comment_eligible": {"type": "boolean"},
+        "is_key_document": {"type": "boolean"},
+        "level_1": {"type": "integer"},
+        "level_1_label": {"type": "keyword"},
+        "level_2": {"type": "integer"},
+        "level_2_label": {"type": "keyword"},
+        "parent_doc_id": {"type": "long"},
+        "sort_order": {"type": "integer"},
+        "text": {"type": "text", "term_vector": "with_positions_offsets"},
+        "url": {"type": "text", "index": False},
+        "rm_relation": {
+            "type": "join",
+            "relations": {
+                "rulemaking": "level_2_doc"
+            }
+        },
         "documents": {
             "type": "nested",
             "properties": {  # Level 1 documents: level_1=x,level_2=0
