@@ -46,6 +46,14 @@ FROM fosers.rulemaking_vw
 WHERE rm_number = :rm
 """
 
+LEVEL_1_LIST = """
+SELECT
+DISTINCT level_1
+FROM fosers.documents_vw
+WHERE rm_id = :rm
+AND level_1 is not null
+"""
+
 LEVEL_1_DOCS = """
 SELECT
 contents,
@@ -63,10 +71,7 @@ ocrtext,
 sort_order
 FROM fosers.documents_vw
 WHERE rm_id = :rm
-AND level_1 in (SELECT
-DISTINCT level_1
-FROM fosers.documents_vw
-WHERE rm_id = :rm)
+AND level_1 = :level_1
 AND level_2 = 0
 ORDER BY doc_date DESC
 """
@@ -90,6 +95,7 @@ AND level_1 is NULL
 ORDER BY doc_date DESC, doc_id DESC
 
 """
+
 LEVEL_2_ID_LIST = """
 SELECT
 DISTINCT level_2
@@ -288,57 +294,91 @@ def get_single_rulemaking(rm_number, bucket):
 def get_documents(rm_no, rm_id, bucket):
     documents = []
     with db.engine.begin() as conn:
-        rs = conn.execute(text(LEVEL_1_DOCS), {"rm": rm_id}).mappings()
-        for row in rs:
-            document = {
-                "doc_category_id": row["doc_category_id"],
-                "is_comment_eligible": row["is_comment_eligible"],
-                "doc_category_label": constants.DOC_CATEGORY_MAP.get(row["doc_category_id"]),
-                "doc_description": row["doc_description"],
-                "doc_date": row["doc_date"],
-                "doc_id": row["doc_id"],
-                "doc_entities": get_doc_entities(rm_id, row["doc_id"]),
-                "doc_type_id": row["doc_type_id"],
-                "doc_type_label": constants.DOC_TYPE_MAP.get(row["doc_type_id"]),
-                "filename": row["filename"],
-                "is_key_document": row["is_key_document"],
-                "level_1": row["level_1"],
-                "level_2": row["level_2"],
-                "level_1_label": constants.LEVEL_1_MAP.get(row["level_1"]),
-                "level_2_label": (constants.LEVEL_1_2_MAP.get(row["level_1"]).get(row["level_2"])),
-                "sort_order": row["sort_order"],
-                "text": row["ocrtext"],
-                "url": constants.RM_PDF_S3_PATH + "{}/{}".format(row["doc_id"], row["filename"]),
-                "level_2_labels": get_level_2_labels(rm_no, rm_id, row["level_1"], bucket),
-            }
-            if not row["contents"]:
-                logger.error(
-                    "PDF contents not found for document ID {0} and rulemaking no {1}: cannot upload to S3".format(
-                        row["doc_id"], rm_no
-                    )
-                )
-            else:
-                pdf_key = constants.RM_PDF_S3_PATH + "{}/{}/{}".format(
-                    rm_no, row["doc_id"], row["filename"].replace(" ", "-")
-                )
-                document["url"] = constants.RM_URL_PATH + pdf_key
-                filename = row["filename"][:-4]
-                document["filename"] = filename
-                logger.debug("Successfully uploaded rulemaking no {} PDF contents to S3".format(rm_no))
-                documents.append(document)
+        # get level_1 list
+        rs_level1_list = conn.execute(text(LEVEL_1_LIST), {"rm": rm_id}).mappings()
+        for row_list in rs_level1_list:
+            rs = conn.execute(text(LEVEL_1_DOCS), {"rm": rm_id, "level_1": row_list["level_1"]}).mappings()
+            rows = rs.fetchall()
+            row_count = len(rows)
+            if row_count >= 1:
+                # The level_1 document exists in the documents table (level_2 = 0). Only the first row is used
+                # due to duplicate rows.
+                row = rows[0]
+                document = {
+                    "doc_category_id": row["doc_category_id"],
+                    "is_comment_eligible": row["is_comment_eligible"],
+                    "doc_category_label": constants.DOC_CATEGORY_MAP.get(row["doc_category_id"]),
+                    "doc_description": row["doc_description"],
+                    "doc_date": row["doc_date"],
+                    "doc_id": row["doc_id"],
+                    "doc_entities": get_doc_entities(rm_id, row["doc_id"]),
+                    "doc_type_id": row["doc_type_id"],
+                    "doc_type_label": constants.DOC_TYPE_MAP.get(row["doc_type_id"]),
+                    "filename": row["filename"],
+                    "is_key_document": row["is_key_document"],
+                    "level_1": row["level_1"],
+                    "level_2": row["level_2"],
+                    "level_1_label": constants.LEVEL_1_MAP.get(row["level_1"]),
+                    "level_2_label": (constants.LEVEL_1_2_MAP.get(row["level_1"]).get(row["level_2"])),
+                    "sort_order": row["sort_order"],
+                    "text": row["ocrtext"],
+                    "url": constants.RM_PDF_S3_PATH + "{}/{}".format(row["doc_id"], row["filename"]),
+                    "level_2_labels": get_level_2_labels(rm_no, rm_id, row["level_1"], bucket),
+                }
 
-                try:
-                    # The bucket is None when running locally, so there’s no need to upload the PDF to S3
-                    if bucket:
-                        logger.debug("S3: Uploading {}".format(pdf_key))
-                        bucket.put_object(
-                            Key=pdf_key,
-                            Body=bytes(row["contents"]),
-                            ContentType="application/pdf",
-                            ACL="public-read",
+                if not row["contents"]:
+                    logger.error(
+                        "PDF contents not found for document ID {0} and rulemaking no {1}: cannot upload to S3".format(
+                            row["doc_id"], rm_no
                         )
-                except Exception:
-                    pass
+                    )
+                else:
+                    pdf_key = constants.RM_PDF_S3_PATH + "{}/{}/{}".format(
+                        rm_no, row["doc_id"], row["filename"].replace(" ", "-")
+                    )
+                    document["url"] = constants.RM_URL_PATH + pdf_key
+                    filename = row["filename"][:-4]
+                    document["filename"] = filename
+                    logger.debug("Successfully uploaded rulemaking no {} PDF contents to S3".format(rm_no))
+                    documents.append(document)
+
+                    try:
+                        # The bucket is None when running locally, so there’s no need to upload the PDF to S3
+                        if bucket:
+                            logger.debug("S3: Uploading {}".format(pdf_key))
+                            bucket.put_object(
+                                Key=pdf_key,
+                                Body=bytes(row["contents"]),
+                                ContentType="application/pdf",
+                                ACL="public-read",
+                            )
+                    except Exception:
+                        pass
+
+            else:
+                # level_1 has label Only. The level_1 document not exists in the documents table (level_2 = 0).
+                document = {
+                    "doc_category_id": None,
+                    "is_comment_eligible": False,
+                    "doc_category_label": None,
+                    "doc_description": None,
+                    "doc_date": None,
+                    "doc_id": None,
+                    "doc_entities": None,
+                    "doc_type_id": None,
+                    "doc_type_label": None,
+                    "filename": None,
+                    "is_key_document": False,
+                    "level_1": row_list["level_1"],
+                    "level_2": None,
+                    "level_1_label": constants.LEVEL_1_MAP.get(row_list["level_1"]),
+                    "level_2_label": None,
+                    "sort_order": None,
+                    "text": None,
+                    "url": None,
+                    "level_2_labels": get_level_2_labels(rm_no, rm_id, row_list["level_1"], bucket),
+                }
+                documents.append(document)
         return documents
 
 
