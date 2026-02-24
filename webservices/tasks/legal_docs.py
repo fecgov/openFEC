@@ -21,6 +21,7 @@ from webservices.legal.constants import (  # noqa
 from webservices.common.models import db
 from webservices.tasks.utils import get_app_name
 from sqlalchemy import text
+from webservices.env import env
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +70,8 @@ DAILY_MODIFIED_RULEMAKINGS_SEND_ALERT = """
     ORDER BY rm_serial;
 """
 
+TRUE_VALUES = ("true", True, "True", 'TRUE')
+
 
 @shared_task(once={"graceful": True}, base=QueueOnce)
 def refresh_most_recent_legal_doc():
@@ -84,9 +87,19 @@ def refresh_most_recent_legal_doc():
         #   if published_flg = true, reload the case(s) on opensearch service.
         #   if published_flg = false, delete the case(s) on opensearch service.
     """
+    refresh_aos = env.get_credential("REFRESH_AOS", True)
+    refresh_cases = env.get_credential("REFRESH_CASES", True)
+
     with db.engine.begin() as conn:
-        refresh_most_recent_aos(conn)
-        refresh_most_recent_cases(conn)
+        if refresh_aos in TRUE_VALUES:
+            refresh_most_recent_aos(conn)
+        else:
+            logger.info("Skipping AO refresh: `REFRESH_AOS` is set to false.")
+
+        if refresh_cases in TRUE_VALUES:
+            refresh_most_recent_cases(conn)
+        else:
+            logger.info("Skipping Case refresh: `REFRESH_CASES` is set to false.")
 
 
 def refresh_most_recent_aos(conn):
@@ -142,27 +155,32 @@ def refresh_most_recent_rulemakings():
         #   if published_flg = true, reload rulemaking(s) to opensearch service.
         #   if published_flg = false, delete the rulemaking(s) to opensearch service.
     """
-    with db.engine.begin() as conn:
-        logger.info(" Checking for recently modified rulemakings...")
-        rs = conn.execute(text(RECENTLY_MODIFIED_RULEMAKINGS)).mappings()
-        row_count = 0
-        load_count = 0
-        deleted_rulemakings_count = 0
-        for row in rs:
-            row_count += 1
-            logger.info(" Rulemaking %s was recently modified on %s", row["rm_no"], row["pg_date"])
-            load_rulemaking(row["rm_no"])
-            if row["published_flg"]:
-                load_count += 1
-                logger.info(" A total of %d rulemaking(s) have been successfully loaded to opensearch service.",
-                            load_count)
-            else:
-                deleted_rulemakings_count += 1
-                logger.info(" A total of %d rulemaking(s) successfully unpublished from opensearch service.",
-                            deleted_rulemakings_count)
+    refresh_rulemakings = env.get_credential("REFRESH_RULEMAKINGS", True)
 
-        if row_count <= 0:
-            logger.info(" No rulemakings have been modified recently.")
+    if refresh_rulemakings in TRUE_VALUES:
+        with db.engine.begin() as conn:
+            logger.info(" Checking for recently modified rulemakings...")
+            rs = conn.execute(text(RECENTLY_MODIFIED_RULEMAKINGS)).mappings()
+            row_count = 0
+            load_count = 0
+            deleted_rulemakings_count = 0
+            for row in rs:
+                row_count += 1
+                logger.info(" Rulemaking %s was recently modified on %s", row["rm_no"], row["pg_date"])
+                load_rulemaking(row["rm_no"])
+                if row["published_flg"]:
+                    load_count += 1
+                    logger.info(" A total of %d rulemaking(s) have been successfully loaded to opensearch service.",
+                                load_count)
+                else:
+                    deleted_rulemakings_count += 1
+                    logger.info(" A total of %d rulemaking(s) successfully unpublished from opensearch service.",
+                                deleted_rulemakings_count)
+
+            if row_count <= 0:
+                logger.info(" No rulemakings have been modified recently.")
+    else:
+        logger.info("Skipping rulemaking refresh: `REFRESH_RULEMAKINGS` is set to false.")
 
 
 @shared_task(once={"graceful": True}, base=QueueOnce)
