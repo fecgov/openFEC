@@ -3,7 +3,7 @@
 git+https://github.com/18F/rdbms-subsetter
 
 # Testing
-pdbpp==0.9.1
+pdbpp==0.11.7
 click==8.1.3
 
 # requirements.txt generation (pip-compile)

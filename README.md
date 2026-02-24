@@ -54,9 +54,9 @@ We are always trying to improve our documentation. If you have suggestions or ru
      - Read a [Windows tutorial](https://www.postgresqltutorial.com/install-postgresql/)
      - Read a [Linux tutorial](https://www.postgresql.org/docs/13/installation.html) (or follow your OS package manager)
    - Opensearch 2.11 (instructions [here](https://docs.opensearch.org/2.11/install-and-configure/install-opensearch/index/))
-   - Flyway 11.20.0 ([homebrew instructions](https://formulae.brew.sh/formula/flyway))
+   - Flyway 12.0.0 ([homebrew instructions](https://formulae.brew.sh/formula/flyway))
 
-     - After downloading, create a .toml file in the following location: `flyway-11.20.0/conf/flyway.toml` and set the flyway environment variables `environment`, `url`, `user`, `password` and`locations` as
+     - After downloading, create a .toml file in the following location: `flyway-12.0.0/conf/flyway.toml` and set the flyway environment variables `environment`, `url`, `user`, `password` and`locations` as
 
        ```
        [environments.local]

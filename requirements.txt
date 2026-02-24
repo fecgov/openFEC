@@ -23,10 +23,11 @@ requests==2.32.4
 requests-aws4auth==1.0
 sqlalchemy-postgres-copy==0.3.0
 SQLAlchemy==2.0.41
-ujson==5.4.0 # decoding CSP violation reported
+ujson==5.11.0
 urllib3==2.6.3
 webargs==8.7.1
 werkzeug==3.1.5
+yappi==1.7.3
 
 # Marshalling
 flask-apispec==0.11.4

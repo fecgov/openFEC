@@ -6,8 +6,8 @@ from webservices.legal.utils_opensearch import (
     create_opensearch_client,
     DateTimeEncoder
 )
-
-from webservices.tasks.utils import get_bucket
+from webservices.utils import post_to_slack
+from webservices.tasks.utils import get_bucket, get_app_name
 from sqlalchemy import text
 logger = logging.getLogger(__name__)
 
@@ -198,6 +198,7 @@ ORDER BY hearing_date DESC
 def load_rulemaking(specific_rm_no=None):
     opensearch_client = create_opensearch_client()
     rm_count = 0
+    skipped_rulemakings = []
     # slack_message = ""
     if opensearch_client.indices.exists(index=constants.RM_ALIAS):
         logger.debug(" Index alias '{0}' exists, start loading rulemaking...".format(constants.RM_ALIAS))
@@ -205,9 +206,18 @@ def load_rulemaking(specific_rm_no=None):
             if rm is not None:
                 if rm.get("published_flg"):
                     logger.info("Loading rm_no: %s, rm_id: %s", rm["rm_no"], rm["rm_id"])
-                    opensearch_client.index(constants.RM_ALIAS, body=rm, id=rm["rm_id"])
-                    rm_count += 1
-                    logger.info("Successfully loaded rulemaking rm_no: %s, rm_id: %s", rm["rm_no"], rm["rm_id"])
+                    try:
+                        opensearch_client.index(index=constants.RM_ALIAS, body=rm, id=rm["rm_id"])
+                        rm_count += 1
+                        logger.info("Successfully loaded rulemaking rm_no: %s, rm_id: %s", rm["rm_no"], rm["rm_id"])
+                    except Exception as err:
+                        error_msg = str(err)
+                        if "413" in error_msg or "Request size exceeded" in error_msg:
+                            logger.warning("Rulemaking %s too large for standard indexing, skipping: %s",
+                                           rm["rm_no"], err)
+                            skipped_rulemakings.append(rm["rm_no"])
+                        else:
+                            logger.error("Failed to load rulemaking %s: %s", rm["rm_no"], err)
                 else:
                     try:
                         logger.info("Found an unpublished rulemaking - deleting %s: %s from opensearch service",
@@ -225,6 +235,13 @@ def load_rulemaking(specific_rm_no=None):
             logger.debug("debug_rm_data =" + json.dumps(debug_rm_data, indent=3, cls=DateTimeEncoder))
     else:
         logger.error("The index alias '%s' was not found; cannot load rulemaking", constants.RM_ALIAS)
+
+    # Send slack notification if any rulemakings were skipped
+    if skipped_rulemakings:
+        slack_message = f"*Skipped Large Rulemakings* in {get_app_name()}\n"
+        slack_message += f"The following {len(skipped_rulemakings)} rulemaking(s) were too large:\n"
+        slack_message += "\n".join(skipped_rulemakings)
+        post_to_slack(slack_message, constants.SLACK_BOTS)
 
 
 def get_rulemaking(specific_rm_no):
