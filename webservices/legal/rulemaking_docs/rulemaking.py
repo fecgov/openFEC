@@ -41,7 +41,8 @@ rm_year,
 sync_status,
 title,
 pg_date,
-published_flg
+published_flg,
+testify_flg
 FROM fosers.rulemaking_vw
 WHERE rm_number = :rm
 """
@@ -56,9 +57,13 @@ AND level_1 is not null
 
 LEVEL_1_DOCS = """
 SELECT
+admin_close_date,
+comment_close_date,
+calculated_comment_close_date,
 contents,
 doc_category_id,
 is_comment_eligible,
+is_open_for_comment,
 doc_description,
 doc_date,
 doc_id,
@@ -107,9 +112,13 @@ AND level_2 > 0
 
 LEVEL_2_DOCS = """
 SELECT
+admin_close_date,
+comment_close_date,
+calculated_comment_close_date,
 contents,
 doc_category_id,
 is_comment_eligible,
+is_open_for_comment,
 doc_description,
 doc_date,
 doc_id,
@@ -289,6 +298,7 @@ def get_single_rulemaking(rm_number, bucket):
             "sort1": -row["rm_year"],
             "sort2": -row["rm_serial"],
             "sync_status": row["sync_status"],
+            "testify_flg": row["testify_flg"],
             "title": row["title"],
             "type": constants.RULEMAKING_TYPE,
         }
@@ -322,7 +332,11 @@ def get_documents(rm_no, rm_id, bucket):
                 # due to duplicate rows.
                 row = rows[0]
                 document = {
+                    "doc_admin_close_date": row["admin_close_date"],
+                    "doc_comment_close_date": row["comment_close_date"],
+                    "doc_calc_comment_close_date": row["calculated_comment_close_date"],
                     "doc_category_id": row["doc_category_id"],
+                    "is_doc_open_for_comment": row["is_open_for_comment"],
                     "is_comment_eligible": row["is_comment_eligible"],
                     "doc_category_label": constants.DOC_CATEGORY_MAP.get(row["doc_category_id"]),
                     "doc_description": row["doc_description"],
@@ -419,8 +433,12 @@ def get_level_2_docs(rm_no, rm_id, level_1, level_2, bucket):
         rs = conn.execute(text(LEVEL_2_DOCS), {"rm": rm_id, "level_1": level_1, "level_2": level_2}).mappings()
         for row in rs:
             document = {
+                "doc_admin_close_date": row["admin_close_date"],
+                "doc_comment_close_date": row["comment_close_date"],
+                "doc_calc_comment_close_date": row["calculated_comment_close_date"],
                 "doc_category_id": row["doc_category_id"],
                 "is_comment_eligible": row["is_comment_eligible"],
+                "is_doc_open_for_comment": row["is_open_for_comment"],
                 "doc_category_label": constants.DOC_CATEGORY_MAP.get(row["doc_category_id"]),
                 "doc_description": row["doc_description"],
                 "doc_date": row["doc_date"],
