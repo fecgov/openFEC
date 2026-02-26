@@ -1,13 +1,13 @@
 import logging
 import json
+import copy
 import webservices.legal.constants as constants
 from webservices.common.models import db
 from webservices.legal.utils_opensearch import (
     create_opensearch_client,
     DateTimeEncoder
 )
-from webservices.utils import post_to_slack
-from webservices.tasks.utils import get_bucket, get_app_name
+from webservices.tasks.utils import get_bucket
 from sqlalchemy import text
 logger = logging.getLogger(__name__)
 
@@ -205,7 +205,6 @@ def load_rulemaking(specific_rm_no=None):
     opensearch_client = create_opensearch_client()
     rm_count = 0
     skipped_rulemakings = []
-    # slack_message = ""
     if opensearch_client.indices.exists(index=constants.RM_ALIAS):
         logger.debug(" Index alias '{0}' exists, start loading rulemaking...".format(constants.RM_ALIAS))
         for rm in get_rulemaking(specific_rm_no):
@@ -219,8 +218,8 @@ def load_rulemaking(specific_rm_no=None):
                     except Exception as err:
                         error_msg = str(err)
                         if "413" in error_msg or "Request size exceeded" in error_msg:
-                            logger.warning("Rulemaking %s too large for standard indexing, skipping: %s",
-                                           rm["rm_no"], err)
+                            logger.warning("Rulemaking %s too large for standard indexing, will use large process",
+                                           rm["rm_no"])
                             skipped_rulemakings.append(rm["rm_no"])
                         else:
                             logger.error("Failed to load rulemaking %s: %s", rm["rm_no"], err)
@@ -228,26 +227,145 @@ def load_rulemaking(specific_rm_no=None):
                     try:
                         logger.info("Found an unpublished rulemaking - deleting %s: %s from opensearch service",
                                     rm["rm_no"], rm["rm_id"])
-                        opensearch_client.delete(index=constants.RM_ALIAS, id=rm["rm_id"])
+                        # Use delete_rulemaking_with_children to handle both parent and child documents
+                        delete_rulemaking_with_children(opensearch_client, rm["rm_id"])
                         logger.info("Successfully deleted rulemaking rm_no: %s, rm_id: %s from opensearch service",
                                     rm["rm_no"], rm["rm_id"])
                     except Exception as err:
                         logger.error("An error occurred while deleting an unpublished rulemaking: %s %s %s",
                                      rm["rm_no"], rm["rm_id"], err)
             # ==for local debug use: remove the big "documents" section to display the object "rulemakings" data
-            debug_rm_data = rm
-            del debug_rm_data["documents"]
-            logger.debug("rm_data count=" + str(rm_count))
-            logger.debug("debug_rm_data =" + json.dumps(debug_rm_data, indent=3, cls=DateTimeEncoder))
+            if logger.isEnabledFor(logging.DEBUG):
+                debug_rm_data = rm
+                del debug_rm_data["documents"]
+                logger.debug("rm_data count=" + str(rm_count))
+                logger.debug("debug_rm_data =" + json.dumps(debug_rm_data, indent=3, cls=DateTimeEncoder))
     else:
         logger.error("The index alias '%s' was not found; cannot load rulemaking", constants.RM_ALIAS)
 
-    # Send slack notification if any rulemakings were skipped
+    # Automatically load skipped rulemakings using the large process
     if skipped_rulemakings:
-        slack_message = f"*Skipped Large Rulemakings* in {get_app_name()}\n"
-        slack_message += f"The following {len(skipped_rulemakings)} rulemaking(s) were too large:\n"
-        slack_message += "\n".join(skipped_rulemakings)
-        post_to_slack(slack_message, constants.SLACK_BOTS)
+        logger.info("Loading %d large rulemaking(s) using parent-child structure", len(skipped_rulemakings))
+        for rm_no in skipped_rulemakings:
+            try:
+                logger.info("Loading large rulemaking: %s", rm_no)
+                load_large_rulemaking(rm_no)
+                rm_count += 1
+            except Exception as err:
+                logger.error("Failed to load large rulemaking %s: %s", rm_no, err)
+        logger.info("Completed loading %d large rulemaking(s)", len(skipped_rulemakings))
+
+
+def delete_rulemaking_with_children(opensearch_client, rm_id):
+    """Delete a rulemaking and all its child documents.
+    """
+    try:
+        # Delete all child documents (level_2_docs) for this rulemaking
+        query = {
+            "query": {
+                "term": {
+                    "rm_relation.parent": rm_id
+                }
+            }
+        }
+        # Use delete_by_query to remove all child documents
+        result = opensearch_client.delete_by_query(
+            index=constants.RM_ALIAS,
+            body=query,
+            routing=rm_id,
+            conflicts='proceed'
+        )
+
+        deleted_children = result.get('deleted', 0)
+        if deleted_children > 0:
+            logger.info("Deleted %d child documents for rulemaking %s", deleted_children, rm_id)
+        else:
+            logger.debug("No child documents found for rulemaking %s (normal for small rulemakings)", rm_id)
+
+        # Delete the parent document
+        opensearch_client.delete(index=constants.RM_ALIAS, id=rm_id)
+        logger.info("Successfully deleted rulemaking %s and its children", rm_id)
+
+    except Exception as err:
+        logger.error("Error deleting rulemaking %s with children: %s", rm_id, err)
+        raise
+
+
+def load_large_rulemaking(specific_rm_no):
+    """Load large rulemaking with level-2 docs as separate searchable documents using parent-child.
+
+    Command: `python cli.py load_large_rulemaking 2014-01`
+    """
+    opensearch_client = create_opensearch_client()
+
+    if not opensearch_client.indices.exists(index=constants.RM_ALIAS):
+        logger.error("The index alias '%s' was not found; cannot load rulemaking", constants.RM_ALIAS)
+        return
+
+    # Get the rulemaking data
+    rm_number = "REG " + specific_rm_no
+    bucket = get_bucket()
+    rm = get_single_rulemaking(rm_number, bucket)
+
+    if not rm or not rm.get("published_flg"):
+        logger.error("Rulemaking %s not found or not published", specific_rm_no)
+        return
+
+    logger.info("Loading large rulemaking rm_no: %s, rm_id: %s", rm["rm_no"], rm["rm_id"])
+
+    # Delete existing rulemaking and its children if it exists (for republishing)
+    try:
+        if opensearch_client.exists(index=constants.RM_ALIAS, id=rm["rm_id"]):
+            logger.info("Rulemaking %s already exists, deleting before re-indexing", rm["rm_no"])
+            delete_rulemaking_with_children(opensearch_client, rm["rm_id"])
+    except Exception as err:
+        logger.debug("No existing rulemaking to delete: %s", err)
+
+    # Collect all level-2 docs BEFORE modifying parent
+    level_2_docs_to_index = []
+    for doc in rm.get('documents', []):
+        for level_2_label in doc.get('level_2_labels', []):
+            for level_2_doc in level_2_label.get('level_2_docs', []):
+                child_doc = {
+                    'doc_id': level_2_doc.get('doc_id'),
+                    'parent_doc_id': doc['doc_id'],
+                    'text': level_2_doc.get('text'),
+                    'doc_category_id': level_2_doc.get('doc_category_id'),
+                    'rm_relation': {
+                        'name': 'level_2_doc',
+                        'parent': rm['rm_id']
+                    }
+                }
+                level_2_docs_to_index.append(child_doc)
+
+    # Create parent documents w/o ocrtext
+    rm_parent = copy.deepcopy(rm)
+    rm_parent['rm_relation'] = {'name': 'rulemaking'}
+
+    for doc in rm_parent.get('documents', []):
+        doc.pop('text', None)
+        for level_2_label in doc.get('level_2_labels', []):
+            # Keep all level_2_docs fields except ocrtext
+            for level_2_doc in level_2_label.get('level_2_docs', []):
+                level_2_doc.pop('text', None)
+
+    for doc in rm_parent.get('no_tier_documents', []):
+        doc.pop('text', None)
+
+    # Index parent rulemaking
+    opensearch_client.index(index=constants.RM_ALIAS, body=rm_parent, id=rm["rm_id"])
+
+    logger.info("Indexing %d level-2 documents separately for rm_no: %s", len(level_2_docs_to_index), rm["rm_no"])
+    # Index level-2 docs separately with parent-child relationship
+    for l2_doc in level_2_docs_to_index:
+        opensearch_client.index(
+            index=constants.RM_ALIAS,
+            body=l2_doc,
+            id=f"{rm['rm_id']}_l2_{l2_doc['doc_id']}",
+            routing=rm['rm_id']
+        )
+
+    logger.info("Successfully loaded large rulemaking rm_no: %s, rm_id: %s", rm["rm_no"], rm["rm_id"])
 
 
 def get_rulemaking(specific_rm_no):
@@ -574,7 +692,7 @@ def get_doc_entities(rm_id, document_id):
                 {
                     "name": row["name"],
                     "role": row["role"],
-                 }
+                }
             )
     return doc_entities
 

@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from .rulemaking import load_rulemaking
+from .rulemaking import load_rulemaking, load_large_rulemaking  # noqa: F401
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 # TODO (clucas) verify if this is working as intended
