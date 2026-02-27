@@ -213,7 +213,7 @@ def get_child_document_query(q, **kwargs):
     # Build inner_hits configuration
     inner_hits_config = {
         "size": 100,
-        "_source": ["doc_id", "parent_doc_id"],
+        "_source": {"excludes": ["text"]},
     }
 
     # Only add highlight if we have a regular query (not just proximity)
@@ -222,10 +222,6 @@ def get_child_document_query(q, **kwargs):
             "require_field_match": False,
             "fields": {"text": {}}
         }
-
-    # Add proximity source if needed
-    if has_proximity:
-        inner_hits_config["_source"] = ["doc_id", "parent_doc_id", "text"]
 
     return Q(
         "has_child",
@@ -237,6 +233,7 @@ def get_child_document_query(q, **kwargs):
 
 def get_document_query_params(q, **kwargs):
     must_clauses = []
+    # For nested inner_hits, use full paths to exclude text fields
     proximity_source = {"excludes": ["documents.text",
                         "documents.level_2_labels.level_2_docs.text",
                                      "no_tier_documents.text"]}
