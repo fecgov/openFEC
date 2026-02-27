@@ -697,6 +697,12 @@ def _append_source_if_new(inner_hit, formatted_hit, seen_doc_ids):
     doc_dict = inner_hit._source.to_dict()
     doc_id = doc_dict.get("doc_id")
 
+    # If no doc_id, always append (can't track duplicates)
+    if doc_id is None:
+        formatted_hit["source"].append(doc_dict)
+        return
+
+    # If we have a doc_id, only append if we haven't seen it before
     if doc_id not in seen_doc_ids:
         formatted_hit["source"].append(doc_dict)
         seen_doc_ids.add(doc_id)
