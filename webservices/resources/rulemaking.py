@@ -622,8 +622,7 @@ def _process_level_2_doc_inner_hits(inner, formatted_hit):
         # Handle proximity source data if present
         if hasattr(child_hit, "_source") and child_hit._source:
             source_dict = child_hit._source.to_dict()
-            if source_dict.get("text"):  # Has proximity text data
-                formatted_hit["source"].append(source_dict)
+            formatted_hit["source"].append(source_dict)
 
         highlights = _extract_highlights(child_hit)
         if highlights:
