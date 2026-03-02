@@ -24,6 +24,14 @@ logger = logging.getLogger("cli")
 @click.argument('rm_no', default=None, required=False)
 def load_rulemaking_cli(rm_no):
     rulemaking_docs.load_rulemaking(rm_no)
+
+
+@cli.command('load_large_rulemaking')
+@click.argument('rm_no', required=True)
+def load_large_rulemaking_cli(rm_no):
+    rulemaking_docs.load_large_rulemaking(rm_no)
+
+
 # end -- rulemaking commands
 
 
