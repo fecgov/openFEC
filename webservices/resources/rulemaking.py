@@ -646,28 +646,63 @@ def _extract_child_ids(child_hit):
 
 
 def _attach_level_2_child_highlights(formatted_hit, parent_doc_id, doc_id, highlights):
-    for doc_idx, document in enumerate(formatted_hit.get("documents", [])):
+    """
+    Attach highlights from child documents (parent-child relationship).
+    Used for large rulemakings where documents are stored as separate child docs.
+
+    Args:
+        parent_doc_id: The parent document's doc_id
+        doc_id: The child document's doc_id
+
+    Logic:
+        - If parent_doc_id == doc_id: This is a level 1 document (level_2=0)
+        - Otherwise: This is a level 2 document (level_2>0)
+    """
+    documents = formatted_hit.get("documents", [])
+
+    # Level 1 document (parent_doc_id == doc_id)
+    if parent_doc_id == doc_id:
+        _attach_level_1_highlights(documents, doc_id, highlights, formatted_hit)
+        return
+
+    # Level 2 document (nested child)
+    _attach_level_2_nested_highlights(documents, parent_doc_id, doc_id, highlights, formatted_hit)
+
+
+def _attach_level_1_highlights(documents, doc_id, highlights, formatted_hit):
+    """
+    Attach highlights to a level 1 document (level_2=0).
+    Finds the document in the documents array and adds highlights directly.
+    """
+    for doc_idx, document in enumerate(documents):
+        if document.get("doc_id") == doc_id:
+            document.setdefault("highlights", []).extend(highlights)
+            # Use -1 to indicate level 1 (no nested level 2)
+            formatted_hit["document_highlights"].setdefault(doc_idx, {}).setdefault(-1, []).extend(highlights)
+            logger.debug(f"Added highlights to level 1 doc[{doc_idx}]")
+            return
+
+
+def _attach_level_2_nested_highlights(documents, parent_doc_id, doc_id, highlights, formatted_hit):
+    """
+    Attach highlights to a level 2 document (level_2>0).
+    Finds the document in documents[x].level_2_labels[y].level_2_docs[z].
+    """
+    for doc_idx, document in enumerate(documents):
         if document.get("doc_id") != parent_doc_id:
             continue
 
         for label_idx, label in enumerate(document.get("level_2_labels", [])):
             for doc2_idx, doc2 in enumerate(label.get("level_2_docs", [])):
-                if doc2.get("doc_id") != doc_id:
-                    continue
-
-                doc2.setdefault("highlights", []).extend(highlights)
-
-                formatted_hit["document_highlights"] \
-                    .setdefault(doc_idx, {}) \
-                    .setdefault(label_idx, {}) \
-                    .setdefault(doc2_idx, []) \
-                    .extend(highlights)
-
-                logger.debug(
-                    f"Added highlights to doc[{doc_idx}]."
-                    f"label[{label_idx}].doc2[{doc2_idx}]"
-                )
-                return
+                if doc2.get("doc_id") == doc_id:
+                    doc2.setdefault("highlights", []).extend(highlights)
+                    formatted_hit["document_highlights"] \
+                        .setdefault(doc_idx, {}) \
+                        .setdefault(label_idx, {}) \
+                        .setdefault(doc2_idx, []) \
+                        .extend(highlights)
+                    logger.debug(f"Added highlights to doc[{doc_idx}].label[{label_idx}].doc2[{doc2_idx}]")
+                    return
 
 
 def _process_nested_inner_hits(inner, formatted_hit, seen_doc_ids, nested_field_name):
@@ -715,46 +750,70 @@ def _extract_nested_offsets(inner_hit):
 
 
 def _attach_nested_highlights(formatted_hit, offsets, highlights, nested_field_name):
+    """
+    Attach highlights from nested documents (nested structure).
+    Used for small rulemakings where documents are stored in nested arrays.
+
+    Args:
+        offsets: List of nesting offsets from OpenSearch
+
+    Logic:
+        - 1 offset: Level 1 document or no_tier_document
+        - 3 offsets: Level 2 document (doc > level_2_labels > level_2_docs)
+    """
     if not highlights:
         return
 
-    # Document-level highlight (documents or no_tier_documents)
     if len(offsets) == 1:
-        doc_offset = offsets[0]
-
-        # Check which nested field this highlight belongs to
-        if "no_tier" in nested_field_name:
-            # Attach to no_tier_documents
-            no_tier_docs = formatted_hit.get("no_tier_documents", [])
-            if doc_offset < len(no_tier_docs):
-                no_tier_doc = no_tier_docs[doc_offset]
-                no_tier_doc.setdefault("highlights", []).extend(highlights)
-        else:
-            # Attach to documents (default behavior for "documents" or nested documents)
-            formatted_hit["document_highlights"] \
-                .setdefault(doc_offset, {}) \
-                .setdefault(-1, []) \
-                .extend(highlights)
-
-            documents = formatted_hit.get("documents", [])
-            if doc_offset < len(documents):
-                document = documents[doc_offset]
-                document.setdefault("highlights", []).extend(highlights)
-
-    # Level 2 document highlight
+        _attach_single_level_highlights(formatted_hit, offsets[0], highlights, nested_field_name)
     elif len(offsets) == 3:
-        doc_offset, label_offset, doc2_offset = offsets
+        _attach_triple_level_highlights(formatted_hit, offsets, highlights)
 
-        formatted_hit["document_highlights"] \
-            .setdefault(doc_offset, {}) \
-            .setdefault(label_offset, {}) \
-            .setdefault(doc2_offset, []) \
-            .extend(highlights)
 
-        document = formatted_hit["documents"][doc_offset]
-        label = document["level_2_labels"][label_offset]
-        doc2 = label["level_2_docs"][doc2_offset]
-        doc2.setdefault("highlights", []).extend(highlights)
+def _attach_single_level_highlights(formatted_hit, doc_offset, highlights, nested_field_name):
+    """
+    Attach highlights for single-level nested documents.
+    Handles both level 1 documents and no_tier_documents.
+    """
+    if "no_tier" in nested_field_name:
+        no_tier_docs = formatted_hit.get("no_tier_documents", [])
+        if doc_offset < len(no_tier_docs):
+            no_tier_docs[doc_offset].setdefault("highlights", []).extend(highlights)
+    else:
+        documents = formatted_hit.get("documents", [])
+        if doc_offset < len(documents):
+            documents[doc_offset].setdefault("highlights", []).extend(highlights)
+            # Use -1 to indicate level 1 (no nested level 2)
+            formatted_hit["document_highlights"].setdefault(doc_offset, {}).setdefault(-1, []).extend(highlights)
+
+
+def _attach_triple_level_highlights(formatted_hit, offsets, highlights):
+    """
+    Attach highlights for level 2 nested documents.
+    Path: documents[doc_offset].level_2_labels[label_offset].level_2_docs[doc2_offset]
+    """
+    doc_offset, label_offset, doc2_offset = offsets
+
+    documents = formatted_hit.get("documents", [])
+    if doc_offset >= len(documents):
+        return
+
+    document = documents[doc_offset]
+    labels = document.get("level_2_labels", [])
+    if label_offset >= len(labels):
+        return
+
+    label = labels[label_offset]
+    level_2_docs = label.get("level_2_docs", [])
+    if doc2_offset >= len(level_2_docs):
+        return
+
+    level_2_docs[doc2_offset].setdefault("highlights", []).extend(highlights)
+    formatted_hit["document_highlights"] \
+        .setdefault(doc_offset, {}) \
+        .setdefault(label_offset, {}) \
+        .setdefault(doc2_offset, []) \
+        .extend(highlights)
 
 
 def _extract_highlights(hit):

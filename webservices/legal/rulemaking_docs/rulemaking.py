@@ -321,9 +321,38 @@ def load_large_rulemaking(specific_rm_no):
     except Exception as err:
         logger.debug("No existing rulemaking to delete: %s", err)
 
-    # Collect all level-2 docs BEFORE modifying parent
+    # Collect all documents with text (both level 1 and level 2) before modifying parent
     level_2_docs_to_index = []
     for doc in rm.get('documents', []):
+        # Add level 1 document as child if it has text
+        if doc.get('text'):
+            child_doc = {
+                'doc_id': doc.get('doc_id'),
+                'parent_doc_id': doc.get('doc_id'),
+                'text': doc.get('text'),
+                'doc_category_id': doc.get('doc_category_id'),
+                'doc_category_label': doc.get('doc_category_label'),
+                'doc_date': doc.get('doc_date'),
+                'doc_description': doc.get('doc_description'),
+                'doc_type_id': doc.get('doc_type_id'),
+                'doc_type_label': doc.get('doc_type_label'),
+                'filename': doc.get('filename'),
+                'is_key_document': doc.get('is_key_document'),
+                'is_comment_eligible': doc.get('is_comment_eligible'),
+                'level_1': doc.get('level_1'),
+                'level_2': doc.get('level_2'),
+                'level_1_label': doc.get('level_1_label'),
+                'level_2_label': doc.get('level_2_label'),
+                'sort_order': doc.get('sort_order'),
+                'url': doc.get('url'),
+                'rm_relation': {
+                    'name': 'level_2_doc',
+                    'parent': rm['rm_id']
+                }
+            }
+            level_2_docs_to_index.append(child_doc)
+
+        # Add level 2 documents as children
         for level_2_label in doc.get('level_2_labels', []):
             for level_2_doc in level_2_label.get('level_2_docs', []):
                 child_doc = {
