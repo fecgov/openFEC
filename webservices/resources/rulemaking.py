@@ -142,6 +142,19 @@ def build_search_query(q, type_, from_hit, hits_returned, **kwargs):
                 )
             )
         )
+
+        # Exclude from child documents (for large rulemakings with parent-child structure)
+        must_exclude_list.append(
+            Q(
+                "has_child",
+                type="level_2_doc",
+                query=Q(
+                    "simple_query_string",
+                    query=kwargs.get("q_exclude"),
+                    fields=["text"]
+                )
+            )
+        )
         # Return rulemakings without the q_exclude value in their documents
         query = query.query("bool", must_not=must_exclude_list, minimum_should_match=1)
 
