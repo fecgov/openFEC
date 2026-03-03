@@ -129,6 +129,7 @@ RM_MAPPING = {
             }  # End: level_2_labels
         },  # End: documents
         "fr_publication_dates": {"type": "date", "format": "date_optional_time"},
+        "has_eligible_documents": {"type": "boolean"},
         "hearing_dates": {"type": "date", "format": "date_optional_time"},
         "is_open_for_comment": {"type": "boolean"},
         "key_documents": {

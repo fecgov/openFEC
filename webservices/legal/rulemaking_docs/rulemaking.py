@@ -476,7 +476,29 @@ def get_single_rulemaking(rm_number, bucket):
             rm["witness_names"],
             rm["rm_entities"],
         ) = get_rm_entities(rm_id)
+
+        rm["has_eligible_documents"] = add_has_eligible_documents(rm)
     return rm
+
+
+def add_has_eligible_documents(rm):
+    """Check if ANY document in the rulemaking has is_comment_eligible = True.
+    This rolls up the is_comment_eligible flag from both document levels
+    for front-end performance.
+    """
+    return any([
+        # Check level 1 documents
+        any(doc.get("is_comment_eligible", False) for doc in rm.get("documents", [])),
+        # Check level 2 documents
+        any(
+            level_2_doc.get("is_comment_eligible", False)
+            for doc in rm.get("documents", [])
+            for level_2_label in doc.get("level_2_labels", [])
+            for level_2_doc in level_2_label.get("level_2_docs", [])
+        ),
+        # Check no_tier_documents??
+        # any(doc.get("is_comment_eligible", False) for doc in rm.get("no_tier_documents", []))
+    ])
 
 
 def get_documents(rm_no, rm_id, bucket):
