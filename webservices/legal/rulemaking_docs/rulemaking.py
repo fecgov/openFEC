@@ -445,7 +445,6 @@ def get_single_rulemaking(rm_number, bucket):
             "calculated_comment_close_date": row["calculated_comment_close_date"],
             "comment_close_date": row["comment_close_date"],
             "description": row["description"],
-            "is_open_for_comment": row["is_open_for_comment"],
             "last_updated": row["last_updated"],
             "key_documents": get_key_documents(rm_no, rm_id, bucket),
             "no_tier_documents": get_no_tier_documents(rm_no, rm_id, bucket),
@@ -477,7 +476,7 @@ def get_single_rulemaking(rm_number, bucket):
             rm["rm_entities"],
         ) = get_rm_entities(rm_id)
 
-        rm["has_eligible_documents"] = add_has_eligible_documents(rm)
+        rm["is_open_for_comment"] = add_has_eligible_documents(rm)
     return rm
 
 
@@ -496,8 +495,6 @@ def add_has_eligible_documents(rm):
             for level_2_label in doc.get("level_2_labels", [])
             for level_2_doc in level_2_label.get("level_2_docs", [])
         ),
-        # Check no_tier_documents??
-        # any(doc.get("is_comment_eligible", False) for doc in rm.get("no_tier_documents", []))
     ])
 
 
@@ -519,7 +516,6 @@ def get_documents(rm_no, rm_id, bucket):
                     "doc_comment_close_date": row["comment_close_date"],
                     "doc_calc_comment_close_date": row["calculated_comment_close_date"],
                     "doc_category_id": row["doc_category_id"],
-                    "is_doc_open_for_comment": row["is_open_for_comment"],
                     "is_comment_eligible": row["is_comment_eligible"],
                     "doc_category_label": constants.DOC_CATEGORY_MAP.get(row["doc_category_id"]),
                     "doc_description": row["doc_description"],
@@ -621,7 +617,6 @@ def get_level_2_docs(rm_no, rm_id, level_1, level_2, bucket):
                 "doc_calc_comment_close_date": row["calculated_comment_close_date"],
                 "doc_category_id": row["doc_category_id"],
                 "is_comment_eligible": row["is_comment_eligible"],
-                "is_doc_open_for_comment": row["is_open_for_comment"],
                 "doc_category_label": constants.DOC_CATEGORY_MAP.get(row["doc_category_id"]),
                 "doc_description": row["doc_description"],
                 "doc_date": row["doc_date"],
