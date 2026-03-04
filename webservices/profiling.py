@@ -1,6 +1,6 @@
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
-from webservices.common.models.base import RoutingSession as Session
+# from webservices.common.models.base import RoutingSession as Session
 # import time
 import logging
 import io
@@ -73,7 +73,7 @@ def after_cursor_execute(conn, cursor, statement, parameters, context, executema
     total = time.time() - conn.info["query_start_time"].pop(-1)
     logger.debug("Query Complete!")
     logger.debug("Total Time: %f", total)
-"""
+
 
 
 @event.listens_for(Engine, "checkin")
@@ -102,6 +102,17 @@ def on_session_reset(session, previous_transaction):
             f"Session {id(session)} — reset/closed, "
             f"identity map size: {len(session.identity_map)}"
         )
+"""
+
+
+@event.listens_for(Engine, "checkout")
+def receive_checkout(dbapi_connection, connection_record, connection_proxy):
+    logger.debug(f"CHECKOUT {id(dbapi_connection)}")
+
+
+@event.listens_for(Engine, "checkin")
+def receive_checkin(dbapi_connection, connection_record):
+    logger.debug(f"CHECKIN {id(dbapi_connection)}")
 
 
 @contextlib.contextmanager
