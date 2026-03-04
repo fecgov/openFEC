@@ -1,6 +1,7 @@
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
-import time
+from webservices.common.models.base import RoutingSession as Session
+# import time
 import logging
 import io
 import contextlib
@@ -60,7 +61,7 @@ logging.basicConfig()
 logger = logging.getLogger("sql_profiling")
 logger.setLevel(logging.DEBUG)
 
-
+"""
 @event.listens_for(Engine, "before_cursor_execute")
 def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
     conn.info.setdefault("query_start_time", []).append(time.time())
@@ -72,6 +73,35 @@ def after_cursor_execute(conn, cursor, statement, parameters, context, executema
     total = time.time() - conn.info["query_start_time"].pop(-1)
     logger.debug("Query Complete!")
     logger.debug("Total Time: %f", total)
+"""
+
+
+@event.listens_for(Engine, "checkin")
+def receive_checkin(dbapi_connection, connection_record):
+    logger.debug("A connection was returned to the pool (Session closed/transaction finished).")
+
+
+@event.listens_for(Engine, 'checkout')
+def receive_checkout(dbapi_connection, connection_record, connection_proxy):
+    logger.debug("A connection was checked out from the pool")
+
+
+@event.listens_for(Session, "after_begin")
+def after_begin(session, transaction, connection):
+    logger.debug(f"Session {id(session)} — transaction began")
+
+
+@event.listens_for(Session, "after_transaction_end")
+def on_transaction_end(session, transaction):
+    logger.debug(f"Session {id(session)} — closed, identity map size: {len(session.identity_map)}")
+
+
+@event.listens_for(Session, "after_soft_rollback")
+def on_session_reset(session, previous_transaction):
+    logger.debug(
+            f"Session {id(session)} — reset/closed, "
+            f"identity map size: {len(session.identity_map)}"
+        )
 
 
 @contextlib.contextmanager

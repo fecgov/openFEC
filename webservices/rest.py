@@ -160,7 +160,7 @@ def create_app(test_config=None):
     cors.CORS(app)
     api.init_app(app)
     NPlusOne(app)
-
+    import webservices.profiling # noqa
     app.config.from_mapping(
         CELERY=dict(
             broker_url=redis_url(),
