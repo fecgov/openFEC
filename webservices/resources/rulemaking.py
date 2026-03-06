@@ -614,6 +614,8 @@ def execute_search_query(query):
             else:
                 _process_nested_inner_hits(inner, formatted_hit, seen_doc_ids, key)
 
+    _sort_documents_by_doc_date(formatted_hits)
+
     count_dict = es_results.hits.total
     return formatted_hits, count_dict["value"]
 
@@ -623,6 +625,27 @@ def _initialize_formatted_hit(hit):
     formatted_hit["document_highlights"] = {}
     formatted_hit["source"] = []
     return formatted_hit
+
+
+def _sort_documents_by_doc_date(formatted_hits):
+    """Sort documents by doc_date descending for level 1 and level 2 documents"""
+    for hit in formatted_hits:
+        # Sort level 1 documents
+        if "documents" in hit and hit["documents"]:
+            hit["documents"].sort(
+                key=lambda doc: doc.get("doc_date") or "",
+                reverse=True
+            )
+
+            # Sort level 2 documents within each level 1 document
+            for doc in hit["documents"]:
+                if "level_2_labels" in doc:
+                    for label in doc["level_2_labels"]:
+                        if "level_2_docs" in label and label["level_2_docs"]:
+                            label["level_2_docs"].sort(
+                                key=lambda d: d.get("doc_date") or "",
+                                reverse=True
+                            )
 
 
 def _process_level_2_doc_inner_hits(inner, formatted_hit):
