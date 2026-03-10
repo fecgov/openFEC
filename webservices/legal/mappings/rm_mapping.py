@@ -45,7 +45,6 @@ RM_MAPPING = {
             "type": "nested",
             "properties": {  # Level 1 documents: level_1=x,level_2=0
                 "is_comment_eligible": {"type": "boolean"},
-                "is_doc_open_for_comment": {"type": "boolean"},
                 "doc_admin_close_date": {"type": "date", "format": "date_optional_time"},
                 "doc_comment_close_date": {"type": "date", "format": "date_optional_time"},
                 "doc_calc_comment_close_date": {"type": "date", "format": "date_optional_time"},
@@ -85,7 +84,6 @@ RM_MAPPING = {
                             "type": "nested",
                             "properties": {
                                 "is_comment_eligible": {"type": "boolean"},
-                                "is_doc_open_for_comment": {"type": "boolean"},
                                 "doc_admin_close_date": {"type": "date", "format": "date_optional_time"},
                                 "doc_comment_close_date": {"type": "date", "format": "date_optional_time"},
                                 "doc_calc_comment_close_date": {"type": "date", "format": "date_optional_time"},
