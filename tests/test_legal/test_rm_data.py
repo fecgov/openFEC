@@ -20,8 +20,11 @@ TEST_RM_1 = {
   "type": "rulemakings",
   "documents": [
     {
+      "doc_admin_close_date": None,
+      "doc_comment_close_date": "2026-01-27T23:59:59",
+      "doc_calc_comment_close_date": None,
       "doc_category_id": 4,
-      "is_comment_eligible": False,
+      "is_comment_eligible": True,
       "doc_category_label": "Federal Register Document",
       "doc_description": None,
       "doc_date": "2025-01-03",
@@ -46,8 +49,11 @@ TEST_RM_1 = {
           "level_2_label": "Open Meeting Documents",
           "level_2_docs": [
             {
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": "2026-01-27T23:59:59",
+              "doc_calc_comment_close_date": None,
               "doc_category_id": 3,
-              "is_comment_eligible": False,
+              "is_comment_eligible": True,
               "doc_category_label": "Agenda Document",
               "doc_description": None,
               "doc_date": "2024-12-19",
@@ -69,6 +75,9 @@ TEST_RM_1 = {
               Draft-Final-Rule-12.19.24.pdf"""
             },
             {
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "doc_category_id": 7,
               "is_comment_eligible": False,
               "doc_category_label": "Votes",
@@ -107,6 +116,7 @@ TEST_RM_1 = {
   "counsel_names": [],
   "petitioner_names": [],
   "representative_names": [],
+  "testify_flg": True,
   "witness_names": [],
   "rm_entities": [
     {
@@ -149,6 +159,9 @@ TEST_RM_2 = {
   "documents": [
     {
       "doc_category_id": 4,
+      "doc_admin_close_date": None,
+      "doc_comment_close_date": None,
+      "doc_calc_comment_close_date": None,
       "is_comment_eligible": False,
       "doc_category_label": "Federal Register Document",
       "doc_description": "NOA.pdf",
@@ -173,6 +186,9 @@ TEST_RM_2 = {
           "level_2_docs": [
             {
               "doc_category_id": 7,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": "2026-01-27T23:59:59",
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Votes",
               "doc_description": """REG 2024-08 (Untraceable Electronic Payment Methods)
@@ -196,6 +212,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 3,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": "2026-01-27T23:59:59",
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Agenda Document",
               "doc_description": "REG 2024-08 (Untraceable Electronic Payment Methods) Draft NOA.pdf",
@@ -223,6 +242,9 @@ TEST_RM_2 = {
           "level_2_docs": [
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Jones_Tracey_11_26_2024_22_12_27_CommentText.pdf",
@@ -249,6 +271,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Becker_Stephen__11_29_2024_18_52_27_CommentText.pdf",
@@ -275,6 +300,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Butler_Pamela_11_29_2024_19_34_27_CommentText.pdf",
@@ -301,6 +329,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": "2026-01-27T23:59:59",
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Coyne__Kevin__11_29_2024_18_34_27_CommentText.pdf",
@@ -327,6 +358,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": "2026-01-27T23:59:59",
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Daughenbaugh_Lisa_11_29_2024_18_30_27_CommentText.pdf",
@@ -353,6 +387,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": "2026-01-27T23:59:59",
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Dean_Dezri_11_29_2024_18_36_27_CommentText.pdf",
@@ -379,6 +416,10 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": "2026-01-27T23:59:59",
+              "doc_calc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Fleharty_Barry_11_29_2024_18_32_27_CommentText.pdf",
@@ -405,6 +446,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Franklin__Laura_11_29_2024_20_56_27_CommentText.pdf",
@@ -431,6 +475,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Haas_Michael_11_29_2024_20_20_27_CommentText.pdf",
@@ -457,6 +504,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Hoffer_Peggy_11_29_2024_11_38_27_CommentText.pdf",
@@ -483,6 +533,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Hunter_Richard_11_29_2024_20_58_27_CommentText.pdf",
@@ -509,6 +562,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Junkin_Yolanda_11_29_2024_19_16_27_CommentText.pdf",
@@ -535,6 +591,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Knowles_Jon_11_29_2024_22_30_27_CommentText.pdf",
@@ -561,6 +620,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Land_Robert_11_29_2024_20_04_27_CommentText.pdf",
@@ -587,6 +649,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Marshal_James__11_29_2024_22_50_27_CommentText.pdf",
@@ -613,6 +678,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Pambin_Donald_11_29_2024_19_04_27_CommentText.pdf",
@@ -639,6 +707,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Piety_Bobbie_11_29_2024_20_04_27_CommentText.pdf",
@@ -665,6 +736,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_runion_nate_11_29_2024_20_46_27_CommentText (002).pdf",
@@ -691,6 +765,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Shapiro_Deanna_11_29_2024_20_28_27_CommentText.pdf",
@@ -717,6 +794,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Skousen__Jess_11_29_2024_21_06_27_CommentText.pdf",
@@ -743,6 +823,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Smartt_Lori_11_29_2024_20_44_27_CommentText.pdf",
@@ -769,6 +852,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Stewart_Peter_11_29_2024_19_44_27_CommentText.pdf",
@@ -795,6 +881,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Stultz_Kerry_11_29_2024_20_36_27_CommentText.pdf",
@@ -821,6 +910,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Swaim_Barb_11_29_2024_19_38_27_CommentText.pdf",
@@ -847,6 +939,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Swim_David_11_29_2024_19_10_27_CommentText.pdf",
@@ -873,6 +968,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Thompson__Michelle__11_29_2024_22_46_27_CommentText.pdf",
@@ -899,6 +997,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Turtle_Walking_11_29_2024_20_16_27_CommentText (002).pdf",
@@ -925,6 +1026,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Yarbrough__Marilou__11_29_2024_20_24_27_CommentText.pdf",
@@ -951,6 +1055,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Zanett_Robert_11_29_2024_20_56_27_CommentText.pdf",
@@ -977,6 +1084,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Barker_Carole_11_30_2024_05_42_27_CommentText.pdf",
@@ -1003,6 +1113,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Becker_Judi_11_30_2024_18_18_34_CommentText.pdf",
@@ -1029,6 +1142,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Brule_Steve_11_30_2024_06_54_27_CommentText.pdf",
@@ -1055,6 +1171,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_caruso_Vince_11_30_2024_14_42_34_CommentText.pdf",
@@ -1081,6 +1200,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Coss_Stephen_11_30_2024_10_12_27_CommentText.pdf",
@@ -1107,6 +1229,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Costello__Melanie__11_30_2024_07_52_27_CommentText.pdf",
@@ -1133,6 +1258,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Frazier_Michael_11_30_2024_12_24_43_CommentText.pdf",
@@ -1159,6 +1287,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_George_Phillip_11_30_2024_09_54_27_CommentText.pdf",
@@ -1185,6 +1316,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Glaser_Leilani_11_30_2024_10_18_27_CommentText.pdf",
@@ -1211,6 +1345,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Halbert_Melissa_11_30_2024_10_34_27_CommentText.pdf",
@@ -1237,6 +1374,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Helms_Steve_11_30_2024_06_44_27_CommentText.pdf",
@@ -1263,6 +1403,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Hickman__Jeannie_11_30_2024_07_56_27_CommentText.pdf",
@@ -1289,6 +1432,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Joan_Betty_11_30_2024_08_52_27_CommentText.pdf",
@@ -1315,6 +1461,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Kemner_Robert_11_30_2024_22_16_34_CommentText.pdf",
@@ -1341,6 +1490,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Lamb_Geoffrey_11_30_2024_12_10_27_CommentText.pdf",
@@ -1367,6 +1519,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Lubell_Paul_11_30_2024_09_10_27_CommentText.pdf",
@@ -1393,6 +1548,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Maglicco_Larry_11_30_2024_08_28_27_CommentText.pdf",
@@ -1419,6 +1577,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_McMillan_John_11_30_2024_12_16_43_CommentText.pdf",
@@ -1445,6 +1606,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Nasby_Richard_11_30_2024_10_06_27_CommentText.pdf",
@@ -1471,6 +1635,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Paradise_Len__11_30_2024_15_20_34_CommentText.pdf",
@@ -1497,6 +1664,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Price_Christopher_11_30_2024_07_56_27_CommentText.pdf",
@@ -1523,6 +1693,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Rettmann_Gary_11_30_2024_03_36_27_CommentText.pdf",
@@ -1549,6 +1722,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Roberson_Greg_11_30_2024_00_22_27_CommentText.pdf",
@@ -1575,6 +1751,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Sass_David_11_30_2024_09_30_27_CommentText.pdf",
@@ -1601,6 +1780,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Sautter_Ronald_11_30_2024_09_48_27_CommentText.pdf",
@@ -1627,6 +1809,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Smith_Travis_11_30_2024_01_24_27_CommentText.pdf",
@@ -1653,6 +1838,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Speer_Scott_11_30_2024_05_58_27_CommentText.pdf",
@@ -1679,6 +1867,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Strothenke__June_11_30_2024_07_46_27_CommentText.pdf",
@@ -1705,6 +1896,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Wallace_Edsel_11_30_2024_08_10_27_CommentText.pdf",
@@ -1731,6 +1925,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Weixel_Richard_11_30_2024_13_06_43_CommentText.pdf",
@@ -1757,6 +1954,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Piechowski_Linda_12_01_2024_19_04_34_CommentText.pdf",
@@ -1783,6 +1983,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Reiser_Anne_12_01_2024_19_34_34_CommentText.pdf",
@@ -1809,6 +2012,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Alexander_Mike_12_02_2024_08_38_34_CommentText.pdf",
@@ -1835,6 +2041,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Hall_Virginia_12_02_2024_16_20_34_CommentText.pdf",
@@ -1861,6 +2070,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Anderson_Andy_12_06_2024_10_25_05_CommentText.pdf",
@@ -1887,6 +2099,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Fyre_Sarah_12_06_2024_17_59_05_CommentText.pdf",
@@ -1913,6 +2128,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_brown_ralph_12_11_2024_23_35_43_CommentText.pdf",
@@ -1939,6 +2157,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Tobin_Cristina__12_17_2024_19_37_43_CommentText.pdf",
@@ -1965,6 +2186,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Featherston_Anne_12_27_2024_13_53_46_CommentText.pdf",
@@ -1991,6 +2215,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_06_Cabral_Nikole_01_18_2025_23_10_00_CommentText.pdf",
@@ -2017,6 +2244,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_06_Wozniak_Agnes_01_18_2025_20_24_00_CommentText.pdf",
@@ -2043,6 +2273,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_06_Staruch_Stephen_01_24_2025_22_54_00_CommentText.pdf",
@@ -2069,6 +2302,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "REG_2024_08_Rose_Vivien_01_24_2025_01_54_00_CommentText.pdf",
@@ -2095,6 +2331,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": """REG_2024_08_Langer_Andrew_01_27_2025_17_02_46_CRF
@@ -2130,6 +2369,9 @@ TEST_RM_2 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": """REG_2024_08_Rosenberg_Eli_01_27_2025_11_22_46_Comment Letter to Federal Election
@@ -2166,6 +2408,9 @@ TEST_RM_2 = {
     },
     {
       "doc_category_id": 6,
+      "doc_admin_close_date": None,
+      "doc_comment_close_date": None,
+      "doc_calc_comment_close_date": None,
       "is_comment_eligible": False,
       "doc_category_label": "Commencing Document",
       "doc_description": "Rulemaking Petition",
@@ -2288,6 +2533,7 @@ TEST_RM_2 = {
   "representative_names": [
     "Yarbrough, Marilou"
   ],
+  "testify_flg": False,
   "witness_names": [],
   "rm_entities": [
     {
@@ -2671,6 +2917,9 @@ TEST_RM_3 = {
   "documents": [
     {
       "doc_category_id": 4,
+      "doc_admin_close_date": None,
+      "doc_comment_close_date": None,
+      "doc_calc_comment_close_date": None,
       "is_comment_eligible": False,
       "doc_category_label": "Federal Register Document",
       "doc_description": None,
@@ -2692,6 +2941,9 @@ TEST_RM_3 = {
     },
     {
       "doc_category_id": 4,
+      "doc_admin_close_date": None,
+      "doc_comment_close_date": None,
+      "doc_calc_comment_close_date": None,
       "is_comment_eligible": False,
       "doc_category_label": "Federal Register Document",
       "doc_description": None,
@@ -2716,6 +2968,9 @@ TEST_RM_3 = {
           "level_2_docs": [
             {
               "doc_category_id": 3,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Agenda Document",
               "doc_description": "REG 2024-04 (Form 3-Z) Draft Notice of Proposed Rulemaking.pdf",
@@ -2737,6 +2992,9 @@ TEST_RM_3 = {
             },
             {
               "doc_category_id": 7,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Votes",
               "doc_description": None,
@@ -2764,6 +3022,9 @@ TEST_RM_3 = {
           "level_2_docs": [
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "Comment",
@@ -2790,6 +3051,9 @@ TEST_RM_3 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "Comment",
@@ -2841,6 +3105,7 @@ TEST_RM_3 = {
   "counsel_names": [],
   "petitioner_names": [],
   "representative_names": [],
+  "testify_flg": False,
   "witness_names": [],
   "rm_entities": [
     {
@@ -2898,6 +3163,9 @@ TEST_RM_4 = {
   "documents": [
     {
       "doc_category_id": 4,
+      "doc_admin_close_date": None,
+      "doc_comment_close_date": None,
+      "doc_calc_comment_close_date": None,
       "is_comment_eligible": False,
       "doc_category_label": "Federal Register Document",
       "doc_description": "Notification of Availability of Rulemaking Petition",
@@ -2922,6 +3190,9 @@ TEST_RM_4 = {
           "level_2_docs": [
             {
               "doc_category_id": 3,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Agenda Document",
               "doc_description": "Draft Notification of Availability",
@@ -2942,6 +3213,9 @@ TEST_RM_4 = {
             },
             {
               "doc_category_id": 7,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Votes",
               "doc_description": """Certification of the Commission's Vote
@@ -2970,6 +3244,9 @@ TEST_RM_4 = {
           "level_2_docs": [
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "Comment from Campaign Legal Center",
@@ -3004,6 +3281,9 @@ TEST_RM_4 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "Comment from Janet Cordingley",
@@ -3030,6 +3310,9 @@ TEST_RM_4 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "Comment from John Panzer",
@@ -3056,6 +3339,9 @@ TEST_RM_4 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "Comment from The Honorable Catherine Cortez Masto",
@@ -3083,6 +3369,9 @@ TEST_RM_4 = {
             },
             {
               "doc_category_id": 5,
+              "doc_admin_close_date": None,
+              "doc_comment_close_date": None,
+              "doc_calc_comment_close_date": None,
               "is_comment_eligible": False,
               "doc_category_label": "Comments and Ex Parte Communications",
               "doc_description": "Comment from Elias Law Group",
@@ -3109,6 +3398,9 @@ TEST_RM_4 = {
     },
     {
       "doc_category_id": 6,
+      "doc_admin_close_date": None,
+      "doc_comment_close_date": None,
+      "doc_calc_comment_close_date": None,
       "is_comment_eligible": False,
       "doc_category_label": "Commencing Document",
       "doc_description": "Petition for Rulemaking",
@@ -3178,6 +3470,7 @@ TEST_RM_4 = {
     "Gonsalves-Brown, Sophia",
     "Laramore, Lydia"
   ],
+  "testify_flg": False,
   "witness_names": [],
   "rm_entities": [
     {

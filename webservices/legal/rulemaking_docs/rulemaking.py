@@ -1,13 +1,13 @@
 import logging
 import json
+import copy
 import webservices.legal.constants as constants
 from webservices.common.models import db
 from webservices.legal.utils_opensearch import (
     create_opensearch_client,
     DateTimeEncoder
 )
-from webservices.utils import post_to_slack
-from webservices.tasks.utils import get_bucket, get_app_name
+from webservices.tasks.utils import get_bucket
 from sqlalchemy import text
 logger = logging.getLogger(__name__)
 
@@ -41,16 +41,29 @@ rm_year,
 sync_status,
 title,
 pg_date,
-published_flg
+published_flg,
+testify_flg
 FROM fosers.rulemaking_vw
 WHERE rm_number = :rm
 """
 
+LEVEL_1_LIST = """
+SELECT
+DISTINCT level_1
+FROM fosers.documents_vw
+WHERE rm_id = :rm
+AND level_1 is not null
+"""
+
 LEVEL_1_DOCS = """
 SELECT
+admin_close_date,
+comment_close_date,
+calculated_comment_close_date,
 contents,
 doc_category_id,
 is_comment_eligible,
+is_open_for_comment,
 doc_description,
 doc_date,
 doc_id,
@@ -63,10 +76,7 @@ ocrtext,
 sort_order
 FROM fosers.documents_vw
 WHERE rm_id = :rm
-AND level_1 in (SELECT
-DISTINCT level_1
-FROM fosers.documents_vw
-WHERE rm_id = :rm)
+AND level_1 = :level_1
 AND level_2 = 0
 ORDER BY doc_date DESC
 """
@@ -90,6 +100,7 @@ AND level_1 is NULL
 ORDER BY doc_date DESC, doc_id DESC
 
 """
+
 LEVEL_2_ID_LIST = """
 SELECT
 DISTINCT level_2
@@ -101,9 +112,13 @@ AND level_2 > 0
 
 LEVEL_2_DOCS = """
 SELECT
+admin_close_date,
+comment_close_date,
+calculated_comment_close_date,
 contents,
 doc_category_id,
 is_comment_eligible,
+is_open_for_comment,
 doc_description,
 doc_date,
 doc_id,
@@ -199,7 +214,6 @@ def load_rulemaking(specific_rm_no=None):
     opensearch_client = create_opensearch_client()
     rm_count = 0
     skipped_rulemakings = []
-    # slack_message = ""
     if opensearch_client.indices.exists(index=constants.RM_ALIAS):
         logger.debug(" Index alias '{0}' exists, start loading rulemaking...".format(constants.RM_ALIAS))
         for rm in get_rulemaking(specific_rm_no):
@@ -213,8 +227,8 @@ def load_rulemaking(specific_rm_no=None):
                     except Exception as err:
                         error_msg = str(err)
                         if "413" in error_msg or "Request size exceeded" in error_msg:
-                            logger.warning("Rulemaking %s too large for standard indexing, skipping: %s",
-                                           rm["rm_no"], err)
+                            logger.warning("Rulemaking %s too large for standard indexing, will use large process",
+                                           rm["rm_no"])
                             skipped_rulemakings.append(rm["rm_no"])
                         else:
                             logger.error("Failed to load rulemaking %s: %s", rm["rm_no"], err)
@@ -222,26 +236,188 @@ def load_rulemaking(specific_rm_no=None):
                     try:
                         logger.info("Found an unpublished rulemaking - deleting %s: %s from opensearch service",
                                     rm["rm_no"], rm["rm_id"])
-                        opensearch_client.delete(index=constants.RM_ALIAS, id=rm["rm_id"])
+                        # Use delete_rulemaking_with_children to handle both parent and child documents
+                        delete_rulemaking_with_children(opensearch_client, rm["rm_id"])
                         logger.info("Successfully deleted rulemaking rm_no: %s, rm_id: %s from opensearch service",
                                     rm["rm_no"], rm["rm_id"])
                     except Exception as err:
                         logger.error("An error occurred while deleting an unpublished rulemaking: %s %s %s",
                                      rm["rm_no"], rm["rm_id"], err)
             # ==for local debug use: remove the big "documents" section to display the object "rulemakings" data
-            debug_rm_data = rm
-            del debug_rm_data["documents"]
-            logger.debug("rm_data count=" + str(rm_count))
-            logger.debug("debug_rm_data =" + json.dumps(debug_rm_data, indent=3, cls=DateTimeEncoder))
+            if logger.isEnabledFor(logging.DEBUG):
+                debug_rm_data = rm
+                del debug_rm_data["documents"]
+                logger.debug("rm_data count=" + str(rm_count))
+                logger.debug("debug_rm_data =" + json.dumps(debug_rm_data, indent=3, cls=DateTimeEncoder))
     else:
         logger.error("The index alias '%s' was not found; cannot load rulemaking", constants.RM_ALIAS)
 
-    # Send slack notification if any rulemakings were skipped
+    # Automatically load skipped rulemakings using the large process
     if skipped_rulemakings:
-        slack_message = f"*Skipped Large Rulemakings* in {get_app_name()}\n"
-        slack_message += f"The following {len(skipped_rulemakings)} rulemaking(s) were too large:\n"
-        slack_message += "\n".join(skipped_rulemakings)
-        post_to_slack(slack_message, constants.SLACK_BOTS)
+        logger.info("Loading %d large rulemaking(s) using parent-child structure", len(skipped_rulemakings))
+        for rm_no in skipped_rulemakings:
+            try:
+                logger.info("Loading large rulemaking: %s", rm_no)
+                load_large_rulemaking(rm_no)
+                rm_count += 1
+            except Exception as err:
+                logger.error("Failed to load large rulemaking %s: %s", rm_no, err)
+        logger.info("Completed loading %d large rulemaking(s)", len(skipped_rulemakings))
+
+
+def delete_rulemaking_with_children(opensearch_client, rm_id):
+    """Delete a rulemaking and all its child documents.
+    """
+    try:
+        # Delete all child documents (level_2_docs) for this rulemaking
+        query = {
+            "query": {
+                "term": {
+                    "rm_relation.parent": rm_id
+                }
+            }
+        }
+        # Use delete_by_query to remove all child documents
+        result = opensearch_client.delete_by_query(
+            index=constants.RM_ALIAS,
+            body=query,
+            routing=rm_id,
+            conflicts='proceed'
+        )
+
+        deleted_children = result.get('deleted', 0)
+        if deleted_children > 0:
+            logger.info("Deleted %d child documents for rulemaking %s", deleted_children, rm_id)
+        else:
+            logger.debug("No child documents found for rulemaking %s (normal for small rulemakings)", rm_id)
+
+        # Delete the parent document
+        opensearch_client.delete(index=constants.RM_ALIAS, id=rm_id)
+        logger.info("Successfully deleted rulemaking %s and its children", rm_id)
+
+    except Exception as err:
+        logger.error("Error deleting rulemaking %s with children: %s", rm_id, err)
+        raise
+
+
+def load_large_rulemaking(specific_rm_no):
+    """Load large rulemaking with level-2 docs as separate searchable documents using parent-child.
+
+    Command: `python cli.py load_large_rulemaking 2014-01`
+    """
+    opensearch_client = create_opensearch_client()
+
+    if not opensearch_client.indices.exists(index=constants.RM_ALIAS):
+        logger.error("The index alias '%s' was not found; cannot load rulemaking", constants.RM_ALIAS)
+        return
+
+    # Get the rulemaking data
+    rm_number = "REG " + specific_rm_no
+    bucket = get_bucket()
+    rm = get_single_rulemaking(rm_number, bucket)
+
+    if not rm or not rm.get("published_flg"):
+        logger.error("Rulemaking %s not found or not published", specific_rm_no)
+        return
+
+    logger.info("Loading large rulemaking rm_no: %s, rm_id: %s", rm["rm_no"], rm["rm_id"])
+
+    # Delete existing rulemaking and its children if it exists (for republishing)
+    try:
+        if opensearch_client.exists(index=constants.RM_ALIAS, id=rm["rm_id"]):
+            logger.info("Rulemaking %s already exists, deleting before re-indexing", rm["rm_no"])
+            delete_rulemaking_with_children(opensearch_client, rm["rm_id"])
+    except Exception as err:
+        logger.debug("No existing rulemaking to delete: %s", err)
+
+    # Collect all documents with text (both level 1 and level 2) before modifying parent
+    level_2_docs_to_index = []
+    for doc in rm.get('documents', []):
+        # Add level 1 document as child if it has text
+        if doc.get('text'):
+            child_doc = {
+                'doc_id': doc.get('doc_id'),
+                'parent_doc_id': doc.get('doc_id'),
+                'text': doc.get('text'),
+                'doc_category_id': doc.get('doc_category_id'),
+                'doc_category_label': doc.get('doc_category_label'),
+                'doc_date': doc.get('doc_date'),
+                'doc_description': doc.get('doc_description'),
+                'doc_type_id': doc.get('doc_type_id'),
+                'doc_type_label': doc.get('doc_type_label'),
+                'filename': doc.get('filename'),
+                'is_key_document': doc.get('is_key_document'),
+                'is_comment_eligible': doc.get('is_comment_eligible'),
+                'level_1': doc.get('level_1'),
+                'level_2': doc.get('level_2'),
+                'level_1_label': doc.get('level_1_label'),
+                'level_2_label': doc.get('level_2_label'),
+                'sort_order': doc.get('sort_order'),
+                'url': doc.get('url'),
+                'rm_relation': {
+                    'name': 'level_2_doc',
+                    'parent': rm['rm_id']
+                }
+            }
+            level_2_docs_to_index.append(child_doc)
+
+        # Add level 2 documents as children
+        for level_2_label in doc.get('level_2_labels', []):
+            for level_2_doc in level_2_label.get('level_2_docs', []):
+                child_doc = {
+                    'doc_id': level_2_doc.get('doc_id'),
+                    'parent_doc_id': doc['doc_id'],
+                    'text': level_2_doc.get('text'),
+                    'doc_category_id': level_2_doc.get('doc_category_id'),
+                    'doc_category_label': level_2_doc.get('doc_category_label'),
+                    'doc_date': level_2_doc.get('doc_date'),
+                    'doc_description': level_2_doc.get('doc_description'),
+                    'doc_type_id': level_2_doc.get('doc_type_id'),
+                    'doc_type_label': level_2_doc.get('doc_type_label'),
+                    'filename': level_2_doc.get('filename'),
+                    'is_key_document': level_2_doc.get('is_key_document'),
+                    'is_comment_eligible': level_2_doc.get('is_comment_eligible'),
+                    'level_1': level_2_doc.get('level_1'),
+                    'level_2': level_2_doc.get('level_2'),
+                    'level_1_label': level_2_doc.get('level_1_label'),
+                    'level_2_label': level_2_doc.get('level_2_label'),
+                    'sort_order': level_2_doc.get('sort_order'),
+                    'url': level_2_doc.get('url'),
+                    'rm_relation': {
+                        'name': 'level_2_doc',
+                        'parent': rm['rm_id']
+                    }
+                }
+                level_2_docs_to_index.append(child_doc)
+
+    # Create parent documents w/o ocrtext
+    rm_parent = copy.deepcopy(rm)
+    rm_parent['rm_relation'] = {'name': 'rulemaking'}
+
+    for doc in rm_parent.get('documents', []):
+        doc.pop('text', None)
+        for level_2_label in doc.get('level_2_labels', []):
+            # Keep all level_2_docs fields except ocrtext
+            for level_2_doc in level_2_label.get('level_2_docs', []):
+                level_2_doc.pop('text', None)
+
+    for doc in rm_parent.get('no_tier_documents', []):
+        doc.pop('text', None)
+
+    # Index parent rulemaking
+    opensearch_client.index(index=constants.RM_ALIAS, body=rm_parent, id=rm["rm_id"])
+
+    logger.info("Indexing %d level-2 documents separately for rm_no: %s", len(level_2_docs_to_index), rm["rm_no"])
+    # Index level-2 docs separately with parent-child relationship
+    for l2_doc in level_2_docs_to_index:
+        opensearch_client.index(
+            index=constants.RM_ALIAS,
+            body=l2_doc,
+            id=f"{rm['rm_id']}_l2_{l2_doc['doc_id']}",
+            routing=rm['rm_id']
+        )
+
+    logger.info("Successfully loaded large rulemaking rm_no: %s, rm_id: %s", rm["rm_no"], rm["rm_id"])
 
 
 def get_rulemaking(specific_rm_no):
@@ -269,7 +445,6 @@ def get_single_rulemaking(rm_number, bucket):
             "calculated_comment_close_date": row["calculated_comment_close_date"],
             "comment_close_date": row["comment_close_date"],
             "description": row["description"],
-            "is_open_for_comment": row["is_open_for_comment"],
             "last_updated": row["last_updated"],
             "key_documents": get_key_documents(rm_no, rm_id, bucket),
             "no_tier_documents": get_no_tier_documents(rm_no, rm_id, bucket),
@@ -283,6 +458,7 @@ def get_single_rulemaking(rm_number, bucket):
             "sort1": -row["rm_year"],
             "sort2": -row["rm_serial"],
             "sync_status": row["sync_status"],
+            "testify_flg": row["testify_flg"],
             "title": row["title"],
             "type": constants.RULEMAKING_TYPE,
         }
@@ -299,63 +475,120 @@ def get_single_rulemaking(rm_number, bucket):
             rm["witness_names"],
             rm["rm_entities"],
         ) = get_rm_entities(rm_id)
+
+        rm["is_open_for_comment"] = add_has_eligible_documents(rm)
     return rm
+
+
+def add_has_eligible_documents(rm):
+    """Check if ANY document in the rulemaking has is_comment_eligible = True.
+    This rolls up the is_comment_eligible flag from both document levels
+    for front-end performance.
+    """
+    return any([
+        # Check level 1 documents
+        any(doc.get("is_comment_eligible", False) for doc in rm.get("documents", [])),
+        # Check level 2 documents
+        any(
+            level_2_doc.get("is_comment_eligible", False)
+            for doc in rm.get("documents", [])
+            for level_2_label in doc.get("level_2_labels", [])
+            for level_2_doc in level_2_label.get("level_2_docs", [])
+        ),
+    ])
 
 
 def get_documents(rm_no, rm_id, bucket):
     documents = []
     with db.engine.begin() as conn:
-        rs = conn.execute(text(LEVEL_1_DOCS), {"rm": rm_id}).mappings()
-        for row in rs:
-            document = {
-                "doc_category_id": row["doc_category_id"],
-                "is_comment_eligible": row["is_comment_eligible"],
-                "doc_category_label": constants.DOC_CATEGORY_MAP.get(row["doc_category_id"]),
-                "doc_description": row["doc_description"],
-                "doc_date": row["doc_date"],
-                "doc_id": row["doc_id"],
-                "doc_entities": get_doc_entities(rm_id, row["doc_id"]),
-                "doc_type_id": row["doc_type_id"],
-                "doc_type_label": constants.DOC_TYPE_MAP.get(row["doc_type_id"]),
-                "filename": row["filename"],
-                "is_key_document": row["is_key_document"],
-                "level_1": row["level_1"],
-                "level_2": row["level_2"],
-                "level_1_label": constants.LEVEL_1_MAP.get(row["level_1"]),
-                "level_2_label": (constants.LEVEL_1_2_MAP.get(row["level_1"]).get(row["level_2"])),
-                "sort_order": row["sort_order"],
-                "text": row["ocrtext"],
-                "url": constants.RM_PDF_S3_PATH + "{}/{}".format(row["doc_id"], row["filename"]),
-                "level_2_labels": get_level_2_labels(rm_no, rm_id, row["level_1"], bucket),
-            }
-            if not row["contents"]:
-                logger.error(
-                    "PDF contents not found for document ID {0} and rulemaking no {1}: cannot upload to S3".format(
-                        row["doc_id"], rm_no
-                    )
-                )
-            else:
-                pdf_key = constants.RM_PDF_S3_PATH + "{}/{}/{}".format(
-                    rm_no, row["doc_id"], row["filename"].replace(" ", "-")
-                )
-                document["url"] = constants.RM_URL_PATH + pdf_key
-                filename = row["filename"][:-4]
-                document["filename"] = filename
-                logger.debug("Successfully uploaded rulemaking no {} PDF contents to S3".format(rm_no))
-                documents.append(document)
+        # get level_1 list
+        rs_level1_list = conn.execute(text(LEVEL_1_LIST), {"rm": rm_id}).mappings()
+        for row_list in rs_level1_list:
+            rs = conn.execute(text(LEVEL_1_DOCS), {"rm": rm_id, "level_1": row_list["level_1"]}).mappings()
+            rows = rs.fetchall()
+            row_count = len(rows)
+            if row_count >= 1:
+                # The level_1 document exists in the documents table (level_2 = 0). Only the first row is used
+                # due to duplicate rows.
+                row = rows[0]
+                document = {
+                    "doc_admin_close_date": row["admin_close_date"],
+                    "doc_comment_close_date": row["comment_close_date"],
+                    "doc_calc_comment_close_date": row["calculated_comment_close_date"],
+                    "doc_category_id": row["doc_category_id"],
+                    "is_comment_eligible": row["is_comment_eligible"],
+                    "doc_category_label": constants.DOC_CATEGORY_MAP.get(row["doc_category_id"]),
+                    "doc_description": row["doc_description"],
+                    "doc_date": row["doc_date"],
+                    "doc_id": row["doc_id"],
+                    "doc_entities": get_doc_entities(rm_id, row["doc_id"]),
+                    "doc_type_id": row["doc_type_id"],
+                    "doc_type_label": constants.DOC_TYPE_MAP.get(row["doc_type_id"]),
+                    "filename": row["filename"],
+                    "is_key_document": row["is_key_document"],
+                    "level_1": row["level_1"],
+                    "level_2": row["level_2"],
+                    "level_1_label": constants.LEVEL_1_MAP.get(row["level_1"]),
+                    "level_2_label": (constants.LEVEL_1_2_MAP.get(row["level_1"]).get(row["level_2"])),
+                    "sort_order": row["sort_order"],
+                    "text": row["ocrtext"],
+                    "url": constants.RM_PDF_S3_PATH + "{}/{}".format(row["doc_id"], row["filename"]),
+                    "level_2_labels": get_level_2_labels(rm_no, rm_id, row["level_1"], bucket),
+                }
 
-                try:
-                    # The bucket is None when running locally, so there’s no need to upload the PDF to S3
-                    if bucket:
-                        logger.debug("S3: Uploading {}".format(pdf_key))
-                        bucket.put_object(
-                            Key=pdf_key,
-                            Body=bytes(row["contents"]),
-                            ContentType="application/pdf",
-                            ACL="public-read",
+                if not row["contents"]:
+                    logger.error(
+                        "PDF contents not found for document ID {0} and rulemaking no {1}: cannot upload to S3".format(
+                            row["doc_id"], rm_no
                         )
-                except Exception:
-                    pass
+                    )
+                else:
+                    pdf_key = constants.RM_PDF_S3_PATH + "{}/{}/{}".format(
+                        rm_no, row["doc_id"], row["filename"].replace(" ", "-")
+                    )
+                    document["url"] = constants.RM_URL_PATH + pdf_key
+                    filename = row["filename"][:-4]
+                    document["filename"] = filename
+                    logger.debug("Successfully uploaded rulemaking no {} PDF contents to S3".format(rm_no))
+                    documents.append(document)
+
+                    try:
+                        # The bucket is None when running locally, so there’s no need to upload the PDF to S3
+                        if bucket:
+                            logger.debug("S3: Uploading {}".format(pdf_key))
+                            bucket.put_object(
+                                Key=pdf_key,
+                                Body=bytes(row["contents"]),
+                                ContentType="application/pdf",
+                                ACL="public-read",
+                            )
+                    except Exception:
+                        pass
+
+            else:
+                # level_1 has label Only. The level_1 document not exists in the documents table (level_2 = 0).
+                document = {
+                    "doc_category_id": None,
+                    "is_comment_eligible": False,
+                    "doc_category_label": None,
+                    "doc_description": None,
+                    "doc_date": None,
+                    "doc_id": None,
+                    "doc_entities": [],
+                    "doc_type_id": None,
+                    "doc_type_label": None,
+                    "filename": None,
+                    "is_key_document": False,
+                    "level_1": row_list["level_1"],
+                    "level_2": None,
+                    "level_1_label": constants.LEVEL_1_MAP.get(row_list["level_1"]),
+                    "level_2_label": None,
+                    "sort_order": None,
+                    "text": None,
+                    "url": None,
+                    "level_2_labels": get_level_2_labels(rm_no, rm_id, row_list["level_1"], bucket),
+                }
+                documents.append(document)
         return documents
 
 
@@ -379,6 +612,9 @@ def get_level_2_docs(rm_no, rm_id, level_1, level_2, bucket):
         rs = conn.execute(text(LEVEL_2_DOCS), {"rm": rm_id, "level_1": level_1, "level_2": level_2}).mappings()
         for row in rs:
             document = {
+                "doc_admin_close_date": row["admin_close_date"],
+                "doc_comment_close_date": row["comment_close_date"],
+                "doc_calc_comment_close_date": row["calculated_comment_close_date"],
                 "doc_category_id": row["doc_category_id"],
                 "is_comment_eligible": row["is_comment_eligible"],
                 "doc_category_label": constants.DOC_CATEGORY_MAP.get(row["doc_category_id"]),
@@ -534,7 +770,7 @@ def get_doc_entities(rm_id, document_id):
                 {
                     "name": row["name"],
                     "role": row["role"],
-                 }
+                }
             )
     return doc_entities
 
