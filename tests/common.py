@@ -76,8 +76,8 @@ class BaseTestCase(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.app_context.pop()
         db.engine.dispose()  # fix too many client issues
+        cls.app_context.pop()
 
 
 class ApiBaseTest(BaseTestCase):
