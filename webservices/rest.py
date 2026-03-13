@@ -10,6 +10,7 @@ import os
 from marshmallow import EXCLUDE
 import ujson
 import sqlalchemy as sa
+from sqlalchemy.exc import OperationalError
 import flask_cors as cors
 from nplusone.ext.flask_sqlalchemy import NPlusOne
 
@@ -500,6 +501,13 @@ def create_app(test_config=None):
         for header, value in headers.items():
             response.headers.add(header, value)
         return response
+
+    @app.errorhandler(OperationalError)
+    def handle_db_timeout(e):
+        if hasattr(e, 'orig') and 'canceling statement due to statement timeout' in str(e.orig):
+            app.logger.warning('Statement timeout on %s', request.path)
+            return jsonify({'message': 'Query timed out', 'status': 408}), 408
+        return handle_exception(e)
 
     @app.errorhandler(Exception)
     def handle_exception(exception):
