@@ -29,8 +29,7 @@ SQL_CONFIG = {
 }
 
 REQUIRED_CREDS = (
-    "SQLA_CONN",
-    "FEC_SLACK_TOKEN",
+    "SQLA_CONN"
 )
 
 REQUIRED_SERVICES = ("aws-elasticache-redis", "s3", "aws-elasticsearch")
