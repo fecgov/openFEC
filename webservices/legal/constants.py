@@ -108,6 +108,20 @@ LEVEL_1_MAP = {
     21: "Termination of Rulemaking",
 }
 
+TIER_PRECEDENCE = {
+    15: 0,  # Notice of Disposition (highest priority)
+    5: 1,   # Advance NPRM
+    13: 2,  # Interim Final Rules (swapped with tier 14)
+    14: 3,  # Notice of Availability
+    2: 4,   # NPRM
+    17: 5,  # Supplemental NPRM
+    3: 6,   # Notice of Hearing
+    6: 7,   # Notice of Change of Hearing Date
+    8: 8,   # Correction to Final Rules
+    9: 9,   # Correction to Final Rules and E&J
+    1: 10,  # Final Rules
+    10: 11,  # Explanation and Justification
+}
 
 LEVEL_1_2_MAP = {
     1: {

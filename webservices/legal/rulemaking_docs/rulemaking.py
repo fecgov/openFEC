@@ -1,6 +1,7 @@
 import logging
 import json
 import copy
+import datetime
 import webservices.legal.constants as constants
 from webservices.common.models import db
 from webservices.legal.utils_opensearch import (
@@ -589,7 +590,33 @@ def get_documents(rm_no, rm_id, bucket):
                     "level_2_labels": get_level_2_labels(rm_no, rm_id, row_list["level_1"], bucket),
                 }
                 documents.append(document)
+        if len(documents) > 1:
+            sort_documents_tier_one(documents)
+
         return documents
+
+
+def sort_documents_tier_one(documents):
+    def sort_key(doc):
+        sort_date = get_doc_date(doc)
+
+        tier = constants.TIER_PRECEDENCE.get(doc.get('level_1'), 999)
+
+        return (sort_date, -tier)
+
+    documents.sort(key=sort_key, reverse=True)
+
+
+def get_doc_date(doc):
+    if doc.get("doc_date"):
+        return doc["doc_date"]
+
+    for l2 in reversed(doc.get("level_2_labels", [])):
+        for l2_doc in reversed(l2.get("level_2_docs", [])):
+            if l2_doc.get("doc_date"):
+                return l2_doc["doc_date"]
+
+    return datetime.date.today()
 
 
 def get_level_2_labels(rm_no, rm_id, level_1, bucket):

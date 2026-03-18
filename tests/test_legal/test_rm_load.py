@@ -4,10 +4,10 @@ import subprocess
 
 import pytest
 from tests.common import TEST_CONN, BaseTestCase
-
+import datetime
 from webservices.common.models import db
 from sqlalchemy import text
-# from webservices.rulemaking_docs.rulemaking import get_rulemaking
+from webservices.legal.rulemaking_docs.rulemaking import sort_documents_tier_one
 
 EMPTY_SET = set()
 
@@ -54,6 +54,46 @@ class TestGetRulemaking(BaseTestCase):
                 "ac_date": rm["admin_close_date"]
             }
         )
+
+    def test_rm_sort(self):
+        documents = [
+            {
+                "doc_date": datetime.date(2026, 3, 17),
+                "level_1": 10,
+                "doc_id": 7
+            },
+            {
+                "doc_date": None,
+                "level_1": 3,
+                "doc_id": 8,
+                "level_2_labels": [
+                    {
+                        "level_2_docs": [
+                            {"doc_date": datetime.date(2024, 12, 19)},
+                            {"doc_date": datetime.date(2026, 3, 17)},
+                            {"doc_date": None}
+                        ]
+                    }
+                ]
+            },
+            {
+                "doc_date": None,
+                "level_1": 15,
+                "doc_id": 9,
+                "level_2_labels": [
+                    {
+                        "level_2_docs": [
+                            {"doc_date": None},
+                            {"doc_date": None}
+                        ]
+                    }
+                ]
+            }
+        ]
+        sort_documents_tier_one(documents)
+        self.assertEqual(documents[0]["doc_id"], 9)
+        self.assertEqual(documents[1]["doc_id"], 8)
+        self.assertEqual(documents[2]["doc_id"], 7)
 
     # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
     # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
