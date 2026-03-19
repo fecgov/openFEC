@@ -542,4 +542,13 @@ def create_app(test_config=None):
 
     app.wsgi_app = ProxyFix(app.wsgi_app)
 
+    import memray
+    tracker = memray.Tracker(
+        destination=memray.FileDestination("/tmp/memray_output.bin", overwrite=True)
+    )
+    tracker.__enter__()
+
+    import atexit
+    atexit.register(lambda: tracker.__exit__(None, None, None))
+
     return app
