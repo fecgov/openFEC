@@ -383,7 +383,7 @@ def create_app(test_config=None):
         - Reject all requests that are not routed through the API Umbrella
         - Block any flagged IPs
         - If we're restricting downloads, only allow requests from specified key
-        """
+
         true_values = (True, 'True', 'true', 't')
         if USE_PROXY in true_values:
             try:
@@ -406,7 +406,7 @@ def create_app(test_config=None):
                     if request_api_key_id not in BYPASS_RESTRICTION_API_KEY_IDS:
                         # Service unavailable
                         abort(503, RESTRICT_MESSAGE)
-
+"""
     def get_cache_header(url):
 
         # Time in seconds

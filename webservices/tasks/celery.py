@@ -1,5 +1,6 @@
 import ssl
 from celery import Celery, Task
+from kombu import Queue
 from flask import Flask
 from webservices.tasks import schedule
 from webservices.tasks.utils import redis_url
@@ -15,18 +16,37 @@ def celery_init_app(app: Flask) -> Celery:
     celery_app.config_from_object(app.config["CELERY"])
     celery_app.conf.update(
         broker_url=redis_url(),
-        broker_use_ssl={
-            "ssl_cert_reqs": ssl.CERT_NONE,
-        },
-        redis_backend_use_ssl={
-            "ssl_cert_reqs": ssl.CERT_NONE,
-        },
+       # broker_use_ssl={
+       #     "ssl_cert_reqs": ssl.CERT_NONE,
+       # },
+       # redis_backend_use_ssl={
+       #     "ssl_cert_reqs": ssl.CERT_NONE,
+       # },
+        task_queues=(
+            Queue("critical"),
+            Queue("default"),
+            Queue("download"),
+        ),
+        #task_default_queue="default",
+        #worker_prefetch_multiplier=1,
+        #broker_transport_options={
+        #    "queue_order_strategy": "priority",
+        #},
         imports=(
             "webservices.tasks.refresh_db",
             "webservices.tasks.download",
             "webservices.tasks.legal_docs",
             "webservices.tasks.service_status_checks",
         ),
+        task_routes={
+            "webservices.tasks.refresh_db.*": {"queue": "critical"},
+            "webservices.tasks.download.*": {"queue": "download"},
+            "webservices.tasks.legal_docs.*": {"queue": "critical"},
+            "webservices.tasks.service_status_checks.*": {"queue": "default"},
+        },
+        task_annotations={
+            "webservices.tasks.download.*": {"rate_limit": "30/m"}
+        },
         beat_schedule=schedule,
         broker_connection_timeout=30,  # in seconds
         broker_connection_max_retries=None,  # for unlimited retries
@@ -35,7 +55,7 @@ def celery_init_app(app: Flask) -> Celery:
     celery_app.conf.ONCE = {
         "backend": "celery_once.backends.Redis",
         "settings": {
-            "url": redis_url() + "?ssl=true",
+            "url": redis_url(),  # + "?ssl=true",
             "default_timeout": 60 * 60
         }
 
