@@ -525,6 +525,24 @@ def get_all_query_params(query, **kwargs):
         vote_dates_range["format"] = ACCEPTED_DATE_FORMATS
         must_clauses.append(Q("range", vote_dates=vote_dates_range))
 
+    doc_id = kwargs.get("doc_id")
+    if doc_id is not None:
+        doc_id_query = Q(
+            "bool",
+            should=[
+                Q("nested", path="documents",
+                  query=Q("term", **{"documents.doc_id": doc_id})),
+                Q("nested", path="documents.level_2_labels.level_2_docs",
+                  query=Q("term", **{"documents.level_2_labels.level_2_docs.doc_id": doc_id})),
+                Q("nested", path="no_tier_documents",
+                  query=Q("term", **{"no_tier_documents.doc_id": doc_id})),
+                Q("has_child", type="level_2_doc",
+                  query=Q("term", doc_id=doc_id)),
+            ],
+            minimum_should_match=1
+        )
+        must_clauses.append(doc_id_query)
+
     # Use the .keyword subfield for wildcard matching exact full filename strings.
     # Use wildcard query with *{filename}* so partial matches are possible.
     filename = kwargs.get("filename")
@@ -545,10 +563,30 @@ def get_all_query_params(query, **kwargs):
             inner_hits={}
         )
 
+        # Query for no_tier_documents.filename.keyword
+        no_tier_filename_query = Q(
+            "nested",
+            path="no_tier_documents",
+            query=Q("wildcard", **{"no_tier_documents.filename.keyword": f"*{filename}*"}),
+            inner_hits={}
+        )
+
+        # Query for child docs (large rulemakings)
+        child_filename_query = Q(
+            "has_child",
+            type="level_2_doc",
+            query=Q("wildcard", **{"filename.keyword": f"*{filename}*"})
+        )
+
         must_clauses.append(
             Q(
                 "bool",
-                should=[doc_filename_query, level_2_docs_filename_query],
+                should=[
+                    doc_filename_query,
+                    level_2_docs_filename_query,
+                    no_tier_filename_query,
+                    child_filename_query,
+                ],
                 minimum_should_match=1
             )
         )

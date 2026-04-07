@@ -2530,6 +2530,11 @@ Use `-` before a parameter name to sort in descending order.
 ex: `-rm_no` or `-is_open_for_comment`
 '''
 
+RM_DOC_ID = '''
+Filter rulemakings by a specific document ID (`doc_id`).
+Returns only rulemakings that contain a document matching the given ID.
+'''
+
 RM_IS_KEY_DOCUMENT = '''
 When set to true, only rulemakings with at least one key document are returned
 '''
