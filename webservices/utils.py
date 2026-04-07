@@ -410,7 +410,11 @@ def document_description(
     if report_type:
         clean = re.sub(r"\{[^)]*\}", "", report_type)
     elif document_type == "W":
-        clean = "Loan Agreement/Loan Forgiveness"
+        clean = "C-1/Loan Agreement"
+    elif document_type == "X":
+        clean = "Loan Forgiveness"
+    elif document_type == "A":
+        clean = "Debt Settlement Plan"
     elif document_type_full:
         clean = document_type_full
     elif form_type and form_type in decoders.form_types:
