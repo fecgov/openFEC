@@ -293,11 +293,16 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
             kwargs.get("case_citation_require_all"), **kwargs)
 
     penalty_range = {}
-    if kwargs.get("case_min_penalty_amount") and kwargs.get("case_min_penalty_amount") != '':
-        penalty_range["gte"] = kwargs.get("case_min_penalty_amount")
 
     if kwargs.get("case_max_penalty_amount") and kwargs.get("case_max_penalty_amount") != '':
         penalty_range["lte"] = kwargs.get("case_max_penalty_amount")
+
+    if kwargs.get("case_min_penalty_amount") and kwargs.get("case_min_penalty_amount") != '':
+        penalty_range["gte"] = kwargs.get("case_min_penalty_amount")
+    elif penalty_range and int(penalty_range.get("lte")) >= 0:
+        # if only case_max_penalty_amount is provided, set gte to 0 to remove null (-1) values
+        # don't set gte to 0 if user sets max as a null number
+        penalty_range["gte"] = 0
 
     if penalty_range:
         must_clauses.append(Q("nested", path="dispositions",

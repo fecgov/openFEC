@@ -39,7 +39,6 @@ v1 = Blueprint('v1', __name__, url_prefix='/v1')
 api = restful.Api(v1)
 api.representations['application/json'] = util.output_json
 SHOW_TEST_F1 = env.get_credential('FEC_SHOW_TEST_F1', False)
-RULEMAKINGS_FEATURE = env.get_credential('FEC_FEATURE_RULEMAKINGS', False)
 
 
 api.add_resource(national_party.NationalParty_ScheduleAView, '/national_party/schedule_a/')
@@ -194,8 +193,7 @@ api.add_resource(download.DownloadView, '/download/<path:path>/')
 api.add_resource(legal.UniversalSearch, '/legal/search/')
 api.add_resource(legal.GetLegalCitation, '/legal/citation/<citation_type>/<citation>')
 api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
-if RULEMAKINGS_FEATURE:
-    api.add_resource(rulemaking.RulemakingSearch, '/rulemaking/search/')
+api.add_resource(rulemaking.RulemakingSearch, '/rulemaking/search/')
 api.add_resource(operations_log.OperationsLogView, '/operations-log/')
 api.add_resource(presidential.PresidentialByCandidateView, '/presidential/contributions/by_candidate/')
 api.add_resource(presidential.PresidentialSummaryView, '/presidential/financial_summary/')
