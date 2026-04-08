@@ -449,6 +449,7 @@ rulemaking_search = {
     'doc_category_id': fields.List(IStr(
         validate=validate.OneOf(['', '1', '2', '3', '4', '5', '6', '7', '8'])),
                                 metadata={'description': docs.DOC_CATEGORY_DESC}),
+    'doc_id': fields.Int(required=False, metadata={'description': docs.RM_DOC_ID}),
     'min_federal_registry_publish_date': Date(metadata={'description': docs.RM_MIN_FEDERAL_REGISTRY_DATE}),
     'max_federal_registry_publish_date': Date(metadata={'description': docs.RM_MAX_FEDERAL_REGISTRY_DATE}),
     'min_hearing_date': Date(metadata={'description': docs.RM_MIN_HEARING_DATE}),
