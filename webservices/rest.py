@@ -506,7 +506,7 @@ def create_app(test_config=None):
     def handle_db_timeout(e):
         if hasattr(e, 'orig') and 'canceling statement due to statement timeout' in str(e.orig):
             app.logger.warning('Statement timeout on %s', request.path)
-            return jsonify({'message': 'Query timed out', 'status': 408}), 408
+            return jsonify({'message': 'Query timed out', 'status': 504}), 504
         return handle_exception(e)
 
     @app.errorhandler(Exception)
