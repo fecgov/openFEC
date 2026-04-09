@@ -1224,7 +1224,7 @@ DOC_TYPE = '''
 The type of document for documents other than reports:\n\
     - 2 24 Hour Contribution Notice\n\
     - 4 48 Hour Contribution Notice\n\
-    - A Debt Settlement Statement\n\
+    - A Debt Settlement Plan\n\
     - B Acknowledgment of Receipt of Debt Settlement Statement\n\
     - C RFAI: Debt Settlement First Notice\n\
     - D Commission Debt Settlement Review\n\
@@ -1246,7 +1246,8 @@ The type of document for documents other than reports:\n\
     - R F3L Filing Frequency Change Notice\n\
     - Q Acknowledgment of F3L Filing Frequency Change\n\
     - U Unregistered Committee Notice\n\
-    - W Loan Agreement/Loan Forgiveness\n\
+    - W C-1/Loan Agreement\n\
+    - X Loan Forgiveness\n\
 '''
 DATES_TAG = '''
 Reporting deadlines, election dates FEC meetings, events etc.
