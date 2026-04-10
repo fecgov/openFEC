@@ -640,6 +640,57 @@ PRIMARY_GENERAL_INDICATOR = '''
 Primary general indicator
 '''
 
+DESIGNATED_AGENT_NAME = '''
+Designated agent name
+'''
+
+DESIGNATED_AGENT_LAST_NAME = '''
+Designated agent last name
+'''
+
+DESIGNATED_AGENT_FIRST_NAME = '''
+Designated agent first name
+'''
+
+DESIGNATED_AGENT_MIDDLE_NAME = '''
+Designated agent middle name
+'''
+
+DESIGNATED_AGENT_PREFIX = '''
+Designated agent prefix
+'''
+
+DESIGNATED_AGENT_SUFFIX = '''
+Designated agent suffix
+'''
+
+DESIGNATED_AGENT_STREET1 = '''
+Designated agent street1
+'''
+
+DESIGNATED_AGENT_STREET2 = '''
+Designated agent street2
+'''
+
+DESIGNATED_AGENT_CITY = '''
+Designated agent city
+'''
+
+DESIGNATED_AGENT_STATE = '''
+Designated agent state
+'''
+
+DESIGNATED_AGENT_ZIP = '''
+Designated agent zip
+'''
+
+DESIGNATED_AGENT_TITLE = '''
+Designated agent title
+'''
+
+DESIGNATED_AGENT_PHONE_NUMBER = '''
+Designated agent phone number
+'''
 # ======== committee end ===========
 
 
