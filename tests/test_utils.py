@@ -9,7 +9,6 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices import args
-from flask import current_app
 from webservices import sorting
 from webservices.resources import candidate_aggregates
 from webservices.resources import elections
@@ -310,12 +309,11 @@ class TestSort(ApiBaseTest):
         self.assertEqual(results[0].total_disbursements, 0.0)
 
 
-class TestArgs(TestCase):
+class TestArgs(ApiBaseTest):
     def test_currency(self):
-        if current_app.config['TESTING']:
-            with current_app.test_request_context('?dollars=$24.50'):
-                parsed = flaskparser.parser.parse({'dollars': args.Currency()}, request, location='query')
-                self.assertEqual(parsed, {'dollars': 24.50})
+        with self.application.test_request_context('?dollars=$24.50'):
+            parsed = flaskparser.parser.parse({'dollars': args.Currency()}, request, location='query')
+            self.assertEqual(parsed, {'dollars': 24.50})
 
 
 class TestEnvVarSplit(TestCase):
