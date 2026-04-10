@@ -89,9 +89,9 @@ RM_MAPPING = {
                                 "doc_calc_comment_close_date": {"type": "date", "format": "date_optional_time"},
                                 "doc_category_id": {"type": "integer"},
                                 "doc_category_label": {"type": "keyword"},
-                                "document_date": {"type": "date", "format": "date_optional_time"},
+                                "doc_date": {"type": "date", "format": "date_optional_time"},
                                 "doc_description": {"type": "text"},
-                                "document_id": {"type": "long"},
+                                "doc_id": {"type": "long"},
                                 "doc_entities": {
                                     "properties": {
                                         "role": {"type": "keyword"},
