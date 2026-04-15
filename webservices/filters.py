@@ -4,6 +4,15 @@ from webservices import utils
 from webservices import exceptions
 from webservices.common import models
 
+US_STATES_AND_TERRITORIES = {
+    'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+    'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+    'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+    'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+    'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
+    'DC', 'PR', 'VI', 'GU', 'AS', 'MP', 'AA', 'AE', 'AP',
+}
+
 
 def is_exclude_arg(arg):
     # Handle string and int excludes
@@ -194,3 +203,38 @@ def validate_multiselect_filter(filter, valid_values):
             if value in valid_values:
                 valid_results.append(value)
     return valid_results
+
+
+def determine_state_other(kwargs, state_name):
+    use_state_other = False
+    state_list = set()
+
+    for state in kwargs.get(state_name):
+        if state.lower() == "other":
+            use_state_other = True
+            state_list = set(kwargs[state_name])
+            state_list.remove(state)
+            kwargs.pop(state_name)
+            break
+
+    return use_state_other, state_list, kwargs
+
+
+def filter_state_other(query, state_col, state_list=set()):
+    states_to_exclude = US_STATES_AND_TERRITORIES - state_list
+
+    if len(state_list) > 0:
+        return query.filter(
+            sa.or_(
+                state_col.in_(state_list),
+                ~state_col.in_(states_to_exclude),
+                state_col.is_(None)
+            )
+        )
+
+    return query.filter(
+            sa.or_(
+                ~state_col.in_(states_to_exclude),
+                state_col.is_(None)
+            )
+        )
