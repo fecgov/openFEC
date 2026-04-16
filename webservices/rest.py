@@ -366,6 +366,7 @@ def create_app(test_config=None):
         return jsonify(spec.spec.to_dict())
 
     app.register_blueprint(docs)
+    app.app_context().push()
 
     parser = FlaskRestParser()
     app.config['APISPEC_WEBARGS_PARSER'] = parser
