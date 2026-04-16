@@ -202,8 +202,7 @@ def daily_reload_all_aos_when_change():
                 logger.info(" Daily modified AO %s found at %s", row["ao_no"], row["pg_date"])
                 logger.info(" Daily (%s) reload of all AOs ", datetime.date.today().strftime("%A"))
                 load_advisory_opinions(row["ao_no"])
-                slack_message = slack_message + "AO_" + str(row["ao_no"]) + " found modified at " + str(row["pg_date"])
-                slack_message = slack_message + "\n"
+                slack_message += f"AO_{row['ao_no']} found modified at {row['pg_date']}\n"
         if row_count <= 0:
             logger.info(" No daily (%s) modified AOs found. Skip reload", datetime.date.today().strftime("%A"))
             slack_message = "No daily modified AO found."
@@ -240,13 +239,10 @@ def send_alert_daily_modified_legal_case():
         for row in rs:
             row_count += 1
             if row["published_flg"]:
-                slack_message = slack_message + str(row["case_type"]) + " "
-                + str(row["case_no"]) + " found published at " + str(row["pg_date"])
-                slack_message = slack_message + "\n"
+                slack_message += (f"{row['case_type']} {row['case_no']} found published at {row['pg_date']}\n")
             else:
-                slack_message = slack_message + str(row["case_type"]) + " "
-                + str(row["case_no"]) + " found unpublished at " + str(row["pg_date"])
-                slack_message = slack_message + "\n"
+                slack_message += (f"{row['case_type']} {row['case_no']} found unpublished at {row['pg_date']}\n")
+
     if row_count <= 0:
         slack_message = "No daily modified case (MUR/AF/ADR) found"
 
@@ -265,11 +261,9 @@ def send_alert_daily_modified_rulemakings():
         for row in rs:
             row_count += 1
             if row["published_flg"]:
-                slack_message += 'Rulemaking %s found published at %s' % (row["rm_no"], row["pg_date"])
-                slack_message = slack_message + "\n"
+                slack_message += f"Rulemaking {row['rm_no']} found published at {row['pg_date']}\n"
             else:
-                slack_message += 'Rulemaking %s found unpublished at %s' % (row["rm_no"], row["pg_date"])
-                slack_message = slack_message + "\n"
+                slack_message += f"Rulemaking {row['rm_no']} found unpublished at {row['pg_date']}\n"
     if row_count <= 0:
         slack_message = "No daily modified rulemakings found"
 
