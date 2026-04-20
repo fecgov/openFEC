@@ -7,9 +7,9 @@ import re
 from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
 from postgres_copy import query_entities, format_flags
-from celery_once import QueueOnce
 from smart_open import open
 from celery import shared_task
+from webservices.tasks.celery import FlaskQueueOnce
 from sqlalchemy.dialects import postgresql
 from webservices.env import env
 
@@ -194,7 +194,7 @@ def convert_lists_to_tuples(params, overlap_prefixes):
     return params
 
 
-@shared_task(base=QueueOnce, once={"graceful": True})
+@shared_task(base=FlaskQueueOnce, once={"graceful": True})
 def export_query(path, qs):
     qs = base64.b64decode(qs)
 

@@ -67,7 +67,6 @@ from webservices.tasks.response_exception import ResponseException
 from webservices.tasks.error_code import ErrorCode
 from webservices.tasks.utils import redis_url
 from webservices.api_setup import api, v1
-from celery import signals
 import requests
 
 
@@ -171,18 +170,6 @@ def create_app(test_config=None):
             task_ignore_result=True,  # may need to unset
         ),
     )
-    context = {}
-
-    @signals.task_prerun.connect
-    def push_context(task_id, task, *args, **kwargs):
-        context[task_id] = app.app_context()
-        context[task_id].push()
-
-    @signals.task_postrun.connect
-    def pop_context(task_id, task, *args, **kwargs):
-        if task_id in context:
-            context[task_id].pop()
-            context.pop(task_id)
 
     app.config.from_prefixed_env()
     celery_init_app(app)
