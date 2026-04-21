@@ -1,15 +1,27 @@
 import ssl
 from celery import Celery, Task
+from celery_once import QueueOnce
 from flask import Flask
 from webservices.tasks import schedule
 from webservices.tasks.utils import redis_url
 
+# Created a QueueOnce subclass that runs tasks inside a Flask app context
+# Import this instead of QueueOnce directly
+FlaskQueueOnce = None
+
 
 def celery_init_app(app: Flask) -> Celery:
+    global FlaskQueueOnce
+
     class FlaskTask(Task):
+        abstract = True
+
         def __call__(self, *args: object, **kwargs: object) -> object:
             with app.app_context():
-                return self.run(*args, **kwargs)
+                return super().__call__(*args, **kwargs)
+
+    class FlaskQueueOnce(QueueOnce, FlaskTask):
+        abstract = True
 
     celery_app = Celery(app.name, task_cls=FlaskTask)  # app.name =openfec
     celery_app.config_from_object(app.config["CELERY"])

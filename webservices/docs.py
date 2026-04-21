@@ -640,6 +640,57 @@ PRIMARY_GENERAL_INDICATOR = '''
 Primary general indicator
 '''
 
+DESIGNATED_AGENT_NAME = '''
+Designated agent name
+'''
+
+DESIGNATED_AGENT_LAST_NAME = '''
+Designated agent last name
+'''
+
+DESIGNATED_AGENT_FIRST_NAME = '''
+Designated agent first name
+'''
+
+DESIGNATED_AGENT_MIDDLE_NAME = '''
+Designated agent middle name
+'''
+
+DESIGNATED_AGENT_PREFIX = '''
+Designated agent prefix
+'''
+
+DESIGNATED_AGENT_SUFFIX = '''
+Designated agent suffix
+'''
+
+DESIGNATED_AGENT_STREET1 = '''
+Designated agent street1
+'''
+
+DESIGNATED_AGENT_STREET2 = '''
+Designated agent street2
+'''
+
+DESIGNATED_AGENT_CITY = '''
+Designated agent city
+'''
+
+DESIGNATED_AGENT_STATE = '''
+Designated agent state
+'''
+
+DESIGNATED_AGENT_ZIP = '''
+Designated agent zip
+'''
+
+DESIGNATED_AGENT_TITLE = '''
+Designated agent title
+'''
+
+DESIGNATED_AGENT_PHONE_NUMBER = '''
+Designated agent phone number
+'''
 # ======== committee end ===========
 
 
@@ -1224,7 +1275,7 @@ DOC_TYPE = '''
 The type of document for documents other than reports:\n\
     - 2 24 Hour Contribution Notice\n\
     - 4 48 Hour Contribution Notice\n\
-    - A Debt Settlement Statement\n\
+    - A Debt Settlement Plan\n\
     - B Acknowledgment of Receipt of Debt Settlement Statement\n\
     - C RFAI: Debt Settlement First Notice\n\
     - D Commission Debt Settlement Review\n\
@@ -1246,7 +1297,8 @@ The type of document for documents other than reports:\n\
     - R F3L Filing Frequency Change Notice\n\
     - Q Acknowledgment of F3L Filing Frequency Change\n\
     - U Unregistered Committee Notice\n\
-    - W Loan Agreement/Loan Forgiveness\n\
+    - W C-1/Loan Agreement\n\
+    - X Loan Forgiveness\n\
 '''
 DATES_TAG = '''
 Reporting deadlines, election dates FEC meetings, events etc.
@@ -2528,6 +2580,11 @@ RM_SORT = '''
 Sort `rulemaking`  by `rm_no` or `is_open_for_comment`.
 Use `-` before a parameter name to sort in descending order.
 ex: `-rm_no` or `-is_open_for_comment`
+'''
+
+RM_DOC_ID = '''
+Filter rulemakings by a specific document ID (`doc_id`).
+Returns only rulemakings that contain a document matching the given ID.
 '''
 
 RM_IS_KEY_DOCUMENT = '''

@@ -101,7 +101,11 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
     if relationship:
         query = query.join(relationship)
     if hide_null:
-        query = query.filter(column != None)  # noqa
+        col = column.element if isinstance(column, sa.sql.elements.Label) else column
+        if isinstance(col, sa.sql.functions.FunctionElement):
+            query = query.having(column != None)  # noqa
+        else:
+            query = query.filter(column != None)  # noqa
 
     return query, (
         column,

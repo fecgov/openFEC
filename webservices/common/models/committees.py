@@ -44,6 +44,19 @@ class BaseCommittee(BaseModel):
     last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
     first_f1_date = db.Column(db.Date, index=True, doc=docs.FIRST_F1_DATE)
     last_f1_date = db.Column(db.Date, doc=docs.LAST_F1_DATE)
+    designated_agent_name = db.Column(db.String(100), index=True, doc=docs.DESIGNATED_AGENT_NAME)
+    designated_agent_last_name = db.Column(db.String(50), doc=docs.DESIGNATED_AGENT_LAST_NAME)
+    designated_agent_first_name = db.Column(db.String(50), doc=docs.DESIGNATED_AGENT_FIRST_NAME)
+    designated_agent_middle_name = db.Column(db.String(50), doc=docs.DESIGNATED_AGENT_MIDDLE_NAME)
+    designated_agent_prefix = db.Column(db.String(50), doc=docs.DESIGNATED_AGENT_PREFIX)
+    designated_agent_suffix = db.Column(db.String(50), doc=docs.DESIGNATED_AGENT_SUFFIX)
+    designated_agent_street1 = db.Column(db.String(50), doc=docs.DESIGNATED_AGENT_STREET1)
+    designated_agent_street2 = db.Column(db.String(50), doc=docs.DESIGNATED_AGENT_STREET2)
+    designated_agent_city = db.Column(db.String(50), doc=docs.DESIGNATED_AGENT_CITY)
+    designated_agent_state = db.Column(db.String(50), doc=docs.DESIGNATED_AGENT_STATE)
+    designated_agent_zip = db.Column(db.String(9), doc=docs.DESIGNATED_AGENT_ZIP)
+    designated_agent_title = db.Column(db.String(50), doc=docs.DESIGNATED_AGENT_TITLE)
+    designated_agent_phone_number = db.Column(db.String(50), doc=docs.DESIGNATED_AGENT_PHONE_NUMBER)
 
 
 class BaseConcreteCommittee(BaseCommittee):

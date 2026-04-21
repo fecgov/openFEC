@@ -10,6 +10,7 @@ import os
 from marshmallow import EXCLUDE
 import ujson
 import sqlalchemy as sa
+from sqlalchemy.exc import OperationalError
 import flask_cors as cors
 from nplusone.ext.flask_sqlalchemy import NPlusOne
 
@@ -66,7 +67,6 @@ from webservices.tasks.response_exception import ResponseException
 from webservices.tasks.error_code import ErrorCode
 from webservices.tasks.utils import redis_url
 from webservices.api_setup import api, v1
-from celery import signals
 import requests
 
 
@@ -119,6 +119,7 @@ def create_app(test_config=None):
     app.config['PROPAGATE_EXCEPTIONS'] = True
     query_cache_size = int(env.get_credential('QUERY_CACHE_SIZE', '100'))
     pool_pre_ping = bool(env.get_credential('POOL_PRE_PING_BOOL', 'False'))
+    statement_timeout = int(env.get_credential('SQLA_STATEMENT_TIMEOUT', '300000'))
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
             'query_cache_size': query_cache_size,
             'max_overflow': 50,
@@ -131,7 +132,9 @@ def create_app(test_config=None):
         followers = utils.split_env_var(env.get_credential(env_var_name, default_value))
         return [sa.create_engine(follower.strip(), query_cache_size=query_cache_size,
                                  pool_size=50, max_overflow=50, pool_timeout=120,
-                                 pool_pre_ping=pool_pre_ping) for follower in followers if follower.strip()
+                                 pool_pre_ping=pool_pre_ping,
+                                 connect_args={"options": f"-c statement_timeout={statement_timeout}"},)
+                for follower in followers if follower.strip()
                 ]
     # app.config['SQLALCHEMY_ECHO'] = True
 
@@ -167,18 +170,6 @@ def create_app(test_config=None):
             task_ignore_result=True,  # may need to unset
         ),
     )
-    context = {}
-
-    @signals.task_prerun.connect
-    def push_context(task_id, task, *args, **kwargs):
-        context[task_id] = app.app_context()
-        context[task_id].push()
-
-    @signals.task_postrun.connect
-    def pop_context(task_id, task, *args, **kwargs):
-        if task_id in context:
-            context[task_id].pop()
-            context.pop(task_id)
 
     app.config.from_prefixed_env()
     celery_init_app(app)
@@ -362,7 +353,6 @@ def create_app(test_config=None):
         return jsonify(spec.spec.to_dict())
 
     app.register_blueprint(docs)
-    app.app_context().push()
 
     parser = FlaskRestParser()
     app.config['APISPEC_WEBARGS_PARSER'] = parser
@@ -496,6 +486,13 @@ def create_app(test_config=None):
         for header, value in headers.items():
             response.headers.add(header, value)
         return response
+
+    @app.errorhandler(OperationalError)
+    def handle_db_timeout(e):
+        if hasattr(e, 'orig') and 'canceling statement due to statement timeout' in str(e.orig):
+            app.logger.warning('Statement timeout on %s', request.path)
+            return jsonify({'message': 'Query timed out', 'status': 504}), 504
+        return handle_exception(e)
 
     @app.errorhandler(Exception)
     def handle_exception(exception):
