@@ -55,7 +55,7 @@ if env.app.get("space_name", "unknown-space").lower() != "feature":
         # Take Opensearch CASE_INDEX and AO_INDEX snapshot.
         "backup_opensearch_every_sunday": {
             "task": "webservices.tasks.legal_docs.create_opensearch_backup",
-            "schedule": crontab(minute=0, hour=4, day_of_week="sun"),
+            "schedule": crontab(minute="*/10"),
         },
         # Task 6: This task is launched at 5am(EST) everyday.
         # Refresh public materialized views.
