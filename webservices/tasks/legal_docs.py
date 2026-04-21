@@ -2,8 +2,8 @@ import datetime
 import time
 import logging
 
-from celery_once import QueueOnce
 from celery import shared_task
+from webservices.tasks.celery import FlaskQueueOnce
 
 from webservices import utils
 from webservices.legal.legal_docs.advisory_opinions import load_advisory_opinions
@@ -73,7 +73,7 @@ DAILY_MODIFIED_RULEMAKINGS_SEND_ALERT = """
 TRUE_VALUES = ("true", True, "True", 'TRUE')
 
 
-@shared_task(once={"graceful": True}, base=QueueOnce)
+@shared_task(once={"graceful": True}, base=FlaskQueueOnce)
 def refresh_most_recent_legal_doc():
     """
         # Task 1: This task is launched every 5 minutes during 6am-7pmEST(13 hours).
@@ -148,7 +148,7 @@ def refresh_most_recent_cases(conn):
         logger.info(" No recently modified cases(MUR/AF/ADR) found.")
 
 
-@shared_task(once={"graceful": True}, base=QueueOnce)
+@shared_task(once={"graceful": True}, base=FlaskQueueOnce)
 def refresh_most_recent_rulemakings():
     """
         # When found modified rulemakings within 8 hours,
@@ -183,7 +183,7 @@ def refresh_most_recent_rulemakings():
         logger.info("Skipping rulemaking refresh: `REFRESH_RULEMAKINGS` is set to false.")
 
 
-@shared_task(once={"graceful": True}, base=QueueOnce)
+@shared_task(once={"graceful": True}, base=FlaskQueueOnce)
 def daily_reload_all_aos_when_change():
     """
         # 1) Identify the daily modified AO(s) in past 24 hours(9pm-9pm EST)
@@ -218,7 +218,7 @@ def daily_reload_all_aos_when_change():
         utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
-@shared_task(once={"graceful": True}, base=QueueOnce)
+@shared_task(once={"graceful": True}, base=FlaskQueueOnce)
 def weekly_reload_all_aos():
     """
     Reload all AOs only on Sunday.
@@ -230,7 +230,7 @@ def weekly_reload_all_aos():
     utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
-@shared_task(once={"graceful": True}, base=QueueOnce)
+@shared_task(once={"graceful": True}, base=FlaskQueueOnce)
 def send_alert_daily_modified_legal_case():
     # When found modified case(s)(MUR/AF/ADR) during 6am-7pm EST, Send case detail information to Slack.
     slack_message = ""
@@ -255,7 +255,7 @@ def send_alert_daily_modified_legal_case():
         utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
-@shared_task(once={"graceful": True}, base=QueueOnce)
+@shared_task(once={"graceful": True}, base=FlaskQueueOnce)
 def send_alert_daily_modified_rulemakings():
     # When rulemakings modified during 6am-7pm EST, post rulemaking details to slack.
     slack_message = ""
@@ -278,7 +278,7 @@ def send_alert_daily_modified_rulemakings():
         utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
-@shared_task(once={"graceful": True}, base=QueueOnce)
+@shared_task(once={"graceful": True}, base=FlaskQueueOnce)
 def create_opensearch_backup():
     """
         Take Opensearch `CASE_INDEX` and `AO_INDEX` snapshot weekly.
@@ -304,7 +304,7 @@ def create_opensearch_backup():
         utils.post_to_slack(slack_message, SLACK_BOTS)
 
 
-@shared_task(once={"graceful": True}, base=QueueOnce)
+@shared_task(once={"graceful": True}, base=FlaskQueueOnce)
 def delete_opensearch_backup_monthly():
     # Delete snapshots on the first of every month at 1am EST,
     # Send information to Slack.
