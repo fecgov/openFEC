@@ -465,6 +465,11 @@ def configure_snapshot_repository(repo_name=None):
         constants.S3_PRIVATE_SERVICE_INSTANCE_NAME))
 
     try:
+        base_path = constants.REPO_BASE_PATHS.get(repo_name)
+        if not base_path:
+            raise ValueError(
+                f"Unknown repository name: {repo_name}. Must be one of {list(constants.REPO_BASE_PATHS.keys())}")
+
         body = {
             "type": "s3",
             "settings": {
@@ -472,7 +477,7 @@ def configure_snapshot_repository(repo_name=None):
                 "region": credentials["region"],
                 "access_key": credentials["access_key_id"],
                 "secret_key": credentials["secret_access_key"],
-                "base_path": constants.S3_BACKUP_DIRECTORY,
+                "base_path": base_path,
                 "role_arn": env.get_credential("OS2_SNAPSHOT_ROLE_ARN"),
             },
         }
