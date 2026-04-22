@@ -1,13 +1,13 @@
-# import datetime
 import subprocess
-# from unittest.mock import patch
-
+from unittest.mock import patch
+import psycopg2
 import pytest
 from tests.common import TEST_CONN, BaseTestCase
 import datetime
 from webservices.common.models import db
 from sqlalchemy import text
 from webservices.legal.rulemaking_docs.rulemaking import sort_documents_tier_one
+from webservices.legal.rulemaking_docs.rulemaking import get_rulemaking, get_documents
 
 EMPTY_SET = set()
 
@@ -18,7 +18,7 @@ class TestGetRulemaking(BaseTestCase):
     def setUp(self):
         self.connection = db.engine.connect()
         subprocess.check_call(
-            ["psql", TEST_CONN, "-f", "data/load_base_advisory_opinion_data.sql"]
+            ["psql", TEST_CONN, "-f", "data/load_base_rulemaking_data.sql"]
         )
 
     def tearDown(self):
@@ -26,34 +26,65 @@ class TestGetRulemaking(BaseTestCase):
         self.connection.close()
         db.session.remove()
 
-    # def test_rulemaking_doc(self):
-    #     expected_rm = {
-    #         "id": 3177009,
-    #         "rm_number": "REG 2021-01",
-    #         "title": "REG 2021-01 Candidate Salaries",
-    #         "description": "REG 2021-01 Candidate Salaries",
-    #         "comment_close_date": "2023-03-29",
-    #         "admin_close_date": None,
-    #     }
-    #     self.create_rm(3177009, expected_rm)
-    #     actual_rm = next(get_rulemaking(None))
+    def test_simple_rm(self):
+        expected_rm = {
+            "admin_close_date": None,
+            "calculated_comment_close_date": datetime.datetime(2025, 1, 27, 23, 59, 59),
+            "comment_close_date": datetime.datetime(2025, 1, 27, 23, 59, 59),
+            "commenter_names": [],
+            "counsel_names": [],
+            "description": "REG 2024-08 Amendments of Rules",
+            "documents": [],
+            "fr_publication_dates": [datetime.date(2025, 1, 27)],
+            "hearing_dates": [],
+            "is_open_for_comment": False,
+            "key_documents": [],
+            "last_updated": None,
+            "no_tier_documents": [],
+            "petitioner_names": [],
+            "published_flg": True,
+            "representative_names": [],
+            "rm_entities": [],
+            "rm_id": 3472947,
+            "rm_name": "Amendments of Rules",
+            "rm_no": "2024-08",
+            "rm_number": "REG 2024-08",
+            "rm_serial": 8,
+            "rm_year": 2024,
+            "sort1": -2024,
+            "sort2": -8,
+            "sync_status": "UPTODATE",
+            "testify_flg": None,
+            "title": "REG 2024-08 Amendments of Rules",
+            "type": "rulemakings",
+            "vote_dates": [],
+            "witness_names": []
+        }
 
-    #     assert actual_rm == expected_rm
+        self.create_rm(expected_rm)
+        actual_rm = next(get_rulemaking(None))
+        assert actual_rm == expected_rm
 
-    def create_rm(self, rm_id, rm):
+    def create_rm(self, rm):
         self.connection.execute(
             text(
-                """INSERT INTO fosers.rulemaster (id, rm_number, title, description, comment_close_date,
-                admin_close_date) VALUES (:rm, :rm_num, :title, :descr, :cc_date, :ac_date)"""),
+                """INSERT INTO fosers.rulemaster (id, rm_number, title, description,
+                comment_close_date, admin_close_date, sync_status, published_flg, testify_flg)
+                VALUES (:id, :rm_number, :title, :description, :comment_close_date,
+                :admin_close_date, :sync_status, :published_flg, :testify_flg)"""),
             {
-                "rm": rm_id,
-                "rm_num": rm["rm_number"],
+                "id": rm["rm_id"],
+                "rm_number": rm["rm_number"],
                 "title": rm["title"],
-                "descr": rm["description"],
-                "cc_date": rm["comment_close_date"],
-                "ac_date": rm["admin_close_date"]
+                "description": rm["description"],
+                "comment_close_date": rm["comment_close_date"],
+                "admin_close_date": rm["admin_close_date"],
+                "sync_status": rm["sync_status"],
+                "published_flg": rm["published_flg"],
+                "testify_flg": rm["testify_flg"]
             }
         )
+        self.connection.commit()
 
     def test_rm_sort(self):
         documents = [
@@ -95,356 +126,263 @@ class TestGetRulemaking(BaseTestCase):
         self.assertEqual(documents[1]["doc_id"], 8)
         self.assertEqual(documents[2]["doc_id"], 7)
 
-    # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
-    # @patch("webservices.legal.legal_docs.opensearch_management.create_index")
-    # def test_ao_with_entities(self, get_bucket, create_opensearch_client, create_index):
-    #     expected_requestor_names = [
-    #         "The Manchurian Candidate",
-    #         "Federation of Interstate Truckers",
-    #     ]
-    #     expected_requestor_types = [
-    #         "Federal candidate/candidate committee/officeholder",
-    #         "Labor Organization",
-    #     ]
-    #     expected_commenter_names = ["Tom Troll", "Harry Troll"]
-    #     expected_representative_names = ["Dewey Cheetham and Howe LLC"]
-    #     expected_ao = {
-    #         "type": "advisory_opinions",
-    #         "no": "2017-01",
-    #         "doc_id": "advisory_opinions_2017-01",
-    #         "name": "An AO name",
-    #         "summary": "An AO summary",
-    #         "request_date": datetime.date(2016, 6, 10),
-    #         "issue_date": datetime.date(2016, 12, 15),
-    #         "documents": [],
-    #         "requestor_names": expected_requestor_names,
-    #         "requestor_types": expected_requestor_types,
-    #     }
+    @patch("webservices.legal.rulemaking_docs.rulemaking.get_bucket")
+    def test_rm_documents(self, get_bucket):
+        # 1)Test the get_documents(rm_no, rm_id, bucket) function
+        # in webservices/legal/rulemaking_docs/rulemaking.py.
+        # 2)For the filename field:
+        # In the table, filenames are stored as xxxxx.pdf.
+        # In the output, they should appear as xxxxx (without the file extension).
+        # in rulemaking.py (line 551) to remove the extension:filename = row["filename"][:-4]
+        # 3)For the content field:
+        # It should be uploaded to S3 only and not in the expected output object.
+        expected_level_2_docs_1 = [
+            {
+                "doc_admin_close_date": None,
+                "doc_calc_comment_close_date": None,
+                "doc_category_id": 7,
+                "doc_category_label": "Votes",
+                "doc_comment_close_date": None,
+                "doc_date": datetime.date(2024, 11, 13),
+                "doc_description": "REG 2024-08 (Electronic).pdf",
+                "doc_entities": [],
+                "doc_id": 425609,
+                "doc_type_id": 44,
+                "doc_type_label": "Vote to approve",
+                "filename": "REG 2024-08 (Electronic)",
+                "is_comment_eligible": False,
+                "is_key_document": False,
+                "level_1": 14,
+                "level_1_label": "Notice of Availability",
+                "level_2": 1,
+                "level_2_label": "Open Meeting Documents",
+                "sort_order": 0,
+                'text': 'level 2 document1',
+                "url": "/files/legal/rulemakings/2024-08/425609/REG-2024-08-(Electronic).pdf",
+            },
+            {
+                "doc_admin_close_date": None,
+                "doc_calc_comment_close_date": None,
+                "doc_category_id": 3,
+                "doc_category_label": "Agenda Document",
+                "doc_comment_close_date": None,
+                "doc_date": datetime.date(2024, 11, 14),
+                "doc_description": "REG 2024-08 (Untraceable Electronic).pdf",
+                "doc_entities": [],
+                "doc_id": 425595,
+                "doc_type_id": 27,
+                "doc_type_label": "Draft Notice of Availability",
+                "filename": "REG 2024-08 (Untraceable Electronic)",
+                "is_comment_eligible": False,
+                "is_key_document": False,
+                "level_1": 14,
+                "level_1_label": "Notice of Availability",
+                "level_2": 1,
+                "level_2_label": "Open Meeting Documents",
+                "sort_order": 0,
+                'text': 'level 2 document2',
+                "url": "/files/legal/rulemakings/2024-08/425595/REG-2024-08-(Untraceable-Electronic).pdf",
+            },
+        ]
 
-    #     self.create_ao(1, expected_ao)
-    #     for i, _ in enumerate(expected_requestor_names):
-    #         self.create_requestor(
-    #             1, i + 1, expected_requestor_names[i], expected_requestor_types[i]
-    #         )
-    #     offset = len(expected_requestor_names)
-    #     for i, _ in enumerate(expected_commenter_names):
-    #         self.create_commenter(1, i + offset + 1, expected_commenter_names[i])
-    #     offset += len(expected_commenter_names)
-    #     for i, _ in enumerate(expected_representative_names):
-    #         self.create_representative(
-    #             1, i + offset + 1, expected_representative_names[i]
-    #         )
+        expected_level_2_labels_1 = [
+            {
+                "level_2": 1,
+                "level_2_label": "Open Meeting Documents",
+                "level_2_docs": expected_level_2_docs_1,
+            },
+        ]
 
-    #     actual_ao = next(get_rulemaking(None))
+        expected_documents = [
+            {
+                "doc_admin_close_date": None,
+                "doc_calc_comment_close_date": None,
+                "doc_category_id": 4,
+                "doc_category_label": "Federal Register Document",
+                "doc_comment_close_date": None,
+                "doc_date": datetime.date(2024, 11, 26),
+                "doc_description": "NOA.pdf",
+                "doc_entities": [],
+                "doc_id": 425629,
+                "doc_type_id": 66,
+                "doc_type_label": "Notice of Availability",
+                "filename": "NOA",
+                "is_comment_eligible": False,
+                "is_key_document": False,
+                "level_1": 14,
+                "level_1_label": "Notice of Availability",
+                "level_2": 0,
+                "level_2_label": "Notice of Availability",
+                "level_2_labels": expected_level_2_labels_1,
+                "sort_order": 0,
+                'text': 'level 1 document',
+                "url": "/files/legal/rulemakings/2024-08/425629/NOA.pdf",
+            },
+        ]
 
-    #     assert set(actual_ao["requestor_names"]) == set(expected_requestor_names)
-    #     assert set(actual_ao["requestor_types"]) == set(expected_requestor_types)
-    #     assert set(actual_ao["commenter_names"]) == set(expected_commenter_names)
-    #     assert set(actual_ao["representative_names"]) == set(
-    #         expected_representative_names
-    #     )
+        level1_doc = {
+            "id": 425629,
+            "rm_id": 3472947,
+            "filename": "NOA.pdf",
+            "category": 4,
+            "description": "NOA.pdf",
+            "contents": "content11".encode("utf-8"),
+            "date1": datetime.date(2024, 11, 26),
+            "is_key_document": 0,
+            "type_id": 66,
+            "sync_status": None,
+            "sort_order": 0,
+            "comment_close_date": None,
+            "admin_close_date": None,
+        }
+        self.create_documents(level1_doc)
 
-    # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
-    # @patch("webservices.legal.legal_docs.opensearch_management.create_index")
-    # def test_ao_with_entity_individual(self, get_bucket, create_opensearch_client, create_index):
-    #     expected_entity = {
-    #         "role": "Commenter",
-    #         "name": "Mr Dan Becker MD",
-    #         "type": "Individual",
-    #     }
-    #     expected_ao = {
-    #         "type": "advisory_opinions",
-    #         "no": "2017-01",
-    #         "doc_id": "advisory_opinions_2017-01",
-    #         "name": "An AO name",
-    #         "summary": "An AO summary",
-    #         "request_date": datetime.date(2016, 6, 10),
-    #         "issue_date": datetime.date(2016, 12, 15),
-    #         "documents": [],
-    #         "requestor_names": [],
-    #         "requestor_types": [],
-    #         "entities": [expected_entity],
-    #     }
-    #     self.create_ao(1, expected_ao)
-    #     self.create_entity_individual(1, 123, "", 15, 2, "Mr", "Dan", "Becker", "MD")
+        level2_doc1 = {
+            "id": 425609,
+            "rm_id": 3472947,
+            "filename": "REG 2024-08 (Electronic).pdf",
+            "category": 7,
+            "description": "REG 2024-08 (Electronic).pdf",
+            "contents": "content21".encode("utf-8"),
+            "date1": datetime.date(2024, 11, 13),
+            "is_key_document": 0,
+            "type_id": 44,
+            "sync_status": None,
+            "sort_order": 0,
+            "comment_close_date": None,
+            "admin_close_date": None,
+        }
+        self.create_documents(level2_doc1)
 
-    #     actual_ao = next(get_rulemaking(None))
-    #     assert actual_ao["entities"] == [
-    #         {"role": "Commenter",
-    #             "name": "Mr Dan Becker MD",
-    #             "type": "Individual"}]
+        level2_doc2 = {
+            "id": 425595,
+            "rm_id": 3472947,
+            "filename": "REG 2024-08 (Untraceable Electronic).pdf",
+            "category": 3,
+            "description": "REG 2024-08 (Untraceable Electronic).pdf",
+            "contents": "content22".encode("utf-8"),
+            "date1": datetime.date(2024, 11, 14),
+            "is_key_document": 0,
+            "type_id": 27,
+            "sync_status": None,
+            "sort_order": 0,
+            "comment_close_date": None,
+            "admin_close_date": None,
+        }
+        self.create_documents(level2_doc2)
 
-    # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
-    # @patch("webservices.legal.legal_docs.opensearch_management.create_index")
-    # def test_completed_ao_with_docs(self, get_bucket, create_opensearch_client, create_index):
-    #     ao_no = "2017-01"
-    #     filename = "Some File.pdf"
-    #     expected_document = {
-    #         "document_id": 1,
-    #         "category": "Final Opinion",
-    #         "text": "Some Text",
-    #         "description": "Some Description",
-    #         "date": datetime.datetime(2017, 2, 9, 0, 0),
-    #         "url": "/files/legal/aos/{0}/{1}".format(ao_no, filename.replace(' ', '-')),
-    #         "filename": filename[:-4]
-    #     }
-    #     expected_ao = {
-    #         "no": ao_no,
-    #         "name": "An AO name",
-    #         "summary": "An AO summary",
-    #         "request_date": datetime.date(2016, 6, 10),
-    #         "issue_date": datetime.date(2016, 12, 15),
-    #         "is_pending": True,
-    #         "status": "Final",
-    #         "documents": [expected_document],
-    #     }
-    #     self.create_ao(1, expected_ao)
-    #     self.create_document(1, expected_document, filename)
+        self.create_documents_ocrtext(425629, "level 1 document")
+        self.create_documents_ocrtext(425609, "level 2 document1")
+        self.create_documents_ocrtext(425595, "level 2 document2")
 
-    #     actual_ao = next(get_rulemaking(None))
+        calendar = {
+            "id": 35834,
+            "rm_id": 3472947,
+            "event_name": "Policy - Notice of Availability (NOA)",
+            "event_key": 106881,
+            "eventdt": datetime.date(2025, 1, 27),
+        }
+        self.create_calendar(calendar)
 
-    #     assert actual_ao["is_pending"] is False
-    #     assert actual_ao["status"] == "Final"
+        tiermapping1 = {
+            "level1": 14,
+            "level2": 0,
+            "type_id": 66,
+            "description": "Notice of Availabilty"
+        }
+        tiermapping2 = {
+            "level1": 14,
+            "level2": 1,
+            "type_id": 27,
+            "description": "Draft Notice of Availability"
+        }
+        tiermapping3 = {
+            "level1": 14,
+            "level2": 1,
+            "type_id": 44,
+            "description": "Vote to approve"
+        }
+        self.create_tiermapping(tiermapping1)
+        self.create_tiermapping(tiermapping2)
+        self.create_tiermapping(tiermapping3)
 
-    #     actual_document = actual_ao["documents"][0]
-    #     for key in expected_document:
-    #         assert actual_document[key] == expected_document[key]
+        actual_documents2 = get_documents("2024-08", 3472947, get_bucket)
+        assert actual_documents2 == expected_documents
 
-    # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
-    # @patch("webservices.legal.legal_docs.opensearch_management.create_index")
-    # def test_ao_citations(self, get_bucket, create_opensearch_client, create_index):
-    #     ao1_document = {
-    #         "document_id": 1,
-    #         "category": "Final Opinion",
-    #         "text": "Not an AO reference 1776-01",
-    #         "description": "Some Description",
-    #         "date": datetime.datetime(2017, 2, 9, 0, 0),
-    #     }
-    #     ao1 = {
-    #         "no": "2017-01",
-    #         "doc_id": "advisory_opinions_2017-01",
-    #         "name": "1st AO name",
-    #         "summary": "1st AO summary",
-    #         "status": "Final",
-    #         "request_date": datetime.date(2016, 6, 10),
-    #         "issue_date": datetime.date(2016, 12, 15),
-    #         "documents": [ao1_document],
-    #     }
+        self.connection.execute(
+            text("""DELETE FROM fosers.documents""")
+        )
+        self.connection.commit()
 
-    #     ao2_document = {
-    #         "document_id": 2,
-    #         "category": "Final Opinion",
-    #         "text": "Reference to AO 2017-01",
-    #         "description": "Some Description",
-    #         "date": datetime.datetime(2017, 2, 9, 0, 0),
-    #     }
-    #     ao2 = {
-    #         "no": "2017-02",
-    #         "doc_id": "advisory_opinions_2017-02",
-    #         "name": "2nd AO name",
-    #         "summary": "2nd AO summary",
-    #         "status": "Final",
-    #         "request_date": datetime.date(2016, 6, 10),
-    #         "issue_date": datetime.date(2016, 12, 15),
-    #         "documents": [ao2_document],
-    #     }
+    def create_documents(self, document):
+        self.connection.execute(
+            text("""INSERT INTO fosers.documents
+            (id, rm_id, filename, category, description, contents, date1, is_key_document,
+            type_id, sync_status, sort_order, comment_close_date, admin_close_date)
+            VALUES (:id, :rm_id, :filename, :category, :description, :contents,
+            :date1, :is_key_document, :type_id, :sync_status, :sort_order,
+            :comment_close_date, :admin_close_date)"""),
+            {
+                "id": document["id"],
+                "rm_id": document["rm_id"],
+                "filename": document["filename"],
+                "category": document["category"],
+                "description": document["description"],
+                "contents": psycopg2.Binary(document["contents"]),
+                "date1": document["date1"],
+                "is_key_document": document["is_key_document"],
+                "type_id": document["type_id"],
+                "sync_status": document["sync_status"],
+                "sort_order": document["sort_order"],
+                "comment_close_date": document["comment_close_date"],
+                "admin_close_date": document["admin_close_date"],
+            }
+        )
+        self.connection.commit()
 
-    #     self.create_ao(1, ao1)
-    #     self.create_document(1, ao1_document)
-    #     self.create_ao(2, ao2)
-    #     self.create_document(2, ao2_document)
+    def create_documents_ocrtext(self, id, ocrtext):
+        self.connection.execute(
+            text("""
+            INSERT INTO fosers.documents_ocrtext(id, ocrtext)VALUES (:id, :ocrtext)"""),
+            {
+                "id": id,
+                "ocrtext": ocrtext,
+            }
+        )
+        self.connection.commit()
 
-    #     actual_aos = [ao for ao in get_advisory_opinions(None)]
-    #     assert len(actual_aos) == 2
+    def create_calendar(self, calendar):
+        self.connection.execute(
+            text("""
+            INSERT INTO fosers.calendar(id, rm_id, event_key, event_name, eventdt)
+                 VALUES (:id, :rm_id, :event_key, :event_name, :eventdt)"""),
+            {
+                "id": calendar["id"],
+                "rm_id": calendar["rm_id"],
+                "event_key": calendar["event_key"],
+                "event_name": calendar["event_name"],
+                "eventdt": calendar["eventdt"],
+            }
+        )
+        self.connection.commit()
+        # --106881, 107212, 112434, 108851, 107093, 106993, 107034, 112451, 108818
 
-    #     actual_ao1 = next(filter(lambda a: a["no"] == "2017-01", actual_aos))
-    #     actual_ao2 = next(filter(lambda a: a["no"] == "2017-02", actual_aos))
-
-    #     assert actual_ao1["ao_citations"] == []
-    #     assert actual_ao1["aos_cited_by"] == [{"no": "2017-02", "name": "2nd AO name"}]
-
-    #     assert actual_ao2["ao_citations"] == [{"no": "2017-01", "name": "1st AO name"}]
-    #     assert actual_ao2["aos_cited_by"] == []
-
-    # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
-    # @patch("webservices.legal.legal_docs.opensearch_management.create_index")
-    # def test_ao_offsets(self, get_bucket, create_opensearch_client, create_index):
-    #     expected_ao1 = {
-    #         "type": "advisory_opinions",
-    #         "no": "2015-01",
-    #         "ao_no": "2015-01",
-    #         "ao_year": 2015,
-    #         "ao_serial": 1,
-    #         "doc_id": "advisory_opinions_2015-01",
-    #         "name": "AO name1",
-    #         "summary": "AO summary1",
-    #         "request_date": datetime.date(2016, 6, 10),
-    #         "issue_date": datetime.date(2016, 12, 15),
-    #         "is_pending": True,
-    #         "status": "Pending",
-    #         "ao_citations": [],
-    #         "statutory_citations": [],
-    #         "regulatory_citations": [],
-    #         "aos_cited_by": [],
-    #         "documents": [],
-    #         "requestor_names": [],
-    #         "requestor_types": [],
-    #         "commenter_names": [],
-    #         "representative_names": [],
-    #         "sort1": -2015,
-    #         "sort2": -1,
-    #         "entities": [],
-    #     }
-    #     expected_ao2 = {
-    #         "type": "advisory_opinions",
-    #         "no": "2015-02",
-    #         "ao_no": "2015-02",
-    #         "ao_year": 2015,
-    #         "ao_serial": 2,
-    #         "doc_id": "advisory_opinions_2015-02",
-    #         "name": "An AO name2",
-    #         "summary": "An AO summary2",
-    #         "request_date": datetime.date(2016, 6, 10),
-    #         "issue_date": datetime.date(2016, 12, 15),
-    #         "is_pending": True,
-    #         "status": "Pending",
-    #         "ao_citations": [],
-    #         "statutory_citations": [],
-    #         "regulatory_citations": [],
-    #         "aos_cited_by": [],
-    #         "documents": [],
-    #         "requestor_names": [],
-    #         "requestor_types": [],
-    #         "commenter_names": [],
-    #         "representative_names": [],
-    #         "sort1": -2015,
-    #         "sort2": -2,
-    #         "entities": [],
-    #     }
-    #     expected_ao3 = {
-    #         "type": "advisory_opinions",
-    #         "no": "2016-01",
-    #         "ao_no": "2016-01",
-    #         "ao_year": 2016,
-    #         "ao_serial": 1,
-    #         "doc_id": "advisory_opinions_2016-01",
-    #         "name": "An AO name3",
-    #         "summary": "An AO summary3",
-    #         "request_date": datetime.date(2016, 6, 10),
-    #         "issue_date": datetime.date(2016, 12, 15),
-    #         "is_pending": True,
-    #         "status": "Pending",
-    #         "ao_citations": [],
-    #         "statutory_citations": [],
-    #         "regulatory_citations": [],
-    #         "aos_cited_by": [],
-    #         "documents": [],
-    #         "requestor_names": [],
-    #         "requestor_types": [],
-    #         "commenter_names": [],
-    #         "representative_names": [],
-    #         "sort1": -2016,
-    #         "sort2": -1,
-    #         "entities": [],
-    #     }
-    #     self.create_ao(1, expected_ao1)
-    #     self.create_ao(2, expected_ao2)
-    #     self.create_ao(3, expected_ao3)
-
-    #     gen = get_rulemaking(None)
-    #     assert (next(gen)) == expected_ao3
-    #     assert (next(gen)) == expected_ao2
-    #     assert (next(gen)) == expected_ao1
-
-    #     gen = get_rulemaking('2015-02')
-    #     assert (next(gen)) == expected_ao3
-    #     assert (next(gen)) == expected_ao2
-
-    # def create_document(self, ao_id, document, filename='201801_C.pdf'):
-    #     self.connection.execute(
-    #         """
-    #         INSERT INTO aouser.document
-    #         (document_id, ao_id, category, ocrtext, fileimage, description, document_date, filename)
-    #         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
-    #         document["document_id"],
-    #         ao_id,
-    #         document["category"],
-    #         document["text"],
-    #         document["text"],
-    #         document["description"],
-    #         document["date"],
-    #         filename,
-    #     )
-
-    # def create_requestor(self, ao_id, entity_id, requestor_name, requestor_type):
-    #     entity_type_id = self.connection.execute(
-    #         "SELECT entity_type_id FROM aouser.entity_type " " WHERE description = %s ",
-    #         requestor_type,
-    #     ).scalar()
-
-    #     self.create_entity(ao_id, entity_id, requestor_name, entity_type_id, 1)
-
-    # def create_commenter(self, ao_id, entity_id, requestor_name):
-    #     self.create_entity(ao_id, entity_id, requestor_name, 16, 2)
-
-    # def create_representative(self, ao_id, entity_id, requestor_name):
-    #     self.create_entity(ao_id, entity_id, requestor_name, 16, 3)
-
-    # def create_entity(self, ao_id, entity_id, requestor_name, entity_type_id, role_id):
-    #     self.connection.execute(
-    #         """
-    #         INSERT INTO aouser.entity
-    #         (entity_id, name, type)
-    #         VALUES (%s, %s, %s)""",
-    #         entity_id,
-    #         requestor_name,
-    #         entity_type_id,
-    #     )
-    #     self.connection.execute(
-    #         """
-    #         INSERT INTO aouser.players
-    #         (player_id, ao_id, entity_id, role_id)
-    #         VALUES (%s, %s, %s, %s)""",
-    #         entity_id,
-    #         ao_id,
-    #         entity_id,
-    #         role_id,
-    #     )
-
-    # def create_entity_individual(self, ao_id, entity_id, requestor_name, entity_type_id,
-    #                              role_id, prefix, first_name, last_name, suffix):
-    #     self.connection.execute(
-    #         """
-    #         INSERT INTO aouser.entity
-    #         (prefix, first_name, last_name, suffix, entity_id, name, type)
-    #         VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-    #         prefix,
-    #         first_name,
-    #         last_name,
-    #         suffix,
-    #         entity_id,
-    #         requestor_name,
-    #         entity_type_id,
-    #     )
-    #     self.connection.execute(
-    #         """
-    #         INSERT INTO aouser.players
-    #         (player_id, ao_id, entity_id, role_id)
-    #         VALUES (%s, %s, %s, %s)""",
-    #         entity_id,
-    #         ao_id,
-    #         entity_id,
-    #         role_id,
-    #     )
+    def create_tiermapping(self, tm):
+        self.connection.execute(
+            text("""
+            INSERT INTO fosers.tiermapping(level1, level2, type_id, description)
+                 VALUES (:level1, :level2, :type_id, :description)"""),
+            {
+                "level1": tm["level1"],
+                "level2": tm["level2"],
+                "type_id": tm["type_id"],
+                "description": tm["description"],
+            }
+        )
+        self.connection.commit()
 
     def clear_test_data(self):
-        # tables = ["calendar", "commissioners", "documentplayers", "documents",
-        #           "participants", "rulemaster", "tiermapping", "votes", ]
-        tables = ["rulemaster"]
+        tables = ["calendar", "commissioners", "documentplayers", "documents",
+                  "participants", "rulemaster", "tiermapping", "votes", ]
         for table in tables:
             self.connection.execute(text("DELETE FROM fosers.{}".format(table)))
