@@ -8,6 +8,7 @@ import datetime
 from webservices.common.models import db
 from sqlalchemy import text
 from webservices.legal.rulemaking_docs.rulemaking import sort_documents_tier_one
+from webservices.legal.rulemaking_docs.rulemaking import get_rulemaking
 
 EMPTY_SET = set()
 
@@ -18,7 +19,7 @@ class TestGetRulemaking(BaseTestCase):
     def setUp(self):
         self.connection = db.engine.connect()
         subprocess.check_call(
-            ["psql", TEST_CONN, "-f", "data/load_base_advisory_opinion_data.sql"]
+            ["psql", TEST_CONN, "-f", "data/load_base_rulemaking_data.sql"]
         )
 
     def tearDown(self):
@@ -26,34 +27,65 @@ class TestGetRulemaking(BaseTestCase):
         self.connection.close()
         db.session.remove()
 
-    # def test_rulemaking_doc(self):
-    #     expected_rm = {
-    #         "id": 3177009,
-    #         "rm_number": "REG 2021-01",
-    #         "title": "REG 2021-01 Candidate Salaries",
-    #         "description": "REG 2021-01 Candidate Salaries",
-    #         "comment_close_date": "2023-03-29",
-    #         "admin_close_date": None,
-    #     }
-    #     self.create_rm(3177009, expected_rm)
-    #     actual_rm = next(get_rulemaking(None))
+    def test_simple_rm(self):
+        expected_rm = {
+            "admin_close_date": datetime.datetime(1999, 9, 24, 23, 59, 59),
+            "calculated_comment_close_date": datetime.datetime(1999, 9, 24, 23, 59, 59),
+            "comment_close_date": datetime.datetime(1999, 9, 24, 23, 59, 59),
+            "commenter_names": [],
+            "counsel_names": [],
+            "description": "rm description",
+            "documents": [],
+            "fr_publication_dates": [],
+            "hearing_dates": [],
+            "is_open_for_comment": False,
+            "key_documents": [],
+            "last_updated": None,
+            "no_tier_documents": [],
+            "petitioner_names": [],
+            "published_flg": True,
+            "representative_names": [],
+            "rm_entities": [],
+            "rm_id": 11,
+            "rm_name": "rm name",
+            "rm_no": "2000-01",
+            "rm_number": "REG 2000-01",
+            "rm_serial": 1,
+            "rm_year": 2000,
+            "sort1": -2000,
+            "sort2": -1,
+            "sync_status": "UPTODATE",
+            "testify_flg": False,
+            "title": "REG 2000-01 rm name",
+            "type": "rulemakings",
+            "vote_dates": [],
+            "witness_names": []
+        }
 
-    #     assert actual_rm == expected_rm
+        self.create_rm(expected_rm)
+        actual_rm = next(get_rulemaking(None))
+        assert actual_rm == expected_rm
 
-    def create_rm(self, rm_id, rm):
+    def create_rm(self, rm):
         self.connection.execute(
             text(
-                """INSERT INTO fosers.rulemaster (id, rm_number, title, description, comment_close_date,
-                admin_close_date) VALUES (:rm, :rm_num, :title, :descr, :cc_date, :ac_date)"""),
+                """INSERT INTO fosers.rulemaster (id, rm_number, title, description,
+                comment_close_date, admin_close_date, sync_status, published_flg, testify_flg)
+                VALUES (:id, :rm_number, :title, :description, :comment_close_date,
+                :admin_close_date, :sync_status, :published_flg, :testify_flg)"""),
             {
-                "rm": rm_id,
-                "rm_num": rm["rm_number"],
+                "id": rm["rm_id"],
+                "rm_number": rm["rm_number"],
                 "title": rm["title"],
-                "descr": rm["description"],
-                "cc_date": rm["comment_close_date"],
-                "ac_date": rm["admin_close_date"]
+                "description": rm["description"],
+                "comment_close_date": rm["comment_close_date"],
+                "admin_close_date": rm["admin_close_date"],
+                "sync_status": rm["sync_status"],
+                "published_flg": rm["published_flg"],
+                "testify_flg": rm["testify_flg"]
             }
         )
+        self.connection.commit()
 
     def test_rm_sort(self):
         documents = [
@@ -96,111 +128,143 @@ class TestGetRulemaking(BaseTestCase):
         self.assertEqual(documents[2]["doc_id"], 7)
 
     # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
-    # @patch("webservices.legal.legal_docs.opensearch_management.create_index")
-    # def test_ao_with_entities(self, get_bucket, create_opensearch_client, create_index):
-    #     expected_requestor_names = [
-    #         "The Manchurian Candidate",
-    #         "Federation of Interstate Truckers",
-    #     ]
-    #     expected_requestor_types = [
-    #         "Federal candidate/candidate committee/officeholder",
-    #         "Labor Organization",
-    #     ]
-    #     expected_commenter_names = ["Tom Troll", "Harry Troll"]
-    #     expected_representative_names = ["Dewey Cheetham and Howe LLC"]
-    #     expected_ao = {
-    #         "type": "advisory_opinions",
-    #         "no": "2017-01",
-    #         "doc_id": "advisory_opinions_2017-01",
-    #         "name": "An AO name",
-    #         "summary": "An AO summary",
-    #         "request_date": datetime.date(2016, 6, 10),
-    #         "issue_date": datetime.date(2016, 12, 15),
-    #         "documents": [],
-    #         "requestor_names": expected_requestor_names,
-    #         "requestor_types": expected_requestor_types,
+    # def test_rm_documents(self, get_bucket):
+    # def test_rm_documents(self):
+
+    #     expected_documents = [
+    #     {
+    #         "doc_admin_close_date": None,
+    #         "doc_calc_comment_close_date": None,
+    #         "doc_category_id": 4,
+    #         "doc_category_label": "Federal Register Document",
+    #         "doc_comment_close_date": None,
+    #         "doc_date": datetime.date(2024, 11, 26),
+    #         "doc_description": "NOA.pdf",
+    #         "doc_entities": [],
+    #         "doc_id": 425629,
+    #         "doc_type_id": 66,
+    #         "doc_type_label": "Notice of Availability",
+    #         "filename": "NOA",
+    #         "is_comment_eligible": False,
+    #         "is_key_document": False,
+    #         "level_1": 14,
+    #         "level_1_label": "Notice of Availability",
+    #         "level_2": 0,
+    #         "level_2_label": "Notice of Availability",
+    #         "level_2_labels": [
+    #             {
+    #                 "level_2": 1,
+    #                 "level_2_docs": [
+    #                     {
+    #                         "doc_admin_close_date": None,
+    #                         "doc_calc_comment_close_date": None,
+    #                         "doc_category_id": 7,
+    #                         "doc_category_label": "Votes",
+    #                         "doc_comment_close_date": None,
+    #                         "doc_date": "2024-11-13",
+    #                         "doc_description": "REG 2024-08 (Untraceable Electronic Payment Methods).pdf",
+    #                         "doc_entities": [],
+    #                         "doc_id": 425609,
+    #                         "doc_type_id": 44,
+    #                         "doc_type_label": "Vote to approve",
+    #                         "filename": "REG 2024-08 (Untraceable Electronic Payment Methods)",
+    #                         "is_comment_eligible": False,
+    #                         "is_key_document": False,
+    #                         "level_1": 14,
+    #                         "level_1_label": "Notice of Availability",
+    #                         "level_2": 1,
+    #                         "level_2_label": "Open Meeting Documents",
+    #                         "sort_order": 0,
+    #                         "url": "/files/legal/rulemakings/2024-08/425609/
+    #                           REG-2024-08-(Untraceable-Electronic-Payment-Methods).pdf"
+    #                     },
+    #                     {
+    #                         "doc_admin_close_date": None,
+    #                         "doc_calc_comment_close_date": None,
+    #                         "doc_category_id": 3,
+    #                         "doc_category_label": "Agenda Document",
+    #                         "doc_comment_close_date": None,
+    #                         "doc_date": "2024-11-14",
+    #                         "doc_description": "REG 2024-08 (Untraceable Electronic Payment Methods) Draft NOA.pdf",
+    #                         "doc_entities": [],
+    #                         "doc_id": 425595,
+    #                         "doc_type_id": 27,
+    #                         "doc_type_label": "Draft Notice of Availability",
+    #                         "filename": "REG 2024-08 (Untraceable Electronic Payment Methods) Draft NOA",
+    #                         "is_comment_eligible": False,
+    #                         "is_key_document": False,
+    #                         "level_1": 14,
+    #                         "level_1_label": "Notice of Availability",
+    #                         "level_2": 1,
+    #                         "level_2_label": "Open Meeting Documents",
+    #                         "sort_order": 0,
+    #                         "url": "/files/legal/rulemakings/2024-08/425595/
+    #                           REG-2024-08-(Untraceable-Electronic-Payment-Methods)-Draft-NOA.pdf"
+    #                     }
+    #                 ]
+    #             },
+    #             {
+    #                 "level_2": 2,
+    #                 "level_2_docs": [
+    #                     {
+    #                         "doc_admin_close_date": None,
+    #                         "doc_calc_comment_close_date": None,
+    #                         "doc_category_id": 5,
+    #                         "doc_category_label": "Comments and Ex Parte Communications",
+    #                         "doc_comment_close_date": None,
+    #                         "doc_date": "2024-11-26",
+    #                         "doc_description": "REG_2024_08_Jones_Tracey_11_26_2024_22_12_27_CommentText.pdf",
+    #                         "doc_entities": [
+    #                             {
+    #                                 "name": "Jones, Tracey",
+    #                                 "role": "Commenter"
+    #                             }
+    #                         ],
+    #                         "doc_id": 425741,
+    #                         "doc_type_id": 74,
+    #                         "doc_type_label": "Comments",
+    #                         "filename": "REG_2024_08_Jones_Tracey_11_26_2024_22_12_27_CommentText",
+    #                         "is_comment_eligible": False,
+    #                         "is_key_document": False,
+    #                         "level_1": 14,
+    #                         "level_1_label": "Notice of Availability",
+    #                         "level_2": 2,
+    #                         "level_2_label": "Comments",
+    #                         "sort_order": 0,
+    #                         "url": "/files/legal/rulemakings/2024-08/425741/
+    #                           REG_2024_08_Jones_Tracey_11_26_2024_22_12_27_CommentText.pdf"
+    #                     },
+    #                 ]
+    #             }
+    #         ],
+    #         "sort_order": 0,
+    #         "url": "/files/legal/rulemakings/2024-08/425629/NOA.pdf"
+    #     },
+    #     {
+    #         "doc_admin_close_date": None,
+    #         "doc_calc_comment_close_date": None,
+    #         "doc_category_id": 6,
+    #         "doc_category_label": "Commencing Document",
+    #         "doc_comment_close_date": None,
+    #         "doc_date": "2024-10-22",
+    #         "doc_description": "Rulemaking Petition",
+    #         "doc_entities": [],
+    #         "doc_id": 425690,
+    #         "doc_type_id": 73,
+    #         "doc_type_label": "Commencing Document",
+    #         "filename": "OCR Rulemaking petition_Paxton (10.22.24)",
+    #         "is_comment_eligible": False,
+    #         "is_key_document": True,
+    #         "level_1": 7,
+    #         "level_1_label": "Commencing Document",
+    #         "level_2": 0,
+    #         "level_2_label": "Commencing Document",
+    #         "level_2_labels": [],
+    #         "sort_order": 0,
+    #         "url": "/files/legal/rulemakings/2024-08/425690/OCR-Rulemaking-petition_Paxton-(10.22.24).pdf"
     #     }
+    # ]
 
-    #     self.create_ao(1, expected_ao)
-    #     for i, _ in enumerate(expected_requestor_names):
-    #         self.create_requestor(
-    #             1, i + 1, expected_requestor_names[i], expected_requestor_types[i]
-    #         )
-    #     offset = len(expected_requestor_names)
-    #     for i, _ in enumerate(expected_commenter_names):
-    #         self.create_commenter(1, i + offset + 1, expected_commenter_names[i])
-    #     offset += len(expected_commenter_names)
-    #     for i, _ in enumerate(expected_representative_names):
-    #         self.create_representative(
-    #             1, i + offset + 1, expected_representative_names[i]
-    #         )
-
-    #     actual_ao = next(get_rulemaking(None))
-
-    #     assert set(actual_ao["requestor_names"]) == set(expected_requestor_names)
-    #     assert set(actual_ao["requestor_types"]) == set(expected_requestor_types)
-    #     assert set(actual_ao["commenter_names"]) == set(expected_commenter_names)
-    #     assert set(actual_ao["representative_names"]) == set(
-    #         expected_representative_names
-    #     )
-
-    # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
-    # @patch("webservices.legal.legal_docs.opensearch_management.create_index")
-    # def test_ao_with_entity_individual(self, get_bucket, create_opensearch_client, create_index):
-    #     expected_entity = {
-    #         "role": "Commenter",
-    #         "name": "Mr Dan Becker MD",
-    #         "type": "Individual",
-    #     }
-    #     expected_ao = {
-    #         "type": "advisory_opinions",
-    #         "no": "2017-01",
-    #         "doc_id": "advisory_opinions_2017-01",
-    #         "name": "An AO name",
-    #         "summary": "An AO summary",
-    #         "request_date": datetime.date(2016, 6, 10),
-    #         "issue_date": datetime.date(2016, 12, 15),
-    #         "documents": [],
-    #         "requestor_names": [],
-    #         "requestor_types": [],
-    #         "entities": [expected_entity],
-    #     }
-    #     self.create_ao(1, expected_ao)
-    #     self.create_entity_individual(1, 123, "", 15, 2, "Mr", "Dan", "Becker", "MD")
-
-    #     actual_ao = next(get_rulemaking(None))
-    #     assert actual_ao["entities"] == [
-    #         {"role": "Commenter",
-    #             "name": "Mr Dan Becker MD",
-    #             "type": "Individual"}]
-
-    # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
-    # @patch("webservices.legal.legal_docs.opensearch_management.create_index")
-    # def test_completed_ao_with_docs(self, get_bucket, create_opensearch_client, create_index):
-    #     ao_no = "2017-01"
-    #     filename = "Some File.pdf"
-    #     expected_document = {
-    #         "document_id": 1,
-    #         "category": "Final Opinion",
-    #         "text": "Some Text",
-    #         "description": "Some Description",
-    #         "date": datetime.datetime(2017, 2, 9, 0, 0),
-    #         "url": "/files/legal/aos/{0}/{1}".format(ao_no, filename.replace(' ', '-')),
-    #         "filename": filename[:-4]
-    #     }
-    #     expected_ao = {
-    #         "no": ao_no,
-    #         "name": "An AO name",
-    #         "summary": "An AO summary",
-    #         "request_date": datetime.date(2016, 6, 10),
-    #         "issue_date": datetime.date(2016, 12, 15),
-    #         "is_pending": True,
-    #         "status": "Final",
-    #         "documents": [expected_document],
-    #     }
     #     self.create_ao(1, expected_ao)
     #     self.create_document(1, expected_document, filename)
 
@@ -270,116 +334,38 @@ class TestGetRulemaking(BaseTestCase):
     #     assert actual_ao2["ao_citations"] == [{"no": "2017-01", "name": "1st AO name"}]
     #     assert actual_ao2["aos_cited_by"] == []
 
-    # @patch("webservices.legal.legal_docs.advisory_opinions.get_bucket")
-    # @patch("webservices.legal.legal_docs.advisory_opinions.create_opensearch_client")
-    # @patch("webservices.legal.legal_docs.opensearch_management.create_index")
-    # def test_ao_offsets(self, get_bucket, create_opensearch_client, create_index):
-    #     expected_ao1 = {
-    #         "type": "advisory_opinions",
-    #         "no": "2015-01",
-    #         "ao_no": "2015-01",
-    #         "ao_year": 2015,
-    #         "ao_serial": 1,
-    #         "doc_id": "advisory_opinions_2015-01",
-    #         "name": "AO name1",
-    #         "summary": "AO summary1",
-    #         "request_date": datetime.date(2016, 6, 10),
-    #         "issue_date": datetime.date(2016, 12, 15),
-    #         "is_pending": True,
-    #         "status": "Pending",
-    #         "ao_citations": [],
-    #         "statutory_citations": [],
-    #         "regulatory_citations": [],
-    #         "aos_cited_by": [],
-    #         "documents": [],
-    #         "requestor_names": [],
-    #         "requestor_types": [],
-    #         "commenter_names": [],
-    #         "representative_names": [],
-    #         "sort1": -2015,
-    #         "sort2": -1,
-    #         "entities": [],
-    #     }
-    #     expected_ao2 = {
-    #         "type": "advisory_opinions",
-    #         "no": "2015-02",
-    #         "ao_no": "2015-02",
-    #         "ao_year": 2015,
-    #         "ao_serial": 2,
-    #         "doc_id": "advisory_opinions_2015-02",
-    #         "name": "An AO name2",
-    #         "summary": "An AO summary2",
-    #         "request_date": datetime.date(2016, 6, 10),
-    #         "issue_date": datetime.date(2016, 12, 15),
-    #         "is_pending": True,
-    #         "status": "Pending",
-    #         "ao_citations": [],
-    #         "statutory_citations": [],
-    #         "regulatory_citations": [],
-    #         "aos_cited_by": [],
-    #         "documents": [],
-    #         "requestor_names": [],
-    #         "requestor_types": [],
-    #         "commenter_names": [],
-    #         "representative_names": [],
-    #         "sort1": -2015,
-    #         "sort2": -2,
-    #         "entities": [],
-    #     }
-    #     expected_ao3 = {
-    #         "type": "advisory_opinions",
-    #         "no": "2016-01",
-    #         "ao_no": "2016-01",
-    #         "ao_year": 2016,
-    #         "ao_serial": 1,
-    #         "doc_id": "advisory_opinions_2016-01",
-    #         "name": "An AO name3",
-    #         "summary": "An AO summary3",
-    #         "request_date": datetime.date(2016, 6, 10),
-    #         "issue_date": datetime.date(2016, 12, 15),
-    #         "is_pending": True,
-    #         "status": "Pending",
-    #         "ao_citations": [],
-    #         "statutory_citations": [],
-    #         "regulatory_citations": [],
-    #         "aos_cited_by": [],
-    #         "documents": [],
-    #         "requestor_names": [],
-    #         "requestor_types": [],
-    #         "commenter_names": [],
-    #         "representative_names": [],
-    #         "sort1": -2016,
-    #         "sort2": -1,
-    #         "entities": [],
-    #     }
-    #     self.create_ao(1, expected_ao1)
-    #     self.create_ao(2, expected_ao2)
-    #     self.create_ao(3, expected_ao3)
+    def create_document(self, documents):
+        self.connection.execute(
+            text("""IINSERT INTO fosers.documents
+            (id, rm_id, filename, category, description, contents, date1, is_key_document,
+            type_id, sync_status, sort_order, comment_close_date, admin_close_date)
+            VALUES (:id, :rm_id, :filename, :category, :description, :contents,
+            :date1, :is_key_document, :type_id, :sync_status, :sort_order,
+            :comment_close_date, :admin_close_date)"""),
+            {
+                "id": documents["rm_id"],
+                "rm_id": documents["rm_number"],
+                "title": documents["title"],
+                "description": documents["description"],
+                "comment_close_date": documents["comment_close_date"],
+                "admin_close_date": documents["admin_close_date"],
+                "sync_status": documents["sync_status"],
+                "published_flg": documents["published_flg"],
+                "testify_flg": documents["testify_flg"]
+            }
+        )
+        self.connection.commit()
 
-    #     gen = get_rulemaking(None)
-    #     assert (next(gen)) == expected_ao3
-    #     assert (next(gen)) == expected_ao2
-    #     assert (next(gen)) == expected_ao1
-
-    #     gen = get_rulemaking('2015-02')
-    #     assert (next(gen)) == expected_ao3
-    #     assert (next(gen)) == expected_ao2
-
-    # def create_document(self, ao_id, document, filename='201801_C.pdf'):
-    #     self.connection.execute(
-    #         """
-    #         INSERT INTO aouser.document
-    #         (document_id, ao_id, category, ocrtext, fileimage, description, document_date, filename)
-    #         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
-    #         document["document_id"],
-    #         ao_id,
-    #         document["category"],
-    #         document["text"],
-    #         document["text"],
-    #         document["description"],
-    #         document["date"],
-    #         filename,
-    #     )
+    def create_documents_ocrtext(self, documents_ocrtext):
+        self.connection.execute(
+            text("""
+            INSERT INTO fosers.documents_ocrtext(id, ocrtext)VALUES (:id, :ocrtext)"""),
+            {
+                "id": documents_ocrtext["rm_id"],
+                "ocrtext": documents_ocrtext["ocrtext"],
+            }
+        )
+        self.connection.commit()
 
     # def create_requestor(self, ao_id, entity_id, requestor_name, requestor_type):
     #     entity_type_id = self.connection.execute(
@@ -443,8 +429,8 @@ class TestGetRulemaking(BaseTestCase):
     #     )
 
     def clear_test_data(self):
-        # tables = ["calendar", "commissioners", "documentplayers", "documents",
-        #           "participants", "rulemaster", "tiermapping", "votes", ]
-        tables = ["rulemaster"]
+
+        tables = ["calendar", "commissioners", "documentplayers", "documents",
+                  "participants", "rulemaster", "tiermapping", "votes", ]
         for table in tables:
             self.connection.execute(text("DELETE FROM fosers.{}".format(table)))
