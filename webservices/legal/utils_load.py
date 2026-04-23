@@ -127,15 +127,19 @@ def slow_reload_zero_downtime(index_name=None):
 
     opensearch_client = create_opensearch_client()
 
-    # 1) Find the current live index via search_alias, determine the new target
+    # 1) Find the current live index via search_alias
     try:
-        aliases = opensearch_client.indices.get_alias(name=search_alias)
+        aliases = opensearch_client.indices.get_alias(
+            index="{0},{1}".format(index_name, swap_index),
+            name=search_alias
+        )
         old_index = list(aliases.keys())[0]
         logger.info(" Search alias '{0}' currently points to '{1}'.".format(search_alias, old_index))
         new_index = swap_index if old_index == index_name else index_name
     except Exception:
-        # Alias doesn't exist yet (first run or broken state), default to swap_index
-        logger.warning(" Search alias '{0}' not found, defaulting to first run.".format(search_alias))
+        # Alias doesn't exist yet (first run or broken state)
+        logger.warning(" Search alias '{0}' not found on '{1}' or '{2}', defaulting to first run.".format(
+            search_alias, index_name, swap_index))
         old_index = None
         new_index = swap_index
 
