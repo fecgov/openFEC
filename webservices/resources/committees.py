@@ -8,6 +8,7 @@ from webservices import schemas
 from webservices import exceptions
 from webservices.common import models
 from webservices.common.views import ApiResource
+from webservices.filters import filter_state_other, determine_state_other
 
 
 def filter_year(model, query, years):
@@ -84,6 +85,7 @@ class CommitteeList(ApiResource):
         )
 
     def build_query(self, **kwargs):
+        use_state_other = False
 
         if kwargs.get("sort"):
             if "q" not in kwargs and kwargs["sort"] in {"receipts", "-receipts"}:
@@ -91,6 +93,11 @@ class CommitteeList(ApiResource):
                     "Cannot sort on receipts when parameter 'q' is not set",
                     status_code=422,
                 )
+
+        if kwargs.get("state"):
+            use_state_other, state_list, kwargs = determine_state_other(
+                kwargs,
+                "state")
 
         query = super().build_query(**kwargs)
         if kwargs.get("candidate_id"):
@@ -111,6 +118,9 @@ class CommitteeList(ApiResource):
 
         if kwargs.get("cycle"):
             query = query.filter(models.Committee.cycles.overlap(kwargs["cycle"]))
+
+        if use_state_other:
+            query = filter_state_other(query, models.Committee.state, state_list)
 
         query = query.execution_options(overlap_columns=set(['cycles_', 'candidate_ids_', 'sponsor_candidate_ids_']))
         return query

@@ -169,6 +169,26 @@ class TestNationalParty(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_state'], 'CA')
 
+    def test_state_other_filter(self):
+        [
+            factories.NationalParty_ScheduleAFactory(contributor_state='NY'),
+            factories.NationalParty_ScheduleAFactory(contributor_state='CA'),
+            factories.NationalParty_ScheduleAFactory(contributor_state='AC'),
+            factories.NationalParty_ScheduleAFactory(contributor_state=None),
+
+        ]
+        results = self._results(
+            api.url_for(NationalParty_ScheduleAView, contributor_state='other', **self.kwargs)
+        )
+        self.assertEqual(len(results), 2)
+
+        state = ['CA', 'other', 'ca']
+
+        results = self._results(
+            api.url_for(NationalParty_ScheduleAView, contributor_state=state, **self.kwargs)
+        )
+        self.assertEqual(len(results), 3)
+
     def test_filterby_zip(self):
         [
             factories.NationalParty_ScheduleAFactory(contributor_zip=96789),
@@ -417,6 +437,23 @@ class TestNationalPartyScheduleB(ApiBaseTest):
             api.url_for(NationalParty_ScheduleBView, recipient_committee_designation='B', **self.kwargs)
         )
         self.assertEqual(len(results), 2)
+
+    def test_state_other_filter(self):
+        [
+            factories.NationalParty_ScheduleBFactory(recipient_state='A'),
+            factories.NationalParty_ScheduleBFactory(recipient_state=None),
+            factories.NationalParty_ScheduleBFactory(recipient_state='NV'),
+        ]
+        results = self._results(
+            api.url_for(NationalParty_ScheduleBView, recipient_state='other', **self.kwargs)
+        )
+        self.assertEqual(len(results), 2)
+
+        state = ['other', 'NV']
+        results = self._results(
+            api.url_for(NationalParty_ScheduleBView, recipient_state=state, **self.kwargs)
+        )
+        self.assertEqual(len(results), 3)
 
     def test_recipient_committee_type_filter(self):
         [

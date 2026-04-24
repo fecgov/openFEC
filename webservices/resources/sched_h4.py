@@ -8,6 +8,7 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
+from webservices.filters import determine_state_other, filter_state_other
 
 
 # Used for endpoint `/schedules/schedule_h4/`
@@ -90,7 +91,18 @@ class ScheduleH4View(ItemizedResource):
             ))
 
     def build_query(self, **kwargs):
+        use_state_other = False
+
+        if kwargs.get("payee_state"):
+            use_state_other, state_list, kwargs = determine_state_other(
+                kwargs,
+                "payee_state")
+
         query = super(ScheduleH4View, self).build_query(**kwargs)
+
+        if use_state_other:
+            query = filter_state_other(query, models.ScheduleH4.payee_state, state_list)
+
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         utils.check_form_line_number(kwargs)
