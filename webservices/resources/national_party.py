@@ -79,7 +79,18 @@ class NationalParty_ScheduleAView(ApiResource):
         )
 
     def build_query(self, **kwargs):
+        use_state_other = False
+
+        if kwargs.get("contributor_state"):
+            use_state_other, state_list, kwargs = filters.determine_state_other(
+                kwargs,
+                "contributor_state")
+
         query = super().build_query(**kwargs)
+
+        if use_state_other:
+            query = filters.filter_state_other(query, models.NationalParty_ScheduleA.contributor_state, state_list)
+
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
         query = utils.validate_and_filter_zip_codes(
                 query, kwargs, 'contributor_zip', filters, self.filter_multi_start_with_fields
@@ -149,7 +160,19 @@ class NationalParty_ScheduleBView(ApiResource):
         )
 
     def build_query(self, **kwargs):
+
+        use_state_other = False
+
+        if kwargs.get("recipient_state"):
+            use_state_other, state_list, kwargs = filters.determine_state_other(
+                kwargs,
+                "recipient_state")
+
         query = super().build_query(**kwargs)
+
+        if use_state_other:
+            query = filters.filter_state_other(query, models.NationalParty_ScheduleB.recipient_state, state_list)
+
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
         query = utils.validate_and_filter_zip_codes(
                 query, kwargs, 'recipient_zip', filters, self.filter_multi_start_with_fields

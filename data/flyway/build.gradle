@@ -7,7 +7,7 @@ repositories {
 
 dependencies {
     implementation group: "org.flywaydb", name: "flyway-gradle-plugin", version: ""
-    implementation (group: "org.flywaydb", name: "flyway-commandline", version: "12.1.1") {
+    implementation (group: "org.flywaydb", name: "flyway-commandline", version: "12.4.0") {
         exclude group: "com.microsoft.sqlserver", module: "msql-jdbc"
         exclude group: "com.h2database", module: "h2"
         exclude group: "com.pivotal.jdbc", module: "greenplumdriver"

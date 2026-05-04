@@ -214,6 +214,25 @@ class TestScheduleA(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_state'], 'CA')
 
+    def test_schedule_a_state_other(self):
+        [
+            factories.ScheduleAFactory(contributor_state='NY'),
+            factories.ScheduleAFactory(contributor_state=None),
+            factories.ScheduleAFactory(contributor_state='AAA'),
+
+        ]
+        results = self._results(
+            api.url_for(ScheduleAView, contributor_state='other', **self.kwargs)
+        )
+        self.assertEqual(len(results), 2)
+
+        state = ['other', 'NY']
+
+        results = self._results(
+            api.url_for(ScheduleAView, contributor_state=state, **self.kwargs)
+        )
+        self.assertEqual(len(results), 3)
+
     def test_schedule_a_filter_zip(self):
         [
             factories.ScheduleAFactory(contributor_zip=96789),
@@ -947,6 +966,29 @@ class TestScheduleB(ApiBaseTest):
         )
         self.assertEqual(len(results), 2)
 
+    def test_state_other_filter(self):
+        [
+            factories.ScheduleBFactory(recipient_state='DC'),
+            factories.ScheduleBFactory(recipient_state='S'),
+            factories.ScheduleBFactory(recipient_state=None),
+        ]
+        results = self._results(
+            api.url_for(ScheduleBView, recipient_state='DC', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+
+        results = self._results(
+            api.url_for(ScheduleBView, recipient_state='other', **self.kwargs)
+        )
+        self.assertEqual(len(results), 2)
+
+        state = ['other', 'DC']
+
+        results = self._results(
+            api.url_for(ScheduleBView, recipient_state=state, **self.kwargs)
+        )
+        self.assertEqual(len(results), 3)
+
     def test_schedule_b_spender_org_type_filter(self):
         [
             factories.ScheduleBFactory(spender_committee_org_type='W'),
@@ -1168,6 +1210,23 @@ class TestScheduleE(ApiBaseTest):
             results = self._results(api.url_for(ScheduleEView, **{label: values[0]}))
             assert len(results) == 1
             assert results[0][column.key] == values[0]
+
+    def test_state_other_filter(self):
+        [
+            factories.ScheduleEFactory(candidate_office_state=None),
+            factories.ScheduleEFactory(candidate_office_state='WV'),
+            factories.ScheduleEFactory(candidate_office_state='J'),
+        ]
+        results = self._results(
+            api.url_for(ScheduleEView, candidate_office_state='other')
+        )
+        self.assertEqual(len(results), 2)
+
+        state = ['other', 'WV']
+        results = self._results(
+            api.url_for(ScheduleEView, candidate_office_state=state)
+        )
+        self.assertEqual(len(results), 3)
 
     def test_schedule_e_filter_fulltext_pass(self):
         """
@@ -1574,6 +1633,29 @@ class TestScheduleH4(ApiBaseTest):
         )
         self.assertEqual(response.status_code, 400)
         self.assertIn(b'Invalid form_line_number', response.data)
+
+    def test_state_other_filter(self):
+        [
+            factories.ScheduleH4Factory(payee_state=None),
+            factories.ScheduleH4Factory(payee_state='O'),
+            factories.ScheduleH4Factory(payee_state='FL'),
+        ]
+        results = self._results(
+            api.url_for(ScheduleH4View, payee_state='FL', **self.kwargs)
+        )
+        self.assertEqual(len(results), 1)
+
+        results = self._results(
+            api.url_for(ScheduleH4View, payee_state='other', **self.kwargs)
+        )
+        self.assertEqual(len(results), 2)
+
+        state = ['other', 'FL']
+
+        results = self._results(
+            api.url_for(ScheduleH4View, payee_state=state, **self.kwargs)
+        )
+        self.assertEqual(len(results), 3)
 
     def test_schedule_h4_efile_filters(self):
         filters = [
