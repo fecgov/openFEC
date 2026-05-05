@@ -195,6 +195,25 @@ class CommitteeFormatTest(ApiBaseTest):
             response = self._response(page)
             self.assertGreater(original_count, response["pagination"]["count"])
 
+    def test_state_other(self):
+        [
+            factories.CommitteeFactory(state='NY'),
+            factories.CommitteeFactory(state=None),
+            factories.CommitteeFactory(state='AB'),
+            factories.CommitteeFactory(state='DC'),
+        ]
+        results = self._results(
+            api.url_for(CommitteeList, state='other')
+        )
+        self.assertEqual(len(results), 2)
+
+        state = ['other', 'NY', 'other', 'DC']
+
+        results = self._results(
+            api.url_for(CommitteeList, state=state)
+        )
+        self.assertEqual(len(results), 4)
+
     def test_committee_year_filter_skips_null_first_file_date(self):
         # Build fixtures
         dates = [

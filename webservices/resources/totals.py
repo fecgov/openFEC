@@ -86,10 +86,20 @@ class TotalsByEntityTypeView(ApiResource):
             committee_type_map.get(entity_type),
             default_schemas,
         )
+        use_state_other = False
+
+        if kwargs.get("committee_state"):
+            use_state_other, state_list, kwargs = filters.determine_state_other(
+                kwargs,
+                "committee_state")
+
         query = sa.select(totals_class)
         # Committee ID needs to be handled separately because it's not in kwargs
         if committee_id is not None:
             query = query.filter(totals_class.committee_id.in_(committee_id))
+
+        if use_state_other:
+            query = filters.filter_state_other(query, totals_class.committee_state, state_list)
 
         query = filters.filter_multi(
             query,

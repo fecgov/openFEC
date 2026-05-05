@@ -416,3 +416,73 @@ class TestFilterFulltext_NA(ApiBaseTest):
             api.url_for(ScheduleAView, contributor_employer='-N/A')
         )
         self.assertEqual(len(results), 4)
+
+
+class TestDetermineStateOther:
+
+    def test_other_present_removes_key_and_returns_true(self):
+        kwargs = {"states": ["CA", "other", "TX"]}
+        use_other, state_list, result_kwargs = filters.determine_state_other(kwargs, "states")
+
+        assert use_other is True
+        assert state_list == {"CA", "TX"}
+        assert "states" not in result_kwargs
+
+    def test_other_case_insensitive_uppercase(self):
+        kwargs = {"states": ["OTHER", "NY"]}
+        use_other, state_list, result_kwargs = filters.determine_state_other(kwargs, "states")
+
+        assert use_other is True
+        assert state_list == {"NY"}
+        assert "states" not in result_kwargs
+
+    def test_other_case_insensitive_mixed_case(self):
+        kwargs = {"states": ["Other", "FL"]}
+        use_other, state_list, _ = filters.determine_state_other(kwargs, "states")
+
+        assert use_other is True
+        assert state_list == {"FL"}
+
+    def test_no_other_returns_false_and_empty_set(self):
+        kwargs = {"states": ["CA", "TX", "NY"]}
+        use_other, state_list, result_kwargs = filters.determine_state_other(kwargs, "states")
+
+        assert use_other is False
+        assert state_list == set()
+        assert result_kwargs == {"states": ["CA", "TX", "NY"]}
+
+    def test_only_other_in_list(self):
+        kwargs = {"states": ["other"]}
+        use_other, state_list, result_kwargs = filters.determine_state_other(kwargs, "states")
+
+        assert use_other is True
+        assert state_list == set()
+        assert "states" not in result_kwargs
+
+    def test_other_only_processed_once_on_first_occurrence(self):
+        kwargs = {"states": ["other", "CA", "other"]}
+        use_other, state_list, result_kwargs = filters.determine_state_other(kwargs, "states")
+
+        assert use_other is True
+        assert "CA" in state_list
+        assert "states" not in result_kwargs
+
+    def test_unrelated_kwargs_preserved(self):
+        kwargs = {"states": ["other", "WA"], "years": [2021, 2022]}
+        _, _, result_kwargs = filters.determine_state_other(kwargs, "states")
+
+        assert "years" in result_kwargs
+        assert result_kwargs["years"] == [2021, 2022]
+
+    def test_empty_list_returns_false(self):
+        kwargs = {"states": []}
+        use_other, state_list, result_kwargs = filters.determine_state_other(kwargs, "states")
+
+        assert use_other is False
+        assert state_list == set()
+
+    def test_mutates_original_kwargs(self):
+        kwargs = {"states": ["other", "OR"]}
+        _, _, result_kwargs = filters.determine_state_other(kwargs, "states")
+
+        assert result_kwargs is kwargs

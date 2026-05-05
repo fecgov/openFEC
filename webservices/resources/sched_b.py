@@ -9,6 +9,8 @@ from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
 from webservices import exceptions
+from webservices.filters import determine_state_other, filter_state_other
+
 """
 two years restriction removed from schedule_b. For details, refer:
 https://github.com/fecgov/openFEC/issues/3595
@@ -87,6 +89,13 @@ class ScheduleBView(ItemizedResource):
             ))
 
     def build_query(self, **kwargs):
+        use_state_other = False
+
+        if kwargs.get("recipient_state"):
+            use_state_other, state_list, kwargs = determine_state_other(
+                kwargs,
+                "recipient_state")
+
         query = super(ScheduleBView, self).build_query(**kwargs)
         # might be worth looking to factoring these out into the filter script
         if kwargs.get('sub_id'):
@@ -102,6 +111,9 @@ class ScheduleBView(ItemizedResource):
                     exceptions.LINE_NUMBER_ERROR,
                     status_code=400,
                 )
+        if use_state_other:
+            query = filter_state_other(query, models.ScheduleB.recipient_state, state_list)
+
         return query
 
 

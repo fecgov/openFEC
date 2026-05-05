@@ -9,6 +9,7 @@ from sqlalchemy.orm import aliased, contains_eager
 from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
+from webservices.filters import determine_state_other, filter_state_other
 
 
 # Used for endpoint `/schedules/schedule_e/`
@@ -110,11 +111,22 @@ class ScheduleEView(ItemizedResource):
         return query
 
     def build_query(self, **kwargs):
+        use_state_other = False
+
+        if kwargs.get("candidate_office_state"):
+            use_state_other, state_list, kwargs = determine_state_other(
+                kwargs,
+                "candidate_office_state")
+
         query = super().build_query(**kwargs)
         if 'most_recent' in kwargs:
             query = query.filter(sa.or_(self.model.most_recent == kwargs.get('most_recent'),
                                         self.model.most_recent == None))  # noqa
         utils.check_form_line_number(kwargs)
+
+        if use_state_other:
+            query = filter_state_other(query, models.ScheduleE.candidate_office_state, state_list)
+
         return query
 
 

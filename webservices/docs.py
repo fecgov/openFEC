@@ -1595,6 +1595,10 @@ Selects all filings received before this date
 
 STATE_GENERIC = 'US state or territory'
 
+STATE_OTHER = '''
+A valid two-letter U.S. state or territory code. Use `ZZ` for foreign countries, or `other` for
+foreign countries and any invalid or missing values.'''
+
 ZIP_CODE = 'Zip code'
 
 CANDIDATE_MIN_FIRST_FILE_DATE = 'Selects all candidates whose first filing was received by the FEC after this date.'

@@ -52,6 +52,12 @@ OS_SERVICE_INSTANCE_NAME = "fec-api-opensearch"
 AWS_ES_SERVICE = "es"
 REGION = "us-gov-west-1"
 PORT = 443
+REPO_BASE_PATHS = {
+    CASE_REPO: f"{S3_BACKUP_DIRECTORY}/case_repo",
+    AO_REPO: f"{S3_BACKUP_DIRECTORY}/ao_repo",
+    ARCH_MUR_REPO: f"{S3_BACKUP_DIRECTORY}/arch_mur_repo",
+}
+
 # ========= For legal document end ==========
 
 DOCS_PATH = "docs"

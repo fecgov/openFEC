@@ -73,7 +73,7 @@ class TestTotalsByEntityType(ApiBaseTest):
         'all_loans_received': 1,
         'allocated_federal_election_levin_share': 2,
         'treasurer_name': 'Treasurer, Trudy',
-        'committee_state': 'DC',
+        'committee_state': None,
         'filing_frequency': 'Q',
         'filing_frequency_full': 'Quarterly filer',
         'first_file_date': datetime.date.fromisoformat("1982-12-31"),
@@ -147,6 +147,24 @@ class TestTotalsByEntityType(ApiBaseTest):
         )
         assert len(results) == 1
         self.assertEqual(results[0]['cycle'], presidential_fields['cycle'])
+
+    def test_state_other(self):
+        factories.TotalsPacFactory(**self.first_pac_total)
+        factories.TotalsPacFactory(**self.second_pac_total)
+
+        results = self._results(
+            api.url_for(TotalsByEntityTypeView, committee_state='other', entity_type='pac-party')
+        )
+
+        assert len(results) == 1
+
+        state = ['other', 'CT']
+
+        results = self._results(
+            api.url_for(TotalsByEntityTypeView, committee_state=state, entity_type='pac-party')
+        )
+
+        assert len(results) == 2
 
     def test_designation_filter(self):
         party_fields = {
