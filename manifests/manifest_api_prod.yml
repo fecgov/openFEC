@@ -17,6 +17,7 @@ applications:
       - fec-creds-prod
       - fec-s3-api
       - fec-s3-snapshot
+    timeout: 180
     env:
       FEC_API_USE_PROXY: true
       FEC_API_RESTRICT_DOWNLOADS: true
