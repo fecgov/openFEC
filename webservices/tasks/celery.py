@@ -31,7 +31,7 @@ def celery_init_app(app: Flask) -> Celery:
             "ssl_cert_reqs": ssl.CERT_NONE,
         },
         redis_backend_use_ssl={
-            "ssl_cert_reqs": ssl.CERT_NONE,
+             "ssl_cert_reqs": ssl.CERT_NONE,
         },
         imports=(
             "webservices.tasks.refresh_db",
