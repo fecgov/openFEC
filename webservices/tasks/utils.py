@@ -67,5 +67,12 @@ def get_redis_value(key, fallback=None):
     return json.loads(value) if value else fallback
 
 
+def delete_redis_value(key):
+    """
+    Delete a value from redis by key
+    """
+    get_redis_instance().delete(key)
+
+
 def get_redis_instance():
     return redis.Redis.from_url(redis_url())

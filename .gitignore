@@ -59,7 +59,7 @@ target/
 
 # Celery artifacts
 celerybeat-schedule
-
+dump.rdb
 # Credientials
 *.env.json
 
@@ -73,6 +73,7 @@ static/swagger-ui/js
 # Pycharm
 .idea
 .vscode/launch.json
+*.vscode/settings.json
 
 # token file
 token.txt

@@ -9,6 +9,7 @@ from flask_apispec.utils import resolve_annotations
 from postgres_copy import query_entities, format_flags
 from smart_open import open
 from celery import shared_task
+from celery.exceptions import SoftTimeLimitExceeded
 from webservices.tasks.celery import FlaskQueueOnce
 from sqlalchemy.dialects import postgresql
 from webservices.env import env
@@ -26,6 +27,9 @@ from flask import Flask, current_app
 logger = logging.getLogger(__name__)
 
 IGNORE_FIELDS = {"page", "per_page", "sort", "sort_hide_null"}
+
+DOWNLOAD_SOFT_LIMIT = int(env.get_credential("DOWNLOAD_SOFT_LIMIT", 240))
+DOWNLOAD_HARD_LIMIT = int(env.get_credential("DOWNLOAD_HARD_LIMIT", 300))
 
 
 def call_resource(app: Flask, path, qs):
@@ -194,8 +198,15 @@ def convert_lists_to_tuples(params, overlap_prefixes):
     return params
 
 
-@shared_task(base=FlaskQueueOnce, once={"graceful": True})
-def export_query(path, qs):
+@shared_task(
+    bind=True,
+    base=FlaskQueueOnce,
+    once={"graceful": True},
+    soft_time_limit=DOWNLOAD_SOFT_LIMIT,
+    time_limit=DOWNLOAD_HARD_LIMIT,
+)
+def export_query(self, path, qs):
+    task_id = self.request.id
     qs = base64.b64decode(qs)
 
     try:
@@ -204,8 +215,15 @@ def export_query(path, qs):
         logger.info("Download resource: {0}".format(qs))
         make_bundle(resource)
         logger.info("Bundled: {0}".format(qs))
+    except SoftTimeLimitExceeded:
+        logger.exception("Download soft time limit exceeded (8 min): {0}".format(qs))
+        task_utils.delete_redis_value('download-queued:{}'.format(task_id))
+        task_utils.set_redis_value('download-failed:{}'.format(task_id), True, age=7200)
+        raise
     except Exception:
         logger.exception("Download failed: {0}".format(qs))
+        task_utils.delete_redis_value('download-queued:{}'.format(task_id))
+        task_utils.set_redis_value('download-failed:{}'.format(task_id), True, age=7200)
 
 
 @shared_task
