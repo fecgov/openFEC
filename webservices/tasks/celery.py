@@ -1,4 +1,3 @@
-import ssl
 from celery import Celery, Task
 from celery_once import QueueOnce
 from flask import Flask
@@ -27,12 +26,12 @@ def celery_init_app(app: Flask) -> Celery:
     celery_app.config_from_object(app.config["CELERY"])
     celery_app.conf.update(
         broker_url=redis_url(),
-        broker_use_ssl={
-            "ssl_cert_reqs": ssl.CERT_NONE,
-        },
-        redis_backend_use_ssl={
-            "ssl_cert_reqs": ssl.CERT_NONE,
-        },
+        # broker_use_ssl={
+        #    "ssl_cert_reqs": ssl.CERT_NONE,
+        # },
+        # redis_backend_use_ssl={
+        #     "ssl_cert_reqs": ssl.CERT_NONE,
+        # ,
         imports=(
             "webservices.tasks.refresh_db",
             "webservices.tasks.download",
@@ -47,7 +46,7 @@ def celery_init_app(app: Flask) -> Celery:
     celery_app.conf.ONCE = {
         "backend": "celery_once.backends.Redis",
         "settings": {
-            "url": redis_url() + "?ssl=true",
+            "url": redis_url(),  # + "?ssl=true",
             "default_timeout": 60 * 60
         }
 
