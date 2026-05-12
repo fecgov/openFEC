@@ -1,6 +1,7 @@
 import base64
 import datetime
 import hashlib
+import json
 import unittest.mock as mock
 
 import pytest
@@ -67,6 +68,30 @@ class TestDownloadTask(ApiBaseTest):
             },
             ExpiresIn=resource.URL_EXPIRY,
         )
+
+    @mock.patch('webservices.tasks.download.task_utils.delete_redis_value')
+    @mock.patch('webservices.tasks.download.task_utils.set_redis_value')
+    @mock.patch('webservices.tasks.download.make_bundle')
+    @mock.patch('webservices.tasks.download.call_resource')
+    def test_export_query_writes_failure_on_exception(self, call_resource,
+                                                      make_bundle, set_redis_value, delete_redis_value):
+        make_bundle.side_effect = Exception('S3 error')
+        tasks.export_query('/v1/candidates/', base64.b64encode(b'office=H').decode())
+        assert set_redis_value.called
+        key = set_redis_value.call_args[0][0]
+        assert key.startswith('download-failed:')
+        assert set_redis_value.call_args[0][1] is True
+        assert delete_redis_value.called
+
+    @mock.patch('webservices.tasks.download.task_utils.delete_redis_value')
+    @mock.patch('webservices.tasks.download.task_utils.set_redis_value')
+    @mock.patch('webservices.tasks.download.make_bundle')
+    @mock.patch('webservices.tasks.download.call_resource')
+    def test_export_query_no_failure_redis_on_success(self, call_resource,
+                                                      make_bundle, set_redis_value, delete_redis_value):
+        tasks.export_query('/v1/candidates/', base64.b64encode(b'office=H').decode())
+        assert not set_redis_value.called
+        assert not delete_redis_value.called
 
     @mock.patch('webservices.tasks.download.make_bundle')
     def test_views(self, make_bundle):
@@ -139,20 +164,73 @@ class TestDownloadTask(ApiBaseTest):
 
 
 class TestDownloadResource(ApiBaseTest):
+    @mock.patch('webservices.resources.download.task_utils.set_redis_value')
     @mock.patch('webservices.resources.download.get_cached_file')
     @mock.patch('webservices.resources.download.download.export_query')
-    def test_download(self, export, get_cached):
+    def test_download(self, export, get_cached, set_redis_value):
         get_cached.return_value = None
+        export.delay.return_value = mock.Mock(id='test-task-id')
         res = self.client.post(
             api.url_for(resource.DownloadView, path='candidates', office='S', q='joh', sort='receipts')
         )
-        assert res.get_json() == {'status': 'queued'}
+        assert res.get_json() == {'status': 'queued', 'task_id': 'test-task-id'}
         get_cached.assert_called_once_with(
             '/v1/candidates/', b'office=S&q=joh&sort=receipts', filename=None
         )
         export.delay.assert_called_once_with(
             '/v1/candidates/', base64.b64encode(b'office=S&q=joh&sort=receipts').decode('UTF-8')
         )
+        set_redis_value.assert_called_once_with('download-queued:test-task-id', True, age=7200)
+
+    @mock.patch('webservices.resources.download.task_utils.set_redis_value')
+    @mock.patch('webservices.resources.download.get_cached_file')
+    @mock.patch('webservices.resources.download.download.export_query')
+    @mock.patch('webservices.resources.download.task_utils.get_redis_value')
+    def test_download_with_task_id_no_failure_not_queued(self, get_redis_value, export, get_cached, set_redis_value):
+        # task_id is stale — neither failed nor queued in Redis — so a new task is queued
+        get_cached.return_value = None
+        get_redis_value.return_value = None
+        export.delay.return_value = mock.Mock(id='new-task-id')
+        res = self.client.post(
+            api.url_for(resource.DownloadView, path='candidates', office='S'),
+            data=json.dumps({'task_id': 'old-task-id'}),
+            content_type='application/json',
+        )
+        assert res.get_json() == {'status': 'queued', 'task_id': 'new-task-id'}
+        get_redis_value.assert_any_call('download-failed:old-task-id')
+        get_redis_value.assert_any_call('download-queued:old-task-id')
+        assert export.delay.called
+
+    @mock.patch('webservices.resources.download.get_cached_file')
+    @mock.patch('webservices.resources.download.download.export_query')
+    @mock.patch('webservices.resources.download.task_utils.get_redis_value')
+    def test_download_with_task_id_still_queued(self, get_redis_value, export, get_cached):
+        # task_id is valid and still running — return same task_id without queuing new task
+        get_cached.return_value = None
+        get_redis_value.side_effect = lambda key: key == 'download-queued:running-task-id'
+        res = self.client.post(
+            api.url_for(resource.DownloadView, path='candidates', office='S'),
+            data=json.dumps({'task_id': 'running-task-id'}),
+            content_type='application/json',
+        )
+        assert res.get_json() == {'status': 'queued', 'task_id': 'running-task-id'}
+        assert not export.delay.called
+
+    @mock.patch('webservices.resources.download.get_cached_file')
+    @mock.patch('webservices.resources.download.download.export_query')
+    @mock.patch('webservices.resources.download.delete_redis_value')
+    @mock.patch('webservices.resources.download.task_utils.get_redis_value')
+    def test_download_with_task_id_failed(self, get_redis_value, delete_redis_value, export, get_cached):
+        get_cached.return_value = None
+        get_redis_value.return_value = True
+        res = self.client.post(
+            api.url_for(resource.DownloadView, path='candidates', office='S'),
+            data=json.dumps({'task_id': 'failed-task-id'}),
+            content_type='application/json',
+        )
+        assert res.status_code == 500
+        delete_redis_value.assert_called_once_with('download-failed:failed-task-id')
+        assert not export.delay.called
 
     @mock.patch('webservices.resources.download.get_cached_file')
     @mock.patch('webservices.resources.download.download.export_query')
