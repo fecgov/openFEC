@@ -2,6 +2,7 @@ import ssl
 from celery import Celery, Task
 from celery_once import QueueOnce
 from flask import Flask
+from kombu import Queue, Exchange
 from webservices.tasks import schedule
 from webservices.tasks.utils import redis_url
 
@@ -42,7 +43,19 @@ def celery_init_app(app: Flask) -> Celery:
         beat_schedule=schedule,
         broker_connection_timeout=30,  # in seconds
         broker_connection_max_retries=None,  # for unlimited retries
-        task_acks_late=False
+        task_acks_late=False,
+        task_queues=(
+            Queue("high", Exchange("high"), routing_key="high"),
+            Queue("default", Exchange("default"), routing_key="default"),
+            Queue("low", Exchange("low"), routing_key="low"),
+        ),
+        task_default_queue="default",
+        task_routes={
+            "webservices.tasks.service_status_checks.*": {"queue": "high"},
+            "webservices.tasks.download.*": {"queue": "low"},
+            "webservices.tasks.refresh_db.*": {"queue": "default"},
+            "webservices.tasks.legal_docs.*": {"queue": "default"},
+        },
     )
     celery_app.conf.ONCE = {
         "backend": "celery_once.backends.Redis",
