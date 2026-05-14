@@ -62,6 +62,7 @@ celerybeat-schedule
 dump.rdb
 # Credientials
 *.env.json
+celerybeat-schedule.db
 
 # Compiled swagger files
 static/swagger-ui/css
