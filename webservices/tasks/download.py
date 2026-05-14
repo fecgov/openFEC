@@ -199,8 +199,8 @@ def convert_lists_to_tuples(params, overlap_prefixes):
     bind=True,
     base=FlaskQueueOnce,
     once={"graceful": True},
-    soft_time_limit=480,
-    time_limit=600,
+    soft_time_limit=1,
+    time_limit=2,
 )
 def export_query(self, path, qs):
     task_id = self.request.id
