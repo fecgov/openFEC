@@ -231,7 +231,6 @@ def fetch_seek_page(
         if (
             not sort_index
             and kwargs["sort_null_only"]
-            and paginator.sort_column[1] == sa.asc
         ):
             sort_index = None
             query = query.filter(null_sort_by == None)  # noqa
