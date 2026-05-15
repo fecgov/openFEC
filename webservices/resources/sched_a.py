@@ -118,6 +118,7 @@ class ScheduleAView(ItemizedResource):
             args.make_sort_args(
                 default='-contribution_receipt_date',
                 validator=args.OptionValidator(self.sort_options),
+                default_sort_nulls_last=True,
             ),
         )
 

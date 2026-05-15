@@ -85,7 +85,7 @@ class ScheduleBView(ItemizedResource):
             args.make_sort_args(
                 default='-disbursement_date',
                 validator=args.OptionValidator(self.sort_options),
-                show_nulls_last_arg=False,
+                default_sort_nulls_last=True,
             ))
 
     def build_query(self, **kwargs):
