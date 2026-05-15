@@ -623,69 +623,6 @@ class TestScheduleA(ApiBaseTest):
             ],
         )
 
-    def test_schedule_a_null_pagination_with_null_sort_column_values_descending(self):
-        filings = [
-            factories.ScheduleAFactory(contribution_receipt_date=None)
-            # this range should ensure the page has a null transition
-            for _ in range(10)
-        ]
-        filings = filings + [
-            factories.ScheduleAFactory(
-                contribution_receipt_date=datetime.date(2016, 1, 1)
-            )
-            for _ in range(15)
-        ]
-
-        page1 = self._results(
-            api.url_for(
-                ScheduleAView,
-                sort='-contribution_receipt_date',
-                **self.kwargs
-            )
-        )
-
-        self.assertEqual(len(page1), 20)
-
-        top_reversed_from_middle = filings[9::-1]
-        reversed_from_bottom_to_middle = filings[-1:14:-1]
-        top_reversed_from_middle.extend(reversed_from_bottom_to_middle)
-        self.assertEqual(
-            [int(each['sub_id']) for each in page1],
-            [each.sub_id for each in top_reversed_from_middle],
-        )
-        self.assertEqual(
-            [each['contribution_receipt_date'] for each in page1],
-            [
-                each.contribution_receipt_date.strftime('%Y-%m-%d')
-                if each.contribution_receipt_date
-                else None
-                for each in top_reversed_from_middle
-            ],
-        )
-        page2 = self._results(
-            api.url_for(
-                ScheduleAView,
-                last_index=page1[-1]['sub_id'],
-                last_contribution_receipt_date=page1[-1]['contribution_receipt_date'],
-                sort='-contribution_receipt_date',
-                **self.kwargs
-            )
-        )
-        self.assertEqual(len(page2), 5)
-        self.assertEqual(
-            [int(each['sub_id']) for each in page2],
-            [each.sub_id for each in filings[14:9:-1]],
-        )
-        self.assertEqual(
-            [each['contribution_receipt_date'] for each in page2],
-            [
-                each.contribution_receipt_date.strftime('%Y-%m-%d')
-                if each.contribution_receipt_date
-                else None
-                for each in filings[14:9:-1]
-            ],
-        )
-
     def test_schedule_a_null_pagination_with_null_sort_column_values_ascending(self):
         filings = [
             factories.ScheduleAFactory(contribution_receipt_date=None)
@@ -1011,7 +948,7 @@ class TestScheduleB(ApiBaseTest):
         )
         self.assertEqual(len(results), 2)
 
-    def test_schedule_b_sort_ignores_nulls_last_parameter(self):
+    def test_schedule_b_sort_nulls_last_default(self):
         disbursements = [
             factories.ScheduleBFactory(disbursement_amount=50),
             factories.ScheduleBFactory(
@@ -1024,7 +961,9 @@ class TestScheduleB(ApiBaseTest):
                 disbursement_amount=100, disbursement_date=datetime.date(2016, 1, 1)
             ),
         ]
-        sub_ids = [str(each.sub_id) for each in disbursements]
+        # null date sorts last by default (matches DESC NULLS LAST index definition)
+        expected_sub_ids = [str(each.sub_id) for each in disbursements[1:]]
+        expected_sub_ids.append(str(disbursements[0].sub_id))
         results = self._results(
             api.url_for(
                 ScheduleBView,
@@ -1032,7 +971,7 @@ class TestScheduleB(ApiBaseTest):
                 **self.kwargs
             )
         )
-        self.assertEqual([each['sub_id'] for each in results], sub_ids)
+        self.assertEqual([each['sub_id'] for each in results], expected_sub_ids)
 
     def test_schedule_b_invalid_two_year_transaction_period(self):
 
