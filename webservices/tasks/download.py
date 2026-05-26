@@ -28,6 +28,9 @@ logger = logging.getLogger(__name__)
 
 IGNORE_FIELDS = {"page", "per_page", "sort", "sort_hide_null"}
 
+DOWNLOAD_SOFT_LIMIT = int(env.get_credential("DOWNLOAD_SOFT_LIMIT", 240))
+DOWNLOAD_HARD_LIMIT = int(env.get_credential("DOWNLOAD_HARD_LIMIT", 300))
+
 
 def call_resource(app: Flask, path, qs):
     with app.app_context():
@@ -199,8 +202,8 @@ def convert_lists_to_tuples(params, overlap_prefixes):
     bind=True,
     base=FlaskQueueOnce,
     once={"graceful": True},
-    soft_time_limit=1,
-    time_limit=2,
+    soft_time_limit=DOWNLOAD_SOFT_LIMIT,
+    time_limit=DOWNLOAD_HARD_LIMIT,
 )
 def export_query(self, path, qs):
     task_id = self.request.id

@@ -15,6 +15,9 @@ from webservices.tasks.utils import delete_redis_value
 from webservices.tasks import utils as task_utils
 from webservices.utils import use_kwargs_original
 from flask import current_app
+import logging
+
+logger = logging.getLogger(__name__)
 
 client = boto3.client('s3')
 
@@ -44,6 +47,7 @@ class DownloadView(utils.Resource):
         if task_id:
             if task_utils.get_redis_value('download-failed:{}'.format(task_id)):
                 delete_redis_value('download-failed:{}'.format(task_id))
+                logging.exception(f"Download {task_id} failed")
                 raise exceptions.ApiError('Download failed', status_code=http.client.INTERNAL_SERVER_ERROR)
             if task_utils.get_redis_value('download-queued:{}'.format(task_id)):
                 return {'status': 'queued', 'task_id': task_id}
