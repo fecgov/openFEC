@@ -216,7 +216,7 @@ def export_query(self, path, qs):
         make_bundle(resource)
         logger.info("Bundled: {0}".format(qs))
     except SoftTimeLimitExceeded:
-        logger.exception("Download soft time limit exceeded (8 min): {0}".format(qs))
+        logger.exception(f"Download soft time limit exceeded ({DOWNLOAD_SOFT_LIMIT} seconds): {qs}")
         task_utils.delete_redis_value('download-queued:{}'.format(task_id))
         task_utils.set_redis_value('download-failed:{}'.format(task_id), True, age=7200)
         raise
