@@ -404,17 +404,11 @@ related_efile_summary = functools.partial(
 
 
 def document_description(
-    report_year, report_type=None, document_type_full=None, document_type=None, form_type=None
+    report_year, report_type=None, document_type_full=None, form_type=None
 ):
 
     if report_type:
         clean = re.sub(r"\{[^)]*\}", "", report_type)
-    elif document_type == "W":
-        clean = "C-1/Loan Agreement"
-    elif document_type == "X":
-        clean = "Loan Forgiveness"
-    elif document_type == "A":
-        clean = "Debt Settlement Plan"
     elif document_type_full:
         clean = document_type_full
     elif form_type and form_type in decoders.form_types:
