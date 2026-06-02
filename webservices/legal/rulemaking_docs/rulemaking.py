@@ -406,7 +406,7 @@ def load_large_rulemaking(specific_rm_no):
         doc.pop('text', None)
 
     # Index parent rulemaking
-    opensearch_client.index(index=constants.RM_ALIAS, body=rm_parent, id=rm["rm_id"])
+    opensearch_client.index(index=constants.RM_ALIAS, body=rm_parent, id=rm["rm_id"], routing=rm["rm_id"])
 
     logger.info("Indexing %d level-2 documents separately for rm_no: %s", len(level_2_docs_to_index), rm["rm_no"])
     # Index level-2 docs separately with parent-child relationship

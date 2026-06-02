@@ -549,10 +549,24 @@ def create_opensearch_snapshot(index_name):
     if index_name in INDEX_DICT.keys():
         repo_name = INDEX_DICT.get(index_name)[4]
         prefix_snapshot = INDEX_DICT.get(index_name)[5]
-        index_name_list = [index_name]
+        xxxx_alias = INDEX_DICT.get(index_name)[1]
         opensearch_client = create_opensearch_client()
+
+        # Choose the index via the write alias, since
+        # slow_reload_zero_downtime may have left index XXXX_SWAP_INDEX
+        try:
+            aliases = opensearch_client.indices.get_alias(name=xxxx_alias)
+            physical_index = list(aliases.keys())[0]
+            logger.info(" Alias '{0}' resolved to physical index '{1}' for snapshot.".format(
+                xxxx_alias, physical_index))
+        except Exception:
+            logger.warning(
+                " Could not resolve alias '{0}', falling back to '{1}'.".format(
+                    xxxx_alias, index_name))
+            physical_index = index_name
+
         body = {
-            "indices": index_name_list,
+            "indices": [physical_index],
         }
         configure_snapshot_repository(repo_name)
         snapshot_name = "{0}_{1}".format(
