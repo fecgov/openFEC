@@ -7,6 +7,7 @@ applications:
     no-route: true
     health-check-type: process
     command: celery --app webservices.tasks.make_celery worker --loglevel ${LOGLEVEL:=INFO} --concurrency 2 -Q high,default,low --prefetch-multiplier 1
+    timeout: 180
     path: ../
     stack: cflinuxfs4
     buildpacks:
