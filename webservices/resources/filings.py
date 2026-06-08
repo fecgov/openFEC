@@ -17,7 +17,6 @@ from webservices.common import models
     },
 )
 class BaseFilings(ApiResource):
-
     model = models.Filings
     schema = schemas.FilingsSchema
     page_schema = schemas.FilingsPageSchema
@@ -101,7 +100,6 @@ class FilingsView(BaseFilings):
 # Ex1: http://127.0.0.1:5000/v1/filings/?q_filer=san
 # Ex2: http://127.0.0.1:5000/v1/filings/?candidate_id=H8TX10094
 class FilingsList(BaseFilings):
-
     filter_multi_fields = BaseFilings.filter_multi_fields + [
         ("committee_id", models.Filings.committee_id),
         ("candidate_id", models.Filings.candidate_id),

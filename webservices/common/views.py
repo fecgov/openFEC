@@ -39,14 +39,23 @@ class ApiResource(utils.Resource):
     @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
-        is_estimate = counts.is_estimated_count(self, query)
-        if not is_estimate:
-            count = None
+        if counts.check_result_exist(self, query):
+            # result exist
+            is_estimate = counts.is_estimated_count(self, query)
+            if not is_estimate:
+                # is exact count
+                count = None
+            else:
+                # get estimated count
+                count, _ = counts.get_estimated_count(self, query)
         else:
-            count, _ = counts.get_count(self, query)
+            # result not exist, set count = 0
+            count = 0
+
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
+
         return utils.fetch_page(
             query, kwargs, models.db.session, is_count_exact=self.is_count_exact,
             count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
@@ -82,18 +91,27 @@ class ItemizedResource(ApiResource):
         self.validate_kwargs(kwargs)
 
         query = self.build_query(**kwargs)
-        is_estimate = counts.is_estimated_count(self, query)
-        if not is_estimate:
-            count = None
+        if counts.check_result_exist(self, query):
+            # result exist
+            is_estimate = counts.is_estimated_count(self, query)
+            if not is_estimate:
+                # is exact count
+                count = None
+            else:
+                # get estimated count
+                count, _ = counts.get_estimated_count(self, query)
         else:
-            count, _ = counts.get_count(self, query)
-        return utils.fetch_seek_page(query,
-                                     kwargs,
-                                     self.index_column,
-                                     models.db.session,
-                                     is_count_exact=self.is_count_exact,
-                                     count=count,
-                                     cap=self.cap)
+            # result exist, set count = 0
+            count = 0
+
+        return utils.fetch_seek_page(
+            query,
+            kwargs,
+            self.index_column,
+            models.db.session,
+            is_count_exact=self.is_count_exact,
+            count=count,
+            cap=self.cap)
 
     def validate_kwargs(self, kwargs):
         """Custom keyword argument validation
