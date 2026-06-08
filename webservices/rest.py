@@ -132,7 +132,10 @@ def create_app(test_config=None):
                                  pool_size=50, max_overflow=50, pool_timeout=120,
                                  pool_pre_ping=pool_pre_ping) for follower in followers if follower.strip()
                 ]
+
+    # Uncomment these two lines to enable local query display
     # app.config['SQLALCHEMY_ECHO'] = True
+    # logging.getLogger("sqlalchemy.engine").propagate = False
 
     # Modify app configuration and logging level for production
     if not app.debug:

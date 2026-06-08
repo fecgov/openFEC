@@ -128,6 +128,9 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         )
 
     def _fetch(self, last_index, sort_index=None, limit=None):
+        if self.count == 0:
+            self.is_count_exact = True
+            return []
         cursor = self.cursor
         direction = self.sort_column[1] if self.sort_column else sa.asc
         lhs, rhs = (), ()
@@ -217,9 +220,11 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
 def fetch_seek_page(
     query, kwargs, index_column, session, is_count_exact=None, clear=False, count=None, cap=100
 ):
+
     paginator = fetch_seek_paginator(
         query, kwargs, index_column, session, is_count_exact=is_count_exact, clear=clear, count=count, cap=cap
     )
+
     if paginator.sort_column is not None:
         sort_index = kwargs["last_{0}".format(paginator.sort_column[2])]
         null_sort_by = paginator.sort_column[0]
