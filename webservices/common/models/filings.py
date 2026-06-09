@@ -98,7 +98,6 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
             self.report_year,
             self.report_type_full,
             self.document_type_full,
-            self.document_type,
             self.form_type,
         )
 
@@ -161,7 +160,6 @@ class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.M
             self.coverage_end_date.year,
             clean_report_type(self.report.report_type_full),
             None,
-            self.document_type,
             self.form_type,
         )
 

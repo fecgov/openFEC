@@ -1279,7 +1279,7 @@ The type of document for documents other than reports:\n\
     - B Acknowledgment of Receipt of Debt Settlement Statement\n\
     - C RFAI: Debt Settlement First Notice\n\
     - D Commission Debt Settlement Review\n\
-    - E Commission Response TO Debt Settlement Request\n\
+    - E Commission Response To Debt Settlement Request\n\
     - F Administrative Termination\n\
     - G Debt Settlement Plan Amendment\n\
     - H Disavowal Notice\n\
@@ -1290,13 +1290,13 @@ The type of document for documents other than reports:\n\
     - M Filing Frequency Change Notice\n\
     - N Paper Amendment to Electronic Report\n\
     - O Acknowledgment of Filing Frequency Change\n\
-    - S RFAI: Debt Settlement Second\n\
-    - T Miscellaneous Report TO FEC\n\
-    - V Repeat Violation Notice (441A OR 441B)\n\
     - P Notice of Paper Filing\n\
-    - R F3L Filing Frequency Change Notice\n\
     - Q Acknowledgment of F3L Filing Frequency Change\n\
+    - R F3L Filing Frequency Change Notice\n\
+    - S RFAI: Debt Settlement Second\n\
+    - T Miscellaneous Submission To FEC\n\
     - U Unregistered Committee Notice\n\
+    - V Repeat Violation Notice (441A OR 441B)\n\
     - W C-1/Loan Agreement\n\
     - X Loan Forgiveness\n\
 '''
