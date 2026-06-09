@@ -45,8 +45,8 @@ jobs:
           command: |
             sudo apt-get --allow-releaseinfo-change-suite update && sudo apt-get install -y default-jdk
             mkdir flyway
-            curl -sL https://github.com/flyway/flyway/releases/download/flyway-12.4.0/flyway-commandline-12.4.0-linux-x64.tar.gz | tar zxv -C flyway
-            echo 'export PATH=./flyway/flyway-12.4.0:$PATH' >> $BASH_ENV
+            curl -sL https://github.com/flyway/flyway/releases/download/flyway-12.7.0/flyway-commandline-12.7.0-linux-x64.tar.gz | tar zxv -C flyway
+            echo 'export PATH=./flyway/flyway-12.7.0:$PATH' >> $BASH_ENV
 
       - restore_cache:
           keys:
@@ -106,7 +106,7 @@ jobs:
           name: Upload coverage report to codecov
           command: |
             . .env/bin/activate
-            curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
+            curl https://keybase.io/codecovsecops/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
             curl -Os https://uploader.codecov.io/latest/linux/codecov
             curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
             curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
