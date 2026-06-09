@@ -136,6 +136,12 @@ def initialize_legal_data_cli(index_name):
     load_utils.initialize_legal_data(index_name)
 
 
+@cli.command('slow_reload_zero_downtime')
+@click.argument('index_name', default=None, required=False)
+def slow_reload_zero_downtime_cli(index_name):
+    load_utils.slow_reload_zero_downtime(index_name)
+
+
 @cli.command('update_mapping_and_reload_legal_data')
 @click.argument('index_name', default=None, required=False)
 def update_mapping_and_reload_legal_data_cli(index_name):
