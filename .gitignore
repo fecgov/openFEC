@@ -58,7 +58,7 @@ docs/_build/
 target/
 
 # Celery artifacts
-celerybeat-schedule
+celerybeat-schedule.db
 dump.rdb
 # Credientials
 *.env.json

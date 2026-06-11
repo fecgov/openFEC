@@ -111,7 +111,7 @@ def query_with_labels(query, schema, sort_columns=False):
         entities.sort(key=lambda x: x.name)
 
     if joins:
-        query = query.join(*joins).with_only_columns(*entities)
+        query = query.outerjoin(*joins).with_only_columns(*entities)
     else:
         query = query.with_only_columns(*entities)
 
