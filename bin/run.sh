@@ -1,2 +1,2 @@
 python cli.py cf_startup
-gunicorn --access-logfile - --error-logfile - --log-level info --timeout 300 -k gevent -w 9 'webservices.rest:create_app()'
+gunicorn -c gunicorn.conf.py 'webservices.rest:create_app()'
