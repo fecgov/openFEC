@@ -124,6 +124,14 @@ class ScheduleAView(ItemizedResource):
     def build_query(self, **kwargs):
         use_state_other = False
 
+        if kwargs.get('contributor_name') or kwargs.get('contributor_employer') or kwargs.get('contributor_occupation'):
+            self.contains_single_letter_search = any( # noqa
+                len(word) == 1
+                for field in ['contributor_name', 'contributor_employer', 'contributor_occupation']
+                for val in kwargs.get(field) or []
+                for word in val.split()
+                if word
+            )
         if kwargs.get("contributor_state"):
             use_state_other, state_list, kwargs = filters.determine_state_other(
                 kwargs,

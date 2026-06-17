@@ -25,7 +25,7 @@ def is_estimated_count(resource, query):
         query = query.with_only_columns(primary_key)
     if resource.use_estimated_counts:
         estimated_count = get_estimated_count(query)
-        if estimated_count > resource.estimated_count_threshold:
+        if estimated_count > resource.estimated_count_threshold or resource.contains_single_letter_search:
             resource.is_count_exact = False
             return True
     resource.is_count_exact = True

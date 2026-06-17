@@ -34,6 +34,7 @@ class ApiResource(utils.Resource):
     contains_individual_columns = False
     contains_joined_load = False
     union_query = None
+    contains_single_letter_search = False
 
     @use_kwargs(Ref('args'))
     @marshal_with(Ref('page_schema'))
