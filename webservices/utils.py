@@ -36,6 +36,9 @@ class Resource(six.with_metaclass(MethodResourceMeta, restful.Resource)):
     pass
 
 
+VALID_TRUE_VALUES = ("true", True, "True", 'TRUE')
+
+
 API_KEY_ARG = fields.Str(
      load_default="DEMO_KEY", metadata={'description': docs.API_KEY_DESCRIPTION},
 )

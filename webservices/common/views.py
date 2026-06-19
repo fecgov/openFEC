@@ -7,6 +7,7 @@ from webservices.common import counts
 from webservices.utils import use_kwargs
 from webservices.common import models
 import sqlalchemy as sa
+from webservices.env import env
 
 
 class ApiResource(utils.Resource):
@@ -39,8 +40,22 @@ class ApiResource(utils.Resource):
     @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
-        if counts.check_result_exist(self, query):
-            # result exist
+        if env.get_credential("CHECK_RESULT_EXIST_REGULAR_API", False) in utils.VALID_TRUE_VALUES:
+            # Call check_result_exist to check whether the result exists
+            if counts.check_result_exist(self, query):
+                # result exist
+                is_estimate = counts.is_estimated_count(self, query)
+                if not is_estimate:
+                    # is exact count
+                    count = None
+                else:
+                    # get estimated count
+                    count, _ = counts.get_estimated_count(self, query)
+            else:
+                # result not exist, set count = 0
+                count = 0
+        else:
+            # Don't Call check_result_exist function
             is_estimate = counts.is_estimated_count(self, query)
             if not is_estimate:
                 # is exact count
@@ -48,9 +63,6 @@ class ApiResource(utils.Resource):
             else:
                 # get estimated count
                 count, _ = counts.get_estimated_count(self, query)
-        else:
-            # result not exist, set count = 0
-            count = 0
 
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
@@ -89,10 +101,23 @@ class ItemizedResource(ApiResource):
         """Get itemized resources.
         """
         self.validate_kwargs(kwargs)
-
         query = self.build_query(**kwargs)
-        if counts.check_result_exist(self, query):
-            # result exist
+        if env.get_credential("CHECK_RESULT_EXIST_ITEMIZED_API", False) in utils.VALID_TRUE_VALUES:
+            # Call check_result_exist to check whether the result exists
+            if counts.check_result_exist(self, query):
+                # result exist
+                is_estimate = counts.is_estimated_count(self, query)
+                if not is_estimate:
+                    # is exact count
+                    count = None
+                else:
+                    # get estimated count
+                    count, _ = counts.get_estimated_count(self, query)
+            else:
+                # result not exist, set count = 0
+                count = 0
+        else:
+            # Don't Call check_result_exist function
             is_estimate = counts.is_estimated_count(self, query)
             if not is_estimate:
                 # is exact count
@@ -100,10 +125,6 @@ class ItemizedResource(ApiResource):
             else:
                 # get estimated count
                 count, _ = counts.get_estimated_count(self, query)
-        else:
-            # result exist, set count = 0
-            count = 0
-
         return utils.fetch_seek_page(
             query,
             kwargs,
