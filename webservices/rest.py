@@ -133,7 +133,7 @@ def create_app(test_config=None):
                                  pool_pre_ping=pool_pre_ping) for follower in followers if follower.strip()
                 ]
     # app.config['SQLALCHEMY_ECHO'] = True
-
+    import webservices.profiling # noqa
     # Modify app configuration and logging level for production
     if not app.debug:
         app.logger.addHandler(logging.StreamHandler())
