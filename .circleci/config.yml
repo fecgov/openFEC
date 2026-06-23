@@ -45,8 +45,8 @@ jobs:
           command: |
             sudo apt-get --allow-releaseinfo-change-suite update && sudo apt-get install -y default-jdk
             mkdir flyway
-            curl -sL https://github.com/flyway/flyway/releases/download/flyway-12.7.0/flyway-commandline-12.7.0-linux-x64.tar.gz | tar zxv -C flyway
-            echo 'export PATH=./flyway/flyway-12.7.0:$PATH' >> $BASH_ENV
+            curl -sL https://github.com/flyway/flyway/releases/download/flyway-12.9.0/flyway-commandline-12.9.0-linux-x64.tar.gz | tar zxv -C flyway
+            echo 'export PATH=./flyway/flyway-12.9.0:$PATH' >> $BASH_ENV
 
       - restore_cache:
           keys:
@@ -62,9 +62,9 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
             [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-            nvm install 22.1.0
-            nvm use 22.1.0
-            nvm alias default 22.1.0
+            nvm install 24.16.0
+            nvm use 24.16.0
+            nvm alias default 24.16.0
             npm install
             npm run build
 
