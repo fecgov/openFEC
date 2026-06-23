@@ -5,9 +5,32 @@ repositories {
     mavenCentral()
 }
 
+configurations.all {
+    resolutionStrategy.force "io.netty:netty-handler:4.1.135.Final"
+    resolutionStrategy.force "io.netty:netty-handler-proxy:4.1.135.Final"
+    resolutionStrategy.force "io.netty:netty-codec-dns:4.1.135.Final"
+    resolutionStrategy.force "io.netty:netty-codec-http:4.1.135.Final"
+    resolutionStrategy.force "io.netty:netty-codec-http2:4.1.135.Final"
+    resolutionStrategy.force "io.netty:netty-resolver-dns:4.1.135.Final"
+    resolutionStrategy.force "io.projectreactor.netty:reactor-netty-http:1.2.18"
+    resolutionStrategy.force "com.fasterxml.jackson.core:jackson-core:2.21.2"
+    resolutionStrategy.force "org.apache.httpcomponents.core5:httpcore5-h2:5.3.5"
+    resolutionStrategy.force "com.nimbusds:nimbus-jose-jwt:10.0.2"
+}
+
 dependencies {
     implementation group: "org.flywaydb", name: "flyway-gradle-plugin", version: ""
-    implementation (group: "org.flywaydb", name: "flyway-commandline", version: "12.8.1") {
+    implementation "io.netty:netty-handler:4.1.135.Final"
+    implementation "io.netty:netty-handler-proxy:4.1.135.Final"
+    implementation "io.netty:netty-codec-dns:4.1.135.Final"
+    implementation "io.netty:netty-codec-http:4.1.135.Final"
+    implementation "io.netty:netty-codec-http2:4.1.135.Final"
+    implementation "io.netty:netty-resolver-dns:4.1.135.Final"
+    implementation "io.projectreactor.netty:reactor-netty-http:1.2.18"
+    implementation "com.fasterxml.jackson.core:jackson-core:2.21.2"
+    implementation "org.apache.httpcomponents.core5:httpcore5-h2:5.3.5"
+    implementation "com.nimbusds:nimbus-jose-jwt:10.0.2"
+    implementation (group: "org.flywaydb", name: "flyway-commandline", version: "12.9.0") {
         exclude group: "com.microsoft.sqlserver", module: "msql-jdbc"
         exclude group: "com.h2database", module: "h2"
         exclude group: "com.pivotal.jdbc", module: "greenplumdriver"
