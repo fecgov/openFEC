@@ -3,7 +3,7 @@ applications:
   - name: celery-beat
     instances: 1
     memory: 500M
-    disk_quota: 1G
+    disk_quota: 2G
     no-route: true
     health-check-type: process
     command: celery --app webservices.tasks.make_celery beat --loglevel INFO
