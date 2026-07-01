@@ -3,7 +3,7 @@ applications:
   - name: api
     instances: 12
     memory: 2G
-    disk_quota: 1G
+    disk_quota: 2G
     stack: cflinuxfs4
     buildpacks:
       - python_buildpack
