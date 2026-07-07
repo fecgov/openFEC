@@ -7,6 +7,7 @@ from webservices.common import counts
 from webservices.utils import use_kwargs
 from webservices.common import models
 import sqlalchemy as sa
+from webservices.env import env
 
 
 class ApiResource(utils.Resource):
@@ -39,14 +40,34 @@ class ApiResource(utils.Resource):
     @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
-        is_estimate = counts.is_estimated_count(self, query)
-        if not is_estimate:
-            count = None
+        if env.get_credential("CHECK_RESULT_EXIST_REGULAR_API", False) in utils.VALID_TRUE_VALUES:
+            # Call check_result_exist to check whether the result exists
+            if counts.check_result_exist(self, query):
+                # result exist
+                is_estimate = counts.is_estimated_count(self, query)
+                if not is_estimate:
+                    # is exact count
+                    count = None
+                else:
+                    # get estimated count
+                    count, _ = counts.get_estimated_count(self, query)
+            else:
+                # result not exist, set count = 0
+                count = 0
         else:
-            count, _ = counts.get_count(self, query)
+            # Don't Call check_result_exist function
+            is_estimate = counts.is_estimated_count(self, query)
+            if not is_estimate:
+                # is exact count
+                count = None
+            else:
+                # get estimated count
+                count, _ = counts.get_estimated_count(self, query)
+
         multi = False
         if isinstance(kwargs['sort'], (list, tuple)):
             multi = True
+
         return utils.fetch_page(
             query, kwargs, models.db.session, is_count_exact=self.is_count_exact,
             count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
@@ -80,20 +101,38 @@ class ItemizedResource(ApiResource):
         """Get itemized resources.
         """
         self.validate_kwargs(kwargs)
-
         query = self.build_query(**kwargs)
-        is_estimate = counts.is_estimated_count(self, query)
-        if not is_estimate:
-            count = None
+        if env.get_credential("CHECK_RESULT_EXIST_ITEMIZED_API", False) in utils.VALID_TRUE_VALUES:
+            # Call check_result_exist to check whether the result exists
+            if counts.check_result_exist(self, query):
+                # result exist
+                is_estimate = counts.is_estimated_count(self, query)
+                if not is_estimate:
+                    # is exact count
+                    count = None
+                else:
+                    # get estimated count
+                    count, _ = counts.get_estimated_count(self, query)
+            else:
+                # result not exist, set count = 0
+                count = 0
         else:
-            count, _ = counts.get_count(self, query)
-        return utils.fetch_seek_page(query,
-                                     kwargs,
-                                     self.index_column,
-                                     models.db.session,
-                                     is_count_exact=self.is_count_exact,
-                                     count=count,
-                                     cap=self.cap)
+            # Don't Call check_result_exist function
+            is_estimate = counts.is_estimated_count(self, query)
+            if not is_estimate:
+                # is exact count
+                count = None
+            else:
+                # get estimated count
+                count, _ = counts.get_estimated_count(self, query)
+        return utils.fetch_seek_page(
+            query,
+            kwargs,
+            self.index_column,
+            models.db.session,
+            is_count_exact=self.is_count_exact,
+            count=count,
+            cap=self.cap)
 
     def validate_kwargs(self, kwargs):
         """Custom keyword argument validation
