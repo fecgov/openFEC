@@ -119,7 +119,7 @@ def create_app(test_config=None):
     app.config['PROPAGATE_EXCEPTIONS'] = True
     query_cache_size = int(env.get_credential('QUERY_CACHE_SIZE', '100'))
     pool_pre_ping = bool(env.get_credential('POOL_PRE_PING_BOOL', 'False'))
-    statement_timeout = int(env.get_credential('SQLA_STATEMENT_TIMEOUT', 1000))
+    statement_timeout = int(env.get_credential('SQLA_STATEMENT_TIMEOUT', 55000))
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
             'query_cache_size': query_cache_size,
             'max_overflow': 50,
