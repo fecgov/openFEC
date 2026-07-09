@@ -34,7 +34,7 @@ class TestBaseTestCase(BaseTestCase):
         assert response.headers["Access-Control-Allow-Origin"] == "*"
 
 
-class StatementTimeoutTest(unittest.TestCase):
+class TestStatementTimeout(unittest.TestCase):
     """Test statement_timeout configuration should only apply to reader"""
     def test_follower_engines_have_statement_timeout(self):
         with patch.dict('os.environ', {'SQLA_STATEMENT_TIMEOUT': '30000'}):
