@@ -58,13 +58,14 @@ REPO_BASE_PATHS = {
     ARCH_MUR_REPO: f"{S3_BACKUP_DIRECTORY}/arch_mur_repo",
 }
 
-# ========= For legal document end ==========
 
+# ========= For legal document end ==========
 DOCS_PATH = "docs"
 RULEMAKING_PATH = "rulemaking"
 RULEMAKING_TYPE = "rulemakings"
 DISMISSED_ALL = "4"
 DISMISSED_CATEGORIES = {"3", "5", "6", "7", "8"}
+
 
 # =========Start rulemaking Constants==========
 RM_INDEX = "rm_index"
@@ -76,7 +77,7 @@ RM_SEARCH_ALIAS = "rm_search_alias"
 RM_PDF_S3_PATH = "legal/rulemakings/"
 RM_URL_PATH = "/files/"
 
-# doc_category_id(int):doc_category_label(string)
+# Get doc_category_label by passing doc_category_id(int)
 DOC_CATEGORY_MAP = {
     1: "Open Meeting",
     2: "Hearing",
@@ -88,8 +89,7 @@ DOC_CATEGORY_MAP = {
     8: "Press &amp; Public Guidance",
 }
 
-
-# level_1(int):level_1_label(string)
+# Get level_1_label by passing level_1 using the following mapping.
 LEVEL_1_MAP = {
     1: "Final Rules",
     2: "NPRM",
@@ -114,6 +114,7 @@ LEVEL_1_MAP = {
     21: "Termination of Rulemaking",
 }
 
+# Get the priority by passing level_1, where 0 represents the highest priority.
 TIER_PRECEDENCE = {
     15: 0,  # Notice of Disposition (highest priority)
     5: 1,   # Advance NPRM
@@ -129,6 +130,7 @@ TIER_PRECEDENCE = {
     10: 11,  # Explanation and Justification
 }
 
+# Get the level_2_label by passing level_1 and level_2 using the following mapping.
 LEVEL_1_2_MAP = {
     1: {
         0: "Final Rules",
@@ -239,7 +241,7 @@ LEVEL_1_2_MAP = {
     },
 }
 
-
+# Get doc_type label by passing doc_type_id using the following mapping.
 DOC_TYPE_MAP = {
     0:  "NO TIER ENTRY Sers Code :0",
     1:  "NO TIER ENTRY Sers Code :1",
@@ -570,4 +572,4 @@ ENTITY_ROLE_TYPES = {
 }
 
 ENTITY_ROLE_TYPE_VALID_VALUES = ['1', '2', '3', '4', '5']
-# ========= For rulemaking end ==========
+# ========= End rulemaking Constants ==========

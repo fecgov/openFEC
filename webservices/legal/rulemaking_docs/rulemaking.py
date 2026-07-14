@@ -79,7 +79,7 @@ FROM fosers.documents_vw
 WHERE rm_id = :rm
 AND level_1 = :level_1
 AND level_2 = 0
-ORDER BY doc_date DESC
+ORDER BY doc_date,doc_id
 """
 
 NO_TIER_DOCUMENTS = """
@@ -99,7 +99,6 @@ FROM fosers.documents_vw
 WHERE rm_id = :rm
 AND level_1 is NULL
 ORDER BY doc_date DESC, doc_id DESC
-
 """
 
 LEVEL_2_ID_LIST = """
@@ -108,7 +107,6 @@ DISTINCT level_2
 FROM fosers.documents_vw
 WHERE rm_id = :rm
 AND level_1 = :level
-AND level_2 > 0
 """
 
 LEVEL_2_DOCS = """
@@ -509,8 +507,13 @@ def get_documents(rm_no, rm_id, bucket):
             rows = rs.fetchall()
             row_count = len(rows)
             if row_count >= 1:
-                # The level_1 document exists in the documents table (level_2 = 0). Only the first row is used
-                # due to duplicate rows.
+                # Case 1: When row_count == 1, there is a single document row
+                #         in documents_vw with a level_1 value and level_2 = 0.
+                # Case 2: When row_count > 1, multiple document rows in documents_vw
+                #         with the same level_1 value and level_2 = 0,
+                #         only the first row is displayed as the level_1 document;
+                #         all remaining rows are displayed as level_2 documents.
+                # Ex: 1994-02, rm_id=74241, level_1=8, level_2=0
                 row = rows[0]
                 document = {
                     "doc_admin_close_date": row["admin_close_date"],
@@ -567,7 +570,8 @@ def get_documents(rm_no, rm_id, bucket):
                         pass
 
             else:
-                # level_1 has label Only. The level_1 document not exists in the documents table (level_2 = 0).
+                # If no level_1 document record exists in documents_vw for the specified level_1 value and level_2 = 0,
+                # only the level_1 label will be displayed. Ex:1997-03,rm_id=4391,level_1=1
                 document = {
                     "doc_category_id": None,
                     "is_comment_eligible": False,
@@ -621,15 +625,30 @@ def get_doc_date(doc):
 
 def get_level_2_labels(rm_no, rm_id, level_1, bucket):
     level_2_labels = []
+    document = {}
     with db.engine.begin() as conn:
         rs = conn.execute(text(LEVEL_2_ID_LIST), {"rm": rm_id, "level": level_1}).mappings()
         for row in rs:
-            document = {
-                "level_2": row["level_2"],
-                "level_2_label": (constants.LEVEL_1_2_MAP.get(level_1).get(row["level_2"])),
-                "level_2_docs": get_level_2_docs(rm_no, rm_id, level_1, row["level_2"], bucket),
-            }
-            level_2_labels.append(document)
+            if row["level_2"] == 0:
+                with db.engine.begin() as conn2:
+                    rs = conn2.execute(text(LEVEL_2_DOCS), {"rm": rm_id, "level_1": level_1, "level_2": 0}).mappings()
+                    rows = rs.fetchall()
+                    row_count = len(rows)
+                    if row_count > 1:
+                        document = {
+                            "level_2": row["level_2"],
+                            "level_2_label": (constants.LEVEL_1_2_MAP.get(level_1).get(row["level_2"])),
+                            "level_2_docs": get_level_2_docs(rm_no, rm_id, level_1, 0, bucket),
+                        }
+            else:
+                document = {
+                    "level_2": row["level_2"],
+                    "level_2_label": (constants.LEVEL_1_2_MAP.get(level_1).get(row["level_2"])),
+                    "level_2_docs": get_level_2_docs(rm_no, rm_id, level_1, row["level_2"], bucket),
+                }
+
+            if document:
+                level_2_labels.append(document)
         return level_2_labels
 
 
@@ -637,7 +656,16 @@ def get_level_2_docs(rm_no, rm_id, level_1, level_2, bucket):
     level_2_documents = []
     with db.engine.begin() as conn:
         rs = conn.execute(text(LEVEL_2_DOCS), {"rm": rm_id, "level_1": level_1, "level_2": level_2}).mappings()
-        for row in rs:
+        rows = rs.fetchall()
+        row_count = len(rows)
+        if row_count >= 1 and level_2 == 0:
+            # When row_count > 1, multiple document rows in documents_vw with the same level_1 value and level_2 = 0.
+            # The first row is displayed as the level_1 document,
+            # while all remaining rows are displayed as level_2 documents.
+            # Therefore, retrieve all items from the rows list except the first one as the level_2 documents.
+            # Ex: 1994-02, rm_id=74241, level_1=8, level_2=0
+            rows = rows[1:]
+        for row in rows:
             document = {
                 "doc_admin_close_date": row["admin_close_date"],
                 "doc_comment_close_date": row["comment_close_date"],
@@ -738,6 +766,9 @@ def get_key_documents(rm_no, rm_id, bucket):
 
 
 def get_no_tier_documents(rm_no, rm_id, bucket):
+    # Some documents in the document table have level_1 = null and level_2 = null.
+    # These documents will be added to a separate dictionary array: no_tier_documents[].
+    # Ex: 2004-06, rm_id=90767
     no_tier_documents = []
     with db.engine.begin() as conn:
         rs = conn.execute(text(NO_TIER_DOCUMENTS), {"rm": rm_id}).mappings()
