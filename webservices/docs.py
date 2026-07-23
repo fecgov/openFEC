@@ -389,19 +389,48 @@ COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
         - C communication cost\n\
         - D delegate\n\
         - E electioneering communication\n\
-        - H House\n\
+        - H house\n\
         - I independent expenditure filer (not a committee)\n\
         - N PAC - nonqualified\n\
         - O independent expenditure-only (super PACs)\n\
         - P presidential\n\
         - Q PAC - qualified\n\
-        - S Senate\n\
+        - S senate\n\
         - U single candidate independent expenditure\n\
         - V PAC with non-contribution account, nonqualified\n\
         - W PAC with non-contribution account, qualified\n\
         - X party, nonqualified\n\
         - Y party, qualified\n\
         - Z national party non-federal account\n\
+'
+COMMITTEE_TYPE_EFILE = 'Box checked on Form 1 Line 5\n\
+        - A principal campaign committee\n\
+        - B other authorized committee\n\
+        - C single candidate independent expenditure-only committee\n\
+        - D party committee\n\
+        - E PAC - seperate segregated fund\n\
+        - F PAC - nonconnected \n\
+        - G independent expenditure-only (super PACs)\n\
+        - H PAC with non-contribution account (hybrid PACs)\n\
+        - I joint fundraising representative (at least one authorized)\n\
+        - J joint fundraising representative (no authorized committees)\n\
+'
+DERIVED_COMMITTEE_TYPE = 'Additional Form 1 and 1s Line 5 information \n\
+    The rules for assigning a derived committee type use data from real_efile.f1 and\n\
+    real_efile.f1s to determine that committee type. Except for joint fundraising\n\
+    representative committees (JFR), derived committee type is determined by committee_type\n\
+    or a combination of committee_type and candidate_office from from the F1 row. Derived\n\
+    committee type for JFRs is determined using one additional column from F1S, joint\n\
+    fundraising committee type (jfr_cmte_type), and the reference rule in the electronic\n\
+    filing specifications.\n\
+        - H house\n\
+        - N political action committee (PAC)\n\
+        - O independent expenditure-only (super PACs)\n\
+        - P presidential\n\
+        - S senate\n\
+        - U single candidate independent expenditure-only committee\n\
+        - V PAC with non-contribution account (hybrid PACs)\n\
+        - X party\n\
 '
 COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS = COMMITTEE_TYPE + '\
         - all All Committee Types\n\
