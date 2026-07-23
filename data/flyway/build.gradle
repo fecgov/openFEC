@@ -1,5 +1,7 @@
-apply plugin: "java"
-apply plugin: "application"
+plugins {
+    id 'java'
+    id 'application'
+}
 
 repositories {
     mavenCentral()
@@ -49,7 +51,9 @@ dependencies {
     }
 }
 
-mainClassName = "org.flywaydb.commandline.Main"
+application {
+    mainClass = 'org.flywaydb.commandline.Main'
+}
 
 task createJarsDir {
     def jars = file("$buildDir/jars")
