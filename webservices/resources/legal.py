@@ -975,8 +975,10 @@ class GetLegalCitation(Resource):
                 ],
                 minimum_should_match=1,
             )
+            .source(excludes=["sort3", "sort4"])
             .extra(size=10)
             .index(SEARCH_ALIAS)
+            .sort({"sort3": {"order": "asc"}, "sort4": {"order": "asc"}})
         )
 
         # logger.debug("Citation final query =" + json.dumps(query.to_dict(), indent=3, cls=DateTimeEncoder))
