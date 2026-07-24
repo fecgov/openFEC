@@ -63,6 +63,8 @@ AO_MAPPING = {
         "representative_names": {"type": "text"},
         "citation_type": {"type": "keyword"},
         "citation_text": {"type": "keyword"},
+        "sort3": {"type": "integer"},
+        "sort4": {"type": "integer"},
         "doc_type": {"type": "keyword"},
         "entities": {
             "properties": {

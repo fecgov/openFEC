@@ -2139,7 +2139,9 @@ first_citation = {
       "citation_text": "2 U.S.C. §31021",
       "citation_type": "statute",
       "doc_type": "murs",
-      "type": "citations"
+      "type": "citations",
+      "sort3": 2,
+      "sort4": 31021
     }
 
 
@@ -2147,21 +2149,27 @@ second_citation = {
       "citation_text": "18 U.S.C. 603",
       "citation_type": "statute",
       "doc_type": "advisory_opinions",
-      "type": "citations"
+      "type": "citations",
+      "sort3": 18,
+      "sort4": 603
     }
 
 third_citation = {
       "citation_text": "11 CFR §104.12",
       "citation_type": "regulation",
       "doc_type": "murs",
-      "type": "citations"
+      "type": "citations",
+      "sort3": 11,
+      "sort4": 104012
     }
 
 fourth_citation = {
       "citation_text": "11 CFR §116.12",
       "citation_type": "regulation",
       "doc_type": "advisory_opinions",
-      "type": "citations"
+      "type": "citations",
+      "sort3": 11,
+      "sort4": 116012
     }
 
 
