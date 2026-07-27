@@ -77,3 +77,6 @@ static/swagger-ui/js
 
 # token file
 token.txt
+
+# hide flyway gradle
+data/flyway/.gradle/
