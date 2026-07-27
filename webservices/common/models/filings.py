@@ -255,7 +255,7 @@ class Form1(db.Model):
     candidate_party = db.Column('party', db.String, index=True, doc=docs.PARTY)
     candidate_district = db.Column('district', db.String, index=True, doc=docs.ELECTION_DISTRICT)
 
-    committee_type = db.Column('cmte_type', db.String, index=True, doc=docs.COMMITTEE_TYPE)
+    committee_type = db.Column('cmte_type', db.String, index=True, doc=docs.COMMITTEE_TYPE_EFILE)
     committee_city = db.Column('com_city', db.String, doc=docs.COMMITTEE_CITY)
     committee_name = db.Column('com_name', db.String, doc=docs.COMMITTEE_NAME)
     committee_state = db.Column('com_state', db.String, doc=docs.COMMITTEE_STATE)
@@ -263,6 +263,7 @@ class Form1(db.Model):
     committee_str2 = db.Column('com_str2', db.String, doc=docs.COMMITTEE_STREET_2)
     committee_zip = db.Column('com_zip', db.String, doc=docs.COMMITTEE_ZIP)
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
+    derived_committee_type = db.Column('derived_cmte_type', db.String, doc=docs.DERIVED_COMMITTEE_TYPE)
     email = db.Column(db.String, doc=docs.COMMITTEE_EMAIL)
 
     election_state = db.Column('el_state', db.String, index=True, doc=docs.ELECTION_STATE)
