@@ -34,6 +34,12 @@ dependencies {
     implementation "com.nimbusds:nimbus-jose-jwt:10.0.2"
     implementation (group: "org.flywaydb", name: "flyway-commandline", version: "13.0.0") {
         exclude group: "com.microsoft.sqlserver", module: "msql-jdbc"
+        exclude group: "com.microsoft.azure", module: "msal4j"
+        exclude group: "com.google.cloud", module: "google-cloud-storage"
+        exclude group: "com.azure", module: "azure-identity"
+        exclude group: "com.ing.data", module: "cassandra-jdbc-wrapper"
+        exclude group: "org.flywaydb", module: "flyway-database-nc-cassandra"
+        exclude group: "org.apache.commons", module: "commons-text"
         exclude group: "com.h2database", module: "h2"
         exclude group: "com.pivotal.jdbc", module: "greenplumdriver"
         exclude group: "net.sourceforge.jtds", module: "jtds"
