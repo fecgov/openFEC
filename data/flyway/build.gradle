@@ -21,7 +21,7 @@ configurations.all {
 }
 
 dependencies {
-    implementation group: "org.flywaydb", name: "flyway-gradle-plugin", version: ""
+    implementation group: "org.flywaydb", name: "flyway-gradle-plugin", version: "9.6.1"
     implementation "io.netty:netty-handler:4.1.136.Final"
     implementation "io.netty:netty-handler-proxy:4.1.136.Final"
     implementation "io.netty:netty-codec-dns:4.1.136.Final"
