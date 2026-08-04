@@ -454,15 +454,18 @@ def get_citations(ao_names):
             "citation_text": "%d CFR §%d.%d" % (citation[0], citation[1], citation[2]),
             "citation_type": "regulation",
             "doc_type": "advisory_opinions",
+            "sort3": citation[0],
+            "sort4": (citation[1] * 1000 + citation[2]),
         }
         opensearch_client.index(index=AO_ALIAS, body=entry, id=entry["citation_text"])
-
     for citation in all_statutory_citations:
         entry = {
             "type": "citations",
             "citation_text": "%d U.S.C. §%s" % (citation[0], citation[1]),
             "citation_type": "statute",
             "doc_type": "advisory_opinions",
+            "sort3": citation[0],
+            "sort4": re.sub(r'\D', '', citation[1])
         }
         opensearch_client.index(index=AO_ALIAS, body=entry, id=entry["citation_text"])
     logger.info(" AO Citations loaded.")
