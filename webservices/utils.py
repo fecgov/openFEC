@@ -220,6 +220,104 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         return ret
 
 
+class SeekNullsLastPaginator(paginators.SeekPaginator):
+    """Seek paginator that doesn't add COALESCE by splitting into two queries
+    one for non-null sort values and one for null sort values (always sorted last regardless of direction).
+      - ASC non-null rows first (ordered asc), then null rows (ordered by sub_id asc)
+      - DESC non-null rows first (ordered desc), then null rows (ordered by sub_id desc)
+    """
+
+    def __init__(self, cursor, per_page, hide_null, index_column, session,
+                 is_count_exact=None, sort_column=None, count=None):
+        self.hide_null = hide_null
+        self.session = session
+        super(SeekNullsLastPaginator, self).__init__(
+            cursor, per_page, index_column, session, is_count_exact, sort_column, count
+        )
+
+    def _fetch(self, last_index, sort_index=None, limit=None):
+        if self.count == 0:
+            self.is_count_exact = True
+            return []
+
+        cursor = self.cursor
+        direction = self.sort_column[1] if self.sort_column else sa.asc
+
+        # No sort column or hide_null=True: one query
+        if self.sort_column is None or self.hide_null:
+            lhs, rhs = (), ()
+            if sort_index is not None and self.sort_column is not None:
+                lhs += (self.sort_column[0],)
+                rhs += (sort_index,)
+            if last_index is not None:
+                lhs += (self.index_column,)
+                rhs += (last_index,)
+            lhs = sa.tuple_(*lhs)
+            rhs = sa.tuple_(*rhs)
+            if rhs.clauses:
+                f = lhs > rhs if direction == sa.asc else lhs < rhs
+                cursor = cursor.filter(f)
+            query = cursor.order_by(direction(self.index_column)).limit(limit)
+            return self.session.execute(query).unique().scalars().all()
+
+        sort_col = self.sort_column[0]
+
+        in_null_zone = (sort_index is None and last_index is not None)
+
+        if in_null_zone:
+            # Cursor is inside the null zone.  Only null rows remain; seek by
+            # sub_id alone.  Clear any existing ORDER BY before applying the
+            # sub_id-only order.
+            null_q = cursor.filter(sort_col == None)  # noqa: E711
+            if last_index is not None:
+                null_q = null_q.filter(
+                    self.index_column > last_index
+                    if direction == sa.asc
+                    else self.index_column < last_index
+                )
+            null_q = null_q.order_by(None).order_by(direction(self.index_column)).limit(limit)
+            return self.session.execute(null_q).unique().scalars().all()
+        non_null_q = cursor.filter(sort_col != None)  # noqa: E711
+        if sort_index is not None and last_index is not None:
+            lhs = sa.tuple_(sort_col, self.index_column)
+            rhs = sa.tuple_(sort_index, last_index)
+            non_null_q = non_null_q.filter(
+                lhs > rhs if direction == sa.asc else lhs < rhs
+            )
+        elif sort_index is not None:
+            non_null_q = non_null_q.filter(
+                sort_col > sort_index if direction == sa.asc else sort_col < sort_index
+            )
+
+        non_null_q = non_null_q.order_by(None).order_by(
+            direction(sort_col), direction(self.index_column)
+        ).limit(limit)
+        non_null_results = self.session.execute(non_null_q).unique().scalars().all()
+
+        if len(non_null_results) >= limit:
+            return non_null_results
+
+        remaining = limit - len(non_null_results)
+        null_q = cursor.filter(sort_col == None)  # noqa: E711
+        null_q = null_q.order_by(None).order_by(direction(self.index_column)).limit(remaining)
+        null_results = self.session.execute(null_q).unique().scalars().all()
+
+        return non_null_results + null_results
+
+    def _get_index_values(self, result):
+        ret = {"last_index": str(paginators.convert_value(result, self.index_column))}
+
+        if self.sort_column:
+            key = "last_{0}".format(self.sort_column[2])
+            ret[key] = paginators.convert_value(result, self.sort_column[0])
+
+            if ret[key] is None:
+                ret.pop(key)
+                ret["sort_null_only"] = True
+
+        return ret
+
+
 def fetch_seek_page(
     query, kwargs, index_column, session, is_count_exact=None, clear=False, count=None, cap=100
 ):
@@ -281,6 +379,61 @@ def fetch_seek_paginator(query, kwargs, index_column, session, is_count_exact=No
         is_count_exact=is_count_exact,
         sort_column=sort_column,
         count=count
+    )
+
+
+def fetch_seek_page_nulls_last(
+    query, kwargs, index_column, session, is_count_exact=None, clear=False, count=None, cap=100
+):
+    paginator = fetch_seek_paginator_nulls_last(
+        query, kwargs, index_column, session,
+        is_count_exact=is_count_exact, clear=clear, count=count, cap=cap
+    )
+
+    if paginator.sort_column is not None:
+        sort_index = kwargs.get("last_{0}".format(paginator.sort_column[2]))
+        if kwargs.get("sort_null_only"):
+            sort_index = None
+    else:
+        sort_index = None
+
+    return paginator.get_page(
+        last_index=kwargs["last_index"], sort_index=sort_index
+    )
+
+
+def fetch_seek_paginator_nulls_last(
+    query, kwargs, index_column, session,
+    is_count_exact=None, clear=False, count=None, cap=100
+):
+    check_cap(kwargs, cap)
+    model = index_column.parent.class_
+    sort, hide_null, nulls_last = (
+        kwargs.get("sort"),
+        kwargs.get("sort_hide_null"),
+        kwargs.get("sort_nulls_last"),
+    )
+    if sort:
+        query, sort_column = sorting.sort(
+            query,
+            sort,
+            model=model,
+            clear=clear,
+            hide_null=hide_null,
+            nulls_last=nulls_last,
+        )
+    else:
+        sort_column = None
+
+    return SeekNullsLastPaginator(
+        query,
+        kwargs["per_page"],
+        kwargs["sort_hide_null"],
+        index_column,
+        session,
+        is_count_exact=is_count_exact,
+        sort_column=sort_column,
+        count=count,
     )
 
 
