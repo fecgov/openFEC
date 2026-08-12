@@ -29,10 +29,10 @@ dependencies {
     implementation "io.netty:netty-codec-http2:4.1.136.Final"
     implementation "io.netty:netty-resolver-dns:4.1.136.Final"
     implementation "io.projectreactor.netty:reactor-netty-http:1.2.18"
-    implementation "com.fasterxml.jackson.core:jackson-core:2.21.4"
     implementation "org.apache.httpcomponents.core5:httpcore5-h2:5.4.3"
     implementation "com.nimbusds:nimbus-jose-jwt:10.0.2"
     implementation (group: "org.flywaydb", name: "flyway-commandline", version: "13.0.0") {
+        exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
         exclude group: "com.microsoft.sqlserver", module: "msql-jdbc"
         exclude group: "com.microsoft.azure", module: "msal4j"
         exclude group: "com.google.cloud", module: "google-cloud-storage"
@@ -53,6 +53,7 @@ dependencies {
         exclude group: "com.google.guava", module: "guava"
         constraints {
 	       implementation("org.postgresql:postgresql:42.6.0.jar")
+           implementation("com.fasterxml.jackson.core:jackson-databind:2.22.1")
         }
     }
 }
