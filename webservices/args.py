@@ -8,6 +8,7 @@ from webservices import exceptions
 from webservices.common.models import db
 from webservices.utils import check_committee_id, check_candidate_id, get_current_cycle
 import datetime
+from webservices.env import env
 
 
 def _validate_natural(value):
@@ -347,7 +348,8 @@ names = {
 
 # for endpoint: /legal/search/ (resources/legal.py/UniversalSearch)
 legal_universal_search = {
-    'q': fields.Str(required=False, metadata={'description': docs.TEXT_SEARCH}),
+    'q': fields.Str(required=False, validate=validate.Length(max=int(env.get_credential('LEGAL_MAX_CHAR', 500))),
+                    metadata={'description': docs.TEXT_SEARCH}),
     'from_hit': fields.Int(required=False, metadata={'description': docs.FROM_HIT}),
     'hits_returned': fields.Int(required=False, metadata={'description': docs.HITS_RETURNED}),
     'type': fields.Str(
