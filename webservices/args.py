@@ -8,6 +8,7 @@ from webservices import exceptions
 from webservices.common.models import db
 from webservices.utils import check_committee_id, check_candidate_id, get_current_cycle
 import datetime
+from webservices.env import env
 
 
 def _validate_natural(value):
@@ -347,7 +348,8 @@ names = {
 
 # for endpoint: /legal/search/ (resources/legal.py/UniversalSearch)
 legal_universal_search = {
-    'q': fields.Str(required=False, metadata={'description': docs.TEXT_SEARCH}),
+    'q': fields.Str(required=False, validate=validate.Length(max=int(env.get_credential('LEGAL_MAX_CHAR', 500))),
+                    metadata={'description': docs.TEXT_SEARCH}),
     'from_hit': fields.Int(required=False, metadata={'description': docs.FROM_HIT}),
     'hits_returned': fields.Int(required=False, metadata={'description': docs.HITS_RETURNED}),
     'type': fields.Str(
@@ -401,7 +403,8 @@ legal_universal_search = {
     'case_regulatory_citation': fields.List(IStr, required=False, metadata={'description': docs.REGULATORY_CITATION}),
     'case_statutory_citation': fields.List(IStr, required=False, metadata={'description': docs.STATUTORY_CITATION}),
     'case_citation_require_all': fields.Bool(metadata={'description': docs.CITATION_REQUIRE_ALL}),
-    'q_exclude': IStr(required=False, metadata={'description': docs.Q_EXCLUDE}),
+    'q_exclude': IStr(required=False, validate=validate.Length(max=int(env.get_credential('LEGAL_MAX_CHAR', 500))),
+                      metadata={'description': docs.Q_EXCLUDE}),
     'case_doc_category_id': fields.List(IStr(
         validate=validate.OneOf(
             ['', '1', '2', '3', '4', '5', '6', '1001', '1002', '1003', '1004', '1005', '1006', '2001'])),
@@ -428,7 +431,8 @@ legal_universal_search = {
     'sort': IStr(required=False, metadata={'description': docs.SORT}),
     'case_min_penalty_amount': fields.Str(required=False, metadata={'description': docs.CASE_MIN_PENALTY_AMOUNT}),
     'case_max_penalty_amount': fields.Str(required=False, metadata={'description': docs.CASE_MAX_PENALTY_AMOUNT}),
-    'q_proximity': fields.List(fields.Str, metadata={'description': docs.Q_PROXIMITY}),
+    'q_proximity': fields.List(fields.Str, validate=validate.Length(max=int(env.get_credential('LEGAL_MAX_CHAR', 500))),
+                               metadata={'description': docs.Q_PROXIMITY}),
     'max_gaps': fields.Int(required=False, metadata={'description': docs.MAX_GAPS}),
     'proximity_preserve_order': fields.Bool(required=False, metadata={'description': docs.PROXIMITY_PRESERVE_ORDER}),
     'proximity_filter': fields.Str(validate=validate.OneOf(["after", "before"]),
