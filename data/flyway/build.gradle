@@ -8,13 +8,13 @@ repositories {
 }
 
 configurations.all {
-    resolutionStrategy.force "io.netty:netty-handler:4.1.136.Final"
-    resolutionStrategy.force "io.netty:netty-handler-proxy:4.1.136.Final"
-    resolutionStrategy.force "io.netty:netty-codec-dns:4.1.136.Final"
-    resolutionStrategy.force "io.netty:netty-codec-http:4.1.136.Final"
-    resolutionStrategy.force "io.netty:netty-codec-http2:4.1.136.Final"
-    resolutionStrategy.force "io.netty:netty-resolver-dns:4.1.136.Final"
-    resolutionStrategy.force "io.projectreactor.netty:reactor-netty-http:1.2.18"
+    resolutionStrategy.force "io.netty:netty-handler:4.1.137.Final"
+    resolutionStrategy.force "io.netty:netty-handler-proxy:4.1.137.Final"
+    resolutionStrategy.force "io.netty:netty-codec-dns:4.1.137.Final"
+    resolutionStrategy.force "io.netty:netty-codec-http:4.1.137.Final"
+    resolutionStrategy.force "io.netty:netty-codec-http2:4.1.137.Final"
+    resolutionStrategy.force "io.netty:netty-resolver-dns:4.1.137.Final"
+    resolutionStrategy.force "io.projectreactor.netty:reactor-netty-http:3.7.19"
     resolutionStrategy.force "com.fasterxml.jackson.core:jackson-core:2.21.4"
     resolutionStrategy.force "org.apache.httpcomponents.core5:httpcore5-h2:5.4.3"
     resolutionStrategy.force "com.nimbusds:nimbus-jose-jwt:10.0.2"
@@ -22,12 +22,12 @@ configurations.all {
 
 dependencies {
     implementation group: "org.flywaydb", name: "flyway-gradle-plugin", version: "9.6.1"
-    implementation "io.netty:netty-handler:4.1.136.Final"
-    implementation "io.netty:netty-handler-proxy:4.1.136.Final"
-    implementation "io.netty:netty-codec-dns:4.1.136.Final"
-    implementation "io.netty:netty-codec-http:4.1.136.Final"
-    implementation "io.netty:netty-codec-http2:4.1.136.Final"
-    implementation "io.netty:netty-resolver-dns:4.1.136.Final"
+    implementation "io.netty:netty-handler:4.1.137.Final"
+    implementation "io.netty:netty-handler-proxy:4.1.137.Final"
+    implementation "io.netty:netty-codec-dns:4.1.137.Final"
+    implementation "io.netty:netty-codec-http:4.1.137.Final"
+    implementation "io.netty:netty-codec-http2:4.1.137.Final"
+    implementation "io.netty:netty-resolver-dns:4.1.137.Final"
     implementation "io.projectreactor.netty:reactor-netty-http:1.2.18"
     implementation "org.apache.httpcomponents.core5:httpcore5-h2:5.4.3"
     implementation "com.nimbusds:nimbus-jose-jwt:10.0.2"
@@ -51,6 +51,7 @@ dependencies {
         exclude group: "org.xerial", module: "sqlite-jdbc"
         exclude group: "com.google.protobuf", module: "protobuf-java"
         exclude group: "com.google.guava", module: "guava"
+        exclude group: "com.couchbase.client", module: "core-io"
         constraints {
 	       implementation("org.postgresql:postgresql:42.6.0.jar")
            implementation("com.fasterxml.jackson.core:jackson-databind:2.22.1")
