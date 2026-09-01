@@ -638,7 +638,7 @@ form1efilings = {
     'image_number': fields.List(ImageNumber, metadata={'description': docs.IMAGE_NUMBER}),
     'min_load_timestamp': Date(metadata={'description': docs.LOAD_DATE}),
     'max_load_timestamp': Date(metadata={'description': docs.LOAD_DATE}),
-    'committee_type': fields.List(fields.Str, metadata={'description': docs.COMMITTEE_TYPE}),
+    'committee_type': fields.List(fields.Str, metadata={'description': docs.COMMITTEE_TYPE_EFILE}),
     'organization_type': fields.List(
         IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W', 'H', 'I'])),
         metadata={'description': docs.ORGANIZATION_TYPE},
