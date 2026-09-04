@@ -1,24 +1,22 @@
 ---
 applications:
-  - name: celery-worker
+  - name: celery-worker-default
     instances: 1
     memory: 1G
     disk_quota: 1G
     no-route: true
     health-check-type: process
-    command: celery --app webservices.tasks.make_celery worker --loglevel ${LOGLEVEL:=INFO} --concurrency 2 -Q high
+    command: celery --app webservices.tasks.make_celery worker --loglevel ${LOGLEVEL:=INFO} --concurrency 2 -Q default
     path: ../
     stack: cflinuxfs4
     buildpacks:
       - python_buildpack
     services:
-      - api-creds-stage
+      - api-creds-dev
       - fec-api-opensearch
       - fec-elasticache-redis
-      - fec-creds-stage
+      - fec-creds-dev
       - fec-s3-api
       - fec-s3-snapshot
     env:
-      FEC_API_USE_PROXY: true
-      FEC_API_RESTRICT_DOWNLOADS: true
-      APP_NAME: fec | api | stage
+      APP_NAME: fec | api | dev

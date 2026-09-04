@@ -1,12 +1,12 @@
 ---
 applications:
   - name: celery-worker
-    instances: 6
+    instances: 1
     memory: 1.5G
     disk_quota: 2G
     no-route: true
     health-check-type: process
-    command: celery --app webservices.tasks.make_celery worker --loglevel ${LOGLEVEL:=INFO} --concurrency 3
+    command: celery --app webservices.tasks.make_celery worker --loglevel ${LOGLEVEL:=INFO} --concurrency 3 -Q high
     path: ../
     stack: cflinuxfs4
     buildpacks:
