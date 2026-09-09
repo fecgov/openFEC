@@ -1,5 +1,5 @@
 from tests import factories
-from tests.common import ApiBaseTest
+from tests.common import ApiBaseTest, assert_dicts_subset
 
 from webservices.common.models import db
 from webservices.api_setup import api
@@ -7,6 +7,7 @@ from webservices.resources.spending_by_others import (
     ECTotalsByCandidateView,
     IETotalsByCandidateView,
     CCTotalsByCandidateView,
+    ScheduleESupportOpposeTotalsView
 )
 from webservices.resources.aggregates import (
     CCAggregatesView,
@@ -688,3 +689,224 @@ class TestCCAggregatesView(ApiBaseTest):
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0]['committee_name'], 'Acme Co')
         self.assertEqual(results[1]['committee_name'], 'Acme Co')
+
+
+class TestScheduleESupportOpposeTotals(ApiBaseTest):
+
+    def setUp(self):
+        super().setUp()
+
+        factories.ScheduleESupportOpposeTotalsFactory(
+                cycle=2024,
+                candidate_office='P',
+                candidate_state='US',
+                candidate_district='00',
+                support_oppose_indicator='S',
+                ie_total=1000
+            ),
+        factories.ScheduleESupportOpposeTotalsFactory(
+                cycle=2020,
+                candidate_office='P',
+                candidate_state='US',
+                candidate_district='00',
+                support_oppose_indicator='O',
+                ie_total=2000
+            ),
+        factories.ScheduleESupportOpposeTotalsFactory(
+                cycle=2016,
+                candidate_office='P',
+                candidate_state='US',
+                candidate_district='00',
+                support_oppose_indicator='O',
+                ie_total=3000
+            ),
+        factories.ScheduleESupportOpposeTotalsFactory(
+                cycle=2012,
+                candidate_office='P',
+                candidate_state='US',
+                candidate_district='00',
+                support_oppose_indicator='Others',
+                ie_total=4000
+            ),
+        factories.ScheduleESupportOpposeTotalsFactory(
+                cycle=2010,
+                candidate_office='H',
+                candidate_state='AZ',
+                candidate_district='01',
+                support_oppose_indicator='S',
+                ie_total=5000
+            ),
+        factories.ScheduleESupportOpposeTotalsFactory(
+                cycle=2010,
+                candidate_office='H',
+                candidate_state='AZ',
+                candidate_district='01',
+                support_oppose_indicator='Others',
+                ie_total=6000
+        ),
+
+    def test_base(self):
+        results = self._results(api.url_for(ScheduleESupportOpposeTotalsView))
+        assert len(results) == 6
+
+    def test_filter_by_cycle(self):
+        results = self._results(api.url_for(ScheduleESupportOpposeTotalsView,
+                                            cycle=2024))
+        assert len(results) == 1
+        assert_dicts_subset(
+            results[0],
+            {
+                'cycle': 2024,
+                'candidate_office': 'P',
+                'candidate_state': 'US',
+                'candidate_district': '00',
+                'support_oppose_indicator': 'S',
+                'ie_total': 1000
+            }
+        )
+
+    def test_multi_filter(self):
+        results = self._results(api.url_for(ScheduleESupportOpposeTotalsView,
+                                            cycle=2016, support_oppose='O'))
+
+        assert len(results) == 1
+
+        assert_dicts_subset(
+            results[0],
+            {
+                'cycle': 2016,
+                'candidate_office': 'P',
+                'candidate_state': 'US',
+                'candidate_district': '00',
+                'support_oppose_indicator': 'O',
+                'ie_total': 3000
+            }
+        )
+
+    def test_sort_by_cycle(self):
+        results = self._results(api.url_for(ScheduleESupportOpposeTotalsView, sort="-cycle"))
+
+        assert len(results) == 6
+
+        assert_dicts_subset(
+            results[0],
+            {
+                'cycle': 2024,
+                'candidate_office': 'P',
+                'candidate_state': 'US',
+                'candidate_district': '00',
+                'support_oppose_indicator': 'S',
+                'ie_total': 1000
+            },
+        )
+        assert_dicts_subset(
+            results[1],
+            {
+               'cycle': 2020,
+               'candidate_office': 'P',
+               'candidate_state': 'US',
+               'candidate_district': '00',
+               'support_oppose_indicator': 'O',
+               'ie_total': 2000
+            }
+        )
+        assert_dicts_subset(
+            results[2],
+            {
+                'cycle': 2016,
+                'candidate_office': 'P',
+                'candidate_state': 'US',
+                'candidate_district': '00',
+                'support_oppose_indicator': 'O',
+                'ie_total': 3000
+            }
+        )
+        assert_dicts_subset(
+            results[3],
+            {
+                'cycle': 2012,
+                'candidate_office': 'P',
+                'candidate_state': 'US',
+                'candidate_district': '00',
+                'support_oppose_indicator': 'Others',
+                'ie_total': 4000
+            }
+        )
+        assert_dicts_subset(
+            results[4],
+            {
+                'cycle': 2010,
+                'candidate_office': 'H',
+                'candidate_state': 'AZ',
+                'candidate_district': '01',
+                'support_oppose_indicator': 'S',
+                'ie_total': 5000
+            }
+        )
+        assert_dicts_subset(
+            results[5],
+            {
+                'cycle': 2010,
+                'candidate_office': 'H',
+                'candidate_state': 'AZ',
+                'candidate_district': '01',
+                'support_oppose_indicator': 'Others',
+                'ie_total': 6000
+            }
+        )
+
+    def test_filter_by_office(self):
+        results = self._results(api.url_for(ScheduleESupportOpposeTotalsView, office='H'))
+
+        assert len(results) == 2
+
+        assert_dicts_subset(
+            results[0],
+            {
+                'cycle': 2010,
+                'candidate_office': 'H',
+                'candidate_state': 'AZ',
+                'candidate_district': '01',
+                'support_oppose_indicator': 'S',
+                'ie_total': 5000
+            },
+        )
+        assert_dicts_subset(
+            results[1],
+            {
+               'cycle': 2010,
+               'candidate_office': 'H',
+               'candidate_state': 'AZ',
+               'candidate_district': '01',
+               'support_oppose_indicator': 'Others',
+               'ie_total': 6000
+            }
+        )
+
+    def test_filter_by_support_oppose(self):
+        results = self._results(api.url_for(ScheduleESupportOpposeTotalsView, support_oppose='Others'))
+
+        assert len(results) == 2
+
+        assert_dicts_subset(
+            results[0],
+            {
+                'cycle': 2010,
+                'candidate_office': 'H',
+                'candidate_state': 'AZ',
+                'candidate_district': '01',
+                'support_oppose_indicator': 'Others',
+                'ie_total': 6000
+            },
+        )
+        assert_dicts_subset(
+            results[1],
+            {
+                'cycle': 2012,
+                'candidate_office': 'P',
+                'candidate_state': 'US',
+                'candidate_district': '00',
+                'support_oppose_indicator': 'Others',
+                'ie_total': 4000
+            },
+        )

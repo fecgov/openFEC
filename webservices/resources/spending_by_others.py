@@ -5,6 +5,7 @@ from webservices import utils
 from webservices import docs
 from webservices import schemas
 from webservices.common.views import ApiResource
+from webservices.common import models
 from webservices.common.models import (
     CandidateHistory,
     ElectioneeringByCandidate,
@@ -156,6 +157,45 @@ class IETotalsByCandidateView(ApiResource):
         )
 
         return query
+
+
+# used for '/schedules/schedule_e/all_candidates/support_oppose_totals/'
+# under tag: independent expenditure
+# Ex: http://127.0.0.1:5000/v1/schedules/all_candidates/support_oppose_totals/?sort=-cycle
+@doc(
+    tags=['independent expenditures'],
+    description=docs.SCHEDULE_E_INDEPENDENT_EXPENDITURES_SUPPORT_OPPOSE_TOTALS,
+)
+class ScheduleESupportOpposeTotalsView(ApiResource):
+
+    model = models.ScheduleESupportOpposeTotals
+    schema = schemas.ScheduleESupportOpposeTotalsSchema
+    page_schema = schemas.ScheduleESupportOpposeTotalsPageSchema
+    sort_option = [
+            'cycle',
+    ]
+    filter_multi_fields = [
+            ('cycle', model.cycle),
+            ('office', model.candidate_office),
+            ('state', model.candidate_state),
+            ('district', model.candidate_district),
+        ]
+
+    filter_match_fields = [
+        ('support_oppose', model.support_oppose_indicator)
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.schedule_e_all_candidates_support_oppose_totals,
+            # args.make_sort_args()
+            args.make_sort_args(
+                            default='cycle',
+                        ),
+
+        )
 
 
 # used for '/communication_costs/totals/by_candidate/'
