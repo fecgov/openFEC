@@ -1138,6 +1138,9 @@ SCHEDULE_E_INDEPENDENT_EXPENDITURES_TOTALS_BY_CANDIDATE = '''
 Total independent expenditure on supported or opposed candidates by cycle or candidate election year.
 '''
 
+SCHEDULE_E_INDEPENDENT_EXPENDITURES_SUPPORT_OPPOSE_TOTALS = '''
+Independent expenditure supported or opposed totals for all candidates by cycle or candidate election year.
+'''
 COMMUNICATIONS_COSTS_TOTALS_BY_CANDIDATE = '''
 Total communications costs aggregated across committees on supported or opposed candidates \
 by cycle or candidate election year.
@@ -2940,4 +2943,8 @@ reporting date after this date are returned.
 ITEMIZED_MAX_DATE = '''
 The latest date used to filter reported activity. Only records with an applicable reporting date
 before this date are returned.
+'''
+
+IE_SUPPORT_OPPOSE_AGGREGATE_ALL_CANDIDATES = '''
+Aggregate totals for independent expenditures supporting or opposing all candidates
 '''

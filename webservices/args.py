@@ -1368,6 +1368,20 @@ schedule_e_totals_by_candidate_other_costs_IE = {
     'election_full': election_full,
 }
 
+# used for '/schedules/schedule_e/all_candidadtes/support_oppose_totals/'
+# under tag: independent expenditures
+# ScheduleESupportOpposeTotalsView in spending_by_others.py
+schedule_e_all_candidates_support_oppose_totals = {
+
+    'cycle': fields.List(fields.Int, metadata={'description': docs.RECORD_CYCLE}),
+    'state': fields.List(IStr, metadata={'description': docs.STATE}),
+    'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), metadata={'description': docs.OFFICE}),
+    'district': fields.List(District, metadata={'description': docs.DISTRICT}),
+    'support_oppose': fields.Str(
+            validate=validate.OneOf(['S', 'O', 'Other']),
+            metadata={'description': docs.SUPPORT_OPPOSE}),
+}
+
 # used for '/communication_costs/totals/by_candidate/'
 # under tag: communication cost
 # CCTotalsByCandidateView in spending_by_others.py
