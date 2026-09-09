@@ -111,3 +111,14 @@ class CommunicationCostByCandidate(BaseSpendingAggregate):
 
 class ElectioneeringByCandidate(BaseSpendingAggregate):
     __tablename__ = 'ofec_electioneering_aggregate_candidate_mv'
+
+
+class ScheduleESupportOpposeTotals(db.Model):
+    __tablename__ = 'ofec_ie_so_aggregate_mv_tmp_hc'
+    idx = db.Column(db.Integer, primary_key=True, doc=docs.RECORD_CYCLE)
+    cycle = db.Column('cycle', db.Integer, primary_key=True, doc=docs.RECORD_CYCLE)
+    candidate_office = db.Column('s_o_cand_office', db.String, doc=docs.OFFICE)
+    candidate_state = db.Column('s_o_cand_office_st', db.String, doc=docs.STATE)
+    candidate_district = db.Column('s_o_cand_office_district', db.String, doc=docs.DISTRICT)
+    support_oppose_indicator = db.Column('support_oppose_indicator', db.String, doc=docs.SUPPORT_OPPOSE_INDICATOR)
+    ie_total = db.Column('total', db.Numeric, doc=docs.IE_SUPPORT_OPPOSE_AGGREGATE_ALL_CANDIDATES)

@@ -269,6 +269,7 @@ def create_app(test_config=None):
     apidoc.register(spending_by_others.ECTotalsByCandidateView, blueprint='v1')
     apidoc.register(spending_by_others.IETotalsByCandidateView, blueprint='v1')
     apidoc.register(spending_by_others.CCTotalsByCandidateView, blueprint='v1')
+    apidoc.register(spending_by_others.ScheduleESupportOpposeTotalsView, blueprint='v1')
     # feature flag to publish endpoint
     # when turning this on, uncomment from spec.py
     if bool(env.get_credential('FEC_FEATURE_PRESIDENTIAL', '')):
