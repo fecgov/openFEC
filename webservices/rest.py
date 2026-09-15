@@ -420,6 +420,8 @@ def create_app(test_config=None):
             return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, CALENDAR_CACHE)
         if '/legal/' in url:
             return DEFAULT_HEADER_TYPE, '{}{}'.format(DEFAULT_HEADER_PREFIX, LEGAL_CACHE)
+        if '/monitoring/celery_check' in url:
+            return DEFAULT_HEADER_TYPE, 'no-store, no-cache, must-revalidate, max-age=0'
 
         # This will work differently in local environment - will use local timezone
         for endpoint in LONG_CACHE_ENDPOINTS:
