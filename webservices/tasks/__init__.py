@@ -22,12 +22,13 @@ if env.app.get("space_name", "unknown-space").lower() != "feature":
             "schedule": crontab(minute="*/5", hour="10-23"),
         },
         # Task 1C: refresh_most_recent_rulemakings(conn):
-        # When found modified rulemaking(s) within 10 hours and 5 minutes
-        #   if published_flg = true, upload the rulemaking(s) to elasticsearch service.
-        #   if published_flg = false, delete the rulemaking(s) from elasticsearch service.
+        # The task runs every 1 minute, 24 hours a day.
+        # When found modified rulemaking(s) anytime
+        #   if published_flg = true, upload the rulemaking(s) to opensearch service.
+        #   if published_flg = false, delete the rulemaking(s) from opensearch service.
         "refresh_most_recent_rulemakings": {
             "task": "webservices.tasks.legal_docs.refresh_most_recent_rulemakings",
-            "schedule": crontab(minute="*/1", hour="10-23"),
+            "schedule": crontab(minute="*/1"),
         },
         # Task 2: This task is launched at 9pm(EST) everyday except Sunday.
         # 1) Identify the daily modified AO(s) in past 24 hours(9pm-9pm EST)
