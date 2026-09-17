@@ -50,7 +50,7 @@ class DownloadView(utils.Resource):
                 logging.exception(f"Download {task_id} failed")
                 raise exceptions.ApiError('Download failed', status_code=http.client.INTERNAL_SERVER_ERROR)
             if task_utils.get_redis_value('download-queued:{}'.format(task_id)):
-                return {'status': 'queued', 'task_id': task_id}
+                return {'status': 'queued', 'task_id': task_id}, 202
 
         resource = download.call_resource(current_app, path, request.query_string.decode('UTF-8'))
 
@@ -66,7 +66,7 @@ class DownloadView(utils.Resource):
         ).id
         task_utils.set_redis_value('download-queued:{}'.format(task_id), True, age=7200)
 
-        return {'status': 'queued', 'task_id': task_id}
+        return {'status': 'queued', 'task_id': task_id}, 202
 
 
 def get_cached_file(path, qs, filename=None):
