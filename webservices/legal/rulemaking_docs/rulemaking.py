@@ -541,6 +541,7 @@ def get_documents(rm_no, rm_id, bucket):
                 }
 
                 if not row["contents"]:
+                    documents.append(document)
                     logger.error(
                         "PDF contents not found for document ID {0} and rulemaking no {1}: cannot upload to S3".format(
                             row["doc_id"], rm_no
