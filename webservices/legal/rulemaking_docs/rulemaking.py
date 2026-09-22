@@ -569,7 +569,7 @@ def get_documents(rm_no, rm_id, bucket):
                             )
                     except Exception:
                         pass
-                
+
             else:
                 # If no level_1 document record exists in documents_vw for the specified level_1 value and level_2 = 0,
                 # only the level_1 label will be displayed. Ex:1997-03,rm_id=4391,level_1=1
