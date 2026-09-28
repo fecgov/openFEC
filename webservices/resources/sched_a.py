@@ -100,14 +100,18 @@ class ScheduleAView(ItemizedResource):
     secondary_index_options = [
         'committee_id',
         'contributor_id',
+        'image_number',
+    ]
+
+    combo_index_options = [
         'contributor_name',
         'contributor_city',
         'contributor_zip',
         'contributor_employer',
         'contributor_occupation',
-        'image_number',
     ]
     use_pk_for_count = True
+    max_count = 2
 
     @property
     def args(self):
@@ -151,6 +155,68 @@ class ScheduleAView(ItemizedResource):
                     exceptions.LINE_NUMBER_ERROR, status_code=400,
                 )
         return query
+
+    def validate_kwargs(self, kwargs):
+        """Custom keyword argument validation
+
+            - Secondary index
+            - Pagination
+            - Filters with max count
+
+            """
+        if self.secondary_index_options:
+            two_year_transaction_periods = set(
+                kwargs.get('two_year_transaction_period', [])
+            )
+
+            if len(two_year_transaction_periods) != 1:
+                uses_combo_index = any(
+                                                kwargs.get(field) for field in self.combo_index_options
+                                            )
+                uses_secondary_index = any(
+                                                kwargs.get(field) for field in self.secondary_index_options
+                                            )
+                if not uses_secondary_index and not uses_combo_index:
+                    raise exceptions.ApiError(
+                        "Please choose a single `two_year_transaction_period` or "
+                        "add one of the following filters to your query: `{}`".format(
+                            "`, `".join(self.secondary_index_options)
+                        ),
+                        status_code=400,
+                    )
+                elif len(two_year_transaction_periods) < 1 and uses_combo_index:
+                    raise exceptions.ApiError(
+                        "When using any of these filters: `{}` please also add a `two_year_transaction_period`".format(
+                            "`, `".join(self.combo_index_options)
+                        ),
+                        status_code=400,
+                    )
+        if kwargs.get("last_index"):
+            if all(
+                    kwargs.get("last_{}".format(option)) is None
+                    for option in self.sort_options
+            ) and not kwargs.get("sort_null_only"):
+                raise exceptions.ApiError(
+                    "When paginating through results, both values from the \
+                    previous page's `last_indexes` object are needed. For more information, \
+                    see https://api.open.fec.gov/developers/. Please add one of the following \
+                    filters to your query: `sort_null_only`=True, {}".format(
+                        ", ".join("`last_" + option + "`" for option in self.sort_options)
+                    ),
+                    status_code=422,
+                )
+            over_limit_fields = [
+                field
+                for field in self.filters_with_max_count
+                if len(kwargs.get(field, [])) > self.max_count
+            ]
+            if over_limit_fields:
+                raise exceptions.ApiError(
+                    "Can only specify up to {0} values for `{1}`".format(
+                        self.max_count, "`, `".join(over_limit_fields)
+                    ),
+                    status_code=422,
+                )
 
 
 # Used for '/schedules/schedule_a/efile/'
