@@ -116,23 +116,31 @@ def filter_fulltext_NA(query, kwargs, fields):
             exclude_list = build_exclude_list(kwargs.get(key))
             include_list = build_include_list(kwargs.get(key))
             if exclude_list:
-                filters = []
+                filter_vals = []
                 for value in exclude_list:
                     if value.strip().upper() == "N/A":
                         query = query.filter(original_column != 'N/A')
                     else:
-                        filters.append(sa.not_(column.op('@@')(sa.func.to_tsquery(utils.parse_fulltext(value)))))
-                query = query.filter(sa.and_(*filters)) if len(filters) > 1 else query.filter(*filters)
+                        filter_vals.append(utils.parse_fulltext(value))
+                if filter_vals:
+                    combined = " | ".join(filter_vals)
+                    filter = sa.not_(column.op('@@')(sa.func.to_tsquery(combined)))
+                    query = query.filter(filter)
             if include_list:
-                filters = []
+                filter_vals = []
+                fulltext_filter = []
                 for value in include_list:
                     if value.strip().upper() == "N/A":
                         query = query.filter(original_column == 'N/A')
                     else:
-                        filters.append(column.op('@@')(sa.func.to_tsquery(utils.parse_fulltext(value))))
+                        filter_vals.append(utils.parse_fulltext(value))
                         if value.upper() == 'NULL':
-                            filters.append(column.is_(None))
-                query = query.filter(sa.or_(*filters)) if len(filters) > 1 else query.filter(*filters)
+                            fulltext_filter.append(column.is_(None))
+                if filter_vals:
+                    combined = " | ".join(filter_vals)
+                    fulltext_filter.append(column.op('@@')(sa.func.to_tsquery(combined)))
+                query = query.filter(sa.or_(
+                    *fulltext_filter)) if len(fulltext_filter) > 1 else query.filter(*fulltext_filter)
     return query
 
 
