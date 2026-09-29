@@ -96,6 +96,7 @@ class ItemizedResource(ApiResource):
     filters_with_max_count = []
     max_count = 10
     secondary_index_options = []
+    fetch_seek_page_func = staticmethod(utils.fetch_seek_page)
 
     def get(self, **kwargs):
         """Get itemized resources.
@@ -125,7 +126,7 @@ class ItemizedResource(ApiResource):
             else:
                 # get estimated count
                 count, _ = counts.get_estimated_count(self, query)
-        return utils.fetch_seek_page(
+        return self.fetch_seek_page_func(
             query,
             kwargs,
             self.index_column,
