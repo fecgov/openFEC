@@ -1,0 +1,17 @@
+# This is a Gradle generated file for dependency locking.
+# Manual edits can break the build and are not advised.
+# This file is expected to be part of source control.
+com.fasterxml.jackson.core:jackson-annotations:2.22=compileClasspath,testCompileClasspath
+com.fasterxml.woodstox:woodstox-core:7.2.1=compileClasspath,testCompileClasspath
+org.codehaus.woodstox:stax2-api:4.3.0=compileClasspath,testCompileClasspath
+org.flywaydb:flyway-command-mcp:13.7.0=compileClasspath,testCompileClasspath
+org.flywaydb:flyway-commandline:13.7.0=compileClasspath,testCompileClasspath
+org.flywaydb:flyway-core-utilities:13.7.0=compileClasspath,testCompileClasspath
+org.flywaydb:flyway-core:13.7.0=compileClasspath,testCompileClasspath
+org.jline:jansi:4.3.1=compileClasspath,testCompileClasspath
+tools.jackson.core:jackson-core:3.2.3=compileClasspath,testCompileClasspath
+tools.jackson.core:jackson-databind:3.2.3=compileClasspath,testCompileClasspath
+tools.jackson.dataformat:jackson-dataformat-toml:3.2.3=compileClasspath,testCompileClasspath
+tools.jackson.dataformat:jackson-dataformat-xml:3.2.3=compileClasspath,testCompileClasspath
+tools.jackson:jackson-bom:3.2.3=compileClasspath,testCompileClasspath
+empty=annotationProcessor,testAnnotationProcessor
