@@ -1946,6 +1946,18 @@ class IETotalsByCandidateSchema(ma.Schema):
 augment_schemas(IETotalsByCandidateSchema)
 
 
+ScheduleESupportOpposeTotalsSchema = make_schema(
+    models.ScheduleESupportOpposeTotals,
+    fields={
+        'ie_total': ma.fields.Float(),
+        },
+    options={'exclude': ('idx',)}
+)
+ScheduleESupportOpposeTotalsPageSchema = make_page_schema(ScheduleESupportOpposeTotalsSchema)
+register_schema(ScheduleESupportOpposeTotalsSchema)
+register_schema(ScheduleESupportOpposeTotalsPageSchema)
+
+
 class CCTotalsByCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
