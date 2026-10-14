@@ -22,7 +22,7 @@ jobs:
           POSTGRES_DB: cfdm_unit_test
 
       # Opensearch
-      - image: opensearchproject/opensearch:2.11.1
+      - image: opensearchproject/opensearch:2.17.1
         environment:
           cluster.name: opensearch
           DISABLE_SECURITY_PLUGIN: "true"
