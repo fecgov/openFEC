@@ -2,7 +2,7 @@
 applications:
   - name: api
     instances: 12
-    memory: 2G
+    memory: 2.5G
     disk_quota: 2G
     stack: cflinuxfs4
     buildpacks:
