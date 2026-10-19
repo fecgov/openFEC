@@ -572,4 +572,9 @@ ENTITY_ROLE_TYPES = {
 }
 
 ENTITY_ROLE_TYPE_VALID_VALUES = ['1', '2', '3', '4', '5']
+
 # ========= End rulemaking Constants ==========
+
+STATUTES_TITLE_26_WEBSITE_URL = "https://uscode.house.gov/download/releasepoints/us/pl/119/121/xml_usc26@119-121.zip"
+
+STATUTES_TITLE_52_WEBSITE_URL = "https://uscode.house.gov/download/releasepoints/us/pl/119/121/xml_usc52@119-121.zip"
