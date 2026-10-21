@@ -23,7 +23,7 @@ requests==2.32.4
 requests-aws4auth==1.0
 sqlalchemy-postgres-copy==0.3.0
 SQLAlchemy==2.0.41
-urllib3==2.7.0
+urllib3==2.8.0
 ujson==5.13.0
 webargs==8.7.1
 werkzeug==3.1.8
