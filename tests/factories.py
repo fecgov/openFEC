@@ -438,6 +438,13 @@ class CommunicationCostByCandidateFactory(BaseAggregateFactory):
     support_oppose_indicator = "S"
 
 
+class ScheduleESupportOpposeTotalsFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleESupportOpposeTotals
+
+    idx = factory.Sequence(lambda n: n)
+
+
 class ElectioneeringByCandidateFactory(BaseAggregateFactory):
     class Meta:
         model = models.ElectioneeringByCandidate
