@@ -84,6 +84,8 @@ RESTRICT_TRAFFIC = env.get_credential('FEC_API_RESTRICT_TRAFFIC', False)
 RESTRICT_MESSAGE = "We apologize for the inconvenience, but we are temporarily " \
     "blocking API traffic. Please contact apiinfo@fec.gov if this is an urgent issue."
 SHOW_TEST_F1 = env.get_credential('FEC_SHOW_TEST_F1', False)
+NO_CACHE_ERRORS = env.get_credential('FEC_NO_CACHE_ERRORS', True)
+true_values = (True, 'True', 'true', 't')
 
 
 def sqla_conn_string():
@@ -374,7 +376,6 @@ def create_app(test_config=None):
         - Block any flagged IPs
         - If we're restricting downloads, only allow requests from specified key
         """
-        true_values = (True, 'True', 'true', 't')
         if USE_PROXY in true_values:
             try:
                 *_, source_ip, api_data_route, cf_route = request.access_route
@@ -435,7 +436,8 @@ def create_app(test_config=None):
 
     @app.after_request
     def add_caching_headers(response):
-
+        if NO_CACHE_ERRORS in true_values and response.status_code >= 400:
+            response.headers.add('Cache-Control', 'no-store')
         cache_header_type, cache_header = get_cache_header(request.path)
         response.headers.add(cache_header_type, cache_header)
         return response
