@@ -10,6 +10,7 @@ from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
 from webservices import exceptions
+from webservices.env import env
 
 """
 two years restriction removed from schedule_a. For details, refer:
@@ -151,6 +152,12 @@ class ScheduleAView(ItemizedResource):
                     exceptions.LINE_NUMBER_ERROR, status_code=400,
                 )
         return query
+
+    @property
+    def fetch_seek_page_func(self):
+        if env.get_credential("SCHED_A_NULLS_LAST_PAGINATOR", "False") in utils.VALID_TRUE_VALUES:
+            return utils.fetch_seek_page_nulls_last
+        return utils.fetch_seek_page
 
 
 # Used for '/schedules/schedule_a/efile/'
