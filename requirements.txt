@@ -14,8 +14,8 @@ icalendar==4.0.2
 invoke==2.2.0
 kombu==5.5.3 # Starting from celery 5.x release, the minimum required version is Kombu 5.x
 networkx==2.6.2
-prance[osv]==0.22.11.4.0
-pre-commit==4.6.0 #client-side hook triggered by operations like git commit
+prance[osv]==23.6.21.0
+pre-commit==4.7.0 #client-side hook triggered by operations like git commit
 psycopg2-binary==2.9.1
 python-dateutil==2.8.1
 python-dotenv>=0.20.0 # Sets variable defaults in .flaskenv file
@@ -28,6 +28,8 @@ ujson==5.13.0
 webargs==8.7.1
 werkzeug==3.1.8
 yappi==1.7.3
+virtualenv==21.14.7 # pin to remediate security vulnerbility with pre-commit
+packaging==26.3 # pin to remediate security vulnerbility with pre-commit
 
 # Marshalling
 flask-apispec==0.11.4
