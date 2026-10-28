@@ -8,12 +8,13 @@ repositories {
 }
 
 configurations.all {
-    resolutionStrategy.force "tools.jackson.core:jackson-core:3.2.3"
+    resolutionStrategy.force "tools.jackson.core:jackson-databind:3.2.4"
+
 }
 
 
 dependencies {
-    implementation (group: "org.flywaydb", name: "flyway-commandline", version: "13.7.0") {
+    implementation (group: "org.flywaydb", name: "flyway-commandline", version: "13.11.1") {
         exclude group: "com.microsoft.sqlserver", module: "msql-jdbc"
         exclude group: "com.microsoft.azure", module: "msal4j"
         exclude group: "com.google.cloud", module: "google-cloud-storage"
