@@ -8,6 +8,8 @@ import requests
 from webservices.legal.utils_opensearch import create_opensearch_client
 from webservices.legal.constants import (  # noqa
     AO_ALIAS,
+    STATUTES_TITLE_26_WEBSITE_URL,
+    STATUTES_TITLE_52_WEBSITE_URL
 )
 
 logger = logging.getLogger(__name__)
@@ -17,11 +19,27 @@ def get_xml_tree_from_url(url):
     r = requests.get(url, stream=True)
 
     with NamedTemporaryFile("wb+") as f:
+        # Write download into temp file
         for chunk in r:
             f.write(chunk)
         f.seek(0)
-        zip_file = ZipFile(f.name)
 
+        try:
+            # Try reading as ZIP
+            zip_file = ZipFile(f.name)
+
+        except Exception:
+            # Fallback: try reading as XML
+            try:
+                f.seek(0)
+                return Et.parse(f.name)
+            except Et.ParseError:
+                raise RuntimeError(
+                    f"Failed to load XML or ZIP from {url}. "
+                    "The server may be down or returning an error page."
+                )
+
+        # If ZIP succeeded → extract XML inside it
         with zip_file.open(zip_file.namelist()[0]) as title, NamedTemporaryFile(
             "wb+"
         ) as title_xml:
@@ -32,10 +50,7 @@ def get_xml_tree_from_url(url):
 
 def get_title_52_statutes():
     opensearch_client = create_opensearch_client()
-    title_parsed = get_xml_tree_from_url(
-        "https://uscode.house.gov/download/"
-        "releasepoints/us/pl/114/219/xml_usc52@114-219.zip"
-    )
+    title_parsed = get_xml_tree_from_url(STATUTES_TITLE_52_WEBSITE_URL)
     tag_name = "{{http://xml.house.gov/schemas/uslm/1.0}}{0}"
     section_count = 0
     for subtitle in title_parsed.iter(tag_name.format("subtitle")):
@@ -77,10 +92,7 @@ def get_title_52_statutes():
 
 def get_title_26_statutes():
     opensearch_client = create_opensearch_client()
-    title_parsed = get_xml_tree_from_url(
-        "https://uscode.house.gov/download/"
-        "releasepoints/us/pl/114/219/xml_usc26@114-219.zip"
-    )
+    title_parsed = get_xml_tree_from_url(STATUTES_TITLE_26_WEBSITE_URL)
     tag_name = "{{http://xml.house.gov/schemas/uslm/1.0}}{0}"
     section_count = 0
     for subtitle in title_parsed.iter(tag_name.format("subtitle")):

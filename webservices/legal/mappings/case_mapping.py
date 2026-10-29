@@ -102,6 +102,8 @@ CITATION_MAPPING = {
     "citation_type": {"type": "keyword"},
     "citation_text": {"type": "keyword"},
     "doc_type": {"type": "keyword"},
+    "sort3": {"type": "integer"},
+    "sort4": {"type": "integer"},
 }
 
 MUR_MAPPING = {
