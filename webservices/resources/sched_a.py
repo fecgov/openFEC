@@ -158,8 +158,14 @@ class ScheduleAView(ItemizedResource):
         if len(committee_ids) < 2 or kwargs.get('sub_id'):
             return None
         return [
-            self.build_query(**{**kwargs, 'committee_id': [committee_id]})
+            self.build_query(**{**kwargs, 'committee_id': [committee_id]}, _apply_options=False)
             for committee_id in committee_ids
+        ]
+
+    def branch_entity_options(self, entity, **kwargs):
+        return [
+            sa.orm.joinedload(entity.committee),
+            sa.orm.joinedload(entity.contributor),
         ]
 
 

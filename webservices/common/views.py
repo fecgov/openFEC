@@ -133,10 +133,14 @@ class ItemizedResource(ApiResource):
             is_count_exact=self.is_count_exact,
             count=count,
             cap=self.cap,
-            branch_queries=self.build_branch_queries(**kwargs))
+            branch_queries=self.build_branch_queries(**kwargs),
+            branch_options=self.branch_entity_options)
 
     def build_branch_queries(self, **kwargs):
         return None
+
+    def branch_entity_options(self, entity, **kwargs):
+        return []
 
     def validate_kwargs(self, kwargs):
         """Custom keyword argument validation
