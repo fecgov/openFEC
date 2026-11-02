@@ -132,7 +132,11 @@ class ItemizedResource(ApiResource):
             models.db.session,
             is_count_exact=self.is_count_exact,
             count=count,
-            cap=self.cap)
+            cap=self.cap,
+            branch_queries=self.build_branch_queries(**kwargs))
+
+    def build_branch_queries(self, **kwargs):
+        return None
 
     def validate_kwargs(self, kwargs):
         """Custom keyword argument validation

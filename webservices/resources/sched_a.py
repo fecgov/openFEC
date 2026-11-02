@@ -152,6 +152,16 @@ class ScheduleAView(ItemizedResource):
                 )
         return query
 
+    def build_branch_queries(self, **kwargs):
+        committee_ids = kwargs.get('committee_id') or []
+        print('committee_ids', committee_ids)
+        if len(committee_ids) < 2 or kwargs.get('sub_id'):
+            return None
+        return [
+            self.build_query(**{**kwargs, 'committee_id': [committee_id]})
+            for committee_id in committee_ids
+        ]
+
 
 # Used for '/schedules/schedule_a/efile/'
 # under tag:'receipts'

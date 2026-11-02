@@ -139,7 +139,7 @@ def create_app(test_config=None):
                 ]
 
     # Uncomment these two lines to enable local query display
-    # app.config['SQLALCHEMY_ECHO'] = True
+    app.config['SQLALCHEMY_ECHO'] = True
     # logging.getLogger("sqlalchemy.engine").propagate = False
 
     # Modify app configuration and logging level for production

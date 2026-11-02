@@ -113,7 +113,7 @@ def fetch_page(
 
 class SeekCoalescePaginator(paginators.SeekPaginator):
     def __init__(self, cursor, per_page, hide_null, index_column, session,
-                 is_count_exact=None, sort_column=None, count=None):
+                 is_count_exact=None, sort_column=None, count=None, branch_cursors=None):
         self.max_column_map = {
             "date": date.max,
             "float": float("inf"),
@@ -126,6 +126,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         }
         self.hide_null = hide_null
         self.session = session
+        self.branch_cursors = branch_cursors
         super(SeekCoalescePaginator, self).__init__(
             cursor, per_page, index_column, session, is_count_exact, sort_column, count
         )
@@ -134,7 +135,32 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         if self.count == 0:
             self.is_count_exact = True
             return []
-        cursor = self.cursor
+        if self.branch_cursors:
+            return self._fetch_branches(last_index, sort_index, limit)
+        query = self._seek_query(self.cursor, last_index, sort_index).limit(limit)
+        return self.session.execute(query).unique().scalars().all()
+
+    def _fetch_branches(self, last_index, sort_index, limit):
+        print('branches', len(self.branch_cursors))
+        rows = []
+        for cursor in self.branch_cursors:
+            query = self._seek_query(cursor, last_index, sort_index).limit(limit)
+            rows.extend(self.session.execute(query).unique().scalars().all())
+
+        direction = self.sort_column[1] if self.sort_column else sa.asc
+        sort_key = self.sort_column[0].key if self.sort_column else None
+        index_key = self.index_column.key
+
+        def merge_key(row):
+
+            value = getattr(row, sort_key) if sort_key else None
+            index = getattr(row, index_key)
+            return (0, value, index) if value is not None else (1, 0, index)
+
+        rows.sort(key=merge_key, reverse=(direction != sa.asc))
+        return rows[:limit]
+
+    def _seek_query(self, cursor, last_index, sort_index=None):
         direction = self.sort_column[1] if self.sort_column else sa.asc
         lhs, rhs = (), ()
 
@@ -168,8 +194,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             filter = lhs > rhs if direction == sa.asc else lhs < rhs
             cursor = cursor.filter(filter)
 
-        query = cursor.order_by(direction(self.index_column)).limit(limit)
-        return self.session.execute(query).unique().scalars().all()
+        return cursor.order_by(direction(self.index_column))
 
     def _get_index_values(self, result):
         """Get index values from last result, to be used in seeking to the next
@@ -221,11 +246,13 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
 
 
 def fetch_seek_page(
-    query, kwargs, index_column, session, is_count_exact=None, clear=False, count=None, cap=100
+    query, kwargs, index_column, session, is_count_exact=None, clear=False, count=None, cap=100,
+    branch_queries=None
 ):
 
     paginator = fetch_seek_paginator(
-        query, kwargs, index_column, session, is_count_exact=is_count_exact, clear=clear, count=count, cap=cap
+        query, kwargs, index_column, session, is_count_exact=is_count_exact, clear=clear, count=count, cap=cap,
+        branch_queries=branch_queries
     )
 
     if paginator.sort_column is not None:
@@ -244,6 +271,11 @@ def fetch_seek_page(
             sort_index = None
             query = query.filter(null_sort_by == None)  # noqa
             paginator.cursor = query
+            if paginator.branch_cursors:
+                paginator.branch_cursors = [
+                    branch.filter(null_sort_by == None) # noqa
+                    for branch in paginator.branch_cursors
+                ]
     else:
         sort_index = None
 
@@ -252,7 +284,9 @@ def fetch_seek_page(
     )
 
 
-def fetch_seek_paginator(query, kwargs, index_column, session, is_count_exact=None, clear=False, count=None, cap=100):
+def fetch_seek_paginator(query, kwargs, index_column, session, is_count_exact=None, clear=False, count=None, cap=100,
+                         branch_queries=None
+                         ):
     check_cap(kwargs, cap)
     model = index_column.parent.class_
     sort, hide_null, nulls_last = (
@@ -269,6 +303,21 @@ def fetch_seek_paginator(query, kwargs, index_column, session, is_count_exact=No
             hide_null=hide_null,
             nulls_last=nulls_last,
         )
+        if branch_queries and len(branch_queries) > 1:
+            branch_queries = [
+                sorting.sort(
+                    branch,
+                    sort,
+                    model=model,
+                    clear=clear,
+                    hide_null=hide_null,
+                    nulls_last=nulls_last,
+                )[0]
+                for branch in branch_queries
+
+            ]
+        else:
+            branch_queries = None
     else:
         sort_column = None
 
@@ -280,7 +329,8 @@ def fetch_seek_paginator(query, kwargs, index_column, session, is_count_exact=No
         session,
         is_count_exact=is_count_exact,
         sort_column=sort_column,
-        count=count
+        count=count,
+        branch_cursors=branch_queries if len(branch_queries or []) > 1 else None,
     )
 
 
