@@ -3,6 +3,7 @@ import json
 import time
 import datetime
 import certifi
+import re
 import webservices.legal.constants as constants
 
 
@@ -65,23 +66,48 @@ def create_eregs_link(part, section):
     return "/regulations/{}/CURRENT".format(url_part_section)
 
 
+def parse_citation_sort_fields(citation_text, citation_type):
+    sort3 = None
+    sort4 = None
+    if citation_type == "statute":
+        match = re.match(r"(\d+)\s+U\.S\.C\.\s*§?\s*(.+)", citation_text)
+        if match:
+            sort3 = int(match.group(1))
+            sort4_digits = re.sub(r"\D", "", match.group(2))
+            sort4 = int(sort4_digits) if sort4_digits else None
+
+    elif citation_type == "regulation":
+        match = re.match(r"(\d+)\s+CFR\s*§?\s*(\d+)\.(\d+)", citation_text)
+        if match:
+            sort3 = int(match.group(1))
+            sort4 = int(match.group(2)) * 1000 + int(match.group(3))
+
+    return sort3, sort4
+
+
 def upload_citations(statutory_citations, regulatory_citations, index, doc_type, opensearch_client):
     try:
         for citation in statutory_citations:
+            sort3, sort4 = parse_citation_sort_fields(citation, "statute")
             entry = {
                 "type": "citations",
                 "citation_text": citation,
                 "citation_type": "statute",
                 "doc_type": doc_type,
+                "sort3": sort3,
+                "sort4": sort4,
             }
             opensearch_client.index(index=index, body=entry, id=f"{doc_type}_{citation}")
 
         for citation in regulatory_citations:
+            sort3, sort4 = parse_citation_sort_fields(citation, "regulation")
             entry = {
                 "type": "citations",
                 "citation_text": citation,
                 "citation_type": "regulation",
                 "doc_type": doc_type,
+                "sort3": sort3,
+                "sort4": sort4,
             }
             opensearch_client.index(index=index, body=entry, id=f"{doc_type}_{citation}")
     except Exception:
