@@ -168,6 +168,11 @@ api.add_resource(
 )
 
 api.add_resource(
+    spending_by_others.ScheduleESupportOpposeTotalsView,
+    '/schedules/schedule_e/all_candidates/support_oppose_totals/',
+)
+
+api.add_resource(
     filings.FilingsView,
     '/committee/<committee_id>/filings/',
     '/candidate/<candidate_id>/filings/',
