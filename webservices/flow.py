@@ -55,7 +55,8 @@ def get_graph():
         'totals_ie',
         'totals_presidential',
         'totals_inaugural_donations',
-        'totals_national_party'
+        'totals_national_party',
+        'ofec_ie_so_aggregate'
     ]
     graph.add_nodes_from(MATERIALIZED_VIEWS)
 
