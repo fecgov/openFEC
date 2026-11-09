@@ -837,6 +837,57 @@ class TestScheduleA(ApiBaseTest):
         )
         self.assertEqual(response.status_code, 422)
 
+    def test_schedule_a_pagination_rejects_empty_last_index(self):
+        response = self.app.get(
+            api.url_for(
+                ScheduleAView,
+                sort='contribution_receipt_date',
+                last_index='',
+                **self.kwargs
+            )
+        )
+
+        self.assertEqual(response.status_code, 422)
+
+    def test_schedule_a_pagination_allows_wrong_cursor_field_name(self):
+        for _ in range(5):
+            factories.ScheduleAFactory(
+                contribution_receipt_date=datetime.date(2025, 1, 1)
+            )
+
+        response = self.app.get(
+            api.url_for(
+                ScheduleAView,
+                sort='contribution_receipt_date',
+                last_index=1,
+                last_contribution_receipt_amount=5,
+                **self.kwargs
+            )
+        )
+
+        # Current behavior is to log and continue.
+        self.assertEqual(response.status_code, 200)
+
+    def test_schedule_a_pagination_allows_conflicting_sort_null_only_cursor(self,):
+        for _ in range(5):
+            factories.ScheduleAFactory(
+                contribution_receipt_date=datetime.date(2025, 1, 1)
+            )
+
+        response = self.app.get(
+            api.url_for(
+                ScheduleAView,
+                sort='contribution_receipt_date',
+                last_index=1,
+                sort_null_only=True,
+                last_contribution_receipt_date='2025-01-01',
+                **self.kwargs
+            )
+        )
+
+        # Current behavior does not validate this cursor state.
+        self.assertEqual(response.status_code, 200)
+
     def test_schedule_a_pagination_bad_per_page(self):
         response = self.app.get(
             api.url_for(ScheduleAView, two_year_transaction_period=2018, per_page=999)
