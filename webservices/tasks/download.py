@@ -204,6 +204,7 @@ def convert_lists_to_tuples(params, overlap_prefixes):
     once={"graceful": True},
     soft_time_limit=DOWNLOAD_SOFT_LIMIT,
     time_limit=DOWNLOAD_HARD_LIMIT,
+    rate_limit="3/m",
 )
 def export_query(self, path, qs):
     task_id = self.request.id
