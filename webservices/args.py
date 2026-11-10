@@ -293,7 +293,8 @@ def make_sort_args(
         ),
         'sort_null_only': fields.Bool(
             load_default=default_nulls_only,
-            metadata={'description': 'Toggle that filters out all rows having sort column that is non-null'}
+            metadata={'description': 'Toggle indicating that the current cursor is in the '
+                      'null-valued portion of the results.'}
         ),
 
     }
