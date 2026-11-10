@@ -293,7 +293,8 @@ def make_sort_args(
         ),
         'sort_null_only': fields.Bool(
             load_default=default_nulls_only,
-            metadata={'description': 'Toggle that filters out all rows having sort column that is non-null'}
+            metadata={'description': 'Toggle indicating that the current cursor is in the '
+                      'null-valued portion of the results.'}
         ),
 
     }
@@ -1366,6 +1367,20 @@ schedule_e_totals_by_candidate_other_costs_IE = {
     'cycle': fields.List(fields.Int, metadata={'description': docs.RECORD_CYCLE}),
     'candidate_id': fields.List(Candidate_ID, metadata={'description': docs.CANDIDATE_ID}),
     'election_full': election_full,
+}
+
+# used for '/schedules/schedule_e/all_candidates/support_oppose_totals/'
+# under tag: independent expenditures
+# ScheduleESupportOpposeTotalsView in spending_by_others.py
+schedule_e_all_candidates_support_oppose_totals = {
+
+    'cycle': fields.List(fields.Int, metadata={'description': docs.RECORD_CYCLE}),
+    'state': fields.List(IStr, metadata={'description': docs.STATE}),
+    'office': fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P']), metadata={'description': docs.OFFICE}),
+    'district': fields.List(District, metadata={'description': docs.DISTRICT}),
+    'support_oppose': fields.Str(
+            validate=validate.OneOf(['S', 'O', 'Other']),
+            metadata={'description': docs.SUPPORT_OPPOSE}),
 }
 
 # used for '/communication_costs/totals/by_candidate/'
