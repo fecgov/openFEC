@@ -26,7 +26,7 @@ SQLAlchemy==2.0.41
 urllib3==2.8.0
 ujson==5.13.0
 webargs==8.7.1
-werkzeug==3.1.8
+werkzeug==3.1.9
 yappi==1.7.3
 virtualenv==21.14.7 # pin to remediate security vulnerbility with pre-commit
 packaging==26.3 # pin to remediate security vulnerbility with pre-commit
