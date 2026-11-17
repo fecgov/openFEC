@@ -220,6 +220,350 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         return ret
 
 
+class SeekNullsPaginator(paginators.SeekPaginator):
+    """Keyset paginator that places null sort values first.
+        ascending:
+            1. NULL rows ordered by index_column ASC
+            2. non-NULL rows ordered by sort_column ASC, index_column ASC
+        descending:
+            1. NULL rows ordered by index_column ASC
+            2. non-NULL rows ordered by sort_column DESC, index_column DESC
+    """
+
+    def __init__(
+        self,
+        cursor,
+        per_page,
+        hide_null,
+        index_column,
+        session,
+        is_count_exact=None,
+        sort_column=None,
+        count=None,
+    ):
+        self.hide_null = bool(hide_null)
+        self.session = session
+
+        super(SeekNullsPaginator, self).__init__(
+            cursor,
+            per_page,
+            index_column,
+            session,
+            is_count_exact,
+            sort_column,
+            count,
+        )
+
+    def _get_direction(self):
+        if self.sort_column is None:
+            return sa.asc, True
+
+        direction = self.sort_column[1]
+
+        if direction is sa.asc or direction == sa.asc:
+            return sa.asc, True
+
+        if direction is sa.desc or direction == sa.desc:
+            return sa.desc, False
+
+        raise ValueError(
+            "Unsupported sort direction. Expected sqlalchemy.asc or "
+            "sqlalchemy.desc."
+        )
+
+    @staticmethod
+    def _apply_seek_filter(query, lhs, rhs, ascending):
+        """Apply the appropriate keyset comparison."""
+        if ascending:
+            return query.filter(lhs > rhs)
+
+        return query.filter(lhs < rhs)
+
+    def _execute(self, query):
+        """
+        The incoming query must not multiply ORM entities through joins.
+        SQL LIMIT is applied before Result.unique().
+        """
+        return self.session.execute(query).unique().scalars().all()
+
+    def _fetch_null_rows(self, cursor, sort_col, last_index, limit):
+        query = cursor.filter(sort_col.is_(None))
+
+        if last_index is not None:
+            query = query.filter(self.index_column > last_index)
+
+        query = (
+            query.order_by(None)
+            .order_by(sa.asc(self.index_column))
+            .limit(limit)
+        )
+
+        return self._execute(query)
+
+    def _fetch_non_null_rows(
+        self,
+        cursor,
+        sort_col,
+        direction,
+        ascending,
+        limit,
+        sort_index=None,
+        last_index=None,
+    ):
+        """Fetch rows from the non-NULL block."""
+        query = cursor.filter(sort_col.is_not(None))
+
+        if sort_index is not None:
+            if last_index is not None:
+                lhs = sa.tuple_(sort_col, self.index_column)
+                rhs = sa.tuple_(sort_index, last_index)
+            else:
+                lhs = sort_col
+                rhs = sort_index
+
+            query = self._apply_seek_filter(
+                query,
+                lhs,
+                rhs,
+                ascending,
+            )
+
+        query = (
+            query.order_by(None)
+            .order_by(
+                direction(sort_col),
+                direction(self.index_column),
+            )
+            .limit(limit)
+        )
+
+        return self._execute(query)
+
+    def _fetch_single_query(
+        self,
+        cursor,
+        direction,
+        ascending,
+        last_index,
+        sort_index,
+        limit,
+    ):
+        """Fetch a page when no split NULL query is necessary."""
+        query = cursor.order_by(None)
+
+        if self.sort_column is None:
+            if last_index is not None:
+                query = query.filter(self.index_column > last_index)
+
+            query = query.order_by(sa.asc(self.index_column))
+        else:
+            sort_col = self.sort_column[0]
+
+            if sort_index is not None and last_index is not None:
+                lhs = sa.tuple_(sort_col, self.index_column)
+                rhs = sa.tuple_(sort_index, last_index)
+
+                query = self._apply_seek_filter(
+                    query,
+                    lhs,
+                    rhs,
+                    ascending,
+                )
+            elif sort_index is not None:
+                query = self._apply_seek_filter(
+                    query,
+                    sort_col,
+                    sort_index,
+                    ascending,
+                )
+            elif last_index is not None:
+                # This state is valid for an index-only cursor. It should not
+                # normally occur for a non-null sorted continuation cursor.
+                query = query.filter(self.index_column > last_index)
+
+            query = query.order_by(
+                direction(sort_col),
+                direction(self.index_column),
+            )
+
+        query = query.limit(limit)
+        return self._execute(query)
+
+    def _fetch(self, last_index, sort_index=None, limit=None):
+        if self.count == 0:
+            self.is_count_exact = True
+            return []
+
+        if limit is None or limit <= 0:
+            raise ValueError("limit must be a positive integer")
+
+        cursor = self.cursor
+        direction, ascending = self._get_direction()
+
+        # No explicit sort expression or NULL rows have already been removed
+        # by sorting.sort(..., hide_null=True).
+        if self.sort_column is None or self.hide_null:
+            return self._fetch_single_query(
+                cursor=cursor,
+                direction=direction,
+                ascending=ascending,
+                last_index=last_index,
+                sort_index=sort_index,
+                limit=limit,
+            )
+
+        sort_col = self.sort_column[0]
+
+        # A missing sort value means either:
+        #   * this is the first page, when last_index is also None; or
+        #   * the previous page ended on a NULL row.
+        if sort_index is None:
+            null_results = self._fetch_null_rows(
+                cursor=cursor,
+                sort_col=sort_col,
+                last_index=last_index,
+                limit=limit,
+            )
+
+            if len(null_results) == limit:
+                return null_results
+
+            remaining = limit - len(null_results)
+
+            non_null_results = self._fetch_non_null_rows(
+                cursor=cursor,
+                sort_col=sort_col,
+                direction=direction,
+                ascending=ascending,
+                limit=remaining,
+            )
+
+            return null_results + non_null_results
+
+        # The previous page ended in the non-NULL block.
+        return self._fetch_non_null_rows(
+            cursor=cursor,
+            sort_col=sort_col,
+            direction=direction,
+            ascending=ascending,
+            limit=limit,
+            sort_index=sort_index,
+            last_index=last_index,
+        )
+
+    def _get_index_values(self, result):
+        last_index = paginators.convert_value(
+            result,
+            self.index_column,
+        )
+
+        if last_index is None:
+            raise ValueError(
+                "index_column returned NULL. Seek pagination requires a "
+                "non-null index column."
+            )
+
+        ret = {
+            "last_index": str(last_index),
+        }
+
+        if self.sort_column is not None:
+            sort_key = "last_{0}".format(self.sort_column[2])
+            sort_value = paginators.convert_value(
+                result,
+                self.sort_column[0],
+            )
+
+            if sort_value is None:
+                ret["sort_null_only"] = True
+            else:
+                ret[sort_key] = sort_value
+
+        return ret
+
+
+def fetch_seek_page_nulls(
+    query, kwargs, index_column, session,
+    is_count_exact=None, clear=False, count=None, cap=100,
+):
+    paginator = fetch_seek_paginator_nulls(
+        query=query,
+        kwargs=kwargs,
+        index_column=index_column,
+        session=session,
+        is_count_exact=is_count_exact,
+        clear=clear,
+        count=count,
+        cap=cap,
+    )
+
+    last_index = kwargs.get("last_index")
+
+    if last_index == "":
+        raise exceptions.ApiError(
+            "last_index cannot be an empty string", status_code=422
+        )
+
+    sort_index = None
+
+    if paginator.sort_column is not None:
+        sort_index = kwargs.get("last_{0}".format(paginator.sort_column[2]))
+
+        if (
+            last_index is not None
+            and sort_index is None
+            and not kwargs.get("sort_null_only")
+        ):
+            logger.warning(
+                "Sorted cursor with last_index but no sort value or "
+                "sort_null_only: %s", {k: kwargs.get(k) for k in
+                                       ("sort", "last_index", "sort_null_only")},
+            )
+
+    return paginator.get_page(last_index=last_index, sort_index=sort_index)
+
+
+def fetch_seek_paginator_nulls(
+    query,
+    kwargs,
+    index_column,
+    session,
+    is_count_exact=None,
+    clear=False,
+    count=None,
+    cap=100,
+):
+    check_cap(kwargs, cap)
+
+    model = index_column.parent.class_
+
+    sort = kwargs.get("sort")
+    hide_null = bool(kwargs.get("sort_hide_null", False))
+
+    if sort:
+        query, sort_column = sorting.sort(
+            query,
+            sort,
+            model=model,
+            clear=clear,
+            hide_null=hide_null,
+            nulls_last=False,
+        )
+    else:
+        sort_column = None
+
+    return SeekNullsPaginator(
+        cursor=query,
+        per_page=kwargs["per_page"],
+        hide_null=hide_null,
+        index_column=index_column,
+        session=session,
+        is_count_exact=is_count_exact,
+        sort_column=sort_column,
+        count=count,
+    )
+
+
 def fetch_seek_page(
     query, kwargs, index_column, session, is_count_exact=None, clear=False, count=None, cap=100
 ):
