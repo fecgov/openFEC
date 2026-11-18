@@ -491,6 +491,26 @@ class TestCaseDocsOpensearch(OpenSearchBaseTest):
         for filter in filters:
             self.check_incorrect_values({filter[0]: filter[1]},  ["total_murs", "total_adrs"], False)
 
+    def test_citation_filters_with_case_no(self):
+        # case_no must still apply when a citation filter is set
+        reg_citation = "11 CFR §104.3"
+
+        for require_all in ["false", "true"]:
+            response = self._results_mur(api.url_for(UniversalSearch,
+                                                     case_no="100",
+                                                     case_regulatory_citation=reg_citation,
+                                                     case_citation_require_all=require_all))
+            # logging.info(response)
+
+            assert [mur["no"] for mur in response["murs"]] == ["100"]
+            self.assertEqual(response["total_adrs"], 0)
+
+            # MUR 101 is not cited under 11 CFR 104.3
+            self.check_incorrect_values({"case_no": "101",
+                                         "case_regulatory_citation": reg_citation,
+                                         "case_citation_require_all": require_all},
+                                        ["total_murs", "total_adrs"], False)
+
 # ---------------------- End MUR and ADR filters ------------------------------------------------
 # ---------------------- Start MUR  filters ------------------------------------------------
     def test_mur_type_filter(self):
