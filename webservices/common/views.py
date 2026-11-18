@@ -97,6 +97,21 @@ class ItemizedResource(ApiResource):
     max_count = 10
     secondary_index_options = []
     fetch_seek_page_func = staticmethod(utils.fetch_seek_page)
+    estimated_count_filters = []
+    max_periods_for_exact_count = 0
+    period_filter = 'two_year_transaction_period'
+
+    def use_estimated_count_only(self, kwargs):
+        if not any(kwargs.get(name) for name in self.estimated_count_filters):
+            return False
+        periods = set(kwargs.get(self.period_filter) or [])
+        return not periods or len(periods) > self.max_periods_for_exact_count
+
+    def is_estimated_count(self, query, kwargs):
+        if self.use_estimated_count_only(kwargs):
+            self.is_count_exact = False
+            return True
+        return counts.is_estimated_count(self, query)
 
     def get(self, **kwargs):
         """Get itemized resources.
@@ -107,7 +122,7 @@ class ItemizedResource(ApiResource):
             # Call check_result_exist to check whether the result exists
             if counts.check_result_exist(self, query):
                 # result exist
-                is_estimate = counts.is_estimated_count(self, query)
+                is_estimate = self.is_estimated_count(query, kwargs)
                 if not is_estimate:
                     # is exact count
                     count = None
@@ -119,7 +134,7 @@ class ItemizedResource(ApiResource):
                 count = 0
         else:
             # Don't Call check_result_exist function
-            is_estimate = counts.is_estimated_count(self, query)
+            is_estimate = self.is_estimated_count(query, kwargs)
             if not is_estimate:
                 # is exact count
                 count = None

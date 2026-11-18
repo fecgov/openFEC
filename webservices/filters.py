@@ -105,7 +105,7 @@ def fulltext_match(column, value):
 
     return sa.and_(
         column.op('@@')(sa.func.to_tsquery(long_query)),
-        column.op('||')(sa.cast('', TSVECTOR)).op('@@')(sa.func.to_tsquery(full_query)),
+        column.op('||')(sa.literal_column("''::tsvector", TSVECTOR)).op('@@')(sa.func.to_tsquery(full_query)),
     )
 
 
