@@ -110,9 +110,9 @@ class ScheduleAView(ItemizedResource):
     ]
     use_pk_for_count = True
     estimated_count_filters = [
-        'contributor_name',
-        'contributor_employer',
-        'contributor_occupation',
+       # 'contributor_name',
+       # 'contributor_employer',
+       # 'contributor_occupation',
     ]
     max_periods_for_exact_count = 2
 
