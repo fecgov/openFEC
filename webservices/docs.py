@@ -2466,6 +2466,7 @@ Primary Subject Description:\n\
     - 18 - Reporting\n\
     - 19 - Soft Money\n\
     - 20 - Solicitation\n\
+    - 21 - Independent Expenditures\n\
 '''
 
 SECONDARY_SUBJECT_DESCRIPTION = '''

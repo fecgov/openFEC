@@ -802,7 +802,8 @@ PRIMARY_SUBJECT_MAP = {
     'Presidential': '17',
     'Reporting': '18',
     'Soft Money': '19',
-    'Solicitation': '20'
+    'Solicitation': '20',
+    'Independent Expenditures': '21'
 }
 
 
