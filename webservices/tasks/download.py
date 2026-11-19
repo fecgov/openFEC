@@ -4,12 +4,15 @@ import logging
 import datetime
 import re
 
+import psycopg2
+from psycopg2 import errorcodes
 from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
 from postgres_copy import query_entities, format_flags
 from smart_open import open
 from celery import shared_task
 from celery.exceptions import SoftTimeLimitExceeded
+from sqlalchemy import exc as sa_exc
 from webservices.tasks.celery import FlaskQueueOnce
 from sqlalchemy.dialects import postgresql
 from webservices.env import env
@@ -30,6 +33,13 @@ IGNORE_FIELDS = {"page", "per_page", "sort", "sort_hide_null"}
 
 DOWNLOAD_SOFT_LIMIT = int(env.get_credential("DOWNLOAD_SOFT_LIMIT", 240))
 DOWNLOAD_HARD_LIMIT = int(env.get_credential("DOWNLOAD_HARD_LIMIT", 300))
+
+# Failure categories emitted in the "download_failed" log line. Keep these stable: they are searched in logs.
+FAILURE_SOFT_TIME_LIMIT = "soft_time_limit"
+FAILURE_DB_STATEMENT_TIMEOUT = "db_statement_timeout"
+FAILURE_DB_QUERY_CANCELED = "db_query_canceled"
+FAILURE_DB_ERROR = "db_error"
+FAILURE_UNEXPECTED = "unexpected_error"
 
 
 def call_resource(app: Flask, path, qs):
@@ -198,6 +208,76 @@ def convert_lists_to_tuples(params, overlap_prefixes):
     return params
 
 
+def _exception_chain(exc):
+    """Yield exc and the exceptions it wraps: SQLAlchemy ``.orig``, ``__cause__`` and ``__context__``."""
+    seen = set()
+    pending = [exc]
+    while pending:
+        current = pending.pop(0)
+        if current is None or id(current) in seen:
+            continue
+        seen.add(id(current))
+        yield current
+        pending.extend([getattr(current, "orig", None), current.__cause__, current.__context__])
+
+
+def classify_download_failure(exc):
+    """Return (category, pgcode) for a download failure.
+
+    Statement timeouts and other cancellations share SQLSTATE 57014 (query_canceled), so the
+    server message is used to tell them apart. Handles both SQLAlchemy-wrapped errors (the
+    count query) and raw psycopg2 errors (the COPY, which runs on a raw DBAPI connection).
+    """
+    if isinstance(exc, SoftTimeLimitExceeded):
+        return FAILURE_SOFT_TIME_LIMIT, None
+    for error in _exception_chain(exc):
+        if isinstance(error, psycopg2.Error):
+            pgcode = error.pgcode
+            if pgcode == errorcodes.QUERY_CANCELED:
+                diag = getattr(error, "diag", None)
+                message = (getattr(diag, "message_primary", None) or str(error)).lower()
+                if "statement timeout" in message:
+                    return FAILURE_DB_STATEMENT_TIMEOUT, pgcode
+                return FAILURE_DB_QUERY_CANCELED, pgcode
+            return FAILURE_DB_ERROR, pgcode
+    if any(isinstance(error, sa_exc.SQLAlchemyError) for error in _exception_chain(exc)):
+        return FAILURE_DB_ERROR, None
+    return FAILURE_UNEXPECTED, None
+
+
+def _log_download_failure(task_id, path, exc):
+    """Emit one searchable line per failure. Deliberately excludes the query string and the
+    exception message, which can contain SQL and bound parameter values."""
+    category, pgcode = classify_download_failure(exc)
+    logger.error(
+        "download_failed task_id=%s category=%s exception_class=%s.%s pgcode=%s path=%s",
+        task_id, category, type(exc).__module__, type(exc).__qualname__, pgcode, path,
+    )
+
+
+def _record_download_failure(task_id):
+    """Write the failure state the API polls for. Redis errors are logged and swallowed so they
+    never mask the original download exception.
+
+    The failed key is written first, and the queued key is only removed once that succeeds:
+    if neither key were present, the next API poll would queue the failed query again.
+    """
+    for event, operation in (
+        ("download_failure_state_not_recorded",
+         lambda: task_utils.set_redis_value('download-failed:{}'.format(task_id), True, age=7200)),
+        ("download_queued_state_not_cleared",
+         lambda: task_utils.delete_redis_value('download-queued:{}'.format(task_id))),
+    ):
+        try:
+            operation()
+        except Exception as redis_exc:
+            logger.error(
+                "%s task_id=%s exception_class=%s.%s",
+                event, task_id, type(redis_exc).__module__, type(redis_exc).__qualname__,
+            )
+            return
+
+
 @shared_task(
     bind=True,
     base=FlaskQueueOnce,
@@ -215,15 +295,20 @@ def export_query(self, path, qs):
         logger.info("Download resource: {0}".format(qs))
         make_bundle(resource)
         logger.info("Bundled: {0}".format(qs))
-    except SoftTimeLimitExceeded:
+    except SoftTimeLimitExceeded as exc:
         logger.exception(f"Download soft time limit exceeded ({DOWNLOAD_SOFT_LIMIT} seconds): {qs}")
-        task_utils.delete_redis_value('download-queued:{}'.format(task_id))
-        task_utils.set_redis_value('download-failed:{}'.format(task_id), True, age=7200)
+        _record_download_failure(task_id)
+        _log_download_failure(task_id, path, exc)
         raise
-    except Exception:
-        logger.exception("Download failed: {0}".format(qs))
-        task_utils.delete_redis_value('download-queued:{}'.format(task_id))
-        task_utils.set_redis_value('download-failed:{}'.format(task_id), True, age=7200)
+    except Exception as exc:
+        # No exc_info: the exception is re-raised and Celery logs its traceback, which can include
+        # SQL and bound parameters; logging it here as well would duplicate them.
+        logger.error("Download failed: {0}".format(qs))
+        _record_download_failure(task_id)
+        _log_download_failure(task_id, path, exc)
+        # Re-raise so the worker reports the task as failed (#6704). No retry is configured, so
+        # the task is not requeued; the API reports the failure via download-failed:<task_id>.
+        raise
 
 
 @shared_task

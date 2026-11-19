@@ -265,6 +265,50 @@ celery --app webservices.tasks.make_celery worker
 celery --app webservices.tasks.make_celery beat
 ```
 
+##### Download task failures
+
+`POST /v1/download/<resource>/` queues `webservices.tasks.download.export_query` and returns `202` with
+`{"status": "queued", "task_id": ...}`. Clients poll the same URL with that `task_id`:
+
+- `200` `{"status": "complete", "url": ...}` once the CSV exists in S3.
+- `500` `Download failed` once if `download-failed:<task_id>` is set; the key is then deleted. The failed poll does not queue a new task.
+- `202` `{"status": "queued", ...}` while `download-queued:<task_id>` is set in Redis.
+- If neither key is set (for example, both expired), the poll queues a new task.
+
+If building or uploading the CSV raises an exception (including the soft time limit), the task sets
+`download-failed:<task_id>` (2-hour expiry), then deletes `download-queued:<task_id>`, and re-raises.
+It logs a general failure message (`Download failed: ...`, or the soft-time-limit message) and a `download_failed`
+line; Celery's worker log may also record the re-raised exception.
+The worker then reports the task as failed (Celery's `task_failure` signal and worker log) instead of succeeded.
+Because `task_ignore_result` is set, the failure is not stored in the result backend. Failures are not retried.
+Search worker logs for `download_failed`:
+
+```
+download_failed task_id=<id> category=<category> exception_class=<module.Class> pgcode=<SQLSTATE> path=<api path>
+```
+
+`category` is one of `soft_time_limit`, `db_statement_timeout`, `db_query_canceled` (other `57014` cancellations),
+`db_error` (any other database error) or `unexpected_error`. `db_statement_timeout` is recognized from PostgreSQL's
+English error message, so it requires English server messages (`lc_messages`).
+This line omits the query string and exception message. For failures other than the soft time limit, the task does
+not log the traceback itself, which can contain SQL and bound parameters; Celery's task-failure log includes it. The
+soft-time-limit branch still logs its traceback with `logger.exception`.
+
+Redis errors never replace the original error, which is still re-raised:
+
+- If setting `download-failed` fails, the task logs `download_failure_state_not_recorded` and keeps `download-queued`,
+  so polling returns `queued` until it expires instead of rerunning the failed query.
+- If only deleting `download-queued` fails, the failure state is recorded and the task logs
+  `download_queued_state_not_cleared`. The next poll still returns `500`, because `download-failed` is checked first.
+
+The task doesn't record a failure when:
+
+- the hard time limit kills it,
+- it fails before its `try` block (for example, an invalid query-string encoding), or
+- it never runs.
+
+In those cases polling returns `queued` until `download-queued` expires (2 hours); the next poll then queues a new task.
+
 ## Editing Swagger
 
 We are using a customized 2.x version of swagger-ui to display our API developer documentation.
