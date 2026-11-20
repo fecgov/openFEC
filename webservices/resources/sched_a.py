@@ -110,6 +110,17 @@ class ScheduleAView(ItemizedResource):
     ]
     use_pk_for_count = True
 
+    @staticmethod
+    def timeout_hint(request_args):
+
+        periods = set(request_args.getlist('two_year_transaction_period'))
+        if len(periods) == 1:
+            return None
+        return (
+            'Searching across multiple two-year periods can be slow. Try again with a'
+            ' single `two_year_transaction_period`, for example `two_year_transaction_period=2026`.'
+        )
+
     @property
     def args(self):
         return utils.extend(
