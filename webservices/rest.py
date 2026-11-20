@@ -498,7 +498,13 @@ def create_app(test_config=None):
     def handle_db_timeout(e):
         if hasattr(e, 'orig') and 'canceling statement due to statement timeout' in str(e.orig):
             app.logger.warning('Statement timeout on %s', request.path)
-            return jsonify({'message': 'Query timed out', 'status': 504}), 504
+            message = 'Query timed out'
+            view = app.view_functions.get(request.endpoint) if request.endpoint else None
+            timeout_hint = getattr(getattr(view, 'view_class', None), 'timeout_hint', None)
+            hint = timeout_hint(request.args) if timeout_hint else None
+            if hint:
+                message = '{}. {}'.format(message, hint)
+            return jsonify({'message': message, 'status': 504}), 504
         return handle_exception(e)
 
     @app.errorhandler(Exception)

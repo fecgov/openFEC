@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from webservices import utils
 from webservices import exceptions
 from webservices.common import models
@@ -12,6 +12,8 @@ US_STATES_AND_TERRITORIES = {
     'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
     'DC', 'PR', 'VI', 'GU', 'AS', 'MP', 'AA', 'AE', 'AP', 'US',
 }
+
+FULLTEXT_MIN_INDEX_LENGTH = 3
 
 
 def is_exclude_arg(arg):
@@ -88,6 +90,25 @@ def filter_overlap(query, kwargs, fields):
     return query
 
 
+def fulltext_match(column, value):
+    terms = utils.parse_fulltext_terms(value)
+    full_query = utils.join_fulltext_terms(terms)
+    long_terms = [term for term in terms if len(term) >= FULLTEXT_MIN_INDEX_LENGTH]
+
+    if not long_terms or len(long_terms) == len(terms):
+        return column.op('@@')(sa.func.to_tsquery(full_query))
+
+    long_query = utils.join_fulltext_terms(long_terms)
+
+    if not models.db.session.scalar(sa.select(sa.func.numnode(sa.func.to_tsquery(long_query)))):
+        return column.op('@@')(sa.func.to_tsquery(full_query))
+
+    return sa.and_(
+        column.op('@@')(sa.func.to_tsquery(long_query)),
+        column.op('||')(sa.literal_column("''::tsvector", TSVECTOR)).op('@@')(sa.func.to_tsquery(full_query)),
+    )
+
+
 def filter_fulltext(query, kwargs, fields):
     for key, column in fields:
         if kwargs.get(key):
@@ -102,7 +123,7 @@ def filter_fulltext(query, kwargs, fields):
             if include_list:
                 filters = []
                 for value in include_list:
-                    filters.append(column.op('@@')(sa.func.to_tsquery(utils.parse_fulltext(value))))
+                    filters.append(fulltext_match(column, value))
                     if value.upper() == 'NULL':
                         filters.append(column.is_(None))
                 query = query.filter(sa.or_(*filters)) if len(filters) > 1 else query.filter(*filters)
@@ -129,7 +150,7 @@ def filter_fulltext_NA(query, kwargs, fields):
                     if value.strip().upper() == "N/A":
                         query = query.filter(original_column == 'N/A')
                     else:
-                        filters.append(column.op('@@')(sa.func.to_tsquery(utils.parse_fulltext(value))))
+                        filters.append(fulltext_match(column, value))
                         if value.upper() == 'NULL':
                             filters.append(column.is_(None))
                 query = query.filter(sa.or_(*filters)) if len(filters) > 1 else query.filter(*filters)
