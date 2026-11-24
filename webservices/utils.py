@@ -654,8 +654,16 @@ def parse_fulltext(text):
     bytestring. For further parsing in re.sub below, the string is first decoded into
     ascii (the encode and decode are chained).
     '''
+    return join_fulltext_terms(parse_fulltext_terms(text))
+
+
+def parse_fulltext_terms(text):
     text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
-    return " & ".join([part + ":*" for part in re.sub(r"\W", " ", text).split()])
+    return re.sub(r"\W", " ", text).split()
+
+
+def join_fulltext_terms(terms):
+    return " & ".join([term + ":*" for term in terms])
 
 
 office_args_required = ["office", "cycle"]

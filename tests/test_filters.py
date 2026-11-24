@@ -418,6 +418,65 @@ class TestFilterFulltext_NA(ApiBaseTest):
         self.assertEqual(len(results), 4)
 
 
+class TestFulltextMatch(ApiBaseTest):
+    def setUp(self):
+        super(TestFulltextMatch, self).setUp()
+        employers = ['Gamma Brown Co', 'Brown Inc', 'The G Group', 'Gold Inc', 'O\'Brien LLC']
+        self.receipts = [
+            factories.ScheduleAFactory(
+                committee_id='C0000000{}'.format(index),
+                contributor_employer_text=sa.func.to_tsvector(employer),
+                contributor_employer=employer,
+            )
+            for index, employer in enumerate(employers)
+        ]
+
+    def _employers(self, value):
+        query = filters.filter_fulltext_NA(
+            sa.select(models.ScheduleA),
+            {'contributor_employer': [value]},
+            ScheduleAView.filter_fulltext_fields_NA,
+        )
+        return {
+            each.contributor_employer
+            for each in models.db.session.execute(query).unique().scalars().all()
+        }
+
+    def _sql(self, value):
+        expression = filters.fulltext_match(models.ScheduleA.contributor_employer_text, value)
+        return str(expression.compile(compile_kwargs={'literal_binds': True}))
+
+    def test_short_and_long_terms_split_index_and_recheck(self):
+        sql = self._sql('G Brown')
+        self.assertIn("to_tsquery('Brown:*')", sql)
+        self.assertIn("|| ''::tsvector", sql)
+        self.assertIn("to_tsquery('G:* & Brown:*')", sql)
+        self.assertEqual(self._employers('G Brown'), {'Gamma Brown Co'})
+
+    def test_api_results_with_split(self):
+        results = self._results(api.url_for(ScheduleAView, contributor_employer='G Brown'))
+        self.assertEqual([each['contributor_employer'] for each in results], ['Gamma Brown Co'])
+
+    def test_punctuation_fragments(self):
+        self.assertIn("|| ''::tsvector", self._sql("O'Brien"))
+        self.assertEqual(self._employers("O'Brien"), {"O'Brien LLC"})
+
+    def test_only_short_terms_unchanged(self):
+        sql = self._sql('G')
+        self.assertNotIn('::tsvector', sql)
+        self.assertEqual(self._employers('G'), {'Gamma Brown Co', 'The G Group', 'Gold Inc'})
+
+    def test_only_long_terms_unchanged(self):
+        sql = self._sql('Gold Inc')
+        self.assertNotIn('::tsvector', sql)
+        self.assertEqual(self._employers('Gold Inc'), {'Gold Inc'})
+
+    def test_long_stopword_with_short_term_falls_back(self):
+        # 'the' is a stopword, so the long-only query would be empty
+        self.assertNotIn('::tsvector', self._sql('The G'))
+        self.assertEqual(self._employers('The G'), {'Gamma Brown Co', 'The G Group', 'Gold Inc'})
+
+
 class TestDetermineStateOther:
 
     def test_other_present_removes_key_and_returns_true(self):

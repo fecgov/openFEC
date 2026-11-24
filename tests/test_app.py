@@ -93,3 +93,37 @@ class TestStatementTimeout(unittest.TestCase):
 
             finally:
                 app_context.pop()
+
+
+class TestTimeoutHint(BaseTestCase):
+    timeout_error = OperationalError(
+        "statement", {}, Exception("canceling statement due to statement timeout"),
+    )
+
+    def _timed_out_response(self, url):
+        with patch('webservices.common.counts.is_estimated_count', side_effect=self.timeout_error):
+            response = self.client.get(url)
+        self.assertEqual(response.status_code, 504)
+        return response.get_json()['message']
+
+    def test_schedule_a_without_period_gets_hint(self):
+        message = self._timed_out_response('/v1/schedules/schedule_a/?contributor_name=Brown')
+        self.assertTrue(message.startswith('Query timed out. '))
+        self.assertIn('single `two_year_transaction_period`', message)
+
+    def test_schedule_a_with_several_periods_gets_hint(self):
+        message = self._timed_out_response(
+            '/v1/schedules/schedule_a/?contributor_name=Brown'
+            '&two_year_transaction_period=2022&two_year_transaction_period=2024'
+        )
+        self.assertIn('single `two_year_transaction_period`', message)
+
+    def test_schedule_a_with_one_period_has_no_hint(self):
+        message = self._timed_out_response(
+            '/v1/schedules/schedule_a/?contributor_name=Brown&two_year_transaction_period=2024'
+        )
+        self.assertEqual(message, 'Query timed out')
+
+    def test_other_endpoints_have_no_hint(self):
+        message = self._timed_out_response('/v1/schedules/schedule_b/?recipient_name=Brown')
+        self.assertEqual(message, 'Query timed out')
