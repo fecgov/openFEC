@@ -389,7 +389,7 @@ legal_universal_search = {
     'primary_subject_id': fields.List(IStr(
         validate=validate.OneOf(
             ['', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11',
-                '12', '13', '14', '15', '16', '17', '18', '19', '20'])),
+                '12', '13', '14', '15', '16', '17', '18', '19', '20', '21'])),
             metadata={'description': docs.PRIMARY_SUBJECT_DESCRIPTION}),
     'secondary_subject_id': fields.List(IStr(
         validate=validate.OneOf(

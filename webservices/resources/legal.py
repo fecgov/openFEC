@@ -257,7 +257,7 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     primary_subject_id = kwargs.get("primary_subject_id", [])
     primary_subject_id_valid_values = ['1', '2', '3', '4', '5', '6', '7', '8', '9',
                                        '10', '11', '12', '13', '14', '15', '16',
-                                       '17', '18', '19', '20']
+                                       '17', '18', '19', '20', '21']
 
     # Validate 'primary_subject_id filter'
     valid_primary_subject_id = filters.validate_multiselect_filter(
@@ -286,7 +286,7 @@ def case_query_builder(q, type_, from_hit, hits_returned, **kwargs):
                             query=kwargs.get("case_respondents"), fields=["respondents"]))
 
     if kwargs.get("case_regulatory_citation") or kwargs.get("case_statutory_citation"):
-        return case_apply_citation_params(
+        query = case_apply_citation_params(
             query,
             kwargs.get("case_regulatory_citation"),
             kwargs.get("case_statutory_citation"),
